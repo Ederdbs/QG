@@ -1,0 +1,622 @@
+---
+title: "From the Marker Matrix to Diversity Metrics"
+subtitle: "Maize hybrid selection under a genetic diversity constraint"
+author: "Technical document"
+date: "`r format(Sys.Date(), '%Y-%m-%d')`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    theme: readable
+    df_print: kable
+bibliography: references.bib
+link-citations: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE,
+                      fig.width = 8, fig.height = 5, comment = "#>")
+options(digits = 6)
+root <- if (basename(getwd()) == "doc") ".." else "."
+for (f in list.files(file.path(root, "R"), full.names = TRUE)) source(f)
+```
+
+# Scope
+
+This document describes, with explicit algebra and the code that implements
+it, the path from the lines' marker matrix to the metrics used to constrain
+diversity loss when selecting hybrids.
+
+The central thesis is that **two different matrices are needed, and swapping
+them is the easiest mistake to make**: the genomic matrix of @vanraden2008 to
+*predict* performance, and the molecular coancestry matrix of @caballero2002
+to *measure* diversity. Section \@ref(why-not-g) shows algebraically and
+numerically why the first one cannot serve the second.
+
+As a running example, a small simulated set:
+
+```{r data}
+cfg <- modifyList(sim_config, list(n_pool_A = 25, n_pool_B = 25, m = 1500))
+ctx <- simulate_data(cfg)
+n_sel <- 40
+c(hybrids = ctx$N, markers = ctx$m, lines = ctx$n_lines)
+```
+
+# From Line to Hybrid
+
+## Coding
+
+Let $\mathbf{M}^{L}$ be the $L \times m$ matrix of line genotypes, with
+$M^{L}_{ik} \in \{0, 2\}$ = count of the reference allele at marker $k$.
+Inbred lines are homozygous, so the value 1 never occurs — residual
+heterozygotes must be imputed or discarded beforehand.
+
+## Hybrid Genotype
+
+The $F_1$ hybrid between lines $a$ and $b$ receives one gamete from each
+parent. Since both parents are homozygous, the gamete from $a$ carries
+$M^{L}_{ak}/2$ copies of the reference allele, and therefore
+
+$$
+M^{H}_{(ab)k} \;=\; \frac{M^{L}_{ak} + M^{L}_{bk}}{2} \;\in\; \{0, 1, 2\}.
+$$
+
+The value 1 appears exactly at markers where the two lines differ — these are
+the hybrid's heterozygous loci, and they are the ones carrying heterosis.
+Predicting the hybrid's genotype is **deterministic**, not statistical: it is
+the one piece of information that requires no assumption at all
+[@technow2014].
+
+```{r hybrids, eval=FALSE}
+# R/00_data.R
+ped <- expand.grid(a = a_ids, b = b_ids)                    # all A x B combinations
+M   <- (L[ped$a, , drop = FALSE] + L[ped$b, , drop = FALSE]) / 2
+```
+
+From here on we work with the **within-individual reference-allele
+frequency**, which is the natural quantity for coancestry:
+
+$$
+x_{ik} \;=\; \frac{M^{H}_{ik}}{2} \;\in\; \{0,\; 0.5,\; 1\}.
+$$
+
+```{r x}
+str(ctx$X[1:3, 1:6])
+```
+
+# The VanRaden Genomic Matrix {#g-vanraden}
+
+## Definition
+
+With $p_k$ = reference-allele frequency in the hybrid population,
+$\mathbf{Z} = \mathbf{M}^{H} - \mathbf{1}\,2\mathbf{p}'$ is the centered matrix
+and
+
+$$
+\mathbf{G} \;=\; \frac{\mathbf{Z}\mathbf{Z}'}{2\sum_{k} p_k (1-p_k)}.
+$$
+
+This is @vanraden2008's first parametrization. It estimates realized additive
+relationship and is what feeds GBLUP to predict traits from already-estimated
+marker effects.
+
+```{r g, eval=FALSE}
+vanraden_G <- function(M) {
+  p <- colMeans(M) / 2
+  Z <- sweep(M, 2, 2 * p, "-")
+  list(G = tcrossprod(Z) / (2 * sum(p * (1 - p))), Z = Z, p = p)
+}
+```
+
+## Why G Cannot Measure Diversity {#why-not-g}
+
+Centering on $2\mathbf{p}$ uses frequencies **from the population itself**.
+So every column of $\mathbf{Z}$ sums to zero:
+
+$$
+\mathbf{Z}'\mathbf{1} = \mathbf{0}
+\quad\Longrightarrow\quad
+\mathbf{1}'\mathbf{G}\mathbf{1}
+\;=\; \frac{\mathbf{1}'\mathbf{Z}\mathbf{Z}'\mathbf{1}}{2\sum_k p_k q_k}
+\;=\; \frac{\lVert \mathbf{Z}'\mathbf{1}\rVert^2}{2\sum_k p_k q_k}
+\;=\; 0 .
+$$
+
+The sum of **all** elements of $\mathbf{G}$ is identically zero. Since group
+coancestry is proportional to that sum, it equals zero for the whole
+population, and the status number $N_s = 1/(2\theta)$ diverges:
+
+```{r g-zero}
+c(sum_G       = sum(ctx$G),
+  theta_on_G  = mean(ctx$G) / 2,
+  Ns_on_G     = 1 / (2 * mean(ctx$G) / 2))
+```
+
+In subsets the sum isn't zero, but it is a **centered** quantity that
+oscillates around zero and takes negative values. It is not a probability and
+admits no identity-by-descent interpretation.
+
+> The root of the problem is the implicit base population. $\mathbf{G}$
+> measures relatedness *relative* to the current population; diversity
+> requires an *absolute* scale. See @gomezromano2016 and @villanueva2020 for
+> a discussion of which genomic coancestry matrix to use in which context.
+
+# The Molecular Coancestry Matrix {#f-molecular}
+
+## Definition
+
+Malécot's coancestry [@malecot1948] between $i$ and $j$ is the probability
+that two randomly sampled alleles, one from each individual, at the same
+locus, are identical. Replacing identity by descent with **identity by
+state** — what markers actually observe — yields molecular coancestry
+[@caballero2002; @caballero2000]:
+
+$$
+f_{ij} \;=\; \frac{1}{m}\sum_{k=1}^{m}
+\Big[\, x_{ik}\,x_{jk} \;+\; (1-x_{ik})(1-x_{jk}) \,\Big].
+$$
+
+The first term is the probability that both sampled alleles are the
+reference allele; the second, that both are the alternative allele.
+Properties:
+
+- $f_{ij} \in [0, 1]$ always. **A negative value is a symptom of the wrong
+  matrix being used.**
+- Self-coancestry is $f_{ii} = (1 + F_i)/2$, with $F_i$ the individual's
+  molecular homozygosity [@wright1922]. For a fully heterozygous $F_1$,
+  $f_{ii} = 0.5$.
+- No centering, no scaling, no arbitrary base population.
+
+## Computable Form
+
+Computing the double sum naively is $O(n^2 m)$. Expanding:
+
+$$
+\sum_k \big[x_{ik}x_{jk} + (1-x_{ik})(1-x_{jk})\big]
+= 2\sum_k x_{ik}x_{jk} \;-\; \sum_k x_{ik} \;-\; \sum_k x_{jk} \;+\; m,
+$$
+
+which gives, with $\mathbf{s} = \mathbf{X}\mathbf{1}$ (row sums),
+
+$$
+\boxed{\;\mathbf{f} \;=\; \frac{1}{m}\Big( 2\,\mathbf{X}\mathbf{X}'
+\;-\; \mathbf{s}\mathbf{1}' \;-\; \mathbf{1}\mathbf{s}' \;+\; m\,\mathbf{J} \Big)\;}
+$$
+
+with $\mathbf{J}$ the all-ones matrix. **A single matrix product**, the same
+cost as a $\mathbf{G}$ matrix.
+
+```{r f-code, eval=FALSE}
+molecular_coancestry <- function(X) {
+  m <- ncol(X)
+  s <- rowSums(X)
+  (2 * tcrossprod(X) - outer(s, rep(1, nrow(X))) -
+     outer(rep(1, nrow(X)), s) + m) / m
+}
+```
+
+```{r f-check}
+c(minimum = min(ctx$f), maximum = max(ctx$f),
+  diagonal_mean = mean(diag(ctx$f)), off_diagonal_mean = mean(ctx$f[upper.tri(ctx$f)]))
+```
+
+The value 0.5 would be the floor of the diagonal, reached by a hybrid
+heterozygous at *every* marker. The excess above 0.5 measures exactly the
+fraction of markers at which the two parent lines carry the same allele —
+loci where the $F_1$ is homozygous and, by definition, contribute nothing to
+heterosis:
+
+```{r f-diagonal}
+fd <- mean(diag(ctx$f))
+c(diagonal_mean = fd,
+  molecular_F = 2 * fd - 1,             # f_ii = (1 + F_i)/2
+  heterozygous_fraction = 2 * (1 - fd))
+```
+
+This fraction depends directly on the divergence between heterotic pools
+(`fst` in `sim_config`): more divergent pools produce more heterozygous $F_1$
+hybrids and a diagonal closer to 0.5.
+
+# Metrics Derived from f
+
+## Group Coancestry and the Off-Diagonal Metric Problem
+
+The group coancestry [@cockerham1967] of a set $S$ of $n$ individuals is the
+mean of **all** $n^2$ elements, diagonal included:
+
+$$
+\theta_S \;=\; \frac{1}{n^2}\sum_{i \in S}\sum_{j \in S} f_{ij}
+\;=\; \frac{1}{n^2}\,\mathbf{1}'\mathbf{f}_S\mathbf{1}.
+$$
+
+It is the probability that two alleles sampled at random *from the whole
+set* are identical — including the possibility of both coming from the same
+individual. That is why the diagonal enters: it represents the chance of
+sampling the same individual twice, which is real when the set is used as a
+crossing pool.
+
+Splitting diagonal ($\bar f_d$) from off-diagonal ($\bar f_o$):
+
+$$
+\theta_S \;=\; \frac{\bar f_d}{n} \;+\; \frac{n-1}{n}\,\bar f_o .
+\tag{1}
+$$
+
+The off-diagonal mean $\bar f_o$ is therefore just one of the two terms. When
+$\bar f_d$ varies little across individuals — the case of an all-$F_1$
+population — the two metrics rank almost identically, and the off-diagonal
+metric works fine as a *ranking*. What it does not provide is the
+interpretable scale and the correct baseline (Sections \@ref(ns) and
+\@ref(baseline)).
+
+```{r theta}
+idx <- sample.int(ctx$N, n_sel)
+theta_group(idx, ctx)
+```
+
+## Gene Diversity: θ and He Are the Same Quantity {#identity}
+
+This is the result that simplifies everything else. Starting from the
+definition and swapping the order of summation:
+
+$$
+\theta_S \;=\; \frac{1}{m}\sum_k \left[
+\frac{1}{n^2}\sum_i\sum_j x_{ik}x_{jk}
++ \frac{1}{n^2}\sum_i\sum_j (1-x_{ik})(1-x_{jk}) \right]
+$$
+
+The double sum factors: $\frac{1}{n^2}\sum_i\sum_j x_{ik}x_{jk} =
+\big(\frac{1}{n}\sum_i x_{ik}\big)^2 = \bar p_k^2$, where $\bar p_k$ is the
+**group's** allele frequency. Hence
+
+$$
+\theta_S \;=\; \frac{1}{m}\sum_k \big(\bar p_k^2 + \bar q_k^2\big),
+\qquad\text{and therefore}\qquad
+\boxed{\;GD_S \;=\; 1 - \theta_S \;=\; \frac{1}{m}\sum_k 2\,\bar p_k \bar q_k
+\;\equiv\; H_e\;}
+$$
+
+which is exactly Nei's gene diversity [@nei1973]. **Group coancestry and
+expected heterozygosity are not independent checks: they are the same
+quantity written two ways.**
+
+Three practical consequences:
+
+1. One fewer metric to justify to the technical committee.
+2. "Losing 5% of diversity" gains an exact meaning: 5% of the set's expected
+   heterozygosity.
+3. Two computation routes with the same result and very different costs —
+   the matrix route is $O(n^2)$, the frequency route is $O(nm)$. For
+   $n=200$ and $m=25000$ that is 40 thousand versus 5 million operations.
+   **The matrix route is ~100x cheaper, and it's the one that belongs in the
+   optimizer's inner loop.**
+
+```{r identity}
+c(via_submatrix  = theta_group(idx, ctx),
+  via_frequency   = theta_from_freq(idx, ctx),
+  difference      = theta_group(idx, ctx) - theta_from_freq(idx, ctx))
+
+c(GD = gene_diversity(idx, ctx), He_Nei = he_nei(idx, ctx))
+```
+
+Equality to machine precision is the implementation's strongest sanity check:
+if it fails, matrix `f` is centered, rescaled, or has the wrong coding.
+
+## Status Number Ns {#ns}
+
+@lindgren1997 and @lindgren1998 propose expressing group coancestry on the
+scale of individual counts:
+
+$$
+N_s \;=\; \frac{1}{2\,\theta_S}.
+$$
+
+The reading is direct: $N_s$ is the number of **unrelated, non-inbred**
+individuals that would have the same gene diversity as the observed set.
+Edge cases:
+
+```{r ns-limits}
+fake <- ctx
+fake$f <- matrix(0.5, 5, 5)      # unrelated, p = 0.5
+c(theta = theta_group(1:5, fake), Ns = status_number(1:5, fake))
+
+fake$f <- matrix(1, 5, 5)        # all identical and homozygous
+c(theta = theta_group(1:5, fake), Ns = status_number(1:5, fake))
+```
+
+### An Important Caveat About Ne {-}
+
+@toro2020 show that the **rate-based** effective size, $N_e = 1/(2\Delta F)$,
+loses meaning under molecular diversity management: optimization increases
+diversity in early generations, producing a negative $\Delta F$ and therefore
+a negative $N_e$, and its long-term behavior fails to converge to an
+asymptotic value.
+
+This **does not invalidate** $N_s$. The distinction is that $N_s$ is a
+monotonic reparametrization of $\theta$ — a *static descriptor* of the set —
+while $N_e$ is a *rate* between generations. Use $N_s$ to compare sets; don't
+extrapolate it to project future drift.
+
+For the same reason, do not use the linkage-disequilibrium-based $N_e$ here
+($N_e = 1/(3(\bar r^2 - 1/S))$): it estimates population history, not the
+composition of a selected sample.
+
+## Effective Number of Parents
+
+A metric independent of $\mathbf{f}$, computed purely from the hybrids'
+pedigree. Letting $p_i$ be the frequency with which line $i$ appears as a
+parent among the selected hybrids,
+
+$$
+N_{e(\text{par})} \;=\; \frac{1}{\sum_i p_i^2},
+$$
+
+the inverse Simpson index. It captures precisely what coancestry blurs: 200
+hybrids can have acceptable $\theta$ while still drawing on only 12 lines, if
+those 12 happen to be genetically distant from one another.
+
+```{r ne-par}
+c(random          = ne_parents(sel_random(ctx, n_sel), ctx),
+  truncation      = ne_parents(sel_truncation(ctx, n_sel), ctx),
+  theoretical_max = ctx$n_lines)
+```
+
+Its cost is negligible (a `tabulate` count), which makes it a natural
+candidate to **enter the objective function alongside $\theta$**.
+
+## Allelic Richness
+
+$\theta$ and $H_e$ are averages across markers and are dominated by
+intermediate-frequency alleles. A lost rare allele barely moves them, yet the
+loss is irreversible. We count markers that were polymorphic in the
+population and became rare or fixed in the selection:
+
+$$
+A_{\text{lost}} \;=\; \#\{k : \text{MAF}_k^{(S)} < 0.05 \;\wedge\;
+\text{MAF}_k^{(\text{pop})} \ge 0.05 \}.
+$$
+
+```{r richness}
+c(random      = alleles_lost(sel_random(ctx, n_sel), ctx),
+  truncation  = alleles_lost(sel_truncation(ctx, n_sel), ctx))
+```
+
+It is the only metric in the set **genuinely non-redundant** with $\theta$.
+
+## Distances: E-NE and A-NE
+
+With distance $d_{ij} = 1 - f_{ij}$, @debeukelaer2018 define in Core Hunter 3
+two measures that capture opposite aspects that $\theta$ alone cannot
+separate:
+
+$$
+\text{E-NE} = \frac{1}{n}\sum_{i \in S} \min_{j \in S,\, j \ne i} d_{ij},
+\qquad
+\text{A-NE} = \frac{1}{N}\sum_{i=1}^{N} \min_{j \in S} d_{ij}.
+$$
+
+- **E-NE** (*entry-to-nearest-entry*) measures **non-redundancy within the
+  selection**. It tells apart "200 individuals spread out" from "100
+  near-identical pairs spread out", configurations that can share the same
+  $\theta$.
+- **A-NE** (*accession-to-nearest-entry*) measures **representativeness of
+  the population**. It detects a selection that optimizes $\theta$ by
+  concentrating in one region of genetic space while ignoring the rest.
+
+```{r ene-ane}
+sapply(list(random = sel_random(ctx, n_sel),
+            truncation = sel_truncation(ctx, n_sel),
+            greedy_div = sel_greedy(ctx, n_sel, w = 0)),
+       function(s) c(ENE = ene(s, ctx), ANE = ane(s, ctx)))
+```
+
+## Effective Dimensionality
+
+Over the eigenvalues $\lambda_1 \ge \dots \ge \lambda_n$ of the submatrix
+$\mathbf{f}_S$, the participation ratio
+
+$$
+D_{\text{eff}} \;=\; \frac{\left(\sum_i \lambda_i\right)^2}{\sum_i \lambda_i^2}
+$$
+
+counts how many independent directions of genetic variation remain. It
+equals 1 if all variation lies on a single axis and $n$ if it is spread
+evenly.
+
+```{r effdim}
+c(random     = eff_dim(sel_random(ctx, n_sel), ctx),
+  truncation = eff_dim(sel_truncation(ctx, n_sel), ctx))
+```
+
+## Decomposition by Heterotic Group
+
+In hybrid maize the diversity **between pools** is the engine of heterosis
+and cannot be spent; the diversity **within each pool** is the fuel for
+future progress. Following the logic of subdivided populations
+[@caballero2002; @fernandez2019], we compute molecular coancestry between
+lines $\mathbf{f}^{L}$ and weight it by each line's usage among the selected
+hybrids:
+
+$$
+\theta_A = \mathbf{w}_A' \mathbf{f}^{L} \mathbf{w}_A, \qquad
+\theta_B = \mathbf{w}_B' \mathbf{f}^{L} \mathbf{w}_B, \qquad
+\theta_{AB} = \mathbf{w}_A' \mathbf{f}^{L} \mathbf{w}_B,
+$$
+
+with $\mathbf{w}_A$ the vector of usage frequencies of pool-A lines.
+
+```{r pools}
+rbind(random     = theta_pools(sel_random(ctx, n_sel), ctx),
+      truncation = theta_pools(sel_truncation(ctx, n_sel), ctx))
+```
+
+A blind optimizer can keep global $\theta$ acceptable while eroding one of
+the pools. Without the decomposition this goes unnoticed, and the
+consequence only shows up the following cycle.
+
+# The Correct Baseline {#baseline}
+
+## Why Not Compare Against the 5000 × 5000 Matrix
+
+The natural comparison — coancestry of the selected set against that of the
+whole population — is **biased by construction**. Applying equation (1) to
+both sets:
+
+$$
+\theta_S - \theta_N
+= \left(\frac{1}{n} - \frac{1}{N}\right)\left(\bar f_d - \bar f_o\right)
+\;>\; 0,
+$$
+
+since $\bar f_d > \bar f_o$ whenever individuals are not clones. A
+**random** sample of 200 already looks less diverse than the population of
+5000, without any selection having occurred. The bias is purely from
+sampling and grows the smaller the sample.
+
+Checking the formula numerically:
+
+```{r bias}
+fd <- mean(diag(ctx$f)); fo <- mean(ctx$f[upper.tri(ctx$f)])
+predicted_bias <- (1/n_sel - 1/ctx$N) * (fd - fo)
+
+set.seed(11)
+observed_bias <- mean(replicate(400, theta_group(sample.int(ctx$N, n_sel), ctx))) -
+                 theta_group(seq_len(ctx$N), ctx)
+
+c(predicted = predicted_bias, observed = observed_bias)
+```
+
+Note also that the **off-diagonal** mean of a random subset is an *unbiased*
+estimator of the population's off-diagonal mean. In other words, the metric
+you already use is free of this bias — but it is also not comparable across
+sample sizes on the $N_s$ scale.
+
+## Operational Definition of Loss
+
+The "0% loss" reference is the **distribution of random subsets of the same
+size**, obtained by resampling:
+
+$$
+\alpha \;=\; \frac{GD_{\text{random}(n)} - GD_S}{GD_{\text{random}(n)}}.
+$$
+
+So $\alpha = 0$ means "as diverse as a random sample of the same size", and
+$\alpha < 0$ means more diverse than chance. Resampling also throws in the
+standard deviation, and hence the z-score of any strategy.
+
+```{r null}
+null <- null_distribution(ctx, n_sel, B = 400, B_full = 60)
+c(GD_population = gene_diversity(seq_len(ctx$N), ctx),
+  GD_reference = null$gd_ref, sd = null$gd_sd)
+
+sapply(list(random = sel_random(ctx, n_sel),
+            truncation = sel_truncation(ctx, n_sel),
+            trunc_cap = sel_truncation_cap(ctx, n_sel)),
+       alpha_loss, ctx = ctx, gd_ref = null$gd_ref)
+```
+
+## How to Set the α Limit
+
+The acceptable limit **should not be chosen a priori**. Pure truncation —
+the greediest possible selection — defines the maximum attainable $\alpha$.
+If that ceiling is lower than the intended limit, the constraint restricts
+nothing.
+
+```{r alpha-max}
+attainable_alpha_max <- alpha_loss(sel_truncation(ctx, n_sel), ctx, null$gd_ref)
+c(attainable_alpha_max = attainable_alpha_max,
+  intended_limit = 0.05,
+  active_constraint = attainable_alpha_max > 0.05)
+```
+
+On the full dataset (2500 hybrids, 5000 markers, selecting 100) that ceiling
+came out at **3.63%** — a 5% limit would be inoperative. The correct
+procedure is to trace the $\alpha \times$ gain frontier and choose the knee
+of the curve.
+
+# Use Inside the Optimizer
+
+## Constraint Formulation, Not a Weighted Sum
+
+With $\mathbf{u}$ the multi-trait index and $S$ the set of $n$ selected
+individuals:
+
+$$
+\max_{S,\; |S| = n} \; \frac{1}{n}\sum_{i \in S} u_i
+\qquad \text{subject to} \qquad
+\alpha(S) \;\le\; \alpha_{\max}.
+$$
+
+The common alternative, $\max\; \bar u - \lambda\,\theta_S$, requires
+calibrating $\lambda$, which has no direct interpretation. The constraint
+form preserves the operational meaning: "I accept losing at most
+$\alpha_{\max}$ of diversity". It is the same principle behind optimal
+contribution selection [@meuwissen1997], differing in that there
+contributions $\mathbf{c}$ are continuous while here the problem is
+combinatorial (0/1 with equal weight), which motivates using differential
+evolution [@storn1997; @mullen2011].
+
+```{r fitness, eval=FALSE}
+make_fitness <- function(ctx, n_sel, alpha_max, gd_ref, penalty = 1000) {
+  function(par) {
+    idx  <- decode(par, ctx$N, n_sel)
+    gd   <- 1 - mean(ctx$f[idx, idx])          # matrix route: 40k operations
+    viol <- max(0, (gd_ref - gd) / gd_ref - alpha_max)
+    -(mean(ctx$index[idx]) - penalty * viol)   # DEoptim minimizes
+  }
+}
+```
+
+## Which Metric Belongs in the Inner Loop
+
+The optimizer performs on the order of $10^5$ to $10^6$ evaluations. The cost
+per call decides what goes into the objective function and what is left for
+post-hoc validation:
+
+```{r cost}
+cost_per_eval(ctx, n_sel, reps = 20)
+```
+
+Practical conclusion: $\theta$ (matrix route) and $N_{e(\text{par})}$ go into
+the objective; allelic richness, A-NE, and $G_{st}$ are computed **once** on
+the final solution.
+
+## Convergence Diagnostic
+
+The problem's continuous relaxation — allowing $0 \le c_i \le 1/n$ with
+$\sum_i c_i = 1$ instead of $c_i \in \{0, 1/n\}$ — provides a valid upper
+bound, since every discrete solution is feasible under the relaxed problem. A
+large gap between the differential evolution result and that bound indicates
+**the optimizer hasn't converged**, not that the problem is intrinsically
+hard.
+
+In practice, seeding the initial population with heuristic solutions (greedy
+on $\theta$, truncation with a per-parent usage cap) is decisive: without it
+the optimizer ends up *below* a plain greedy.
+
+# Operational Summary
+
+| Step | Object | Formula |
+|---|---|---|
+| 1 | Hybrid genotype | $M^{H}_{(ab)k} = (M^{L}_{ak} + M^{L}_{bk})/2$ |
+| 2 | Trait prediction | VanRaden $\mathbf{G}$, $\mathbf{Z}\mathbf{Z}'/2\sum p_kq_k$ |
+| 3 | **Diversity** | $\mathbf{f} = (2\mathbf{X}\mathbf{X}' - \mathbf{s}\mathbf{1}' - \mathbf{1}\mathbf{s}' + m\mathbf{J})/m$ |
+| 4 | Group coancestry | $\theta_S = \mathbf{1}'\mathbf{f}_S\mathbf{1}/n^2$ |
+| 5 | Gene diversity | $GD = 1 - \theta_S \equiv H_e$ |
+| 6 | Interpretable scale | $N_s = 1/(2\theta_S)$ |
+| 7 | Baseline | resampling of $n$ individuals, not the full population |
+| 8 | Loss | $\alpha = (GD_{\text{random}} - GD_S)/GD_{\text{random}}$ |
+
+Mistakes to avoid, in order of severity:
+
+1. Computing coancestry over centered $\mathbf{G}$ — a meaningless result.
+2. Comparing the $n \times n$ submatrix against the $N \times N$ matrix —
+   sampling bias read as diversity loss.
+3. Fixing $\alpha_{\max}$ before knowing the attainable ceiling.
+4. Omitting the diagonal from $\theta$ — small impact in an $F_1$ population,
+   but required for the $N_s$ scale to be meaningful.
+5. Running the optimizer without a warm start and concluding the problem is
+   hard.
+
+# References

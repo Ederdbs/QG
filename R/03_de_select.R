@@ -1,15 +1,15 @@
-# Estratégias de seleção de n_sel híbridos entre N candidatos.
-# Todas retornam um vetor de índices.
+# Strategies for selecting n_sel hybrids among N candidates.
+# All return an index vector.
 
-# --- Baselines --------------------------------------------------------------
+# --- Baselines -----------------------------------------------------------------
 
 sel_random <- function(ctx, n_sel) sample.int(ctx$N, n_sel)
 
-# Teto de ganho, piso de diversidade.
+# Ceiling on gain, floor on diversity.
 sel_truncation <- function(ctx, n_sel) order(ctx$index, decreasing = TRUE)[seq_len(n_sel)]
 
-# Truncamento com teto de uso por linhagem. O baseline barato: nenhuma matriz,
-# só contagem, e costuma capturar boa parte do benefício.
+# Truncation with a per-line usage cap. The cheap baseline: no matrix at all,
+# just counting, and it usually captures most of the benefit.
 sel_truncation_cap <- function(ctx, n_sel, cap = ceiling(2 * n_sel / ctx$n_lines) + 1) {
   ord <- order(ctx$index, decreasing = TRUE)
   used <- integer(ctx$n_lines)
@@ -24,10 +24,10 @@ sel_truncation_cap <- function(ctx, n_sel, cap = ceiling(2 * n_sel / ctx$n_lines
   out
 }
 
-# Greedy com atualização incremental: adicionar j muda a soma total da submatriz
-# em 2*s_j + f_jj, onde s_j = soma de f[i,j] sobre os já escolhidos. O(N) por passo.
-# Score = w*índice - theta.  w = 0 -> diversidade pura (teto de diversidade,
-# ganho ~0). w > 0 -> heurística OCS discreta. w -> Inf converge ao truncamento.
+# Greedy with incremental updates: adding j changes the submatrix total by
+# 2*s_j + f_jj, where s_j = sum of f[i,j] over the already-chosen. O(N) per step.
+# Score = w*index - theta.  w = 0 -> pure diversity (ceiling on diversity,
+# ~0 gain). w > 0 -> discrete OCS heuristic. w -> Inf converges to truncation.
 sel_greedy <- function(ctx, n_sel, w = 0) {
   f <- ctx$f
   d <- diag(f)
@@ -48,13 +48,13 @@ sel_greedy <- function(ctx, n_sel, w = 0) {
   out
 }
 
-# --- Differential evolution -------------------------------------------------
+# --- Differential evolution -----------------------------------------------------
 
-# Codificação: 200 valores contínuos em [1, N], não um vetor de N chaves —
-# 5000 dimensões é inviável para DE. Duplicatas reparadas de forma determinística
-# (fitness ruidoso impede o DE de convergir).
-# ponytail: reparo preenche com os índices livres mais baixos, o que enviesa
-# levemente; trocar por "livre mais próximo" se o DE estagnar.
+# Encoding: n_sel continuous values in [1, N], not an N-key vector — 5000
+# dimensions is infeasible for DE. Duplicates are repaired deterministically
+# (a noisy fitness would keep the DE from converging).
+# ponytail: the repair fills in the lowest free indices, which introduces a
+# slight bias; switch to "nearest free" if the DE stalls.
 decode <- function(par, N, n_sel) {
   k <- as.integer(par)
   k[k < 1L] <- 1L; k[k > N] <- N
@@ -63,9 +63,9 @@ decode <- function(par, N, n_sel) {
   k
 }
 
-# Restrição, não soma ponderada: alpha = perda relativa de diversidade gênica
-# contra a referência aleatória. Violação vira penalidade proporcional, então
-# "alpha_max = 0.05" continua significando "aceito perder 5%".
+# Constraint, not a weighted sum: alpha = relative loss of gene diversity
+# against the random reference. A violation becomes a proportional penalty, so
+# "alpha_max = 0.05" still means "I accept losing 5%".
 make_fitness <- function(ctx, n_sel, alpha_max, gd_ref, penalty = 1000) {
   N <- ctx$N
   f <- ctx$f
@@ -74,14 +74,14 @@ make_fitness <- function(ctx, n_sel, alpha_max, gd_ref, penalty = 1000) {
     idx <- decode(par, N, n_sel)
     gd <- 1 - mean(f[idx, idx])
     viol <- max(0, (gd_ref - gd) / gd_ref - alpha_max)
-    -(mean(ix[idx]) - penalty * viol)   # DEoptim minimiza
+    -(mean(ix[idx]) - penalty * viol)   # DEoptim minimizes
   }
 }
 
 sel_de <- function(ctx, n_sel, alpha_max, gd_ref, NP = 300, itermax = 2000,
                    seeds = NULL, trace = FALSE) {
   fit <- make_fitness(ctx, n_sel, alpha_max, gd_ref)
-  # Warm start com as soluções heurísticas: o DE parte de algo já viável.
+  # Warm start with heuristic solutions: the DE starts from something already feasible.
   initial <- matrix(runif(NP * n_sel, 1, ctx$N + 1), NP, n_sel)
   if (!is.null(seeds)) for (i in seq_along(seeds)) initial[i, ] <- seeds[[i]] + 0.5
 
@@ -92,11 +92,11 @@ sel_de <- function(ctx, n_sel, alpha_max, gd_ref, NP = 300, itermax = 2000,
   decode(res$optim$bestmem, ctx$N, n_sel)
 }
 
-# --- Relaxamento contínuo de OCS (limite superior) --------------------------
+# --- Continuous OCS relaxation (upper bound) -------------------------------------
 
-# max c'u - lambda*c'f c  s.a.  sum(c)=1, 0 <= c <= 1/n_sel.
-# O teto c_i <= 1/n_sel é o que torna isto um limite superior válido para o
-# problema 0/1 de peso igual. Gap grande contra o DE = DE não convergiu.
+# max c'u - lambda*c'f c  s.t.  sum(c)=1, 0 <= c <= 1/n_sel.
+# The cap c_i <= 1/n_sel is what makes this a valid upper bound for the equal-
+# weight 0/1 problem. A large gap against the DE means the DE hasn't converged.
 project_capped_simplex <- function(v, cap) {
   lo <- min(v) - 1; hi <- max(v)
   for (i in 1:60) {
@@ -106,11 +106,12 @@ project_capped_simplex <- function(v, cap) {
   pmin(pmax(v - (lo + hi) / 2, 0), cap)
 }
 
-# iters baixo dá um "limite superior" MENOR que o ótimo discreto — inútil.
-# 4000 é o mínimo que converge nos testes; conferir sempre que mudar de dataset.
+# Too few iters yields an "upper bound" SMALLER than the discrete optimum —
+# useless. 4000 is the minimum that converges in testing; re-check whenever
+# the dataset changes.
 ocs_relaxation <- function(ctx, n_sel, lambdas, iters = 4000) {
   cap <- 1 / n_sel
-  L <- max(rowSums(abs(ctx$f)))   # cota de Gershgorin para o maior autovalor
+  L <- max(rowSums(abs(ctx$f)))   # Gershgorin bound on the largest eigenvalue
   do.call(rbind, lapply(lambdas, function(lam) {
     step <- 1 / (2 * max(lam, 1e-6) * L)
     c_ <- rep(1 / ctx$N, ctx$N)

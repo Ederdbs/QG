@@ -1,8 +1,8 @@
-# Benchmark: distribuição nula, comparação de estratégias, fronteira ganho x alpha.
+# Benchmark: null distribution, strategy comparison, gain-vs-alpha frontier.
 
-# A referência de "0% de perda" é a distribuição de subconjuntos ALEATÓRIOS de
-# tamanho n_sel — não a população de 5000. Comparar direto com a matriz inteira
-# confunde efeito de amostragem com efeito de seleção.
+# The "0% loss" reference is the distribution of RANDOM subsets of size n_sel —
+# not the population of 5000. Comparing directly against the full matrix
+# confounds a sampling effect with a selection effect.
 null_distribution <- function(ctx, n_sel, B = 2000, B_full = 200, seed = 7) {
   set.seed(seed)
   cheap <- t(replicate(B, metrics_cheap(sample.int(ctx$N, n_sel), ctx)))
@@ -11,8 +11,8 @@ null_distribution <- function(ctx, n_sel, B = 2000, B_full = 200, seed = 7) {
        gd_ref = mean(cheap[, "GD"]), gd_sd = sd(cheap[, "GD"]))
 }
 
-# alpha = perda relativa de diversidade gênica contra a referência aleatória.
-# Negativo = mais diverso que uma amostra aleatória.
+# alpha = relative loss of gene diversity against the random reference.
+# Negative = more diverse than a random sample.
 alpha_loss <- function(idx, ctx, gd_ref) (gd_ref - gene_diversity(idx, ctx)) / gd_ref
 
 evaluate <- function(sels, ctx, gd_ref) {
@@ -20,8 +20,8 @@ evaluate <- function(sels, ctx, gd_ref) {
   cbind(out, alpha = (gd_ref - out[, "GD"]) / gd_ref)
 }
 
-# Quantos desvios da nula cada métrica coloca cada estratégia. Métrica que não
-# separa truncamento de aleatório não serve como restrição.
+# How many standard deviations from the null each metric places each strategy.
+# A metric that doesn't separate truncation from random is useless as a constraint.
 discriminatory_power <- function(tab, null) {
   mu <- colMeans(null$full); sdv <- apply(null$full, 2, sd)
   cols <- intersect(colnames(tab), names(mu))
@@ -29,21 +29,21 @@ discriminatory_power <- function(tab, null) {
   round(z, 2)
 }
 
-# Custo por avaliação: define o que pode entrar no fitness do DE (~1e5 chamadas).
+# Cost per evaluation: decides what can go inside the DE fitness (~1e5 calls).
 cost_per_eval <- function(ctx, n_sel, reps = 30) {
   fns <- list(theta_group = theta_group, theta_from_freq = theta_from_freq,
               ne_parents = ne_parents, alleles_lost = alleles_lost,
               ENE = ene, ANE = ane, eff_dim = eff_dim, Gst = gst)
   idx <- sample.int(ctx$N, n_sel)
   data.frame(
-    metrica = names(fns),
-    us_por_avaliacao = round(sapply(fns, function(f)
+    metric = names(fns),
+    us_per_eval = round(sapply(fns, function(f)
       1e6 * system.time(for (i in seq_len(reps)) f(idx, ctx))[["elapsed"]] / reps), 1),
     row.names = NULL
   )
 }
 
-# --- Gráficos (base R, sem dependências) ------------------------------------
+# --- Plots (base R, no dependencies) -----------------------------------------
 
 plot_null <- function(null, tab, file) {
   vars <- c("GD", "Ns", "Ne_parents", "ENE")
@@ -80,9 +80,9 @@ plot_frontier <- function(front, greedy_front, relax, tab, gd_ref, file) {
   png(file, width = 1000, height = 750, res = 110)
   op <- par(mar = c(4.5, 4.5, 3, 1))
   plot(front$alpha * 100, front$index, type = "b", pch = 19, lwd = 2, col = "#b2182b",
-       xlab = "perda de diversidade gênica, alpha (%)",
-       ylab = "índice médio dos selecionados (desvios)",
-       main = "Fronteira ganho x diversidade",
+       xlab = "gene diversity loss, alpha (%)",
+       ylab = "mean index of selected (deviations)",
+       main = "Gain vs. diversity frontier",
        xlim = range(c(front$alpha, greedy_front$alpha, a_relax) * 100),
        ylim = range(c(front$index, greedy_front$index, relax[, "index"], tab[, "index"])))
   lines(greedy_front$alpha * 100, greedy_front$index, type = "b", pch = 17, col = "#2166ac")
@@ -92,7 +92,7 @@ plot_frontier <- function(front, greedy_front, relax, tab, gd_ref, file) {
   text(tab[, "alpha"] * 100, tab[, "index"], rownames(tab), pos = 4, cex = 0.6, col = "grey30")
   abline(v = 0, lty = 3)
   legend("bottomright",
-         c("DE com restrição", "greedy (w)", "relaxamento contínuo OCS", "outras"),
+         c("constrained DE", "greedy (w)", "continuous OCS relaxation", "other"),
          col = c("#b2182b", "#2166ac", "grey55", "grey40"), pch = c(19, 17, 1, 4),
          lwd = c(2, 1, 1, NA), lty = c(1, 1, 2, NA), bty = "n", cex = 0.75)
   par(op); dev.off()

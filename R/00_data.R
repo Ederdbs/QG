@@ -1,19 +1,19 @@
-# Dados: simulação de linhagens -> híbridos -> G (predição) + f (diversidade).
+# Data: line simulation -> hybrids -> G (prediction) + f (diversity).
 #
-# load_data() é o ÚNICO ponto a trocar quando os dados reais chegarem.
-# O resto do código só enxerga o objeto `ctx`.
+# load_data() is the ONLY point to swap once real data arrives.
+# The rest of the code only ever sees the `ctx` object.
 
 sim_config <- list(
-  n_pool_A = 50,     # linhagens no grupo heterótico A
-  n_pool_B = 50,     # linhagens no grupo heterótico B
-  m        = 5000,   # marcadores (real: 25000)
+  n_pool_A = 50,     # lines in heterotic group A
+  n_pool_B = 50,     # lines in heterotic group B
+  m        = 5000,   # markers (real dataset: 25000)
   n_traits = 3,
-  fst      = 0.15,   # divergência entre pools
+  fst      = 0.15,   # divergence between pools
   seed     = 1
 )
 
-# Genótipos das linhagens, 0/2 (endogâmicas = homozigotas), com dois pools
-# divergentes via modelo Balding-Nichols.
+# Line genotypes, 0/2 (inbred = homozygous), with two divergent pools via a
+# Balding-Nichols model.
 simulate_lines <- function(cfg) {
   set.seed(cfg$seed)
   p_anc <- runif(cfg$m, 0.05, 0.95)
@@ -27,10 +27,10 @@ simulate_lines <- function(cfg) {
   L
 }
 
-# Coancestria molecular (Caballero & Toro): f_ij = P(dois alelos idênticos por estado).
-# x = frequência do alelo de referência DENTRO do indivíduo (0, 0.5, 1).
+# Molecular coancestry (Caballero & Toro): f_ij = P(two alleles identical by state).
+# x = frequency of the reference allele WITHIN the individual (0, 0.5, 1).
 #   Sum_k [x_i x_j + (1-x_i)(1-x_j)] = 2 Sum_k x_i x_j - Sum x_i - Sum x_j + m
-# Um único tcrossprod. Nunca centrar: f tem que ficar em [0,1].
+# A single tcrossprod. Never center: f must stay in [0,1].
 molecular_coancestry <- function(X) {
   m <- ncol(X)
   s <- rowSums(X)
@@ -39,8 +39,8 @@ molecular_coancestry <- function(X) {
   f
 }
 
-# VanRaden. Só para a predição dos traits — NÃO usar para diversidade:
-# com Z centrada na própria população, sum(G) == 0 por construção.
+# VanRaden. Only for trait prediction — do NOT use for diversity:
+# with Z centered on its own population, sum(G) == 0 by construction.
 vanraden_G <- function(M) {
   p <- colMeans(M) / 2
   Z <- sweep(M, 2, 2 * p, "-")
@@ -53,13 +53,13 @@ simulate_data <- function(cfg = sim_config) {
   a_ids <- seq_len(cfg$n_pool_A)
   b_ids <- cfg$n_pool_A + seq_len(cfg$n_pool_B)
 
-  # Todas as combinações A x B.
+  # All A x B combinations.
   ped <- expand.grid(a = a_ids, b = b_ids)
   M <- (L[ped$a, , drop = FALSE] + L[ped$b, , drop = FALSE]) / 2  # 0/1/2
 
   vr <- vanraden_G(M)
 
-  # Efeitos de marcador correlacionados entre traits -> GEBVs preditos.
+  # Marker effects correlated across traits -> predicted GEBVs.
   set.seed(cfg$seed + 99)
   R <- matrix(c(1, 0.3, -0.3, 0.3, 1, 0.1, -0.3, 0.1, 1), 3, 3)[seq_len(cfg$n_traits),
                                                                 seq_len(cfg$n_traits), drop = FALSE]
@@ -73,7 +73,7 @@ simulate_data <- function(cfg = sim_config) {
             fL = molecular_coancestry(L / 2), cfg = cfg)
 }
 
-# Monta o contexto e pré-calcula o que é constante entre avaliações.
+# Builds the context and precomputes what stays constant across evaluations.
 build_ctx <- function(X, f, G, traits, ped, n_lines, pool, fL, cfg,
                       weights = rep(1, ncol(traits))) {
   p_pop <- colMeans(X)
@@ -81,12 +81,12 @@ build_ctx <- function(X, f, G, traits, ped, n_lines, pool, fL, cfg,
     X = X, f = f, G = G, traits = traits, ped = ped,
     n_lines = n_lines, pool = pool, fL = fL, cfg = cfg,
     N = nrow(X), m = ncol(X),
-    index = as.numeric(scale(traits %*% weights)),   # índice multi-trait, em desvios
+    index = as.numeric(scale(traits %*% weights)),   # multi-trait index, in deviations
     maf_pop = pmin(p_pop, 1 - p_pop)
   )
 }
 
-# Troque o corpo desta função pelos seus arquivos reais.
+# Swap the body of this function for your real data files.
 load_data <- function(path = "data") {
   fx <- file.path(path, "ctx.rds")
   if (file.exists(fx)) return(readRDS(fx))

@@ -1,42 +1,42 @@
-# Métricas de diversidade. Todas com assinatura f(idx, ctx) -> escalar.
-# Todas sobre a coancestria molecular `ctx$f`, nunca sobre a G centrada.
+# Diversity metrics. All share the signature f(idx, ctx) -> scalar.
+# All operate on the molecular coancestry `ctx$f`, never on centered G.
 
-# --- Núcleo -----------------------------------------------------------------
+# --- Core --------------------------------------------------------------------
 
-# Coancestria de grupo (Cockerham): média de TODOS os n^2 elementos, diagonal
-# incluída. A média off-diagonal sozinha ignora a homozigose de cada híbrido.
+# Group coancestry (Cockerham): mean of ALL n^2 elements, diagonal included.
+# The off-diagonal mean alone ignores each hybrid's own homozygosity.
 theta_group <- function(idx, ctx) mean(ctx$f[idx, idx])
 
-# Diversidade gênica. Identidade exata: 1 - theta == He de Nei (ver tests/).
+# Gene diversity. Exact identity: 1 - theta == Nei's He (see tests/).
 gene_diversity <- function(idx, ctx) 1 - theta_group(idx, ctx)
 
-# Status number (Lindgren & Mullin 1997): "híbridos não-aparentados equivalentes".
-# Descritor estático do grupo, não projeção de deriva.
+# Status number (Lindgren & Mullin 1997): "equivalent unrelated hybrids".
+# A static descriptor of the group, not a drift projection.
 status_number <- function(idx, ctx) 1 / (2 * theta_group(idx, ctx))
 
-# Mesma quantidade pela rota das frequências alélicas: O(n*m) em vez de O(n^2).
-# ~100x mais cara — serve de validação, não entra no fitness do DE.
+# Same quantity via allele frequencies: O(n*m) instead of O(n^2).
+# ~100x more expensive — used for validation, never inside the DE fitness.
 theta_from_freq <- function(idx, ctx) {
   p <- colMeans(ctx$X[idx, , drop = FALSE])
   mean(p^2 + (1 - p)^2)
 }
 
-# He de Nei, calculada de forma independente.
+# Nei's He, computed independently.
 he_nei <- function(idx, ctx) {
   p <- colMeans(ctx$X[idx, , drop = FALSE])
   mean(2 * p * (1 - p))
 }
 
-# Número efetivo de parentais. Independente de f: pega o caso "theta bom,
-# mas só 12 linhagens usadas".
+# Effective number of parents. Independent of f: catches the case "theta looks
+# fine, but only 12 lines were actually used".
 ne_parents <- function(idx, ctx) {
   cnt <- tabulate(c(ctx$ped$a[idx], ctx$ped$b[idx]), nbins = ctx$n_lines)
   p <- cnt / sum(cnt)
   1 / sum(p^2)
 }
 
-# Decomposição por grupo heterótico. A diversidade ENTRE pools é o motor da
-# heterose: theta global pode estar bom com um dos pools erodido.
+# Decomposition by heterotic group. Diversity BETWEEN pools is the engine of
+# heterosis: global theta can look fine while one pool is being eroded.
 theta_pools <- function(idx, ctx) {
   if (is.null(ctx$fL)) return(c(theta_A = NA, theta_B = NA, theta_AB = NA))
   wA <- tabulate(ctx$ped$a[idx], nbins = ctx$n_lines); wA <- wA / sum(wA)
@@ -46,42 +46,42 @@ theta_pools <- function(idx, ctx) {
     theta_AB = drop(wA %*% ctx$fL %*% wB))
 }
 
-# Número efetivo de linhagens usadas em CADA pool. Ao contrário de theta_pools,
-# não precisa de fL — só da genealogia. Pega a erosão de um pool isolado.
+# Effective number of lines used in EACH pool. Unlike theta_pools, this needs
+# no fL — only the pedigree. Catches erosion in a single pool.
 ne_lines_pool <- function(idx, ctx) {
   ne <- function(v) { p <- tabulate(v) / length(v); 1 / sum(p^2) }
-  c(Ne_linhas_A = ne(ctx$ped$a[idx]), Ne_linhas_B = ne(ctx$ped$b[idx]))
+  c(Ne_lines_A = ne(ctx$ped$a[idx]), Ne_lines_B = ne(ctx$ped$b[idx]))
 }
 
-# Marcadores que eram polimórficos na população e ficaram raros/fixados na
-# seleção. Única métrica genuinamente independente de theta.
+# Markers that were polymorphic in the population and became rare/fixed in the
+# selection. The only metric genuinely independent of theta.
 alleles_lost <- function(idx, ctx, maf = 0.05) {
   p <- colMeans(ctx$X[idx, , drop = FALSE])
   sum(pmin(p, 1 - p) < maf & ctx$maf_pop >= maf)
 }
 
-# --- Diagnóstico ------------------------------------------------------------
+# --- Diagnostic ---------------------------------------------------------------
 
-# Distância = 1 - coancestria molecular.
+# Distance = 1 - molecular coancestry.
 
-# Entry-to-nearest-entry (Core Hunter 3): não-redundância DENTRO da seleção.
-# Distingue "200 espalhados" de "100 pares quase idênticos".
+# Entry-to-nearest-entry (Core Hunter 3): non-redundancy WITHIN the selection.
+# Tells apart "200 spread out" from "100 near-identical pairs".
 ene <- function(idx, ctx) {
   d <- 1 - ctx$f[idx, idx]
   diag(d) <- Inf
   mean(apply(d, 1, min))
 }
 
-# Accession-to-nearest-entry: representatividade da população inteira.
+# Accession-to-nearest-entry: representativeness of the whole population.
 ane <- function(idx, ctx) mean(1 - apply(ctx$f[, idx, drop = FALSE], 1, max))
 
-# Quantas direções independentes de variação sobraram.
+# How many independent directions of variation remain.
 eff_dim <- function(idx, ctx) {
   l <- eigen(ctx$f[idx, idx], symmetric = TRUE, only.values = TRUE)$values
   sum(l)^2 / sum(l^2)
 }
 
-# Gst de Nei entre selecionados e não-selecionados.
+# Nei's Gst between selected and non-selected.
 gst <- function(idx, ctx) {
   ps <- colMeans(ctx$X[idx, , drop = FALSE])
   pn <- colMeans(ctx$X[-idx, , drop = FALSE])
@@ -97,16 +97,16 @@ max_line_use <- function(idx, ctx) {
 
 mean_index <- function(idx, ctx) mean(ctx$index[idx])
 
-# A métrica que o usuário tem hoje, para comparação.
+# The metric the user has in production today, kept for comparison.
 mean_offdiag <- function(idx, ctx) {
   s <- ctx$f[idx, idx]
   n <- length(idx)
   (sum(s) - sum(diag(s))) / (n * (n - 1))
 }
 
-# --- Agregadores ------------------------------------------------------------
+# --- Aggregators ---------------------------------------------------------------
 
-# Baratas: podem rodar milhares de vezes (nula, fitness do DE).
+# Cheap: safe to run thousands of times (null distribution, DE fitness).
 metrics_cheap <- function(idx, ctx) {
   th <- theta_group(idx, ctx)
   c(index = mean_index(idx, ctx), theta = th, GD = 1 - th, Ns = 1 / (2 * th),
@@ -114,7 +114,7 @@ metrics_cheap <- function(idx, ctx) {
     max_line = max_line_use(idx, ctx), theta_pools(idx, ctx))
 }
 
-# Caras (varrem os 25k marcadores ou fazem eigen): pós-hoc.
+# Expensive (sweep all 25k markers, or eigendecompose): post-hoc only.
 metrics_full <- function(idx, ctx) {
   c(metrics_cheap(idx, ctx), ne_lines_pool(idx, ctx),
     He = he_nei(idx, ctx), alleles_lost = alleles_lost(idx, ctx),
