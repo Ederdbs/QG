@@ -63,4 +63,27 @@ for (i in 1:50) {
 }
 ok("decode() é determinístico, único e dentro dos limites")
 
+# 9. Contrato das duas etapas.
+st1 <- etapa1_simular(cfg)
+stopifnot(all(c("X", "f", "hibridos") %in% names(st1)),
+          max(st1$X) <= 1, min(st1$f) >= 0, max(st1$f) <= 1,
+          all(c("hibrido", "linhagem_A", "linhagem_B") %in% names(st1$hibridos)),
+          nrow(st1$hibridos) == nrow(st1$X))
+ok("etapa1 devolve X, f e hibridos coerentes")
+
+r <- etapa2_selecionar(st1$X, st1$f, st1$hibridos, n_sel = 20, alphas = c(0, 0.02),
+                       B_nula = 50, NP = 40, itermax = 30, verbose = FALSE)
+cen <- setdiff(names(r$selecao), c(names(st1$hibridos), "n_cenarios"))
+stopifnot(nrow(r$selecao) == nrow(st1$X),
+          all(sapply(r$selecao[cen], sum) == 20),   # cada cenário seleciona n_sel
+          all(unlist(r$selecao[cen]) %in% 0:1),
+          nrow(r$metricas) == length(cen))
+ok(sprintf("etapa2: %d cenários, %d selecionados em cada", length(cen), 20))
+
+# A etapa 2 roda sem fL — só perde theta_A/B/AB.
+r2 <- etapa2_selecionar(st1$X, st1$f, st1$hibridos, n_sel = 20, alphas = 0,
+                        B_nula = 50, NP = 40, itermax = 30, verbose = FALSE)
+stopifnot(is.na(r2$metricas$theta_A[1]), !is.na(r2$metricas$Ne_linhas_A[1]))
+ok("etapa2 sem fL: theta_pools vira NA, Ne por pool continua")
+
 cat("\nTodas as checagens passaram.\n")

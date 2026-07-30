@@ -1,20 +1,46 @@
-# Benchmark de diversidade para seleção de híbridos
+# Seleção de híbridos com restrição de diversidade
 
 ```
-Rscript tests/test_metrics.R   # checagens de sanidade (~10 s)
-Rscript run_all.R              # benchmark completo -> report/ (~6 min)
+Rscript tests/test_metrics.R   # checagens de sanidade (~40 s)
+Rscript run_all.R              # pipeline em 2 etapas -> report/ (~4 min)
+Rscript run_benchmark.R        # benchmark de métricas + gráficos (~6 min)
 ```
+
+Documento técnico com as derivações: `doc/diversidade_metricas.Rmd`.
 
 Configuração atual: 50+50 linhagens → 2500 híbridos, 5000 marcadores, seleciona 100 (4%).
-Para a escala real, edite `sim_config` em `R/00_data.R` (`n_pool_A/B = 71`, `m = 25000`)
-ou troque `load_data()` pelos seus arquivos.
+Para a escala real, edite `sim_config` em `R/00_data.R` (`n_pool_A/B = 71`, `m = 25000`).
+
+## Pipeline em duas etapas
+
+```r
+# ETAPA 1 — genótipos das linhagens -> X, f, hibridos
+st1 <- etapa1_simular()
+#   ou, com dados reais:
+#   st1 <- etapa1_montar(X = marcadores_hibridos, ped = pedigree, traits = traits_preditos)
+
+# ETAPA 2 — os três objetos acima -> seleção por DE em vários cenários de alpha
+res <- etapa2_selecionar(st1$X, st1$f, st1$hibridos, n_sel = 200,
+                         alphas = NULL,   # NULL = grade automática até o teto atingível
+                         pesos  = NULL,   # NULL = peso igual entre traits
+                         fL = st1$fL)     # opcional: habilita theta_A/theta_B/theta_AB
+
+res$selecao    # N linhas x (híbridos + uma coluna 0/1 por cenário + n_cenarios)
+res$metricas   # um cenário por linha: alpha, índice, Ns, Ne_parents, ...
+res$ref        # gd_ref, alpha_max atingível, viés da população como referência
+```
+
+`etapa1_montar()` aceita a matriz de marcadores em codificação 0/1/2 ou 0/0.5/1.
+A etapa 2 roda sem `fL`; só perde a decomposição por grupo heterótico.
 
 | Arquivo | Papel |
 |---|---|
-| `R/00_data.R` | simulação, `G` de VanRaden (predição), `f` coancestria molecular (diversidade). `load_data()` é o único ponto a trocar |
+| `R/00_data.R` | simulação, `G` de VanRaden (predição), `f` coancestria molecular (diversidade) |
 | `R/01_metrics.R` | as métricas, todas `f(idx, ctx) -> escalar` |
 | `R/02_benchmark.R` | nula, poder discriminatório, custo, gráficos |
-| `R/03_de_select.R` | estratégias de seleção: truncamento, cap parental, greedy, DE, relaxamento OCS |
+| `R/03_de_select.R` | estratégias: truncamento, cap parental, greedy, DE, relaxamento OCS |
+| `R/10_etapa1.R` | etapa 1 — contrato de saída X / f / hibridos |
+| `R/11_etapa2.R` | etapa 2 — seleção por cenário, métricas, tabela 0/1 |
 
 ## Resultados (dados simulados)
 

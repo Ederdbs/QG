@@ -38,11 +38,19 @@ ne_parents <- function(idx, ctx) {
 # Decomposição por grupo heterótico. A diversidade ENTRE pools é o motor da
 # heterose: theta global pode estar bom com um dos pools erodido.
 theta_pools <- function(idx, ctx) {
+  if (is.null(ctx$fL)) return(c(theta_A = NA, theta_B = NA, theta_AB = NA))
   wA <- tabulate(ctx$ped$a[idx], nbins = ctx$n_lines); wA <- wA / sum(wA)
   wB <- tabulate(ctx$ped$b[idx], nbins = ctx$n_lines); wB <- wB / sum(wB)
   c(theta_A = drop(wA %*% ctx$fL %*% wA),
     theta_B = drop(wB %*% ctx$fL %*% wB),
     theta_AB = drop(wA %*% ctx$fL %*% wB))
+}
+
+# Número efetivo de linhagens usadas em CADA pool. Ao contrário de theta_pools,
+# não precisa de fL — só da genealogia. Pega a erosão de um pool isolado.
+ne_lines_pool <- function(idx, ctx) {
+  ne <- function(v) { p <- tabulate(v) / length(v); 1 / sum(p^2) }
+  c(Ne_linhas_A = ne(ctx$ped$a[idx]), Ne_linhas_B = ne(ctx$ped$b[idx]))
 }
 
 # Marcadores que eram polimórficos na população e ficaram raros/fixados na
@@ -108,7 +116,7 @@ metrics_cheap <- function(idx, ctx) {
 
 # Caras (varrem os 25k marcadores ou fazem eigen): pós-hoc.
 metrics_full <- function(idx, ctx) {
-  c(metrics_cheap(idx, ctx),
+  c(metrics_cheap(idx, ctx), ne_lines_pool(idx, ctx),
     He = he_nei(idx, ctx), alleles_lost = alleles_lost(idx, ctx),
     ENE = ene(idx, ctx), ANE = ane(idx, ctx),
     eff_dim = eff_dim(idx, ctx), Gst = gst(idx, ctx))
