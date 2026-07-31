@@ -139,8 +139,34 @@ admits no identity-by-descent interpretation.
 
 > The root of the problem is the implicit base population. $\mathbf{G}$
 > measures relatedness *relative* to the current population; diversity
-> requires an *absolute* scale. See @gomezromano2016 and @villanueva2020 for
+> requires an *absolute* scale. See @gomezromano2016 and @meuwissen2020 for
 > a discussion of which genomic coancestry matrix to use in which context.
+
+## f Is Not an Ad Hoc Choice — It Has a Name in the GOC Literature
+
+Two independent lines of work converge on the matrix used here. Nejati-Javaremi
+et al. [-@nejatijavaremi1997] proposed the *allelic-similarity* method,
+$f_{ij} = 0.25\sum_{k=1}^{2}\sum_{l=1}^{2}\delta_{kl}$ where $\delta_{kl}=1$ if
+the $k$-th allele of $i$ equals the $l$-th allele of $j$ — exactly the
+identity-by-state average used in $\mathbf{f}$ above, generalized here from
+single loci to a genome-wide mean. @gomezromano2016 contrast it directly
+against the crossproduct-based matrices (VanRaden-style): the allelic-similarity
+matrix is guaranteed to stay in $[0,1]$ by construction, while crossproduct
+matrices normalized by *current* allele frequencies are not — precisely the
+failure mode demonstrated numerically above.
+
+The same matrix reappears from a second angle. @toro2014 and @meuwissen2020
+show that fixing the VanRaden centering frequency at $p_k = 0.5$ for every
+marker — instead of the sample frequency $\bar p_k$ — produces a matrix,
+denoted $\mathbf{G}_{0.5}$, that "is proportional to homozygosity-based
+inbreeding and molecular coancestry." That is structurally our
+$\mathbf{f}$: replacing $2p_k$ with $1$ in the VanRaden centering removes the
+population-dependent term that forced $\mathbf{1}'\mathbf{G}\mathbf{1}=0$,
+which is exactly the fix derived independently in Section \@ref(f-molecular)
+from first principles. $\mathbf{f}$ is not a heuristic substitute for
+$\mathbf{G}$ — it is the member of the VanRaden family that has an absolute
+scale, arrived at from two unrelated derivations in the quantitative-genetics
+literature.
 
 # The Molecular Coancestry Matrix {#f-molecular}
 
@@ -342,6 +368,38 @@ For the same reason, do not use the linkage-disequilibrium-based $N_e$ here
 ($N_e = 1/(3(\bar r^2 - 1/S))$): it estimates population history, not the
 composition of a selected sample.
 
+### A Second Caveat: θ Tracks Homozygosity, Not Drift {-}
+
+@meuwissen2020 draw a distinction that classical theory collapses but genomic
+management reopens: **homozygosity-based inbreeding** ($F_{\text{hom}}$, what
+$\theta$ and $GD$ measure here) and **drift-based inbreeding**
+($F_{\text{drift}}$, the squared change in allele frequency relative to a base
+population) are the same quantity only under neutral, unlinked loci and
+random mating. Once selection actively manages $\mathbf{f}$-type
+(homozygosity) matrices, the two diverge substantially — sometimes with
+opposite sign.
+
+The mechanism is the same one identified in the previous caveat: minimizing
+$\theta_S$ pushes allele frequencies **toward 0.5**, since
+$\theta_S = \frac{1}{m}\sum_k(\bar p_k^2 + \bar q_k^2)$ is minimized at
+$\bar p_k = 0.5$. This lowers $F_{\text{hom}}$ efficiently — sometimes past
+the point of actually reducing drift, because alleles starting below 0.5 are
+pushed up and alleles above 0.5 are pushed down, which is not the same
+direction random drift would take them. @meuwissen2020 report scenarios where
+optimizing a homozygosity-based matrix produced *higher* drift-based inbreeding
+than doing nothing, while the reverse (optimizing IBD-based matrices) kept
+both aligned.
+
+Practical reading for this pipeline: $GD$ and $N_s$ answer "how much
+heterozygosity does the selection preserve," which is the right question for
+next season's hybrid vigor. They do not certify that allele frequencies are
+moving in the direction unmanaged drift would have taken them, which matters
+more for multi-generation recurrent selection than for a single round of
+hybrid selection. If this pipeline is later extended to plan several breeding
+cycles, allelic richness (Section \@ref(richness-section), which counts
+alleles lost rather than frequencies pulled toward 0.5) and pedigree- or
+haplotype-based relationship measures become the safer long-run compasses.
+
 ## Effective Number of Parents
 
 A metric independent of $\mathbf{f}$, computed purely from the hybrids'
@@ -365,7 +423,7 @@ c(random          = ne_parents(sel_random(ctx, n_sel), ctx),
 Its cost is negligible (a `tabulate` count), which makes it a natural
 candidate to **enter the objective function alongside $\theta$**.
 
-## Allelic Richness
+## Allelic Richness {#richness-section}
 
 $\theta$ and $H_e$ are averages across markers and are dominated by
 intermediate-frequency alleles. A lost rare allele barely moves them, yet the
@@ -382,7 +440,22 @@ c(random      = alleles_lost(sel_random(ctx, n_sel), ctx),
   truncation  = alleles_lost(sel_truncation(ctx, n_sel), ctx))
 ```
 
-It is the only metric in the set **genuinely non-redundant** with $\theta$.
+It is the only metric in the set **genuinely non-redundant** with $\theta$, and
+the two-pronged caveat above explains why that independence matters.
+@lopezcortegano2019 compared, in a subdivided simulated population,
+management strategies that maximize *expected heterozygosity* ($H_T$, the
+same family as our $GD$) against strategies that maximize *allelic diversity*
+($A_T$, closer to this section's allele count). Their finding: maximizing
+$A_T$ retained a larger number of alleles **and** produced better control of
+molecular inbreeding ($F$) than maximizing $H_T$ — heterozygosity-maximizing
+management pushes allele frequencies toward 0.5, which favors rare alleles in
+the short run but does not stop them drifting to loss once they are no longer
+the rarest ones, whereas allele-count management defends every segregating
+allele directly. Their recommendation for conservation programs of structured
+populations was to make $A_T$, not $H_T$, the primary target. In this
+pipeline's terms: `alleles_lost` deserves a place next to $\theta$ as a
+tracked outcome, not only as a post-hoc sanity check, whenever the selection
+will feed multiple future cycles rather than a single hybrid release.
 
 ## Distances: E-NE and A-NE
 
@@ -434,7 +507,7 @@ c(random     = eff_dim(sel_random(ctx, n_sel), ctx),
 In hybrid maize the diversity **between pools** is the engine of heterosis
 and cannot be spent; the diversity **within each pool** is the fuel for
 future progress. Following the logic of subdivided populations
-[@caballero2002; @fernandez2019], we compute molecular coancestry between
+[@caballero2002; @lopezcortegano2019], we compute molecular coancestry between
 lines $\mathbf{f}^{L}$ and weight it by each line's usage among the selected
 hybrids:
 
@@ -454,6 +527,36 @@ rbind(random     = theta_pools(sel_random(ctx, n_sel), ctx),
 A blind optimizer can keep global $\theta$ acceptable while eroding one of
 the pools. Without the decomposition this goes unnoticed, and the
 consequence only shows up the following cycle.
+
+### Formalizing the Within/Between Split, and Where It Could Go Next
+
+$\theta_A$, $\theta_B$, and $\theta_{AB}$ as computed here are diagnostic —
+they are reported, not yet fed back into the objective. The subdivided-population
+literature offers a ready-made way to promote them into a tunable target.
+@caballerorodriguezramilo2010, used by @lopezcortegano2019 to manage two
+heterotic-like pools simultaneously, partition total diversity as
+
+$$
+H_T = D_G + \lambda H_S, \qquad
+A_T = D_A + \lambda A_S,
+$$
+
+where $H_S$/$A_S$ are the within-pool components (our $\theta_A$, $\theta_B$,
+converted to diversity), $D_G$/$D_A$ are the between-pool components (a
+function of $\theta_{AB}$ relative to $\theta_A,\theta_B$), and $\lambda \in
+[0, \infty)$ is a weight chosen by the breeder: $\lambda = 0$ optimizes only
+between-pool divergence (protects heterosis, ignores each pool's internal
+health), $\lambda = 1$ weights both components equally, and $\lambda \to
+\infty$ optimizes only within-pool diversity (protects each pool's future
+options, ignores the cross). This maps directly onto the two constraints a
+maize breeder actually has in mind but currently applies only qualitatively:
+"don't blend the pools together" versus "don't paint either pool into a
+corner." Turning $\lambda$ into a second, explicit knob next to $\alpha_{\max}$
+— rather than only inspecting $\theta_A/\theta_B/\theta_{AB}$ after the fact
+— is the natural next step if pool erosion shows up in practice; the current
+implementation reports the ingredients ($\theta_A$, $\theta_B$, $\theta_{AB}$,
+and the per-pool `Ne_lines_A`/`Ne_lines_B` in `R/01_metrics.R`) but leaves the
+weighting decision to the analyst reading the report.
 
 # The Correct Baseline {#baseline}
 
@@ -552,10 +655,57 @@ The common alternative, $\max\; \bar u - \lambda\,\theta_S$, requires
 calibrating $\lambda$, which has no direct interpretation. The constraint
 form preserves the operational meaning: "I accept losing at most
 $\alpha_{\max}$ of diversity". It is the same principle behind optimal
-contribution selection [@meuwissen1997], differing in that there
+contribution selection (OCS) [@meuwissen1997], differing in that there
 contributions $\mathbf{c}$ are continuous while here the problem is
 combinatorial (0/1 with equal weight), which motivates using differential
 evolution [@storn1997; @mullen2011].
+
+### Relation to the Standard OCS Formulation
+
+@gomezromano2016 write the general OCS problem, for a vector of continuous
+contributions $\mathbf{c}$, as
+
+$$
+\text{minimize} \quad \mathbf{c}'\mathbf{G}\mathbf{c}
+\qquad \text{subject to} \qquad
+\mathbf{c}'\mathbf{s} = 0.5,\;\; \mathbf{c}'\mathbf{d} = 0.5,\;\; c_i \ge 0,
+$$
+
+with $\mathbf{s}$/$\mathbf{d}$ indicating sex, and $\mathbf{G}$ the coancestry
+matrix chosen for managing diversity (here, our $\mathbf{f}$). Our formulation
+is the special case of this problem restricted to $c_i \in \{0, 1/n\}$ — a
+fixed number $n$ of candidates contribute equally, none partially — with the
+minimization of $\mathbf{c}'\mathbf{f}\mathbf{c}$ turned into a constraint
+($\alpha(S) \le \alpha_{\max}$) and $\bar u$ promoted to the objective. This
+restriction to equal, all-or-nothing contributions is exactly what makes the
+problem combinatorial and pushes the solution method from convex quadratic
+programming to differential evolution; @carvalheiro2010 used the same
+algorithm for continuous-contribution OCS, so DE is an established tool for
+this problem family, not a choice specific to the discrete case here. The
+`ocs_relaxation()` function in `R/03_de_select.R` implements the continuous
+relaxation of *this* restricted problem (Section \@ref(convergence-diag))
+precisely by dropping the $c_i \in \{0, 1/n\}$ restriction back to $0 \le c_i
+\le 1/n$ — it is the bridge between the two formulations, not a separate
+model.
+
+**A caveat carried over from the general OCS literature.** @gomezromano2016
+show that the *predicted* rate of coancestry in the next generation,
+$E(\Delta f_{t+1}) = (\mathbf{c}'\mathbf{G}_t\mathbf{c} - f_t)/(1-f_t)$, is
+systematically **biased downward** relative to the coancestry actually
+realized after offspring are generated — by roughly a factor of two in their
+simulations with small candidate pools, shrinking as candidate pool size
+grows. The bias arises because $\mathbf{c}'\mathbf{G}\mathbf{c}$ is an
+expectation over Mendelian segregation, and the realized draw has its own
+sampling variance on top of that expectation. This does **not** affect the
+$\theta_S$ computed here on an already-realized hybrid population — $\mathbf{f}$
+is measured on real marker genotypes, not predicted from parental
+contributions, so there is no forward-prediction step to bias. It becomes
+relevant only if this pipeline is later extended to *plan* a further
+generation from the selected 200 hybrids (i.e., to predict *their* offspring's
+coancestry from a contribution vector): at that point, the naive
+$\mathbf{c}'\mathbf{f}\mathbf{c}$ prediction should be expected to
+underestimate realized coancestry, and the margin built into $\alpha_{\max}$
+should account for it.
 
 ```{r fitness, eval=FALSE}
 make_fitness <- function(ctx, n_sel, alpha_max, gd_ref, penalty = 1000) {
@@ -582,7 +732,7 @@ Practical conclusion: $\theta$ (matrix route) and $N_{e(\text{par})}$ go into
 the objective; allelic richness, A-NE, and $G_{st}$ are computed **once** on
 the final solution.
 
-## Convergence Diagnostic
+## Convergence Diagnostic {#convergence-diag}
 
 The problem's continuous relaxation — allowing $0 \le c_i \le 1/n$ with
 $\sum_i c_i = 1$ instead of $c_i \in \{0, 1/n\}$ — provides a valid upper
@@ -594,6 +744,153 @@ hard.
 In practice, seeding the initial population with heuristic solutions (greedy
 on $\theta$, truncation with a per-parent usage cap) is decisive: without it
 the optimizer ends up *below* a plain greedy.
+
+This mirrors a finding from a related but distinct combinatorial-selection
+problem. @debeukelaer2018, optimizing core-collection subsets with local
+search rather than DE, found that a basic stochastic hill-climber (random
+descent) was already competitive, that a considerably more complex genetic
+algorithm did *not* reliably beat it, and that the method which won —
+parallel tempering — won by combining many simple local searches rather than
+by being individually more sophisticated. The common thread with the warm-start
+result here: for this class of problem (select $n$ of $N$ to jointly optimize
+gain and diversity), the return on a smarter *search strategy* around a simple
+move (swap one candidate) consistently outweighs the return on a more elaborate
+*single-solution* search algorithm. A useful direction if the DE result ever
+looks unconvincing on the real 25k-marker data: run several independent DE
+chains from different warm starts (analogous to parallel tempering's multiple
+replicas) rather than reaching for a fundamentally different optimizer.
+
+# Implementation: The Two-Stage Pipeline
+
+Everything above is assembled into a two-stage pipeline, orchestrated by
+`run_all.R` and implemented in `R/10_stage1.R` and `R/11_stage2.R`. The split
+exists because the two stages have different costs and different reasons to
+be re-run: stage 1 (simulating or ingesting the hybrids) is done once per
+breeding cycle; stage 2 (the constrained selection) is cheap enough, and
+sensitive enough to the chosen $\alpha_{\max}$ and trait weights, to be
+re-run many times against the same `X`/`f`/`hybrids` objects.
+
+## Stage 1 — From Lines to (X, f, hybrids)
+
+```{r stage1-code, eval=FALSE}
+# R/10_stage1.R
+stage1_simulate <- function(cfg = sim_config) {
+  d <- simulate_data(cfg)
+  stage1_build(X = d$X, ped = d$ped, traits = d$traits, fL = d$fL)
+}
+
+stage1_build <- function(X, ped, traits, fL = NULL) {
+  if (max(X) > 1) X <- X / 2          # accepts 0/1/2 or 0/0.5/1 coding
+  stopifnot(nrow(X) == nrow(ped), nrow(X) == nrow(traits))
+  hybrids <- data.frame(
+    hybrid = seq_len(nrow(X)),
+    line_A = as.integer(ped$a), line_B = as.integer(ped$b),
+    traits
+  )
+  list(X = X, f = molecular_coancestry(X), hybrids = hybrids, fL = fL)
+}
+```
+
+`stage1_simulate()` is the path used throughout this document. `stage1_build()`
+is the path for real data: it takes a hybrid marker matrix (any of 0/1/2 or
+0/0.5/1 coding — Section \@ref(f-molecular)'s $x_{ik}$), a two-column pedigree
+of parent-line indices, and the table of predicted trait values already
+produced by GBLUP outside this pipeline. It computes $\mathbf{f}$ once, via
+`molecular_coancestry()` (the boxed identity in Section \@ref(f-molecular)),
+and returns the same three-object contract regardless of which path produced
+it — the rest of the pipeline never needs to know whether `X` came from a
+simulation or a genotyping file.
+
+```{r stage1-run}
+st1 <- stage1_simulate(cfg)
+c(hybrids = nrow(st1$X), markers = ncol(st1$X),
+  f_range_lo = min(st1$f), f_range_hi = max(st1$f))
+```
+
+## Stage 2 — Selection Across an α Grid
+
+```{r stage2-code, eval=FALSE}
+# R/11_stage2.R (excerpt)
+stage2_select <- function(X, f, hybrids, n_sel,
+                          alphas = NULL, weights = NULL, fL = NULL,
+                          include_references = TRUE,
+                          B_null = 2000, NP = 300, itermax = 2000, ...) {
+  ctx <- build_ctx_from_stage1(X, f, hybrids, fL, weights)
+
+  # 1. Reference and ceiling (Sections 6-7)
+  gd_rand   <- replicate(B_null, gene_diversity(sample.int(ctx$N, n_sel), ctx))
+  gd_ref    <- mean(gd_rand)
+  alpha_max <- alpha_loss(sel_truncation(ctx, n_sel), ctx, gd_ref)
+  if (is.null(alphas)) alphas <- seq(0, alpha_max, length.out = 5)
+
+  # 2. Warm start (Section "Convergence Diagnostic")
+  seeds <- c(lapply(c(0, 1e-4, 2e-4, 3e-4, 5e-4, 1e-3, 3e-3),
+                    function(w) sel_greedy(ctx, n_sel, w = w)),
+             list(sel_truncation_cap(ctx, n_sel)))
+
+  # 3. One DE run per alpha in the grid
+  scenarios <- lapply(alphas, function(a)
+    sel_de(ctx, n_sel, alpha_max = a, gd_ref = gd_ref,
+          NP = NP, itermax = itermax, seeds = seeds))
+
+  # 4. Metrics per scenario + N x n_scenarios 0/1 table
+  # ...
+}
+```
+
+Four things this function does that are easy to miss from the summary table
+alone, each traceable to a section above:
+
+1. **The reference is recomputed from `X`/`f`, not hardcoded.** `gd_ref` and
+   `alpha_max` come from `n_sel` random draws and one truncation run on
+   *this* dataset (Sections \@ref(baseline) and "How to Set the α Limit") — a
+   different `n_sel`, a different set of hybrids, or real vs. simulated data
+   all shift these numbers, which is why they must never be pasted in from a
+   previous run.
+2. **`alphas = NULL` produces a grid, not a single answer**, spanning $[0,
+   \alpha_{\max}]$ in five steps by default — the mechanism behind the
+   gain-vs-diversity frontier (Section "Which Metric Belongs in the Inner
+   Loop" and `run_benchmark.R`'s `frontier.csv`), available here without a
+   second script.
+3. **The same warm-start seeds serve every $\alpha$ in the grid.** Building
+   them once and reusing them (rather than re-deriving per scenario) is what
+   keeps five-plus DE runs affordable, and is the direct implementation of
+   the Convergence Diagnostic finding above.
+4. **`include_references = TRUE` appends non-DE strategies** (pure
+   truncation, truncation with a parental cap, pure-diversity greedy, one
+   random draw) as extra columns in the same output table, so the DE
+   scenarios are never read in isolation from their baselines.
+
+```{r stage2-run}
+res <- stage2_select(st1$X, st1$f, st1$hybrids, n_sel = n_sel,
+                     alphas = c(0, 0.02), B_null = 300, NP = 80, itermax = 150,
+                     verbose = FALSE)
+res$ref[c("gd_ref", "alpha_max", "n_sel")]
+res$metrics[, c("scenario", "alpha", "index", "Ns", "Ne_parents", "alleles_lost")]
+```
+
+## The Output Contract
+
+```{r stage2-selection}
+scenario_cols <- setdiff(names(res$selection), c(names(st1$hybrids), "n_scenarios"))
+str(res$selection[scenario_cols])
+head(res$selection[order(-res$selection$n_scenarios),
+                   c("hybrid", "line_A", "line_B", scenario_cols, "n_scenarios")], 5)
+```
+
+`res$selection` is one row per hybrid (all `ctx$N` of them, not just the
+selected ones) and one 0/1 column per scenario, so "was hybrid 472 selected
+under the strictest diversity constraint" is a single lookup rather than a
+set intersection. `n_scenarios` — the row sum across scenario columns — is a
+free robustness signal: a hybrid chosen at every point along the
+$\alpha$ grid is a safe pick regardless of how much diversity loss ends up
+being acceptable; a hybrid that appears only when $\alpha_{\max}$ is loosest
+is a gain/diversity trade that only survives if that laxer target is the one
+adopted. `run_all.R` writes this table to
+`report/selection_by_scenario.csv` and the companion metrics table to
+`report/metrics_by_scenario.csv`, unmodified from what `stage2_select()`
+returns — the CSVs are exactly `res$selection` and `res$metrics`, not a
+reshaped summary of them.
 
 # Operational Summary
 
@@ -607,6 +904,7 @@ the optimizer ends up *below* a plain greedy.
 | 6 | Interpretable scale | $N_s = 1/(2\theta_S)$ |
 | 7 | Baseline | resampling of $n$ individuals, not the full population |
 | 8 | Loss | $\alpha = (GD_{\text{random}} - GD_S)/GD_{\text{random}}$ |
+| 9 | Pipeline | `stage1_simulate`/`stage1_build` $\to$ `stage2_select` $\to$ selection + metrics tables |
 
 Mistakes to avoid, in order of severity:
 
@@ -618,5 +916,10 @@ Mistakes to avoid, in order of severity:
    but required for the $N_s$ scale to be meaningful.
 5. Running the optimizer without a warm start and concluding the problem is
    hard.
+6. Treating $GD$/$N_s$ as a certificate against long-run drift — they measure
+   homozygosity-based diversity ($F_{\text{hom}}$), which under active
+   management can diverge from drift-based diversity ($F_{\text{drift}}$,
+   @meuwissen2020). Fine for one round of hybrid selection; track allelic
+   richness too if planning several breeding cycles.
 
 # References

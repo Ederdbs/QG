@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Technical document">
+<meta name="dcterms.date" content="2026-07-30">
+
+<title>From the Marker Matrix to Diversity Metrics</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="diversity_metrics_files/libs/clipboard/clipboard.min.js"></script>
+<script src="diversity_metrics_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="diversity_metrics_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="diversity_metrics_files/libs/quarto-html/popper.min.js"></script>
+<script src="diversity_metrics_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="diversity_metrics_files/libs/quarto-html/anchor.min.js"></script>
+<link href="diversity_metrics_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="diversity_metrics_files/libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="diversity_metrics_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="diversity_metrics_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="diversity_metrics_files/libs/bootstrap/bootstrap-138a6193a3bd40baf1e627da441a4734.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="fullcontent quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">From the Marker Matrix to Diversity Metrics</h1>
+<p class="subtitle lead">Maize hybrid selection under a genetic diversity constraint</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Technical document </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">July 30, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="scope" class="level1">
+<h1>Scope</h1>
+<p>This document describes, with explicit algebra and the code that implements it, the path from the lines’ marker matrix to the metrics used to constrain diversity loss when selecting hybrids.</p>
+<p>The central thesis is that <strong>two different matrices are needed, and swapping them is the easiest mistake to make</strong>: the genomic matrix of <span class="citation" data-cites="vanraden2008">VanRaden (<a href="#ref-vanraden2008" role="doc-biblioref">2008</a>)</span> to <em>predict</em> performance, and the molecular coancestry matrix of <span class="citation" data-cites="caballero2002">Caballero and Toro (<a href="#ref-caballero2002" role="doc-biblioref">2002</a>)</span> to <em>measure</em> diversity. Section @ref(why-not-g) shows algebraically and numerically why the first one cannot serve the second.</p>
+<p>As a running example, a small simulated set:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>cfg <span class="ot">&lt;-</span> <span class="fu">modifyList</span>(sim_config, <span class="fu">list</span>(<span class="at">n_pool_A =</span> <span class="dv">25</span>, <span class="at">n_pool_B =</span> <span class="dv">25</span>, <span class="at">m =</span> <span class="dv">1500</span>))</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>ctx <span class="ot">&lt;-</span> <span class="fu">simulate_data</span>(cfg)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>n_sel <span class="ot">&lt;-</span> <span class="dv">40</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">hybrids =</span> ctx<span class="sc">$</span>N, <span class="at">markers =</span> ctx<span class="sc">$</span>m, <span class="at">lines =</span> ctx<span class="sc">$</span>n_lines)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; hybrids markers   lines 
+#&gt;     625    1500      50</code></pre>
+</div>
+</div>
+</section>
+<section id="from-line-to-hybrid" class="level1">
+<h1>From Line to Hybrid</h1>
+<section id="coding" class="level2">
+<h2 class="anchored" data-anchor-id="coding">Coding</h2>
+<p>Let <span class="math inline">\(\mathbf{M}^{L}\)</span> be the <span class="math inline">\(L \times m\)</span> matrix of line genotypes, with <span class="math inline">\(M^{L}_{ik} \in \{0, 2\}\)</span> = count of the reference allele at marker <span class="math inline">\(k\)</span>. Inbred lines are homozygous, so the value 1 never occurs — residual heterozygotes must be imputed or discarded beforehand.</p>
+</section>
+<section id="hybrid-genotype" class="level2">
+<h2 class="anchored" data-anchor-id="hybrid-genotype">Hybrid Genotype</h2>
+<p>The <span class="math inline">\(F_1\)</span> hybrid between lines <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> receives one gamete from each parent. Since both parents are homozygous, the gamete from <span class="math inline">\(a\)</span> carries <span class="math inline">\(M^{L}_{ak}/2\)</span> copies of the reference allele, and therefore</p>
+<p><span class="math display">\[
+M^{H}_{(ab)k} \;=\; \frac{M^{L}_{ak} + M^{L}_{bk}}{2} \;\in\; \{0, 1, 2\}.
+\]</span></p>
+<p>The value 1 appears exactly at markers where the two lines differ — these are the hybrid’s heterozygous loci, and they are the ones carrying heterosis. Predicting the hybrid’s genotype is <strong>deterministic</strong>, not statistical: it is the one piece of information that requires no assumption at all <span class="citation" data-cites="technow2014">(<a href="#ref-technow2014" role="doc-biblioref">Technow et al. 2014</a>)</span>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># R/00_data.R</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>ped <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">a =</span> a_ids, <span class="at">b =</span> b_ids)                    <span class="co"># all A x B combinations</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>M   <span class="ot">&lt;-</span> (L[ped<span class="sc">$</span>a, , <span class="at">drop =</span> <span class="cn">FALSE</span>] <span class="sc">+</span> L[ped<span class="sc">$</span>b, , <span class="at">drop =</span> <span class="cn">FALSE</span>]) <span class="sc">/</span> <span class="dv">2</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>From here on we work with the <strong>within-individual reference-allele frequency</strong>, which is the natural quantity for coancestry:</p>
+<p><span class="math display">\[
+x_{ik} \;=\; \frac{M^{H}_{ik}}{2} \;\in\; \{0,\; 0.5,\; 1\}.
+\]</span></p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(ctx<span class="sc">$</span>X[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;  num [1:3, 1:6] 0 0 0.5 0.5 0 0 0.5 0.5 0.5 1 ...</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="g-vanraden" class="level1">
+<h1>The VanRaden Genomic Matrix</h1>
+<section id="definition" class="level2">
+<h2 class="anchored" data-anchor-id="definition">Definition</h2>
+<p>With <span class="math inline">\(p_k\)</span> = reference-allele frequency in the hybrid population, <span class="math inline">\(\mathbf{Z} = \mathbf{M}^{H} - \mathbf{1}\,2\mathbf{p}'\)</span> is the centered matrix and</p>
+<p><span class="math display">\[
+\mathbf{G} \;=\; \frac{\mathbf{Z}\mathbf{Z}'}{2\sum_{k} p_k (1-p_k)}.
+\]</span></p>
+<p>This is <span class="citation" data-cites="vanraden2008">VanRaden (<a href="#ref-vanraden2008" role="doc-biblioref">2008</a>)</span>’s first parametrization. It estimates realized additive relationship and is what feeds GBLUP to predict traits from already-estimated marker effects.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>vanraden_G <span class="ot">&lt;-</span> <span class="cf">function</span>(M) {</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(M) <span class="sc">/</span> <span class="dv">2</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  Z <span class="ot">&lt;-</span> <span class="fu">sweep</span>(M, <span class="dv">2</span>, <span class="dv">2</span> <span class="sc">*</span> p, <span class="st">"-"</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">G =</span> <span class="fu">tcrossprod</span>(Z) <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> <span class="fu">sum</span>(p <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p))), <span class="at">Z =</span> Z, <span class="at">p =</span> p)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="why-not-g" class="level2">
+<h2 class="anchored" data-anchor-id="why-not-g">Why G Cannot Measure Diversity</h2>
+<p>Centering on <span class="math inline">\(2\mathbf{p}\)</span> uses frequencies <strong>from the population itself</strong>. So every column of <span class="math inline">\(\mathbf{Z}\)</span> sums to zero:</p>
+<p><span class="math display">\[
+\mathbf{Z}'\mathbf{1} = \mathbf{0}
+\quad\Longrightarrow\quad
+\mathbf{1}'\mathbf{G}\mathbf{1}
+\;=\; \frac{\mathbf{1}'\mathbf{Z}\mathbf{Z}'\mathbf{1}}{2\sum_k p_k q_k}
+\;=\; \frac{\lVert \mathbf{Z}'\mathbf{1}\rVert^2}{2\sum_k p_k q_k}
+\;=\; 0 .
+\]</span></p>
+<p>The sum of <strong>all</strong> elements of <span class="math inline">\(\mathbf{G}\)</span> is identically zero. Since group coancestry is proportional to that sum, it equals zero for the whole population, and the status number <span class="math inline">\(N_s = 1/(2\theta)\)</span> diverges:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">sum_G       =</span> <span class="fu">sum</span>(ctx<span class="sc">$</span>G),</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">theta_on_G  =</span> <span class="fu">mean</span>(ctx<span class="sc">$</span>G) <span class="sc">/</span> <span class="dv">2</span>,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">Ns_on_G     =</span> <span class="dv">1</span> <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> <span class="fu">mean</span>(ctx<span class="sc">$</span>G) <span class="sc">/</span> <span class="dv">2</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;        sum_G   theta_on_G      Ns_on_G 
+#&gt; -4.39605e-11 -5.68063e-17 -8.80184e+15</code></pre>
+</div>
+</div>
+<p>In subsets the sum isn’t zero, but it is a <strong>centered</strong> quantity that oscillates around zero and takes negative values. It is not a probability and admits no identity-by-descent interpretation.</p>
+<blockquote class="blockquote">
+<p>The root of the problem is the implicit base population. <span class="math inline">\(\mathbf{G}\)</span> measures relatedness <em>relative</em> to the current population; diversity requires an <em>absolute</em> scale. See <span class="citation" data-cites="gomezromano2016">Gómez-Romano et al. (<a href="#ref-gomezromano2016" role="doc-biblioref">2016</a>)</span> and <span class="citation" data-cites="meuwissen2020">Meuwissen et al. (<a href="#ref-meuwissen2020" role="doc-biblioref">2020</a>)</span> for a discussion of which genomic coancestry matrix to use in which context.</p>
+</blockquote>
+</section>
+<section id="f-is-not-an-ad-hoc-choice-it-has-a-name-in-the-goc-literature" class="level2">
+<h2 class="anchored" data-anchor-id="f-is-not-an-ad-hoc-choice-it-has-a-name-in-the-goc-literature">f Is Not an Ad Hoc Choice — It Has a Name in the GOC Literature</h2>
+<p>Two independent lines of work converge on the matrix used here. Nejati-Javaremi et al. <span class="citation" data-cites="nejatijavaremi1997">(<a href="#ref-nejatijavaremi1997" role="doc-biblioref">1997</a>)</span> proposed the <em>allelic-similarity</em> method, <span class="math inline">\(f_{ij} = 0.25\sum_{k=1}^{2}\sum_{l=1}^{2}\delta_{kl}\)</span> where <span class="math inline">\(\delta_{kl}=1\)</span> if the <span class="math inline">\(k\)</span>-th allele of <span class="math inline">\(i\)</span> equals the <span class="math inline">\(l\)</span>-th allele of <span class="math inline">\(j\)</span> — exactly the identity-by-state average used in <span class="math inline">\(\mathbf{f}\)</span> above, generalized here from single loci to a genome-wide mean. <span class="citation" data-cites="gomezromano2016">Gómez-Romano et al. (<a href="#ref-gomezromano2016" role="doc-biblioref">2016</a>)</span> contrast it directly against the crossproduct-based matrices (VanRaden-style): the allelic-similarity matrix is guaranteed to stay in <span class="math inline">\([0,1]\)</span> by construction, while crossproduct matrices normalized by <em>current</em> allele frequencies are not — precisely the failure mode demonstrated numerically above.</p>
+<p>The same matrix reappears from a second angle. <span class="citation" data-cites="toro2014">Toro et al. (<a href="#ref-toro2014" role="doc-biblioref">2014</a>)</span> and <span class="citation" data-cites="meuwissen2020">Meuwissen et al. (<a href="#ref-meuwissen2020" role="doc-biblioref">2020</a>)</span> show that fixing the VanRaden centering frequency at <span class="math inline">\(p_k = 0.5\)</span> for every marker — instead of the sample frequency <span class="math inline">\(\bar p_k\)</span> — produces a matrix, denoted <span class="math inline">\(\mathbf{G}_{0.5}\)</span>, that “is proportional to homozygosity-based inbreeding and molecular coancestry.” That is structurally our <span class="math inline">\(\mathbf{f}\)</span>: replacing <span class="math inline">\(2p_k\)</span> with <span class="math inline">\(1\)</span> in the VanRaden centering removes the population-dependent term that forced <span class="math inline">\(\mathbf{1}'\mathbf{G}\mathbf{1}=0\)</span>, which is exactly the fix derived independently in Section @ref(f-molecular) from first principles. <span class="math inline">\(\mathbf{f}\)</span> is not a heuristic substitute for <span class="math inline">\(\mathbf{G}\)</span> — it is the member of the VanRaden family that has an absolute scale, arrived at from two unrelated derivations in the quantitative-genetics literature.</p>
+</section>
+</section>
+<section id="f-molecular" class="level1">
+<h1>The Molecular Coancestry Matrix</h1>
+<section id="definition-1" class="level2">
+<h2 class="anchored" data-anchor-id="definition-1">Definition</h2>
+<p>Malécot’s coancestry <span class="citation" data-cites="malecot1948">(<a href="#ref-malecot1948" role="doc-biblioref">Malécot 1948</a>)</span> between <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> is the probability that two randomly sampled alleles, one from each individual, at the same locus, are identical. Replacing identity by descent with <strong>identity by state</strong> — what markers actually observe — yields molecular coancestry <span class="citation" data-cites="caballero2002 caballero2000">(<a href="#ref-caballero2002" role="doc-biblioref">Caballero and Toro 2002</a>, <a href="#ref-caballero2000" role="doc-biblioref">2000</a>)</span>:</p>
+<p><span class="math display">\[
+f_{ij} \;=\; \frac{1}{m}\sum_{k=1}^{m}
+\Big[\, x_{ik}\,x_{jk} \;+\; (1-x_{ik})(1-x_{jk}) \,\Big].
+\]</span></p>
+<p>The first term is the probability that both sampled alleles are the reference allele; the second, that both are the alternative allele. Properties:</p>
+<ul>
+<li><span class="math inline">\(f_{ij} \in [0, 1]\)</span> always. <strong>A negative value is a symptom of the wrong matrix being used.</strong></li>
+<li>Self-coancestry is <span class="math inline">\(f_{ii} = (1 + F_i)/2\)</span>, with <span class="math inline">\(F_i\)</span> the individual’s molecular homozygosity <span class="citation" data-cites="wright1922">(<a href="#ref-wright1922" role="doc-biblioref">Wright 1922</a>)</span>. For a fully heterozygous <span class="math inline">\(F_1\)</span>, <span class="math inline">\(f_{ii} = 0.5\)</span>.</li>
+<li>No centering, no scaling, no arbitrary base population.</li>
+</ul>
+</section>
+<section id="computable-form" class="level2">
+<h2 class="anchored" data-anchor-id="computable-form">Computable Form</h2>
+<p>Computing the double sum naively is <span class="math inline">\(O(n^2 m)\)</span>. Expanding:</p>
+<p><span class="math display">\[
+\sum_k \big[x_{ik}x_{jk} + (1-x_{ik})(1-x_{jk})\big]
+= 2\sum_k x_{ik}x_{jk} \;-\; \sum_k x_{ik} \;-\; \sum_k x_{jk} \;+\; m,
+\]</span></p>
+<p>which gives, with <span class="math inline">\(\mathbf{s} = \mathbf{X}\mathbf{1}\)</span> (row sums),</p>
+<p><span class="math display">\[
+\boxed{\;\mathbf{f} \;=\; \frac{1}{m}\Big( 2\,\mathbf{X}\mathbf{X}'
+\;-\; \mathbf{s}\mathbf{1}' \;-\; \mathbf{1}\mathbf{s}' \;+\; m\,\mathbf{J} \Big)\;}
+\]</span></p>
+<p>with <span class="math inline">\(\mathbf{J}\)</span> the all-ones matrix. <strong>A single matrix product</strong>, the same cost as a <span class="math inline">\(\mathbf{G}\)</span> matrix.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>molecular_coancestry <span class="ot">&lt;-</span> <span class="cf">function</span>(X) {</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> <span class="fu">ncol</span>(X)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  s <span class="ot">&lt;-</span> <span class="fu">rowSums</span>(X)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  (<span class="dv">2</span> <span class="sc">*</span> <span class="fu">tcrossprod</span>(X) <span class="sc">-</span> <span class="fu">outer</span>(s, <span class="fu">rep</span>(<span class="dv">1</span>, <span class="fu">nrow</span>(X))) <span class="sc">-</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>     <span class="fu">outer</span>(<span class="fu">rep</span>(<span class="dv">1</span>, <span class="fu">nrow</span>(X)), s) <span class="sc">+</span> m) <span class="sc">/</span> m</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">minimum =</span> <span class="fu">min</span>(ctx<span class="sc">$</span>f), <span class="at">maximum =</span> <span class="fu">max</span>(ctx<span class="sc">$</span>f),</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">diagonal_mean =</span> <span class="fu">mean</span>(<span class="fu">diag</span>(ctx<span class="sc">$</span>f)), <span class="at">off_diagonal_mean =</span> <span class="fu">mean</span>(ctx<span class="sc">$</span>f[<span class="fu">upper.tri</span>(ctx<span class="sc">$</span>f)]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;           minimum           maximum     diagonal_mean off_diagonal_mean 
+#&gt;          0.631667          0.835667          0.816308          0.668651</code></pre>
+</div>
+</div>
+<p>The value 0.5 would be the floor of the diagonal, reached by a hybrid heterozygous at <em>every</em> marker. The excess above 0.5 measures exactly the fraction of markers at which the two parent lines carry the same allele — loci where the <span class="math inline">\(F_1\)</span> is homozygous and, by definition, contribute nothing to heterosis:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>fd <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">diag</span>(ctx<span class="sc">$</span>f))</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">diagonal_mean =</span> fd,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">molecular_F =</span> <span class="dv">2</span> <span class="sc">*</span> fd <span class="sc">-</span> <span class="dv">1</span>,             <span class="co"># f_ii = (1 + F_i)/2</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">heterozygous_fraction =</span> <span class="dv">2</span> <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> fd))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;         diagonal_mean           molecular_F heterozygous_fraction 
+#&gt;              0.816308              0.632617              0.367383</code></pre>
+</div>
+</div>
+<p>This fraction depends directly on the divergence between heterotic pools (<code>fst</code> in <code>sim_config</code>): more divergent pools produce more heterozygous <span class="math inline">\(F_1\)</span> hybrids and a diagonal closer to 0.5.</p>
+</section>
+</section>
+<section id="metrics-derived-from-f" class="level1">
+<h1>Metrics Derived from f</h1>
+<section id="group-coancestry-and-the-off-diagonal-metric-problem" class="level2">
+<h2 class="anchored" data-anchor-id="group-coancestry-and-the-off-diagonal-metric-problem">Group Coancestry and the Off-Diagonal Metric Problem</h2>
+<p>The group coancestry <span class="citation" data-cites="cockerham1967">(<a href="#ref-cockerham1967" role="doc-biblioref">Cockerham 1967</a>)</span> of a set <span class="math inline">\(S\)</span> of <span class="math inline">\(n\)</span> individuals is the mean of <strong>all</strong> <span class="math inline">\(n^2\)</span> elements, diagonal included:</p>
+<p><span class="math display">\[
+\theta_S \;=\; \frac{1}{n^2}\sum_{i \in S}\sum_{j \in S} f_{ij}
+\;=\; \frac{1}{n^2}\,\mathbf{1}'\mathbf{f}_S\mathbf{1}.
+\]</span></p>
+<p>It is the probability that two alleles sampled at random <em>from the whole set</em> are identical — including the possibility of both coming from the same individual. That is why the diagonal enters: it represents the chance of sampling the same individual twice, which is real when the set is used as a crossing pool.</p>
+<p>Splitting diagonal (<span class="math inline">\(\bar f_d\)</span>) from off-diagonal (<span class="math inline">\(\bar f_o\)</span>):</p>
+<p><span class="math display">\[
+\theta_S \;=\; \frac{\bar f_d}{n} \;+\; \frac{n-1}{n}\,\bar f_o .
+\tag{1}
+\]</span></p>
+<p>The off-diagonal mean <span class="math inline">\(\bar f_o\)</span> is therefore just one of the two terms. When <span class="math inline">\(\bar f_d\)</span> varies little across individuals — the case of an all-<span class="math inline">\(F_1\)</span> population — the two metrics rank almost identically, and the off-diagonal metric works fine as a <em>ranking</em>. What it does not provide is the interpretable scale and the correct baseline (Sections @ref(ns) and @ref(baseline)).</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>idx <span class="ot">&lt;-</span> <span class="fu">sample.int</span>(ctx<span class="sc">$</span>N, n_sel)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">theta_group</span>(idx, ctx)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 0.673137</code></pre>
+</div>
+</div>
+</section>
+<section id="identity" class="level2">
+<h2 class="anchored" data-anchor-id="identity">Gene Diversity: θ and He Are the Same Quantity</h2>
+<p>This is the result that simplifies everything else. Starting from the definition and swapping the order of summation:</p>
+<p><span class="math display">\[
+\theta_S \;=\; \frac{1}{m}\sum_k \left[
+\frac{1}{n^2}\sum_i\sum_j x_{ik}x_{jk}
++ \frac{1}{n^2}\sum_i\sum_j (1-x_{ik})(1-x_{jk}) \right]
+\]</span></p>
+<p>The double sum factors: <span class="math inline">\(\frac{1}{n^2}\sum_i\sum_j x_{ik}x_{jk} =
+\big(\frac{1}{n}\sum_i x_{ik}\big)^2 = \bar p_k^2\)</span>, where <span class="math inline">\(\bar p_k\)</span> is the <strong>group’s</strong> allele frequency. Hence</p>
+<p><span class="math display">\[
+\theta_S \;=\; \frac{1}{m}\sum_k \big(\bar p_k^2 + \bar q_k^2\big),
+\qquad\text{and therefore}\qquad
+\boxed{\;GD_S \;=\; 1 - \theta_S \;=\; \frac{1}{m}\sum_k 2\,\bar p_k \bar q_k
+\;\equiv\; H_e\;}
+\]</span></p>
+<p>which is exactly Nei’s gene diversity <span class="citation" data-cites="nei1973">(<a href="#ref-nei1973" role="doc-biblioref">Nei 1973</a>)</span>. <strong>Group coancestry and expected heterozygosity are not independent checks: they are the same quantity written two ways.</strong></p>
+<p>Three practical consequences:</p>
+<ol type="1">
+<li>One fewer metric to justify to the technical committee.</li>
+<li>“Losing 5% of diversity” gains an exact meaning: 5% of the set’s expected heterozygosity.</li>
+<li>Two computation routes with the same result and very different costs — the matrix route is <span class="math inline">\(O(n^2)\)</span>, the frequency route is <span class="math inline">\(O(nm)\)</span>. For <span class="math inline">\(n=200\)</span> and <span class="math inline">\(m=25000\)</span> that is 40 thousand versus 5 million operations. <strong>The matrix route is ~100x cheaper, and it’s the one that belongs in the optimizer’s inner loop.</strong></li>
+</ol>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">via_submatrix  =</span> <span class="fu">theta_group</span>(idx, ctx),</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">via_frequency   =</span> <span class="fu">theta_from_freq</span>(idx, ctx),</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">difference      =</span> <span class="fu">theta_group</span>(idx, ctx) <span class="sc">-</span> <span class="fu">theta_from_freq</span>(idx, ctx))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; via_submatrix via_frequency    difference 
+#&gt;      0.673137      0.673137      0.000000</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">GD =</span> <span class="fu">gene_diversity</span>(idx, ctx), <span class="at">He_Nei =</span> <span class="fu">he_nei</span>(idx, ctx))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;       GD   He_Nei 
+#&gt; 0.326863 0.326863</code></pre>
+</div>
+</div>
+<p>Equality to machine precision is the implementation’s strongest sanity check: if it fails, matrix <code>f</code> is centered, rescaled, or has the wrong coding.</p>
+</section>
+<section id="ns" class="level2">
+<h2 class="anchored" data-anchor-id="ns">Status Number Ns</h2>
+<p><span class="citation" data-cites="lindgren1997">Lindgren et al. (<a href="#ref-lindgren1997" role="doc-biblioref">1997</a>)</span> and <span class="citation" data-cites="lindgren1998">Lindgren and Mullin (<a href="#ref-lindgren1998" role="doc-biblioref">1998</a>)</span> propose expressing group coancestry on the scale of individual counts:</p>
+<p><span class="math display">\[
+N_s \;=\; \frac{1}{2\,\theta_S}.
+\]</span></p>
+<p>The reading is direct: <span class="math inline">\(N_s\)</span> is the number of <strong>unrelated, non-inbred</strong> individuals that would have the same gene diversity as the observed set. Edge cases:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>fake <span class="ot">&lt;-</span> ctx</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>fake<span class="sc">$</span>f <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fl">0.5</span>, <span class="dv">5</span>, <span class="dv">5</span>)      <span class="co"># unrelated, p = 0.5</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">theta =</span> <span class="fu">theta_group</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, fake), <span class="at">Ns =</span> <span class="fu">status_number</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, fake))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; theta    Ns 
+#&gt;   0.5   1.0</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>fake<span class="sc">$</span>f <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">5</span>)        <span class="co"># all identical and homozygous</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">theta =</span> <span class="fu">theta_group</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, fake), <span class="at">Ns =</span> <span class="fu">status_number</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, fake))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; theta    Ns 
+#&gt;   1.0   0.5</code></pre>
+</div>
+</div>
+<section id="an-important-caveat-about-ne" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="an-important-caveat-about-ne">An Important Caveat About Ne</h3>
+<p><span class="citation" data-cites="toro2020">Toro et al. (<a href="#ref-toro2020" role="doc-biblioref">2020</a>)</span> show that the <strong>rate-based</strong> effective size, <span class="math inline">\(N_e = 1/(2\Delta F)\)</span>, loses meaning under molecular diversity management: optimization increases diversity in early generations, producing a negative <span class="math inline">\(\Delta F\)</span> and therefore a negative <span class="math inline">\(N_e\)</span>, and its long-term behavior fails to converge to an asymptotic value.</p>
+<p>This <strong>does not invalidate</strong> <span class="math inline">\(N_s\)</span>. The distinction is that <span class="math inline">\(N_s\)</span> is a monotonic reparametrization of <span class="math inline">\(\theta\)</span> — a <em>static descriptor</em> of the set — while <span class="math inline">\(N_e\)</span> is a <em>rate</em> between generations. Use <span class="math inline">\(N_s\)</span> to compare sets; don’t extrapolate it to project future drift.</p>
+<p>For the same reason, do not use the linkage-disequilibrium-based <span class="math inline">\(N_e\)</span> here (<span class="math inline">\(N_e = 1/(3(\bar r^2 - 1/S))\)</span>): it estimates population history, not the composition of a selected sample.</p>
+</section>
+<section id="a-second-caveat-θ-tracks-homozygosity-not-drift" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="a-second-caveat-θ-tracks-homozygosity-not-drift">A Second Caveat: θ Tracks Homozygosity, Not Drift</h3>
+<p><span class="citation" data-cites="meuwissen2020">Meuwissen et al. (<a href="#ref-meuwissen2020" role="doc-biblioref">2020</a>)</span> draw a distinction that classical theory collapses but genomic management reopens: <strong>homozygosity-based inbreeding</strong> (<span class="math inline">\(F_{\text{hom}}\)</span>, what <span class="math inline">\(\theta\)</span> and <span class="math inline">\(GD\)</span> measure here) and <strong>drift-based inbreeding</strong> (<span class="math inline">\(F_{\text{drift}}\)</span>, the squared change in allele frequency relative to a base population) are the same quantity only under neutral, unlinked loci and random mating. Once selection actively manages <span class="math inline">\(\mathbf{f}\)</span>-type (homozygosity) matrices, the two diverge substantially — sometimes with opposite sign.</p>
+<p>The mechanism is the same one identified in the previous caveat: minimizing <span class="math inline">\(\theta_S\)</span> pushes allele frequencies <strong>toward 0.5</strong>, since <span class="math inline">\(\theta_S = \frac{1}{m}\sum_k(\bar p_k^2 + \bar q_k^2)\)</span> is minimized at <span class="math inline">\(\bar p_k = 0.5\)</span>. This lowers <span class="math inline">\(F_{\text{hom}}\)</span> efficiently — sometimes past the point of actually reducing drift, because alleles starting below 0.5 are pushed up and alleles above 0.5 are pushed down, which is not the same direction random drift would take them. <span class="citation" data-cites="meuwissen2020">Meuwissen et al. (<a href="#ref-meuwissen2020" role="doc-biblioref">2020</a>)</span> report scenarios where optimizing a homozygosity-based matrix produced <em>higher</em> drift-based inbreeding than doing nothing, while the reverse (optimizing IBD-based matrices) kept both aligned.</p>
+<p>Practical reading for this pipeline: <span class="math inline">\(GD\)</span> and <span class="math inline">\(N_s\)</span> answer “how much heterozygosity does the selection preserve,” which is the right question for next season’s hybrid vigor. They do not certify that allele frequencies are moving in the direction unmanaged drift would have taken them, which matters more for multi-generation recurrent selection than for a single round of hybrid selection. If this pipeline is later extended to plan several breeding cycles, allelic richness (Section @ref(richness-section), which counts alleles lost rather than frequencies pulled toward 0.5) and pedigree- or haplotype-based relationship measures become the safer long-run compasses.</p>
+</section>
+</section>
+<section id="effective-number-of-parents" class="level2">
+<h2 class="anchored" data-anchor-id="effective-number-of-parents">Effective Number of Parents</h2>
+<p>A metric independent of <span class="math inline">\(\mathbf{f}\)</span>, computed purely from the hybrids’ pedigree. Letting <span class="math inline">\(p_i\)</span> be the frequency with which line <span class="math inline">\(i\)</span> appears as a parent among the selected hybrids,</p>
+<p><span class="math display">\[
+N_{e(\text{par})} \;=\; \frac{1}{\sum_i p_i^2},
+\]</span></p>
+<p>the inverse Simpson index. It captures precisely what coancestry blurs: 200 hybrids can have acceptable <span class="math inline">\(\theta\)</span> while still drawing on only 12 lines, if those 12 happen to be genetically distant from one another.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">random          =</span> <span class="fu">ne_parents</span>(<span class="fu">sel_random</span>(ctx, n_sel), ctx),</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">truncation      =</span> <span class="fu">ne_parents</span>(<span class="fu">sel_truncation</span>(ctx, n_sel), ctx),</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">theoretical_max =</span> ctx<span class="sc">$</span>n_lines)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;          random      truncation theoretical_max 
+#&gt;         35.5556         12.4031         50.0000</code></pre>
+</div>
+</div>
+<p>Its cost is negligible (a <code>tabulate</code> count), which makes it a natural candidate to <strong>enter the objective function alongside <span class="math inline">\(\theta\)</span></strong>.</p>
+</section>
+<section id="richness-section" class="level2">
+<h2 class="anchored" data-anchor-id="richness-section">Allelic Richness</h2>
+<p><span class="math inline">\(\theta\)</span> and <span class="math inline">\(H_e\)</span> are averages across markers and are dominated by intermediate-frequency alleles. A lost rare allele barely moves them, yet the loss is irreversible. We count markers that were polymorphic in the population and became rare or fixed in the selection:</p>
+<p><span class="math display">\[
+A_{\text{lost}} \;=\; \#\{k : \text{MAF}_k^{(S)} &lt; 0.05 \;\wedge\;
+\text{MAF}_k^{(\text{pop})} \ge 0.05 \}.
+\]</span></p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">random      =</span> <span class="fu">alleles_lost</span>(<span class="fu">sel_random</span>(ctx, n_sel), ctx),</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">truncation  =</span> <span class="fu">alleles_lost</span>(<span class="fu">sel_truncation</span>(ctx, n_sel), ctx))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;     random truncation 
+#&gt;         12         79</code></pre>
+</div>
+</div>
+<p>It is the only metric in the set <strong>genuinely non-redundant</strong> with <span class="math inline">\(\theta\)</span>, and the two-pronged caveat above explains why that independence matters. <span class="citation" data-cites="lopezcortegano2019">López-Cortegano et al. (<a href="#ref-lopezcortegano2019" role="doc-biblioref">2019</a>)</span> compared, in a subdivided simulated population, management strategies that maximize <em>expected heterozygosity</em> (<span class="math inline">\(H_T\)</span>, the same family as our <span class="math inline">\(GD\)</span>) against strategies that maximize <em>allelic diversity</em> (<span class="math inline">\(A_T\)</span>, closer to this section’s allele count). Their finding: maximizing <span class="math inline">\(A_T\)</span> retained a larger number of alleles <strong>and</strong> produced better control of molecular inbreeding (<span class="math inline">\(F\)</span>) than maximizing <span class="math inline">\(H_T\)</span> — heterozygosity-maximizing management pushes allele frequencies toward 0.5, which favors rare alleles in the short run but does not stop them drifting to loss once they are no longer the rarest ones, whereas allele-count management defends every segregating allele directly. Their recommendation for conservation programs of structured populations was to make <span class="math inline">\(A_T\)</span>, not <span class="math inline">\(H_T\)</span>, the primary target. In this pipeline’s terms: <code>alleles_lost</code> deserves a place next to <span class="math inline">\(\theta\)</span> as a tracked outcome, not only as a post-hoc sanity check, whenever the selection will feed multiple future cycles rather than a single hybrid release.</p>
+</section>
+<section id="distances-e-ne-and-a-ne" class="level2">
+<h2 class="anchored" data-anchor-id="distances-e-ne-and-a-ne">Distances: E-NE and A-NE</h2>
+<p>With distance <span class="math inline">\(d_{ij} = 1 - f_{ij}\)</span>, <span class="citation" data-cites="debeukelaer2018">De Beukelaer et al. (<a href="#ref-debeukelaer2018" role="doc-biblioref">2018</a>)</span> define in Core Hunter 3 two measures that capture opposite aspects that <span class="math inline">\(\theta\)</span> alone cannot separate:</p>
+<p><span class="math display">\[
+\text{E-NE} = \frac{1}{n}\sum_{i \in S} \min_{j \in S,\, j \ne i} d_{ij},
+\qquad
+\text{A-NE} = \frac{1}{N}\sum_{i=1}^{N} \min_{j \in S} d_{ij}.
+\]</span></p>
+<ul>
+<li><strong>E-NE</strong> (<em>entry-to-nearest-entry</em>) measures <strong>non-redundancy within the selection</strong>. It tells apart “200 individuals spread out” from “100 near-identical pairs spread out”, configurations that can share the same <span class="math inline">\(\theta\)</span>.</li>
+<li><strong>A-NE</strong> (<em>accession-to-nearest-entry</em>) measures <strong>representativeness of the population</strong>. It detects a selection that optimizes <span class="math inline">\(\theta\)</span> by concentrating in one region of genetic space while ignoring the rest.</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sapply</span>(<span class="fu">list</span>(<span class="at">random =</span> <span class="fu">sel_random</span>(ctx, n_sel),</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">truncation =</span> <span class="fu">sel_truncation</span>(ctx, n_sel),</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">greedy_div =</span> <span class="fu">sel_greedy</span>(ctx, n_sel, <span class="at">w =</span> <span class="dv">0</span>)),</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>       <span class="cf">function</span>(s) <span class="fu">c</span>(<span class="at">ENE =</span> <span class="fu">ene</span>(s, ctx), <span class="at">ANE =</span> <span class="fu">ane</span>(s, ctx)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;       random truncation greedy_div
+#&gt; ENE 0.258300   0.255242   0.268167
+#&gt; ANE 0.254442   0.276140   0.261401</code></pre>
+</div>
+</div>
+</section>
+<section id="effective-dimensionality" class="level2">
+<h2 class="anchored" data-anchor-id="effective-dimensionality">Effective Dimensionality</h2>
+<p>Over the eigenvalues <span class="math inline">\(\lambda_1 \ge \dots \ge \lambda_n\)</span> of the submatrix <span class="math inline">\(\mathbf{f}_S\)</span>, the participation ratio</p>
+<p><span class="math display">\[
+D_{\text{eff}} \;=\; \frac{\left(\sum_i \lambda_i\right)^2}{\sum_i \lambda_i^2}
+\]</span></p>
+<p>counts how many independent directions of genetic variation remain. It equals 1 if all variation lies on a single axis and <span class="math inline">\(n\)</span> if it is spread evenly.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">random     =</span> <span class="fu">eff_dim</span>(<span class="fu">sel_random</span>(ctx, n_sel), ctx),</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">truncation =</span> <span class="fu">eff_dim</span>(<span class="fu">sel_truncation</span>(ctx, n_sel), ctx))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;     random truncation 
+#&gt;    1.47395    1.40726</code></pre>
+</div>
+</div>
+</section>
+<section id="decomposition-by-heterotic-group" class="level2">
+<h2 class="anchored" data-anchor-id="decomposition-by-heterotic-group">Decomposition by Heterotic Group</h2>
+<p>In hybrid maize the diversity <strong>between pools</strong> is the engine of heterosis and cannot be spent; the diversity <strong>within each pool</strong> is the fuel for future progress. Following the logic of subdivided populations <span class="citation" data-cites="caballero2002 lopezcortegano2019">(<a href="#ref-caballero2002" role="doc-biblioref">Caballero and Toro 2002</a>; <a href="#ref-lopezcortegano2019" role="doc-biblioref">López-Cortegano et al. 2019</a>)</span>, we compute molecular coancestry between lines <span class="math inline">\(\mathbf{f}^{L}\)</span> and weight it by each line’s usage among the selected hybrids:</p>
+<p><span class="math display">\[
+\theta_A = \mathbf{w}_A' \mathbf{f}^{L} \mathbf{w}_A, \qquad
+\theta_B = \mathbf{w}_B' \mathbf{f}^{L} \mathbf{w}_B, \qquad
+\theta_{AB} = \mathbf{w}_A' \mathbf{f}^{L} \mathbf{w}_B,
+\]</span></p>
+<p>with <span class="math inline">\(\mathbf{w}_A\)</span> the vector of usage frequencies of pool-A lines.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(<span class="at">random     =</span> <span class="fu">theta_pools</span>(<span class="fu">sel_random</span>(ctx, n_sel), ctx),</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>      <span class="at">truncation =</span> <span class="fu">theta_pools</span>(<span class="fu">sel_truncation</span>(ctx, n_sel), ctx))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;             theta_A  theta_B theta_AB
+#&gt; random     0.713892 0.706238 0.632869
+#&gt; truncation 0.755958 0.727068 0.631451</code></pre>
+</div>
+</div>
+<p>A blind optimizer can keep global <span class="math inline">\(\theta\)</span> acceptable while eroding one of the pools. Without the decomposition this goes unnoticed, and the consequence only shows up the following cycle.</p>
+<section id="formalizing-the-withinbetween-split-and-where-it-could-go-next" class="level3">
+<h3 class="anchored" data-anchor-id="formalizing-the-withinbetween-split-and-where-it-could-go-next">Formalizing the Within/Between Split, and Where It Could Go Next</h3>
+<p><span class="math inline">\(\theta_A\)</span>, <span class="math inline">\(\theta_B\)</span>, and <span class="math inline">\(\theta_{AB}\)</span> as computed here are diagnostic — they are reported, not yet fed back into the objective. The subdivided-population literature offers a ready-made way to promote them into a tunable target. <span class="citation" data-cites="caballerorodriguezramilo2010">Caballero and Rodríguez-Ramilo (<a href="#ref-caballerorodriguezramilo2010" role="doc-biblioref">2010</a>)</span>, used by <span class="citation" data-cites="lopezcortegano2019">López-Cortegano et al. (<a href="#ref-lopezcortegano2019" role="doc-biblioref">2019</a>)</span> to manage two heterotic-like pools simultaneously, partition total diversity as</p>
+<p><span class="math display">\[
+H_T = D_G + \lambda H_S, \qquad
+A_T = D_A + \lambda A_S,
+\]</span></p>
+<p>where <span class="math inline">\(H_S\)</span>/<span class="math inline">\(A_S\)</span> are the within-pool components (our <span class="math inline">\(\theta_A\)</span>, <span class="math inline">\(\theta_B\)</span>, converted to diversity), <span class="math inline">\(D_G\)</span>/<span class="math inline">\(D_A\)</span> are the between-pool components (a function of <span class="math inline">\(\theta_{AB}\)</span> relative to <span class="math inline">\(\theta_A,\theta_B\)</span>), and <span class="math inline">\(\lambda \in
+[0, \infty)\)</span> is a weight chosen by the breeder: <span class="math inline">\(\lambda = 0\)</span> optimizes only between-pool divergence (protects heterosis, ignores each pool’s internal health), <span class="math inline">\(\lambda = 1\)</span> weights both components equally, and <span class="math inline">\(\lambda \to
+\infty\)</span> optimizes only within-pool diversity (protects each pool’s future options, ignores the cross). This maps directly onto the two constraints a maize breeder actually has in mind but currently applies only qualitatively: “don’t blend the pools together” versus “don’t paint either pool into a corner.” Turning <span class="math inline">\(\lambda\)</span> into a second, explicit knob next to <span class="math inline">\(\alpha_{\max}\)</span> — rather than only inspecting <span class="math inline">\(\theta_A/\theta_B/\theta_{AB}\)</span> after the fact — is the natural next step if pool erosion shows up in practice; the current implementation reports the ingredients (<span class="math inline">\(\theta_A\)</span>, <span class="math inline">\(\theta_B\)</span>, <span class="math inline">\(\theta_{AB}\)</span>, and the per-pool <code>Ne_lines_A</code>/<code>Ne_lines_B</code> in <code>R/01_metrics.R</code>) but leaves the weighting decision to the analyst reading the report.</p>
+</section>
+</section>
+</section>
+<section id="baseline" class="level1">
+<h1>The Correct Baseline</h1>
+<section id="why-not-compare-against-the-5000-5000-matrix" class="level2">
+<h2 class="anchored" data-anchor-id="why-not-compare-against-the-5000-5000-matrix">Why Not Compare Against the 5000 × 5000 Matrix</h2>
+<p>The natural comparison — coancestry of the selected set against that of the whole population — is <strong>biased by construction</strong>. Applying equation (1) to both sets:</p>
+<p><span class="math display">\[
+\theta_S - \theta_N
+= \left(\frac{1}{n} - \frac{1}{N}\right)\left(\bar f_d - \bar f_o\right)
+\;&gt;\; 0,
+\]</span></p>
+<p>since <span class="math inline">\(\bar f_d &gt; \bar f_o\)</span> whenever individuals are not clones. A <strong>random</strong> sample of 200 already looks less diverse than the population of 5000, without any selection having occurred. The bias is purely from sampling and grows the smaller the sample.</p>
+<p>Checking the formula numerically:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>fd <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">diag</span>(ctx<span class="sc">$</span>f)); fo <span class="ot">&lt;-</span> <span class="fu">mean</span>(ctx<span class="sc">$</span>f[<span class="fu">upper.tri</span>(ctx<span class="sc">$</span>f)])</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>predicted_bias <span class="ot">&lt;-</span> (<span class="dv">1</span><span class="sc">/</span>n_sel <span class="sc">-</span> <span class="dv">1</span><span class="sc">/</span>ctx<span class="sc">$</span>N) <span class="sc">*</span> (fd <span class="sc">-</span> fo)</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">11</span>)</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>observed_bias <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">replicate</span>(<span class="dv">400</span>, <span class="fu">theta_group</span>(<span class="fu">sample.int</span>(ctx<span class="sc">$</span>N, n_sel), ctx))) <span class="sc">-</span></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>                 <span class="fu">theta_group</span>(<span class="fu">seq_len</span>(ctx<span class="sc">$</span>N), ctx)</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">predicted =</span> predicted_bias, <span class="at">observed =</span> observed_bias)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;  predicted   observed 
+#&gt; 0.00345518 0.00350790</code></pre>
+</div>
+</div>
+<p>Note also that the <strong>off-diagonal</strong> mean of a random subset is an <em>unbiased</em> estimator of the population’s off-diagonal mean. In other words, the metric you already use is free of this bias — but it is also not comparable across sample sizes on the <span class="math inline">\(N_s\)</span> scale.</p>
+</section>
+<section id="operational-definition-of-loss" class="level2">
+<h2 class="anchored" data-anchor-id="operational-definition-of-loss">Operational Definition of Loss</h2>
+<p>The “0% loss” reference is the <strong>distribution of random subsets of the same size</strong>, obtained by resampling:</p>
+<p><span class="math display">\[
+\alpha \;=\; \frac{GD_{\text{random}(n)} - GD_S}{GD_{\text{random}(n)}}.
+\]</span></p>
+<p>So <span class="math inline">\(\alpha = 0\)</span> means “as diverse as a random sample of the same size”, and <span class="math inline">\(\alpha &lt; 0\)</span> means more diverse than chance. Resampling also throws in the standard deviation, and hence the z-score of any strategy.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>null <span class="ot">&lt;-</span> <span class="fu">null_distribution</span>(ctx, n_sel, <span class="at">B =</span> <span class="dv">400</span>, <span class="at">B_full =</span> <span class="dv">60</span>)</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">GD_population =</span> <span class="fu">gene_diversity</span>(<span class="fu">seq_len</span>(ctx<span class="sc">$</span>N), ctx),</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">GD_reference =</span> null<span class="sc">$</span>gd_ref, <span class="at">sd =</span> null<span class="sc">$</span>gd_sd)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; GD_population  GD_reference            sd 
+#&gt;    0.33111253    0.32767044    0.00143375</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sapply</span>(<span class="fu">list</span>(<span class="at">random =</span> <span class="fu">sel_random</span>(ctx, n_sel),</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">truncation =</span> <span class="fu">sel_truncation</span>(ctx, n_sel),</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">trunc_cap =</span> <span class="fu">sel_truncation_cap</span>(ctx, n_sel)),</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>       alpha_loss, <span class="at">ctx =</span> ctx, <span class="at">gd_ref =</span> null<span class="sc">$</span>gd_ref)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;     random truncation  trunc_cap 
+#&gt; 0.00183118 0.04319007 0.00452571</code></pre>
+</div>
+</div>
+</section>
+<section id="how-to-set-the-α-limit" class="level2">
+<h2 class="anchored" data-anchor-id="how-to-set-the-α-limit">How to Set the α Limit</h2>
+<p>The acceptable limit <strong>should not be chosen a priori</strong>. Pure truncation — the greediest possible selection — defines the maximum attainable <span class="math inline">\(\alpha\)</span>. If that ceiling is lower than the intended limit, the constraint restricts nothing.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>attainable_alpha_max <span class="ot">&lt;-</span> <span class="fu">alpha_loss</span>(<span class="fu">sel_truncation</span>(ctx, n_sel), ctx, null<span class="sc">$</span>gd_ref)</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">attainable_alpha_max =</span> attainable_alpha_max,</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">intended_limit =</span> <span class="fl">0.05</span>,</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">active_constraint =</span> attainable_alpha_max <span class="sc">&gt;</span> <span class="fl">0.05</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; attainable_alpha_max       intended_limit    active_constraint 
+#&gt;            0.0431901            0.0500000            0.0000000</code></pre>
+</div>
+</div>
+<p>On the full dataset (2500 hybrids, 5000 markers, selecting 100) that ceiling came out at <strong>3.63%</strong> — a 5% limit would be inoperative. The correct procedure is to trace the <span class="math inline">\(\alpha \times\)</span> gain frontier and choose the knee of the curve.</p>
+</section>
+</section>
+<section id="use-inside-the-optimizer" class="level1">
+<h1>Use Inside the Optimizer</h1>
+<section id="constraint-formulation-not-a-weighted-sum" class="level2">
+<h2 class="anchored" data-anchor-id="constraint-formulation-not-a-weighted-sum">Constraint Formulation, Not a Weighted Sum</h2>
+<p>With <span class="math inline">\(\mathbf{u}\)</span> the multi-trait index and <span class="math inline">\(S\)</span> the set of <span class="math inline">\(n\)</span> selected individuals:</p>
+<p><span class="math display">\[
+\max_{S,\; |S| = n} \; \frac{1}{n}\sum_{i \in S} u_i
+\qquad \text{subject to} \qquad
+\alpha(S) \;\le\; \alpha_{\max}.
+\]</span></p>
+<p>The common alternative, <span class="math inline">\(\max\; \bar u - \lambda\,\theta_S\)</span>, requires calibrating <span class="math inline">\(\lambda\)</span>, which has no direct interpretation. The constraint form preserves the operational meaning: “I accept losing at most <span class="math inline">\(\alpha_{\max}\)</span> of diversity”. It is the same principle behind optimal contribution selection (OCS) <span class="citation" data-cites="meuwissen1997">(<a href="#ref-meuwissen1997" role="doc-biblioref">Meuwissen 1997</a>)</span>, differing in that there contributions <span class="math inline">\(\mathbf{c}\)</span> are continuous while here the problem is combinatorial (0/1 with equal weight), which motivates using differential evolution <span class="citation" data-cites="storn1997 mullen2011">(<a href="#ref-storn1997" role="doc-biblioref">Storn and Price 1997</a>; <a href="#ref-mullen2011" role="doc-biblioref">Mullen et al. 2011</a>)</span>.</p>
+<section id="relation-to-the-standard-ocs-formulation" class="level3">
+<h3 class="anchored" data-anchor-id="relation-to-the-standard-ocs-formulation">Relation to the Standard OCS Formulation</h3>
+<p><span class="citation" data-cites="gomezromano2016">Gómez-Romano et al. (<a href="#ref-gomezromano2016" role="doc-biblioref">2016</a>)</span> write the general OCS problem, for a vector of continuous contributions <span class="math inline">\(\mathbf{c}\)</span>, as</p>
+<p><span class="math display">\[
+\text{minimize} \quad \mathbf{c}'\mathbf{G}\mathbf{c}
+\qquad \text{subject to} \qquad
+\mathbf{c}'\mathbf{s} = 0.5,\;\; \mathbf{c}'\mathbf{d} = 0.5,\;\; c_i \ge 0,
+\]</span></p>
+<p>with <span class="math inline">\(\mathbf{s}\)</span>/<span class="math inline">\(\mathbf{d}\)</span> indicating sex, and <span class="math inline">\(\mathbf{G}\)</span> the coancestry matrix chosen for managing diversity (here, our <span class="math inline">\(\mathbf{f}\)</span>). Our formulation is the special case of this problem restricted to <span class="math inline">\(c_i \in \{0, 1/n\}\)</span> — a fixed number <span class="math inline">\(n\)</span> of candidates contribute equally, none partially — with the minimization of <span class="math inline">\(\mathbf{c}'\mathbf{f}\mathbf{c}\)</span> turned into a constraint (<span class="math inline">\(\alpha(S) \le \alpha_{\max}\)</span>) and <span class="math inline">\(\bar u\)</span> promoted to the objective. This restriction to equal, all-or-nothing contributions is exactly what makes the problem combinatorial and pushes the solution method from convex quadratic programming to differential evolution; <span class="citation" data-cites="carvalheiro2010">Carvalheiro et al. (<a href="#ref-carvalheiro2010" role="doc-biblioref">2010</a>)</span> used the same algorithm for continuous-contribution OCS, so DE is an established tool for this problem family, not a choice specific to the discrete case here. The <code>ocs_relaxation()</code> function in <code>R/03_de_select.R</code> implements the continuous relaxation of <em>this</em> restricted problem (Section @ref(convergence-diag)) precisely by dropping the <span class="math inline">\(c_i \in \{0, 1/n\}\)</span> restriction back to <span class="math inline">\(0 \le c_i
+\le 1/n\)</span> — it is the bridge between the two formulations, not a separate model.</p>
+<p><strong>A caveat carried over from the general OCS literature.</strong> <span class="citation" data-cites="gomezromano2016">Gómez-Romano et al. (<a href="#ref-gomezromano2016" role="doc-biblioref">2016</a>)</span> show that the <em>predicted</em> rate of coancestry in the next generation, <span class="math inline">\(E(\Delta f_{t+1}) = (\mathbf{c}'\mathbf{G}_t\mathbf{c} - f_t)/(1-f_t)\)</span>, is systematically <strong>biased downward</strong> relative to the coancestry actually realized after offspring are generated — by roughly a factor of two in their simulations with small candidate pools, shrinking as candidate pool size grows. The bias arises because <span class="math inline">\(\mathbf{c}'\mathbf{G}\mathbf{c}\)</span> is an expectation over Mendelian segregation, and the realized draw has its own sampling variance on top of that expectation. This does <strong>not</strong> affect the <span class="math inline">\(\theta_S\)</span> computed here on an already-realized hybrid population — <span class="math inline">\(\mathbf{f}\)</span> is measured on real marker genotypes, not predicted from parental contributions, so there is no forward-prediction step to bias. It becomes relevant only if this pipeline is later extended to <em>plan</em> a further generation from the selected 200 hybrids (i.e., to predict <em>their</em> offspring’s coancestry from a contribution vector): at that point, the naive <span class="math inline">\(\mathbf{c}'\mathbf{f}\mathbf{c}\)</span> prediction should be expected to underestimate realized coancestry, and the margin built into <span class="math inline">\(\alpha_{\max}\)</span> should account for it.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>make_fitness <span class="ot">&lt;-</span> <span class="cf">function</span>(ctx, n_sel, alpha_max, gd_ref, <span class="at">penalty =</span> <span class="dv">1000</span>) {</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(par) {</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>    idx  <span class="ot">&lt;-</span> <span class="fu">decode</span>(par, ctx<span class="sc">$</span>N, n_sel)</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>    gd   <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">mean</span>(ctx<span class="sc">$</span>f[idx, idx])          <span class="co"># matrix route: 40k operations</span></span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>    viol <span class="ot">&lt;-</span> <span class="fu">max</span>(<span class="dv">0</span>, (gd_ref <span class="sc">-</span> gd) <span class="sc">/</span> gd_ref <span class="sc">-</span> alpha_max)</span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>    <span class="sc">-</span>(<span class="fu">mean</span>(ctx<span class="sc">$</span>index[idx]) <span class="sc">-</span> penalty <span class="sc">*</span> viol)   <span class="co"># DEoptim minimizes</span></span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+</section>
+<section id="which-metric-belongs-in-the-inner-loop" class="level2">
+<h2 class="anchored" data-anchor-id="which-metric-belongs-in-the-inner-loop">Which Metric Belongs in the Inner Loop</h2>
+<p>The optimizer performs on the order of <span class="math inline">\(10^5\)</span> to <span class="math inline">\(10^6\)</span> evaluations. The cost per call decides what goes into the objective function and what is left for post-hoc validation:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cost_per_eval</span>(ctx, n_sel, <span class="at">reps =</span> <span class="dv">20</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;            metric us_per_eval
+#&gt; 1     theta_group           0
+#&gt; 2 theta_from_freq          50
+#&gt; 3      ne_parents           0
+#&gt; 4    alleles_lost         100
+#&gt; 5             ENE          50
+#&gt; 6             ANE         350
+#&gt; 7         eff_dim          50
+#&gt; 8             Gst        1000</code></pre>
+</div>
+</div>
+<p>Practical conclusion: <span class="math inline">\(\theta\)</span> (matrix route) and <span class="math inline">\(N_{e(\text{par})}\)</span> go into the objective; allelic richness, A-NE, and <span class="math inline">\(G_{st}\)</span> are computed <strong>once</strong> on the final solution.</p>
+</section>
+<section id="convergence-diag" class="level2">
+<h2 class="anchored" data-anchor-id="convergence-diag">Convergence Diagnostic</h2>
+<p>The problem’s continuous relaxation — allowing <span class="math inline">\(0 \le c_i \le 1/n\)</span> with <span class="math inline">\(\sum_i c_i = 1\)</span> instead of <span class="math inline">\(c_i \in \{0, 1/n\}\)</span> — provides a valid upper bound, since every discrete solution is feasible under the relaxed problem. A large gap between the differential evolution result and that bound indicates <strong>the optimizer hasn’t converged</strong>, not that the problem is intrinsically hard.</p>
+<p>In practice, seeding the initial population with heuristic solutions (greedy on <span class="math inline">\(\theta\)</span>, truncation with a per-parent usage cap) is decisive: without it the optimizer ends up <em>below</em> a plain greedy.</p>
+<p>This mirrors a finding from a related but distinct combinatorial-selection problem. <span class="citation" data-cites="debeukelaer2018">De Beukelaer et al. (<a href="#ref-debeukelaer2018" role="doc-biblioref">2018</a>)</span>, optimizing core-collection subsets with local search rather than DE, found that a basic stochastic hill-climber (random descent) was already competitive, that a considerably more complex genetic algorithm did <em>not</em> reliably beat it, and that the method which won — parallel tempering — won by combining many simple local searches rather than by being individually more sophisticated. The common thread with the warm-start result here: for this class of problem (select <span class="math inline">\(n\)</span> of <span class="math inline">\(N\)</span> to jointly optimize gain and diversity), the return on a smarter <em>search strategy</em> around a simple move (swap one candidate) consistently outweighs the return on a more elaborate <em>single-solution</em> search algorithm. A useful direction if the DE result ever looks unconvincing on the real 25k-marker data: run several independent DE chains from different warm starts (analogous to parallel tempering’s multiple replicas) rather than reaching for a fundamentally different optimizer.</p>
+</section>
+</section>
+<section id="implementation-the-two-stage-pipeline" class="level1">
+<h1>Implementation: The Two-Stage Pipeline</h1>
+<p>Everything above is assembled into a two-stage pipeline, orchestrated by <code>run_all.R</code> and implemented in <code>R/10_stage1.R</code> and <code>R/11_stage2.R</code>. The split exists because the two stages have different costs and different reasons to be re-run: stage 1 (simulating or ingesting the hybrids) is done once per breeding cycle; stage 2 (the constrained selection) is cheap enough, and sensitive enough to the chosen <span class="math inline">\(\alpha_{\max}\)</span> and trait weights, to be re-run many times against the same <code>X</code>/<code>f</code>/<code>hybrids</code> objects.</p>
+<section id="stage-1-from-lines-to-x-f-hybrids" class="level2">
+<h2 class="anchored" data-anchor-id="stage-1-from-lines-to-x-f-hybrids">Stage 1 — From Lines to (X, f, hybrids)</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co"># R/10_stage1.R</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>stage1_simulate <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">cfg =</span> sim_config) {</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>  d <span class="ot">&lt;-</span> <span class="fu">simulate_data</span>(cfg)</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stage1_build</span>(<span class="at">X =</span> d<span class="sc">$</span>X, <span class="at">ped =</span> d<span class="sc">$</span>ped, <span class="at">traits =</span> d<span class="sc">$</span>traits, <span class="at">fL =</span> d<span class="sc">$</span>fL)</span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>stage1_build <span class="ot">&lt;-</span> <span class="cf">function</span>(X, ped, traits, <span class="at">fL =</span> <span class="cn">NULL</span>) {</span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">max</span>(X) <span class="sc">&gt;</span> <span class="dv">1</span>) X <span class="ot">&lt;-</span> X <span class="sc">/</span> <span class="dv">2</span>          <span class="co"># accepts 0/1/2 or 0/0.5/1 coding</span></span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stopifnot</span>(<span class="fu">nrow</span>(X) <span class="sc">==</span> <span class="fu">nrow</span>(ped), <span class="fu">nrow</span>(X) <span class="sc">==</span> <span class="fu">nrow</span>(traits))</span>
+<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a>  hybrids <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">hybrid =</span> <span class="fu">seq_len</span>(<span class="fu">nrow</span>(X)),</span>
+<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">line_A =</span> <span class="fu">as.integer</span>(ped<span class="sc">$</span>a), <span class="at">line_B =</span> <span class="fu">as.integer</span>(ped<span class="sc">$</span>b),</span>
+<span id="cb45-13"><a href="#cb45-13" aria-hidden="true" tabindex="-1"></a>    traits</span>
+<span id="cb45-14"><a href="#cb45-14" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb45-15"><a href="#cb45-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">X =</span> X, <span class="at">f =</span> <span class="fu">molecular_coancestry</span>(X), <span class="at">hybrids =</span> hybrids, <span class="at">fL =</span> fL)</span>
+<span id="cb45-16"><a href="#cb45-16" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><code>stage1_simulate()</code> is the path used throughout this document. <code>stage1_build()</code> is the path for real data: it takes a hybrid marker matrix (any of 0/1/2 or 0/0.5/1 coding — Section @ref(f-molecular)’s <span class="math inline">\(x_{ik}\)</span>), a two-column pedigree of parent-line indices, and the table of predicted trait values already produced by GBLUP outside this pipeline. It computes <span class="math inline">\(\mathbf{f}\)</span> once, via <code>molecular_coancestry()</code> (the boxed identity in Section @ref(f-molecular)), and returns the same three-object contract regardless of which path produced it — the rest of the pipeline never needs to know whether <code>X</code> came from a simulation or a genotyping file.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>st1 <span class="ot">&lt;-</span> <span class="fu">stage1_simulate</span>(cfg)</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">hybrids =</span> <span class="fu">nrow</span>(st1<span class="sc">$</span>X), <span class="at">markers =</span> <span class="fu">ncol</span>(st1<span class="sc">$</span>X),</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">f_range_lo =</span> <span class="fu">min</span>(st1<span class="sc">$</span>f), <span class="at">f_range_hi =</span> <span class="fu">max</span>(st1<span class="sc">$</span>f))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;     hybrids     markers  f_range_lo  f_range_hi 
+#&gt;  625.000000 1500.000000    0.631667    0.835667</code></pre>
+</div>
+</div>
+</section>
+<section id="stage-2-selection-across-an-α-grid" class="level2">
+<h2 class="anchored" data-anchor-id="stage-2-selection-across-an-α-grid">Stage 2 — Selection Across an α Grid</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co"># R/11_stage2.R (excerpt)</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>stage2_select <span class="ot">&lt;-</span> <span class="cf">function</span>(X, f, hybrids, n_sel,</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>                          <span class="at">alphas =</span> <span class="cn">NULL</span>, <span class="at">weights =</span> <span class="cn">NULL</span>, <span class="at">fL =</span> <span class="cn">NULL</span>,</span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>                          <span class="at">include_references =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>                          <span class="at">B_null =</span> <span class="dv">2000</span>, <span class="at">NP =</span> <span class="dv">300</span>, <span class="at">itermax =</span> <span class="dv">2000</span>, ...) {</span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>  ctx <span class="ot">&lt;-</span> <span class="fu">build_ctx_from_stage1</span>(X, f, hybrids, fL, weights)</span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># 1. Reference and ceiling (Sections 6-7)</span></span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a>  gd_rand   <span class="ot">&lt;-</span> <span class="fu">replicate</span>(B_null, <span class="fu">gene_diversity</span>(<span class="fu">sample.int</span>(ctx<span class="sc">$</span>N, n_sel), ctx))</span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a>  gd_ref    <span class="ot">&lt;-</span> <span class="fu">mean</span>(gd_rand)</span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>  alpha_max <span class="ot">&lt;-</span> <span class="fu">alpha_loss</span>(<span class="fu">sel_truncation</span>(ctx, n_sel), ctx, gd_ref)</span>
+<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.null</span>(alphas)) alphas <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, alpha_max, <span class="at">length.out =</span> <span class="dv">5</span>)</span>
+<span id="cb48-13"><a href="#cb48-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-14"><a href="#cb48-14" aria-hidden="true" tabindex="-1"></a>  <span class="co"># 2. Warm start (Section "Convergence Diagnostic")</span></span>
+<span id="cb48-15"><a href="#cb48-15" aria-hidden="true" tabindex="-1"></a>  seeds <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">lapply</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">1e-4</span>, <span class="fl">2e-4</span>, <span class="fl">3e-4</span>, <span class="fl">5e-4</span>, <span class="fl">1e-3</span>, <span class="fl">3e-3</span>),</span>
+<span id="cb48-16"><a href="#cb48-16" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">function</span>(w) <span class="fu">sel_greedy</span>(ctx, n_sel, <span class="at">w =</span> w)),</span>
+<span id="cb48-17"><a href="#cb48-17" aria-hidden="true" tabindex="-1"></a>             <span class="fu">list</span>(<span class="fu">sel_truncation_cap</span>(ctx, n_sel)))</span>
+<span id="cb48-18"><a href="#cb48-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-19"><a href="#cb48-19" aria-hidden="true" tabindex="-1"></a>  <span class="co"># 3. One DE run per alpha in the grid</span></span>
+<span id="cb48-20"><a href="#cb48-20" aria-hidden="true" tabindex="-1"></a>  scenarios <span class="ot">&lt;-</span> <span class="fu">lapply</span>(alphas, <span class="cf">function</span>(a)</span>
+<span id="cb48-21"><a href="#cb48-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sel_de</span>(ctx, n_sel, <span class="at">alpha_max =</span> a, <span class="at">gd_ref =</span> gd_ref,</span>
+<span id="cb48-22"><a href="#cb48-22" aria-hidden="true" tabindex="-1"></a>          <span class="at">NP =</span> NP, <span class="at">itermax =</span> itermax, <span class="at">seeds =</span> seeds))</span>
+<span id="cb48-23"><a href="#cb48-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-24"><a href="#cb48-24" aria-hidden="true" tabindex="-1"></a>  <span class="co"># 4. Metrics per scenario + N x n_scenarios 0/1 table</span></span>
+<span id="cb48-25"><a href="#cb48-25" aria-hidden="true" tabindex="-1"></a>  <span class="co"># ...</span></span>
+<span id="cb48-26"><a href="#cb48-26" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Four things this function does that are easy to miss from the summary table alone, each traceable to a section above:</p>
+<ol type="1">
+<li><strong>The reference is recomputed from <code>X</code>/<code>f</code>, not hardcoded.</strong> <code>gd_ref</code> and <code>alpha_max</code> come from <code>n_sel</code> random draws and one truncation run on <em>this</em> dataset (Sections @ref(baseline) and “How to Set the α Limit”) — a different <code>n_sel</code>, a different set of hybrids, or real vs.&nbsp;simulated data all shift these numbers, which is why they must never be pasted in from a previous run.</li>
+<li><strong><code>alphas = NULL</code> produces a grid, not a single answer</strong>, spanning <span class="math inline">\([0,
+\alpha_{\max}]\)</span> in five steps by default — the mechanism behind the gain-vs-diversity frontier (Section “Which Metric Belongs in the Inner Loop” and <code>run_benchmark.R</code>’s <code>frontier.csv</code>), available here without a second script.</li>
+<li><strong>The same warm-start seeds serve every <span class="math inline">\(\alpha\)</span> in the grid.</strong> Building them once and reusing them (rather than re-deriving per scenario) is what keeps five-plus DE runs affordable, and is the direct implementation of the Convergence Diagnostic finding above.</li>
+<li><strong><code>include_references = TRUE</code> appends non-DE strategies</strong> (pure truncation, truncation with a parental cap, pure-diversity greedy, one random draw) as extra columns in the same output table, so the DE scenarios are never read in isolation from their baselines.</li>
+</ol>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">stage2_select</span>(st1<span class="sc">$</span>X, st1<span class="sc">$</span>f, st1<span class="sc">$</span>hybrids, <span class="at">n_sel =</span> n_sel,</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">alphas =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.02</span>), <span class="at">B_null =</span> <span class="dv">300</span>, <span class="at">NP =</span> <span class="dv">80</span>, <span class="at">itermax =</span> <span class="dv">150</span>,</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>                     <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>res<span class="sc">$</span>ref[<span class="fu">c</span>(<span class="st">"gd_ref"</span>, <span class="st">"alpha_max"</span>, <span class="st">"n_sel"</span>)]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; $gd_ref
+#&gt; [1] 0.327647
+#&gt; 
+#&gt; $alpha_max
+#&gt; [1] 0.0431219
+#&gt; 
+#&gt; $n_sel
+#&gt; [1] 40</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>res<span class="sc">$</span>metrics[, <span class="fu">c</span>(<span class="st">"scenario"</span>, <span class="st">"alpha"</span>, <span class="st">"index"</span>, <span class="st">"Ns"</span>, <span class="st">"Ne_parents"</span>, <span class="st">"alleles_lost"</span>)]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;         scenario        alpha      index       Ns Ne_parents alleles_lost
+#&gt; 1  DE_alpha_0.00 -0.000144271  1.2749854 0.743709    19.7531           29
+#&gt; 2  DE_alpha_2.00  0.016945380  1.5450142 0.737566    15.7635           55
+#&gt; 3 ref_truncation  0.043121918  1.7750197 0.728352    12.4031           79
+#&gt; 4  ref_trunc_cap  0.004454808  1.0224673 0.742046    27.5862           38
+#&gt; 5    ref_max_div -0.025822941 -0.0231235 0.753134    29.0909           18
+#&gt; 6     ref_random -0.003741256  0.0258376 0.745015    34.7826           16</code></pre>
+</div>
+</div>
+</section>
+<section id="the-output-contract" class="level2">
+<h2 class="anchored" data-anchor-id="the-output-contract">The Output Contract</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>scenario_cols <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(<span class="fu">names</span>(res<span class="sc">$</span>selection), <span class="fu">c</span>(<span class="fu">names</span>(st1<span class="sc">$</span>hybrids), <span class="st">"n_scenarios"</span>))</span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(res<span class="sc">$</span>selection[scenario_cols])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 'data.frame':    625 obs. of  6 variables:
+#&gt;  $ DE_alpha_0.00 : int  0 0 0 0 0 0 0 0 0 0 ...
+#&gt;  $ DE_alpha_2.00 : int  0 0 0 0 0 0 0 0 0 0 ...
+#&gt;  $ ref_truncation: int  0 0 0 0 0 0 0 0 0 0 ...
+#&gt;  $ ref_trunc_cap : int  0 0 0 0 0 0 0 0 0 0 ...
+#&gt;  $ ref_max_div   : int  0 0 1 0 0 0 0 0 0 0 ...
+#&gt;  $ ref_random    : int  0 0 0 0 0 0 0 0 0 0 ...</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(res<span class="sc">$</span>selection[<span class="fu">order</span>(<span class="sc">-</span>res<span class="sc">$</span>selection<span class="sc">$</span>n_scenarios),</span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>                   <span class="fu">c</span>(<span class="st">"hybrid"</span>, <span class="st">"line_A"</span>, <span class="st">"line_B"</span>, scenario_cols, <span class="st">"n_scenarios"</span>)], <span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;     hybrid line_A line_B DE_alpha_0.00 DE_alpha_2.00 ref_truncation
+#&gt; 74      74     24     28             1             1              1
+#&gt; 53      53      3     28             1             1              1
+#&gt; 66      66     16     28             1             1              1
+#&gt; 69      69     19     28             1             1              1
+#&gt; 199    199     24     33             1             1              1
+#&gt;     ref_trunc_cap ref_max_div ref_random n_scenarios
+#&gt; 74              1           0          1           5
+#&gt; 53              1           0          0           4
+#&gt; 66              0           1          0           4
+#&gt; 69              1           0          0           4
+#&gt; 199             0           1          0           4</code></pre>
+</div>
+</div>
+<p><code>res$selection</code> is one row per hybrid (all <code>ctx$N</code> of them, not just the selected ones) and one 0/1 column per scenario, so “was hybrid 472 selected under the strictest diversity constraint” is a single lookup rather than a set intersection. <code>n_scenarios</code> — the row sum across scenario columns — is a free robustness signal: a hybrid chosen at every point along the <span class="math inline">\(\alpha\)</span> grid is a safe pick regardless of how much diversity loss ends up being acceptable; a hybrid that appears only when <span class="math inline">\(\alpha_{\max}\)</span> is loosest is a gain/diversity trade that only survives if that laxer target is the one adopted. <code>run_all.R</code> writes this table to <code>report/selection_by_scenario.csv</code> and the companion metrics table to <code>report/metrics_by_scenario.csv</code>, unmodified from what <code>stage2_select()</code> returns — the CSVs are exactly <code>res$selection</code> and <code>res$metrics</code>, not a reshaped summary of them.</p>
+</section>
+</section>
+<section id="operational-summary" class="level1">
+<h1>Operational Summary</h1>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Step</th>
+<th>Object</th>
+<th>Formula</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>Hybrid genotype</td>
+<td><span class="math inline">\(M^{H}_{(ab)k} = (M^{L}_{ak} + M^{L}_{bk})/2\)</span></td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Trait prediction</td>
+<td>VanRaden <span class="math inline">\(\mathbf{G}\)</span>, <span class="math inline">\(\mathbf{Z}\mathbf{Z}'/2\sum p_kq_k\)</span></td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td><strong>Diversity</strong></td>
+<td><span class="math inline">\(\mathbf{f} = (2\mathbf{X}\mathbf{X}' - \mathbf{s}\mathbf{1}' - \mathbf{1}\mathbf{s}' + m\mathbf{J})/m\)</span></td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>Group coancestry</td>
+<td><span class="math inline">\(\theta_S = \mathbf{1}'\mathbf{f}_S\mathbf{1}/n^2\)</span></td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>Gene diversity</td>
+<td><span class="math inline">\(GD = 1 - \theta_S \equiv H_e\)</span></td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>Interpretable scale</td>
+<td><span class="math inline">\(N_s = 1/(2\theta_S)\)</span></td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td>Baseline</td>
+<td>resampling of <span class="math inline">\(n\)</span> individuals, not the full population</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td>Loss</td>
+<td><span class="math inline">\(\alpha = (GD_{\text{random}} - GD_S)/GD_{\text{random}}\)</span></td>
+</tr>
+<tr class="odd">
+<td>9</td>
+<td>Pipeline</td>
+<td><code>stage1_simulate</code>/<code>stage1_build</code> <span class="math inline">\(\to\)</span> <code>stage2_select</code> <span class="math inline">\(\to\)</span> selection + metrics tables</td>
+</tr>
+</tbody>
+</table>
+<p>Mistakes to avoid, in order of severity:</p>
+<ol type="1">
+<li>Computing coancestry over centered <span class="math inline">\(\mathbf{G}\)</span> — a meaningless result.</li>
+<li>Comparing the <span class="math inline">\(n \times n\)</span> submatrix against the <span class="math inline">\(N \times N\)</span> matrix — sampling bias read as diversity loss.</li>
+<li>Fixing <span class="math inline">\(\alpha_{\max}\)</span> before knowing the attainable ceiling.</li>
+<li>Omitting the diagonal from <span class="math inline">\(\theta\)</span> — small impact in an <span class="math inline">\(F_1\)</span> population, but required for the <span class="math inline">\(N_s\)</span> scale to be meaningful.</li>
+<li>Running the optimizer without a warm start and concluding the problem is hard.</li>
+<li>Treating <span class="math inline">\(GD\)</span>/<span class="math inline">\(N_s\)</span> as a certificate against long-run drift — they measure homozygosity-based diversity (<span class="math inline">\(F_{\text{hom}}\)</span>), which under active management can diverge from drift-based diversity (<span class="math inline">\(F_{\text{drift}}\)</span>, <span class="citation" data-cites="meuwissen2020">Meuwissen et al. (<a href="#ref-meuwissen2020" role="doc-biblioref">2020</a>)</span>). Fine for one round of hybrid selection; track allelic richness too if planning several breeding cycles.</li>
+</ol>
+</section>
+<section id="references" class="level1 unnumbered">
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-caballerorodriguezramilo2010" class="csl-entry" role="listitem">
+Caballero, A., and S. T. Rodríguez-Ramilo. 2010. <span>“A New Method for the Partition of Allelic Diversity Within and Between Subpopulations.”</span> <em>Conservation Genetics</em> 11 (6): 2219–29. <a href="https://doi.org/10.1007/s10592-010-0107-7">https://doi.org/10.1007/s10592-010-0107-7</a>.
+</div>
+<div id="ref-caballero2000" class="csl-entry" role="listitem">
+Caballero, A., and M. A. Toro. 2000. <span>“Interrelations Between Effective Population Size and Other Pedigree Tools for the Management of Conserved Populations.”</span> <em>Genetics Research</em> 75 (3): 331–43. <a href="https://doi.org/10.1017/S0016672399004449">https://doi.org/10.1017/S0016672399004449</a>.
+</div>
+<div id="ref-caballero2002" class="csl-entry" role="listitem">
+Caballero, A., and M. A. Toro. 2002. <span>“Analysis of Genetic Diversity for the Management of Conserved Subdivided Populations.”</span> <em>Conservation Genetics</em> 3 (3): 289–99. <a href="https://doi.org/10.1023/A:1019956205473">https://doi.org/10.1023/A:1019956205473</a>.
+</div>
+<div id="ref-carvalheiro2010" class="csl-entry" role="listitem">
+Carvalheiro, R., S. A. De Queiroz, and B. Kinghorn. 2010. <span>“Optimum Contribution Selection Using Differential Evolution.”</span> <em>Revista Brasileira de Zootecnia</em> 39: 1429–36. <a href="https://doi.org/10.1590/S1516-35982010000700004">https://doi.org/10.1590/S1516-35982010000700004</a>.
+</div>
+<div id="ref-cockerham1967" class="csl-entry" role="listitem">
+Cockerham, C. C. 1967. <span>“Group Inbreeding and Coancestry.”</span> In <em>Genetics</em>, vol. 56.
+</div>
+<div id="ref-debeukelaer2018" class="csl-entry" role="listitem">
+De Beukelaer, H., G. F. Davenport, and V. Fack. 2018. <span>“Core <span>H</span>unter 3: Flexible Core Subset Selection.”</span> <em>BMC Bioinformatics</em> 19 (1): 203. <a href="https://doi.org/10.1186/s12859-018-2209-z">https://doi.org/10.1186/s12859-018-2209-z</a>.
+</div>
+<div id="ref-gomezromano2016" class="csl-entry" role="listitem">
+Gómez-Romano, F., B. Villanueva, J. Fernández, J. A. Woolliams, and R. Pong-Wong. 2016. <span>“The Use of Genomic Coancestry Matrices in the Optimisation of Contributions to Maintain Genetic Diversity at Specific Regions of the Genome.”</span> <em>Genetics Selection Evolution</em> 48: 2. <a href="https://doi.org/10.1186/s12711-015-0172-y">https://doi.org/10.1186/s12711-015-0172-y</a>.
+</div>
+<div id="ref-lindgren1997" class="csl-entry" role="listitem">
+Lindgren, D., L. D. Gea, and P. A. Jefferson. 1997. <span>“Status Number for Measuring Genetic Diversity.”</span> <em>Forest Genetics</em> 4 (2): 69–76.
+</div>
+<div id="ref-lindgren1998" class="csl-entry" role="listitem">
+Lindgren, D., and T. J. Mullin. 1998. <span>“Relatedness and Status Number in Seed Orchard Crops.”</span> <em>Theoretical and Applied Genetics</em> 96 (2): 292–96. <a href="https://doi.org/10.1007/s001220050737">https://doi.org/10.1007/s001220050737</a>.
+</div>
+<div id="ref-lopezcortegano2019" class="csl-entry" role="listitem">
+López-Cortegano, E., R. Pouso, A. Labrador, A. Pérez-Figueroa, J. Fernández, and A. Caballero. 2019. <span>“Optimal Management of Genetic Diversity in Subdivided Populations.”</span> <em>Frontiers in Genetics</em> 10: 843. <a href="https://doi.org/10.3389/fgene.2019.00843">https://doi.org/10.3389/fgene.2019.00843</a>.
+</div>
+<div id="ref-malecot1948" class="csl-entry" role="listitem">
+Malécot, G. 1948. <em>Les Math<span>é</span>matiques de l’h<span>é</span>r<span>é</span>dit<span>é</span></em>. (Paris).
+</div>
+<div id="ref-meuwissen1997" class="csl-entry" role="listitem">
+Meuwissen, T. H. E. 1997. <span>“Maximizing the Response of Selection with a Predefined Rate of Inbreeding.”</span> <em>Journal of Animal Science</em> 75 (4): 934–40. <a href="https://doi.org/10.2527/1997.754934x">https://doi.org/10.2527/1997.754934x</a>.
+</div>
+<div id="ref-meuwissen2020" class="csl-entry" role="listitem">
+Meuwissen, T. H. E., A. K. Sonesson, G. Gebregiwergis, and J. A. Woolliams. 2020. <span>“Management of Genetic Diversity in the Era of Genomics.”</span> <em>Frontiers in Genetics</em> 11: 880. <a href="https://doi.org/10.3389/fgene.2020.00880">https://doi.org/10.3389/fgene.2020.00880</a>.
+</div>
+<div id="ref-mullen2011" class="csl-entry" role="listitem">
+Mullen, K. M., D. Ardia, D. L. Gil, D. Windover, and J. Cline. 2011. <span>“<span>DEoptim</span>: An <span>R</span> Package for Global Optimization by Differential Evolution.”</span> <em>Journal of Statistical Software</em> 40 (6): 1–26. <a href="https://doi.org/10.18637/jss.v040.i06">https://doi.org/10.18637/jss.v040.i06</a>.
+</div>
+<div id="ref-nei1973" class="csl-entry" role="listitem">
+Nei, M. 1973. <span>“Analysis of Gene Diversity in Subdivided Populations.”</span> <em>Proceedings of the National Academy of Sciences</em> 70 (12): 3321–23. <a href="https://doi.org/10.1073/pnas.70.12.3321">https://doi.org/10.1073/pnas.70.12.3321</a>.
+</div>
+<div id="ref-nejatijavaremi1997" class="csl-entry" role="listitem">
+Nejati-Javaremi, A., C. Smith, and J. P. Gibson. 1997. <span>“Effect of Total Allelic Relationship on Accuracy of Evaluation and Response to Selection.”</span> <em>Journal of Animal Science</em> 75 (7): 1738–45. <a href="https://doi.org/10.2527/1997.7571738x">https://doi.org/10.2527/1997.7571738x</a>.
+</div>
+<div id="ref-storn1997" class="csl-entry" role="listitem">
+Storn, R., and K. Price. 1997. <span>“Differential Evolution – a Simple and Efficient Heuristic for Global Optimization over Continuous Spaces.”</span> <em>Journal of Global Optimization</em> 11 (4): 341–59. <a href="https://doi.org/10.1023/A:1008202821328">https://doi.org/10.1023/A:1008202821328</a>.
+</div>
+<div id="ref-technow2014" class="csl-entry" role="listitem">
+Technow, F., T. A. Schrag, W. Schipprack, E. Bauer, H. Simianer, and A. E. Melchinger. 2014. <span>“Genome Properties and Prospects of Genomic Prediction of Hybrid Performance in a Breeding Program of Maize.”</span> <em>Genetics</em> 197 (4): 1343–55. <a href="https://doi.org/10.1534/genetics.114.165860">https://doi.org/10.1534/genetics.114.165860</a>.
+</div>
+<div id="ref-toro2014" class="csl-entry" role="listitem">
+Toro, M. A., B. Villanueva, and J. Fernández. 2014. <span>“Genomics Applied to Management Strategies for Conservation of Farm Animal Genetic Resources.”</span> <em>Animal Genetics</em> 45 (3): 1–10. <a href="https://doi.org/10.1111/age.12140">https://doi.org/10.1111/age.12140</a>.
+</div>
+<div id="ref-toro2020" class="csl-entry" role="listitem">
+Toro, M. A., B. Villanueva, and J. Fernández. 2020. <span>“The Concept of Effective Population Size Loses Its Meaning in the Context of Optimal Management of Diversity Using Molecular Markers.”</span> <em>Journal of Animal Breeding and Genetics</em> 137 (4): 345–55. <a href="https://doi.org/10.1111/jbg.12457">https://doi.org/10.1111/jbg.12457</a>.
+</div>
+<div id="ref-vanraden2008" class="csl-entry" role="listitem">
+VanRaden, P. M. 2008. <span>“Efficient Methods to Compute Genomic Predictions.”</span> <em>Journal of Dairy Science</em> 91 (11): 4414–23. <a href="https://doi.org/10.3168/jds.2007-0980">https://doi.org/10.3168/jds.2007-0980</a>.
+</div>
+<div id="ref-wright1922" class="csl-entry" role="listitem">
+Wright, S. 1922. <span>“Coefficients of Inbreeding and Relationship.”</span> <em>The American Naturalist</em> 56 (645): 330–38.
+</div>
+</div></section></div></main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
