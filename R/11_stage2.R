@@ -3,6 +3,8 @@
 # Consumes the three objects from stage 1 and returns:
 #   $selection  data.frame N x (hybrids + one 0/1 column per scenario)
 #   $metrics    data.frame one scenario per row, with metrics and alpha loss
+#   $z_scores   data.frame one scenario per row: each metric in s.d. from the
+#               random-subset null (a metric without a baseline says nothing)
 #   $ref        gd_ref, attainable alpha_max, n_sel
 
 # Rebuilds the ctx object the metric functions expect.
@@ -19,13 +21,13 @@ build_ctx_from_stage1 <- function(X, f, hybrids, fL = NULL, weights = NULL) {
   list(X = X, f = f, traits = traits, ped = ped, fL = fL,
        n_lines = n_lines, N = nrow(X), m = ncol(X),
        index = as.numeric(scale(scale(traits) %*% weights)),
-       maf_pop = pmin(p_pop, 1 - p_pop))
+       p0 = p_pop, maf_pop = pmin(p_pop, 1 - p_pop))
 }
 
 stage2_select <- function(X, f, hybrids, n_sel,
                           alphas = NULL, weights = NULL, fL = NULL,
                           include_references = TRUE,
-                          B_null = 2000, NP = 300, itermax = 2000,
+                          B_null = 2000, B_full = 200, NP = 300, itermax = 2000,
                           seed = 1, verbose = TRUE) {
   set.seed(seed)
   ctx <- build_ctx_from_stage1(X, f, hybrids, fL, weights)
@@ -33,12 +35,16 @@ stage2_select <- function(X, f, hybrids, n_sel,
 
   # 1. Correct "0% loss" reference: RANDOM subsets of size n_sel, not the full
   #    population (which carries a sampling bias).
-  say(sprintf("[1/4] null distribution by resampling (B = %d)...\n", B_null))
-  gd_rand <- replicate(B_null, gene_diversity(sample.int(ctx$N, n_sel), ctx))
-  gd_ref <- mean(gd_rand)
+  say(sprintf("[1/4] null distribution by resampling (B = %d cheap, %d full)...\n",
+              B_null, B_full))
+  null <- null_distribution(ctx, n_sel, B = B_null, B_full = B_full, seed = seed)
+  gd_ref <- null$gd_ref
+  se <- null$gd_sd / sqrt(B_null)
   bias <- (gene_diversity(seq_len(ctx$N), ctx) - gd_ref) / gd_ref
-  say(sprintf("      GD reference = %.5f (sd %.5f); bias if using the population: %.2f%%\n",
-              gd_ref, sd(gd_rand), 100 * bias))
+  say(sprintf("      GD reference = %.5f (sd %.5f)\n", gd_ref, null$gd_sd))
+  say(sprintf("      Monte-Carlo s.e. %.2g -> alpha differences below %.3f%% are noise\n",
+              se, 100 * se / gd_ref))
+  say(sprintf("      bias if using the population as reference: %.2f%%\n", 100 * bias))
 
   # 2. Attainable loss ceiling. Above it the constraint is inoperative.
   sel_trunc <- sel_truncation(ctx, n_sel)
@@ -85,13 +91,30 @@ stage2_select <- function(X, f, hybrids, n_sel,
     alpha = (gd_ref - met[, "GD"]) / gd_ref,
     met, row.names = NULL, check.names = FALSE)
 
+  # Every metric in s.d. from the random-subset null. Ne_parents = 19 is
+  # meaningless until you know random gives 69.
+  z <- discriminatory_power(met, null)
+  z_scores <- data.frame(scenario = names(scenarios), z,
+                         row.names = NULL, check.names = FALSE)
+  names(z_scores)[-1] <- paste0("z_", colnames(z))
+
+  # The two-lens read (Meuwissen et al. 2020): the alpha constraint pins F_hom
+  # and leaves F_drift free. A large gap is the bill you are not being shown.
+  num <- function(v, fmt) ifelse(is.na(v), "     NA", sprintf(fmt, v))
+  say("      F_hom is what the constraint pins; F_drift is what it does not:\n")
+  for (i in seq_len(nrow(met)))
+    say(sprintf("      %-16s F_hom %s | F_drift %s | gap %s | GD_BS %s\n",
+                rownames(met)[i],
+                num(met[i, "F_hom"], "%+.4f"), num(met[i, "F_drift"], "%.4f"),
+                num(met[i, "cov_diag"], "%+.4f"), num(met[i, "GD_BS"], "%.4f")))
+
   selection <- hybrids
   for (nm in names(scenarios)) selection[[nm]] <- as.integer(seq_len(ctx$N) %in% scenarios[[nm]])
 
   # How many scenarios picked each hybrid: the robust ones show up in all of them.
   selection$n_scenarios <- rowSums(selection[, names(scenarios), drop = FALSE])
 
-  list(selection = selection, metrics = metrics,
-       ref = list(gd_ref = gd_ref, alpha_max = alpha_max, n_sel = n_sel,
+  list(selection = selection, metrics = metrics, z_scores = z_scores,
+       ref = list(gd_ref = gd_ref, gd_se = se, alpha_max = alpha_max, n_sel = n_sel,
                   population_bias = bias))
 }

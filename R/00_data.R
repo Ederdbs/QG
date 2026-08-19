@@ -82,6 +82,7 @@ build_ctx <- function(X, f, G, traits, ped, n_lines, pool, fL, cfg,
     n_lines = n_lines, pool = pool, fL = fL, cfg = cfg,
     N = nrow(X), m = ncol(X),
     index = as.numeric(scale(traits %*% weights)),   # multi-trait index, in deviations
+    p0 = p_pop,                                      # frozen base for F_hom/F_drift
     maf_pop = pmin(p_pop, 1 - p_pop)
   )
 }

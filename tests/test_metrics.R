@@ -72,7 +72,8 @@ stopifnot(all(c("X", "f", "hybrids") %in% names(st1)),
 ok("stage1 returns consistent X, f and hybrids")
 
 r <- stage2_select(st1$X, st1$f, st1$hybrids, n_sel = 20, alphas = c(0, 0.02),
-                   B_null = 50, NP = 40, itermax = 30, verbose = FALSE)
+                   fL = st1$fL, B_null = 50, B_full = 20, NP = 40, itermax = 30,
+                   verbose = FALSE)
 scn <- setdiff(names(r$selection), c(names(st1$hybrids), "n_scenarios"))
 stopifnot(nrow(r$selection) == nrow(st1$X),
           all(sapply(r$selection[scn], sum) == 20),   # each scenario selects n_sel
@@ -82,8 +83,66 @@ ok(sprintf("stage2: %d scenarios, %d selected in each", length(scn), 20))
 
 # stage2 runs without fL — only theta_A/B/AB are lost.
 r2 <- stage2_select(st1$X, st1$f, st1$hybrids, n_sel = 20, alphas = 0,
-                    B_null = 50, NP = 40, itermax = 30, verbose = FALSE)
+                    B_null = 50, B_full = 20, NP = 40, itermax = 30, verbose = FALSE)
 stopifnot(is.na(r2$metrics$theta_A[1]), !is.na(r2$metrics$Ne_lines_A[1]))
 ok("stage2 without fL: theta_pools becomes NA, per-pool Ne still works")
+
+# 10. A selection equal to the base has lost nothing, on either lens.
+all_idx <- seq_len(ctx$N)
+fm_all <- freq_metrics(all_idx, ctx)
+near(fm_all[["F_hom"]], 0)
+near(fm_all[["F_drift"]], 0)
+ok("F_hom and F_drift are exactly 0 when the selection IS the base")
+
+# 11. Eq. 3 of Meuwissen et al. (2020): the gap between the two lenses is
+#     entirely 2*cov(dp/s, (p0-1/2)/s). If this fails one of the three
+#     formulas is wrong.
+fm <- freq_metrics(idx, ctx)
+near(fm[["cov_diag"]], fm[["F_hom"]] - fm[["F_drift"]], tol = 1e-8)
+ok("F_hom - F_drift == 2*mean(dp/s * (p0-1/2)/s)   (their Eq. 3)")
+
+# 12. F_drift is never negative; F_hom IS allowed to be, and the pure
+#     max-diversity greedy (the G_0.5 scheme) is exactly where it goes negative
+#     while paying the largest drift. That signature is the whole point.
+fm_div <- freq_metrics(sel_greedy(ctx, 40, w = 0), ctx)
+fm_tru <- freq_metrics(sel_truncation(ctx, 40), ctx)
+stopifnot(fm_div[["F_drift"]] >= 0, fm_tru[["F_drift"]] >= 0,
+          fm_div[["F_hom"]] < fm_tru[["F_hom"]],
+          fm_div[["F_drift"]] > 0)
+ok(sprintf("max-diversity: F_hom %+.4f, F_drift %.4f | truncation: %+.4f, %.4f",
+           fm_div[["F_hom"]], fm_div[["F_drift"]],
+           fm_tru[["F_hom"]], fm_tru[["F_drift"]]))
+
+# 13. Caballero & Toro partition closes exactly (their Eq. 8).
+gp <- gd_partition(idx, ctx)
+near(gp[["GD_WI"]] + gp[["GD_BI"]] + gp[["GD_BS"]], gp[["GD_T"]])
+near((gp[["GD_WI"]] + gp[["GD_BI"]]) / gp[["GD_T"]], 1 - gp[["F_ST"]])
+stopifnot(gp[["GD_BS"]] > 0, gp[["GD_WI_hyb"]] > gp[["GD_WI"]])
+ok(sprintf("GD partition closes: WI %.4f + BI %.4f + BS %.4f = T %.4f (F_ST %.3f)",
+           gp[["GD_WI"]], gp[["GD_BI"]], gp[["GD_BS"]], gp[["GD_T"]], gp[["F_ST"]]))
+
+# 14. Inbred lines carry ~no within-individual diversity, F1 hybrids carry a lot.
+stopifnot(gp[["GD_WI"]] < 1e-9, gp[["GD_WI_hyb"]] > 0.1)
+ok("GD_WI ~ 0 for inbred lines, GD_WI_hyb large for their F1s")
+
+# 15. Consolidating the marker sweep changed no existing number.
+near(fm[["He"]], he_nei(idx, ctx))
+stopifnot(fm[["alleles_lost"]] == alleles_lost(idx, ctx))
+ok("freq_metrics() reproduces he_nei() and alleles_lost() exactly")
+
+# 16. eff_dim on the double-centered matrix: at most n-1 directions.
+ed <- eff_dim(idx, ctx)
+stopifnot(ed > 0, ed <= length(idx) - 1 + 1e-8)
+ok(sprintf("eff_dim in (0, n-1]: %.2f of %d", ed, length(idx) - 1))
+
+# 17. Stage-2 contract for the new output.
+new_cols <- c("F_hom", "F_drift", "cov_diag", "rare_retained",
+              "GD_WI_hyb", "GD_T", "GD_WI", "GD_BI", "GD_BS", "F_ST")
+stopifnot(all(new_cols %in% names(r$metrics)),
+          nrow(r$z_scores) == nrow(r$metrics),
+          "z_Ne_parents" %in% names(r$z_scores),
+          !anyNA(r$metrics$F_drift),
+          is.na(r2$metrics$GD_BS[1]), !is.na(r2$metrics$GD_WI_hyb[1]))
+ok("stage2 exports both lenses, the partition, and z-scores vs. the null")
 
 cat("\nAll checks passed.\n")

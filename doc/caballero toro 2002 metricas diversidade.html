@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diversidade genética em populações subdivididas — Caballero &amp; Toro (2002)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E1A1F;
+  --vault:#14242B;
+  --vault-2:#1B333C;
+  --frost:#DCE6E7;
+  --paper:#F5F8F8;
+  --paper-2:#EAF0F0;
+  --rule:#C3D2D3;
+  --text:#16272D;
+  --muted:#5C7278;
+  --wi:#1B6E66;      /* GD_WI  dentro de indivíduos */
+  --bi:#79AC9F;      /* GD_BI  entre indivíduos */
+  --bs:#4A5CA6;      /* GD_BS  entre subpopulações */
+  --amber:#C88B26;   /* acento */
+  --warn:#A83A2E;
+  --display:"Bricolage Grotesque","Helvetica Neue",Arial,sans-serif;
+  --body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --maxw:74ch;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--paper);color:var(--text);
+  font-family:var(--body);font-size:17px;line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---------- utilitários tipográficos ---------- */
+.eyebrow{
+  font-family:var(--mono);font-size:.68rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--amber);font-weight:500;
+}
+.sym{font-family:var(--display);font-style:italic;font-weight:600}
+code,.mono{font-family:var(--mono);font-size:.86em}
+.til,.ovl{position:relative;display:inline-block;font-style:italic;font-family:var(--body)}
+.til::after{content:"~";position:absolute;top:-.68em;left:50%;transform:translateX(-50%);font-size:.72em;font-style:normal;line-height:1}
+.ovl::after{content:"";position:absolute;top:-.12em;left:-.04em;right:-.04em;height:1.5px;background:currentColor}
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;margin:0 .25em;line-height:1.25}
+.fr .nu{padding:0 .3em}
+.fr .de{padding:0 .3em;border-top:1.5px solid currentColor}
+.eq{
+  font-family:var(--body);font-size:1.02rem;background:var(--paper-2);
+  border-left:3px solid var(--amber);padding:1.1rem 1.3rem;margin:1.3rem 0;
+  overflow-x:auto;
+}
+.eq.center{text-align:center}
+
+/* ---------- hero ---------- */
+.hero{
+  background:var(--vault);color:var(--frost);
+  padding:clamp(3rem,7vw,5.5rem) clamp(1.2rem,5vw,4rem) clamp(2.5rem,5vw,4rem);
+  border-bottom:4px solid var(--amber);
+}
+.hero-in{max-width:1120px;margin:0 auto}
+.hero h1{
+  font-family:var(--display);font-weight:800;
+  font-size:clamp(2.1rem,5.6vw,4rem);line-height:1.02;
+  letter-spacing:-.025em;margin:.7rem 0 0;max-width:18ch;color:#fff;
+}
+.hero .src{
+  font-family:var(--mono);font-size:.78rem;color:#8FAAAE;margin-top:1.1rem;letter-spacing:.02em;
+}
+.thesis{
+  font-size:clamp(1.05rem,2.1vw,1.3rem);color:#CBDBDC;max-width:56ch;
+  margin:1.6rem 0 0;border-left:2px solid var(--wi);padding-left:1.1rem;
+}
+.thesis b{color:#fff;font-weight:600}
+
+/* ---------- signature: barra de partição ---------- */
+.partition{margin:clamp(2.5rem,5vw,3.5rem) 0 0}
+.partition .plabel{
+  font-family:var(--mono);font-size:.7rem;letter-spacing:.14em;
+  text-transform:uppercase;color:#8FAAAE;margin-bottom:.9rem;
+}
+.bar{display:flex;height:74px;border-radius:2px;overflow:hidden;box-shadow:0 2px 0 rgba(0,0,0,.25)}
+.seg{
+  display:flex;flex-direction:column;justify-content:center;
+  padding:0 .9rem;color:#fff;min-width:0;
+  animation:grow 900ms cubic-bezier(.2,.7,.3,1) both;
+}
+@keyframes grow{from{flex-basis:0;opacity:0}to{opacity:1}}
+.seg .sv{font-family:var(--mono);font-size:1.02rem;font-weight:600;line-height:1.1}
+.seg .sn{font-family:var(--mono);font-size:.66rem;letter-spacing:.09em;opacity:.85;margin-top:.25rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.s-wi{background:var(--wi);flex:0 0 43.65%;animation-delay:80ms}
+.s-bi{background:var(--bi);flex:0 0 37.38%;color:#0E1A1F;animation-delay:240ms}
+.s-bs{background:var(--bs);flex:0 0 18.97%;animation-delay:400ms}
+.brackets{display:flex;margin-top:.5rem;font-family:var(--mono);font-size:.7rem;color:#8FAAAE}
+.brk{border-top:1px solid #3E5A61;padding-top:.4rem;text-align:center}
+.brk.ws{flex:0 0 81.03%}
+.brk.bsx{flex:0 0 18.97%;color:#A9B6E6;border-top-color:#4A5CA6}
+.pnote{font-family:var(--mono);font-size:.72rem;color:#7D989D;margin-top:1.1rem;line-height:1.6}
+
+/* ---------- layout ---------- */
+.wrap{max-width:1120px;margin:0 auto;padding:0 clamp(1.2rem,5vw,4rem);display:flex;gap:3.5rem}
+nav.toc{
+  flex:0 0 200px;position:sticky;top:0;align-self:flex-start;
+  padding:3rem 0;max-height:100vh;overflow-y:auto;
+}
+nav.toc ol{list-style:none;margin:0;padding:0;counter-reset:t}
+nav.toc a{
+  display:block;font-family:var(--mono);font-size:.73rem;color:var(--muted);
+  text-decoration:none;padding:.32rem 0 .32rem .9rem;border-left:2px solid var(--rule);
+  line-height:1.4;
+}
+nav.toc a:hover,nav.toc a:focus{color:var(--wi);border-left-color:var(--wi);background:var(--paper-2)}
+main{flex:1 1 auto;min-width:0;padding:3rem 0 5rem;max-width:var(--maxw)}
+@media (max-width:1000px){.wrap{display:block;padding-bottom:0}nav.toc{display:none}main{max-width:none;padding-top:2rem}}
+
+section{margin:0 0 3.4rem;scroll-margin-top:1.5rem}
+h2{
+  font-family:var(--display);font-weight:700;font-size:clamp(1.45rem,3vw,1.95rem);
+  line-height:1.15;letter-spacing:-.015em;margin:0 0 .2rem;color:var(--ink);
+}
+h2 .num{font-family:var(--mono);font-size:.62em;color:var(--amber);font-weight:500;margin-right:.55em;vertical-align:.12em}
+h3{font-family:var(--display);font-weight:600;font-size:1.13rem;margin:2rem 0 .4rem;color:var(--ink)}
+h2+.lede{color:var(--muted);font-size:1.02rem;margin:.35rem 0 1.5rem;font-style:italic}
+p{margin:0 0 1.05rem}
+a{color:var(--wi)}
+hr.sec{border:0;border-top:1px solid var(--rule);margin:0 0 2rem}
+
+/* ---------- cartões de métrica ---------- */
+.card{
+  border:1px solid var(--rule);border-left:4px solid var(--wi);
+  background:#fff;padding:1.4rem 1.5rem;margin:0 0 1.3rem;
+}
+.card.acc-bs{border-left-color:var(--bs)}
+.card.acc-am{border-left-color:var(--amber)}
+.card-h{display:flex;align-items:baseline;gap:.85rem;margin-bottom:.55rem;flex-wrap:wrap}
+.card-h .mk{
+  font-family:var(--display);font-style:italic;font-weight:700;font-size:1.7rem;
+  color:var(--wi);line-height:1;
+}
+.card.acc-bs .card-h .mk{color:var(--bs)}
+.card.acc-am .card-h .mk{color:var(--amber)}
+.card-h h3{margin:0;font-size:1.06rem}
+.card p:last-child{margin-bottom:0}
+.tag{
+  font-family:var(--mono);font-size:.63rem;letter-spacing:.1em;text-transform:uppercase;
+  background:var(--paper-2);color:var(--muted);padding:.2rem .5rem;border-radius:2px;
+}
+.ex{
+  font-size:.94rem;background:var(--paper-2);border-top:1px solid var(--rule);
+  margin:1rem -1.5rem -1.4rem;padding:.9rem 1.5rem;color:#334B52;
+}
+.ex b{font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);display:block;margin-bottom:.25rem}
+
+/* ---------- destaques ---------- */
+.callout{
+  background:var(--vault);color:var(--frost);padding:1.5rem 1.6rem;margin:1.6rem 0;
+  border-left:4px solid var(--amber);
+}
+.callout p{margin:0}
+.callout p+p{margin-top:.8rem}
+.callout b,.callout strong{color:#fff}
+.flag{
+  border:1px solid #E0C4BF;background:#FBF2F0;border-left:4px solid var(--warn);
+  padding:1.1rem 1.3rem;margin:1.4rem 0;font-size:.95rem;
+}
+.flag .ft{font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--warn);display:block;margin-bottom:.35rem}
+.flag p:last-child{margin-bottom:0}
+
+/* ---------- tabelas ---------- */
+.tw{overflow-x:auto;margin:1.3rem 0}
+table{border-collapse:collapse;width:100%;font-size:.9rem;min-width:520px}
+th{
+  font-family:var(--mono);font-size:.68rem;letter-spacing:.07em;text-transform:uppercase;
+  text-align:left;color:var(--muted);font-weight:500;
+  border-bottom:1.5px solid var(--ink);padding:.5rem .7rem;vertical-align:bottom;
+}
+td{border-bottom:1px solid var(--rule);padding:.52rem .7rem;vertical-align:top}
+td.n,th.n{text-align:right;font-family:var(--mono);font-size:.82rem}
+tbody tr:hover{background:var(--paper-2)}
+td .pos{color:var(--wi);font-weight:600}
+td .neg{color:var(--warn);font-weight:600}
+caption{caption-side:bottom;text-align:left;font-size:.8rem;color:var(--muted);padding-top:.6rem;font-style:italic}
+
+/* ---------- barra divergente do leave-one-out ---------- */
+.dv{display:flex;align-items:center;height:15px;width:150px;position:relative}
+.dv::before{content:"";position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--rule)}
+.dv i{position:absolute;height:11px;top:2px;border-radius:1px}
+.dv i.l{background:var(--warn);right:50%}
+.dv i.g{background:var(--wi);left:50%}
+
+/* ---------- código ---------- */
+pre{
+  background:var(--ink);color:#D6E4E5;font-family:var(--mono);font-size:.775rem;
+  line-height:1.62;padding:1.3rem 1.4rem;overflow-x:auto;margin:1.2rem 0;
+  border-left:4px solid var(--wi);
+}
+pre .c{color:#6E8A8F;font-style:italic}
+pre .k{color:#E5B65C}
+pre .s{color:#8FC7B8}
+pre .f{color:#9DB6E8}
+
+ul,ol{margin:0 0 1.1rem;padding-left:1.35rem}
+li{margin-bottom:.42rem}
+li::marker{color:var(--amber)}
+.steps{list-style:none;padding-left:0;counter-reset:st}
+.steps li{counter-increment:st;padding-left:2.4rem;position:relative;margin-bottom:.75rem}
+.steps li::before{
+  content:counter(st,decimal-leading-zero);position:absolute;left:0;top:.1em;
+  font-family:var(--mono);font-size:.75rem;color:var(--amber);font-weight:600;
+}
+
+footer{
+  background:var(--vault);color:#8FAAAE;padding:2.5rem clamp(1.2rem,5vw,4rem);
+  font-family:var(--mono);font-size:.75rem;line-height:1.75;
+}
+footer div{max-width:1120px;margin:0 auto}
+footer b{color:var(--frost)}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-in">
+    <div class="eyebrow">Leitura anotada · genética quantitativa aplicada</div>
+    <h1>Diversidade não é distância</h1>
+    <div class="src">Caballero A &amp; Toro MA (2002) · Analysis of genetic diversity for the management of conserved subdivided populations · <i>Conservation Genetics</i> 3:289–299</div>
+    <p class="thesis">Métodos baseados em distância genética medem apenas a divergência <b>entre</b> grupos. A métrica correta para manejar germoplasma é a <b>coancestria média global</b> — e minimizá-la é matematicamente equivalente a maximizar o tamanho efetivo populacional.</p>
+
+    <div class="partition">
+      <div class="plabel">Partição da diversidade total &nbsp;·&nbsp; GD<sub>T</sub> = 0,6744 &nbsp;·&nbsp; exemplo do artigo</div>
+      <div class="bar">
+        <div class="seg s-wi"><span class="sv">0,2944</span><span class="sn">GD_WI · dentro de indivíduos</span></div>
+        <div class="seg s-bi"><span class="sv">0,2521</span><span class="sn">GD_BI · entre indivíduos</span></div>
+        <div class="seg s-bs"><span class="sv">0,1279</span><span class="sn">GD_BS · entre pops</span></div>
+      </div>
+      <div class="brackets">
+        <div class="brk ws">GD<sub>WS</sub> = 81,0 % da diversidade total — invisível para métodos de distância</div>
+        <div class="brk bsx">F<sub>ST</sub> = 0,190</div>
+      </div>
+      <p class="pnote">Uma árvore filogenética enxerga apenas a faixa da direita. As decisões de conservação e de composição de população-base dependem das três.</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<nav class="toc" aria-label="Sumário">
+  <ol>
+    <li><a href="#notacao">00 · Notação</a></li>
+    <li><a href="#blocos">01 · Blocos fundamentais</a></li>
+    <li><a href="#derivadas">02 · α e G</a></li>
+    <li><a href="#distancias">03 · Distâncias</a></li>
+    <li><a href="#global">04 · Coancestria global</a></li>
+    <li><a href="#fstat">05 · Estatísticas F</a></li>
+    <li><a href="#particao">06 · Partição</a></li>
+    <li><a href="#marcadores">07 · Marcadores</a></li>
+    <li><a href="#leaveout">08 · Remover um acesso</a></li>
+    <li><a href="#contrib">09 · Contribuições ótimas</a></li>
+    <li><a href="#ne">10 · Tamanho efetivo</a></li>
+    <li><a href="#weitzman">11 · Crítica a Weitzman</a></li>
+    <li><a href="#exemplo">12 · Exemplo verificado</a></li>
+    <li><a href="#codigo">13 · Código R</a></li>
+    <li><a href="#roteiro">14 · Roteiro de decisão</a></li>
+    <li><a href="#refs">15 · Referências</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<!-- ================= INVERSÃO ================= -->
+<section id="inversao">
+  <div class="callout">
+    <p><b>O resultado que sustenta o artigo.</b> No exemplo dos autores, o método de Weitzman conclui que perder a subpopulação 2 custaria <b>−65,5 %</b> da diversidade — é a mais divergente do conjunto. A análise por coancestria mostra que removê-la <b>aumenta</b> a diversidade do pool em <b>+6,5 %</b>.</p>
+    <p>Ela é distante porque está internamente fixada (<span class="mono">f₂₂ = 0,875</span>, ou seja <span class="mono">H<sub>e</sub> = 0,125</span> em 4 indivíduos). Alelos fixados por deriva não são recurso genético — são a ausência dele.</p>
+  </div>
+</section>
+
+<!-- ================= 00 NOTAÇÃO ================= -->
+<section id="notacao">
+  <hr class="sec">
+  <h2><span class="num">00</span>Notação e convenções</h2>
+  <p class="lede">Três acentos, três significados. Confundi-los é a origem de quase todo erro de aplicação.</p>
+
+  <div class="tw">
+  <table>
+    <thead><tr><th style="width:16%">Símbolo</th><th>Significado</th></tr></thead>
+    <tbody>
+      <tr><td class="n"><span class="sym">f<sub>ij</sub></span></td><td>Coancestria média entre as subpopulações <i>i</i> e <i>j</i>, sobre todos os <span class="mono">N<sub>i</sub>×N<sub>j</sub></span> pares</td></tr>
+      <tr><td class="n"><span class="til">f</span></td><td>Média ponderada <b>dentro</b> das subpopulações: <span class="mono">Σ f<sub>ii</sub>N<sub>i</sub>/N<sub>T</sub></span></td></tr>
+      <tr><td class="n"><span class="ovl">f</span></td><td>Média sobre <b>todos</b> os pares da metapopulação, incluindo entre subpopulações</td></tr>
+      <tr><td class="n"><span class="sym">N<sub>i</sub>, N<sub>T</sub>, n</span></td><td>Tamanho da subpopulação <i>i</i>, total, e número de subpopulações</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>Vale sempre <span class="mono"><span class="ovl">f</span> ≤ <span class="til">f</span> ≤ <span class="til">s</span></span>. As diferenças entre esses três números <i>são</i> a partição da diversidade. Todo cálculo é feito por loco e depois promediado sobre locos — nunca promedie frequências antes.</p>
+
+  <div class="flag">
+    <span class="ft">Ponto sutil, frequentemente errado</span>
+    <p>Todas as coancestrias aqui incluem os pares de um indivíduo consigo mesmo (coancestria de grupo, <i>sensu</i> Cockerham 1967). É isso que faz <span class="mono">1 − f<sub>ii</sub></span> ser exatamente a heterozigosidade esperada de Nei e faz toda a álgebra fechar.</p>
+  </div>
+</section>
+
+<!-- ================= 01 BLOCOS ================= -->
+<section id="blocos">
+  <hr class="sec">
+  <h2><span class="num">01</span>Os três blocos fundamentais</h2>
+  <p class="lede">Tudo o mais no artigo é álgebra sobre estas três quantidades.</p>
+
+  <div class="card">
+    <div class="card-h"><span class="mk">f<sub>ij</sub></span><h3>Coancestria entre subpopulações</h3><span class="tag">0 – 1</span></div>
+    <div class="eq center">f<sub>ij</sub> = Σ<sub>k</sub> <span class="til">p</span><sub>k,i</sub> · <span class="til">p</span><sub>k,j</sub></div>
+    <p>Probabilidade de que dois alelos, um amostrado ao acaso em <i>i</i> e outro em <i>j</i>, sejam idênticos. É a medida de <b>redundância</b> entre dois materiais: se você cruzar plantas de <i>i</i> com plantas de <i>j</i>, a progênie terá endogamia esperada <span class="mono">F = f<sub>ij</sub></span>.</p>
+    <div class="ex"><b>Milho</b>Entre um pool Stiff Stalk e um Non-Stiff Stalk, <span class="mono">f<sub>ij</sub></span> é baixa — é essa baixa coancestria que sustenta o padrão heterótico. Entre duas linhagens elite da mesma família pode passar de 0,6, e o cruzamento não gera nada de novo.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-h"><span class="mk">f<sub>ii</sub></span><h3>Coancestria dentro da subpopulação</h3><span class="tag">1 − f<sub>ii</sub> = H<sub>e</sub></span></div>
+    <p>O caso <span class="mono">i = j</span>. Sob marcadores, <span class="mono">f<sub>ii</sub> = Σ<sub>k</sub> <span class="til">p</span>²<sub>k,i</sub></span> é a homozigosidade esperada, logo <b><span class="mono">1 − f<sub>ii</sub></span> é a diversidade gênica de Nei do acesso</b> — a matéria-prima da variância aditiva disponível para seleção intrapopulacional.</p>
+    <div class="ex"><b>Banco de germoplasma</b>Um acesso crioulo regenerado 20 vezes com 40 espigas por ciclo acumula coancestria e vê <span class="mono">f<sub>ii</sub></span> subir silenciosamente. É o alarme mais barato de erosão genética dentro do banco — e exatamente o que uma árvore de distâncias não enxerga.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-h"><span class="mk">s<sub>i</sub></span><h3>Auto-coancestria e endogamia molecular</h3><span class="tag">1 − s<sub>i</sub> = H<sub>o</sub></span></div>
+    <div class="eq center">s<sub>i</sub> = Σ<sub>k</sub> Σ<sub>l</sub> p²<sub>k,l,i</sub> / N<sub>i</sub> &nbsp;&nbsp;·&nbsp;&nbsp; F<sub>i</sub> = 2s<sub>i</sub> − 1</div>
+    <p>Com <span class="mono">p<sub>k,l,i</sub></span> = dosagem do alelo <i>k</i> no indivíduo <i>l</i> (1 homozigoto, 0,5 heterozigoto, 0).</p>
+    <div class="flag">
+      <span class="ft">Não confunda</span>
+      <p><span class="mono">F<sub>i</sub></span> é endogamia <b>molecular</b>, medida contra uma base hipotética onde todos os alelos são distintos. Não é <span class="mono">F<sub>IS</sub></span> e não é comparável entre estudos com painéis diferentes. Para "esta população está acasalando ao acaso?", use <span class="mono">α<sub>i</sub></span>.</p>
+    </div>
+    <div class="ex"><b>Autógamas</b>Soja, arroz, trigo: linhagens puras têm <span class="mono">s<sub>i</sub> → 1</span>, logo <span class="mono">F<sub>i</sub> → 1</span> e <span class="mono">H<sub>o</sub> → 0</span>. Isso é o esperado — muda apenas onde a diversidade reside.</div>
+  </div>
+</section>
+
+<!-- ================= 02 DERIVADAS ================= -->
+<section id="derivadas">
+  <hr class="sec">
+  <h2><span class="num">02</span>Desvio de Hardy–Weinberg e o medidor de sistema reprodutivo</h2>
+
+  <div class="eq center">
+    α<sub>i</sub> = <span class="fr"><span class="nu">F<sub>i</sub> − f<sub>ii</sub></span><span class="de">1 − f<sub>ii</sub></span></span>
+    &nbsp;&nbsp;&nbsp; G<sub>i</sub> = <span class="fr"><span class="nu">s<sub>i</sub> − f<sub>ii</sub></span><span class="de">1 − f<sub>ii</sub></span></span>
+    &nbsp;&nbsp;&nbsp; G<sub>i</sub> = (1 + α<sub>i</sub>) / 2
+  </div>
+
+  <div class="card acc-am">
+    <div class="card-h"><span class="mk">α<sub>i</sub></span><h3>Desvio das proporções de Hardy–Weinberg</h3></div>
+    <p>Análogo de <span class="mono">F<sub>IS</sub></span> em nível de subpopulação. <span class="mono">α &gt; 0</span>: excesso de homozigotos — autofecundação, acasalamento entre aparentados, efeito Wahlund por subestrutura interna, ou alelos nulos. <span class="mono">α &lt; 0</span>: excesso de heterozigotos — dioicia, autoincompatibilidade, seleção, ou um sintético recém-formado.</p>
+  </div>
+
+  <div class="card acc-am">
+    <div class="card-h"><span class="mk">G<sub>i</sub></span><h3>Proporção da diversidade que está entre indivíduos</h3><span class="tag">métrica subutilizada</span></div>
+    <p>Funciona como um <b>medidor do sistema reprodutivo</b>, e é o que decide o desenho de amostragem do acesso.</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th class="n" style="width:18%">G<sub>i</sub></th><th>Situação</th><th>Material típico</th></tr></thead>
+        <tbody>
+          <tr><td class="n">≈ 0,50</td><td>Panmixia perfeita</td><td>Milho, girassol, populações abertas</td></tr>
+          <tr><td class="n">&lt; 0,50</td><td>Excesso de heterozigotos</td><td>Sintéticos F1, clones, autoincompatíveis</td></tr>
+          <tr><td class="n">→ 1,00</td><td>Todos homozigotos</td><td>Linhagens endogâmicas, DH, autógamas</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="ex"><b>Consequência operacional</b><span class="mono">1 − G<sub>i</sub></span> é a fração da diversidade guardada <i>dentro</i> de cada planta. Com <span class="mono">G → 1</span> (autógamas), um indivíduo captura quase nada e você precisa de muitas plantas por acesso. Com <span class="mono">G ≈ 0,5</span> (milho), poucas plantas já capturam metade da diversidade do acesso.</div>
+  </div>
+</section>
+
+<!-- ================= 03 DISTÂNCIAS ================= -->
+<section id="distancias">
+  <hr class="sec">
+  <h2><span class="num">03</span>Distâncias</h2>
+
+  <div class="eq center">
+    D<sub>ij</sub> = (s<sub>i</sub> + s<sub>j</sub>)/2 − f<sub>ij</sub>
+    &nbsp;&nbsp;·&nbsp;&nbsp;
+    <b>D</b><sub>ij</sub> = (f<sub>ii</sub> + f<sub>jj</sub>)/2 − f<sub>ij</sub> = Σ<sub>k</sub> ½(<span class="til">p</span><sub>k,i</sub> − <span class="til">p</span><sub>k,j</sub>)²
+  </div>
+
+  <p>A distância mínima de Nei <span class="mono"><b>D</b><sub>ij</sub></span> é, literalmente, metade da soma dos quadrados das diferenças de frequência alélica: um <b>componente de variância</b>, não uma distância evolutiva calibrada em tempo. Ela é legítima e é a peça que compõe <span class="mono">F<sub>ST</sub></span>. O erro do método de Weitzman não é usá-la — é usar <i>somente</i> ela.</p>
+
+  <div class="callout">
+    <p><b>Economia computacional de O(N²).</b> A Equação 13 do artigo calcula <span class="mono">D<sub>ij</sub></span> por dupla soma sobre todos os pares de indivíduos, a custo <span class="mono">O(N<sub>i</sub>N<sub>j</sub>m)</span>. É desnecessário: a identidade <span class="mono">D<sub>ij</sub> = (s<sub>i</sub>+s<sub>j</sub>)/2 − f<sub>ij</sub></span> é <b>exata</b> e reduz o custo a <span class="mono">O(Nm)</span>.</p>
+    <p>Verificado numericamente contra a Tabela 2 do artigo: coincide até a última casa decimal. Para 50 mil SNPs e 5 mil acessos, isso é a diferença entre horas e segundos.</p>
+  </div>
+</section>
+
+<!-- ================= 04 GLOBAL ================= -->
+<section id="global">
+  <hr class="sec">
+  <h2><span class="num">04</span>Coancestria global e a decomposição da contribuição</h2>
+  <p class="lede">A equação mais útil do artigo para uso prático.</p>
+
+  <div class="eq center">
+    <span class="ovl">f</span> = Σ<sub>i</sub> (N<sub>i</sub>/N<sub>T</sub>) · [ f<sub>ii</sub> − Σ<sub>j</sub> <b>D</b><sub>ij</sub> N<sub>j</sub>/N<sub>T</sub> ]
+  </div>
+
+  <p>A contribuição de cada acesso à coancestria global — isto é, à <i>perda</i> de diversidade do pool — tem dois sinais opostos:</p>
+  <ul>
+    <li><b>Termo positivo (f<sub>ii</sub>):</b> quanto mais internamente fixado o acesso, mais ele aumenta a coancestria global. Ele dilui o pool com cópias do mesmo alelo.</li>
+    <li><b>Termo negativo (distância média):</b> quanto mais distante dos demais, mais ele reduz a coancestria global.</li>
+  </ul>
+  <p>Um método baseado só em distância vê apenas o segundo termo. Daí a inversão de conclusões.</p>
+</section>
+
+<!-- ================= 05 F-STAT ================= -->
+<section id="fstat">
+  <hr class="sec">
+  <h2><span class="num">05</span>Estatísticas F</h2>
+
+  <div class="eq center">
+    F<sub>IS</sub> = <span class="fr"><span class="nu"><span class="til">F</span> − <span class="til">f</span></span><span class="de">1 − <span class="til">f</span></span></span>
+    &nbsp;&nbsp; F<sub>ST</sub> = <span class="fr"><span class="nu"><span class="til">f</span> − <span class="ovl">f</span></span><span class="de">1 − <span class="ovl">f</span></span></span> = <span class="fr"><span class="nu"><span class="ovl">D</span></span><span class="de">1 − <span class="ovl">f</span></span></span>
+    &nbsp;&nbsp; F<sub>IT</sub> = <span class="fr"><span class="nu"><span class="til">F</span> − <span class="ovl">f</span></span><span class="de">1 − <span class="ovl">f</span></span></span>
+  </div>
+  <p>com <span class="mono">(1 − F<sub>IT</sub>) = (1 − F<sub>IS</sub>)(1 − F<sub>ST</sub>)</span>.</p>
+  <p><span class="mono">F<sub>ST</sub></span> informa que fração da variação neutra está <i>entre</i> acessos. Landraces de milho ficam tipicamente em 0,03–0,15 — a maior parte da diversidade está dentro de cada landrace, o que favorece amostrar poucos acessos com muitas plantas em vez do contrário. Coleções de linhagens elite e autógamas podem passar de 0,4. Em painéis de material fixado, <span class="mono">F<sub>IS</sub></span> perde sentido biológico.</p>
+</section>
+
+<!-- ================= 06 PARTIÇÃO ================= -->
+<section id="particao">
+  <hr class="sec">
+  <h2><span class="num">06</span>A partição da diversidade</h2>
+  <p class="lede">O coração do artigo — e o que muda a estratégia por espécie.</p>
+
+  <div class="eq center">
+    (1 − <span class="ovl">f</span>) = (1 − <span class="til">s</span>) + (<span class="til">s</span> − <span class="til">f</span>) + (<span class="til">f</span> − <span class="ovl">f</span>)
+  </div>
+
+  <div class="tw">
+  <table>
+    <thead><tr><th style="width:18%">Componente</th><th style="width:20%">Definição</th><th>Significado biológico</th></tr></thead>
+    <tbody>
+      <tr><td><b>GD<sub>T</sub></b></td><td class="n">1 − <span class="ovl">f</span></td><td>Diversidade total: H<sub>e</sub> do pool inteiro se tudo fosse recombinado</td></tr>
+      <tr><td><b>GD<sub>WI</sub></b></td><td class="n">1 − <span class="til">s</span></td><td>Heterozigosidade carregada dentro de cada planta</td></tr>
+      <tr><td><b>GD<sub>BI</sub></b></td><td class="n"><span class="til">s</span> − <span class="til">f</span></td><td>Variação segregante entre plantas do mesmo acesso — o alvo da seleção intrapopulacional</td></tr>
+      <tr><td><b>GD<sub>WS</sub></b></td><td class="n">1 − <span class="til">f</span></td><td>Total dentro de subpopulações (WI + BI)</td></tr>
+      <tr><td><b>GD<sub>BS</sub></b></td><td class="n"><span class="til">f</span> − <span class="ovl">f</span></td><td>Divergência entre acessos — o único componente que Weitzman enxerga</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="eq center">
+    GD<sub>WI</sub>/GD<sub>T</sub> = (1−G)(1−F<sub>ST</sub>) &nbsp;·&nbsp;
+    GD<sub>BI</sub>/GD<sub>T</sub> = G(1−F<sub>ST</sub>) &nbsp;·&nbsp;
+    GD<sub>WS</sub>/GD<sub>T</sub> = 1−F<sub>ST</sub> &nbsp;·&nbsp;
+    GD<sub>BS</sub>/GD<sub>T</sub> = F<sub>ST</sub>
+  </div>
+
+  <h3>Por que isso muda a estratégia por espécie</h3>
+  <ul>
+    <li><b>Alógamas</b> (milho, girassol, forrageiras, espécies florestais): <span class="mono">GD<sub>WI</sub></span> é grande — a diversidade está literalmente dentro das plantas. Conservar significa manter heterozigosidade: regenerar com muitos indivíduos e contribuições equilibradas.</li>
+    <li><b>Autógamas e coleções de DH</b> (soja, trigo, arroz, feijão): <span class="mono">GD<sub>WI</sub> ≈ 0</span>. Toda a diversidade é BI + BS. Conservar significa manter <i>número de linhagens distintas</i>; heterozigosidade não é alvo. Perder linhagens, sim, é irreversível.</li>
+    <li><b>Clonais</b> (batata, cana, fruteiras): <span class="mono">GD<sub>WI</sub></span> é alta e <b>congelada</b> — não se reduz por deriva enquanto o clone existir. A conta de <span class="mono">N<sub>e</sub></span> do artigo não se aplica sem adaptação.</li>
+  </ul>
+</section>
+
+<!-- ================= 07 MARCADORES ================= -->
+<section id="marcadores">
+  <hr class="sec">
+  <h2><span class="num">07</span>Estimação a partir de marcadores</h2>
+  <p>Todo o pipeline se reduz a dois produtos de matrizes. Três cuidados decidem se o resultado é utilizável:</p>
+  <ol>
+    <li><b>Amostras, não censos.</b> As fórmulas assumem população inteira medida. Com amostras, aplique correções de tamanho finito (Nei &amp; Chesser 1983; Pons &amp; Chaouche 1995) — sem elas, você subestima H<sub>e</sub> e infla F<sub>ST</sub> justamente nos acessos com poucos indivíduos genotipados, que são os raros que se queria avaliar.</li>
+    <li><b>Coancestria molecular ≠ genealógica.</b> A conversão <span class="mono">1 − <span class="ovl">f</span><sub>m</sub> = (1 − Σ p<sub>k</sub>²)(1 − <span class="ovl">f</span>)</span> depende de frequências na população-base que você não conhece; Lynch &amp; Ritland (1999) mostram que é instável. Use coancestria molecular <i>comparativamente</i>, dentro do mesmo painel, nunca em valor absoluto entre estudos.</li>
+    <li><b>Viés de averiguação.</b> Chips de SNP desenvolvidos em material elite subestimam sistematicamente a diversidade de landraces e parentes silvestres — precisamente o material que a análise deveria valorizar. Prefira GBS ou sequenciamento; no mínimo, declare o viés.</li>
+  </ol>
+</section>
+
+<!-- ================= 08 LEAVE-ONE-OUT ================= -->
+<section id="leaveout">
+  <hr class="sec">
+  <h2><span class="num">08</span>Perda — ou ganho — ao remover um acesso</h2>
+
+  <div class="tw">
+  <table>
+    <thead><tr><th>Acesso</th><th class="n">GD<sub>T</sub> sem ele</th><th class="n">Δ ponderada</th><th class="n">Δ não pond.</th><th class="n">Weitzman</th><th style="width:160px">Δ não ponderada</th></tr></thead>
+    <tbody>
+      <tr><td>Sub 1</td><td class="n">0,6296</td><td class="n">−11,3 + 4,7 = <span class="neg">−6,6 %</span></td><td class="n">−6,8 %</td><td class="n">−5,8 %</td><td><div class="dv"><i class="l" style="width:34px"></i></div></td></tr>
+      <tr><td><b>Sub 2</b></td><td class="n">0,6869</td><td class="n">+9,6 − 7,8 = <span class="pos">+1,8 %</span></td><td class="n"><span class="pos">+6,5 %</span></td><td class="n"><span class="neg">−65,5 %</span></td><td><div class="dv"><i class="g" style="width:33px"></i></div></td></tr>
+      <tr><td>Sub 3</td><td class="n">0,6481</td><td class="n">−1,2 − 5,1 = <span class="neg">−3,9 %</span></td><td class="n">−7,0 %</td><td class="n">−63,3 %</td><td><div class="dv"><i class="l" style="width:35px"></i></div></td></tr>
+      <tr><td>Sub 4</td><td class="n">0,6690</td><td class="n">−3,1 + 2,3 = <span class="neg">−0,8 %</span></td><td class="n">−3,6 %</td><td class="n">−9,0 %</td><td><div class="dv"><i class="l" style="width:18px"></i></div></td></tr>
+    </tbody>
+    <caption>Cada Δ é a soma de dois termos de sinal oposto: coancestria interna e distância média aos demais.</caption>
+  </table>
+  </div>
+
+  <p>Na reanálise das onze raças suínas europeias de Laval et al. (2000) o padrão se repete: Weitzman aponta a raça Basca como a mais valiosa (−15,2 %); a análise de coancestria mostra que removê-la <b>aumentaria</b> a diversidade em 0,67 %, e que remover as quatro raças francesas aumentaria em 3,21 %.</p>
+
+  <div class="flag">
+    <span class="ft">Tradução para banco de germoplasma</span>
+    <p>Um acesso raro, com poucas plantas e alta homozigose — o típico acesso "único" numa árvore de distâncias — pode estar contribuindo <i>negativamente</i> para o pool. Isso <b>não</b> significa descartá-lo: significa que a prioridade correta é <b>regenerá-lo com N maior</b>, não replicá-lo numa coleção nuclear.</p>
+  </div>
+</section>
+
+<!-- ================= 09 CONTRIBUIÇÕES ================= -->
+<section id="contrib">
+  <hr class="sec">
+  <h2><span class="num">09</span>Contribuições ótimas</h2>
+  <p class="lede">Como compor um sintético, uma população-base ou uma coleção nuclear.</p>
+
+  <div class="eq center">
+    max GD<sub>T</sub> = 1 − Σ<sub>i,j</sub> f<sub>ij</sub> c<sub>i</sub> c<sub>j</sub> &nbsp;&nbsp; sujeito a &nbsp; c<sub>i</sub> ≥ 0, &nbsp; Σ c<sub>i</sub> = 1
+  </div>
+
+  <p>É um problema de <b>programação quadrática</b>: minimizar <span class="mono">c′Fc</span>. No exemplo do artigo a solução é <span class="mono">c = (0,522; 0,000; 0,270; 0,208)</span>, elevando GD<sub>T</sub> de 0,6744 para 0,6874 (+1,92 %). A subpopulação 2 recebe peso zero.</p>
+
+  <h3>Três usos diretos</h3>
+  <ul>
+    <li><b>População-base de seleção recorrente.</b> <span class="mono">c<sub>i</sub></span> dá a proporção de sementes de cada fonte que maximiza a variância aditiva de longo prazo.</li>
+    <li><b>Coleção nuclear.</b> Em vez de agrupamento + amostragem proporcional, resolva a QP diretamente com restrições operacionais: teto de capacidade de multiplicação, piso legal ou cultural para acessos protegidos.</li>
+    <li><b>Seleção com contribuição ótima (OCS).</b> Trocando o objetivo por <span class="mono">max c′g − λ·c′Fc</span> com <span class="mono">g</span> = GEBVs, chega-se ao arcabouço de Meuwissen (1997), hoje padrão em programas genômicos. O artigo é o caso <span class="mono">λ → ∞</span>, diversidade pura. O melhorista opera no meio da curva.</li>
+  </ul>
+</section>
+
+<!-- ================= 10 NE ================= -->
+<section id="ne">
+  <hr class="sec">
+  <h2><span class="num">10</span>Minimizar coancestria = maximizar N<sub>e</sub></h2>
+
+  <div class="eq center">
+    N<sub>e</sub> ≈ <span class="fr"><span class="nu">2Nn</span><span class="de">(<span class="ovl">V</span><sub>WS</sub> + V<sub>BS</sub> + 1)(1 − F<sub>IT</sub>)</span></span>
+  </div>
+
+  <p>Generaliza Wray &amp; Thompson (1990) e recupera Whitlock &amp; Barton (1997) e Caballero (1994) como casos particulares. <span class="mono">S²<sub>W</sub></span> e <span class="mono">S²<sub>B</sub></span> são as variâncias do número de descendentes dentro e entre subpopulações.</p>
+
+  <div class="callout">
+    <p><b>A intervenção de melhor custo-benefício em manejo de germoplasma.</b> Com contribuições iguais (<span class="mono">S²<sub>W</sub> = S²<sub>B</sub> = 0</span>), a equação dá <span class="mono">N<sub>e</sub> ≈ 2Nn/(1 − F<sub>IT</sub>)</span> — cerca do <b>dobro</b> do N<sub>e</sub> obtido com contribuições aleatórias.</p>
+    <p>Ou seja: colher o mesmo número de sementes de cada planta e o mesmo número de plantas de cada família <b>dobra o tamanho efetivo</b>. Sem custo, sem genotipagem, sem tecnologia. O oposto — colher a granel de um talhão, o que amostra desproporcionalmente as plantas mais produtivas — inflaciona S²<sub>W</sub> e derruba N<sub>e</sub>.</p>
+  </div>
+</section>
+
+<!-- ================= 11 WEITZMAN ================= -->
+<section id="weitzman">
+  <hr class="sec">
+  <h2><span class="num">11</span>Por que o método de Weitzman falha dentro da espécie</h2>
+
+  <div class="tw">
+  <table>
+    <thead><tr><th style="width:45%">Problema</th><th>Consequência</th></tr></thead>
+    <tbody>
+      <tr><td>Usa apenas distâncias entre grupos</td><td>Ignora GD<sub>WS</sub>, que é 80–95 % de GD<sub>T</sub> em alógamas</td></tr>
+      <tr><td>Remover um elemento sempre "reduz" a diversidade, por construção</td><td>Impossível detectar acessos redundantes ou fixados</td></tr>
+      <tr><td>Não considera N<sub>i</sub> nem N<sub>e,i</sub></td><td>Um acesso com N<sub>e</sub> = 13 é tratado como um com N<sub>e</sub> = 32.686</td></tr>
+      <tr><td>Interpretação filogenética exige isolamento e evolução independente</td><td>Falso em espécies domesticadas, com fluxo constante entre pools</td></tr>
+      <tr><td>Não se conecta a H<sub>e</sub> de Nei</td><td>Não há como ligar a decisão a N<sub>e</sub>, a deriva, ou à variância aditiva esperada</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>A ressalva honesta — que o artigo faz e o melhorista deve levar a sério</h3>
+  <p>Critérios baseados em variação intrapopulacional tendem a <b>favorecer sistematicamente as populações maiores</b>. O critério de coancestria pode empurrar um banco em direção ao material elite e abundante, o oposto do objetivo de conservação. Além disso:</p>
+  <ul>
+    <li>Marcadores neutros não medem valor adaptativo, resistência, tolerância a estresse nem valor cultural. Um acesso fixado pode carregar o único alelo de resistência a uma ferrugem emergente.</li>
+    <li><b>Riqueza alélica</b> é mais sensível a gargalos do que heterozigosidade e costuma ser o critério mais relevante para pré-melhoramento. O argumento de que minimizar a coancestria média maximiza o número efetivo de alelos é válido assintoticamente, mas não protege alelos raros no curto prazo.</li>
+    <li>Chaiwong &amp; Kinghorn (1999) pesaram a variação entre grupos 5× mais que a de dentro. É arbitrário, mas reconhece o problema. Solução mais defensável: otimizar <span class="mono">c</span> com pisos mínimos por acesso, em vez de mexer nos pesos.</li>
+  </ul>
+
+  <div class="flag">
+    <span class="ft">Regra prática</span>
+    <p>Use a coancestria global para decidir <b>proporções e esforço de regeneração</b>. Nunca a use sozinha para decidir <b>descarte</b>. Custo de armazenar semente é baixo; extinção é irreversível.</p>
+  </div>
+</section>
+
+<!-- ================= 12 EXEMPLO ================= -->
+<section id="exemplo">
+  <hr class="sec">
+  <h2><span class="num">12</span>Exemplo numérico verificado</h2>
+  <p class="lede">4 subpopulações (N = 12, 4, 8, 6), 3 locos com 5, 3 e 3 alelos. Todos os valores foram recomputados a partir dos genótipos da Tabela 1 do artigo.</p>
+
+  <div class="tw">
+  <table>
+    <thead><tr><th></th><th class="n">Sub 1</th><th class="n">Sub 2</th><th class="n">Sub 3</th><th class="n">Sub 4</th></tr></thead>
+    <tbody>
+      <tr><td>Sub 1</td><td class="n"><b>0,3391</b></td><td class="n">0,3021</td><td class="n">0,2535</td><td class="n">0,3229</td></tr>
+      <tr><td>Sub 2</td><td class="n">0,3050</td><td class="n"><b>0,8750</b></td><td class="n">0,3073</td><td class="n">0,3889</td></tr>
+      <tr><td>Sub 3</td><td class="n">0,1544</td><td class="n">0,3685</td><td class="n"><b>0,4766</b></td><td class="n">0,2483</td></tr>
+      <tr><td>Sub 4</td><td class="n">0,0318</td><td class="n">0,2338</td><td class="n">0,1752</td><td class="n"><b>0,3704</b></td></tr>
+    </tbody>
+    <caption>Diagonal e acima: coancestria f<sub>ij</sub>. Abaixo da diagonal: distância mínima de Nei <b>D</b><sub>ij</sub>.</caption>
+  </table>
+  </div>
+
+  <div class="tw">
+  <table>
+    <thead><tr><th>Sub</th><th class="n">F<sub>i</sub></th><th class="n">s<sub>i</sub></th><th class="n">α<sub>i</sub></th><th class="n">G<sub>i</sub></th><th class="n">Contribuição a <span class="ovl">f</span></th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td class="n">0,3056</td><td class="n">0,6528</td><td class="n">−0,0508</td><td class="n">0,4746</td><td class="n">0,1356 − 0,0352 = 0,1004</td></tr>
+      <tr><td>2</td><td class="n">0,8333</td><td class="n">0,9167</td><td class="n">−0,3333</td><td class="n">0,3333</td><td class="n">0,1167 − 0,0356 = 0,0811</td></tr>
+      <tr><td>3</td><td class="n">0,2917</td><td class="n">0,6458</td><td class="n">−0,3532</td><td class="n">0,3234</td><td class="n">0,1271 − 0,0389 = 0,0882</td></tr>
+      <tr><td>4</td><td class="n">0,5000</td><td class="n">0,7500</td><td class="n">+0,2059</td><td class="n">0,6029</td><td class="n">0,0741 − 0,0182 = 0,0559</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p class="mono" style="font-size:.83rem;line-height:1.9;background:var(--paper-2);padding:1rem 1.2rem;border-left:3px solid var(--rule)">
+    <span class="til">f</span> = 0,4535 &nbsp;·&nbsp; <span class="til">F</span> = 0,4111 &nbsp;·&nbsp; <span class="til">s</span> = 0,7056 &nbsp;·&nbsp; <span class="ovl">D</span> = 0,1279 &nbsp;·&nbsp; <span class="ovl">f</span> = 0,3256<br>
+    F<sub>IS</sub> = −0,0775 &nbsp;·&nbsp; F<sub>ST</sub> = 0,1897 &nbsp;·&nbsp; F<sub>IT</sub> = 0,1268<br>
+    GD<sub>T</sub> = 0,6744 &nbsp;·&nbsp; GD<sub>WI</sub> = 0,2944 (43,7 %) &nbsp;·&nbsp; GD<sub>BI</sub> = 0,2521 (37,4 %) &nbsp;·&nbsp; GD<sub>BS</sub> = 0,1279 (19,0 %)<br>
+    c ótimo = (0,522; 0,000; 0,270; 0,208) &nbsp;→&nbsp; GD<sub>T</sub> = 0,6874
+  </p>
+
+  <div class="flag">
+    <span class="ft">Duas erratas detectadas na verificação</span>
+    <p><b>Tipográfica.</b> A Tabela 2b lista F<sub>2</sub> = 0,8383, mas F<sub>i</sub> = 2s<sub>i</sub> − 1 = 2(0,9167) − 1 = 0,8333. Todos os demais valores das Tabelas 2 e 3 foram reproduzidos exatamente.</p>
+    <p><b>Conceitual.</b> Na Discussão, o texto afirma que contribuições iguais são necessárias "para minimizar o tamanho efetivo" e "maximizar a coancestria média". Está invertido — a Equação 15 e todo o argumento do artigo mostram o oposto: contribuições iguais <b>maximizam</b> N<sub>e</sub> e <b>minimizam</b> a coancestria.</p>
+  </div>
+</section>
+
+<!-- ================= 13 CÓDIGO ================= -->
+<section id="codigo">
+  <hr class="sec">
+  <h2><span class="num">13</span>Implementação em R</h2>
+  <p>Validado contra as Tabelas 2 e 3 do artigo. Com <i>n</i> subpopulações e <i>m</i> locos o custo é O(<i>nm</i>) para as frequências e O(<i>n</i>²<i>m</i>) para a matriz de coancestria — trivial mesmo com m = 10⁶, desde que se use <code>tcrossprod()</code> (BLAS) e se evite a Equação 13. Rcpp só se justifica para a matriz indivíduo × indivíduo.</p>
+
+<pre><span class="c"># =====================================================================
+#  Diversidade genética em populações subdivididas
+#  Caballero &amp; Toro (2002) Conservation Genetics 3:289-299
+#  Implementação vetorizada para painéis de marcadores biálicos (SNP)
+# =====================================================================</span>
+
+<span class="c">#' @param G   matriz n_ind x n_loci, dosagem do alelo de referência (0/1/2)
+#' @param pop vetor com o rótulo da subpopulação de cada indivíduo</span>
+<span class="f">gd_partition</span> &lt;- <span class="k">function</span>(G, pop, weights = <span class="k">c</span>(<span class="s">"census"</span>, <span class="s">"equal"</span>)) {
+
+  weights &lt;- <span class="f">match.arg</span>(weights)
+  pop  &lt;- <span class="f">as.factor</span>(pop); pops &lt;- <span class="f">levels</span>(pop)
+  n    &lt;- <span class="f">length</span>(pops); m &lt;- <span class="f">ncol</span>(G)
+  P    &lt;- G / 2                              <span class="c"># dosagem por indivíduo</span>
+
+  <span class="c">## frequências alélicas por subpopulação  (Eq. 10)</span>
+  Pbar &lt;- <span class="f">t</span>(<span class="f">vapply</span>(pops, <span class="k">function</span>(k)
+            <span class="f">colMeans</span>(P[pop == k, , drop = <span class="k">FALSE</span>], na.rm = <span class="k">TRUE</span>), <span class="f">numeric</span>(m)))
+  <span class="f">rownames</span>(Pbar) &lt;- pops
+  Q &lt;- 1 - Pbar
+
+  <span class="c">## coancestria entre subpopulações  (Eq. 11)  f_ij = mean_loci(p_i p_j + q_i q_j)</span>
+  f &lt;- (<span class="f">tcrossprod</span>(Pbar) + <span class="f">tcrossprod</span>(Q)) / m
+  <span class="f">dimnames</span>(f) &lt;- <span class="f">list</span>(pops, pops)
+
+  <span class="c">## auto-coancestria (Eq. 12) e endogamia molecular</span>
+  s &lt;- <span class="f">vapply</span>(pops, <span class="k">function</span>(k) {
+         Pk &lt;- P[pop == k, , drop = <span class="k">FALSE</span>]
+         <span class="f">mean</span>(<span class="f">rowMeans</span>(Pk^2 + (1 - Pk)^2, na.rm = <span class="k">TRUE</span>))
+       }, <span class="f">numeric</span>(1))
+  Fi &lt;- 2 * s - 1
+
+  <span class="c">## distância mínima de Nei (Eq. 3) -- identidade exata, evita a Eq. 13 O(N^2)</span>
+  fii &lt;- <span class="f">diag</span>(f)
+  D   &lt;- <span class="f">outer</span>(fii, fii, <span class="s">"+"</span>) / 2 - f
+
+  Ni &lt;- <span class="f">as.numeric</span>(<span class="f">table</span>(pop)[pops])
+  w  &lt;- <span class="k">if</span> (weights == <span class="s">"census"</span>) Ni / <span class="f">sum</span>(Ni) <span class="k">else</span> <span class="f">rep</span>(1 / n, n)
+
+  <span class="c">## médias da metapopulação (Eq. 1, 4, 5)</span>
+  f_til &lt;- <span class="f">sum</span>(w * fii); s_til &lt;- <span class="f">sum</span>(w * s); F_til &lt;- <span class="f">sum</span>(w * Fi)
+  f_bar &lt;- <span class="f">as.numeric</span>(<span class="f">t</span>(w) %*% f %*% w)      <span class="c"># coancestria GLOBAL</span>
+  D_bar &lt;- <span class="f">as.numeric</span>(<span class="f">t</span>(w) %*% D %*% w)
+
+  <span class="c">## desvio de HW e proporção entre indivíduos (Eq. 2)</span>
+  alpha &lt;- (Fi - fii) / (1 - fii)
+  Gi    &lt;- (s  - fii) / (1 - fii)
+
+  <span class="c">## estatísticas F (Eq. 6) e partição da diversidade (Eq. 7)</span>
+  F_IS &lt;- (F_til - f_til) / (1 - f_til)
+  F_ST &lt;- D_bar / (1 - f_bar)
+  F_IT &lt;- (F_til - f_bar) / (1 - f_bar)
+  GD   &lt;- <span class="k">c</span>(GD_T = 1 - f_bar, GD_WI = 1 - s_til, GD_BI = s_til - f_til,
+            GD_WS = 1 - f_til, GD_BS = f_til - f_bar)
+
+  <span class="c">## contribuição de cada subpop a f_bar (Eq. 5, forma decomposta)</span>
+  contrib &lt;- <span class="f">data.frame</span>(pop = pops, N = Ni, f_ii = fii, He = 1 - fii,
+                s_i = s, F_i = Fi, alpha_i = alpha, G_i = Gi,
+                termo_coanc = w * fii,
+                termo_dist  = w * <span class="f">as.numeric</span>(D %*% w), row.names = <span class="k">NULL</span>)
+  contrib$contrib_fbar &lt;- contrib$termo_coanc - contrib$termo_dist
+
+  <span class="f">list</span>(f = f, D_nei = D, w = w, por_subpop = contrib,
+       globais = <span class="k">c</span>(f_til = f_til, F_til = F_til, s_til = s_til,
+                   D_bar = D_bar, f_bar = f_bar,
+                   F_IS = F_IS, F_ST = F_ST, F_IT = F_IT),
+       diversidade = GD)
+}
+
+
+<span class="c">#' Perda (-) ou ganho (+) de diversidade ao remover cada subpopulação</span>
+<span class="f">loss_gain</span> &lt;- <span class="k">function</span>(res, weights = <span class="k">c</span>(<span class="s">"census"</span>, <span class="s">"equal"</span>)) {
+  weights &lt;- <span class="f">match.arg</span>(weights)
+  f &lt;- res$f; Ni &lt;- res$por_subpop$N; n &lt;- <span class="f">nrow</span>(f)
+  wf &lt;- <span class="k">function</span>(idx) {
+    w &lt;- <span class="k">if</span> (weights == <span class="s">"census"</span>) Ni[idx]/<span class="f">sum</span>(Ni[idx]) <span class="k">else</span> <span class="f">rep</span>(1/<span class="f">length</span>(idx), <span class="f">length</span>(idx))
+    <span class="f">as.numeric</span>(<span class="f">t</span>(w) %*% f[idx, idx, drop = <span class="k">FALSE</span>] %*% w)
+  }
+  GD_full &lt;- 1 - <span class="f">wf</span>(<span class="f">seq_len</span>(n))
+  out &lt;- <span class="f">vapply</span>(<span class="f">seq_len</span>(n), <span class="k">function</span>(k) {
+    GD_k &lt;- 1 - <span class="f">wf</span>(<span class="f">setdiff</span>(<span class="f">seq_len</span>(n), k))
+    <span class="k">c</span>(GD_sem_i = GD_k, delta_pct = 100 * (GD_k - GD_full) / GD_full)
+  }, <span class="f">numeric</span>(2))
+  <span class="f">data.frame</span>(pop = <span class="f">rownames</span>(f), <span class="f">t</span>(out), row.names = <span class="k">NULL</span>)
+}
+
+
+<span class="c">#' Contribuições ótimas c_i que maximizam a diversidade do pool (Eq. 9)
+#' Programação quadrática:  min c'Fc   s.a.  sum(c) = 1,  lower &lt;= c &lt;= upper</span>
+<span class="f">optimal_contributions</span> &lt;- <span class="k">function</span>(f, lower = 0, upper = 1, ridge = 1e-8) {
+  n    &lt;- <span class="f">nrow</span>(f)
+  Dmat &lt;- 2 * (f + <span class="f">diag</span>(ridge, n))              <span class="c"># ridge garante definida positiva</span>
+  Amat &lt;- <span class="f">cbind</span>(<span class="f">rep</span>(1, n), <span class="f">diag</span>(n), -<span class="f">diag</span>(n))
+  bvec &lt;- <span class="k">c</span>(1, <span class="f">rep</span>(lower, n), <span class="f">rep</span>(-upper, n))
+  sol  &lt;- quadprog::<span class="f">solve.QP</span>(Dmat, <span class="f">rep</span>(0, n), Amat, bvec, meq = 1)
+  ci   &lt;- <span class="f">pmax</span>(sol$solution, 0); ci &lt;- ci / <span class="f">sum</span>(ci)
+  <span class="f">list</span>(c_i = <span class="f">setNames</span>(<span class="f">round</span>(ci, 6), <span class="f">rownames</span>(f)),
+       GD_max = <span class="f">as.numeric</span>(1 - <span class="f">t</span>(ci) %*% f %*% ci))
+}
+
+
+<span class="c">#' Seleção com contribuição ótima (OCS):  max  c'g - lambda * c'Fc</span>
+<span class="f">ocs</span> &lt;- <span class="k">function</span>(f, gebv, lambda = 1, lower = 0, upper = 1) {
+  n    &lt;- <span class="f">nrow</span>(f)
+  Dmat &lt;- 2 * lambda * (f + <span class="f">diag</span>(1e-8, n))
+  Amat &lt;- <span class="f">cbind</span>(<span class="f">rep</span>(1, n), <span class="f">diag</span>(n), -<span class="f">diag</span>(n))
+  bvec &lt;- <span class="k">c</span>(1, <span class="f">rep</span>(lower, n), <span class="f">rep</span>(-upper, n))
+  sol  &lt;- quadprog::<span class="f">solve.QP</span>(Dmat, <span class="f">as.numeric</span>(gebv), Amat, bvec, meq = 1)
+  ci   &lt;- <span class="f">pmax</span>(sol$solution, 0); ci &lt;- ci / <span class="f">sum</span>(ci)
+  <span class="f">list</span>(c_i = <span class="f">setNames</span>(<span class="f">round</span>(ci, 6), <span class="f">rownames</span>(f)),
+       merito      = <span class="f">as.numeric</span>(<span class="f">crossprod</span>(ci, gebv)),
+       coancestria = <span class="f">as.numeric</span>(<span class="f">t</span>(ci) %*% f %*% ci))
+}
+
+<span class="c"># ---------------------------------------------------------------------
+# Uso típico
+# ---------------------------------------------------------------------
+# res &lt;- gd_partition(G_snp, acesso)
+# res$diversidade; res$globais["F_ST"]
+# res$por_subpop[order(res$por_subpop$contrib_fbar, decreasing = TRUE), ]
+# loss_gain(res)
+# optimal_contributions(res$f, upper = 0.20)      # teto operacional de 20%
+#
+# Fronteira mérito x diversidade:
+# fronteira &lt;- do.call(rbind, lapply(10^seq(-2, 3, length = 40), function(l) {
+#   o &lt;- ocs(res$f, gebv, lambda = l); data.frame(l, o$merito, o$coancestria)
+# }))</span></pre>
+</section>
+
+<!-- ================= 14 ROTEIRO ================= -->
+<section id="roteiro">
+  <hr class="sec">
+  <h2><span class="num">14</span>Roteiro de decisão para um programa</h2>
+  <ol class="steps">
+    <li><b>Genotipe</b> com painel sem viés de averiguação para o material-alvo; codifique 0/1/2.</li>
+    <li><b>Defina as subpopulações honestamente</b> — acessos, landraces, grupos heteróticos, ciclos. A partição é sensível a essa definição: o "S" de F<sub>ST</sub> é uma escolha sua, não um dado.</li>
+    <li><b>Calcule a partição.</b> F<sub>ST</sub> baixo (&lt; 0,10) → a diversidade está dentro dos acessos: priorize N por acesso na regeneração. F<sub>ST</sub> alto → priorize número de acessos.</li>
+    <li><b>Rode o leave-one-out.</b> Acessos com contribuição positiva grande à coancestria (alto f<sub>ii</sub>, baixa distância) são candidatos a regeneração com N ampliado, não a descarte.</li>
+    <li><b>Resolva a QP com restrições operacionais</b> para compor a coleção nuclear ou a população-base.</li>
+    <li><b>Na recombinação, iguale contribuições.</b> Dobra o N<sub>e</sub> de graça.</li>
+    <li><b>Cruze com informação não-neutra</b> antes de qualquer descarte: fenótipos, resistências, dados de passaporte, valor cultural. A métrica ordena prioridades; ela não decide sozinha.</li>
+  </ol>
+</section>
+
+<!-- ================= 15 REFS ================= -->
+<section id="refs">
+  <hr class="sec">
+  <h2><span class="num">15</span>Referências essenciais</h2>
+  <ul style="font-size:.94rem">
+    <li><b>Caballero A &amp; Toro MA (2002)</b> Analysis of genetic diversity for the management of conserved subdivided populations. <i>Conservation Genetics</i> 3:289–299. — artigo base</li>
+    <li>Caballero A &amp; Toro MA (2000) Interrelations between effective population size and other pedigree tools. <i>Genet Res</i> 75:331–343.</li>
+    <li>Nei M (1973) Analysis of gene diversity in subdivided populations. <i>PNAS</i> 70:3321–3323.</li>
+    <li>Cockerham CC (1967) Group inbreeding and coancestry. <i>Genetics</i> 56:89–104.</li>
+    <li>Wang J &amp; Caballero A (1999) Developments in predicting the effective size of subdivided populations. <i>Heredity</i> 82:212–226.</li>
+    <li>Wray NR &amp; Thompson R (1990) Predictions of rates of inbreeding in selected populations. <i>Genet Res</i> 55:41–54.</li>
+    <li>Meuwissen THE (1997) Maximizing the response of selection with a predefined rate of inbreeding. <i>J Anim Sci</i> 75:934–940. — extensão natural da Eq. 9 para OCS</li>
+    <li>Petit RJ, El Mousadik A &amp; Pons O (1998) Identifying populations for conservation on the basis of genetic markers. <i>Conserv Biol</i> 12:844–855. — riqueza alélica</li>
+  </ul>
+</section>
+
+</main>
+</div>
+
+<footer>
+  <div>
+    <b>Leitura anotada de Caballero &amp; Toro (2002)</b> com foco em melhoramento de plantas.<br>
+    Todos os valores das Tabelas 2 e 3 foram recomputados a partir dos genótipos da Tabela 1 e conferem — com duas erratas do original registradas na Seção 12.
+  </div>
+</footer>
+
+</body>
+</html>

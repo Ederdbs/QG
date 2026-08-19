@@ -45,9 +45,11 @@ $fL       (optional) coancestry BETWEEN LINES — only enables theta_A/theta_B/t
   traits, fL)` for real data (accepts 0/1/2 or 0/0.5/1 marker coding, auto-detects and rescales).
 - **Stage 2** (`R/11_stage2.R`): `stage2_select(X, f, hybrids, n_sel, alphas, weights, fL)` runs
   the full pipeline — null distribution, attainable alpha ceiling, DE per alpha scenario, metrics
-  — and returns `$selection` (0/1 columns per scenario), `$metrics` (one row per scenario), `$ref`.
+  — and returns `$selection` (0/1 columns per scenario), `$metrics` (one row per scenario),
+  `$z_scores` (each metric in s.d. from the random null), and `$ref`.
 - Both stages rebuild an internal `ctx` list (`build_ctx` / `build_ctx_from_stage1`) that all
-  metric and selection functions take as their second argument.
+  metric and selection functions take as their second argument. It carries `p0` (frozen
+  candidate-pool allele frequencies) and `maf_pop`; both constructors must stay in sync.
 
 To point this at real data, only `load_data()` in `R/00_data.R` and the `stage1_build()` call
 need to change — everything else operates on `ctx`/`X`/`f`/`hybrids` and is agnostic to origin.
@@ -69,7 +71,21 @@ need to change — everything else operates on `ctx`/`X`/`f`/`hybrids` and is ag
 - **All diversity metrics share the signature `f(idx, ctx) -> scalar`** (`R/01_metrics.R`).
   `metrics_cheap()` is safe to call thousands of times (null distribution, DE fitness);
   `metrics_full()` adds expensive ones (eigendecomposition, full marker sweep) — post-hoc only,
-  never inside the DE fitness loop.
+  never inside the DE fitness loop. `freq_metrics()` is the single marker sweep: everything
+  needing `colMeans(X[idx, ])` goes in there, not in a new function with its own sweep.
+- **Two lenses, deliberately asymmetric.** `theta`/`GD`/`alpha` are the *homozygosity* lens and
+  the only thing the DE constrains — that is Meuwissen et al. (2020)'s `G_0.5` scheme. `F_drift`
+  is the lens the constraint does NOT pin, and `cov_diag` is exactly the gap between them
+  (their Eq. 3, asserted in `tests/`). Drift is `O(n*m)`, so it stays post-hoc: do not move it
+  into `metrics_cheap` or the DE fitness. Both are anchored on `ctx$p0`, the frozen
+  candidate-pool frequencies — never recompute a base per scenario.
+- **`gd_partition()` splits `GD_T` into `GD_WI + GD_BI + GD_BS`** (Caballero & Toro 2002 Eq. 8)
+  over the heterotic pools. `GD_BS` is between-pool divergence — the heterosis engine, to be
+  *preserved*, not minimised. With inbred parent lines `GD_WI == 0` exactly; the hybrid-level
+  `GD_WI_hyb` is the one that carries signal and it needs no `fL`.
+- **Every metric is reported against the random-subset null** (`$z_scores`). `stage2_select()`
+  reuses `null_distribution()` and `discriminatory_power()` from `R/02_benchmark.R` — don't
+  reimplement a resampling loop there.
 - **DE encoding is continuous, not an N-key vector**: `n_sel` continuous values in `[1, N]`,
   decoded and repaired for duplicates (`decode()` in `R/03_de_select.R`). An N-dimensional
   0/1 encoding is infeasible for DE at this scale.

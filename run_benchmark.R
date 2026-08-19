@@ -15,6 +15,7 @@ cat("\n[1/5] null distribution...\n")
 null <- null_distribution(ctx, n_sel)
 gd_ref <- null$gd_ref
 gd_pop <- gene_diversity(seq_len(ctx$N), ctx)
+
 cat(sprintf("  GD population (N=%d) = %.5f\n", ctx$N, gd_pop))
 cat(sprintf("  GD mean of random subsets (n=%d) = %.5f (sd %.5f)\n",
             n_sel, gd_ref, null$gd_sd))
@@ -99,6 +100,8 @@ cat("\n--- Gain vs. alpha frontier ---\n"); print(round(front, 4))
 cat("\n--- Cost per evaluation (us) ---\n"); print(cost)
 cat("\n--- Discriminatory power (standard deviations from the null) ---\n")
 print(zz[, c("GD", "Ns", "offdiag", "Ne_parents", "ENE", "ANE", "eff_dim", "alleles_lost")])
+cat("\n--- The lens the alpha constraint does NOT pin ---\n")
+print(zz[, c("GD", "F_hom", "F_drift", "cov_diag", "rare_retained", "GD_BS", "F_ST")])
 
 keep <- apply(null$full, 2, sd) > 1e-10
 C <- cor(null$full[, keep])
@@ -108,3 +111,4 @@ cat(sprintf("cor(GD, offdiag) = %.4f   <- how much the current metric already ca
             C["GD", "offdiag"]))
 cat(sprintf("\nTotal time: %.1f min\n", as.numeric(difftime(Sys.time(), t0, units = "mins"))))
 cat("Outputs in report/\n")
+

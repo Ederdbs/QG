@@ -36,12 +36,23 @@ res <- stage2_select(
 
 write.csv(res$selection, "report/selection_by_scenario.csv", row.names = FALSE)
 write.csv(res$metrics, "report/metrics_by_scenario.csv", row.names = FALSE)
+write.csv(res$z_scores, "report/zscores_by_scenario.csv", row.names = FALSE)
 
 # --- Summary --------------------------------------------------------------------
 cat("\n=== Metrics per scenario ===\n")
 print(res$metrics[, c("scenario", "alpha", "index", "Ns", "Ne_parents",
                       "Ne_lines_A", "Ne_lines_B", "max_line", "alleles_lost")],
       digits = 4, row.names = FALSE)
+
+# The two lenses plus the pool partition. alpha only constrains the first one.
+cat("\n=== Diversity, both lenses ===\n")
+print(res$metrics[, c("scenario", "alpha", "F_hom", "F_drift", "cov_diag",
+                      "rare_retained", "GD_WI_hyb", "GD_BS", "F_ST")],
+      digits = 4, row.names = FALSE)
+
+cat("\n=== Distance from the random null (s.d.) ===\n")
+print(res$z_scores[, c("scenario", "z_GD", "z_Ne_parents", "z_F_drift",
+                       "z_rare_retained", "z_GD_BS", "z_ANE")], row.names = FALSE)
 
 scenarios <- setdiff(names(res$selection),
                      c(names(st1$hybrids), "n_scenarios"))
