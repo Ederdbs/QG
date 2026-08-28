@@ -1,0 +1,237 @@
+# Coancestry, and the two matrices {#sec-coancestry}
+
+```{r}
+#| include: false
+source("_common.R")
+```
+
+Two matrices are built from the same marker data and they are not
+interchangeable. One predicts traits. The other measures diversity. Using the
+first for the second is the most consequential mistake available in this
+subject, and it fails silently -- it returns a number, and the number is
+meaningless.
+
+This chapter builds both, shows the failure, and derives the matrix used for
+the rest of the book.
+
+## From line to hybrid
+
+Let $\mathbf{M}^{L}$ be the $L \times m$ matrix of line genotypes, with
+$M^{L}_{ik} \in \{0, 2\}$ the count of the reference allele at marker $k$.
+Inbred lines are homozygous, so the value 1 never occurs -- residual
+heterozygotes must be imputed or discarded beforehand.
+
+The F1 hybrid between lines $a$ and $b$ receives one gamete from each parent.
+Since both parents are homozygous, the gamete from $a$ carries $M^{L}_{ak}/2$
+copies of the reference allele, so
+
+$$
+M^{H}_{(ab)k} \;=\; \frac{M^{L}_{ak} + M^{L}_{bk}}{2} \;\in\; \{0, 1, 2\}.
+$$
+
+The value 1 appears exactly at markers where the two lines differ. Those are
+the hybrid's heterozygous loci, and they are the ones carrying heterosis.
+
+Predicting the hybrid's *genotype* is deterministic, not statistical. It is the
+one piece of information in the whole pipeline that requires no assumption at
+all -- unlike its phenotype, which requires a great many.
+
+From here on we work with the **within-individual reference-allele frequency**,
+
+$$
+x_{ik} \;=\; \frac{M^{H}_{ik}}{2} \;\in\; \{0,\; 0.5,\; 1\},
+$$
+
+which is the natural quantity for coancestry: it is the probability that an
+allele drawn at random from individual $i$ at marker $k$ is the reference
+allele.
+
+```{r}
+ctx <- simulate_data(book_cfg)
+ctx$X[1:4, 1:8]
+```
+
+Rows are hybrids, columns markers. A 0.5 is a heterozygous locus.
+
+## The VanRaden matrix, and why it cannot measure diversity {#sec-why-not-g}
+
+With $p_k$ the reference-allele frequency in the hybrid population and
+$\mathbf{Z} = \mathbf{M}^{H} - \mathbf{1}\,2\mathbf{p}'$ the centered matrix,
+
+$$
+\mathbf{G} \;=\; \frac{\mathbf{Z}\mathbf{Z}'}{2\sum_{k} p_k (1-p_k)}.
+$$
+
+This is VanRaden's first parametrisation. It estimates realised additive
+relationship and it is the right matrix for GBLUP. It is implemented as
+`vanraden_G()`:
+
+```{r}
+#| file: !expr file.path("..", "R", "00_data.R")
+#| eval: false
+#| echo: false
+```
+
+```{r}
+args(vanraden_G)
+```
+
+Now the failure. Centering on $2\mathbf{p}$ uses frequencies from the
+population itself, so every column of $\mathbf{Z}$ sums to zero:
+
+$$
+\mathbf{Z}'\mathbf{1} = \mathbf{0}
+\quad\Longrightarrow\quad
+\mathbf{1}'\mathbf{G}\mathbf{1}
+\;=\; \frac{\lVert \mathbf{Z}'\mathbf{1}\rVert^2}{2\sum_k p_k q_k}
+\;=\; 0 .
+$$
+
+The sum of **all** elements of $\mathbf{G}$ is identically zero. Group
+coancestry is proportional to that sum, so it is zero for the whole population,
+and the status number $N_s = 1/(2\theta)$ diverges:
+
+```{r}
+c(sum_G      = sum(ctx$G),
+  theta_on_G = mean(ctx$G) / 2,
+  Ns_on_G    = 1 / (2 * mean(ctx$G) / 2))
+```
+
+That is not a rounding artefact to be worked around. It is exact, and it is
+what centering means. In a *subset* the sum is not zero, but the quantity is
+still centered: it oscillates around zero, takes negative values, is not a
+probability, and admits no identity-by-descent interpretation.
+
+::: {.callout-important}
+## The root cause is the implicit base population
+
+$\mathbf{G}$ measures relatedness *relative to the current population*.
+Diversity requires an *absolute* scale. Any matrix whose centering constant is
+estimated from the same data whose diversity you are measuring will have this
+problem, whatever it is called.
+:::
+
+## Molecular coancestry {#sec-f-molecular}
+
+Malécot's coancestry between $i$ and $j$ is the probability that two randomly
+sampled alleles, one from each individual at the same locus, are identical.
+Replacing identity *by descent* with identity *by state* -- which is what
+markers actually observe -- yields molecular coancestry
+[@caballero2002; @caballero2000]:
+
+$$
+f_{ij} \;=\; \frac{1}{m}\sum_{k=1}^{m}
+\Big[\, x_{ik}\,x_{jk} \;+\; (1-x_{ik})(1-x_{jk}) \,\Big].
+$$
+
+The first term is the probability that both sampled alleles are the reference
+allele; the second, that both are the alternative. Three properties follow
+immediately:
+
+- $f_{ij} \in [0, 1]$ always. **A negative value is a symptom of the wrong
+  matrix.**
+- Self-coancestry is $f_{ii} = (1 + F_i)/2$, with $F_i$ the individual's
+  molecular homozygosity. For a fully heterozygous F1, $f_{ii} = 0.5$.
+- No centering, no scaling, no arbitrary base population.
+
+### Computable form
+
+The double sum is $O(n^2 m)$ if computed naively. Expanding,
+
+$$
+\sum_k \big[x_{ik}x_{jk} + (1-x_{ik})(1-x_{jk})\big]
+= 2\sum_k x_{ik}x_{jk} \;-\; \sum_k x_{ik} \;-\; \sum_k x_{jk} \;+\; m,
+$$
+
+so with $\mathbf{s} = \mathbf{X}\mathbf{1}$ the row sums,
+
+$$
+\mathbf{f} \;=\; \frac{1}{m}\Big( 2\,\mathbf{X}\mathbf{X}'
+\;-\; \mathbf{s}\mathbf{1}' \;-\; \mathbf{1}\mathbf{s}' \;+\; m\,\mathbf{J} \Big),
+$$
+
+a single matrix product -- the same cost as building $\mathbf{G}$.
+
+```{r}
+molecular_coancestry
+```
+
+```{r}
+fmt(c(minimum       = min(ctx$f),
+      maximum       = max(ctx$f),
+      diagonal_mean = mean(diag(ctx$f)),
+      offdiag_mean  = mean(ctx$f[upper.tri(ctx$f)])))
+```
+
+Everything is inside $[0, 1]$, as it must be.
+
+### Reading the diagonal
+
+The value 0.5 is the floor of the diagonal, reached by a hybrid heterozygous at
+*every* marker. The excess above 0.5 measures exactly the fraction of markers
+at which the two parent lines carry the same allele -- loci where the F1 is
+homozygous and therefore contributes nothing to heterosis.
+
+```{r}
+fd <- mean(diag(ctx$f))
+fmt(c(diagonal_mean         = fd,
+      molecular_F           = 2 * fd - 1,     # f_ii = (1 + F_i) / 2
+      heterozygous_fraction = 2 * (1 - fd)))
+```
+
+This fraction depends directly on the divergence between the heterotic pools
+(`fst` in the configuration): more divergent pools give more heterozygous F1
+hybrids and a diagonal closer to 0.5. That relationship is what
+@sec-simulating-crosses puts under experimental control.
+
+## `f` is not an ad hoc substitute
+
+Two independent lines of work converge on this matrix, which is worth stating
+because it is otherwise easy to read $\mathbf{f}$ as "the thing we used because
+$\mathbf{G}$ broke".
+
+Nejati-Javaremi et al. [-@nejatijavaremi1997] proposed the *allelic-similarity*
+method, $f_{ij} = \tfrac{1}{4}\sum_{k=1}^{2}\sum_{l=1}^{2}\delta_{kl}$ with
+$\delta_{kl} = 1$ when the $k$-th allele of $i$ equals the $l$-th of $j$. That
+is exactly the identity-by-state average above, generalised from single loci to
+a genome-wide mean. @gomezromano2016 contrast it directly against
+crossproduct-based matrices: the allelic-similarity matrix is guaranteed to stay
+in $[0, 1]$ by construction, while crossproduct matrices normalised by *current*
+allele frequencies are not -- precisely the failure demonstrated above.
+
+The same matrix arrives from a second direction. @toro2014 and @meuwissen2020
+show that fixing the VanRaden centering frequency at $p_k = 0.5$ for every
+marker, instead of the sample frequency, produces a matrix -- written
+$\mathbf{G}_{0.5}$ -- that is proportional to homozygosity-based inbreeding and
+molecular coancestry. Structurally that is $\mathbf{f}$: replacing $2p_k$ with
+$1$ removes the population-dependent term that forced
+$\mathbf{1}'\mathbf{G}\mathbf{1} = 0$.
+
+So $\mathbf{f}$ is the member of the VanRaden family that has an absolute scale,
+reached independently from two unrelated derivations. That it also happens to be
+the one that does not break is not a coincidence.
+
+## The division of labour
+
+```{r}
+#| echo: false
+knitr::kable(
+  data.frame(
+    Matrix = c("`G` (VanRaden)", "`f` (molecular coancestry)"),
+    Centering = c("sample allele frequencies", "none"),
+    Range = c("centered, signed", "[0, 1]"),
+    `Sum of all elements` = c("exactly 0", "positive, informative"),
+    Use = c("trait prediction (GBLUP)", "every diversity quantity"),
+    check.names = FALSE
+  ),
+  caption = "Two matrices, two jobs. They are built from the same markers and must not be substituted for one another."
+)
+```
+
+This split is enforced throughout `hybdiv`: every metric takes `ctx$f`, and
+`ctx$G` appears only where traits are predicted. The test suite asserts
+`sum(G) == 0` precisely so that a future change which silently starts feeding
+`G` to a diversity metric fails loudly.
+
+The next chapter takes $\mathbf{f}$ and asks what happens when the population it
+describes is not one population, but several.

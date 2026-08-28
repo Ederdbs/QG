@@ -1,0 +1,202 @@
+# Notation and glossary {#sec-notation}
+
+```{r}
+#| include: false
+source("_common.R")
+```
+
+## Symbols
+
+```{r}
+#| echo: false
+knitr::kable(data.frame(
+  Symbol = c("$N$", "$n$, $n_{sel}$", "$L$", "$m$", "$x_{ik}$",
+             "$\\mathbf{X}$", "$\\mathbf{M}$", "$\\mathbf{G}^L$",
+             "$p_k$, $\\bar p_k$", "$p_{0,k}$"),
+  Meaning = c("candidate hybrids in the pool",
+              "hybrids selected",
+              "parent lines",
+              "markers",
+              "within-individual reference-allele frequency of individual i at marker k, in 0/0.5/1",
+              "hybrid marker matrix, N x m",
+              "hybrid dosage matrix, 0/1/2",
+              "line genotype matrix, L x m, coded 0/1",
+              "allele frequency; the bar denotes a group mean",
+              "**frozen** candidate-pool allele frequency: the base"),
+  `In the code` = c("`ctx$N`", "`n_sel`", "`ctx$n_lines`", "`ctx$m`", "`ctx$X[i, k]`",
+                    "`ctx$X`", "-", "`ctx$GL`", "-", "`ctx$p0`"),
+  check.names = FALSE))
+```
+
+### Matrices
+
+```{r}
+#| echo: false
+knitr::kable(data.frame(
+  Symbol = c("$\\mathbf{f}$", "$\\mathbf{f}^L$", "$\\mathbf{G}$", "$\\mathbf{A}$",
+             "$\\mathbf{G}_{0.5}$"),
+  Meaning = c("molecular coancestry of the **hybrids**, N x N, in [0, 1]",
+              "molecular coancestry **between lines**, L x L",
+              "VanRaden genomic relationship, centered -- prediction only",
+              "pedigree relationship",
+              "VanRaden with the centering frequency fixed at 0.5"),
+  Note = c("the diversity kernel; never centered",
+           "the sufficient statistic in disguise -- see the collapse",
+           "sum of all elements is exactly 0; unusable for diversity",
+           "expectation of IBD, no markers",
+           "**this is f**, arrived at from the VanRaden family"),
+  check.names = FALSE))
+```
+
+### Coancestry and diversity
+
+```{r}
+#| echo: false
+knitr::kable(data.frame(
+  Symbol = c("$\\theta_S$", "$GD$, $H_e$", "$N_s$", "$N_{e,\\text{par}}$",
+             "$f_{ii}$", "$s_i$", "$\\tilde x$", "$\\bar x$"),
+  Definition = c("$n^{-2}\\sum_i\\sum_j f_{ij}$, diagonal **included**",
+                 "$1 - \\theta$; these are the same quantity",
+                 "$1/(2\\theta)$",
+                 "$1/\\sum_i p_i^2$ over parent-line usage",
+                 "coancestry within subpopulation i; $1 - f_{ii} = H_{e,i}$",
+                 "self-coancestry; $F_i = 2s_i - 1$",
+                 "weighted mean **within** subpopulations",
+                 "mean over **all pairs**, between-subpopulation pairs included"),
+  `Function` = c("`theta_group()`, `fast_theta()`", "`gene_diversity()`, `he_nei()`",
+                 "`status_number()`", "`ne_parents()`", "`ct_partition()`",
+                 "`ct_partition()`", "-", "-"),
+  check.names = FALSE))
+```
+
+Always $\bar f \le \tilde f \le \tilde s$. The differences between those three
+numbers *are* the partition of diversity.
+
+### The partition
+
+```{r}
+#| echo: false
+knitr::kable(data.frame(
+  Component = c("$GD_T$", "$GD_{WI}$", "$GD_{BI}$", "$GD_{WS}$", "$GD_{BS}$"),
+  Definition = c("$1 - \\bar f$", "$1 - \\tilde s$", "$\\tilde s - \\tilde f$",
+                 "$1 - \\tilde f$", "$\\tilde f - \\bar f$"),
+  Meaning = c("total", "within individuals", "between individuals, within subpopulation",
+              "within subpopulations", "between subpopulations"),
+  `In hybrid breeding` = c("the pool's diversity",
+                           "0 for inbred lines; use `GD_WI_hyb` for the F1s",
+                           "segregating variation available to selection",
+                           "what erodes -- defend it",
+                           "the heterosis engine -- **maintain**, do not maximise"),
+  check.names = FALSE))
+```
+
+with $GD_T = GD_{WI} + GD_{BI} + GD_{BS}$ and $F_{ST} = GD_{BS}/GD_T$.
+
+### Inbreeding, the three lenses
+
+```{r}
+#| echo: false
+knitr::kable(data.frame(
+  Symbol = c("$F_{hom}$", "$F_{drift}$", "$F_{IBD}$", "$F_{ROH}$", "$\\text{cov}$"),
+  Lens = c("homozygosity", "drift", "identity by descent", "hybrid", "-"),
+  Definition = c("$1 - \\overline{H_t/H_0}$; **can be negative**",
+                 "$\\overline{\\delta p^2 / [p_0(1-p_0)]}$; never negative",
+                 "segments inherited from a defined base",
+                 "genome fraction in runs of homozygosity",
+                 "$2\\,\\text{cov}(\\delta p/s,\\,(p_0 - \\tfrac12)/s) = F_{hom} - F_{drift}$"),
+  `Function` = c("`freq_metrics()`", "`freq_metrics()`", "requires pedigree + linkage",
+                 "not implemented", "`freq_metrics()$cov_diag`"),
+  check.names = FALSE))
+```
+
+### Selection and optimisation
+
+```{r}
+#| echo: false
+knitr::kable(data.frame(
+  Symbol = c("$u_i$", "$\\alpha$", "$\\alpha_{\\max}$", "$\\mathbf{c}$",
+             "$\\mathbf{w}$", "$k_a$", "$\\lambda$", "$\\sigma^2_{DH}$", "UC"),
+  Meaning = c("multi-trait index of hybrid i",
+              "$(GD_{\\text{ref}} - GD_S)/GD_{\\text{ref}}$; negative means more diverse than chance",
+              "the diversity budget -- a policy decision",
+              "continuous contributions, summing to 1",
+              "line-usage weights, $w_a = k_a/(2n)$",
+              "times line a is used as a parent",
+              "weight on the coancestry penalty in continuous OCS",
+              "progeny variance of a DH family",
+              "usefulness criterion, $\\mu + i h \\sigma$"),
+  `Function` = c("`ctx$index`", "`alpha_loss()`", "argument to `stage2_select()`",
+                 "`ocs_quadprog()`", "`line_weights()`, `line_usage_freq()`",
+                 "`line_counts()`", "`ocs_relaxation()`", "`sigma2_dh()`",
+                 "`usefulness_criterion()`"),
+  check.names = FALSE))
+```
+
+### Population sizing
+
+```{r}
+#| echo: false
+knitr::kable(data.frame(
+  Symbol = c("$H$", "$D$", "$N_{eq}$", "$L$ (Morgans)", "$A_t$", "$r$"),
+  Meaning = c("panel heterozygosity; 0.125 in an F4",
+              "diversity retained, $\\overline{2p(1-p)}/0.5$",
+              "$(1-H)/(1-D)$ -- a communication device, **not** a Wright Ne",
+              "total map length",
+              "junctions per haplotype at generation t",
+              "recombination fraction, Haldane"),
+  `Function` = c("`panel_het()`", "`diversity_retained()`", "`n_equivalent()`",
+                 "`map$total_cM / 100`", "`expected_junctions()`", "`build_map()`"),
+  check.names = FALSE))
+```
+
+## Conventions
+
+**Coancestry always includes the diagonal.** Group coancestry in the sense of
+Cockerham. That is what makes $1 - \theta$ exactly Nei's $H_e$ and makes the
+algebra close. Drop the diagonal and none of the identities hold.
+
+**Everything is computed per locus and then averaged over loci.** Never average
+frequencies first.
+
+**Marker coding.** Lines are 0/1 (or 0/2) because they are homozygous. Hybrids
+are 0/1/2 as dosage, rescaled to 0/0.5/1 as within-individual frequency.
+`stage1_build()` auto-detects and rescales.
+
+**`f` is never centered, `G` always is.** A negative coancestry is a symptom of
+the wrong matrix.
+
+**Loss is always relative to a same-size random baseline.** Never to the full
+pool.
+
+## Terms
+
+**Balding-Nichols model.** A Beta distribution with mean $p$ and variance
+$F_{ST}\,p(1-p)$, used to draw pool-specific allele frequencies from an
+ancestral frequency. The parameter *is* the expected divergence.
+
+**Group coancestry.** The probability that two alleles sampled at random from a
+whole set are identical in state, including the case of sampling the same
+individual twice.
+
+**Heterotic group / pool.** A set of lines maintained as a breeding unit,
+crossed to lines of a complementary group to produce hybrids. Divergence between
+groups is what generates heterosis.
+
+**Identity by state (IBS) vs by descent (IBD).** IBS is what markers observe:
+two alleles are the same allele. IBD adds the requirement of common ancestry
+from a defined base. The gap between them is where @sec-genomic-era's whole
+argument lives.
+
+**Line-level collapse.** The exact identity $\theta_S = \mathbf{w}'
+\mathbf{f}^L \mathbf{w}$ for F1 hybrids of homozygous lines, which removes the
+need for the $N \times N$ hybrid matrix. See @sec-collapse.
+
+**Status number.** $N_s = 1/(2\theta)$, the number of unrelated non-inbred
+individuals with the same gene diversity. A static descriptor.
+
+**Truncation selection.** Take the top $n$ by index, ignore everything else. The
+ceiling on gain and the floor on diversity.
+
+**Warm start.** Seeding an optimiser's initial population with heuristic
+solutions. Not optional here: without it the differential evolution finishes
+below a plain greedy.

@@ -1,4 +1,4 @@
-# STAGE 2 — optimized selection via differential evolution under a diversity constraint.
+# STAGE 2 -- optimized selection via differential evolution under a diversity constraint.
 #
 # Consumes the three objects from stage 1 and returns:
 #   $selection  data.frame N x (hybrids + one 0/1 column per scenario)
@@ -7,7 +7,17 @@
 #               random-subset null (a metric without a baseline says nothing)
 #   $ref        gd_ref, attainable alpha_max, n_sel
 
-# Rebuilds the ctx object the metric functions expect.
+#' Rebuild the evaluation context from the stage-1 contract
+#'
+#' Delegates to [build_ctx] so the two constructors cannot drift apart.
+#'
+#' @param X Hybrid marker matrix from [stage1_build].
+#' @param f Hybrid molecular coancestry matrix from [stage1_build].
+#' @param hybrids Hybrid table from [stage1_build].
+#' @param fL Optional line coancestry matrix.
+#' @param weights Trait weights, or `NULL` for equal weights.
+#' @return A `ctx` list, see [build_ctx].
+#' @export
 build_ctx_from_stage1 <- function(X, f, hybrids, fL = NULL, weights = NULL) {
   traits <- as.matrix(hybrids[, setdiff(names(hybrids),
                       c("hybrid", "line_A", "line_B")), drop = FALSE])
@@ -15,15 +25,43 @@ build_ctx_from_stage1 <- function(X, f, hybrids, fL = NULL, weights = NULL) {
   stopifnot(length(weights) == ncol(traits))
 
   ped <- data.frame(a = hybrids$line_A, b = hybrids$line_B)
-  n_lines <- max(ped$a, ped$b)
-  p_pop <- colMeans(X)
-
-  list(X = X, f = f, traits = traits, ped = ped, fL = fL,
-       n_lines = n_lines, N = nrow(X), m = ncol(X),
-       index = as.numeric(scale(scale(traits) %*% weights)),
-       p0 = p_pop, maf_pop = pmin(p_pop, 1 - p_pop))
+  build_ctx(X = X, f = f, G = NULL, traits = traits, ped = ped,
+            n_lines = max(ped$a, ped$b), pool = NULL, fL = fL, cfg = NULL,
+            weights = weights)
 }
 
+
+#' Stage 2: constrained selection across a grid of diversity budgets
+#'
+#' Runs the full selection pipeline: the random-subset null distribution, the
+#' attainable `alpha` ceiling implied by truncation, a greedy warm start and
+#' differential evolution for each `alpha` scenario, then the full metric panel
+#' and its z-scores against the null.
+#'
+#' Every metric is reported against the random null, because a metric without a
+#' baseline says nothing.
+#'
+#' @param X Hybrid marker matrix from [stage1_build].
+#' @param f Hybrid molecular coancestry matrix from [stage1_build].
+#' @param hybrids Hybrid table from [stage1_build].
+#' @param n_sel Number of hybrids to select.
+#' @param alphas Numeric vector of diversity-loss budgets, or `NULL` for an
+#'   automatic grid up to the attainable ceiling.
+#' @param weights Trait weights for the index, or `NULL` for equal weights.
+#' @param fL Optional line coancestry matrix; enables the heterotic-group
+#'   decomposition.
+#' @param include_references Also evaluate random, truncation and
+#'   maximum-diversity references.
+#' @param B_null,B_full Replicates for the cheap and full null panels.
+#' @param NP,itermax Differential-evolution population size and generations.
+#' @param seed Random seed.
+#' @param verbose Print progress.
+#' @return A list with `selection` (0/1 columns per scenario), `metrics` (one
+#'   row per scenario), `z_scores` (each metric in standard deviations from the
+#'   random null) and `ref` (`gd_ref`, its Monte Carlo standard error,
+#'   `alpha_max`, `n_sel`).
+#' @seealso [stage1_build] for the previous stage.
+#' @export
 stage2_select <- function(X, f, hybrids, n_sel,
                           alphas = NULL, weights = NULL, fL = NULL,
                           include_references = TRUE,
@@ -54,7 +92,7 @@ stage2_select <- function(X, f, hybrids, n_sel,
   if (is.null(alphas)) alphas <- seq(0, alpha_max, length.out = 5)
   inop <- alphas > alpha_max + 1e-9
   if (any(inop)) warning(sprintf(
-    "inoperative alphas (above the %.2f%% ceiling): %s — the constraint doesn't restrict anything in these scenarios",
+    "inoperative alphas (above the %.2f%% ceiling): %s -- the constraint doesn't restrict anything in these scenarios",
     100 * alpha_max, paste0(round(100 * alphas[inop], 2), "%", collapse = ", ")))
 
   # 3. Warm start. Without this the DE ends up BELOW a plain greedy.

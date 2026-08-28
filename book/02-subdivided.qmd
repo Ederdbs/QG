@@ -1,0 +1,368 @@
+# Diversity in a subdivided population {#sec-subdivided}
+
+```{r}
+#| include: false
+source("_common.R")
+```
+
+A breeding programme is never one population. It is heterotic groups, or
+accessions, or landraces, or cycles -- and the diversity of the whole is not the
+average of the diversity of the parts. @caballero2002 give the partition that
+makes this precise, and it is the analytical backbone of everything that
+follows: the constraint in @sec-ocs is a special case of it, and the
+within/between asymmetry that makes plant hybrid breeding different from animal
+breeding is a statement about which term of it you are allowed to minimise.
+
+The paper's central claim is uncomfortable and worth stating first: **a method
+that ranks accessions by distance alone can invert the correct conclusion.** An
+accession can be the most distant *because* it is internally fixed, and removing
+it can *raise* the diversity of the pool. We reproduce that result numerically
+below.
+
+## Notation
+
+- A metapopulation of $n$ subpopulations; subpopulation $i$ has $N_i$
+  individuals, $N_T = \sum_i N_i$.
+- A tilde, $\tilde{x}$, is a weighted mean **within** subpopulations:
+  $\tilde{f} = \sum_i f_{ii} N_i / N_T$.
+- A bar, $\bar{x}$, is a mean over **all pairs** in the metapopulation,
+  between-subpopulation pairs included:
+  $\bar{f} = \sum_{i,j} f_{ij} N_i N_j / N_T^2$.
+- Always $\bar{f} \le \tilde{f} \le \tilde{s}$. The differences between those
+  three numbers *are* the partition of diversity.
+- Everything is computed per locus and then averaged over loci. Never average
+  frequencies first.
+
+::: {.callout-warning}
+## The subtle point, and the one most often got wrong
+
+Every coancestry here includes the pairs of an individual with **itself** --
+group coancestry in the sense of Cockerham. That is what makes $1 - f_{ii}$
+exactly Nei's expected heterozygosity, and it is what makes the algebra close.
+Drop the diagonal and none of the identities below hold.
+:::
+
+## The three coancestry blocks
+
+### $f_{ij}$, between subpopulations
+
+The probability that two alleles, one sampled at random in subpopulation $i$ and
+one in $j$, are identical. From markers, $f_{ij} = \sum_k \tilde p_{k,i}
+\tilde p_{k,j}$.
+
+Read it as **redundancy** between two materials. If you cross plants of $i$ with
+plants of $j$, the progeny has expected inbreeding $F = f_{ij}$. It answers:
+what do I gain by recombining these two accessions?
+
+In maize, $f_{ij}$ between a Stiff Stalk pool and a Non-Stiff Stalk pool is
+typically low -- and that low between-group coancestry is exactly what sustains
+the heterotic pattern. Between two elite lines of the same family it can exceed
+0.6, and the cross generates nothing new.
+
+### $f_{ii}$, within a subpopulation
+
+The case $i = j$. From markers $f_{ii} = \sum_k \tilde p_{k,i}^2$, the expected
+homozygosity, so
+
+$$1 - f_{ii} \;=\; H_{e,i} \;=\; \text{Nei's gene diversity of accession } i.$$
+
+A landrace accession regenerated twenty times with forty ears per cycle
+accumulates coancestry and watches $f_{ii}$ rise silently. It is the cheapest
+alarm for genetic erosion *inside* a genebank -- and it is precisely what a
+distance tree cannot see.
+
+### $s_i$ and $F_i$, self-coancestry and molecular inbreeding
+
+$$s_i = \sum_k \sum_l \frac{p_{k,l,i}^2}{N_i}, \qquad
+  F_i = 2 s_i - 1, \qquad 1 - s_i = H_{o,i}$$
+
+with $p_{k,l,i}$ the dosage of allele $k$ in individual $l$.
+
+::: {.callout-important}
+## $F_i$ here is molecular, and is not $F_{IS}$
+
+It is measured against a hypothetical base in which all alleles are distinct. It
+is **not** comparable across studies using different marker panels. For the
+question "is this population mating at random?", use $\alpha_i$ below.
+:::
+
+In soybean, rice and wheat, pure lines have $s_i \to 1$, so $F_i \to 1$ and
+$H_o \to 0$. That is expected, not a symptom. It changes only *where* the
+diversity resides.
+
+## Two per-subpopulation metrics
+
+$$\alpha_i = \frac{F_i - f_{ii}}{1 - f_{ii}}, \qquad
+  G_i = \frac{s_i - f_{ii}}{1 - f_{ii}} = \frac{1 + \alpha_i}{2}$$
+
+$\alpha_i$ is the subpopulation's analogue of $F_{IS}$: positive means an excess
+of homozygotes (selfing, mating among relatives, a Wahlund effect from internal
+substructure, null alleles); negative means an excess of heterozygotes
+(dioecy, self-incompatibility, selection, or a freshly formed F1 or synthetic).
+
+$G_i$ is the proportion of the accession's diversity that sits **between**
+individuals rather than inside them, and it is probably the most underused
+quantity in the paper. It is a mating-system meter:
+
+```{r}
+#| echo: false
+knitr::kable(data.frame(
+  `G_i` = c("~ 0.5", "< 0.5", "-> 1.0"),
+  Situation = c("perfect panmixia", "excess of heterozygotes", "all homozygous"),
+  `Typical material` = c("maize, sunflower, open populations",
+                         "F1 synthetics, heterozygous clones, self-incompatibles",
+                         "inbred lines, doubled haploids, selfing species"),
+  check.names = FALSE),
+  caption = "G_i as a mating-system meter.")
+```
+
+Operationally, $1 - G_i$ is the fraction of an accession's diversity stored
+*inside* each plant, and it decides the sampling design. With $G_i \to 1$
+(selfers), one individual captures almost nothing and you need many plants per
+accession. With $G_i \approx 0.5$ (maize), a few plants already capture half.
+
+## Distances, and what they actually are
+
+Nei's minimum distance between subpopulations is
+
+$$\mathbf{D}_{ij} = \frac{f_{ii} + f_{jj}}{2} - f_{ij}
+                  = \sum_k \tfrac{1}{2}(\tilde p_{k,i} - \tilde p_{k,j})^2 .$$
+
+Note what that is: **half the sum of squared allele-frequency differences** -- a
+variance component, not an evolutionary distance calibrated in time. It is the
+piece that enters $F_{ST}$, and it is legitimate. The error in a
+distance-only method is not using $\mathbf{D}_{ij}$; it is using *only*
+$\mathbf{D}_{ij}$.
+
+::: {.callout-tip}
+## A free $O(N^2)$ saving
+
+The paper's Eq. 13 computes $D_{ij}$ by a double sum over all pairs of
+individuals, at cost $O(N_i N_j m)$. That is unnecessary: the identity
+$D_{ij} = (s_i + s_j)/2 - f_{ij}$ is **exact** and reduces the cost to $O(Nm)$.
+For a 50k-SNP panel and 5000 accessions this is the difference between hours and
+seconds.
+:::
+
+## The equation that matters most in practice
+
+$$\bar{f} = \sum_{i} \frac{N_i}{N_T}
+  \Big[\, \underbrace{f_{ii}}_{\text{internal coancestry}}
+        - \underbrace{\textstyle\sum_j \mathbf{D}_{ij} N_j / N_T}_{\text{mean distance to the others}} \Big]$$
+
+Each accession's contribution to global coancestry -- that is, to the *loss* of
+diversity in the pool -- has **two terms of opposite sign**:
+
+- **Term 1 (+).** The more internally fixed an accession is, the more it
+  *raises* global coancestry: it dilutes the pool with copies of the same
+  allele.
+- **Term 2 (−).** The more distant it is from the others, the more it *reduces*
+  global coancestry.
+
+A distance-only method sees term 2 alone. That is the whole mechanism of the
+inverted conclusions.
+
+## F statistics and the partition
+
+$$F_{IS} = \frac{\tilde F - \tilde f}{1 - \tilde f}, \qquad
+  F_{ST} = \frac{\tilde f - \bar f}{1 - \bar f} = \frac{\bar D}{1 - \bar f}, \qquad
+  F_{IT} = \frac{\tilde F - \bar f}{1 - \bar f}$$
+
+with $(1 - F_{IT}) = (1 - F_{IS})(1 - F_{ST})$.
+
+The partition itself is the heart of the paper:
+
+$$(1 - \bar f) = \underbrace{(1 - \tilde s)}_{GD_{WI}}
+              + \underbrace{(\tilde s - \tilde f)}_{GD_{BI}}
+              + \underbrace{(\tilde f - \bar f)}_{GD_{BS}}$$
+
+```{r}
+#| echo: false
+knitr::kable(data.frame(
+  Component = c("GD_T = 1 - f_bar", "GD_WI = 1 - s_til", "GD_BI = s_til - f_til",
+                "GD_WS = 1 - f_til", "GD_BS = f_til - f_bar"),
+  Definition = c("total diversity", "within individuals",
+                 "between individuals, within accession",
+                 "within subpopulations", "between subpopulations"),
+  Biologically = c("He of the whole pool if everything were recombined",
+                   "heterozygosity carried inside each plant",
+                   "segregating variation available to within-population selection",
+                   "GD_WI + GD_BI",
+                   "divergence; the only component a distance method sees"),
+  check.names = FALSE),
+  caption = "The partition of gene diversity (Caballero & Toro 2002, Eq. 7).")
+```
+
+with the clean identities
+
+$$\frac{GD_{WI}}{GD_T} = (1-G)(1-F_{ST}), \quad
+  \frac{GD_{BI}}{GD_T} = G(1-F_{ST}), \quad
+  \frac{GD_{WS}}{GD_T} = 1-F_{ST}, \quad
+  \frac{GD_{BS}}{GD_T} = F_{ST}.$$
+
+### Why the partition changes the strategy by species
+
+- **Outcrossers** (maize, sunflower, forages, forest trees): $GD_{WI}$ is large.
+  The diversity is literally *inside* the plants. Conserving means maintaining
+  heterozygosity -- regenerate with many individuals and balanced contributions.
+- **Selfers** (soybean, wheat, rice, beans) **and DH or line collections**:
+  $GD_{WI} \approx 0$. All diversity is $GD_{BI} + GD_{BS}$. Conserving means
+  maintaining the *number of distinct lines*; heterozygosity is not a target.
+  Regenerating with few plants per line is acceptable; losing lines is not.
+- **Clonal crops** (potato, sugarcane, fruit trees): $GD_{WI}$ is high and
+  **frozen** -- it does not decay by drift while the clone exists. The $N_e$
+  algebra does not apply without adaptation.
+
+This is the reason a hybrid maize programme cannot manage diversity with a
+single pool-wide number: it needs $GD_{WS}$ defended and $GD_{BS}$ held, and
+those two pull in opposite directions under selection.
+
+## The worked example, reproduced
+
+The paper's metapopulation: four subpopulations of $N$ = 12, 4, 8, 6, three loci
+with 5, 3 and 3 alleles. Its published coancestry matrix:
+
+```{r}
+f <- matrix(c(0.3391, 0.3021, 0.2535, 0.3229,
+              0.3021, 0.8750, 0.3073, 0.3889,
+              0.2535, 0.3073, 0.4766, 0.2483,
+              0.3229, 0.3889, 0.2483, 0.3704), 4, 4, byrow = TRUE,
+            dimnames = list(paste0("Sub", 1:4), paste0("Sub", 1:4)))
+N <- c(12, 4, 8, 6)
+w <- N / sum(N)
+```
+
+Note subpopulation 2: $f_{22} = 0.875$, so $H_e = 0.125$. It is nearly fixed
+internally. Now the global quantities, with the paper's published values beside
+them:
+
+```{r}
+f_bar <- drop(w %*% f %*% w)
+f_til <- sum(w * diag(f))
+s_til <- 0.7056                       # published; needs individual genotypes
+
+data.frame(
+  quantity = c("f_bar", "f_til", "GD_T", "GD_WI", "GD_BI", "GD_BS", "F_ST"),
+  computed = round(c(f_bar, f_til, 1 - f_bar, 1 - s_til, s_til - f_til,
+                     f_til - f_bar, (f_til - f_bar) / (1 - f_bar)), 4),
+  published = c(0.3256, 0.4535, 0.6744, 0.2944, 0.2521, 0.1279, 0.1897)
+)
+```
+
+Every value reproduces exactly. Note that $GD_{BS}$ is only 19% of the total:
+the between-subpopulation divergence -- the only thing a distance method
+measures -- accounts for less than a fifth of the diversity in this
+metapopulation.
+
+### Removing an accession can *increase* diversity
+
+```{r}
+res <- list(f = f, by_subpop = data.frame(N = N))
+cbind(ct_loss_gain(res),
+      delta_pct_equal = round(ct_loss_gain(res, "equal")$delta_pct, 2))
+```
+
+The number to look at is subpopulation 2. A Weitzman-style analysis calls it the
+most valuable in the set -- losing it would cost 65.5% of the diversity, because
+it is the most divergent. The coancestry analysis says removing it **raises**
+pool diversity by 1.8% (census weights) or 6.5% (equal weights).
+
+It is distant *because* it is fixed. Alleles fixed in a sample of four
+individuals are not a genetic resource; they are the result of drift. The same
+pattern appears in the paper's reanalysis of eleven European pig breeds: the
+breed a distance method nominates as most valuable turns out to raise diversity
+by 0.67% when removed.
+
+::: {.callout-caution}
+## What this does and does not license
+
+For a genebank: a rare accession with few plants and high homozygosity -- the
+archetypal "unique" accession on a distance tree -- may be contributing
+*negatively* to the pool. That does **not** mean discard it. It means the
+correct priority may be to **regenerate it at larger $N$**, not to replicate it
+into a core collection. Storing seed is cheap; extinction is irreversible.
+:::
+
+### Optimal contributions
+
+Maximising $GD_T = 1 - \sum_{i,j} f_{ij} c_i c_j$ subject to $c_i \ge 0$ and
+$\sum_i c_i = 1$ is a quadratic programme:
+
+```{r}
+oc <- optimal_contributions(f)
+oc$c_i
+c(GD_before = 1 - f_bar, GD_after = oc$GD_max,
+  gain_pct = 100 * (oc$GD_max - (1 - f_bar)) / (1 - f_bar))
+```
+
+Subpopulation 2 receives weight **zero**, and total diversity rises from 0.6744
+to 0.6874. This reproduces the paper's published solution
+$\mathbf{c} = (0.522,\, 0,\, 0.270,\, 0.208)$ exactly.
+
+Three direct uses in plant breeding:
+
+- **Base population for recurrent selection.** $c_i$ gives the seed proportion
+  from each source that maximises long-term additive variance.
+- **Core collection.** Instead of clustering heuristics plus proportional
+  sampling, solve the quadratic programme directly with operational constraints
+  ($c_i \le$ multiplication capacity, $c_i \ge$ a policy minimum for accessions
+  of cultural importance).
+- **Optimal contribution selection.** Replace the objective with
+  $\max \mathbf{c}'\mathbf{g} - \lambda\,\mathbf{c}'\mathbf{F}\mathbf{c}$ and you
+  have Meuwissen's framework, now standard in genomic programmes. This chapter is
+  the case $\lambda \to \infty$, pure diversity. A breeder operates in the middle
+  of the curve -- which is @sec-ocs.
+
+## Minimising coancestry is maximising $N_e$
+
+Since $N_s = 1/(2\bar f)$, minimising group coancestry and maximising effective
+size are the same operation. The paper's Eq. 14 makes the operational
+consequence explicit. With **equal** contributions ($S_W^2 = S_B^2 = 0$),
+$N_e \approx 2Nn/(1 - F_{IT})$ -- roughly **double** the $N_e$ obtained under
+random (Poisson) contributions.
+
+> Harvesting the same number of seeds from every plant, and the same number of
+> plants from every family, doubles the effective size. No genotyping, no
+> technology, no cost.
+
+It is probably the best cost-benefit intervention available in germplasm
+management. The opposite -- bulk harvest from a plot, which in practice samples
+the most productive plants disproportionately -- inflates $S_W^2$ and collapses
+$N_e$.
+
+## The honest caveats
+
+The paper makes these, and a breeder should take them seriously.
+
+Criteria based on within-population variation systematically **favour larger
+populations**. A $\bar f$ criterion can push a genebank toward abundant elite
+material -- the opposite of the conservation objective. Beyond that:
+
+- Neutral markers do not measure adaptive value, disease resistance, stress
+  adaptation or cultural value. A fixed accession may carry the only resistance
+  allele to an emerging rust.
+- **Allelic richness** is more sensitive to bottlenecks than heterozygosity and
+  is often the more relevant criterion for pre-breeding. The argument that
+  minimising $\bar f$ maximises allelic richness in the long run (via the
+  effective number of alleles being the inverse of mean coancestry) is valid
+  asymptotically but does **not** protect rare alleles in the short term. This
+  is why allelic richness survives the redundancy analysis in @sec-choosing as
+  the one genuinely independent axis.
+- Weighting between-group variation more heavily is arbitrary. A more defensible
+  fix is to optimise $\mathbf{c}$ with per-accession minimum constraints.
+
+**Rule of thumb:** use $\bar f$ to decide *proportions and regeneration effort*;
+never use $\bar f$ alone to decide *discard*.
+
+## Two errata, found while verifying
+
+Worth recording, since the numbers above were checked against the published
+tables.
+
+- Table 2b lists $F_2 = 0.8383$, but $F_i = 2s_i - 1 = 2(0.9167) - 1 = 0.8333$.
+  A typographical error. Every other value in Tables 2 and 3 reproduces exactly.
+- Conceptually, the Discussion states that equal contributions
+  ($S_B^2 = S_W^2 = 0$) are required "to minimise effective size" and "maximise
+  mean coancestry". That is inverted: Eq. 15 and the entire argument of the
+  paper show that equal contributions **maximise** $N_e$ and **minimise**
+  $\bar f$.

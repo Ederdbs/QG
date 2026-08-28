@@ -1,19 +1,56 @@
 # Hybrid Selection Under a Diversity Constraint
 
+Select a subset of F1 hybrids that maximises a multi-trait genomic index while
+constraining the loss of molecular gene diversity, relative to a same-size
+random-sampling baseline.
+
+This repository is two things:
+
+- **`hybdiv`**, an R package with the coancestry kernel, the diversity metrics,
+  the selection strategies and the population-sizing simulator.
+- **the book**, a Quarto book that derives the theory, runs it, and verifies it.
+
+## The book
+
+```sh
+quarto render book          # ~80 s; open book/_book/index.html
 ```
-Rscript tests/test_metrics.R   # sanity checks (~40 s)
-Rscript run_all.R              # 2-stage pipeline -> report/ (~4 min)
-Rscript run_benchmark.R        # metrics benchmark + plots (~6 min)
+
+Twelve chapters and four appendices, in five parts: Foundations, Simulation,
+Metrics, Optimisation, Evidence and practice. Light examples run live at render;
+expensive results are cached in `book/data` and `book/figs` and refreshed with
+`book/scripts/regenerate.R`.
+
+## The package
+
+```sh
+Rscript -e 'devtools::document(); devtools::load_all()'
+Rscript -e 'devtools::test()'     # 184 checks, ~1 min
+Rscript -e 'devtools::check()'    # 0 errors, 0 warnings, 0 notes
 ```
 
-Technical document with the derivations: `doc/diversity_metrics.Rmd`.
+Only `DEoptim` is a hard dependency (used solely by `sel_de()`); `quadprog` is
+suggested. Everything else, plots included, is base R.
 
-Current configuration: 50+50 lines → 2500 hybrids, 5000 markers, selecting 100 (4%).
-For the real scale, edit `sim_config` in `R/00_data.R` (`n_pool_A/B = 71`, `m = 25000`).
+### Runnable pipelines
 
-## Two-Stage Pipeline
+The book runs everything at a reduced scale so it renders quickly. These run the
+same work at the production scale of `sim_config` and write to `report/`:
+
+```sh
+Rscript inst/scripts/run_all.R          # two-stage pipeline, ~4 min
+Rscript inst/scripts/run_benchmark.R    # metrics benchmark + plots, ~6 min
+```
+
+`run_benchmark.R` produces the numeric results quoted below. Both ship with the
+installed package, so `system.file("scripts", "run_all.R", package = "hybdiv")`
+finds them from anywhere.
+
+## Two-stage pipeline
 
 ```r
+library(hybdiv)
+
 # STAGE 1 — line genotypes -> X, f, hybrids
 st1 <- stage1_simulate()
 #   or, with real data:
@@ -25,25 +62,55 @@ res <- stage2_select(st1$X, st1$f, st1$hybrids, n_sel = 200,
                      weights = NULL,   # NULL = equal weight across traits
                      fL = st1$fL)      # optional: enables theta_A/theta_B/theta_AB
 
-res$selection   # N rows x (hybrids + one 0/1 column per scenario + n_scenarios)
-res$metrics     # one scenario per row: alpha, index, Ns, Ne_parents, F_hom, F_drift, GD_BS, ...
+res$selection   # one 0/1 column per scenario, plus n_scenarios
+res$metrics     # one scenario per row
 res$z_scores    # the same metrics in s.d. from the random-subset null
-res$ref         # gd_ref, its Monte-Carlo s.e., alpha_max, bias from using the population
+res$ref         # gd_ref, its Monte-Carlo s.e., alpha_max, bias of the wrong baseline
 ```
 
-`stage1_build()` accepts the marker matrix in 0/1/2 or 0/0.5/1 coding.
-Stage 2 runs without `fL`; it only loses the heterotic-group decomposition.
+`stage1_build()` accepts the marker matrix in 0/1/2 or 0/0.5/1 coding. Stage 2
+runs without `fL`; it only loses the heterotic-group decomposition.
 
-| File | Role |
+Current configuration: 50+50 lines -> 2500 hybrids, 5000 markers, selecting 100
+(4%). For the real scale, edit `sim_config` in `R/00_data.R` (`n_pool_A/B = 71`,
+`m = 25000`).
+
+## Layout
+
+| Path | Role |
 |---|---|
 | `R/00_data.R` | simulation, VanRaden `G` (prediction), molecular coancestry `f` (diversity) |
 | `R/01_metrics.R` | the metrics, all `f(idx, ctx) -> scalar` |
 | `R/02_benchmark.R` | null distribution, discriminatory power, cost, plots |
 | `R/03_de_select.R` | strategies: truncation, parental cap, greedy, DE, OCS relaxation |
+| `R/04_fast_metrics.R` | the line-level route: `theta = w' fL w`, no N x N matrix |
+| `R/05_pipeline_metrics.R` | stage-specific metrics, S1 to S4 |
+| `R/06_f2size.R` | F1 -> F4 population-sizing simulator |
+| `R/07_caballero_toro.R` | subdivided-population partition, optimal contributions |
+| `R/09_reference.R` | slow literal oracles, for verification |
 | `R/10_stage1.R` | stage 1 — X / f / hybrids output contract |
 | `R/11_stage2.R` | stage 2 — per-scenario selection, metrics, 0/1 table |
+| `inst/scripts/` | the two runnable pipelines, at production scale |
+| `book/` | the Quarto book |
+| `doc/` | the source documents the book was built from (provenance; see `doc/README.md`) |
+| `tests/testthat/` | 184 checks |
 
-## Results (Simulated Data)
+## Results (simulated data)
+
+These are reproducible findings from the current simulated dataset, not fixed
+constants: they move if `sim_config` or a seed changes. The relationships
+between them do not.
+
+Each is derived in the book, and every derivation there runs live:
+
+| Result | Book chapter |
+|---|---|
+| 1, 2, 3 -- the two matrices, the `theta`/`He` identity, the off-diagonal metric | 1 *Coancestry*, 6 *A catalogue of metrics* |
+| 4, 5 -- the baseline, and the attainable alpha ceiling | 6 *The correct baseline*, 9 *Optimal contributions* |
+| 6 -- which metrics survive, and what each costs | 7 *Choosing metrics* |
+| 7 -- the warm start | 10 *Combinatorial selection* |
+| 8, 9, 11 -- the two lenses and the covariance diagnostic | 5 *The genomic era* |
+| 10 -- between-pool divergence | 2 *Subdivided populations*, 8 *Pipeline stages* |
 
 **1. Use `f` (molecular coancestry), not VanRaden `G`, for diversity.**
 With `Z` centered on its own population, `sum(G) == 0` exactly — measured:

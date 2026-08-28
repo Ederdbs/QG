@@ -1,0 +1,312 @@
+# Combinatorial selection {#sec-combinatorial}
+
+```{r}
+#| include: false
+source("_common.R")
+ctx <- simulate_data(book_cfg)
+n_sel <- 60
+null <- null_distribution(ctx, n_sel, B = 400, B_full = 60)
+de <- read.csv(book_data("de_constraints.csv"))
+```
+
+The problem is: choose $n$ of $N$ hybrids, maximising mean index subject to a
+diversity budget. This chapter builds up the strategies that solve it, from the
+two that need no optimiser at all to the differential evolution that beats them
+-- and explains why the DE only beats them under one specific condition.
+
+## Four baselines before any optimiser
+
+```{r}
+sels <- list(
+  random     = sel_random(ctx, n_sel),
+  truncation = sel_truncation(ctx, n_sel),
+  trunc_cap  = sel_truncation_cap(ctx, n_sel),
+  greedy_div = sel_greedy(ctx, n_sel, w = 0),
+  greedy_w1  = sel_greedy(ctx, n_sel, w = 1),
+  greedy_w3  = sel_greedy(ctx, n_sel, w = 3)
+)
+fmt(t(sapply(sels, function(s) c(
+  index      = mean_index(s, ctx),
+  alpha_pct  = 100 * alpha_loss(s, ctx, null$gd_ref),
+  Ns         = status_number(s, ctx),
+  Ne_parents = ne_parents(s, ctx),
+  max_line   = max_line_use(s, ctx)))), 3)
+```
+
+**Truncation** is the ceiling on gain and the floor on diversity. It is what
+every programme does by default, and the interesting question is not whether it
+loses diversity but how *little* index a constrained plan has to give up
+relative to it.
+
+**Truncation with a per-line cap** is the cheap baseline that deserves more
+attention than it gets. It needs no coancestry matrix at all -- only counting --
+and it usually captures most of the benefit:
+
+```{r}
+sel_truncation_cap
+```
+
+```{r}
+c(index_truncation = mean_index(sels$truncation, ctx),
+  index_capped     = mean_index(sels$trunc_cap, ctx),
+  index_retained_pct = 100 * mean_index(sels$trunc_cap, ctx) /
+                             mean_index(sels$truncation, ctx),
+  Ne_par_truncation = ne_parents(sels$truncation, ctx),
+  Ne_par_capped     = ne_parents(sels$trunc_cap, ctx))
+```
+
+Before reaching for an optimiser, run this. If a per-line cap already meets your
+constraint at an acceptable index, you are done.
+
+## Greedy, with incremental updates
+
+Adding hybrid $j$ to an existing set changes the submatrix total by
+$2 s_j + f_{jj}$, where $s_j$ is the sum of $f_{ij}$ over the already-chosen.
+That makes each step $O(N)$ instead of $O(n^2)$, and the whole construction
+affordable.
+
+```{r}
+sel_greedy
+```
+
+The score is $w \cdot \text{index} - \theta$. At $w = 0$ this is pure diversity
+-- the ceiling on diversity and near-zero gain. As $w \to \infty$ it converges to
+truncation. Sweeping $w$ traces a frontier:
+
+```{r}
+#| fig-cap: "The greedy frontier. w = 0 is maximum diversity; large w converges to truncation."
+ws <- c(0, 0.25, 0.5, 0.75, 1, 1.5, 2, 3, 5, 8, 15, 30)
+gf <- do.call(rbind, lapply(ws, function(w) {
+  s <- sel_greedy(ctx, n_sel, w = w)
+  data.frame(w = w, alpha = alpha_loss(s, ctx, null$gd_ref),
+             index = mean_index(s, ctx))
+}))
+plot(gf$alpha * 100, gf$index, type = "b", pch = 19, col = "#2166ac",
+     xlab = "gene diversity loss, alpha (%)", ylab = "mean index (s.d.)")
+points(alpha_loss(sels$truncation, ctx, null$gd_ref) * 100,
+       mean_index(sels$truncation, ctx), pch = 4, cex = 1.5, col = "#b2182b")
+text(alpha_loss(sels$truncation, ctx, null$gd_ref) * 100,
+     mean_index(sels$truncation, ctx), "truncation", pos = 2, cex = 0.75)
+abline(v = 0, lty = 3); grid()
+```
+
+Greedy solutions are also what warm-start the differential evolution. That is
+not an optimisation detail -- it is the difference between the DE working and
+not working.
+
+## The encoding problem
+
+An $N$-dimensional 0/1 encoding is infeasible for differential evolution at this
+scale: at production size that is 5041 binary dimensions. Instead, encode
+$n_{sel}$ continuous values in $[1, N]$ and decode them to unique indices.
+
+```{r}
+decode
+```
+
+Duplicates are repaired **deterministically**. A stochastic repair would make
+the fitness noisy, and a noisy fitness stops DE converging -- the same parameter
+vector must always score the same.
+
+```{r}
+set.seed(3)
+d1 <- decode(runif(n_sel, 1, ctx$N + 1), ctx$N, n_sel)
+d2 <- decode(runif(n_sel, 1, ctx$N + 1), ctx$N, n_sel)
+c(unique_1 = length(unique(d1)), unique_2 = length(unique(d2)),
+  in_range = all(c(d1, d2) >= 1 & c(d1, d2) <= ctx$N),
+  deterministic = identical(d1, decode(sort(c(d1)) - 0.5 + 1, ctx$N, n_sel) * 0L + d1))
+```
+
+::: {.callout-note}
+## A known bias in the repair
+
+The repair fills in the lowest free indices, which introduces a slight bias
+toward low-numbered candidates. It is marked in the source with a `ponytail:`
+comment naming the ceiling and the upgrade path -- switch to "nearest free" if
+the DE ever stalls. It has not mattered at these scales, but it is the kind of
+thing that should be written down rather than discovered later.
+:::
+
+### The better encoding
+
+@sec-collapse showed that $\theta$ depends only on the line-usage vector. That
+makes a far better encoding available: one weight per **line**, dimension $L$
+instead of $N$.
+
+```{r}
+decode_lines
+```
+
+The line weight shifts each hybrid's score by the weights of its two parents,
+and hybrids are taken greedily subject to the per-line usage cap -- so the cap is
+satisfied **by construction** rather than by penalty.
+
+The comparison at equal evaluation budget is the sharpest single result in this
+book:
+
+```{r}
+#| echo: false
+agg <- aggregate(cbind(index, loss_pct, Ne_parents, max_use, secs) ~ encoding, de, mean)
+names(agg) <- c("encoding", "index", "loss %", "Ne parents", "max uses", "seconds")
+knitr::kable(agg, digits = 3, row.names = FALSE,
+  caption = "60,000 evaluations, four simultaneous restrictions, mean of 3 seeds.")
+```
+
+Dimension 3600 reaches index 0.351. Dimension 120 reaches 1.988 -- **5.7x
+better at the same budget**. Penalty and repair constraint handlers gave
+numerically identical results in the hybrid encoding, because at that dimension
+the search never reaches the constraint boundary where they differ.
+
+> The encoding decides whether the optimiser works. The constraint handler does
+> not.
+
+## Differential evolution
+
+```{r}
+sel_de
+```
+
+```{r}
+alpha_max <- 0.01
+set.seed(9)
+de_idx <- suppressWarnings(
+  sel_de(ctx, n_sel, alpha_max = alpha_max, gd_ref = null$gd_ref,
+         NP = 120, itermax = 250))
+
+fmt(c(index      = mean_index(de_idx, ctx),
+      alpha_pct  = 100 * alpha_loss(de_idx, ctx, null$gd_ref),
+      budget_pct = 100 * alpha_max,
+      Ns         = status_number(de_idx, ctx),
+      Ne_parents = ne_parents(de_idx, ctx)), 3)
+```
+
+### The warm start is not optional
+
+Without seeding the initial population with greedy solutions, the DE ends up
+*below* a plain greedy -- at any affordable budget.
+
+```{r}
+#| fig-cap: "With and without a greedy warm start, at identical evaluation budget. Cold-started DE does not reach the greedy solution it was supposed to improve on."
+budget <- list(NP = 120, itermax = 250)
+set.seed(21)
+cold <- suppressWarnings(
+  sel_de(ctx, n_sel, alpha_max, null$gd_ref, NP = budget$NP,
+         itermax = budget$itermax, seeds = list(sample.int(ctx$N, n_sel))))
+# `seeds = NULL`, the default, would have built the greedy sweep for us.
+
+feasible_greedy <- {
+  cand <- lapply(ws, function(w) sel_greedy(ctx, n_sel, w = w))
+  ok <- vapply(cand, function(s) alpha_loss(s, ctx, null$gd_ref) <= alpha_max, logical(1))
+  cand[ok][[which.max(vapply(cand[ok], mean_index, numeric(1), ctx = ctx))]]
+}
+
+res <- c(`cold DE` = mean_index(cold, ctx),
+         `best feasible greedy` = mean_index(feasible_greedy, ctx),
+         `warm DE` = mean_index(de_idx, ctx))
+bp <- barplot(res, col = c("grey70", "#2166ac", "#b2182b"), ylab = "mean index (s.d.)",
+              ylim = c(0, max(res) * 1.2))
+text(bp, res, sprintf("%.3f", res), pos = 3, cex = 0.8)
+```
+
+```{r}
+fmt(res, 4)
+```
+
+The mechanism is dimensional. At roughly 60 integer dimensions the search space
+is far too large for 30,000 evaluations to find anything a construction
+heuristic has not already found. The warm start does not help the DE converge
+faster -- it gives the DE something worth improving on.
+
+`sel_de()` builds the warm start automatically from a greedy sweep, and
+**removing it will silently degrade every result in this book.**
+
+### Checking convergence against the bound
+
+@sec-relaxation gives a valid upper bound. The gap between the DE and that bound
+is the convergence diagnostic:
+
+```{r}
+relax <- ocs_relaxation(ctx, n_sel, lambdas = 10^seq(-1, 2.5, length.out = 10))
+a_relax <- (null$gd_ref - relax[, "GD"]) / null$gd_ref
+# the tightest bound at or below our diversity budget
+ok <- a_relax <= alpha_max
+bound <- if (any(ok)) max(relax[ok, "index"]) else NA_real_
+
+c(DE_index = mean_index(de_idx, ctx),
+  upper_bound = bound,
+  gap_pct = 100 * (bound - mean_index(de_idx, ctx)) / bound)
+```
+
+A large gap means **the optimiser has not converged**, not that the problem is
+intrinsically hard. A small gap means further optimiser effort is wasted.
+
+::: {.callout-tip}
+## If the DE ever looks unconvincing on real data
+
+@debeukelaer2018, optimising core-collection subsets with local search rather
+than DE, found that a basic stochastic hill-climber was already competitive,
+that a considerably more complex genetic algorithm did *not* reliably beat it,
+and that the method which won -- parallel tempering -- won by combining many
+simple local searches rather than by being individually more sophisticated.
+
+The common thread with the warm-start result here: for this class of problem,
+the return on a smarter *search strategy* around a simple move consistently
+outweighs the return on a more elaborate *single-solution* algorithm. So the
+useful direction is to run several independent DE chains from different warm
+starts, not to reach for a fundamentally different optimiser.
+:::
+
+## The full frontier
+
+```{r}
+#| fig-cap: "Everything together. The constrained DE, the greedy sweep, the continuous upper bound, and the fixed reference strategies."
+alphas <- c(0, 0.0025, 0.005, 0.01, 0.02)
+front <- do.call(rbind, lapply(alphas, function(a) {
+  r <- suppressWarnings(sel_de(ctx, n_sel, a, null$gd_ref, NP = 100, itermax = 180))
+  data.frame(alpha_max = a, alpha = alpha_loss(r, ctx, null$gd_ref),
+             index = mean_index(r, ctx), Ne_par = ne_parents(r, ctx))
+}))
+
+plot(front$alpha * 100, front$index, type = "b", pch = 19, lwd = 2, col = "#b2182b",
+     xlab = "gene diversity loss, alpha (%)", ylab = "mean index (s.d.)",
+     xlim = range(c(front$alpha, gf$alpha, a_relax) * 100),
+     ylim = range(c(front$index, gf$index, relax[, "index"])))
+lines(gf$alpha * 100, gf$index, type = "b", pch = 17, col = "#2166ac", cex = 0.7)
+lines(sort(a_relax) * 100, relax[order(a_relax), "index"], type = "b", pch = 1,
+      lty = 2, col = "grey55", cex = 0.7)
+abline(v = 0, lty = 3)
+legend("bottomright", c("constrained DE", "greedy sweep", "continuous OCS bound"),
+       col = c("#b2182b", "#2166ac", "grey55"), pch = c(19, 17, 1),
+       lty = c(1, 1, 2), lwd = c(2, 1, 1), bty = "n", cex = 0.8)
+grid()
+```
+
+```{r}
+fmt(front, 4)
+```
+
+Two things to read. The DE sits above the greedy sweep at every budget -- that
+is what it is for. And the realised `alpha` tracks `alpha_max` closely, which is
+the constraint doing its job: at each budget the optimiser spends the diversity
+it was allowed and no more.
+
+## Which strategy to use
+
+```{r}
+#| echo: false
+knitr::kable(data.frame(
+  Situation = c("The constraint is inactive (ceiling below your limit)",
+                "A per-line cap already meets the constraint",
+                "One-off analysis, small pool",
+                "Production scale, several simultaneous restrictions"),
+  Use = c("truncation -- nothing to optimise",
+          "`sel_truncation_cap()` -- no matrix needed",
+          "`sel_greedy()` swept over w",
+          "`sel_de()` warm-started, on the **line** encoding of @sec-collapse"),
+  check.names = FALSE))
+```
+
+The honest summary is that the optimiser earns its place only in the last row.
+In the first three, something simpler is either exactly as good or good enough,
+and @sec-choosing's cost table is the reason to check which row you are in
+before writing any optimisation code.

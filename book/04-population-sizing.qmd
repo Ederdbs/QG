@@ -1,0 +1,366 @@
+# Sizing a segregating population, F1 to F4 {#sec-sizing}
+
+```{r}
+#| include: false
+source("_common.R")
+f2 <- read.csv(book_data("f2_results.csv"))
+ml <- read.csv(book_data("f2_multilocus.csv"))
+```
+
+The previous chapters took the candidate pool as given. This one asks where it
+comes from: a wide cross between two divergent parents, carried F1 -> F2 -> F3
+-> F4, and the question every programme has to answer before it plants anything
+-- **how many plants?**
+
+The answer turns out to depend entirely on what you are sizing *for*. There is
+no single optimal $N$, and the most common failure is to size for the objective
+that saturates earliest and then be surprised when a different objective was
+never met.
+
+## The simulated space is ancestry, not alleles
+
+Each genome position is coded 0 (from parent P1) or 1 (from parent P2). For a
+wide biparental cross between two divergent heterotic groups this is the correct
+abstraction: essentially every locus polymorphic between the parents is
+biallelic, so ancestry is a sufficient statistic. Throughout this chapter,
+"allele frequency" means "frequency of P1 ancestry".
+
+## The assumptions, one at a time
+
+These are the assumptions the numbers rest on. Read them before trusting any of
+the numbers.
+
+**P1. Ancestry, not alleles.** As above.
+
+**P2. Parents fully homozygous and fixed for alternative alleles.** Consequently
+every F1 plant is genetically identical and the genetic $N_e$ of the F1 is 1.
+Sizing the F1 is a **logistical** decision, not a genetic one -- unless the
+parents carry residual heterozygosity, which is handled separately below.
+
+**P3. The genetic map.** Ten chromosomes, lengths from a classical composite
+maize map, about 1670 cM (~17 Morgans). Do **not** use IBM-type map lengths from
+intermated RILs: they are inflated 5-10x by construction and will make every
+answer wrong.
+
+```{r}
+map <- build_map(maize_chr_len, spacing_cM = 2)
+c(chromosomes = length(map$chr_len), markers = map$m,
+  total_cM = map$total_cM, morgans = map$total_cM / 100)
+```
+
+**P4. Haldane recombination, no interference,** identical in male and female.
+The probability of a haplotype switch between adjacent markers $d$ cM apart is
+$r = 0.5(1 - e^{-2d/100})$; the first marker of each chromosome gets $r = 0.5$,
+which produces independent segregation between chromosomes automatically.
+
+*Limitation:* without interference the variance in crossover number is inflated
+(Poisson). Maize has strong positive interference, so the simulated block-length
+distribution has a slightly longer tail than reality. Mean block lengths and
+allele frequencies are unaffected.
+
+**P5. Segregation distortion by rejection sampling,** therefore exact rather
+than approximate. Two mechanisms: *gametophytic* (ga1/Ga1-s type, pollen
+incompatibility) acting only on the male gamete, and *zygotic* (hybrid lethality
+or subvitality) as genotype fitnesses. Because rejection acts on the **whole
+gamete**, the region linked to the distorter is dragged along -- which is
+exactly the phenomenon of interest.
+
+```{r}
+f2_distorters
+```
+
+::: {.callout-warning}
+## The distorters are plausible, not measured
+
+This is the parameter that moves the results most. Replace `f2_distorters` with
+your own F2 genotyping data before using any number here to decide field area.
+:::
+
+**P6. Five schemes,** all ending with $H = 0.125$ so they are directly
+comparable: `ssd` (one seed per plant per generation -- the neutral reference,
+no selection, no drift beyond the meiotic), `ssd_attr` (SSD with 15% random loss
+per generation: vigour, partial sterility, flowering asynchrony -- common in wide
+crosses with exotic material), `bulk` (differential seed contribution, a
+Wright-Fisher model with weights $w_i = e^{\beta(z_i - \bar z)}$ where $z_i$ is
+the share of genome from the adapted parent -- a *phenomenological* model of
+polygenic natural selection, not a model of adaptation loci), and `syn1`/`syn2`
+(one or two random intercrossing cycles in the F2 before the two selfings).
+
+**P7. The F4 panel is not a RIL panel.** Residual heterozygosity is
+$H = 0.125$, and that changes every theoretical expectation:
+
+```{r}
+#| echo: false
+H <- 0.125
+knitr::kable(data.frame(
+  Quantity = c("Var(dosage per line)", "SE(p_hat)", "Diversity retained D",
+               "P(P2 homozygote per locus)", "Junctions per haplotype"),
+  Formula = c("(1 - H) / 4", "0.5 sqrt((1 - H) / N)", "1 - (1 - H) / N",
+              "(1 - H) / 2", "A_2 = L; A_(t+1) = A_t + L H_t"),
+  `Value in F4` = c(sprintf("%.5f", (1 - H) / 4),
+                    sprintf("%.3f / sqrt(N)", 0.5 * sqrt(1 - H)),
+                    sprintf("1 - %.3f / N", 1 - H),
+                    sprintf("%.4f", (1 - H) / 2),
+                    "1.75 L"),
+  check.names = FALSE),
+  caption = "Theoretical identities for an F4 panel. The commonly quoted 0.5/sqrt(N) holds only at F-infinity.")
+```
+
+**P8. The standard error is estimated between replicates,** not between markers.
+This is essential: linked markers are strongly autocorrelated, so the spread
+across markers within one replicate is not an estimator of sampling error.
+
+**P9. What is not modelled,** and therefore cannot be answered here: deliberate
+artificial selection, QTL architecture, phenotypic inbreeding depression,
+mutation (irrelevant on this timescale), and structural variation. If you know
+there is a large inversion between your parents, zero the recombination rate
+over that interval in `build_map()`.
+
+*Known bias:* at 2 cM spacing, double crossovers within an interval are not
+counted. The bias is $-2.0\%$ in junction number, always downward. Use
+`spacing_cM = 1` if you need a faithful count.
+
+## Verifying the identities live
+
+The theory above is not decoration -- it is checkable, and the simulator is only
+trustworthy if it reproduces it.
+
+```{r}
+map10 <- build_map(maize_chr_len, spacing_cM = 10)
+neutral <- make_distortion(map10, NULL, active = FALSE)
+
+set.seed(4)
+F1 <- make_F1(map10, 400)
+F2 <- cross_indices(F1, 1:400, 1:400, map10, neutral)
+F3 <- cross_indices(F2, 1:400, 1:400, map10, neutral)
+F4 <- cross_indices(F3, 1:400, 1:400, map10, neutral)
+
+data.frame(
+  generation = c("F1", "F2", "F3", "F4"),
+  H_observed = round(c(panel_het(F1), panel_het(F2), panel_het(F3), panel_het(F4)), 4),
+  H_expected = c(1, 0.5, 0.25, 0.125)
+)
+```
+
+Heterozygosity halves at every selfing, as it must. And the diversity identity:
+
+```{r}
+set.seed(5)
+check <- do.call(rbind, lapply(c(20, 50, 100, 200), function(N) {
+  pop <- run_scheme("ssd", N, map10, neutral, f2_opt)
+  H <- panel_het(pop)
+  data.frame(N = N,
+             D_observed = diversity_retained(panel_freq(pop)),
+             D_expected = 1 - (1 - H) / N)
+}))
+fmt(check, 4)
+```
+
+Map expansion is an algebraic prediction, and the payoff is a result many
+programmes get wrong:
+
+```{r}
+Lm <- map$total_cM / 100
+rbind(SSD  = expected_junctions("ssd",  map),
+      Syn1 = expected_junctions("syn1", map),
+      Syn2 = expected_junctions("syn2", map))
+```
+
+Each Syn cycle adds only $0.5L$ junctions, not $1.0L$. The extra meiosis creates
+a junction only where the parent is heterozygous, and $H = 0.5$ at the F2/Syn
+stage. Budgeting an intercrossing cycle as "one more map length of
+recombination" overstates what it buys by a factor of two.
+
+## The results
+
+The full grid -- five schemes, `r length(unique(f2$N))` population sizes,
+adaptive replication -- takes several minutes and is shipped precomputed.
+
+```{r}
+#| echo: false
+ssd <- f2[f2$scheme == "ssd", ]
+sel <- ssd[ssd$N %in% c(10, 30, 50, 70, 90, 110, 150, 190, 290, 390), ]
+knitr::kable(data.frame(
+  N = sel$N,
+  D = round(sel$div, 3),
+  `SE(p_hat)` = round(sel$se_p, 3),
+  `skewed genome` = sprintf("%.1f%%", 100 * sel$skew),
+  `min(p, 1-p)` = round(sel$pmin, 3),
+  `N equivalent` = round(sel$n_eq),
+  check.names = FALSE),
+  caption = "SSD, the neutral reference. Everything below comes from this table.")
+```
+
+### The diversity curve saturates at 0.988, not at 1
+
+```{r}
+#| fig-cap: "Diversity retained against population size, five schemes. The theoretical curve is 1 - (1 - H)/N under no distortion."
+schemes <- unique(f2$scheme)
+cols <- c(ssd = "#1b6ca8", ssd_attr = "#7fb3d5", bulk = "#c0392b",
+          syn1 = "#27ae60", syn2 = "#16a085")
+plot(NA, xlim = range(f2$N), ylim = c(0.88, 1.0),
+     xlab = expression(N[F2]~"plants"), ylab = "diversity retained, D")
+grid()
+for (s in schemes) {
+  d <- f2[f2$scheme == s, ]
+  lines(d$N, d$div, type = "b", pch = 19, cex = 0.6, col = cols[s], lwd = 1.8)
+}
+curve(1 - 0.875 / x, add = TRUE, lty = 2, col = "grey30", lwd = 1.5)
+legend("bottomright", c(schemes, "theory, no distortion"),
+       col = c(cols[schemes], "grey30"), lwd = c(rep(1.8, length(schemes)), 1.5),
+       lty = c(rep(1, length(schemes)), 2), pch = c(rep(19, length(schemes)), NA),
+       bty = "n", cex = 0.8)
+```
+
+The gap between the observed curve and the theoretical one is **segregation
+distortion** -- a deterministic bias that does not shrink with more plants.
+Adding plants buys you drift protection; it does not buy you distortion
+protection.
+
+### The bulk is the worst scheme across the whole range
+
+```{r}
+#| echo: false
+b400 <- f2$div[f2$scheme == "bulk"  & f2$N == max(f2$N)]
+s40  <- f2$div[f2$scheme == "ssd"   & f2$N == 30]
+data.frame(comparison = c("bulk, largest N", "SSD, N = 30"),
+           N = c(max(f2$N), 30),
+           D = round(c(b400, s40), 3))
+```
+
+Bulk at the largest population size retains **less** diversity than SSD at 30
+plants. With a less adapted donor parent, natural selection in the bulk removes
+precisely the germplasm the wide cross was made to introduce. If the objective is
+introgression, the bulk is not a cheaper SSD -- it is a different experiment.
+
+### Block size does not depend on N
+
+```{r}
+#| fig-cap: "Ancestry frequency along the ten chromosomes, at N = 20 and N = 300. At N = 20 the whole curve is noisy: that is drift, and more plants remove it. At N = 300 the noise is gone and three peaks remain, exactly at the distorters. Those are the deterministic bias, and no number of plants removes them."
+map4 <- build_map(maize_chr_len, spacing_cM = 4)
+dist <- make_distortion(map4, f2_distorters)
+set.seed(6)
+small <- panel_freq(run_scheme("ssd", 20,  map4, dist, f2_opt))
+large <- panel_freq(run_scheme("ssd", 300, map4, dist, f2_opt))
+
+plot(small, type = "l", col = "#e08214", ylim = c(0, 1),
+     xlab = "genome (chromosomes 1-10)", ylab = "P1 ancestry frequency", xaxt = "n")
+lines(large, col = "#1b6ca8", lwd = 1.6)
+abline(h = 0.5, lty = 2, col = "grey50")
+# chromosome boundaries and distorter positions
+bnd <- which(map4$first)
+axis(1, at = (c(bnd, map4$m + 1)[-1] + bnd) / 2, labels = seq_along(map4$chr_len))
+abline(v = bnd[-1] - 0.5, col = "grey85")
+for (i in seq_len(nrow(f2_distorters)))
+  abline(v = marker_index(map4, f2_distorters$chr[i], f2_distorters$pos_cM[i]),
+         col = "#b2182b", lty = 3)
+legend("topleft", c("N = 20", "N = 300", "distorter"), col = c("#e08214", "#1b6ca8", "#b2182b"),
+       lty = c(1, 1, 3), lwd = c(1, 1.6, 1), bty = "n", cex = 0.8, horiz = TRUE)
+```
+
+Block length depends only on the number of meioses. Against linkage drag the
+instrument is an **intercrossing cycle, not field area** -- which is what the
+Syn curves in the theory table above quantify.
+
+### The metrics saturate at different N
+
+This is the central practical result, and the reason the question "what is the
+optimal $N$?" has no single answer.
+
+```{r}
+#| echo: false
+knitr::kable(data.frame(
+  Objective = c("Diversity retained (D)",
+                "Worst region of the genome, min(p, 1-p)",
+                "Precision of the panel's p_hat",
+                "Recovery of 5 loci",
+                "Recovery of 8-10 loci"),
+  `Saturates near` = c("100-120", "60-80",
+                       "**never** -- falls as 1/sqrt(N)",
+                       "200-260",
+                       "**not saturated** at the largest N tested"),
+  check.names = FALSE),
+  caption = "Different objectives, different answers. Size for the one that binds.")
+```
+
+```{r}
+#| fig-cap: "Multilocus recovery: P(at least one line homozygous for P2 at k loci). This is the objective that keeps paying for larger N."
+kk <- sort(unique(ml$k))
+plot(NA, xlim = range(ml$N), ylim = c(0, 1), xlab = expression(N[F2]),
+     ylab = "P(at least one line)")
+grid()
+for (i in seq_along(kk)) {
+  d <- ml[ml$k == kk[i], ]
+  lines(d$N, d$P, type = "b", pch = 19, cex = 0.6, col = i + 1, lwd = 1.8)
+}
+legend("topright", paste("k =", kk), col = seq_along(kk) + 1, lwd = 1.8,
+       pch = 19, bty = "n")
+```
+
+The marginal gain in $D$ tells the same story from the other side:
+
+```{r}
+#| echo: false
+d <- f2[f2$scheme == "ssd", ]
+d <- d[order(d$N), ]
+data.frame(
+  step = paste0(utils::head(d$N, -1), " -> ", d$N[-1]),
+  gain_in_D = round(diff(d$div), 4)
+)[1:6, ]
+```
+
+The knee is early. Past it, twenty more plants buy thousandths.
+
+## Sizing the F1
+
+With fully homozygous parents the F1 is genetically uniform and the decision is
+logistical. With residual heterozygosity -- $F \approx 0.95$ is common in
+programme lines -- each parent still segregates at a fraction of loci, and each
+F1 plant receives one random gamete from each parent. At a segregating locus the
+chance of losing one of the two parental alleles with $n$ F1 plants is
+$2(1/2)^n$.
+
+```{r}
+s <- f1_sizing(n_F1 = 1:20, h_res = 0.05, n_loci_eff = 5000)
+s[s$n_F1 %in% c(4, 8, 10, 12, 15, 20), ]
+```
+
+Twelve selfed F1 plants already put the expected number of lost loci below one.
+That is the whole F1 sizing argument.
+
+## Working numbers
+
+```{r}
+#| echo: false
+knitr::kable(data.frame(
+  Generation = c("F1", "F2", "", "F3", "F4"),
+  Plants = c("8-15 selfed", "**120** to retain diversity",
+             "**250-400** for multilocus selection or panel frequencies",
+             "same N (SSD, one seed per plant)", "lines x 3-8 plants"),
+  Rationale = c(
+    "Ne = 1, a logistical call. With 5% residual heterozygosity, 12 plants put expected lost loci below 1",
+    "Above this, +280 plants buy +0.005 of D",
+    "These are the objectives that keep gaining with N",
+    "Does not create diversity, only avoids losing it",
+    "Seed multiplication. Plants of the same line are not independent replicates: they share 87.5% of the genome"),
+  check.names = FALSE),
+  caption = "Working numbers for a wide cross. Size for the objective that binds, not for D.")
+```
+
+::: {.callout-caution}
+## On the "equivalent N"
+
+$N_{eq} = (1 - H)/(1 - D)$ answers "how many F4 lines without distortion would
+give the diversity actually observed". It is a **communication device, not a
+Wright effective size**: it converts a deterministic bias into a drift
+equivalent. Use it to compare scenarios; never substitute it into an $N_e$
+formula.
+:::
+
+## Where this connects
+
+The panel this chapter sizes is the raw material for everything else. Its
+diversity is the ceiling: no selection stage downstream can recover variation
+that was never sampled here. @sec-stages puts a number on how the loss is
+distributed across the whole pipeline, and this stage is where the cheapest
+insurance is available -- more plants, once, at the start.

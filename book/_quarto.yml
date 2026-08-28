@@ -1,0 +1,73 @@
+project:
+  type: book
+  output-dir: _book
+
+book:
+  title: "Genetic Diversity in Hybrid Breeding"
+  subtitle: "Measuring it, constraining it, and optimising against it, with R"
+  author: "Eder D. B. S."
+  date: today
+  search: true
+  chapters:
+    - index.qmd
+    - part: "Foundations"
+      chapters:
+        - 01-coancestry.qmd
+        - 02-subdivided.qmd
+    - part: "Simulation"
+      chapters:
+        - 03-simulating-crosses.qmd
+        - 04-population-sizing.qmd
+    - part: "Metrics"
+      chapters:
+        - 05-genomic-era.qmd
+        - 06-metric-catalogue.qmd
+        - 07-choosing-metrics.qmd
+        - 08-pipeline-stages.qmd
+    - part: "Optimisation"
+      chapters:
+        - 09-optimal-contributions.qmd
+        - 10-combinatorial-selection.qmd
+    - part: "Evidence and practice"
+      chapters:
+        - 11-plant-literature.qmd
+        - 12-case-study.qmd
+  appendices:
+    - 90-notation.qmd
+    - 91-package.qmd
+    - 92-verification.qmd
+    - 93-corpora.qmd
+    - 99-references.qmd
+
+bibliography: references.bib
+
+# PDF output needs a LaTeX install (`quarto install tinytex`); add a `pdf:`
+# block here once you have one.
+format:
+  html:
+    theme:
+      light: cosmo
+      dark: darkly
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    code-link: false
+    code-overflow: scroll
+    fig-width: 7
+    fig-height: 4.5
+    fig-dpi: 150
+    df-print: kable
+    citations-hover: true
+    link-external-newwindow: true
+
+execute:
+  freeze: auto
+  warning: false
+  message: false
+  echo: true
+
+knitr:
+  opts_chunk:
+    comment: "#>"
+    collapse: true
+    fig.align: center

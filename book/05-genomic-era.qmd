@@ -1,0 +1,415 @@
+# Diversity metrics in the genomic era {#sec-genomic-era}
+
+```{r}
+#| include: false
+source("_common.R")
+ctx <- simulate_data(book_cfg)
+```
+
+In classical theory, inbreeding measured as **loss of heterozygosity** and
+inbreeding measured as **drift of allele frequencies** are the same thing.
+@meuwissen2020 show that inside genomic optimal-contribution schemes they stop
+being the same thing, and can diverge badly, whenever diversity is controlled
+through **identity by state** on a marker panel. Only when control is through
+**identity by descent** is the classical equivalence restored.
+
+The practical consequence is uncomfortable:
+
+> You hit exactly the target you wrote into the optimiser's constraint, and you
+> pay an unmonitored price in the metric you did not write.
+
+For a plant breeder: if you constrain $\tfrac{1}{2}\mathbf{c}'\mathbf{G}\mathbf{c}$
+using a VanRaden $\mathbf{G}$, you are constraining **drift**. The loss of
+heterozygosity in your germplasm may be running at twice the rate you believe
+you are controlling.
+
+## Three lenses, not three synonyms
+
+```{r}
+#| echo: false
+knitr::kable(data.frame(
+  Lens = c("Drift", "Homozygosity", "IBD", "Hybrid"),
+  `What the metric actually sees` = c(
+    "squared allele-frequency change relative to a base",
+    "proportion of heterozygosity remaining",
+    "segments inherited by descent from a defined base",
+    "haplotype homozygosity used as a proxy for IBD"),
+  `Inbreeding metric` = c("F_drift", "F_hom", "F_IBD", "F_ROH"),
+  `Relationship matrix` = c("G_VR2, G_VR1, G_i(p)", "G_0.5 (molecular coancestry)",
+                            "A, G_LA", "G_ROH"),
+  check.names = FALSE),
+  caption = "The three lenses. G_0.5 is the matrix this book calls f -- see @sec-coancestry.")
+```
+
+::: {.callout-important}
+## Every inbreeding metric is a ratio to a reference population
+
+Without explicitly declaring your base -- cycle 0 of the recurrent programme? a
+landrace panel? the founding heterotic pool? -- none of the numbers below mean
+anything. This is the commonest error in plant applications: using the *current*
+generation's frequencies as the base, which zeroes the historical memory of
+erosion.
+:::
+
+## The metrics, one at a time
+
+### Rate of inbreeding and effective size
+
+What you manage is not $F$ but its rate of accumulation. $F$ is a stock;
+$\Delta F$ is a flow.
+
+$$\Delta F = \frac{F_t - F_{t-1}}{1 - F_{t-1}}, \qquad N_e = \frac{1}{2\Delta F}$$
+
+Since $1 - F_t = (1 - \Delta F)^t$, a regression of $\log(1 - F_t)$ on $t$ has
+slope $\approx -\Delta F$. **The linearity of that regression is itself a
+diagnostic:** in the paper, $\log(1 - F_{drift})$ was approximately linear under
+every scheme, while $\log(1 - F_{hom})$ showed marked curvature under some,
+notably the ROH-based one. Curvature means a non-constant rate -- your $N_e$
+target is not being met steadily.
+
+A tropical maize recurrent programme targeting $N_e = 50$ per cycle needs
+$\Delta F = 0.01$. Measuring $F$ only at cycle 8 and dividing by 8 hides the
+possibility that cycles 1-3 were conservative and cycles 6-8 collapsed the base.
+Always fit the log-linear regression and look at the residual.
+
+### `F_hom`, homozygosity-based
+
+Wright defined an inbreeding coefficient to run from 0 to 1 as heterozygosity
+under random mating falls from its initial state to zero. So the metric is the
+fraction of heterozygosity already lost relative to the base:
+
+$$F_{hom} = 1 - \frac{1}{N_{SNP}}\sum_k \frac{2p_{t,k}(1 - p_{t,k})}{2p_{0,k}(1 - p_{0,k})}
+          = 1 - \frac{1}{N_{SNP}}\sum_k \frac{H_{t,k}}{H_{0,k}}$$
+
+**It can be negative.** If management pushes frequencies toward 0.5,
+heterozygosity rises above the base and the "inbreeding coefficient" goes below
+zero. That is not a numerical error: it is the expected behaviour of any scheme
+that maximises heterozygosity on the monitored panel.
+
+It protects against inbreeding depression and the expression of deleterious
+recessives in homozygosis. It is the right lens when the dominant risk is
+*vigour*.
+
+In maize, heterozygosity is the product itself. Within a heterotic pool under
+reciprocal recurrent selection, `F_hom` computed **within pool** anticipates the
+decline in line-per-se vigour; it says nothing about between-pool divergence,
+which is what generates heterosis in the hybrid. In selfing species, `F_hom`
+measured on fixed lines is $\approx 1$ by construction and is **useless for
+management** -- it has to be computed on allele frequencies in the crossing
+population, not on the homozygosity of individuals.
+
+### `F_drift`, drift-based
+
+$$F_{drift} = \frac{1}{N_{SNP}}\sum_k \frac{(p_{t,k} - p_{0,k})^2}{p_{0,k}(1 - p_{0,k})}$$
+
+**Never negative.** It is formally analogous to Holsinger & Weir's $F_{ST}$
+applied to *one population through time* rather than to a set of populations in
+space. It is exactly the quantity constrained when `G_VR2` goes into the
+optimiser.
+
+It protects against random change in phenotypic value for traits **outside** the
+selection objective, against rare deleterious recessives rising to dangerous
+frequencies, and against irreversible loss of rare alleles.
+
+There is also a selection-intensity reading: the term
+$\delta p^2 / [p_0(1-p_0)]$ approximates the **squared total intensity** applied
+at that marker, with $i \approx \delta p / \sqrt{p_0(1-p_0)}$. Constraining
+`F_drift` constrains how much effective selection the whole genome underwent --
+including at loci you never meant to select.
+
+A wheat programme running six cycles of genomic selection with a VanRaden
+$\mathbf{G}$ and reporting $\Delta F \approx 1\%$ has reported
+$\Delta F_{drift}$ on the training panel. Quantitative disease-resistance loci
+not yet prioritised may have hitch-hiked to extreme frequencies alongside yield
+QTL, and none of that appears in the reported metric.
+
+## The classical equivalence, and the covariance that destroys it
+
+Under purely random drift, with $E[\delta p_t \mid p_0] = 0$ for every $p_0$,
+
+$$\frac{\mathrm{var}(p_{t,k})}{p_0(1-p_0)} = 1 - \frac{H_t}{H_0}
+  \;\;\Longrightarrow\;\; F_{drift} = F_{hom}.$$
+
+The paper's central result quantifies the departure:
+
+$$F_{hom} - F_{drift} \;=\; 2\,\mathrm{cov}\!\left(
+  \frac{\delta p_{t,k}}{\sqrt{p_{0,k}(1-p_{0,k})}},\;
+  \frac{p_{0,k} - 1/2}{\sqrt{p_{0,k}(1-p_{0,k})}}\right)$$
+
+In words: **if the direction of frequency change is correlated with the starting
+frequency, the two measures diverge.** The non-obvious part is that this
+covariance is induced by the *diversity management itself*, not by directional
+selection -- the paper demonstrates this by running the scheme with random
+GEBVs, and the divergence persists.
+
+### Verifying the identity
+
+`freq_metrics()` returns all three quantities in one marker sweep. The identity
+is asserted in the test suite; here it is on live data:
+
+```{r}
+set.seed(31)
+idx <- sample.int(ctx$N, 60)
+fm <- freq_metrics(idx, ctx)
+fmt(fm[c("F_hom", "F_drift", "cov_diag")], 6)
+```
+
+```{r}
+c(F_hom_minus_F_drift = unname(fm[["F_hom"]] - fm[["F_drift"]]),
+  cov_diag            = unname(fm[["cov_diag"]]),
+  residual            = unname(fm[["cov_diag"]] - (fm[["F_hom"]] - fm[["F_drift"]])))
+```
+
+Exact to machine precision. And when the selection *is* the base, both lenses
+must read zero:
+
+```{r}
+fmt(freq_metrics(seq_len(ctx$N), ctx)[c("F_hom", "F_drift", "cov_diag")], 12)
+```
+
+### Why each matrix generates a sign
+
+```{r}
+#| echo: false
+knitr::kable(data.frame(
+  Matrix = c("G_VR2", "G_0.5", "G_VR1", "G_i(p)"),
+  Covariance = c("positive", "negative", "positive, attenuated", "negative"),
+  Mechanism = c(
+    "the constraint penalises delta-p^2, so moving an allele to the *far* extreme costs more than to the near one; the optimiser pushes rare alleles to 0 and common ones to 1",
+    "frequencies are measured as deviations from 0.5, so the optimiser buys 'diversity' by pushing everything to intermediate frequencies",
+    "G_VR2 reweighted by 2p0(1-p0), giving more weight to already-intermediate loci and less room at the extremes",
+    "uses accumulated intensity instead of delta-p^2; since di/dp = [p(1-p)]^-1/2, moves toward the extremes get more expensive"),
+  check.names = FALSE),
+  caption = "The sign of the bias is a property of the matrix, not of the data.")
+```
+
+::: {.callout-warning}
+## Your MAF spectrum decides how bad this is
+
+The magnitude depends on the minor-allele-frequency spectrum. The effect is
+dramatic with sequence data dominated by rare alleles, and much milder with SNP
+chips designed for intermediate MAF.
+
+**Directly translated to plants:** GBS or skim-seq with the full MAF spectrum
+puts you in the severe scenario; a 20-50k chip filtered to MAF > 0.05 puts you in
+the mild one. This is the parameter that decides whether you can live with
+`G_VR2`.
+:::
+
+### The signature, on live data
+
+The pure max-diversity greedy is the `G_0.5` scheme in miniature: it constrains
+molecular coancestry and nothing else. It should drive `F_hom` negative while
+paying the largest drift bill.
+
+```{r}
+panel <- rbind(
+  random      = freq_metrics(sample.int(ctx$N, 60), ctx),
+  max_div     = freq_metrics(sel_greedy(ctx, 60, w = 0), ctx),
+  balanced    = freq_metrics(sel_greedy(ctx, 60, w = 1), ctx),
+  truncation  = freq_metrics(sel_truncation(ctx, 60), ctx)
+)
+fmt(as.data.frame(panel[, c("He", "F_hom", "F_drift", "cov_diag", "rare_retained")]), 4)
+```
+
+Read the `F_hom` and `F_drift` columns together. Maximising diversity on the
+homozygosity lens produces a *negative* `F_hom` -- the selection is more
+heterozygous than the base -- while `F_drift` is strictly positive and larger
+than under random sampling. The bill is real, it is being paid, and a report
+carrying only `F_hom` would not show it.
+
+## The other matrices, briefly
+
+**`F_IBD` via `G_LA`.** Instead of assuming a 50/50 transmission probability for
+each parental allele (as the pedigree matrix $\mathbf{A}$ does), linkage
+analysis over the markers infers which parental haplotype was actually
+transmitted along the chromosome. It requires pedigree **and** markers. It
+measures IBD relative to a base explicitly defined as unrelated and
+non-inbred, so frequency change is determined by the base population rather
+than by linkage disequilibrium generated during selection -- and the
+problematic covariance disappears. It was the **only scheme tested that met
+both the $\Delta F_{hom}$ and $\Delta F_{drift}$ targets**, on the managed panel
+and at unmonitored neutral loci, and it converted inbreeding into gain most
+efficiently.
+
+For plants this is the point of greatest friction. In biparental populations and
+backcross families `G_LA` is natural and cheap -- phase is known and the number
+of meioses since the base is small. In recurrent-selection populations with full
+pedigree (common in commercial maize) it is feasible. In germplasm panels
+*without* pedigree it is inapplicable, and the honest alternative is
+segment-based IBD.
+
+**`F_ROH`.** A run of homozygosity is an uninterrupted stretch of homozygous
+markers; the logic is that many consecutive markers are unlikely to be IBS by
+chance, so the stretch is probably IBD. The fundamental ambiguity is that
+`F_ROH` is IBD when runs are **long** (recent inbreeding) and homozygosity when
+they are **short** (ancient inbreeding, accumulated IBS). The minimum-length
+threshold is therefore a knob that selects the *age* of inbreeding you are
+measuring, and there is no well-defined reference base.
+
+Empirically, `G_ROH` behaved more like `G_0.5` than like an IBD measure. It also
+is **not guaranteed positive semi-definite** -- its elements are computed
+pairwise -- and required substantial diagonal additions for inversion, which
+made it diagonally dominant and artificially inflated the number of parents
+selected.
+
+In a soybean inbred the entire genome is one ROH: `F_ROH` $\approx 1$ and the
+metric saturates. In maize it is useful for diagnosing erosion of elite
+heterotic pools; for *management* inside an optimiser, check positive
+definiteness carefully.
+
+### Side by side
+
+```{r}
+#| echo: false
+knitr::kable(data.frame(
+  Matrix = c("A", "G_VR2", "G_VR1", "G_0.5", "G_i(p)", "G_LA", "G_ROH"),
+  Class = c("IBD (expectation)", "drift", "drift", "homozygosity", "drift",
+            "IBD", "hybrid"),
+  `Behaviour in the optimiser` = c(
+    "high gain, but exceeded targets by ~40% by not accounting for within-family LD",
+    "meets the drift target *only on the managed panel*; F_hom runs away",
+    "reweighted version; smaller bias, smaller gain",
+    "F_hom near zero, drift 4x the target; loses genetic variance early",
+    "inverts the sign of the bias; constraint only indirectly tied to F",
+    "the only one meeting both targets; best gain per unit of inbreeding",
+    "high gain, uncontrolled drift, numerical problems"),
+  check.names = FALSE),
+  caption = "Seven matrices in the same optimiser (Meuwissen et al. 2020).")
+```
+
+::: {.callout-note}
+## An implementation note that is routinely ignored
+
+`G_VR1`, `G_VR2`, `G_0.5` and `G_i(p)` are only **semi**-definite positive (a
+zero eigenvalue from the centering). You must add $\alpha$ to the diagonal
+($\alpha = 0.01$ in the paper) to invert them and for the optimal-contribution
+algorithm to work. $\mathbf{A}$ and `G_LA` are positive definite by
+construction.
+:::
+
+## Reference results
+
+Target $\Delta F = 0.005$ per generation ($N_e = 100$). Values at the
+**unmonitored neutral loci**, generation 20.
+
+```{r}
+#| echo: false
+knitr::kable(data.frame(
+  Scheme = c("G_VR2(M,M)", "G_VR2(M,D)", "G_VR1(M,M)", "G_i(p)(M,M)",
+             "G_0.5(M,M)", "G_ROH(M,M)", "G_LA(M,M)", "A(M,~)"),
+  Class = c("drift", "drift", "drift", "drift", "homozygosity",
+            "homozygosity", "IBD", "IBD"),
+  dF_hom = c(0.0103, 0.0101, 0.0080, 0.0065, 0.0073, 0.0054, 0.0043, 0.0070),
+  dF_drift = c(0.0068, 0.0068, 0.0069, 0.0077, 0.0176, 0.0088, 0.0049, 0.0084),
+  gap = c(0.054, 0.050, 0.021, -0.031, -0.170, -0.070, -0.010, -0.021),
+  gain = c(7.124, 7.107, 6.680, 7.111, 6.734, 9.099, 7.188, 9.890),
+  check.names = FALSE),
+  caption = "Both rate targets are 0.005. Only G_LA meets both.")
+```
+
+Four readings:
+
+1. **No IBS scheme met both targets.** `G_LA` did, within about 2%.
+2. Pedigree $\mathbf{A}$ gave the highest absolute gain but overshot by ~40% --
+   neutral loci hitch-hiking with QTL through within-family LD, which the
+   pedigree expectation of IBD cannot capture.
+3. Using a separate panel for management instead of the GEBV panel changed gain
+   by **less than 0.3%**. Not worth the complexity.
+4. At equal mean inbreeding, `G_LA` beat $\mathbf{A}$ in 65 of 100 replicates
+   and `G_ROH` in 62 of 100.
+
+### The diagnostic nobody runs
+
+Schemes based on IBD selected many parents; VanRaden-style schemes selected few.
+
+> **Rule of thumb.** If your optimal-contribution run is delivering high gain
+> with a suspiciously small number of parents and $\Delta F$ on target, compute
+> `F_hom` and `F_drift` separately on a panel **not used** in the management.
+> The difference between them is your hidden bill.
+
+The book's implementation of that diagnostic is `ne_parents()`, reported
+alongside the two lenses in every scenario -- see @sec-case-study, where a
+selection meeting its diversity target while collapsing from 40 effective
+parents to 12 is visible in one row of the output.
+
+## What to carry into plant breeding
+
+**Declare the base and never redefine it.** Redefining the reference frequencies
+every generation is common in plant pipelines because it is the *default* in
+several $\mathbf{G}$-construction functions. Since frequency changes in
+successive cycles are positively correlated, constraining the variance *within*
+each cycle lets the *accumulated* variance overshoot the target. Freeze $p_0$
+from the founding cycle and propagate it. In this book that is `ctx$p0`, set
+once in `build_ctx()` and never recomputed.
+
+**Do not maximise marker heterozygosity as an objective.** Raising
+heterozygosity on the monitored panel does not raise it at unmonitored loci --
+and it increases real IBD, because raising an allele's frequency means
+multiplying copies of a subset of base alleles.
+
+**Heterotic pools need a two-directional constraint.** Within pool you want to
+limit $\Delta F$. Between pools you want to *preserve* divergence, which is
+directed drift and is desirable. A single global
+$\tfrac{1}{2}\mathbf{c}'\mathbf{G}\mathbf{c}$ cannot express that. Use multiple
+matrices with simultaneous constraints, or per-subpopulation constraints -- which
+is what `gd_partition()` measures and @sec-stages operationalises.
+
+**Selfing species need inbreeding by selfing separated from inbreeding by
+drift.** In soybean, wheat or rice, individual $F$ is $\approx 1$ by design and
+carries no management information. The manageable quantity is allele frequency
+**in the crossing population** and coancestry among the chosen parents. Apply
+the whole `F_hom`/`F_drift` framework at population level, never at line level.
+
+**Region-specific targets rarely earn their complexity.** Causal variants are
+well distributed and what happens at a subset of loci does not predict what
+happens outside it. The legitimate plant exception is R-gene-type resistance
+loci, where allelic diversity has direct and known value.
+
+**Deleterious recessives are a load problem, not a diversity problem.** If you
+have mapped the defect, putting it in the selection index is more efficient than
+controlling it indirectly through a diversity constraint.
+
+**In pure conservation schemes the problem is *worse*, not better.** Without
+directional selection the inbreeding-management term dominates the optimiser and
+the covariance tends to be larger. The IBD recommendation is stronger there.
+
+## Limits of the animal-to-plant transposition
+
+```{r}
+#| echo: false
+knitr::kable(data.frame(
+  `Assumption in the paper` = c(
+    "discrete generations, two sexes, one contribution per individual",
+    "reliable, deep pedigree",
+    "base = simulated founder population at mutation-drift equilibrium",
+    "target Ne = 100 over 20 generations",
+    "one population, one target",
+    "heterozygosity is always desirable"),
+  `Situation in plants` = c(
+    "hermaphroditism, selfing, cloning, overlapping cycles, repeated use of the same parent",
+    "often truncated, or absent in genebanks",
+    "base is an administrative choice (cycle 0) with pre-existing structure",
+    "shorter cycles with GS, but effective elite Ne often below 30",
+    "multiple target environments, G x E, separate heterotic pools",
+    "in selfers transitory; in hybrids the final product; in lines undesirable"),
+  check.names = FALSE))
+```
+
+None of this invalidates the central conclusion. It is an **algebraic** property
+of the optimiser, not a biological property of the species. What it changes is
+*which matrix is practicable*.
+
+## Operational checklist
+
+- Is the base $p_0$ frozen at the founding cycle, and documented?
+- Are `F_hom` and `F_drift` computed **separately** and reported together?
+- Is there a panel of loci **not used in management**, for audit?
+- Is the regression of $\log(1 - F)$ on cycle linear (constant rate)?
+- Is the covariance $2\,\mathrm{cov}(\delta p/s,\, (p_0 - \tfrac12)/s)$ reported
+  as a diagnostic?
+- Is the number of selected parents biologically plausible?
+- Is true genetic variance (or the best estimate of it) being tracked?
+- Is $\mathbf{G}$ positive definite before inversion, and is the added $\alpha$
+  documented?
+- Where possible, is an IBD alternative compared in parallel?

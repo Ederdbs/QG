@@ -1,8 +1,19 @@
 # Benchmark: null distribution, strategy comparison, gain-vs-alpha frontier.
 
-# The "0% loss" reference is the distribution of RANDOM subsets of size n_sel —
-# not the population of 5000. Comparing directly against the full matrix
-# confounds a sampling effect with a selection effect.
+#' Null distribution of the metrics under random sampling
+#'
+#' The correct "0 percent loss" reference is the distribution of **random
+#' subsets of size `n_sel`**, not the full candidate population. Comparing a
+#' selection directly against the full matrix confounds a sampling effect with
+#' a selection effect.
+#'
+#' @param ctx Evaluation context, see [build_ctx].
+#' @param n_sel Number of hybrids selected.
+#' @param B Replicates for the cheap panel.
+#' @param B_full Replicates for the full panel.
+#' @param seed Random seed.
+#' @return A list with matrices `cheap` and `full`, plus `gd_ref` and `gd_sd`.
+#' @export
 null_distribution <- function(ctx, n_sel, B = 2000, B_full = 200, seed = 7) {
   set.seed(seed)
   cheap <- t(replicate(B, metrics_cheap(sample.int(ctx$N, n_sel), ctx)))
@@ -11,17 +22,40 @@ null_distribution <- function(ctx, n_sel, B = 2000, B_full = 200, seed = 7) {
        gd_ref = mean(cheap[, "GD"]), gd_sd = sd(cheap[, "GD"]))
 }
 
-# alpha = relative loss of gene diversity against the random reference.
-# Negative = more diverse than a random sample.
+#' Relative loss of gene diversity
+#'
+#' `alpha = (gd_ref - GD) / gd_ref`. Negative means the selection is *more*
+#' diverse than a random sample of the same size.
+#'
+#' @param idx Integer vector of selected row indices.
+#' @param ctx Evaluation context, see [build_ctx].
+#' @param gd_ref Reference gene diversity from [null_distribution].
+#' @return A scalar.
+#' @export
 alpha_loss <- function(idx, ctx, gd_ref) (gd_ref - gene_diversity(idx, ctx)) / gd_ref
 
+#' Evaluate a list of selections
+#'
+#' @param sels A list of index vectors, ideally named.
+#' @param ctx Evaluation context, see [build_ctx].
+#' @param gd_ref Reference gene diversity from [null_distribution].
+#' @return A matrix, one row per selection, with an `alpha` column appended.
+#' @export
 evaluate <- function(sels, ctx, gd_ref) {
   out <- t(sapply(sels, metrics_full, ctx = ctx))
   cbind(out, alpha = (gd_ref - out[, "GD"]) / gd_ref)
 }
 
-# How many standard deviations from the null each metric places each strategy.
-# A metric that doesn't separate truncation from random is useless as a constraint.
+#' Discriminatory power of each metric
+#'
+#' How many standard deviations from the random null each metric places each
+#' strategy. A metric that cannot separate truncation from random selection is
+#' useless as a constraint.
+#'
+#' @param tab A matrix of metrics, as returned by [evaluate].
+#' @param null The null distribution, see [null_distribution].
+#' @return A matrix of z-scores, rounded to two decimals.
+#' @export
 discriminatory_power <- function(tab, null) {
   mu <- colMeans(null$full); sdv <- apply(null$full, 2, sd)
   cols <- intersect(colnames(tab), names(mu))
@@ -29,7 +63,16 @@ discriminatory_power <- function(tab, null) {
   round(z, 2)
 }
 
-# Cost per evaluation: decides what can go inside the DE fitness (~1e5 calls).
+#' Cost per metric evaluation
+#'
+#' Decides what can live inside the differential-evolution fitness, which makes
+#' on the order of 1e5 calls.
+#'
+#' @param ctx Evaluation context, see [build_ctx].
+#' @param n_sel Number of hybrids selected.
+#' @param reps Repetitions per metric.
+#' @return A data frame with columns `metric` and `us_per_eval`.
+#' @export
 cost_per_eval <- function(ctx, n_sel, reps = 30) {
   fns <- list(theta_group = theta_group, theta_from_freq = theta_from_freq,
               ne_parents = ne_parents, alleles_lost = alleles_lost,
@@ -45,6 +88,13 @@ cost_per_eval <- function(ctx, n_sel, reps = 30) {
 
 # --- Plots (base R, no dependencies) -----------------------------------------
 
+#' Plot the metric null distributions with the strategies overlaid
+#'
+#' @param null The null distribution, see [null_distribution].
+#' @param tab A matrix of metrics, as returned by [evaluate].
+#' @param file Output PNG path.
+#' @return Called for its side effect; returns `NULL` invisibly.
+#' @export
 plot_null <- function(null, tab, file) {
   vars <- c("GD", "Ns", "Ne_parents", "ENE")
   png(file, width = 1100, height = 850, res = 110)
@@ -60,6 +110,12 @@ plot_null <- function(null, tab, file) {
   par(op); dev.off()
 }
 
+#' Plot the correlation matrix of the metrics under the null
+#'
+#' @param null The null distribution, see [null_distribution].
+#' @param file Output PNG path.
+#' @return Called for its side effect; returns `NULL` invisibly.
+#' @export
 plot_correlation <- function(null, file) {
   keep <- apply(null$full, 2, sd) > 1e-10
   C <- cor(null$full[, keep])
@@ -75,6 +131,16 @@ plot_correlation <- function(null, file) {
   par(op); dev.off()
 }
 
+#' Plot the gain-versus-diversity frontier
+#'
+#' @param front Data frame with `alpha` and `index` for the constrained DE.
+#' @param greedy_front Data frame with `alpha` and `index` for the greedy sweep.
+#' @param relax Matrix from [ocs_relaxation].
+#' @param tab A matrix of metrics, as returned by [evaluate].
+#' @param gd_ref Reference gene diversity from [null_distribution].
+#' @param file Output PNG path.
+#' @return Called for its side effect; returns `NULL` invisibly.
+#' @export
 plot_frontier <- function(front, greedy_front, relax, tab, gd_ref, file) {
   a_relax <- (gd_ref - relax[, "GD"]) / gd_ref
   png(file, width = 1000, height = 750, res = 110)

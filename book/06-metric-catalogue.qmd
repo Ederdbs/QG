@@ -1,0 +1,405 @@
+# A catalogue of metrics on `f` {#sec-catalogue}
+
+```{r}
+#| include: false
+source("_common.R")
+ctx <- simulate_data(book_cfg)
+n_sel <- 60
+set.seed(41)
+idx <- sample.int(ctx$N, n_sel)
+```
+
+Every metric in this chapter has the same signature, `f(idx, ctx) -> scalar`,
+and every one operates on the molecular coancestry matrix from
+@sec-coancestry. That uniformity is not tidiness: it is what makes metrics
+interchangeable inside an optimiser, and it is what lets @sec-choosing benchmark
+them against each other on equal terms.
+
+The chapter also settles the question of what "no loss" means, which turns out
+to be less obvious than it sounds.
+
+## Group coancestry, and the off-diagonal problem
+
+The group coancestry [@cockerham1967] of a set $S$ of $n$ individuals is the
+mean of **all** $n^2$ elements, diagonal included:
+
+$$\theta_S \;=\; \frac{1}{n^2}\sum_{i \in S}\sum_{j \in S} f_{ij}
+            \;=\; \frac{1}{n^2}\,\mathbf{1}'\mathbf{f}_S\mathbf{1}.$$
+
+It is the probability that two alleles sampled at random *from the whole set*
+are identical -- including the possibility that both come from the same
+individual. That is why the diagonal enters: it is the chance of sampling the
+same individual twice, which is entirely real when the set is used as a crossing
+pool.
+
+Splitting the diagonal mean $\bar f_d$ from the off-diagonal mean $\bar f_o$,
+
+$$\theta_S \;=\; \frac{\bar f_d}{n} \;+\; \frac{n-1}{n}\,\bar f_o . \tag{1}$$
+
+So the off-diagonal mean -- the metric many programmes already report -- is one
+of two terms. When $\bar f_d$ varies little across individuals, which is the
+case in an all-F1 population, the two rank almost identically:
+
+```{r}
+sels <- list(random     = sel_random(ctx, n_sel),
+             trunc_cap  = sel_truncation_cap(ctx, n_sel),
+             greedy_w1  = sel_greedy(ctx, n_sel, w = 1),
+             greedy_div = sel_greedy(ctx, n_sel, w = 0),
+             truncation = sel_truncation(ctx, n_sel))
+
+cmp <- t(sapply(sels, function(s)
+  c(theta = theta_group(s, ctx), offdiag = mean_offdiag(s, ctx))))
+fmt(as.data.frame(cmp), 5)
+c(rank_correlation = cor(cmp[, "theta"], cmp[, "offdiag"], method = "spearman"))
+```
+
+The off-diagonal metric ranks correctly. What it does not give you is an
+interpretable scale or a defensible baseline -- which is what the rest of this
+chapter supplies.
+
+## Gene diversity: $\theta$ and $H_e$ are the same quantity {#sec-identity}
+
+This is the result that simplifies everything downstream. Starting from the
+definition and swapping the order of summation, the double sum factors:
+
+$$\frac{1}{n^2}\sum_i\sum_j x_{ik}x_{jk}
+  = \Big(\frac{1}{n}\sum_i x_{ik}\Big)^2 = \bar p_k^2,$$
+
+with $\bar p_k$ the **group's** allele frequency. Hence
+
+$$\theta_S = \frac{1}{m}\sum_k \big(\bar p_k^2 + \bar q_k^2\big),
+  \qquad
+  GD_S = 1 - \theta_S = \frac{1}{m}\sum_k 2\,\bar p_k \bar q_k \;\equiv\; H_e,$$
+
+which is exactly Nei's gene diversity [@nei1973]. **Group coancestry and
+expected heterozygosity are not two independent checks. They are one quantity
+written two ways.**
+
+```{r}
+c(via_submatrix = theta_group(idx, ctx),
+  via_frequency = theta_from_freq(idx, ctx),
+  difference    = theta_group(idx, ctx) - theta_from_freq(idx, ctx))
+
+c(GD = gene_diversity(idx, ctx), He_Nei = he_nei(idx, ctx))
+```
+
+Equality to machine precision is the implementation's strongest sanity check.
+If it fails, `f` is centered, rescaled, or built on the wrong marker coding.
+
+Three practical consequences:
+
+1. One fewer metric to justify to a technical committee.
+2. "Losing 5% of diversity" acquires an exact meaning: 5% of the set's expected
+   heterozygosity.
+3. Two computation routes with the same answer and very different costs. The
+   matrix route is $O(n^2)$; the frequency route is $O(nm)$. For $n = 200$ and
+   $m = 25000$ that is forty thousand operations against five million.
+
+```{r}
+reps <- 40
+t_mat <- system.time(for (i in seq_len(reps)) theta_group(idx, ctx))[["elapsed"]]
+t_frq <- system.time(for (i in seq_len(reps)) theta_from_freq(idx, ctx))[["elapsed"]]
+c(us_matrix = 1e6 * t_mat / reps, us_frequency = 1e6 * t_frq / reps,
+  ratio = t_frq / t_mat)
+```
+
+The matrix route is the one that belongs in an optimiser's inner loop.
+@sec-collapse makes it cheaper still.
+
+## Status number $N_s$ {#sec-ns}
+
+@lindgren1997 express group coancestry on the scale of individual counts:
+
+$$N_s = \frac{1}{2\theta_S}.$$
+
+$N_s$ is the number of **unrelated, non-inbred** individuals that would have the
+same gene diversity as the observed set. The edge cases fix the intuition:
+
+```{r}
+fake <- ctx
+fake$f <- matrix(0.5, 5, 5)      # unrelated, p = 0.5
+c(theta = theta_group(1:5, fake), Ns = status_number(1:5, fake))
+
+fake$f <- matrix(1, 5, 5)        # all identical and homozygous
+c(theta = theta_group(1:5, fake), Ns = status_number(1:5, fake))
+```
+
+::: {.callout-warning}
+## $N_s$ is a descriptor, not a drift projection
+
+@toro2020 show that the **rate-based** effective size $N_e = 1/(2\Delta F)$
+loses meaning under molecular diversity management: optimisation increases
+diversity in early generations, producing a negative $\Delta F$ and therefore a
+negative $N_e$, with no long-term asymptote.
+
+This does not invalidate $N_s$. $N_s$ is a monotonic reparametrisation of
+$\theta$ -- a *static descriptor of a set* -- while $N_e$ is a *rate between
+generations*. Use $N_s$ to compare sets; do not extrapolate it to project future
+drift. For the same reason, do not substitute the linkage-disequilibrium $N_e$
+here: that estimates population history, not the composition of a selected
+sample.
+:::
+
+And, from @sec-genomic-era: $\theta$ tracks homozygosity, not drift. $GD$ and
+$N_s$ answer "how much heterozygosity does this selection preserve", which is
+the right question for next season's hybrid vigour. They do not certify that
+allele frequencies are moving as unmanaged drift would have moved them, which
+matters more across multiple recurrent cycles than for a single round of hybrid
+selection.
+
+## Effective number of parents
+
+A metric independent of $\mathbf{f}$, computed purely from the pedigree. With
+$p_i$ the frequency with which line $i$ appears as a parent among the selected
+hybrids,
+
+$$N_{e(\text{par})} = \frac{1}{\sum_i p_i^2},$$
+
+the inverse Simpson index. It captures precisely what coancestry blurs: a set of
+200 hybrids can have an acceptable $\theta$ while drawing on only 12 lines, if
+those 12 happen to be genetically distant from each other.
+
+```{r}
+c(sapply(sels, ne_parents, ctx = ctx), theoretical_max = ctx$n_lines)
+```
+
+Truncation collapses the parent base far more than it moves $\theta$. Its cost
+is a `tabulate` call, which makes it a natural candidate to enter the objective
+function alongside $\theta$ -- and in @sec-choosing it does.
+
+## Allelic richness {#sec-richness}
+
+$\theta$ and $H_e$ are averages across markers and are dominated by
+intermediate-frequency alleles. A lost rare allele barely moves them, yet the
+loss is irreversible. So count markers that were polymorphic in the population
+and became rare or fixed in the selection:
+
+$$A_{\text{lost}} = \#\{k : \text{MAF}^{(S)}_k < 0.05 \;\wedge\;
+                            \text{MAF}^{(\text{pop})}_k \ge 0.05\}.$$
+
+```{r}
+sapply(sels, alleles_lost, ctx = ctx)
+```
+
+It is the only metric in this catalogue **genuinely non-redundant** with
+$\theta$ -- a claim @sec-choosing tests rather than asserts.
+
+@lopezcortegano2019 compared, in a subdivided simulated population, strategies
+maximising *expected heterozygosity* ($H_T$, the same family as $GD$) against
+strategies maximising *allelic diversity* ($A_T$). Maximising $A_T$ retained
+more alleles **and** controlled molecular inbreeding better than maximising
+$H_T$. The mechanism connects directly to @sec-genomic-era:
+heterozygosity-maximising management pushes allele frequencies toward 0.5, which
+favours rare alleles in the short run but does not stop them drifting to loss
+once they are no longer the rarest; allele-count management defends every
+segregating allele directly.
+
+Their recommendation for structured conservation programmes was to make $A_T$,
+not $H_T$, the primary target. In this pipeline's terms: `alleles_lost` deserves
+a place next to $\theta$ as a *tracked outcome*, not only as a post-hoc sanity
+check, whenever the selection feeds several future cycles rather than a single
+hybrid release.
+
+## Distances: E-NE and A-NE
+
+With distance $d_{ij} = 1 - f_{ij}$, Core Hunter 3 [@debeukelaer2018] defines
+two measures capturing opposite aspects that $\theta$ alone cannot separate:
+
+$$\text{E-NE} = \frac{1}{n}\sum_{i \in S} \min_{j \in S,\, j \ne i} d_{ij},
+  \qquad
+  \text{A-NE} = \frac{1}{N}\sum_{i=1}^{N} \min_{j \in S} d_{ij}.$$
+
+- **E-NE**, entry-to-nearest-entry, measures **non-redundancy within the
+  selection**. It distinguishes "200 individuals spread out" from "100
+  near-identical pairs spread out" -- configurations that can share the same
+  $\theta$.
+- **A-NE**, accession-to-nearest-entry, measures **representativeness of the
+  population**. It detects a selection that optimises $\theta$ by concentrating
+  in one region of genetic space and ignoring the rest.
+
+```{r}
+fmt(t(sapply(sels, function(s) c(ENE = ene(s, ctx), ANE = ane(s, ctx)))), 4)
+```
+
+Note the direction: A-NE is a distance to the *nearest selected entry*, so
+**lower is better** for representativeness.
+
+## Effective dimensionality
+
+Over the eigenvalues of the submatrix, the participation ratio
+
+$$D_{\text{eff}} = \frac{(\sum_i \lambda_i)^2}{\sum_i \lambda_i^2}$$
+
+counts how many independent directions of genetic variation remain: 1 if all
+variation lies on a single axis, $n$ if spread evenly.
+
+```{r}
+fmt(sapply(sels, eff_dim, ctx = ctx), 2)
+```
+
+The submatrix is **double-centered** before the eigendecomposition. On a raw
+all-positive `f` the leading eigenvalue is just $n\theta$, so an uncentered
+version would only re-measure $\theta$ under a more expensive name -- a mistake
+worth naming because it is easy to make and produces a plausible-looking number.
+
+## Decomposition by heterotic group
+
+In hybrid maize the diversity **between** pools is the engine of heterosis and
+cannot be spent; the diversity **within** each pool is the fuel for future
+progress. Following @caballero2002, compute molecular coancestry between lines
+and weight it by each line's usage among the selected hybrids:
+
+$$\theta_A = \mathbf{w}_A' \mathbf{f}^{L} \mathbf{w}_A, \qquad
+  \theta_B = \mathbf{w}_B' \mathbf{f}^{L} \mathbf{w}_B, \qquad
+  \theta_{AB} = \mathbf{w}_A' \mathbf{f}^{L} \mathbf{w}_B.$$
+
+```{r}
+fmt(t(sapply(sels, theta_pools, ctx = ctx)), 4)
+```
+
+Feeding those into the Caballero & Toro partition of @sec-subdivided:
+
+```{r}
+fmt(t(sapply(sels, gd_partition, ctx = ctx)), 4)
+```
+
+Two things to read here. `GD_WI` is **exactly zero**: the parent lines are
+inbred, so there is no within-individual diversity at line level -- the algebra
+of @sec-subdivided predicted this, and it is why `GD_WI_hyb`, the heterozygosity
+actually carried inside the F1s, is reported separately. And `GD_BS` *rises*
+under truncation: selection concentrates on the most complementary line pairs,
+which pushes the pools further apart.
+
+::: {.callout-important}
+## A blind optimiser erodes one pool while global $\theta$ looks fine
+
+Without this decomposition that goes unnoticed, and the consequence appears only
+in the following cycle. `ne_lines_pool()` is the cheap version of the same
+alarm -- it needs no `fL`, only the pedigree:
+:::
+
+```{r}
+t(sapply(sels, ne_lines_pool, ctx = ctx))
+```
+
+### Where this could go next
+
+$\theta_A$, $\theta_B$ and $\theta_{AB}$ as computed here are **diagnostic**:
+reported, not fed back into the objective. The subdivided-population literature
+offers a ready-made way to promote them into a tunable target.
+@caballerorodriguezramilo2010, used by @lopezcortegano2019 to manage two
+heterotic-like pools simultaneously, partition total diversity as
+
+$$H_T = D_G + \lambda H_S, \qquad A_T = D_A + \lambda A_S,$$
+
+where $H_S$ and $A_S$ are the within-pool components, $D_G$ and $D_A$ the
+between-pool components, and $\lambda \in [0, \infty)$ is a weight chosen by the
+breeder. $\lambda = 0$ optimises only between-pool divergence -- protects
+heterosis, ignores each pool's internal health. $\lambda \to \infty$ optimises
+only within-pool diversity -- protects each pool's future options, ignores the
+cross.
+
+That maps directly onto the two constraints a maize breeder already has in mind
+but applies only qualitatively: *don't blend the pools* versus *don't paint
+either pool into a corner*. Turning $\lambda$ into a second explicit knob
+alongside $\alpha_{\max}$ is the natural next step if pool erosion shows up in
+practice. The current implementation reports the ingredients and leaves the
+weighting to the analyst.
+
+## The correct baseline {#sec-baseline}
+
+### Why not compare against the whole population
+
+The natural comparison -- coancestry of the selected set against that of the
+whole population -- is **biased by construction**. Applying equation (1) to
+both:
+
+$$\theta_S - \theta_N
+  = \left(\frac{1}{n} - \frac{1}{N}\right)\left(\bar f_d - \bar f_o\right) > 0,$$
+
+since $\bar f_d > \bar f_o$ whenever individuals are not clones. A **random**
+sample already looks less diverse than the population it came from, with no
+selection whatsoever. The bias is pure sampling and grows as the sample shrinks.
+
+```{r}
+fd <- mean(diag(ctx$f)); fo <- mean(ctx$f[upper.tri(ctx$f)])
+predicted_bias <- (1 / n_sel - 1 / ctx$N) * (fd - fo)
+
+set.seed(11)
+observed_bias <- mean(replicate(400, theta_group(sample.int(ctx$N, n_sel), ctx))) -
+                 theta_group(seq_len(ctx$N), ctx)
+
+c(predicted = predicted_bias, observed = observed_bias)
+```
+
+The formula is exact; the residual is Monte Carlo error in the resampling.
+
+Note also that the **off-diagonal** mean of a random subset *is* an unbiased
+estimator of the population's off-diagonal mean. So the metric many programmes
+already use is free of this particular bias -- but it is also not comparable
+across sample sizes on the $N_s$ scale.
+
+### Operational definition of loss
+
+The "0% loss" reference is the **distribution of random subsets of the same
+size**:
+
+$$\alpha \;=\; \frac{GD_{\text{random}(n)} - GD_S}{GD_{\text{random}(n)}}.$$
+
+$\alpha = 0$ means "as diverse as a random sample of the same size";
+$\alpha < 0$ means more diverse than chance. Resampling also delivers the
+standard deviation, and hence a z-score for any strategy.
+
+```{r}
+null <- null_distribution(ctx, n_sel, B = 400, B_full = 60)
+c(GD_population = gene_diversity(seq_len(ctx$N), ctx),
+  GD_reference  = null$gd_ref,
+  sd            = null$gd_sd,
+  apparent_loss_if_wrong_baseline =
+    (gene_diversity(seq_len(ctx$N), ctx) - null$gd_ref) /
+     gene_diversity(seq_len(ctx$N), ctx))
+```
+
+That last number is what a programme would report as a diversity loss if it
+compared against the full pool. It is entirely a sampling artefact.
+
+```{r}
+fmt(sapply(sels, alpha_loss, ctx = ctx, gd_ref = null$gd_ref), 5)
+```
+
+Negative values are selections *more* diverse than chance, which is exactly what
+the max-diversity greedy is for.
+
+### How to set the $\alpha$ limit
+
+The acceptable limit **should not be chosen a priori.** Pure truncation -- the
+greediest possible selection -- defines the maximum attainable $\alpha$. If that
+ceiling is below your intended limit, the constraint restricts nothing and you
+have bought a false sense of control.
+
+```{r}
+attainable <- alpha_loss(sel_truncation(ctx, n_sel), ctx, null$gd_ref)
+c(attainable_alpha_max = attainable,
+  intended_limit       = 0.05,
+  constraint_is_active = attainable > 0.05)
+```
+
+At the full simulated scale that ceiling comes out near **3.6%**, so a 5% limit
+would be inoperative. The correct procedure is to trace the $\alpha$-versus-gain
+frontier and choose its knee, which is @sec-combinatorial.
+
+## Every metric against the null
+
+A metric without a baseline says nothing. The z-score of each metric against the
+random-subset null is how this book reports all of them:
+
+```{r}
+tab <- evaluate(sels, ctx, null$gd_ref)
+fmt(as.data.frame(discriminatory_power(tab, null)[
+  , c("GD", "Ns", "Ne_parents", "F_hom", "F_drift", "alleles_lost", "ENE", "ANE")]), 1)
+```
+
+Read the rows against each other. Truncation is many standard deviations from
+random on `F_drift` and on `Ne_parents` while being far less extreme on `GD` --
+the constraint that would catch it is not the one most programmes apply. That
+observation is what @sec-choosing turns into a recommendation.
