@@ -46,8 +46,6 @@ book:
 
 bibliography: references.bib
 
-# PDF output needs a LaTeX install (`quarto install tinytex`); add a `pdf:`
-# block here once you have one.
 format:
   html:
     theme:
@@ -64,6 +62,16 @@ format:
     df-print: kable
     citations-hover: true
     link-external-newwindow: true
+  # Typst, not `pdf:`. Quarto bundles the Typst compiler, so this needs no
+  # LaTeX install; a `pdf:` block would require `quarto install tinytex`.
+  typst:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    papersize: a4
+    fig-width: 6.5
+    fig-height: 4
+    df-print: kable
 
 execute:
   freeze: auto

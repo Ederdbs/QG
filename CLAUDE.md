@@ -151,8 +151,11 @@ Cached inputs are copied from `doc/` (tracked). **Never make the book read `repo
 `book/scripts/regenerate.R` is the only place the expensive computations live. It is never
 invoked by `quarto render`.
 
-There is no PDF format: no LaTeX is installed. Add a `pdf:` block to `_quarto.yml` after
-`quarto install tinytex` if one is wanted.
+**PDF is Typst, not LaTeX.** `_quarto.yml` declares a `typst:` format; Quarto bundles the
+Typst compiler, so `quarto render book --to typst` needs no TeX install and writes
+`docs/Genetic-Diversity-in-Hybrid-Breeding.pdf` (~280 pp). A `pdf:` block would pull in
+`quarto install tinytex` -- do not add one. A bare `quarto render book` builds both formats;
+pass `--to html` while iterating, the PDF pass roughly doubles the render.
 
 ## Don't relitigate these either
 

@@ -4,7 +4,8 @@
 
 *Genetic Diversity in Hybrid Breeding* — measuring it, constraining it, and
 optimising against it, with R. Twelve chapters and four appendices, every
-derivation runnable.
+derivation runnable. Also available as a
+[PDF](https://ederdbs.github.io/QG/Genetic-Diversity-in-Hybrid-Breeding.pdf) (~280 pp).
 
 | Part | Chapters |
 |---|---|
@@ -30,8 +31,9 @@ This repository is two things:
 ## Building the book
 
 ```sh
-quarto render book     # ~80 s, writes to docs/
-cd book && quarto preview   # live reload while editing
+quarto render book --to html    # ~80 s, writes to docs/
+quarto render book --to typst   # the PDF (Typst, no LaTeX needed)
+cd book && quarto preview       # live reload while editing
 ```
 
 Light examples run live at render; expensive results are cached in `book/data`
