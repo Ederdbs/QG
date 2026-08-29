@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>2&nbsp; Diversity in a subdivided population – Genetic Diversity in Hybrid Breeding</title>
+<title>5&nbsp; Introgressing several genes by backcrossing – Genetic Diversity in Hybrid Breeding</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -61,26 +61,7 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-/* CSS for citations */
-div.csl-bib-body { }
-div.csl-entry {
-  clear: both;
-}
-.hanging-indent div.csl-entry {
-  margin-left:2em;
-  text-indent:-2em;
-}
-div.csl-left-margin {
-  min-width:2em;
-  float:left;
-}
-div.csl-right-inline {
-  margin-left:2em;
-  padding-left:1em;
-}
-div.csl-indent {
-  margin-left: 2em;
-}</style>
+</style>
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
@@ -90,8 +71,8 @@ div.csl-indent {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./03-simulating-crosses.html" rel="next">
-<link href="./01-coancestry.html" rel="prev">
+<link href="./05-genomic-era.html" rel="next">
+<link href="./04-population-sizing.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
@@ -337,7 +318,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./01-coancestry.html">Foundations</a></li><li class="breadcrumb-item"><a href="./02-subdivided.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Diversity in a subdivided population</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./03-simulating-crosses.html">Simulation</a></li><li class="breadcrumb-item"><a href="./04b-backcross-introgression.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Introgressing several genes by backcrossing</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -388,7 +369,7 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./02-subdivided.html" class="sidebar-item-text sidebar-link active">
+  <a href="./02-subdivided.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Diversity in a subdivided population</span></span></a>
   </div>
 </li>
@@ -417,7 +398,7 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./04b-backcross-introgression.html" class="sidebar-item-text sidebar-link">
+  <a href="./04b-backcross-introgression.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Introgressing several genes by backcrossing</span></span></a>
   </div>
 </li>
@@ -555,28 +536,15 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#notation" id="toc-notation" class="nav-link active" data-scroll-target="#notation"><span class="header-section-number">2.1</span> Notation</a></li>
-  <li><a href="#the-three-coancestry-blocks" id="toc-the-three-coancestry-blocks" class="nav-link" data-scroll-target="#the-three-coancestry-blocks"><span class="header-section-number">2.2</span> The three coancestry blocks</a>
-  <ul class="collapse">
-  <li><a href="#f_ij-between-subpopulations" id="toc-f_ij-between-subpopulations" class="nav-link" data-scroll-target="#f_ij-between-subpopulations"><span class="header-section-number">2.2.1</span> <span class="math inline">\(f_{ij}\)</span>, between subpopulations</a></li>
-  <li><a href="#f_ii-within-a-subpopulation" id="toc-f_ii-within-a-subpopulation" class="nav-link" data-scroll-target="#f_ii-within-a-subpopulation"><span class="header-section-number">2.2.2</span> <span class="math inline">\(f_{ii}\)</span>, within a subpopulation</a></li>
-  <li><a href="#s_i-and-f_i-self-coancestry-and-molecular-inbreeding" id="toc-s_i-and-f_i-self-coancestry-and-molecular-inbreeding" class="nav-link" data-scroll-target="#s_i-and-f_i-self-coancestry-and-molecular-inbreeding"><span class="header-section-number">2.2.3</span> <span class="math inline">\(s_i\)</span> and <span class="math inline">\(F_i\)</span>, self-coancestry and molecular inbreeding</a></li>
-  </ul></li>
-  <li><a href="#two-per-subpopulation-metrics" id="toc-two-per-subpopulation-metrics" class="nav-link" data-scroll-target="#two-per-subpopulation-metrics"><span class="header-section-number">2.3</span> Two per-subpopulation metrics</a></li>
-  <li><a href="#distances-and-what-they-actually-are" id="toc-distances-and-what-they-actually-are" class="nav-link" data-scroll-target="#distances-and-what-they-actually-are"><span class="header-section-number">2.4</span> Distances, and what they actually are</a></li>
-  <li><a href="#the-equation-that-matters-most-in-practice" id="toc-the-equation-that-matters-most-in-practice" class="nav-link" data-scroll-target="#the-equation-that-matters-most-in-practice"><span class="header-section-number">2.5</span> The equation that matters most in practice</a></li>
-  <li><a href="#f-statistics-and-the-partition" id="toc-f-statistics-and-the-partition" class="nav-link" data-scroll-target="#f-statistics-and-the-partition"><span class="header-section-number">2.6</span> F statistics and the partition</a>
-  <ul class="collapse">
-  <li><a href="#why-the-partition-changes-the-strategy-by-species" id="toc-why-the-partition-changes-the-strategy-by-species" class="nav-link" data-scroll-target="#why-the-partition-changes-the-strategy-by-species"><span class="header-section-number">2.6.1</span> Why the partition changes the strategy by species</a></li>
-  </ul></li>
-  <li><a href="#the-worked-example-reproduced" id="toc-the-worked-example-reproduced" class="nav-link" data-scroll-target="#the-worked-example-reproduced"><span class="header-section-number">2.7</span> The worked example, reproduced</a>
-  <ul class="collapse">
-  <li><a href="#removing-an-accession-can-increase-diversity" id="toc-removing-an-accession-can-increase-diversity" class="nav-link" data-scroll-target="#removing-an-accession-can-increase-diversity"><span class="header-section-number">2.7.1</span> Removing an accession can <em>increase</em> diversity</a></li>
-  <li><a href="#optimal-contributions" id="toc-optimal-contributions" class="nav-link" data-scroll-target="#optimal-contributions"><span class="header-section-number">2.7.2</span> Optimal contributions</a></li>
-  </ul></li>
-  <li><a href="#minimising-coancestry-is-maximising-n_e" id="toc-minimising-coancestry-is-maximising-n_e" class="nav-link" data-scroll-target="#minimising-coancestry-is-maximising-n_e"><span class="header-section-number">2.8</span> Minimising coancestry is maximising <span class="math inline">\(N_e\)</span></a></li>
-  <li><a href="#the-honest-caveats" id="toc-the-honest-caveats" class="nav-link" data-scroll-target="#the-honest-caveats"><span class="header-section-number">2.9</span> The honest caveats</a></li>
-  <li><a href="#two-errata-found-while-verifying" id="toc-two-errata-found-while-verifying" class="nav-link" data-scroll-target="#two-errata-found-while-verifying"><span class="header-section-number">2.10</span> Two errata, found while verifying</a></li>
+  <li><a href="#the-operation-in-one-diagram" id="toc-the-operation-in-one-diagram" class="nav-link active" data-scroll-target="#the-operation-in-one-diagram"><span class="header-section-number">5.1</span> The operation, in one diagram</a></li>
+  <li><a href="#the-model" id="toc-the-model" class="nav-link" data-scroll-target="#the-model"><span class="header-section-number">5.2</span> The model</a></li>
+  <li><a href="#three-criteria-and-only-one-of-them-binds" id="toc-three-criteria-and-only-one-of-them-binds" class="nav-link" data-scroll-target="#three-criteria-and-only-one-of-them-binds"><span class="header-section-number">5.3</span> Three criteria, and only one of them binds</a></li>
+  <li><a href="#which-selection-index" id="toc-which-selection-index" class="nav-link" data-scroll-target="#which-selection-index"><span class="header-section-number">5.4</span> Which selection index</a></li>
+  <li><a href="#how-long-to-keep-selecting-recombinants" id="toc-how-long-to-keep-selecting-recombinants" class="nav-link" data-scroll-target="#how-long-to-keep-selecting-recombinants"><span class="header-section-number">5.5</span> How long to keep selecting recombinants</a></li>
+  <li><a href="#allocating-a-fixed-budget-across-bc1-bc2-and-bc3" id="toc-allocating-a-fixed-budget-across-bc1-bc2-and-bc3" class="nav-link" data-scroll-target="#allocating-a-fixed-budget-across-bc1-bc2-and-bc3"><span class="header-section-number">5.6</span> Allocating a fixed budget across BC1, BC2 and BC3</a></li>
+  <li><a href="#fixing-the-stack-selfing-against-doubled-haploids" id="toc-fixing-the-stack-selfing-against-doubled-haploids" class="nav-link" data-scroll-target="#fixing-the-stack-selfing-against-doubled-haploids"><span class="header-section-number">5.7</span> Fixing the stack: selfing against doubled haploids</a></li>
+  <li><a href="#sec-bc-assumptions" id="toc-sec-bc-assumptions" class="nav-link" data-scroll-target="#sec-bc-assumptions"><span class="header-section-number">5.8</span> Assumptions, and what is not modelled</a></li>
+  <li><a href="#where-this-connects" id="toc-where-this-connects" class="nav-link" data-scroll-target="#where-this-connects"><span class="header-section-number">5.9</span> Where this connects</a></li>
   </ul>
 </nav>
     </div>
@@ -584,9 +552,9 @@ window.Quarto = {
 <main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./01-coancestry.html">Foundations</a></li><li class="breadcrumb-item"><a href="./02-subdivided.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Diversity in a subdivided population</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./03-simulating-crosses.html">Simulation</a></li><li class="breadcrumb-item"><a href="./04b-backcross-introgression.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Introgressing several genes by backcrossing</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span id="sec-subdivided" class="quarto-section-identifier"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Diversity in a subdivided population</span></span></h1>
+<h1 class="title"><span id="sec-backcross" class="quarto-section-identifier"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Introgressing several genes by backcrossing</span></span></h1>
 </div>
 
 
@@ -603,408 +571,598 @@ window.Quarto = {
 </header>
 
 
-<p>A breeding programme is never one population. It is heterotic groups, or accessions, or landraces, or cycles – and the diversity of the whole is not the average of the diversity of the parts. <span class="citation" data-cites="caballero2002">Caballero and Toro (<a href="99-references.html#ref-caballero2002" role="doc-biblioref">2002</a>)</span> give the partition that makes this precise, and it is the analytical backbone of everything that follows: the constraint in <a href="09-optimal-contributions.html" class="quarto-xref"><span>Chapter 10</span></a> is a special case of it, and the within/between asymmetry that makes plant hybrid breeding different from animal breeding is a statement about which term of it you are allowed to minimise.</p>
-<p>The paper’s central claim is uncomfortable and worth stating first: <strong>a method that ranks accessions by distance alone can invert the correct conclusion.</strong> An accession can be the most distant <em>because</em> it is internally fixed, and removing it can <em>raise</em> the diversity of the pool. We reproduce that result numerically below.</p>
-<section id="notation" class="level2" data-number="2.1">
-<h2 data-number="2.1" class="anchored" data-anchor-id="notation"><span class="header-section-number">2.1</span> Notation</h2>
-<ul>
-<li>A metapopulation of <span class="math inline">\(n\)</span> subpopulations; subpopulation <span class="math inline">\(i\)</span> has <span class="math inline">\(N_i\)</span> individuals, <span class="math inline">\(N_T = \sum_i N_i\)</span>.</li>
-<li>A tilde, <span class="math inline">\(\tilde{x}\)</span>, is a weighted mean <strong>within</strong> subpopulations: <span class="math inline">\(\tilde{f} = \sum_i f_{ii} N_i / N_T\)</span>.</li>
-<li>A bar, <span class="math inline">\(\bar{x}\)</span>, is a mean over <strong>all pairs</strong> in the metapopulation, between-subpopulation pairs included: <span class="math inline">\(\bar{f} = \sum_{i,j} f_{ij} N_i N_j / N_T^2\)</span>.</li>
-<li>Always <span class="math inline">\(\bar{f} \le \tilde{f} \le \tilde{s}\)</span>. The differences between those three numbers <em>are</em> the partition of diversity.</li>
-<li>Everything is computed per locus and then averaged over loci. Never average frequencies first.</li>
-</ul>
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
+<p><a href="04-population-sizing.html" class="quarto-xref"><span>Chapter 4</span></a> sized a segregating population for <em>diversity</em>: the objective was to sample as much of the cross as possible. This chapter is the mirror image. A donor line carries <span class="math inline">\(k\)</span> genes worth having and an elite line carries everything else worth having, and the job is to move the <span class="math inline">\(k\)</span> genes across while <strong>throwing the rest of the donor away</strong>. Here donor genome is contamination, and the only diversity that is wanted is the <span class="math inline">\(k\)</span> target loci themselves.</p>
+<p>The operation is marker-assisted backcrossing (MABC). The numbers below come from a dependency-free simulator of it: a marker grid at 5 cM on ten maize chromosomes (1670 cM), one selected plant advanced per generation, <span class="math inline">\(k = 1\)</span> to <span class="math inline">\(4\)</span> recessive targets from a single donor, carried to BC3. Its source, test battery and technical review are in <code>doc/multigenes/</code>.</p>
+<section id="the-operation-in-one-diagram" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="the-operation-in-one-diagram"><span class="header-section-number">5.1</span> The operation, in one diagram</h2>
+<p>Before any sizing question can be asked, the crossing operations have to be unambiguous – which plant is pollinated by which, and what is genotyped at each step.</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div id="fig-bc-flow" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-bc-flow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="04b-backcross-introgression_files/figure-html/fig-bc-flow-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="1500">
 </div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Warning</span>The subtle point, and the one most often got wrong
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bc-flow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.1: The MABC operation. Left column: the cross made in each generation. Right column: what is genotyped and selected on, and the population size that criterion demands. The recurrent parent E re-enters at every backcross; the fork at the bottom is the fixation step, where doubled haploids and selfing differ by more than an order of magnitude in plants required.
+</figcaption>
+</figure>
 </div>
 </div>
-<div class="callout-body-container callout-body">
-<p>Every coancestry here includes the pairs of an individual with <strong>itself</strong> – group coancestry in the sense of Cockerham. That is what makes <span class="math inline">\(1 - f_{ii}\)</span> exactly Nei’s expected heterozygosity, and it is what makes the algebra close. Drop the diagonal and none of the identities below hold.</p>
 </div>
-</div>
+<p>Two features of that diagram do all the work in the rest of the chapter. The recurrent parent re-enters at every backcross, so donor content halves every generation <em>whether or not anyone selects for it</em>; and the fork at the bottom is where the plant numbers explode, because fixation asks for a homozygote and backcrossing never does.</p>
 </section>
-<section id="the-three-coancestry-blocks" class="level2" data-number="2.2">
-<h2 data-number="2.2" class="anchored" data-anchor-id="the-three-coancestry-blocks"><span class="header-section-number">2.2</span> The three coancestry blocks</h2>
-<section id="f_ij-between-subpopulations" class="level3" data-number="2.2.1">
-<h3 data-number="2.2.1" class="anchored" data-anchor-id="f_ij-between-subpopulations"><span class="header-section-number">2.2.1</span> <span class="math inline">\(f_{ij}\)</span>, between subpopulations</h3>
-<p>The probability that two alleles, one sampled at random in subpopulation <span class="math inline">\(i\)</span> and one in <span class="math inline">\(j\)</span>, are identical. From markers, <span class="math inline">\(f_{ij} = \sum_k \tilde p_{k,i}
-\tilde p_{k,j}\)</span>.</p>
-<p>Read it as <strong>redundancy</strong> between two materials. If you cross plants of <span class="math inline">\(i\)</span> with plants of <span class="math inline">\(j\)</span>, the progeny has expected inbreeding <span class="math inline">\(F = f_{ij}\)</span>. It answers: what do I gain by recombining these two accessions?</p>
-<p>In maize, <span class="math inline">\(f_{ij}\)</span> between a Stiff Stalk pool and a Non-Stiff Stalk pool is typically low – and that low between-group coancestry is exactly what sustains the heterotic pattern. Between two elite lines of the same family it can exceed 0.6, and the cross generates nothing new.</p>
-</section>
-<section id="f_ii-within-a-subpopulation" class="level3" data-number="2.2.2">
-<h3 data-number="2.2.2" class="anchored" data-anchor-id="f_ii-within-a-subpopulation"><span class="header-section-number">2.2.2</span> <span class="math inline">\(f_{ii}\)</span>, within a subpopulation</h3>
-<p>The case <span class="math inline">\(i = j\)</span>. From markers <span class="math inline">\(f_{ii} = \sum_k \tilde p_{k,i}^2\)</span>, the expected homozygosity, so</p>
-<p><span class="math display">\[1 - f_{ii} \;=\; H_{e,i} \;=\; \text{Nei's gene diversity of accession } i.\]</span></p>
-<p>A landrace accession regenerated twenty times with forty ears per cycle accumulates coancestry and watches <span class="math inline">\(f_{ii}\)</span> rise silently. It is the cheapest alarm for genetic erosion <em>inside</em> a genebank – and it is precisely what a distance tree cannot see.</p>
-</section>
-<section id="s_i-and-f_i-self-coancestry-and-molecular-inbreeding" class="level3" data-number="2.2.3">
-<h3 data-number="2.2.3" class="anchored" data-anchor-id="s_i-and-f_i-self-coancestry-and-molecular-inbreeding"><span class="header-section-number">2.2.3</span> <span class="math inline">\(s_i\)</span> and <span class="math inline">\(F_i\)</span>, self-coancestry and molecular inbreeding</h3>
-<p><span class="math display">\[s_i = \sum_k \sum_l \frac{p_{k,l,i}^2}{N_i}, \qquad
-  F_i = 2 s_i - 1, \qquad 1 - s_i = H_{o,i}\]</span></p>
-<p>with <span class="math inline">\(p_{k,l,i}\)</span> the dosage of allele <span class="math inline">\(k\)</span> in individual <span class="math inline">\(l\)</span>.</p>
+<section id="the-model" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="the-model"><span class="header-section-number">5.2</span> The model</h2>
+<p><strong>Two states, one haplotype.</strong> The recurrent parent is a fully homozygous inbred, so the gamete it contributes is invariant and only the donor-derived haplotype has to be tracked: a binary vector over 334 markers. Meiosis is a per-interval Bernoulli switch with Haldane’s</p>
+<p><span class="math display">\[
+r = \tfrac{1}{2}\bigl(1 - e^{-2d/100}\bigr),
+\]</span></p>
+<p>which is exact for this chain precisely because Haldane is memoryless (see the limitation in <a href="#sec-bc-assumptions" class="quarto-xref"><span>Section 5.8</span></a>).</p>
+<p><strong>Donor dosage and IBD are different quantities.</strong> Donor and elite already share a fraction <span class="math inline">\(s\)</span> of the genome by descent – they are both maize, and often both from the same heterotic group. Donor genome inside a shared tract costs nothing. So with <span class="math inline">\(D\)</span> the donor dosage,</p>
+<p><span class="math display">\[
+\text{IBD}_E = 1 - (1 - s)\,D, \qquad \text{IBD}_E + \text{donor-specific} = 1 .
+\]</span></p>
+<p>Both identities hold exactly in the simulator and are asserted in its test battery. Everything below uses <span class="math inline">\(s = 0.6\)</span>.</p>
+<p><strong>Coupling phase.</strong> All <span class="math inline">\(k\)</span> targets come from one donor, on the same haplotype. Two consequences, and the second is easy to get wrong. Linked targets travel <em>together</em>, so linkage drag is the <strong>union</strong> of the donor segments, not their sum. And conditional on both flanking targets being donor-derived, an <em>even</em> number of crossovers is forced in the interval between them, so the probability that they sit in one continuous donor segment is not <span class="math inline">\(e^{-L}\)</span> but</p>
+<p><span class="math display">\[
+P_{\text{same}} = \frac{e^{-L}}{\bigl(1 + e^{-2L}\bigr)/2},
+\qquad L = d/100 \text{ Morgans}.
+\]</span></p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>p_same <span class="ot">&lt;-</span> <span class="cf">function</span>(d_cM) { L <span class="ot">&lt;-</span> d_cM <span class="sc">/</span> <span class="dv">100</span>; <span class="fu">exp</span>(<span class="sc">-</span>L) <span class="sc">/</span> ((<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="dv">2</span> <span class="sc">*</span> L)) <span class="sc">/</span> <span class="dv">2</span>) }</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(<span class="at">d_cM =</span> <span class="fu">c</span>(<span class="dv">20</span>, <span class="dv">60</span>, <span class="dv">400</span>),</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">naive =</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="fu">c</span>(<span class="dv">20</span>, <span class="dv">60</span>, <span class="dv">400</span>) <span class="sc">/</span> <span class="dv">100</span>),</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">conditional =</span> <span class="fu">p_same</span>(<span class="fu">c</span>(<span class="dv">20</span>, <span class="dv">60</span>, <span class="dv">400</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;">d_cM</th>
+<th style="text-align: right;">naive</th>
+<th style="text-align: right;">conditional</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">0.8187308</td>
+<td style="text-align: right;">0.9803280</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">60</td>
+<td style="text-align: right;">0.5488116</td>
+<td style="text-align: right;">0.8435507</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">400</td>
+<td style="text-align: right;">0.0183156</td>
+<td style="text-align: right;">0.0366190</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>At 20 cM that is 0.98 against a naive 0.82. Published stacking simulations get this wrong often enough that it is worth stating separately.</p>
 <div class="callout callout-style-default callout-important callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Important</span><span class="math inline">\(F_i\)</span> here is molecular, and is not <span class="math inline">\(F_{IS}\)</span>
+<span class="screen-reader-only">Important</span>If the alleles come from different donors, none of this applies
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>It is measured against a hypothetical base in which all alleles are distinct. It is <strong>not</strong> comparable across studies using different marker panels. For the question “is this population mating at random?”, use <span class="math inline">\(\alpha_i\)</span> below.</p>
+<p>Coupling phase is an assumption, not a convenience. Two linked targets in repulsion, from two donors, cannot both be recovered without a recombinant in the interval, and the cost explodes. That programme needs an intercross between the donors before any backcrossing starts, and this model does not describe it.</p>
 </div>
 </div>
-<p>In soybean, rice and wheat, pure lines have <span class="math inline">\(s_i \to 1\)</span>, so <span class="math inline">\(F_i \to 1\)</span> and <span class="math inline">\(H_o \to 0\)</span>. That is expected, not a symptom. It changes only <em>where</em> the diversity resides.</p>
 </section>
-</section>
-<section id="two-per-subpopulation-metrics" class="level2" data-number="2.3">
-<h2 data-number="2.3" class="anchored" data-anchor-id="two-per-subpopulation-metrics"><span class="header-section-number">2.3</span> Two per-subpopulation metrics</h2>
-<p><span class="math display">\[\alpha_i = \frac{F_i - f_{ii}}{1 - f_{ii}}, \qquad
-  G_i = \frac{s_i - f_{ii}}{1 - f_{ii}} = \frac{1 + \alpha_i}{2}\]</span></p>
-<p><span class="math inline">\(\alpha_i\)</span> is the subpopulation’s analogue of <span class="math inline">\(F_{IS}\)</span>: positive means an excess of homozygotes (selfing, mating among relatives, a Wahlund effect from internal substructure, null alleles); negative means an excess of heterozygotes (dioecy, self-incompatibility, selection, or a freshly formed F1 or synthetic).</p>
-<p><span class="math inline">\(G_i\)</span> is the proportion of the accession’s diversity that sits <strong>between</strong> individuals rather than inside them, and it is probably the most underused quantity in the paper. It is a mating-system meter:</p>
+<section id="three-criteria-and-only-one-of-them-binds" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="three-criteria-and-only-one-of-them-binds"><span class="header-section-number">5.3</span> Three criteria, and only one of them binds</h2>
+<p>A conversion programme is usually written with three success conditions at BC3: do not lose the genes, recover the recurrent parent, and do not drag a chunk of donor chromosome along with each target. They are not remotely equal in cost.</p>
+<p><strong>Not losing the genes</strong> is exact and cheap. A plant is foreground-positive with probability <span class="math inline">\(q = (1/2)^k\)</span>, so <span class="math inline">\(n\)</span> plants fail with probability <span class="math inline">\((1-q)^n\)</span>:</p>
 <div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>n_for_count <span class="ot">&lt;-</span> <span class="cf">function</span>(q, <span class="at">count =</span> <span class="dv">1</span>, <span class="at">P =</span> <span class="fl">0.95</span>) {</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> count</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span> (<span class="fu">pbinom</span>(count <span class="sc">-</span> <span class="dv">1</span>, n, q) <span class="sc">&gt;</span> <span class="dv">1</span> <span class="sc">-</span> P) n <span class="ot">&lt;-</span> n <span class="sc">+</span> <span class="dv">1</span>L</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  n</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(<span class="at">genes =</span> mb_sz<span class="sc">$</span>genes, <span class="at">q =</span> mb_sz<span class="sc">$</span>q_foreground,</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>           <span class="at">n_BC_per_gen =</span> mb_sz<span class="sc">$</span>n_BC_1plant)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
+<div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
-<caption>G_i as a mating-system meter.</caption>
-<colgroup>
-<col style="width: 8%">
-<col style="width: 27%">
-<col style="width: 63%">
-</colgroup>
 <thead>
 <tr class="header">
-<th style="text-align: left;">G_i</th>
-<th style="text-align: left;">Situation</th>
-<th style="text-align: left;">Typical material</th>
+<th style="text-align: right;">genes</th>
+<th style="text-align: right;">q</th>
+<th style="text-align: right;">n_BC_per_gen</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">~ 0.5</td>
-<td style="text-align: left;">perfect panmixia</td>
-<td style="text-align: left;">maize, sunflower, open populations</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.5000</td>
+<td style="text-align: right;">5</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">&lt; 0.5</td>
-<td style="text-align: left;">excess of heterozygotes</td>
-<td style="text-align: left;">F1 synthetics, heterozygous clones, self-incompatibles</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0.2500</td>
+<td style="text-align: right;">11</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">-&gt; 1.0</td>
-<td style="text-align: left;">all homozygous</td>
-<td style="text-align: left;">inbred lines, doubled haploids, selfing species</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0.1250</td>
+<td style="text-align: right;">23</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0.0625</td>
+<td style="text-align: right;">47</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-<p>Operationally, <span class="math inline">\(1 - G_i\)</span> is the fraction of an accession’s diversity stored <em>inside</em> each plant, and it decides the sampling design. With <span class="math inline">\(G_i \to 1\)</span> (selfers), one individual captures almost nothing and you need many plants per accession. With <span class="math inline">\(G_i \approx 0.5\)</span> (maize), a few plants already capture half.</p>
-</section>
-<section id="distances-and-what-they-actually-are" class="level2" data-number="2.4">
-<h2 data-number="2.4" class="anchored" data-anchor-id="distances-and-what-they-actually-are"><span class="header-section-number">2.4</span> Distances, and what they actually are</h2>
-<p>Nei’s minimum distance between subpopulations is</p>
-<p><span class="math display">\[\mathbf{D}_{ij} = \frac{f_{ii} + f_{jj}}{2} - f_{ij}
-                  = \sum_k \tfrac{1}{2}(\tilde p_{k,i} - \tilde p_{k,j})^2 .\]</span></p>
-<p>Note what that is: <strong>half the sum of squared allele-frequency differences</strong> – a variance component, not an evolutionary distance calibrated in time. It is the piece that enters <span class="math inline">\(F_{ST}\)</span>, and it is legitimate. The error in a distance-only method is not using <span class="math inline">\(\mathbf{D}_{ij}\)</span>; it is using <em>only</em> <span class="math inline">\(\mathbf{D}_{ij}\)</span>.</p>
-<div class="callout callout-style-default callout-tip callout-titled">
+</div>
+<p>Fewer than 50 plants per generation at four genes, and that is the whole foreground problem.</p>
+<p><strong>Recovering the elite is free by BC3.</strong> With no background selection at all, expected donor dosage after 3 backcrosses is <span class="math inline">\((1/2)^{4}
+= 0.0625\)</span>, so</p>
+<p><span class="math display">\[
+\text{IBD}_E = 1 - (1 - s)\,(1/2)^{4} = 0.975
+\]</span></p>
+<p>at <span class="math inline">\(s = 0.6\)</span> – comfortably above a 90% target before a single background marker is scored.</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>IBD with the elite at BC3, s = 0.60. The 90% target was met in 40 of 44 cells of the whole grid; where it was not, the failure was losing the genes, not the background.</caption>
+<thead>
+<tr class="header">
+<th style="text-align: right;">genes</th>
+<th style="text-align: right;">N = 20</th>
+<th style="text-align: right;">N = 80</th>
+<th style="text-align: right;">N = 200</th>
+<th style="text-align: right;">N = 400</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.984</td>
+<td style="text-align: right;">0.995</td>
+<td style="text-align: right;">0.997</td>
+<td style="text-align: right;">0.998</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0.970</td>
+<td style="text-align: right;">0.985</td>
+<td style="text-align: right;">0.990</td>
+<td style="text-align: right;">0.992</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0.956</td>
+<td style="text-align: right;">0.973</td>
+<td style="text-align: right;">0.980</td>
+<td style="text-align: right;">0.984</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0.944</td>
+<td style="text-align: right;">0.954</td>
+<td style="text-align: right;">0.969</td>
+<td style="text-align: right;">0.975</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>That leaves <strong>linkage drag</strong> – the donor chromosome still attached to each target – as the only criterion that a large population can buy. It is the criterion the rest of the chapter is about.</p>
+<div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>A free <span class="math inline">\(O(N^2)\)</span> saving
+<span class="screen-reader-only">Note</span>The reframing
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>The paper’s Eq. 13 computes <span class="math inline">\(D_{ij}\)</span> by a double sum over all pairs of individuals, at cost <span class="math inline">\(O(N_i N_j m)\)</span>. That is unnecessary: the identity <span class="math inline">\(D_{ij} = (s_i + s_j)/2 - f_{ij}\)</span> is <strong>exact</strong> and reduces the cost to <span class="math inline">\(O(Nm)\)</span>. For a 50k-SNP panel and 5000 accessions this is the difference between hours and seconds.</p>
+<p>An index that spends its decisive stage on background recovery is spending it on the criterion that was already satisfied. This is not a hypothetical: it was the defect the technical review found in the first version of this simulator, and correcting it reverses the headline conclusion. The next section is that correction.</p>
 </div>
 </div>
 </section>
-<section id="the-equation-that-matters-most-in-practice" class="level2" data-number="2.5">
-<h2 data-number="2.5" class="anchored" data-anchor-id="the-equation-that-matters-most-in-practice"><span class="header-section-number">2.5</span> The equation that matters most in practice</h2>
-<p><span class="math display">\[\bar{f} = \sum_{i} \frac{N_i}{N_T}
-  \Big[\, \underbrace{f_{ii}}_{\text{internal coancestry}}
-        - \underbrace{\textstyle\sum_j \mathbf{D}_{ij} N_j / N_T}_{\text{mean distance to the others}} \Big]\]</span></p>
-<p>Each accession’s contribution to global coancestry – that is, to the <em>loss</em> of diversity in the pool – has <strong>two terms of opposite sign</strong>:</p>
-<ul>
-<li><strong>Term 1 (+).</strong> The more internally fixed an accession is, the more it <em>raises</em> global coancestry: it dilutes the pool with copies of the same allele.</li>
-<li><strong>Term 2 (−).</strong> The more distant it is from the others, the more it <em>reduces</em> global coancestry.</li>
-</ul>
-<p>A distance-only method sees term 2 alone. That is the whole mechanism of the inverted conclusions.</p>
-</section>
-<section id="f-statistics-and-the-partition" class="level2" data-number="2.6">
-<h2 data-number="2.6" class="anchored" data-anchor-id="f-statistics-and-the-partition"><span class="header-section-number">2.6</span> F statistics and the partition</h2>
-<p><span class="math display">\[F_{IS} = \frac{\tilde F - \tilde f}{1 - \tilde f}, \qquad
-  F_{ST} = \frac{\tilde f - \bar f}{1 - \bar f} = \frac{\bar D}{1 - \bar f}, \qquad
-  F_{IT} = \frac{\tilde F - \bar f}{1 - \bar f}\]</span></p>
-<p>with <span class="math inline">\((1 - F_{IT}) = (1 - F_{IS})(1 - F_{ST})\)</span>.</p>
-<p>The partition itself is the heart of the paper:</p>
-<p><span class="math display">\[(1 - \bar f) = \underbrace{(1 - \tilde s)}_{GD_{WI}}
-              + \underbrace{(\tilde s - \tilde f)}_{GD_{BI}}
-              + \underbrace{(\tilde f - \bar f)}_{GD_{BS}}\]</span></p>
+<section id="which-selection-index" class="level2" data-number="5.4">
+<h2 data-number="5.4" class="anchored" data-anchor-id="which-selection-index"><span class="header-section-number">5.4</span> Which selection index</h2>
+<p>Four policies, all applied to foreground-positive plants only:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Key</th>
+<th>Rule</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>bg</code></td>
+<td>minimise background donor content</td>
+</tr>
+<tr class="even">
+<td><code>rec12</code></td>
+<td>recombinant selection in BC1-BC2 only (classical practice), then background</td>
+</tr>
+<tr class="odd">
+<td><code>rec_bg</code></td>
+<td>recombinant selection throughout, <strong>background</strong> decides among survivors</td>
+</tr>
+<tr class="even">
+<td><code>rec_drag</code></td>
+<td>recombinant selection throughout, <strong>linkage drag</strong> decides, background breaks ties</td>
+</tr>
+</tbody>
+</table>
+<p><code>rec_bg</code> is the natural-looking two-stage rule: truncate on drag, then pick the cleanest background among the survivors. Stage 2 discards stage 1. The plant with the least drag survives the truncation and then loses to a sibling that happens to carry less donor genome somewhere irrelevant.</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div id="fig-bc-index" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-bc-index-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="04b-backcross-introgression_files/figure-html/fig-bc-index-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="1350">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bc-index-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.2: Paired comparison (common random numbers, 300 replicates, s = 0.60) of the two-stage background-priority index against the drag-priority index. Bars are Clopper-Pearson 95% intervals. The criterion is drag &lt;= 30 cM per gene AND IBD &gt;= 0.90 at BC3.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
-<caption>The partition of gene diversity (Caballero &amp; Toro 2002, Eq. 7).</caption>
+<caption>Left block: background-priority. Right block: drag-priority. Same seeds, same shared-IBD backbone.</caption>
+<thead>
+<tr class="header">
+<th style="text-align: right;">genes</th>
+<th style="text-align: right;">N/gen</th>
+<th style="text-align: right;">drag cM</th>
+<th style="text-align: right;">IBD</th>
+<th style="text-align: right;">P(both)</th>
+<th style="text-align: right;">drag cM</th>
+<th style="text-align: right;">IBD</th>
+<th style="text-align: right;">P(both)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">80</td>
+<td style="text-align: right;">78.7</td>
+<td style="text-align: right;">0.972</td>
+<td style="text-align: right;">0.723</td>
+<td style="text-align: right;">64.6</td>
+<td style="text-align: right;">0.962</td>
+<td style="text-align: right;">0.930</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">150</td>
+<td style="text-align: right;">68.8</td>
+<td style="text-align: right;">0.979</td>
+<td style="text-align: right;">0.813</td>
+<td style="text-align: right;">49.4</td>
+<td style="text-align: right;">0.966</td>
+<td style="text-align: right;">0.997</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">250</td>
+<td style="text-align: right;">65.7</td>
+<td style="text-align: right;">0.982</td>
+<td style="text-align: right;">0.860</td>
+<td style="text-align: right;">41.5</td>
+<td style="text-align: right;">0.968</td>
+<td style="text-align: right;">1.000</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">400</td>
+<td style="text-align: right;">59.0</td>
+<td style="text-align: right;">0.984</td>
+<td style="text-align: right;">0.930</td>
+<td style="text-align: right;">36.0</td>
+<td style="text-align: right;">0.969</td>
+<td style="text-align: right;">1.000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">80</td>
+<td style="text-align: right;">138.9</td>
+<td style="text-align: right;">0.956</td>
+<td style="text-align: right;">0.340</td>
+<td style="text-align: right;">130.2</td>
+<td style="text-align: right;">0.952</td>
+<td style="text-align: right;">0.417</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">150</td>
+<td style="text-align: right;">120.9</td>
+<td style="text-align: right;">0.965</td>
+<td style="text-align: right;">0.530</td>
+<td style="text-align: right;">105.7</td>
+<td style="text-align: right;">0.958</td>
+<td style="text-align: right;">0.737</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">250</td>
+<td style="text-align: right;">107.9</td>
+<td style="text-align: right;">0.971</td>
+<td style="text-align: right;">0.667</td>
+<td style="text-align: right;">87.6</td>
+<td style="text-align: right;">0.960</td>
+<td style="text-align: right;">0.923</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">400</td>
+<td style="text-align: right;">103.9</td>
+<td style="text-align: right;">0.973</td>
+<td style="text-align: right;">0.767</td>
+<td style="text-align: right;">75.3</td>
+<td style="text-align: right;">0.961</td>
+<td style="text-align: right;">0.987</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>The trade is 1.1 percentage points of IBD for 19.2 cM of drag, and since the IBD constraint was met in every replicate with margin, it is free. Four genes reach 0.987 at 400 plants per generation. Under the background-priority index the same cell reaches 0.767, which is what produced the original – and wrong – conclusion that the ceiling is unreachable at four genes and the programme must be extended to BC4-BC5 or split in two. <strong>The wall was a property of the index, not of maize.</strong></p>
+</section>
+<section id="how-long-to-keep-selecting-recombinants" class="level2" data-number="5.5">
+<h2 data-number="5.5" class="anchored" data-anchor-id="how-long-to-keep-selecting-recombinants"><span class="header-section-number">5.5</span> How long to keep selecting recombinants</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div id="fig-bc-policies" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-bc-policies-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figs/mabc_policies.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="405">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bc-policies-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.3: Linkage drag at BC3 (left) and probability of meeting the ceiling (right) under the four policies, s = 0.60. Solid = 1 gene, dashed = 3 genes. Extending recombinant selection into BC3 costs no extra plants, only the flanking markers on plants that are being genotyped anyway.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Classical practice stops recombinant selection after BC2, on the reasoning that BC3 is for background clean-up. By BC3 the background needs no clean-up, and the expected distance to the nearest crossover from a target shrinks as <span class="math inline">\(1/g\)</span> with generation <span class="math inline">\(g\)</span> – so BC3 is the generation where a plant buys the <em>most</em> drag reduction. Both of the free changes in <a href="#fig-bc-policies" class="quarto-xref">Figure&nbsp;<span>5.3</span></a> point the same way: genotype the flanking markers in BC3 as well, and let drag decide.</p>
+</section>
+<section id="allocating-a-fixed-budget-across-bc1-bc2-and-bc3" class="level2" data-number="5.6">
+<h2 data-number="5.6" class="anchored" data-anchor-id="allocating-a-fixed-budget-across-bc1-bc2-and-bc3"><span class="header-section-number">5.6</span> Allocating a fixed budget across BC1, BC2 and BC3</h2>
+<p>Given a total number of plants to grow, how should they be split between the three backcrosses?</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div id="fig-bc-alloc" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-bc-alloc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="04b-backcross-introgression_files/figure-html/fig-bc-alloc-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="1350">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bc-alloc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.4: P(criterion met) against the share of a fixed budget spent early, for 1 and 3 genes, binned by total plants. Front-loading BC1 is the worst use of a fixed budget.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>A paired re-run at a fixed budget of 360 plants, three genes, makes the ordering explicit:</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>360 plants, 3 genes, s = 0.60. Left block: background-priority index. Right block: drag-priority.</caption>
 <colgroup>
 <col style="width: 17%">
-<col style="width: 30%">
-<col style="width: 51%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 8%">
+<col style="width: 8%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 8%">
+<col style="width: 8%">
 </colgroup>
 <thead>
 <tr class="header">
-<th style="text-align: left;">Component</th>
-<th style="text-align: left;">Definition</th>
-<th style="text-align: left;">Biologically</th>
+<th style="text-align: left;">BC1/BC2/BC3</th>
+<th style="text-align: right;">drag cM</th>
+<th style="text-align: right;">P(both)</th>
+<th style="text-align: right;">lo</th>
+<th style="text-align: right;">hi</th>
+<th style="text-align: right;">drag cM</th>
+<th style="text-align: right;">P(both)</th>
+<th style="text-align: right;">lo</th>
+<th style="text-align: right;">hi</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">GD_T = 1 - f_bar</td>
-<td style="text-align: left;">total diversity</td>
-<td style="text-align: left;">He of the whole pool if everything were recombined</td>
+<td style="text-align: left;">300/40/20</td>
+<td style="text-align: right;">93.0</td>
+<td style="text-align: right;">0.448</td>
+<td style="text-align: right;">0.385</td>
+<td style="text-align: right;">0.512</td>
+<td style="text-align: right;">75.6</td>
+<td style="text-align: right;">0.656</td>
+<td style="text-align: right;">0.594</td>
+<td style="text-align: right;">0.715</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">GD_WI = 1 - s_til</td>
-<td style="text-align: left;">within individuals</td>
-<td style="text-align: left;">heterozygosity carried inside each plant</td>
+<td style="text-align: left;">120/120/120</td>
+<td style="text-align: right;">72.6</td>
+<td style="text-align: right;">0.772</td>
+<td style="text-align: right;">0.715</td>
+<td style="text-align: right;">0.823</td>
+<td style="text-align: right;">53.5</td>
+<td style="text-align: right;">0.988</td>
+<td style="text-align: right;">0.965</td>
+<td style="text-align: right;">0.998</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">GD_BI = s_til - f_til</td>
-<td style="text-align: left;">between individuals, within accession</td>
-<td style="text-align: left;">segregating variation available to within-population selection</td>
+<td style="text-align: left;">20/150/190</td>
+<td style="text-align: right;">78.7</td>
+<td style="text-align: right;">0.640</td>
+<td style="text-align: right;">0.577</td>
+<td style="text-align: right;">0.700</td>
+<td style="text-align: right;">58.9</td>
+<td style="text-align: right;">0.876</td>
+<td style="text-align: right;">0.829</td>
+<td style="text-align: right;">0.914</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">GD_WS = 1 - f_til</td>
-<td style="text-align: left;">within subpopulations</td>
-<td style="text-align: left;">GD_WI + GD_BI</td>
+<td style="text-align: left;">40/120/200</td>
+<td style="text-align: right;">74.3</td>
+<td style="text-align: right;">0.748</td>
+<td style="text-align: right;">0.689</td>
+<td style="text-align: right;">0.801</td>
+<td style="text-align: right;">58.1</td>
+<td style="text-align: right;">0.940</td>
+<td style="text-align: right;">0.903</td>
+<td style="text-align: right;">0.966</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">GD_BS = f_til - f_bar</td>
-<td style="text-align: left;">between subpopulations</td>
-<td style="text-align: left;">divergence; the only component a distance method sees</td>
+<td style="text-align: left;">200/120/40</td>
+<td style="text-align: right;">79.7</td>
+<td style="text-align: right;">0.680</td>
+<td style="text-align: right;">0.618</td>
+<td style="text-align: right;">0.737</td>
+<td style="text-align: right;">59.3</td>
+<td style="text-align: right;">0.932</td>
+<td style="text-align: right;">0.893</td>
+<td style="text-align: right;">0.960</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-<p>with the clean identities</p>
-<p><span class="math display">\[\frac{GD_{WI}}{GD_T} = (1-G)(1-F_{ST}), \quad
-  \frac{GD_{BI}}{GD_T} = G(1-F_{ST}), \quad
-  \frac{GD_{WS}}{GD_T} = 1-F_{ST}, \quad
-  \frac{GD_{BS}}{GD_T} = F_{ST}.\]</span></p>
-<section id="why-the-partition-changes-the-strategy-by-species" class="level3" data-number="2.6.1">
-<h3 data-number="2.6.1" class="anchored" data-anchor-id="why-the-partition-changes-the-strategy-by-species"><span class="header-section-number">2.6.1</span> Why the partition changes the strategy by species</h3>
-<ul>
-<li><strong>Outcrossers</strong> (maize, sunflower, forages, forest trees): <span class="math inline">\(GD_{WI}\)</span> is large. The diversity is literally <em>inside</em> the plants. Conserving means maintaining heterozygosity – regenerate with many individuals and balanced contributions.</li>
-<li><strong>Selfers</strong> (soybean, wheat, rice, beans) <strong>and DH or line collections</strong>: <span class="math inline">\(GD_{WI} \approx 0\)</span>. All diversity is <span class="math inline">\(GD_{BI} + GD_{BS}\)</span>. Conserving means maintaining the <em>number of distinct lines</em>; heterozygosity is not a target. Regenerating with few plants per line is acceptable; losing lines is not.</li>
-<li><strong>Clonal crops</strong> (potato, sugarcane, fruit trees): <span class="math inline">\(GD_{WI}\)</span> is high and <strong>frozen</strong> – it does not decay by drift while the clone exists. The <span class="math inline">\(N_e\)</span> algebra does not apply without adaptation.</li>
-</ul>
-<p>This is the reason a hybrid maize programme cannot manage diversity with a single pool-wide number: it needs <span class="math inline">\(GD_{WS}\)</span> defended and <span class="math inline">\(GD_{BS}\)</span> held, and those two pull in opposite directions under selection.</p>
+<p>The balanced schedule wins under both indices, and 300/40/20 – the intuitive “cast a wide net early” schedule – is the worst. The mechanism is the <span class="math inline">\(1/g\)</span> shrinkage again: a plant grown in BC3 is offered a much shorter donor segment to trim than a plant grown in BC1, so it converts into drag reduction far more efficiently.</p>
 </section>
-</section>
-<section id="the-worked-example-reproduced" class="level2" data-number="2.7">
-<h2 data-number="2.7" class="anchored" data-anchor-id="the-worked-example-reproduced"><span class="header-section-number">2.7</span> The worked example, reproduced</h2>
-<p>The paper’s metapopulation: four subpopulations of <span class="math inline">\(N\)</span> = 12, 4, 8, 6, three loci with 5, 3 and 3 alleles. Its published coancestry matrix:</p>
+<section id="fixing-the-stack-selfing-against-doubled-haploids" class="level2" data-number="5.7">
+<h2 data-number="5.7" class="anchored" data-anchor-id="fixing-the-stack-selfing-against-doubled-haploids"><span class="header-section-number">5.7</span> Fixing the stack: selfing against doubled haploids</h2>
+<p>Backcrossing only ever asks for a heterozygote. Fixation asks for a homozygote at all <span class="math inline">\(k\)</span> targets, and that is where the plant numbers move by an order of magnitude. Selfing a BC3F1 gives <span class="math inline">\(q = (1/4)^k\)</span>; a doubled haploid derived from a BC3F1 gamete is homozygous everywhere, so it carries all <span class="math inline">\(k\)</span> targets with <span class="math inline">\(q = (1/2)^k\)</span>.</p>
+<p>And the requirement is not one plant but 3, which is a <em>cumulative binomial</em> <span class="math inline">\(P(\text{Bin}(n, q) \ge 3) \ge 0.95\)</span>, not <span class="math inline">\(1 - (1-q)^n\)</span>:</p>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fl">0.3391</span>, <span class="fl">0.3021</span>, <span class="fl">0.2535</span>, <span class="fl">0.3229</span>,</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>              <span class="fl">0.3021</span>, <span class="fl">0.8750</span>, <span class="fl">0.3073</span>, <span class="fl">0.3889</span>,</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>              <span class="fl">0.2535</span>, <span class="fl">0.3073</span>, <span class="fl">0.4766</span>, <span class="fl">0.2483</span>,</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>              <span class="fl">0.3229</span>, <span class="fl">0.3889</span>, <span class="fl">0.2483</span>, <span class="fl">0.3704</span>), <span class="dv">4</span>, <span class="dv">4</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="fu">paste0</span>(<span class="st">"Sub"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>), <span class="fu">paste0</span>(<span class="st">"Sub"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>)))</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>N <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">12</span>, <span class="dv">4</span>, <span class="dv">8</span>, <span class="dv">6</span>)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>w <span class="ot">&lt;-</span> N <span class="sc">/</span> <span class="fu">sum</span>(N)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>Note subpopulation 2: <span class="math inline">\(f_{22} = 0.875\)</span>, so <span class="math inline">\(H_e = 0.125\)</span>. It is nearly fixed internally. Now the global quantities, with the paper’s published values beside them:</p>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>f_bar <span class="ot">&lt;-</span> <span class="fu">drop</span>(w <span class="sc">%*%</span> f <span class="sc">%*%</span> w)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>f_til <span class="ot">&lt;-</span> <span class="fu">sum</span>(w <span class="sc">*</span> <span class="fu">diag</span>(f))</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>s_til <span class="ot">&lt;-</span> <span class="fl">0.7056</span>                       <span class="co"># published; needs individual genotypes</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">quantity =</span> <span class="fu">c</span>(<span class="st">"f_bar"</span>, <span class="st">"f_til"</span>, <span class="st">"GD_T"</span>, <span class="st">"GD_WI"</span>, <span class="st">"GD_BI"</span>, <span class="st">"GD_BS"</span>, <span class="st">"F_ST"</span>),</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">computed =</span> <span class="fu">round</span>(<span class="fu">c</span>(f_bar, f_til, <span class="dv">1</span> <span class="sc">-</span> f_bar, <span class="dv">1</span> <span class="sc">-</span> s_til, s_til <span class="sc">-</span> f_til,</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>                     f_til <span class="sc">-</span> f_bar, (f_til <span class="sc">-</span> f_bar) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> f_bar)), <span class="dv">4</span>),</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">published =</span> <span class="fu">c</span>(<span class="fl">0.3256</span>, <span class="fl">0.4535</span>, <span class="fl">0.6744</span>, <span class="fl">0.2944</span>, <span class="fl">0.2521</span>, <span class="fl">0.1279</span>, <span class="fl">0.1897</span>)</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
+<caption>Plants or lines needed for 3 fixed individuals at P = 0.95.</caption>
 <thead>
 <tr class="header">
-<th style="text-align: left;">quantity</th>
-<th style="text-align: right;">computed</th>
-<th style="text-align: right;">published</th>
+<th style="text-align: right;">genes</th>
+<th style="text-align: right;">q (selfing)</th>
+<th style="text-align: right;">BC3F2 plants</th>
+<th style="text-align: right;">q (DH)</th>
+<th style="text-align: right;">DH lines</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">f_bar</td>
-<td style="text-align: right;">0.3256</td>
-<td style="text-align: right;">0.3256</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.25000</td>
+<td style="text-align: right;">23</td>
+<td style="text-align: right;">0.5000</td>
+<td style="text-align: right;">11</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">f_til</td>
-<td style="text-align: right;">0.4535</td>
-<td style="text-align: right;">0.4535</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0.06250</td>
+<td style="text-align: right;">99</td>
+<td style="text-align: right;">0.2500</td>
+<td style="text-align: right;">23</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">GD_T</td>
-<td style="text-align: right;">0.6744</td>
-<td style="text-align: right;">0.6744</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0.01562</td>
+<td style="text-align: right;">401</td>
+<td style="text-align: right;">0.1250</td>
+<td style="text-align: right;">49</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">GD_WI</td>
-<td style="text-align: right;">0.2944</td>
-<td style="text-align: right;">0.2944</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">GD_BI</td>
-<td style="text-align: right;">0.2521</td>
-<td style="text-align: right;">0.2521</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">GD_BS</td>
-<td style="text-align: right;">0.1279</td>
-<td style="text-align: right;">0.1279</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">F_ST</td>
-<td style="text-align: right;">0.1897</td>
-<td style="text-align: right;">0.1897</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0.00391</td>
+<td style="text-align: right;">1610</td>
+<td style="text-align: right;">0.0625</td>
+<td style="text-align: right;">99</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-</div>
-<p>Every value reproduces exactly. Note that <span class="math inline">\(GD_{BS}\)</span> is only 19% of the total: the between-subpopulation divergence – the only thing a distance method measures – accounts for less than a fifth of the diversity in this metapopulation.</p>
-<section id="removing-an-accession-can-increase-diversity" class="level3" data-number="2.7.1">
-<h3 data-number="2.7.1" class="anchored" data-anchor-id="removing-an-accession-can-increase-diversity"><span class="header-section-number">2.7.1</span> Removing an accession can <em>increase</em> diversity</h3>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">f =</span> f, <span class="at">by_subpop =</span> <span class="fu">data.frame</span>(<span class="at">N =</span> N))</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cbind</span>(<span class="fu">ct_loss_gain</span>(res),</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>      <span class="at">delta_pct_equal =</span> <span class="fu">round</span>(<span class="fu">ct_loss_gain</span>(res, <span class="st">"equal"</span>)<span class="sc">$</span>delta_pct, <span class="dv">2</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<div class="kable-table">
-<table class="caption-top table table-sm table-striped small">
-<thead>
-<tr class="header">
-<th style="text-align: left;">pop</th>
-<th style="text-align: right;">GD_without</th>
-<th style="text-align: right;">delta_pct</th>
-<th style="text-align: right;">delta_pct_equal</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">Sub1</td>
-<td style="text-align: right;">0.6296049</td>
-<td style="text-align: right;">-6.6468853</td>
-<td style="text-align: right;">-6.92</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Sub2</td>
-<td style="text-align: right;">0.6868734</td>
-<td style="text-align: right;">1.8444502</td>
-<td style="text-align: right;">6.47</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Sub3</td>
-<td style="text-align: right;">0.6480760</td>
-<td style="text-align: right;">-3.9081294</td>
-<td style="text-align: right;">-6.94</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Sub4</td>
-<td style="text-align: right;">0.6689694</td>
-<td style="text-align: right;">-0.8102105</td>
-<td style="text-align: right;">-3.56</td>
-</tr>
-</tbody>
-</table>
+<div id="fig-bc-f2" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-bc-f2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="04b-backcross-introgression_files/figure-html/fig-bc-f2-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="1200">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bc-f2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.5: Points: simulation. Dashed: the cumulative binomial. Log scale. Each extra gene multiplies the BC3F2 requirement by four.
+</figcaption>
+</figure>
 </div>
 </div>
 </div>
-<p>The number to look at is subpopulation 2. A Weitzman-style analysis calls it the most valuable in the set – losing it would cost 65.5% of the diversity, because it is the most divergent. The coancestry analysis says removing it <strong>raises</strong> pool diversity by 1.8% (census weights) or 6.5% (equal weights).</p>
-<p>It is distant <em>because</em> it is fixed. Alleles fixed in a sample of four individuals are not a genetic resource; they are the result of drift. The same pattern appears in the paper’s reanalysis of eleven European pig breeds: the breed a distance method nominates as most valuable turns out to raise diversity by 0.67% when removed.</p>
-<div class="callout callout-style-default callout-caution callout-titled">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div id="fig-bc-sizing" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-bc-sizing-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figs/mabc_sizing.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="387">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bc-sizing-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.6: Analytical sizing by stage, log scale. The two blue bars are backcross generations; red is fixation by selfing; green is fixation by doubled haploids.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>At four genes that is 1610 BC3F2 plants against 99 DH lines, a factor of 16.3. For maize, where DH is routine, the alarming number is not the real bottleneck.</p>
+<p><strong>Without DH there is a staggered alternative.</strong> Do not ask one generation to fix everything. Select BC3F2 plants homozygous for two targets and heterozygous for the other two (roughly 330 plants), then close out the remaining two at BC3F3 (roughly 100). Two stages of hundreds instead of one of thousands, at the cost of one generation.</p>
+</section>
+<section id="sec-bc-assumptions" class="level2" data-number="5.8">
+<h2 data-number="5.8" class="anchored" data-anchor-id="sec-bc-assumptions"><span class="header-section-number">5.8</span> Assumptions, and what is not modelled</h2>
+<p>These matter more than usual here, because unlike the diversity chapters this one is used to decide field area.</p>
+<p><strong>No crossover interference (material, and it cuts against the results above).</strong> Meiosis is Haldane, so crossovers are independent between intervals. Maize has strong positive interference. For the event this simulation depends on most – a double recombinant in the two 5 cM intervals flanking a target, which is what turns a long donor segment into a short one – Haldane gives <span class="math inline">\(2.26 \times 10^{-3}\)</span> against <span class="math inline">\(4.90 \times 10^{-4}\)</span> under a coincidence model. <strong>The model over-produces tight recombinants by about 4.6x</strong>, so every population size quoted for close-in trimming is a lower bound. Note the direction: the index correction makes the problem easier, interference makes it harder, and they do not cancel in any principled way. The correct fix is a crossover-position sampler – chiasmata as a stationary gamma renewal process with shape <span class="math inline">\(\nu\)</span> – which reduces to Haldane exactly at <span class="math inline">\(\nu = 1\)</span> and so is backward compatible; maize estimates put <span class="math inline">\(\nu\)</span> near 3.</p>
+<p><strong>One plant advanced per generation.</strong> Real programmes advance 3-10 and cross each to the recurrent parent. Every probability in this chapter is therefore a <strong>single-lineage</strong> probability: it understates achievable progress and it removes lineage-level variance from every distribution shown.</p>
+<p><strong>Uniform recombination rate, no distortion, no genotyping error.</strong> Maize has 5-10x rate variation and strongly suppressed pericentromeric regions; a target in a cold region carries drag no feasible population will trim. Gametophyte factors shift the foreground frequency away from <span class="math inline">\(1/2\)</span>. Map positions here are illustrative and not pinned to a named consensus map – and IBM-type maps must be rescaled before use, exactly as in <a href="04-population-sizing.html" class="quarto-xref"><span>Chapter 4</span></a>.</p>
+<p><strong>Triploid endosperm genetics is not modelled.</strong> The illustrative targets are endosperm genes. The endosperm is 2 maternal : 1 paternal, so a recessive kernel phenotype does not appear on the ear of a heterozygous plant: phenotypic confirmation lags the genotype by one generation, and xenia means it requires a self-pollination, not open pollination.</p>
+<p><strong>The gene set is illustrative, not a breeding recommendation.</strong> <code>sh2</code> and <code>bt2</code> encode the two subunits of the same enzyme, so stacking both is largely redundant – dropping one turns the hard case (<span class="math inline">\(k = 4\)</span>) into the comfortable one (<span class="math inline">\(k = 3\)</span>). <code>o2</code> alone gives opaque endosperm, not QPM: the hardness modifiers are polygenic, unlinked and unmodelled here, which changes the problem class from “stack <span class="math inline">\(k\)</span> Mendelian genes” to “stack <span class="math inline">\(k\)</span> genes plus a QTL background”.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Caution</span>What this does and does not license
+<span class="screen-reader-only">Warning</span>Two statistical habits this chapter had to be repaired for
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>For a genebank: a rare accession with few plants and high homozygosity – the archetypal “unique” accession on a distance tree – may be contributing <em>negatively</em> to the pool. That does <strong>not</strong> mean discard it. It means the correct priority may be to <strong>regenerate it at larger <span class="math inline">\(N\)</span></strong>, not to replicate it into a core collection. Storing seed is cheap; extinction is irreversible.</p>
+<p><strong>Select on the interval, not the point estimate.</strong> The first version of the sizing tables took the first grid point whose <em>point estimate</em> crossed 0.95. With 30-150 replicates the standard error is 0.02-0.09, so that is a winner’s curse: the tables were non-monotone in <span class="math inline">\(N\)</span> (0.97, 0.97, then 0.93 at a larger <span class="math inline">\(N\)</span>), which is a monotone quantity reading noise. Selection is now on the Clopper-Pearson lower bound, and intervals are reported everywhere.</p>
+<p><strong>Never type a number into the prose.</strong> Every figure in the original narrative was a string constant written against an earlier configuration; re-runs put the true values outside the reported confidence intervals, and the same document contradicted itself in three places. Every number in this chapter is interpolated from the cached tables at render time. <a href="92-verification.html" class="quarto-xref"><span>Appendix C</span></a> says which table each one comes from.</p>
 </div>
 </div>
 </section>
-<section id="optimal-contributions" class="level3" data-number="2.7.2">
-<h3 data-number="2.7.2" class="anchored" data-anchor-id="optimal-contributions"><span class="header-section-number">2.7.2</span> Optimal contributions</h3>
-<p>Maximising <span class="math inline">\(GD_T = 1 - \sum_{i,j} f_{ij} c_i c_j\)</span> subject to <span class="math inline">\(c_i \ge 0\)</span> and <span class="math inline">\(\sum_i c_i = 1\)</span> is a quadratic programme:</p>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>oc <span class="ot">&lt;-</span> <span class="fu">optimal_contributions</span>(f)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>oc<span class="sc">$</span>c_i</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     Sub1     Sub2     Sub3     Sub4 </span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 0.522398 0.000000 0.269890 0.207711</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">GD_before =</span> <span class="dv">1</span> <span class="sc">-</span> f_bar, <span class="at">GD_after =</span> oc<span class="sc">$</span>GD_max,</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">gain_pct =</span> <span class="dv">100</span> <span class="sc">*</span> (oc<span class="sc">$</span>GD_max <span class="sc">-</span> (<span class="dv">1</span> <span class="sc">-</span> f_bar)) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> f_bar))</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; GD_before  GD_after  gain_pct </span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 0.6744338 0.6873675 1.9177220</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>Subpopulation 2 receives weight <strong>zero</strong>, and total diversity rises from 0.6744 to 0.6874. This reproduces the paper’s published solution <span class="math inline">\(\mathbf{c} = (0.522,\, 0,\, 0.270,\, 0.208)\)</span> exactly.</p>
-<p>Three direct uses in plant breeding:</p>
-<ul>
-<li><strong>Base population for recurrent selection.</strong> <span class="math inline">\(c_i\)</span> gives the seed proportion from each source that maximises long-term additive variance.</li>
-<li><strong>Core collection.</strong> Instead of clustering heuristics plus proportional sampling, solve the quadratic programme directly with operational constraints (<span class="math inline">\(c_i \le\)</span> multiplication capacity, <span class="math inline">\(c_i \ge\)</span> a policy minimum for accessions of cultural importance).</li>
-<li><strong>Optimal contribution selection.</strong> Replace the objective with <span class="math inline">\(\max \mathbf{c}'\mathbf{g} - \lambda\,\mathbf{c}'\mathbf{F}\mathbf{c}\)</span> and you have Meuwissen’s framework, now standard in genomic programmes. This chapter is the case <span class="math inline">\(\lambda \to \infty\)</span>, pure diversity. A breeder operates in the middle of the curve – which is <a href="09-optimal-contributions.html" class="quarto-xref"><span>Chapter 10</span></a>.</li>
-</ul>
-</section>
-</section>
-<section id="minimising-coancestry-is-maximising-n_e" class="level2" data-number="2.8">
-<h2 data-number="2.8" class="anchored" data-anchor-id="minimising-coancestry-is-maximising-n_e"><span class="header-section-number">2.8</span> Minimising coancestry is maximising <span class="math inline">\(N_e\)</span></h2>
-<p>Since <span class="math inline">\(N_s = 1/(2\bar f)\)</span>, minimising group coancestry and maximising effective size are the same operation. The paper’s Eq. 14 makes the operational consequence explicit. With <strong>equal</strong> contributions (<span class="math inline">\(S_W^2 = S_B^2 = 0\)</span>), <span class="math inline">\(N_e \approx 2Nn/(1 - F_{IT})\)</span> – roughly <strong>double</strong> the <span class="math inline">\(N_e\)</span> obtained under random (Poisson) contributions.</p>
-<blockquote class="blockquote">
-<p>Harvesting the same number of seeds from every plant, and the same number of plants from every family, doubles the effective size. No genotyping, no technology, no cost.</p>
-</blockquote>
-<p>It is probably the best cost-benefit intervention available in germplasm management. The opposite – bulk harvest from a plot, which in practice samples the most productive plants disproportionately – inflates <span class="math inline">\(S_W^2\)</span> and collapses <span class="math inline">\(N_e\)</span>.</p>
-</section>
-<section id="the-honest-caveats" class="level2" data-number="2.9">
-<h2 data-number="2.9" class="anchored" data-anchor-id="the-honest-caveats"><span class="header-section-number">2.9</span> The honest caveats</h2>
-<p>The paper makes these, and a breeder should take them seriously.</p>
-<p>Criteria based on within-population variation systematically <strong>favour larger populations</strong>. A <span class="math inline">\(\bar f\)</span> criterion can push a genebank toward abundant elite material – the opposite of the conservation objective. Beyond that:</p>
-<ul>
-<li>Neutral markers do not measure adaptive value, disease resistance, stress adaptation or cultural value. A fixed accession may carry the only resistance allele to an emerging rust.</li>
-<li><strong>Allelic richness</strong> is more sensitive to bottlenecks than heterozygosity and is often the more relevant criterion for pre-breeding. The argument that minimising <span class="math inline">\(\bar f\)</span> maximises allelic richness in the long run (via the effective number of alleles being the inverse of mean coancestry) is valid asymptotically but does <strong>not</strong> protect rare alleles in the short term. This is why allelic richness survives the redundancy analysis in <a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 8</span></a> as the one genuinely independent axis.</li>
-<li>Weighting between-group variation more heavily is arbitrary. A more defensible fix is to optimise <span class="math inline">\(\mathbf{c}\)</span> with per-accession minimum constraints.</li>
-</ul>
-<p><strong>Rule of thumb:</strong> use <span class="math inline">\(\bar f\)</span> to decide <em>proportions and regeneration effort</em>; never use <span class="math inline">\(\bar f\)</span> alone to decide <em>discard</em>.</p>
-</section>
-<section id="two-errata-found-while-verifying" class="level2" data-number="2.10">
-<h2 data-number="2.10" class="anchored" data-anchor-id="two-errata-found-while-verifying"><span class="header-section-number">2.10</span> Two errata, found while verifying</h2>
-<p>Worth recording, since the numbers above were checked against the published tables.</p>
-<ul>
-<li>Table 2b lists <span class="math inline">\(F_2 = 0.8383\)</span>, but <span class="math inline">\(F_i = 2s_i - 1 = 2(0.9167) - 1 = 0.8333\)</span>. A typographical error. Every other value in Tables 2 and 3 reproduces exactly.</li>
-<li>Conceptually, the Discussion states that equal contributions (<span class="math inline">\(S_B^2 = S_W^2 = 0\)</span>) are required “to minimise effective size” and “maximise mean coancestry”. That is inverted: Eq. 15 and the entire argument of the paper show that equal contributions <strong>maximise</strong> <span class="math inline">\(N_e\)</span> and <strong>minimise</strong> <span class="math inline">\(\bar f\)</span>.</li>
-</ul>
+<section id="where-this-connects" class="level2" data-number="5.9">
+<h2 data-number="5.9" class="anchored" data-anchor-id="where-this-connects"><span class="header-section-number">5.9</span> Where this connects</h2>
+<p><a href="04-population-sizing.html" class="quarto-xref"><span>Chapter 4</span></a> sized a population to <em>keep</em> diversity; this chapter sized one to discard it everywhere except at <span class="math inline">\(k\)</span> loci. The two share their machinery – the same map, the same Haldane meiosis, the same distinction between what is segregating and what is fixed – and they share the lesson that dominates both: <strong>size for the objective that binds.</strong> In <a href="04-population-sizing.html" class="quarto-xref"><span>Chapter 4</span></a> that meant not sizing for gene diversity, which saturates early. Here it means not sizing for background recovery, which is already satisfied at BC3, and putting the plants into the one criterion that a population can actually buy.</p>
+<p>The converted lines this chapter produces re-enter the pool the rest of the book optimises over. A conversion programme run for its own sake reduces diversity by construction: it makes an elite line into a near-copy of itself. If several conversions are run in parallel off the same recurrent parent, the resulting lines are close to each other, and <a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 8</span></a> and <a href="08-pipeline-stages.html" class="quarto-xref"><span>Chapter 9</span></a> are where that cost becomes visible.</p>
 
 
-<div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
-<div id="ref-caballero2002" class="csl-entry" role="listitem">
-Caballero, A., and M. A. Toro. 2002. <span>“Analysis of Genetic Diversity for the Management of Conserved Subdivided Populations.”</span> <em>Conservation Genetics</em> 3 (3): 289–99. <a href="https://doi.org/10.1023/A:1019956205473">https://doi.org/10.1023/A:1019956205473</a>.
-</div>
-</div>
 </section>
 
 </main> <!-- /main -->
@@ -1428,13 +1586,13 @@ Caballero, A., and M. A. Toro. 2002. <span>“Analysis of Genetic Diversity for 
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./01-coancestry.html" class="pagination-link" aria-label="Coancestry, and the two matrices">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Coancestry, and the two matrices</span></span>
+      <a href="./04-population-sizing.html" class="pagination-link" aria-label="Sizing a segregating population, F1 to F4">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Sizing a segregating population, F1 to F4</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./03-simulating-crosses.html" class="pagination-link" aria-label="Simulating lines, pools and crosses">
-        <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Simulating lines, pools and crosses</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./05-genomic-era.html" class="pagination-link" aria-label="Diversity metrics in the genomic era">
+        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Diversity metrics in the genomic era</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

@@ -16,12 +16,18 @@ not maintained in step with it.
 | `diversity_metrics/pipeline_stages.Rmd` | EN | Chapter 8, *Metrics at each pipeline stage* |
 | `diversity_metrics/plant_maize_diversity.Rmd` + `*_synthesis.md` | EN | Chapter 11, *What the plant literature establishes* |
 | `F2size/` | PT-BR | Chapter 4, *Sizing a segregating population* |
+| `multigenes/` | EN | Chapter 5, *Introgressing several genes by backcrossing* |
 
 The four loose `.R` files (`00_sim_ref.R`, `fast_metrics.R`, `pipeline_metrics.R`,
 and `F2size/maize_wide_cross_sim.R`) were folded into the `hybdiv` package and
 are **superseded** — edit `R/`, not these. The `.csv` and `.png` artefacts are
 copied into `book/data` and `book/figs`, which is where the book reads them
 from; `book/scripts/regenerate.R` is how they are refreshed.
+
+`multigenes/maize_mabc_multigene_sim_en.R` is the exception to that: it is
+standalone, base R only, and **not** part of `hybdiv`. Chapter 5 reads the CSVs
+and figures it produced (copied into `book/data` and `book/figs` as `mabc_*`);
+rerun the script itself to refresh them.
 
 Generated `.html` renders have been removed: they are reproducible from the
 `.Rmd` sources, and the book replaces them.

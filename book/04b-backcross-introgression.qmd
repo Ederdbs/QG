@@ -1,0 +1,517 @@
+# Introgressing several genes by backcrossing {#sec-backcross}
+
+```{r}
+#| include: false
+source("_common.R")
+mb_sz    <- read.csv(book_data("mabc_analytical_sizing.csv"))
+mb_uni   <- read.csv(book_data("mabc_uniform.csv"))
+mb_alloc <- read.csv(book_data("mabc_allocation.csv"))
+mb_f2    <- read.csv(book_data("mabc_bcnf2.csv"))
+mb_idx   <- read.csv(book_data("mabc_index_comparison.csv"))
+mb_re    <- read.csv(book_data("mabc_allocation_recheck.csv"))
+
+# The run these tables come from. Everything the prose asserts is interpolated
+# from the tables themselves -- see the note on hard-coded numbers at the end.
+MB <- list(n_bc = 3, s = 0.60, P = 0.95, ibd_target = 0.90,
+           drag_per_gene = 30, flank_cM = 5, n_keep = 3)
+```
+
+@sec-sizing sized a segregating population for *diversity*: the objective was to
+sample as much of the cross as possible. This chapter is the mirror image.
+A donor line carries $k$ genes worth having and an elite line carries everything
+else worth having, and the job is to move the $k$ genes across while
+**throwing the rest of the donor away**. Here donor genome is contamination, and
+the only diversity that is wanted is the $k$ target loci themselves.
+
+The operation is marker-assisted backcrossing (MABC). The numbers below come
+from a dependency-free simulator of it: a marker grid at 5 cM on ten maize
+chromosomes (1670 cM), one selected plant advanced per generation, $k = 1$ to
+$4$ recessive targets from a single donor, carried to BC`r MB$n_bc`. Its source,
+test battery and technical review are in `doc/multigenes/`.
+
+## The operation, in one diagram
+
+Before any sizing question can be asked, the crossing operations have to be
+unambiguous -- which plant is pollinated by which, and what is genotyped at each
+step.
+
+```{r}
+#| label: fig-bc-flow
+#| echo: false
+#| fig-width: 10
+#| fig-height: 7.4
+#| fig-cap: "The MABC operation. Left column: the cross made in each generation. Right column: what is genotyped and selected on, and the population size that criterion demands. The recurrent parent E re-enters at every backcross; the fork at the bottom is the fixation step, where doubled haploids and selfing differ by more than an order of magnitude in plants required."
+box <- function(x, y, w, h, lab, fill = "white", border = "grey25", cex = 0.95,
+                font = 1) {
+  rect(x - w/2, y - h/2, x + w/2, y + h/2, col = fill, border = border, lwd = 1.6)
+  text(x, y, lab, cex = cex, font = font)
+}
+arr <- function(x0, y0, x1, y1, lab = NULL, lty = 1, col = "grey25") {
+  arrows(x0, y0, x1, y1, length = 0.09, lwd = 1.8, lty = lty, col = col)
+  if (!is.null(lab)) text((x0 + x1)/2, (y0 + y1)/2, lab, pos = 4, cex = 0.8,
+                          col = col, offset = 0.25)
+}
+note <- function(y, txt, col = "grey20")
+  text(7.65, y, txt, pos = 4, cex = 0.78, col = col, xpd = NA)
+
+op <- par(mar = c(0.2, 0.2, 0.2, 0.2))
+plot(NA, xlim = c(0, 13.2), ylim = c(0, 10.4), axes = FALSE, xlab = "", ylab = "")
+
+elite <- "#1b6ca8"; donor <- "#c0392b"; dh <- "#2e7d32"
+
+# --- parents ---------------------------------------------------------------
+box(2.2, 9.6, 3.0, 0.8, "Donor D\nk target alleles, coupling phase",
+    fill = "#fdecea", border = donor, cex = 0.8)
+box(6.0, 9.6, 3.0, 0.8, "Elite E (recurrent)\nfully inbred", fill = "#e8f1f8",
+    border = elite, cex = 0.8)
+
+# --- the recurrent-parent recycle line -------------------------------------
+segments(6.0, 9.2, 6.0, 8.85, col = elite, lwd = 1.8)
+segments(6.0, 8.85, 6.75, 8.85, col = elite, lwd = 1.8)
+segments(6.75, 8.85, 6.75, 4.45, col = elite, lwd = 1.8, lty = 2)
+
+# --- the backcross column --------------------------------------------------
+ys <- c(F1 = 8.3, BC1 = 7.0, BC2 = 5.7, BC3 = 4.4)
+labs <- c(F1 = "F1\n100% heterozygous at targets",
+          BC1 = "BC1", BC2 = "BC2", BC3 = "BC3")
+arr(2.2, 9.2, 3.6, 8.75)
+arr(6.0, 9.2, 4.6, 8.75)
+for (i in seq_along(ys)) {
+  box(4.1, ys[i], 3.4, 0.72, labs[i], fill = "grey97", cex = 0.85,
+      font = if (i == 1) 1 else 2)
+  if (i > 1) {
+    arr(4.1, ys[i-1] - 0.36, 4.1, ys[i] + 0.36)
+    segments(6.75, ys[i], 5.85, ys[i], col = elite, lwd = 1.8, lty = 2)
+    arrows(5.85, ys[i], 5.5, ys[i], length = 0.07, lwd = 1.8, col = elite)
+    text(6.3, ys[i] + 0.2, "x E", cex = 0.8, col = elite)
+  }
+}
+
+# --- the fixation fork -----------------------------------------------------
+arr(4.1, 4.04, 2.6, 3.35); arr(4.1, 4.04, 5.6, 3.35)
+box(2.3, 3.0, 3.0, 0.72, "BC3F1 selfed\n-> BC3F2", fill = "grey97", cex = 0.82)
+box(5.9, 3.0, 3.0, 0.72, "BC3F1 gametes\n-> doubled haploids", fill = "#eaf3ea",
+    border = dh, cex = 0.82)
+arr(2.3, 2.64, 2.3, 1.96); arr(5.9, 2.64, 5.9, 1.96)
+box(2.3, 1.6, 3.0, 0.72, "BC3F3\nphenotypic confirmation", fill = "white", cex = 0.82)
+box(5.9, 1.6, 3.0, 0.72, "DH lines\nhomozygous everywhere", fill = "white",
+    border = dh, cex = 0.82)
+arr(2.3, 1.24, 3.6, 0.75); arr(5.9, 1.24, 4.6, 0.75)
+box(4.1, 0.45, 4.2, 0.66, "Converted elite line: k targets fixed",
+    fill = "#eef4ea", border = dh, cex = 0.9, font = 2)
+
+# --- the annotation column -------------------------------------------------
+segments(7.55, 0.1, 7.55, 10.1, col = "grey85", lwd = 1)
+note(8.55, "Every target heterozygous. Nothing to select yet.")
+note(7.25, paste0("Foreground: keep plants heterozygous at all k targets,",
+                  "\nq = (1/2)^k. Recombinant: genotype the flanking",
+                  "\nmarkers at +/- ", MB$flank_cM, " cM and keep the crossovers."))
+note(5.95, "Same two criteria. Background donor content is\nalready halving on its own -- do not spend the\nindex on it.")
+note(4.65, paste0("Foreground, then MINIMUM LINKAGE DRAG,\nbackground only as a tie-break. IBD with E is\nalready ~",
+                  round(1 - (1 - MB$s) * 0.5^(MB$n_bc + 1), 2),
+                  " with no background selection at all."))
+note(3.25, "Fixation. Selfing needs a homozygote at all k\ntargets: q = (1/4)^k.")
+note(2.9, "DH: one gamete, q = (1/2)^k.", col = dh)
+note(1.7, "Recessive endosperm phenotypes appear one\ngeneration after the genotype, and only on a\nselfed ear (xenia).")
+par(op)
+```
+
+Two features of that diagram do all the work in the rest of the chapter. The
+recurrent parent re-enters at every backcross, so donor content halves every
+generation *whether or not anyone selects for it*; and the fork at the bottom is
+where the plant numbers explode, because fixation asks for a homozygote and
+backcrossing never does.
+
+## The model
+
+**Two states, one haplotype.** The recurrent parent is a fully homozygous
+inbred, so the gamete it contributes is invariant and only the donor-derived
+haplotype has to be tracked: a binary vector over 334 markers. Meiosis is a
+per-interval Bernoulli switch with Haldane's
+
+$$
+r = \tfrac{1}{2}\bigl(1 - e^{-2d/100}\bigr),
+$$
+
+which is exact for this chain precisely because Haldane is memoryless (see the
+limitation in @sec-bc-assumptions).
+
+**Donor dosage and IBD are different quantities.** Donor and elite already share
+a fraction $s$ of the genome by descent -- they are both maize, and often both
+from the same heterotic group. Donor genome inside a shared tract costs nothing.
+So with $D$ the donor dosage,
+
+$$
+\text{IBD}_E = 1 - (1 - s)\,D, \qquad \text{IBD}_E + \text{donor-specific} = 1 .
+$$
+
+Both identities hold exactly in the simulator and are asserted in its test
+battery. Everything below uses $s = `r MB$s`$.
+
+**Coupling phase.** All $k$ targets come from one donor, on the same haplotype.
+Two consequences, and the second is easy to get wrong. Linked targets travel
+*together*, so linkage drag is the **union** of the donor segments, not their
+sum. And conditional on both flanking targets being donor-derived, an *even*
+number of crossovers is forced in the interval between them, so the probability
+that they sit in one continuous donor segment is not $e^{-L}$ but
+
+$$
+P_{\text{same}} = \frac{e^{-L}}{\bigl(1 + e^{-2L}\bigr)/2},
+\qquad L = d/100 \text{ Morgans}.
+$$
+
+```{r}
+p_same <- function(d_cM) { L <- d_cM / 100; exp(-L) / ((1 + exp(-2 * L)) / 2) }
+data.frame(d_cM = c(20, 60, 400),
+           naive = exp(-c(20, 60, 400) / 100),
+           conditional = p_same(c(20, 60, 400)))
+```
+
+At 20 cM that is 0.98 against a naive 0.82. Published stacking simulations get
+this wrong often enough that it is worth stating separately.
+
+::: {.callout-important}
+## If the alleles come from different donors, none of this applies
+
+Coupling phase is an assumption, not a convenience. Two linked targets in
+repulsion, from two donors, cannot both be recovered without a recombinant in
+the interval, and the cost explodes. That programme needs an intercross between
+the donors before any backcrossing starts, and this model does not describe it.
+:::
+
+## Three criteria, and only one of them binds
+
+A conversion programme is usually written with three success conditions at BC3:
+do not lose the genes, recover the recurrent parent, and do not drag a chunk of
+donor chromosome along with each target. They are not remotely equal in cost.
+
+**Not losing the genes** is exact and cheap. A plant is foreground-positive with
+probability $q = (1/2)^k$, so $n$ plants fail with probability $(1-q)^n$:
+
+```{r}
+n_for_count <- function(q, count = 1, P = 0.95) {
+  n <- count
+  while (pbinom(count - 1, n, q) > 1 - P) n <- n + 1L
+  n
+}
+data.frame(genes = mb_sz$genes, q = mb_sz$q_foreground,
+           n_BC_per_gen = mb_sz$n_BC_1plant)
+```
+
+Fewer than 50 plants per generation at four genes, and that is the whole
+foreground problem.
+
+**Recovering the elite is free by BC3.** With no background selection at all,
+expected donor dosage after `r MB$n_bc` backcrosses is $(1/2)^{`r MB$n_bc + 1`}
+= `r fmt(0.5^(MB$n_bc + 1), 4)`$, so
+
+$$
+\text{IBD}_E = 1 - (1 - s)\,(1/2)^{4} = `r fmt(1 - (1 - MB$s) * 0.5^4, 3)`
+$$
+
+at $s = `r MB$s`$ -- comfortably above a 90% target before a single background
+marker is scored.
+
+```{r}
+#| echo: false
+d <- mb_uni[mb_uni$strategy == "rec_bg" & mb_uni$s == MB$s &
+              mb_uni$gen == MB$n_bc, c("genes", "N", "ibd", "p_ibd")]
+knitr::kable(
+  reshape(d[d$N %in% c(20, 80, 200, 400), ], idvar = "genes", timevar = "N",
+          direction = "wide", drop = "p_ibd"),
+  row.names = FALSE, digits = 3,
+  col.names = c("genes", paste("N =", c(20, 80, 200, 400))),
+  caption = sprintf(
+    "IBD with the elite at BC%d, s = %.2f. The %d%% target was met in %d of %d cells of the whole grid; where it was not, the failure was losing the genes, not the background.",
+    MB$n_bc, MB$s, 100 * MB$ibd_target, sum(d$p_ibd >= MB$P), nrow(d)))
+```
+
+That leaves **linkage drag** -- the donor chromosome still attached to each
+target -- as the only criterion that a large population can buy. It is the
+criterion the rest of the chapter is about.
+
+::: {.callout-note}
+## The reframing
+
+An index that spends its decisive stage on background recovery is spending it on
+the criterion that was already satisfied. This is not a hypothetical: it was the
+defect the technical review found in the first version of this simulator, and
+correcting it reverses the headline conclusion. The next section is that
+correction.
+:::
+
+## Which selection index
+
+Four policies, all applied to foreground-positive plants only:
+
+| Key | Rule |
+|---|---|
+| `bg` | minimise background donor content |
+| `rec12` | recombinant selection in BC1-BC2 only (classical practice), then background |
+| `rec_bg` | recombinant selection throughout, **background** decides among survivors |
+| `rec_drag` | recombinant selection throughout, **linkage drag** decides, background breaks ties |
+
+`rec_bg` is the natural-looking two-stage rule: truncate on drag, then pick the
+cleanest background among the survivors. Stage 2 discards stage 1. The plant
+with the least drag survives the truncation and then loses to a sibling that
+happens to carry less donor genome somewhere irrelevant.
+
+```{r}
+#| label: fig-bc-index
+#| echo: false
+#| fig-width: 9
+#| fig-height: 4.4
+#| fig-cap: "Paired comparison (common random numbers, 300 replicates, s = 0.60) of the two-stage background-priority index against the drag-priority index. Bars are Clopper-Pearson 95% intervals. The criterion is drag <= 30 cM per gene AND IBD >= 0.90 at BC3."
+op <- par(mfrow = c(1, 2), mar = c(4.3, 4.4, 2.6, 0.8))
+cols <- c(script = "#c0392b", drag = "#2e7d32")
+for (k in c(3, 4)) {
+  d <- mb_idx[mb_idx$k == k, ]
+  plot(NA, xlim = range(d$N), ylim = c(0, 1), xlab = "Plants per generation",
+       ylab = "P( drag ceiling AND IBD target )",
+       main = sprintf("%d genes", k))
+  grid(col = "grey92", lty = 1); abline(h = 0.95, lty = 3, col = "grey30", lwd = 2)
+  for (ix in names(cols)) {
+    dd <- d[d$index == ix, ]
+    arrows(dd$N, dd$lo, dd$N, dd$hi, length = 0.03, angle = 90, code = 3,
+           col = cols[ix], lwd = 1.6)
+    lines(dd$N, dd$p_both, col = cols[ix], lwd = 2.4, type = "b", pch = 19)
+  }
+  if (k == 3) legend("bottomright", c("background-priority", "drag-priority"),
+                     col = cols, lwd = 2.4, pch = 19, bty = "n", cex = 0.85)
+}
+par(op)
+```
+
+```{r}
+#| echo: false
+w <- reshape(mb_idx[, c("k", "N", "index", "drag", "ibd", "p_both")],
+             idvar = c("k", "N"), timevar = "index", direction = "wide")
+knitr::kable(w[order(w$k, w$N), ], row.names = FALSE, digits = 3,
+  col.names = c("genes", "N/gen", "drag cM", "IBD", "P(both)",
+                "drag cM", "IBD", "P(both)"),
+  caption = "Left block: background-priority. Right block: drag-priority. Same seeds, same shared-IBD backbone.")
+```
+
+The trade is `r fmt(100 * mean(w$ibd.script - w$ibd.drag), 1)` percentage points
+of IBD for
+`r fmt(mean(w$drag.script - w$drag.drag), 1)` cM of drag, and since the IBD
+constraint was met in every replicate with margin, it is free. Four genes reach
+`r fmt(max(mb_idx$p_both[mb_idx$k == 4 & mb_idx$index == "drag"]), 3)` at
+`r mb_idx$N[which.max(replace(mb_idx$p_both, mb_idx$k != 4 | mb_idx$index != "drag", -1))]`
+plants per generation. Under the background-priority index the same cell reaches
+`r fmt(mb_idx$p_both[mb_idx$k == 4 & mb_idx$index == "script" & mb_idx$N == 400], 3)`,
+which is what produced the original -- and wrong -- conclusion that the ceiling
+is unreachable at four genes and the programme must be extended to BC4-BC5 or
+split in two. **The wall was a property of the index, not of maize.**
+
+## How long to keep selecting recombinants
+
+```{r}
+#| label: fig-bc-policies
+#| echo: false
+#| fig-cap: "Linkage drag at BC3 (left) and probability of meeting the ceiling (right) under the four policies, s = 0.60. Solid = 1 gene, dashed = 3 genes. Extending recombinant selection into BC3 costs no extra plants, only the flanking markers on plants that are being genotyped anyway."
+knitr::include_graphics(book_fig("mabc_policies.png"))
+```
+
+Classical practice stops recombinant selection after BC2, on the reasoning that
+BC3 is for background clean-up. By BC3 the background needs no clean-up, and the
+expected distance to the nearest crossover from a target shrinks as $1/g$ with
+generation $g$ -- so BC3 is the generation where a plant buys the *most* drag
+reduction. Both of the free changes in @fig-bc-policies point the same way:
+genotype the flanking markers in BC3 as well, and let drag decide.
+
+## Allocating a fixed budget across BC1, BC2 and BC3
+
+Given a total number of plants to grow, how should they be split between the
+three backcrosses?
+
+```{r}
+#| label: fig-bc-alloc
+#| echo: false
+#| fig-width: 9
+#| fig-height: 4.4
+#| fig-cap: "P(criterion met) against the share of a fixed budget spent early, for 1 and 3 genes, binned by total plants. Front-loading BC1 is the worst use of a fixed budget."
+op <- par(mfrow = c(1, 2), mar = c(4.3, 4.4, 2.6, 0.8))
+brk <- c(0, 150, 300, 500, Inf); lab <- c("< 150", "150-300", "300-500", "> 500")
+cols <- c("#c0392b", "#e67e22", "#27ae60", "#1b6ca8")
+for (k in sort(unique(mb_alloc$genes))) {
+  d <- mb_alloc[mb_alloc$genes == k, ]
+  d$frac <- (d$bc1 + d$bc2) / d$total
+  d$bin <- cut(d$total, brk, labels = lab)
+  plot(NA, xlim = c(0.3, 1), ylim = c(0, 1),
+       xlab = "Share of budget spent on BC1 + BC2",
+       ylab = "P( IBD target AND drag ceiling )", main = sprintf("%d gene(s)", k))
+  grid(col = "grey92", lty = 1); abline(h = 0.95, lty = 3, col = "grey30", lwd = 2)
+  for (i in seq_along(lab)) {
+    dd <- d[d$bin == lab[i], ]
+    if (!nrow(dd)) next
+    ag <- aggregate(p_both ~ round(frac, 1), dd, mean)
+    lines(ag[[1]], ag[[2]], col = cols[i], lwd = 2.4, type = "b", pch = 19)
+  }
+  if (k == 1) legend("bottomleft", paste("total", lab), col = cols, lwd = 2,
+                     lty = 1, bty = "n", cex = 0.8)
+}
+par(op)
+```
+
+A paired re-run at a fixed budget of 360 plants, three genes, makes the ordering
+explicit:
+
+```{r}
+#| echo: false
+knitr::kable(reshape(mb_re[, c("sched", "index", "drag", "p_both", "lo", "hi")],
+                     idvar = "sched", timevar = "index", direction = "wide"),
+  row.names = FALSE, digits = 3,
+  col.names = c("BC1/BC2/BC3", "drag cM", "P(both)", "lo", "hi",
+                "drag cM", "P(both)", "lo", "hi"),
+  caption = "360 plants, 3 genes, s = 0.60. Left block: background-priority index. Right block: drag-priority.")
+```
+
+The balanced schedule wins under both indices, and
+`r mb_re$sched[which.min(mb_re$p_both)]` -- the intuitive "cast a wide net
+early" schedule -- is the worst. The mechanism is the $1/g$ shrinkage again: a
+plant grown in BC3 is offered a much shorter donor segment to trim than a plant
+grown in BC1, so it converts into drag reduction far more efficiently.
+
+## Fixing the stack: selfing against doubled haploids
+
+Backcrossing only ever asks for a heterozygote. Fixation asks for a homozygote
+at all $k$ targets, and that is where the plant numbers move by an order of
+magnitude. Selfing a BC3F1 gives $q = (1/4)^k$; a doubled haploid derived from a
+BC3F1 gamete is homozygous everywhere, so it carries all $k$ targets with
+$q = (1/2)^k$.
+
+And the requirement is not one plant but `r MB$n_keep`, which is a *cumulative
+binomial* $P(\text{Bin}(n, q) \ge `r MB$n_keep`) \ge `r MB$P`$, not
+$1 - (1-q)^n$:
+
+```{r}
+#| echo: false
+knitr::kable(mb_sz[, c("genes", "q_F2", "n_F2_3plants", "q_DH", "n_DH_3lines")],
+  row.names = FALSE, digits = c(0, 5, 0, 4, 0),
+  col.names = c("genes", "q (selfing)", "BC3F2 plants", "q (DH)", "DH lines"),
+  caption = sprintf("Plants or lines needed for %d fixed individuals at P = %.2f.",
+                    MB$n_keep, MB$P))
+```
+
+```{r}
+#| label: fig-bc-f2
+#| echo: false
+#| fig-width: 8
+#| fig-height: 4.6
+#| fig-cap: "Points: simulation. Dashed: the cumulative binomial. Log scale. Each extra gene multiplies the BC3F2 requirement by four."
+op <- par(mar = c(4.4, 4.6, 1.2, 0.8))
+kcol <- c("#1b6ca8", "#27ae60", "#e67e22", "#c0392b")
+plot(NA, xlim = range(mb_f2$n_f2), ylim = c(0, 1), log = "x",
+     xlab = "Genotyped BC3F2 plants",
+     ylab = sprintf("P( >= %d homozygotes at all targets )", MB$n_keep))
+grid(col = "grey92", lty = 1); abline(h = MB$P, lty = 3, col = "grey30", lwd = 2)
+nn <- unique(round(exp(seq(log(3), log(max(mb_f2$n_f2)), length.out = 400))))
+for (k in sort(unique(mb_f2$genes))) {
+  lines(nn, 1 - pbinom(MB$n_keep - 1, nn, 0.25^k), col = kcol[k], lty = 2, lwd = 1.6)
+  d <- mb_f2[mb_f2$genes == k, ]
+  points(d$n_f2, d$p_ok, col = kcol[k], pch = 19)
+}
+legend("topleft", sprintf("%d gene(s): n = %d", mb_sz$genes, mb_sz$n_F2_3plants),
+       col = kcol[mb_sz$genes], lwd = 2, pch = 19, bty = "n", cex = 0.85)
+par(op)
+```
+
+```{r}
+#| label: fig-bc-sizing
+#| echo: false
+#| fig-cap: "Analytical sizing by stage, log scale. The two blue bars are backcross generations; red is fixation by selfing; green is fixation by doubled haploids."
+knitr::include_graphics(book_fig("mabc_sizing.png"))
+```
+
+At four genes that is
+`r mb_sz$n_F2_3plants[4]` BC3F2 plants against `r mb_sz$n_DH_3lines[4]` DH lines,
+a factor of
+`r fmt(mb_sz$n_F2_3plants[4] / mb_sz$n_DH_3lines[4], 1)`. For maize, where DH is
+routine, the alarming number is not the real bottleneck.
+
+**Without DH there is a staggered alternative.** Do not ask one generation to
+fix everything. Select BC3F2 plants homozygous for two targets and heterozygous
+for the other two (roughly 330 plants), then close out the remaining two at
+BC3F3 (roughly 100). Two stages of hundreds instead of one of thousands, at the
+cost of one generation.
+
+## Assumptions, and what is not modelled {#sec-bc-assumptions}
+
+These matter more than usual here, because unlike the diversity chapters this
+one is used to decide field area.
+
+**No crossover interference (material, and it cuts against the results above).**
+Meiosis is Haldane, so crossovers are independent between intervals. Maize has
+strong positive interference. For the event this simulation depends on most -- a
+double recombinant in the two 5 cM intervals flanking a target, which is what
+turns a long donor segment into a short one -- Haldane gives
+$2.26 \times 10^{-3}$ against $4.90 \times 10^{-4}$ under a coincidence model.
+**The model over-produces tight recombinants by about 4.6x**, so every
+population size quoted for close-in trimming is a lower bound. Note the
+direction: the index correction makes the problem easier, interference makes it
+harder, and they do not cancel in any principled way. The correct fix is a
+crossover-position sampler -- chiasmata as a stationary gamma renewal process
+with shape $\nu$ -- which reduces to Haldane exactly at $\nu = 1$ and so is
+backward compatible; maize estimates put $\nu$ near 3.
+
+**One plant advanced per generation.** Real programmes advance 3-10 and cross
+each to the recurrent parent. Every probability in this chapter is therefore a
+**single-lineage** probability: it understates achievable progress and it
+removes lineage-level variance from every distribution shown.
+
+**Uniform recombination rate, no distortion, no genotyping error.** Maize has
+5-10x rate variation and strongly suppressed pericentromeric regions; a target
+in a cold region carries drag no feasible population will trim. Gametophyte
+factors shift the foreground frequency away from $1/2$. Map positions here are
+illustrative and not pinned to a named consensus map -- and IBM-type maps must
+be rescaled before use, exactly as in @sec-sizing.
+
+**Triploid endosperm genetics is not modelled.** The illustrative targets are
+endosperm genes. The endosperm is 2 maternal : 1 paternal, so a recessive kernel
+phenotype does not appear on the ear of a heterozygous plant: phenotypic
+confirmation lags the genotype by one generation, and xenia means it requires a
+self-pollination, not open pollination.
+
+**The gene set is illustrative, not a breeding recommendation.** `sh2` and `bt2`
+encode the two subunits of the same enzyme, so stacking both is largely
+redundant -- dropping one turns the hard case ($k = 4$) into the comfortable one
+($k = 3$). `o2` alone gives opaque endosperm, not QPM: the hardness modifiers
+are polygenic, unlinked and unmodelled here, which changes the problem class
+from "stack $k$ Mendelian genes" to "stack $k$ genes plus a QTL background".
+
+::: {.callout-warning}
+## Two statistical habits this chapter had to be repaired for
+
+**Select on the interval, not the point estimate.** The first version of the
+sizing tables took the first grid point whose *point estimate* crossed 0.95.
+With 30-150 replicates the standard error is 0.02-0.09, so that is a winner's
+curse: the tables were non-monotone in $N$ (0.97, 0.97, then 0.93 at a larger
+$N$), which is a monotone quantity reading noise. Selection is now on the
+Clopper-Pearson lower bound, and intervals are reported everywhere.
+
+**Never type a number into the prose.** Every figure in the original narrative
+was a string constant written against an earlier configuration; re-runs put the
+true values outside the reported confidence intervals, and the same document
+contradicted itself in three places. Every number in this chapter is
+interpolated from the cached tables at render time. @sec-verification says which
+table each one comes from.
+:::
+
+## Where this connects
+
+@sec-sizing sized a population to *keep* diversity; this chapter sized one to
+discard it everywhere except at $k$ loci. The two share their machinery -- the
+same map, the same Haldane meiosis, the same distinction between what is
+segregating and what is fixed -- and they share the lesson that dominates both:
+**size for the objective that binds.** In @sec-sizing that meant not sizing for
+gene diversity, which saturates early. Here it means not sizing for background
+recovery, which is already satisfied at BC3, and putting the plants into the one
+criterion that a population can actually buy.
+
+The converted lines this chapter produces re-enter the pool the rest of the book
+optimises over. A conversion programme run for its own sake reduces diversity by
+construction: it makes an elite line into a near-copy of itself. If several
+conversions are run in parallel off the same recurrent parent, the resulting
+lines are close to each other, and @sec-choosing and @sec-stages are where that
+cost becomes visible.
