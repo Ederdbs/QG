@@ -585,7 +585,7 @@ window.Quarto = {
 <p>Every function used in this book lives in one package, whose source is the <code>R/</code> directory of this repository. This appendix is the index.</p>
 <div class="cell" data-layout-align="center">
 <pre><code>#&gt; exported_objects 
-#&gt;              141</code></pre>
+#&gt;              166</code></pre>
 </div>
 <section id="installation" class="level2" data-number="B.1">
 <h2 data-number="B.1" class="anchored" data-anchor-id="installation"><span class="header-section-number">B.1</span> Installation</h2>
@@ -602,8 +602,8 @@ window.Quarto = {
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
-<col style="width: 23%">
-<col style="width: 54%">
+<col style="width: 22%">
+<col style="width: 56%">
 <col style="width: 21%">
 </colgroup>
 <thead>
@@ -655,16 +655,21 @@ window.Quarto = {
 <td style="text-align: left;"><a href="02-subdivided.html" class="quarto-xref"><span>Chapter 2</span></a></td>
 </tr>
 <tr class="odd">
+<td style="text-align: left;"><code>R/08_mabc.R</code></td>
+<td style="text-align: left;">marker-assisted backcrossing: drag, the selection index, sizing</td>
+<td style="text-align: left;"><a href="04b-backcross-introgression.html" class="quarto-xref"><span>Chapter 5</span></a></td>
+</tr>
+<tr class="even">
 <td style="text-align: left;"><code>R/09_reference.R</code></td>
 <td style="text-align: left;">slow literal oracles, for verification</td>
 <td style="text-align: left;"><a href="92-verification.html" class="quarto-xref"><span>Appendix C</span></a></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><code>R/10_stage1.R</code></td>
 <td style="text-align: left;">stage 1: lines to the X / f / hybrids contract</td>
 <td style="text-align: left;"><a href="03-simulating-crosses.html" class="quarto-xref"><span>Chapter 3</span></a></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><code>R/11_stage2.R</code></td>
 <td style="text-align: left;">stage 2: constrained selection across an alpha grid</td>
 <td style="text-align: left;"><a href="12-case-study.html" class="quarto-xref"><span>Chapter 13</span></a></td>
@@ -1027,9 +1032,10 @@ window.Quarto = {
 </section>
 <section id="runnable-scripts" class="level2" data-number="B.5">
 <h2 data-number="B.5" class="anchored" data-anchor-id="runnable-scripts"><span class="header-section-number">B.5</span> Runnable scripts</h2>
-<p>The book runs everything at a reduced scale so it renders quickly. Two scripts ship with the package and run the same work at the production scale of <code>sim_config</code>, writing their tables and plots to <code>report/</code>:</p>
+<p>The book runs everything at a reduced scale so it renders quickly. Three scripts ship with the package and run the same work at the production scale of <code>sim_config</code>, writing their tables and plots to <code>report/</code>:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Rscript</span> inst/scripts/run_all.R          <span class="co"># the two-stage pipeline, ~4 min</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">Rscript</span> inst/scripts/run_benchmark.R    <span class="co"># the metrics benchmark, ~6 min</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">Rscript</span> inst/scripts/run_benchmark.R    <span class="co"># the metrics benchmark, ~6 min</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="ex">Rscript</span> inst/scripts/run_mabc.R         <span class="co"># the MABC scans, ~3 min</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><code>run_benchmark.R</code> is the source of the numeric results quoted in <code>README.md</code>, and the only place the three <code>plot_*</code> helpers above are exercised. From an installed copy of the package:</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="fu">system.file</span>(<span class="st">"scripts"</span>, <span class="st">"run_all.R"</span>, <span class="at">package =</span> <span class="st">"hybdiv"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -1237,217 +1243,253 @@ window.Quarto = {
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">alleles_lost</td>
-<td style="text-align: left;">fast_gene_div</td>
-<td style="text-align: left;">metrics_full</td>
+<td style="text-align: left;">f2_run_experiment</td>
+<td style="text-align: left;">mean_offdiag</td>
 <td style="text-align: left;">reps_for_N</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">alleles_retained</td>
-<td style="text-align: left;">fast_he_nei</td>
-<td style="text-align: left;">min_minor_freq</td>
-<td style="text-align: left;">run_scheme</td>
+<td style="text-align: left;">fast_alleles_lost</td>
+<td style="text-align: left;">meiosis</td>
+<td style="text-align: left;">run_bc_program</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">alleles_retained_fast</td>
-<td style="text-align: left;">fast_ne_parents</td>
-<td style="text-align: left;">molecular_coancestry</td>
-<td style="text-align: left;">s1_monitor</td>
+<td style="text-align: left;">fast_ctx</td>
+<td style="text-align: left;">meiosis_sel</td>
+<td style="text-align: left;">run_scheme</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">alpha_loss</td>
-<td style="text-align: left;">fast_pbar</td>
-<td style="text-align: left;">mrd_matrix</td>
-<td style="text-align: left;">s3_status_num</td>
+<td style="text-align: left;">fast_gene_div</td>
+<td style="text-align: left;">metrics_cheap</td>
+<td style="text-align: left;">s1_monitor</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">ane</td>
-<td style="text-align: left;">fast_status_num</td>
-<td style="text-align: left;">multilocus_recovery</td>
+<td style="text-align: left;">fast_he_nei</td>
+<td style="text-align: left;">metrics_full</td>
+<td style="text-align: left;">s3_status_num</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">backcross</td>
+<td style="text-align: left;">fast_ne_parents</td>
+<td style="text-align: left;">min_minor_freq</td>
 <td style="text-align: left;">s3_theta</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;">BITS_PER_WORD</td>
-<td style="text-align: left;">fast_theta</td>
-<td style="text-align: left;">n_equivalent</td>
+<td style="text-align: left;">fast_pbar</td>
+<td style="text-align: left;">molecular_coancestry</td>
 <td style="text-align: left;">sel_de</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;">block_lengths</td>
-<td style="text-align: left;">fast_theta_pools</td>
-<td style="text-align: left;">ne_lines_pool</td>
+<td style="text-align: left;">fast_status_num</td>
+<td style="text-align: left;">mrd_matrix</td>
 <td style="text-align: left;">sel_greedy</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;">build_ctx</td>
-<td style="text-align: left;">fixed_fraction</td>
-<td style="text-align: left;">ne_parents</td>
+<td style="text-align: left;">fast_theta</td>
+<td style="text-align: left;">multilocus_recovery</td>
 <td style="text-align: left;">sel_intensity</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;">build_ctx_from_stage1</td>
-<td style="text-align: left;">freq_metrics</td>
-<td style="text-align: left;">ne_parents_from_counts</td>
+<td style="text-align: left;">fast_theta_pools</td>
+<td style="text-align: left;">n_equivalent</td>
 <td style="text-align: left;">sel_random</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;">build_map</td>
-<td style="text-align: left;">gd_partition</td>
-<td style="text-align: left;">null_distribution</td>
+<td style="text-align: left;">fixed_fraction</td>
+<td style="text-align: left;">n_for_count</td>
 <td style="text-align: left;">sel_truncation</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;">bulk_weights</td>
-<td style="text-align: left;">gene_diversity</td>
-<td style="text-align: left;">ocs_quadprog</td>
+<td style="text-align: left;">foreground_ok</td>
+<td style="text-align: left;">ne_lines_pool</td>
 <td style="text-align: left;">sel_truncation_cap</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;">coancestry_from_mrd</td>
-<td style="text-align: left;">gst</td>
-<td style="text-align: left;">ocs_relaxation</td>
+<td style="text-align: left;">freq_metrics</td>
+<td style="text-align: left;">ne_parents</td>
 <td style="text-align: left;">select_lines_constrained</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;">col_cumsum</td>
-<td style="text-align: left;">gst_nei</td>
-<td style="text-align: left;">optimal_contributions</td>
+<td style="text-align: left;">gd_partition</td>
+<td style="text-align: left;">ne_parents_from_counts</td>
+<td style="text-align: left;">select_parent</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">cost_per_eval</td>
+<td style="text-align: left;">gene_diversity</td>
+<td style="text-align: left;">null_distribution</td>
+<td style="text-align: left;">selfing_step</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">cp_hi</td>
+<td style="text-align: left;">gst</td>
+<td style="text-align: left;">ocs_quadprog</td>
 <td style="text-align: left;">sigma_dh_crosses</td>
 </tr>
-<tr class="even">
-<td style="text-align: left;">cost_per_eval</td>
-<td style="text-align: left;">he_nei</td>
-<td style="text-align: left;">p_het</td>
+<tr class="odd">
+<td style="text-align: left;">cp_lo</td>
+<td style="text-align: left;">gst_nei</td>
+<td style="text-align: left;">ocs_relaxation</td>
 <td style="text-align: left;">sigma2_dh</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;">cross_indices</td>
-<td style="text-align: left;">hybrid_theta_from_usage</td>
-<td style="text-align: left;">pack_lines</td>
+<td style="text-align: left;">haldane_r</td>
+<td style="text-align: left;">optimal_contributions</td>
 <td style="text-align: left;">sim_config</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;">ct_loss_gain</td>
-<td style="text-align: left;">junctions_per_hap</td>
-<td style="text-align: left;">panel_freq</td>
+<td style="text-align: left;">he_nei</td>
+<td style="text-align: left;">p_het</td>
 <td style="text-align: left;">simulate_data</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;">ct_partition</td>
-<td style="text-align: left;">line_counts</td>
-<td style="text-align: left;">panel_het</td>
+<td style="text-align: left;">hybrid_theta_from_usage</td>
+<td style="text-align: left;">p_same_segment</td>
 <td style="text-align: left;">simulate_lines</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;">ctx_from_pools</td>
-<td style="text-align: left;">line_usage</td>
-<td style="text-align: left;">plot_correlation</td>
+<td style="text-align: left;">ibd_elite</td>
+<td style="text-align: left;">pack_lines</td>
 <td style="text-align: left;">simulate_pools</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;">decode</td>
-<td style="text-align: left;">line_usage_freq</td>
-<td style="text-align: left;">plot_frontier</td>
+<td style="text-align: left;">junctions_per_hap</td>
+<td style="text-align: left;">panel_freq</td>
+<td style="text-align: left;">sizing_table</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">decode_lines</td>
+<td style="text-align: left;">line_counts</td>
+<td style="text-align: left;">panel_het</td>
 <td style="text-align: left;">skew_fraction</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">decode_lines</td>
-<td style="text-align: left;">line_weights</td>
-<td style="text-align: left;">plot_null</td>
+<td style="text-align: left;">decode_rank</td>
+<td style="text-align: left;">line_usage</td>
+<td style="text-align: left;">plot_correlation</td>
 <td style="text-align: left;">stage1_build</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">decode_rank</td>
-<td style="text-align: left;">load_data</td>
-<td style="text-align: left;">pool_balance</td>
+<td style="text-align: left;">dh_cross_coancestry</td>
+<td style="text-align: left;">line_usage_freq</td>
+<td style="text-align: left;">plot_frontier</td>
 <td style="text-align: left;">stage1_simulate</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">dh_cross_coancestry</td>
-<td style="text-align: left;">loss_ledger</td>
-<td style="text-align: left;">pool_complementarity</td>
+<td style="text-align: left;">dh_pool_theta</td>
+<td style="text-align: left;">line_weights</td>
+<td style="text-align: left;">plot_null</td>
 <td style="text-align: left;">stage2_select</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">dh_pool_theta</td>
-<td style="text-align: left;">loss_vs_resampling</td>
-<td style="text-align: left;">popcount32</td>
+<td style="text-align: left;">dh_sib_coancestry</td>
+<td style="text-align: left;">load_data</td>
+<td style="text-align: left;">pool_balance</td>
 <td style="text-align: left;">status_number</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">dh_sib_coancestry</td>
-<td style="text-align: left;">maize_chr_len</td>
-<td style="text-align: left;">project_capped_simplex</td>
-<td style="text-align: left;">theta_ceiling</td>
+<td style="text-align: left;">discriminatory_power</td>
+<td style="text-align: left;">loss_ledger</td>
+<td style="text-align: left;">pool_complementarity</td>
+<td style="text-align: left;">strat_rec_until</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">discriminatory_power</td>
-<td style="text-align: left;">make_distortion</td>
-<td style="text-align: left;">ref_alleles_fixed</td>
-<td style="text-align: left;">theta_decompose</td>
+<td style="text-align: left;">diversity_retained</td>
+<td style="text-align: left;">loss_vs_resampling</td>
+<td style="text-align: left;">popcount32</td>
+<td style="text-align: left;">summarise_reps</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">diversity_retained</td>
-<td style="text-align: left;">make_F1</td>
+<td style="text-align: left;">donor_dosage</td>
+<td style="text-align: left;">mabc_opt</td>
+<td style="text-align: left;">project_capped_simplex</td>
+<td style="text-align: left;">target_indices</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">donor_specific</td>
+<td style="text-align: left;">maize_chr_len</td>
+<td style="text-align: left;">ref_alleles_fixed</td>
+<td style="text-align: left;">theta_ceiling</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">drag_total</td>
+<td style="text-align: left;">maize_targets</td>
 <td style="text-align: left;">ref_alleles_lost</td>
-<td style="text-align: left;">theta_from_freq</td>
+<td style="text-align: left;">theta_decompose</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">eff_dim</td>
-<td style="text-align: left;">make_fitness</td>
+<td style="text-align: left;">make_distortion</td>
 <td style="text-align: left;">ref_ane</td>
-<td style="text-align: left;">theta_group</td>
+<td style="text-align: left;">theta_from_freq</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">ene</td>
-<td style="text-align: left;">make_fitness_fast</td>
+<td style="text-align: left;">make_F1</td>
 <td style="text-align: left;">ref_eff_dim</td>
-<td style="text-align: left;">theta_pools</td>
+<td style="text-align: left;">theta_group</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">evaluate</td>
-<td style="text-align: left;">make_theta_fun</td>
+<td style="text-align: left;">make_fitness</td>
 <td style="text-align: left;">ref_ene</td>
+<td style="text-align: left;">theta_pools</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">expected_donor</td>
+<td style="text-align: left;">make_fitness_fast</td>
+<td style="text-align: left;">ref_gene_div</td>
 <td style="text-align: left;">theta_state</td>
 </tr>
-<tr class="even">
-<td style="text-align: left;">expected_junctions</td>
-<td style="text-align: left;">marker_index</td>
-<td style="text-align: left;">ref_gene_div</td>
+<tr class="odd">
+<td style="text-align: left;">expected_drag</td>
+<td style="text-align: left;">make_shared_ibd</td>
+<td style="text-align: left;">ref_he_nei</td>
 <td style="text-align: left;">theta_swap</td>
 </tr>
-<tr class="odd">
-<td style="text-align: left;">f1_sizing</td>
-<td style="text-align: left;">max_line_use</td>
-<td style="text-align: left;">ref_he_nei</td>
+<tr class="even">
+<td style="text-align: left;">expected_ibd</td>
+<td style="text-align: left;">make_theta_fun</td>
+<td style="text-align: left;">ref_ne_parents</td>
 <td style="text-align: left;">usefulness_criterion</td>
 </tr>
-<tr class="even">
-<td style="text-align: left;">f2_distorters</td>
-<td style="text-align: left;">mean_index</td>
-<td style="text-align: left;">ref_ne_parents</td>
+<tr class="odd">
+<td style="text-align: left;">expected_junctions</td>
+<td style="text-align: left;">marker_index</td>
+<td style="text-align: left;">ref_status_num</td>
 <td style="text-align: left;">vanraden_G</td>
 </tr>
-<tr class="odd">
-<td style="text-align: left;">f2_opt</td>
-<td style="text-align: left;">mean_offdiag</td>
-<td style="text-align: left;">ref_status_num</td>
+<tr class="even">
+<td style="text-align: left;">f1_sizing</td>
+<td style="text-align: left;">marker_weights</td>
+<td style="text-align: left;">ref_theta</td>
 <td style="text-align: left;">zyg_fitness</td>
 </tr>
-<tr class="even">
-<td style="text-align: left;">f2_run_experiment</td>
-<td style="text-align: left;">meiosis</td>
-<td style="text-align: left;">ref_theta</td>
-<td style="text-align: left;"></td>
-</tr>
 <tr class="odd">
-<td style="text-align: left;">fast_alleles_lost</td>
-<td style="text-align: left;">meiosis_sel</td>
+<td style="text-align: left;">f2_distorters</td>
+<td style="text-align: left;">max_line_use</td>
 <td style="text-align: left;">ref_theta_freq</td>
 <td style="text-align: left;"></td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">fast_ctx</td>
-<td style="text-align: left;">metrics_cheap</td>
+<td style="text-align: left;">f2_opt</td>
+<td style="text-align: left;">mean_index</td>
 <td style="text-align: left;">ref_theta_pools</td>
 <td style="text-align: left;"></td>
 </tr>

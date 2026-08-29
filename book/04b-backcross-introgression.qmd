@@ -24,10 +24,11 @@ else worth having, and the job is to move the $k$ genes across while
 the only diversity that is wanted is the $k$ target loci themselves.
 
 The operation is marker-assisted backcrossing (MABC). The numbers below come
-from a dependency-free simulator of it: a marker grid at 5 cM on ten maize
-chromosomes (1670 cM), one selected plant advanced per generation, $k = 1$ to
-$4$ recessive targets from a single donor, carried to BC`r MB$n_bc`. Its source,
-test battery and technical review are in `doc/multigenes/`.
+from a simulator of it: a marker grid at 5 cM on ten maize chromosomes
+(1670 cM), one selected plant advanced per generation, $k = 1$ to $4$ recessive
+targets from a single donor, carried to BC`r MB$n_bc`. It ships with the
+package -- the engine and the selection index are `R/08_mabc.R`, the experiment
+driver is `inst/scripts/run_mabc.R` -- and @sec-bc-running shows how to run it.
 
 ## The operation, in one diagram
 
@@ -161,10 +162,9 @@ P_{\text{same}} = \frac{e^{-L}}{\bigl(1 + e^{-2L}\bigr)/2},
 $$
 
 ```{r}
-p_same <- function(d_cM) { L <- d_cM / 100; exp(-L) / ((1 + exp(-2 * L)) / 2) }
 data.frame(d_cM = c(20, 60, 400),
            naive = exp(-c(20, 60, 400) / 100),
-           conditional = p_same(c(20, 60, 400)))
+           conditional = p_same_segment(c(20, 60, 400)))
 ```
 
 At 20 cM that is 0.98 against a naive 0.82. Published stacking simulations get
@@ -189,13 +189,8 @@ donor chromosome along with each target. They are not remotely equal in cost.
 probability $q = (1/2)^k$, so $n$ plants fail with probability $(1-q)^n$:
 
 ```{r}
-n_for_count <- function(q, count = 1, P = 0.95) {
-  n <- count
-  while (pbinom(count - 1, n, q) > 1 - P) n <- n + 1L
-  n
-}
 data.frame(genes = mb_sz$genes, q = mb_sz$q_foreground,
-           n_BC_per_gen = mb_sz$n_BC_1plant)
+           n_BC_per_gen = vapply(mb_sz$q_foreground, n_for_count, integer(1)))
 ```
 
 Fewer than 50 plants per generation at four genes, and that is the whole
@@ -435,6 +430,92 @@ fix everything. Select BC3F2 plants homozygous for two targets and heterozygous
 for the other two (roughly 330 plants), then close out the remaining two at
 BC3F3 (roughly 100). Two stages of hundreds instead of one of thousands, at the
 cost of one generation.
+
+## Running the simulation {#sec-bc-running}
+
+Everything above is reproducible from the package. The engine and the decision
+layer are in `R/08_mabc.R`; the experiment driver that produced the cached
+tables is `inst/scripts/run_mabc.R`.
+
+**One programme, interactively.** Build a map, place the targets, draw the
+donor-elite sharing, and run the three backcrosses:
+
+```{r}
+map <- build_map(maize_chr_len, spacing_cM = 5)
+w   <- marker_weights(map)
+tg  <- target_indices(map, k = 3)              # the first three of maize_targets
+sh  <- make_shared_ibd(map, s = 0.60, mw = w, target_idx = tg)
+
+pr <- run_bc_program(n_sched = c(120, 120, 120), s = 0.60,
+                     strategy = "rec_drag", map = map, opt = mabc_opt,
+                     tg = tg, w = w, shared = sh)
+fmt(pr$traj, 3)
+```
+
+`n_sched` is the schedule, one entry per backcross, so `c(300, 40, 20)` and
+`c(120, 120, 120)` are the two allocations compared above. Passing the same
+`shared` mask to two calls is what makes a comparison between selection indices
+paired rather than confounded with the donor-elite pair.
+
+**Comparing indices on common random numbers.** Reset the seed before each
+strategy so the two programmes see the same meioses:
+
+```{r}
+drag_of <- function(strategy) {
+  set.seed(7)
+  run_bc_program(c(120, 120, 120), 0.60, strategy, map, mabc_opt, tg, w,
+                 shared = sh)$traj$drag[mabc_opt$n_bc]
+}
+c(rec_bg = drag_of("rec_bg"), rec_drag = drag_of("rec_drag"))
+```
+
+A single replicate is noise; the tables above are 300 of these per cell, which
+is the driver's job.
+
+**The analytical sizing needs no simulation at all.** It is a cumulative
+binomial, so it is exact and instant:
+
+```{r}
+sizing_table(k_max = 4, flank_cM = 5, P = 0.95, n_keep = 3)
+```
+
+**The full scans, from the shell.** The driver runs the whole grid -- four
+policies by four gene numbers by eleven population sizes by three values of $s$,
+plus the allocation grid and the BCnF2 stage -- and writes the CSVs, the nine
+figures and a self-contained HTML report:
+
+```sh
+Rscript inst/scripts/run_mabc.R --test              # 35 checks, ~10 s
+Rscript inst/scripts/run_mabc.R --quick --out=DIR   # reduced grid, ~30 s
+Rscript inst/scripts/run_mabc.R --out=report/mabc   # the full run, ~3 min
+```
+
+The cached tables this chapter reads are the full run's
+`results_uniform.csv`, `results_allocation.csv`, `results_bcnf2.csv` and
+`analytical_sizing.csv`, copied into `book/data` as `mabc_*.csv`; the header of
+the driver lists the copy commands.
+
+**Pointing it at your own programme.** Three things change and nothing else:
+
+```{r}
+#| eval: false
+# 1. your map
+map <- build_map(my_chr_len_cM, spacing_cM = 5)
+
+# 2. your targets -- same columns as maize_targets
+my_targets <- data.frame(gene = c("A", "B"), chr = c(1, 5),
+                         pos_cM = c(40, 110), label = c("A", "B"))
+tg <- target_indices(map, k = 2, targets = my_targets)
+
+# 3. your criteria
+opt <- utils::modifyList(mabc_opt,
+                         list(n_bc = 4, drag_per_gene = 20, target_ibd = 0.95))
+```
+
+`s` -- how much of the genome your donor and your elite already share -- is the
+parameter worth measuring rather than assuming. It scales the whole cost: at
+$s = 0.7$ most of the donor genome that survives is free, at $s = 0$ none of it
+is.
 
 ## Assumptions, and what is not modelled {#sec-bc-assumptions}
 

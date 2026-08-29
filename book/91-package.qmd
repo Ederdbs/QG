@@ -35,7 +35,8 @@ Everything else, including every plot, is base R.
 knitr::kable(data.frame(
   File = c("`R/00_data.R`", "`R/01_metrics.R`", "`R/02_benchmark.R`",
            "`R/03_de_select.R`", "`R/04_fast_metrics.R`", "`R/05_pipeline_metrics.R`",
-           "`R/06_f2size.R`", "`R/07_caballero_toro.R`", "`R/09_reference.R`",
+           "`R/06_f2size.R`", "`R/07_caballero_toro.R`", "`R/08_mabc.R`",
+           "`R/09_reference.R`",
            "`R/10_stage1.R`", "`R/11_stage2.R`"),
   Role = c("simulation, the two matrices, the `ctx` builder",
            "the diversity metrics, all `f(idx, ctx) -> scalar`",
@@ -45,12 +46,14 @@ knitr::kable(data.frame(
            "stage-specific metrics for S1 to S4",
            "F1 to F4 population sizing simulator",
            "Caballero & Toro subdivided-population analysis",
+           "marker-assisted backcrossing: drag, the selection index, sizing",
            "slow literal oracles, for verification",
            "stage 1: lines to the X / f / hybrids contract",
            "stage 2: constrained selection across an alpha grid"),
   Chapter = c("@sec-simulating-crosses", "@sec-catalogue", "@sec-catalogue",
               "@sec-combinatorial", "@sec-choosing", "@sec-stages",
-              "@sec-sizing", "@sec-subdivided", "@sec-verification",
+              "@sec-sizing", "@sec-subdivided", "@sec-backcross",
+              "@sec-verification",
               "@sec-simulating-crosses", "@sec-case-study"),
   check.names = FALSE))
 ```
@@ -187,13 +190,14 @@ idx(
 
 ## Runnable scripts
 
-The book runs everything at a reduced scale so it renders quickly. Two scripts
+The book runs everything at a reduced scale so it renders quickly. Three scripts
 ship with the package and run the same work at the production scale of
 `sim_config`, writing their tables and plots to `report/`:
 
 ```sh
 Rscript inst/scripts/run_all.R          # the two-stage pipeline, ~4 min
 Rscript inst/scripts/run_benchmark.R    # the metrics benchmark, ~6 min
+Rscript inst/scripts/run_mabc.R         # the MABC scans, ~3 min
 ```
 
 `run_benchmark.R` is the source of the numeric results quoted in `README.md`,

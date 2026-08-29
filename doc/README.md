@@ -24,10 +24,11 @@ are **superseded** — edit `R/`, not these. The `.csv` and `.png` artefacts are
 copied into `book/data` and `book/figs`, which is where the book reads them
 from; `book/scripts/regenerate.R` is how they are refreshed.
 
-`multigenes/maize_mabc_multigene_sim_en.R` is the exception to that: it is
-standalone, base R only, and **not** part of `hybdiv`. Chapter 5 reads the CSVs
-and figures it produced (copied into `book/data` and `book/figs` as `mabc_*`);
-rerun the script itself to refresh them.
+The multi-gene MABC simulator went the same way: its engine and decision layer
+are now `R/08_mabc.R` and its driver is `inst/scripts/run_mabc.R`, so
+`multigenes/` keeps only the review, the README and the artefacts. Chapter 5
+reads those CSVs and figures from `book/data` and `book/figs` (as `mabc_*`);
+`Rscript inst/scripts/run_mabc.R` is how they are refreshed.
 
 Generated `.html` renders have been removed: they are reproducible from the
 `.Rmd` sources, and the book replaces them.

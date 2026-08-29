@@ -543,8 +543,9 @@ window.Quarto = {
   <li><a href="#how-long-to-keep-selecting-recombinants" id="toc-how-long-to-keep-selecting-recombinants" class="nav-link" data-scroll-target="#how-long-to-keep-selecting-recombinants"><span class="header-section-number">5.5</span> How long to keep selecting recombinants</a></li>
   <li><a href="#allocating-a-fixed-budget-across-bc1-bc2-and-bc3" id="toc-allocating-a-fixed-budget-across-bc1-bc2-and-bc3" class="nav-link" data-scroll-target="#allocating-a-fixed-budget-across-bc1-bc2-and-bc3"><span class="header-section-number">5.6</span> Allocating a fixed budget across BC1, BC2 and BC3</a></li>
   <li><a href="#fixing-the-stack-selfing-against-doubled-haploids" id="toc-fixing-the-stack-selfing-against-doubled-haploids" class="nav-link" data-scroll-target="#fixing-the-stack-selfing-against-doubled-haploids"><span class="header-section-number">5.7</span> Fixing the stack: selfing against doubled haploids</a></li>
-  <li><a href="#sec-bc-assumptions" id="toc-sec-bc-assumptions" class="nav-link" data-scroll-target="#sec-bc-assumptions"><span class="header-section-number">5.8</span> Assumptions, and what is not modelled</a></li>
-  <li><a href="#where-this-connects" id="toc-where-this-connects" class="nav-link" data-scroll-target="#where-this-connects"><span class="header-section-number">5.9</span> Where this connects</a></li>
+  <li><a href="#sec-bc-running" id="toc-sec-bc-running" class="nav-link" data-scroll-target="#sec-bc-running"><span class="header-section-number">5.8</span> Running the simulation</a></li>
+  <li><a href="#sec-bc-assumptions" id="toc-sec-bc-assumptions" class="nav-link" data-scroll-target="#sec-bc-assumptions"><span class="header-section-number">5.9</span> Assumptions, and what is not modelled</a></li>
+  <li><a href="#where-this-connects" id="toc-where-this-connects" class="nav-link" data-scroll-target="#where-this-connects"><span class="header-section-number">5.10</span> Where this connects</a></li>
   </ul>
 </nav>
     </div>
@@ -572,7 +573,7 @@ window.Quarto = {
 
 
 <p><a href="04-population-sizing.html" class="quarto-xref"><span>Chapter 4</span></a> sized a segregating population for <em>diversity</em>: the objective was to sample as much of the cross as possible. This chapter is the mirror image. A donor line carries <span class="math inline">\(k\)</span> genes worth having and an elite line carries everything else worth having, and the job is to move the <span class="math inline">\(k\)</span> genes across while <strong>throwing the rest of the donor away</strong>. Here donor genome is contamination, and the only diversity that is wanted is the <span class="math inline">\(k\)</span> target loci themselves.</p>
-<p>The operation is marker-assisted backcrossing (MABC). The numbers below come from a dependency-free simulator of it: a marker grid at 5 cM on ten maize chromosomes (1670 cM), one selected plant advanced per generation, <span class="math inline">\(k = 1\)</span> to <span class="math inline">\(4\)</span> recessive targets from a single donor, carried to BC3. Its source, test battery and technical review are in <code>doc/multigenes/</code>.</p>
+<p>The operation is marker-assisted backcrossing (MABC). The numbers below come from a simulator of it: a marker grid at 5 cM on ten maize chromosomes (1670 cM), one selected plant advanced per generation, <span class="math inline">\(k = 1\)</span> to <span class="math inline">\(4\)</span> recessive targets from a single donor, carried to BC3. It ships with the package – the engine and the selection index are <code>R/08_mabc.R</code>, the experiment driver is <code>inst/scripts/run_mabc.R</code> – and <a href="#sec-bc-running" class="quarto-xref"><span>Section 5.8</span></a> shows how to run it.</p>
 <section id="the-operation-in-one-diagram" class="level2" data-number="5.1">
 <h2 data-number="5.1" class="anchored" data-anchor-id="the-operation-in-one-diagram"><span class="header-section-number">5.1</span> The operation, in one diagram</h2>
 <p>Before any sizing question can be asked, the crossing operations have to be unambiguous – which plant is pollinated by which, and what is genotyped at each step.</p>
@@ -598,7 +599,7 @@ Figure&nbsp;5.1: The MABC operation. Left column: the cross made in each generat
 <p><span class="math display">\[
 r = \tfrac{1}{2}\bigl(1 - e^{-2d/100}\bigr),
 \]</span></p>
-<p>which is exact for this chain precisely because Haldane is memoryless (see the limitation in <a href="#sec-bc-assumptions" class="quarto-xref"><span>Section 5.8</span></a>).</p>
+<p>which is exact for this chain precisely because Haldane is memoryless (see the limitation in <a href="#sec-bc-assumptions" class="quarto-xref"><span>Section 5.9</span></a>).</p>
 <p><strong>Donor dosage and IBD are different quantities.</strong> Donor and elite already share a fraction <span class="math inline">\(s\)</span> of the genome by descent – they are both maize, and often both from the same heterotic group. Donor genome inside a shared tract costs nothing. So with <span class="math inline">\(D\)</span> the donor dosage,</p>
 <p><span class="math display">\[
 \text{IBD}_E = 1 - (1 - s)\,D, \qquad \text{IBD}_E + \text{donor-specific} = 1 .
@@ -610,10 +611,9 @@ P_{\text{same}} = \frac{e^{-L}}{\bigl(1 + e^{-2L}\bigr)/2},
 \qquad L = d/100 \text{ Morgans}.
 \]</span></p>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>p_same <span class="ot">&lt;-</span> <span class="cf">function</span>(d_cM) { L <span class="ot">&lt;-</span> d_cM <span class="sc">/</span> <span class="dv">100</span>; <span class="fu">exp</span>(<span class="sc">-</span>L) <span class="sc">/</span> ((<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="dv">2</span> <span class="sc">*</span> L)) <span class="sc">/</span> <span class="dv">2</span>) }</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(<span class="at">d_cM =</span> <span class="fu">c</span>(<span class="dv">20</span>, <span class="dv">60</span>, <span class="dv">400</span>),</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">naive =</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="fu">c</span>(<span class="dv">20</span>, <span class="dv">60</span>, <span class="dv">400</span>) <span class="sc">/</span> <span class="dv">100</span>),</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">conditional =</span> <span class="fu">p_same</span>(<span class="fu">c</span>(<span class="dv">20</span>, <span class="dv">60</span>, <span class="dv">400</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(<span class="at">d_cM =</span> <span class="fu">c</span>(<span class="dv">20</span>, <span class="dv">60</span>, <span class="dv">400</span>),</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>           <span class="at">naive =</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="fu">c</span>(<span class="dv">20</span>, <span class="dv">60</span>, <span class="dv">400</span>) <span class="sc">/</span> <span class="dv">100</span>),</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">conditional =</span> <span class="fu">p_same_segment</span>(<span class="fu">c</span>(<span class="dv">20</span>, <span class="dv">60</span>, <span class="dv">400</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -665,13 +665,8 @@ P_{\text{same}} = \frac{e^{-L}}{\bigl(1 + e^{-2L}\bigr)/2},
 <p>A conversion programme is usually written with three success conditions at BC3: do not lose the genes, recover the recurrent parent, and do not drag a chunk of donor chromosome along with each target. They are not remotely equal in cost.</p>
 <p><strong>Not losing the genes</strong> is exact and cheap. A plant is foreground-positive with probability <span class="math inline">\(q = (1/2)^k\)</span>, so <span class="math inline">\(n\)</span> plants fail with probability <span class="math inline">\((1-q)^n\)</span>:</p>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>n_for_count <span class="ot">&lt;-</span> <span class="cf">function</span>(q, <span class="at">count =</span> <span class="dv">1</span>, <span class="at">P =</span> <span class="fl">0.95</span>) {</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> count</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span> (<span class="fu">pbinom</span>(count <span class="sc">-</span> <span class="dv">1</span>, n, q) <span class="sc">&gt;</span> <span class="dv">1</span> <span class="sc">-</span> P) n <span class="ot">&lt;-</span> n <span class="sc">+</span> <span class="dv">1</span>L</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  n</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(<span class="at">genes =</span> mb_sz<span class="sc">$</span>genes, <span class="at">q =</span> mb_sz<span class="sc">$</span>q_foreground,</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>           <span class="at">n_BC_per_gen =</span> mb_sz<span class="sc">$</span>n_BC_1plant)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(<span class="at">genes =</span> mb_sz<span class="sc">$</span>genes, <span class="at">q =</span> mb_sz<span class="sc">$</span>q_foreground,</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>           <span class="at">n_BC_per_gen =</span> <span class="fu">vapply</span>(mb_sz<span class="sc">$</span>q_foreground, n_for_count, <span class="fu">integer</span>(<span class="dv">1</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1134,8 +1129,183 @@ Figure&nbsp;5.6: Analytical sizing by stage, log scale. The two blue bars are ba
 <p>At four genes that is 1610 BC3F2 plants against 99 DH lines, a factor of 16.3. For maize, where DH is routine, the alarming number is not the real bottleneck.</p>
 <p><strong>Without DH there is a staggered alternative.</strong> Do not ask one generation to fix everything. Select BC3F2 plants homozygous for two targets and heterozygous for the other two (roughly 330 plants), then close out the remaining two at BC3F3 (roughly 100). Two stages of hundreds instead of one of thousands, at the cost of one generation.</p>
 </section>
-<section id="sec-bc-assumptions" class="level2" data-number="5.8">
-<h2 data-number="5.8" class="anchored" data-anchor-id="sec-bc-assumptions"><span class="header-section-number">5.8</span> Assumptions, and what is not modelled</h2>
+<section id="sec-bc-running" class="level2" data-number="5.8">
+<h2 data-number="5.8" class="anchored" data-anchor-id="sec-bc-running"><span class="header-section-number">5.8</span> Running the simulation</h2>
+<p>Everything above is reproducible from the package. The engine and the decision layer are in <code>R/08_mabc.R</code>; the experiment driver that produced the cached tables is <code>inst/scripts/run_mabc.R</code>.</p>
+<p><strong>One programme, interactively.</strong> Build a map, place the targets, draw the donor-elite sharing, and run the three backcrosses:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>map <span class="ot">&lt;-</span> <span class="fu">build_map</span>(maize_chr_len, <span class="at">spacing_cM =</span> <span class="dv">5</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>w   <span class="ot">&lt;-</span> <span class="fu">marker_weights</span>(map)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>tg  <span class="ot">&lt;-</span> <span class="fu">target_indices</span>(map, <span class="at">k =</span> <span class="dv">3</span>)              <span class="co"># the first three of maize_targets</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>sh  <span class="ot">&lt;-</span> <span class="fu">make_shared_ibd</span>(map, <span class="at">s =</span> <span class="fl">0.60</span>, <span class="at">mw =</span> w, <span class="at">target_idx =</span> tg)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>pr <span class="ot">&lt;-</span> <span class="fu">run_bc_program</span>(<span class="at">n_sched =</span> <span class="fu">c</span>(<span class="dv">120</span>, <span class="dv">120</span>, <span class="dv">120</span>), <span class="at">s =</span> <span class="fl">0.60</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>                     <span class="at">strategy =</span> <span class="st">"rec_drag"</span>, <span class="at">map =</span> map, <span class="at">opt =</span> mabc_opt,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>                     <span class="at">tg =</span> tg, <span class="at">w =</span> w, <span class="at">shared =</span> sh)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(pr<span class="sc">$</span>traj, <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;">gen</th>
+<th style="text-align: right;">ibd</th>
+<th style="text-align: right;">dose</th>
+<th style="text-align: right;">drag</th>
+<th style="text-align: right;">n_fg</th>
+<th style="text-align: right;">ibd_pop_mean</th>
+<th style="text-align: left;">fail</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.878</td>
+<td style="text-align: right;">0.251</td>
+<td style="text-align: right;">162.5</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">0.891</td>
+<td style="text-align: left;">FALSE</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0.934</td>
+<td style="text-align: right;">0.127</td>
+<td style="text-align: right;">97.5</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">0.925</td>
+<td style="text-align: left;">FALSE</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0.951</td>
+<td style="text-align: right;">0.094</td>
+<td style="text-align: right;">70.0</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">0.952</td>
+<td style="text-align: left;">FALSE</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p><code>n_sched</code> is the schedule, one entry per backcross, so <code>c(300, 40, 20)</code> and <code>c(120, 120, 120)</code> are the two allocations compared above. Passing the same <code>shared</code> mask to two calls is what makes a comparison between selection indices paired rather than confounded with the donor-elite pair.</p>
+<p><strong>Comparing indices on common random numbers.</strong> Reset the seed before each strategy so the two programmes see the same meioses:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>drag_of <span class="ot">&lt;-</span> <span class="cf">function</span>(strategy) {</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(<span class="dv">7</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">run_bc_program</span>(<span class="fu">c</span>(<span class="dv">120</span>, <span class="dv">120</span>, <span class="dv">120</span>), <span class="fl">0.60</span>, strategy, map, mabc_opt, tg, w,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">shared =</span> sh)<span class="sc">$</span>traj<span class="sc">$</span>drag[mabc_opt<span class="sc">$</span>n_bc]</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">rec_bg =</span> <span class="fu">drag_of</span>(<span class="st">"rec_bg"</span>), <span class="at">rec_drag =</span> <span class="fu">drag_of</span>(<span class="st">"rec_drag"</span>))</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   rec_bg rec_drag </span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       60       45</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>A single replicate is noise; the tables above are 300 of these per cell, which is the driver’s job.</p>
+<p><strong>The analytical sizing needs no simulation at all.</strong> It is a cumulative binomial, so it is exact and instant:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sizing_table</span>(<span class="at">k_max =</span> <span class="dv">4</span>, <span class="at">flank_cM =</span> <span class="dv">5</span>, <span class="at">P =</span> <span class="fl">0.95</span>, <span class="at">n_keep =</span> <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 13%">
+<col style="width: 12%">
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 12%">
+<col style="width: 13%">
+<col style="width: 7%">
+<col style="width: 12%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: right;">genes</th>
+<th style="text-align: right;">q_foreground</th>
+<th style="text-align: right;">n_BC_1plant</th>
+<th style="text-align: right;">n_BC_1rec</th>
+<th style="text-align: right;">q_F2</th>
+<th style="text-align: right;">n_F2_1plant</th>
+<th style="text-align: right;">n_F2_3plants</th>
+<th style="text-align: right;">q_DH</th>
+<th style="text-align: right;">n_DH_3lines</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.5000</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">125</td>
+<td style="text-align: right;">0.2500000</td>
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">23</td>
+<td style="text-align: right;">0.5000</td>
+<td style="text-align: right;">11</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0.2500</td>
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">251</td>
+<td style="text-align: right;">0.0625000</td>
+<td style="text-align: right;">47</td>
+<td style="text-align: right;">99</td>
+<td style="text-align: right;">0.2500</td>
+<td style="text-align: right;">23</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0.1250</td>
+<td style="text-align: right;">23</td>
+<td style="text-align: right;">503</td>
+<td style="text-align: right;">0.0156250</td>
+<td style="text-align: right;">191</td>
+<td style="text-align: right;">401</td>
+<td style="text-align: right;">0.1250</td>
+<td style="text-align: right;">49</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0.0625</td>
+<td style="text-align: right;">47</td>
+<td style="text-align: right;">1006</td>
+<td style="text-align: right;">0.0039063</td>
+<td style="text-align: right;">766</td>
+<td style="text-align: right;">1610</td>
+<td style="text-align: right;">0.0625</td>
+<td style="text-align: right;">99</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p><strong>The full scans, from the shell.</strong> The driver runs the whole grid – four policies by four gene numbers by eleven population sizes by three values of <span class="math inline">\(s\)</span>, plus the allocation grid and the BCnF2 stage – and writes the CSVs, the nine figures and a self-contained HTML report:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Rscript</span> inst/scripts/run_mabc.R <span class="at">--test</span>              <span class="co"># 35 checks, ~10 s</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">Rscript</span> inst/scripts/run_mabc.R <span class="at">--quick</span> <span class="at">--out</span><span class="op">=</span>DIR   <span class="co"># reduced grid, ~30 s</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="ex">Rscript</span> inst/scripts/run_mabc.R <span class="at">--out</span><span class="op">=</span>report/mabc   <span class="co"># the full run, ~3 min</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The cached tables this chapter reads are the full run’s <code>results_uniform.csv</code>, <code>results_allocation.csv</code>, <code>results_bcnf2.csv</code> and <code>analytical_sizing.csv</code>, copied into <code>book/data</code> as <code>mabc_*.csv</code>; the header of the driver lists the copy commands.</p>
+<p><strong>Pointing it at your own programme.</strong> Three things change and nothing else:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. your map</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>map <span class="ot">&lt;-</span> <span class="fu">build_map</span>(my_chr_len_cM, <span class="at">spacing_cM =</span> <span class="dv">5</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. your targets -- same columns as maize_targets</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>my_targets <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">gene =</span> <span class="fu">c</span>(<span class="st">"A"</span>, <span class="st">"B"</span>), <span class="at">chr =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">5</span>),</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>                         <span class="at">pos_cM =</span> <span class="fu">c</span>(<span class="dv">40</span>, <span class="dv">110</span>), <span class="at">label =</span> <span class="fu">c</span>(<span class="st">"A"</span>, <span class="st">"B"</span>))</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>tg <span class="ot">&lt;-</span> <span class="fu">target_indices</span>(map, <span class="at">k =</span> <span class="dv">2</span>, <span class="at">targets =</span> my_targets)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. your criteria</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>opt <span class="ot">&lt;-</span> utils<span class="sc">::</span><span class="fu">modifyList</span>(mabc_opt,</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>                         <span class="fu">list</span>(<span class="at">n_bc =</span> <span class="dv">4</span>, <span class="at">drag_per_gene =</span> <span class="dv">20</span>, <span class="at">target_ibd =</span> <span class="fl">0.95</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><code>s</code> – how much of the genome your donor and your elite already share – is the parameter worth measuring rather than assuming. It scales the whole cost: at <span class="math inline">\(s = 0.7\)</span> most of the donor genome that survives is free, at <span class="math inline">\(s = 0\)</span> none of it is.</p>
+</section>
+<section id="sec-bc-assumptions" class="level2" data-number="5.9">
+<h2 data-number="5.9" class="anchored" data-anchor-id="sec-bc-assumptions"><span class="header-section-number">5.9</span> Assumptions, and what is not modelled</h2>
 <p>These matter more than usual here, because unlike the diversity chapters this one is used to decide field area.</p>
 <p><strong>No crossover interference (material, and it cuts against the results above).</strong> Meiosis is Haldane, so crossovers are independent between intervals. Maize has strong positive interference. For the event this simulation depends on most – a double recombinant in the two 5 cM intervals flanking a target, which is what turns a long donor segment into a short one – Haldane gives <span class="math inline">\(2.26 \times 10^{-3}\)</span> against <span class="math inline">\(4.90 \times 10^{-4}\)</span> under a coincidence model. <strong>The model over-produces tight recombinants by about 4.6x</strong>, so every population size quoted for close-in trimming is a lower bound. Note the direction: the index correction makes the problem easier, interference makes it harder, and they do not cancel in any principled way. The correct fix is a crossover-position sampler – chiasmata as a stationary gamma renewal process with shape <span class="math inline">\(\nu\)</span> – which reduces to Haldane exactly at <span class="math inline">\(\nu = 1\)</span> and so is backward compatible; maize estimates put <span class="math inline">\(\nu\)</span> near 3.</p>
 <p><strong>One plant advanced per generation.</strong> Real programmes advance 3-10 and cross each to the recurrent parent. Every probability in this chapter is therefore a <strong>single-lineage</strong> probability: it understates achievable progress and it removes lineage-level variance from every distribution shown.</p>
@@ -1157,8 +1327,8 @@ Figure&nbsp;5.6: Analytical sizing by stage, log scale. The two blue bars are ba
 </div>
 </div>
 </section>
-<section id="where-this-connects" class="level2" data-number="5.9">
-<h2 data-number="5.9" class="anchored" data-anchor-id="where-this-connects"><span class="header-section-number">5.9</span> Where this connects</h2>
+<section id="where-this-connects" class="level2" data-number="5.10">
+<h2 data-number="5.10" class="anchored" data-anchor-id="where-this-connects"><span class="header-section-number">5.10</span> Where this connects</h2>
 <p><a href="04-population-sizing.html" class="quarto-xref"><span>Chapter 4</span></a> sized a population to <em>keep</em> diversity; this chapter sized one to discard it everywhere except at <span class="math inline">\(k\)</span> loci. The two share their machinery – the same map, the same Haldane meiosis, the same distinction between what is segregating and what is fixed – and they share the lesson that dominates both: <strong>size for the objective that binds.</strong> In <a href="04-population-sizing.html" class="quarto-xref"><span>Chapter 4</span></a> that meant not sizing for gene diversity, which saturates early. Here it means not sizing for background recovery, which is already satisfied at BC3, and putting the plants into the one criterion that a population can actually buy.</p>
 <p>The converted lines this chapter produces re-enter the pool the rest of the book optimises over. A conversion programme run for its own sake reduces diversity by construction: it makes an elite line into a near-copy of itself. If several conversions are run in parallel off the same recurrent parent, the resulting lines are close to each other, and <a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 8</span></a> and <a href="08-pipeline-stages.html" class="quarto-xref"><span>Chapter 9</span></a> are where that cost becomes visible.</p>
 
