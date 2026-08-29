@@ -19,7 +19,7 @@ Rscript -e 'devtools::test()'       # 184 checks (~1 min) — run after any chan
 Rscript -e 'devtools::check()'      # must stay at 0 errors, 0 warnings, 0 notes
 Rscript inst/scripts/run_all.R                   # two-stage pipeline -> report/ (~4 min)
 Rscript inst/scripts/run_benchmark.R             # metrics benchmark + plots -> report/ (~6 min)
-quarto render book                  # the book (~80 s) -> book/_book/
+quarto render book                  # the book (~80 s) -> docs/
 ```
 
 **The repo root IS the R package `hybdiv`.** `R/` and `tests/` are the package's own
@@ -132,6 +132,13 @@ A Quarto book: 12 chapters in 5 parts, plus 4 appendices. `book/_quarto.yml` lis
 `book/_common.R` is sourced by every chapter — it loads the package (via `pkgload::load_all`
 when not installed), sets `book_cfg` (the reduced teaching scale: 25+25 lines, 2000 markers),
 and defines `book_data()`/`book_fig()`/`fmt()`.
+
+**The rendered HTML is committed.** `_quarto.yml` sets `output-dir: ../docs`, and `docs/` is
+tracked, because GitHub Pages serves it from the main branch at
+<https://ederdbs.github.io/QG/> with no CI and no second branch. Two consequences: re-render
+before committing whenever a chapter changes, or the published book goes stale; and
+`book/.nojekyll` is listed under `resources:` so it is copied into `docs/` on every render --
+without it Jekyll silently drops paths beginning with an underscore.
 
 **Execution is hybrid, deliberately.** Light examples run live at render; expensive results
 (the DE sweeps, the production-scale cost benchmark, the F2 sizing grid) are cached in

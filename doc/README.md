@@ -4,8 +4,8 @@ These are the working documents the book was built from. They are kept as
 provenance: each one is the original analysis, in the language and format it was
 written in, before being translated and reorganised into `book/`.
 
-**For reading, use the book.** `quarto render book` and open
-`book/_book/index.html`. These files are not maintained in step with it.
+**For reading, use the book**: <https://ederdbs.github.io/QG/>. These files are
+not maintained in step with it.
 
 | Source | Language | Became |
 |---|---|---|

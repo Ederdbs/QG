@@ -1,5 +1,21 @@
 # Hybrid Selection Under a Diversity Constraint
 
+## 📖 [**Read the book online**](https://ederdbs.github.io/QG/)
+
+*Genetic Diversity in Hybrid Breeding* — measuring it, constraining it, and
+optimising against it, with R. Twelve chapters and four appendices, every
+derivation runnable.
+
+| Part | Chapters |
+|---|---|
+| **Foundations** | [Coancestry and the two matrices](https://ederdbs.github.io/QG/01-coancestry.html) · [Diversity in a subdivided population](https://ederdbs.github.io/QG/02-subdivided.html) |
+| **Simulation** | [Simulating lines, pools and crosses](https://ederdbs.github.io/QG/03-simulating-crosses.html) · [Sizing a segregating population](https://ederdbs.github.io/QG/04-population-sizing.html) |
+| **Metrics** | [Diversity metrics in the genomic era](https://ederdbs.github.io/QG/05-genomic-era.html) · [A catalogue of metrics](https://ederdbs.github.io/QG/06-metric-catalogue.html) · [Choosing metrics](https://ederdbs.github.io/QG/07-choosing-metrics.html) · [Metrics at each pipeline stage](https://ederdbs.github.io/QG/08-pipeline-stages.html) |
+| **Optimisation** | [Optimal contributions and the alpha constraint](https://ederdbs.github.io/QG/09-optimal-contributions.html) · [Combinatorial selection](https://ederdbs.github.io/QG/10-combinatorial-selection.html) |
+| **Evidence and practice** | [What the plant literature establishes](https://ederdbs.github.io/QG/11-plant-literature.html) · [End to end, and the checklist](https://ederdbs.github.io/QG/12-case-study.html) |
+
+---
+
 Select a subset of F1 hybrids that maximises a multi-trait genomic index while
 constraining the loss of molecular gene diversity, relative to a same-size
 random-sampling baseline.
@@ -8,18 +24,18 @@ This repository is two things:
 
 - **`hybdiv`**, an R package with the coancestry kernel, the diversity metrics,
   the selection strategies and the population-sizing simulator.
-- **the book**, a Quarto book that derives the theory, runs it, and verifies it.
+- **the book**, whose rendered HTML is committed to `docs/` and served at the
+  link above.
 
-## The book
+## Building the book
 
 ```sh
-quarto render book          # ~80 s; open book/_book/index.html
+quarto render book     # ~80 s, writes to docs/
+cd book && quarto preview   # live reload while editing
 ```
 
-Twelve chapters and four appendices, in five parts: Foundations, Simulation,
-Metrics, Optimisation, Evidence and practice. Light examples run live at render;
-expensive results are cached in `book/data` and `book/figs` and refreshed with
-`book/scripts/regenerate.R`.
+Light examples run live at render; expensive results are cached in `book/data`
+and `book/figs` and refreshed with `book/scripts/regenerate.R`.
 
 ## The package
 

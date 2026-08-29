@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>5&nbsp; Diversity metrics in the genomic era – Genetic Diversity in Hybrid Breeding</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./06-metric-catalogue.html" rel="next">
+<link href="./04-population-sizing.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-37a0ccb6f5b9899fcb884e11bb6f7458.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./05-genomic-era.html">Metrics</a></li><li class="breadcrumb-item"><a href="./05-genomic-era.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Diversity metrics in the genomic era</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Genetic Diversity in Hybrid Breeding</a> 
+        <div class="sidebar-tools-main">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-coancestry.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Coancestry, and the two matrices</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-subdivided.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Diversity in a subdivided population</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Simulation</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-simulating-crosses.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Simulating lines, pools and crosses</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-population-sizing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Sizing a segregating population, F1 to F4</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Metrics</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-genomic-era.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Diversity metrics in the genomic era</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-metric-catalogue.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">A catalogue of metrics on <code>f</code></span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-choosing-metrics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Choosing metrics: collapse, cost, redundancy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-pipeline-stages.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Metrics at each pipeline stage, and five traps</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Optimisation</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-optimal-contributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Optimal contributions and the <span class="math inline">\(\alpha\)</span> constraint</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-combinatorial-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Combinatorial selection</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Evidence and practice</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-plant-literature.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">What the plant literature establishes</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-case-study.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">End to end, and the operational checklist</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./90-notation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Notation and glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./91-package.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">The <code>hybdiv</code> package</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./92-verification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Verification</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./93-corpora.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">D</span>&nbsp; <span class="chapter-title">The bibliographic corpora</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./99-references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#three-lenses-not-three-synonyms" id="toc-three-lenses-not-three-synonyms" class="nav-link active" data-scroll-target="#three-lenses-not-three-synonyms"><span class="header-section-number">5.1</span> Three lenses, not three synonyms</a></li>
+  <li><a href="#the-metrics-one-at-a-time" id="toc-the-metrics-one-at-a-time" class="nav-link" data-scroll-target="#the-metrics-one-at-a-time"><span class="header-section-number">5.2</span> The metrics, one at a time</a>
+  <ul class="collapse">
+  <li><a href="#rate-of-inbreeding-and-effective-size" id="toc-rate-of-inbreeding-and-effective-size" class="nav-link" data-scroll-target="#rate-of-inbreeding-and-effective-size"><span class="header-section-number">5.2.1</span> Rate of inbreeding and effective size</a></li>
+  <li><a href="#f_hom-homozygosity-based" id="toc-f_hom-homozygosity-based" class="nav-link" data-scroll-target="#f_hom-homozygosity-based"><span class="header-section-number">5.2.2</span> <code>F_hom</code>, homozygosity-based</a></li>
+  <li><a href="#f_drift-drift-based" id="toc-f_drift-drift-based" class="nav-link" data-scroll-target="#f_drift-drift-based"><span class="header-section-number">5.2.3</span> <code>F_drift</code>, drift-based</a></li>
+  </ul></li>
+  <li><a href="#the-classical-equivalence-and-the-covariance-that-destroys-it" id="toc-the-classical-equivalence-and-the-covariance-that-destroys-it" class="nav-link" data-scroll-target="#the-classical-equivalence-and-the-covariance-that-destroys-it"><span class="header-section-number">5.3</span> The classical equivalence, and the covariance that destroys it</a>
+  <ul class="collapse">
+  <li><a href="#verifying-the-identity" id="toc-verifying-the-identity" class="nav-link" data-scroll-target="#verifying-the-identity"><span class="header-section-number">5.3.1</span> Verifying the identity</a></li>
+  <li><a href="#why-each-matrix-generates-a-sign" id="toc-why-each-matrix-generates-a-sign" class="nav-link" data-scroll-target="#why-each-matrix-generates-a-sign"><span class="header-section-number">5.3.2</span> Why each matrix generates a sign</a></li>
+  <li><a href="#the-signature-on-live-data" id="toc-the-signature-on-live-data" class="nav-link" data-scroll-target="#the-signature-on-live-data"><span class="header-section-number">5.3.3</span> The signature, on live data</a></li>
+  </ul></li>
+  <li><a href="#the-other-matrices-briefly" id="toc-the-other-matrices-briefly" class="nav-link" data-scroll-target="#the-other-matrices-briefly"><span class="header-section-number">5.4</span> The other matrices, briefly</a>
+  <ul class="collapse">
+  <li><a href="#side-by-side" id="toc-side-by-side" class="nav-link" data-scroll-target="#side-by-side"><span class="header-section-number">5.4.1</span> Side by side</a></li>
+  </ul></li>
+  <li><a href="#reference-results" id="toc-reference-results" class="nav-link" data-scroll-target="#reference-results"><span class="header-section-number">5.5</span> Reference results</a>
+  <ul class="collapse">
+  <li><a href="#the-diagnostic-nobody-runs" id="toc-the-diagnostic-nobody-runs" class="nav-link" data-scroll-target="#the-diagnostic-nobody-runs"><span class="header-section-number">5.5.1</span> The diagnostic nobody runs</a></li>
+  </ul></li>
+  <li><a href="#what-to-carry-into-plant-breeding" id="toc-what-to-carry-into-plant-breeding" class="nav-link" data-scroll-target="#what-to-carry-into-plant-breeding"><span class="header-section-number">5.6</span> What to carry into plant breeding</a></li>
+  <li><a href="#limits-of-the-animal-to-plant-transposition" id="toc-limits-of-the-animal-to-plant-transposition" class="nav-link" data-scroll-target="#limits-of-the-animal-to-plant-transposition"><span class="header-section-number">5.7</span> Limits of the animal-to-plant transposition</a></li>
+  <li><a href="#operational-checklist" id="toc-operational-checklist" class="nav-link" data-scroll-target="#operational-checklist"><span class="header-section-number">5.8</span> Operational checklist</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./05-genomic-era.html">Metrics</a></li><li class="breadcrumb-item"><a href="./05-genomic-era.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Diversity metrics in the genomic era</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="sec-genomic-era" class="quarto-section-identifier"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Diversity metrics in the genomic era</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>In classical theory, inbreeding measured as <strong>loss of heterozygosity</strong> and inbreeding measured as <strong>drift of allele frequencies</strong> are the same thing. <span class="citation" data-cites="meuwissen2020">Meuwissen et al. (<a href="99-references.html#ref-meuwissen2020" role="doc-biblioref">2020</a>)</span> show that inside genomic optimal-contribution schemes they stop being the same thing, and can diverge badly, whenever diversity is controlled through <strong>identity by state</strong> on a marker panel. Only when control is through <strong>identity by descent</strong> is the classical equivalence restored.</p>
+<p>The practical consequence is uncomfortable:</p>
+<blockquote class="blockquote">
+<p>You hit exactly the target you wrote into the optimiser’s constraint, and you pay an unmonitored price in the metric you did not write.</p>
+</blockquote>
+<p>For a plant breeder: if you constrain <span class="math inline">\(\tfrac{1}{2}\mathbf{c}'\mathbf{G}\mathbf{c}\)</span> using a VanRaden <span class="math inline">\(\mathbf{G}\)</span>, you are constraining <strong>drift</strong>. The loss of heterozygosity in your germplasm may be running at twice the rate you believe you are controlling.</p>
+<section id="three-lenses-not-three-synonyms" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="three-lenses-not-three-synonyms"><span class="header-section-number">5.1</span> Three lenses, not three synonyms</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>The three lenses. G_0.5 is the matrix this book calls f – see <a href="01-coancestry.html" class="quarto-xref"><span>Chapter 1</span></a>.</caption>
+<colgroup>
+<col style="width: 11%">
+<col style="width: 45%">
+<col style="width: 16%">
+<col style="width: 26%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Lens</th>
+<th style="text-align: left;">What the metric actually sees</th>
+<th style="text-align: left;">Inbreeding metric</th>
+<th style="text-align: left;">Relationship matrix</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Drift</td>
+<td style="text-align: left;">squared allele-frequency change relative to a base</td>
+<td style="text-align: left;">F_drift</td>
+<td style="text-align: left;">G_VR2, G_VR1, G_i(p)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Homozygosity</td>
+<td style="text-align: left;">proportion of heterozygosity remaining</td>
+<td style="text-align: left;">F_hom</td>
+<td style="text-align: left;">G_0.5 (molecular coancestry)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">IBD</td>
+<td style="text-align: left;">segments inherited by descent from a defined base</td>
+<td style="text-align: left;">F_IBD</td>
+<td style="text-align: left;">A, G_LA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Hybrid</td>
+<td style="text-align: left;">haplotype homozygosity used as a proxy for IBD</td>
+<td style="text-align: left;">F_ROH</td>
+<td style="text-align: left;">G_ROH</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Every inbreeding metric is a ratio to a reference population
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Without explicitly declaring your base – cycle 0 of the recurrent programme? a landrace panel? the founding heterotic pool? – none of the numbers below mean anything. This is the commonest error in plant applications: using the <em>current</em> generation’s frequencies as the base, which zeroes the historical memory of erosion.</p>
+</div>
+</div>
+</section>
+<section id="the-metrics-one-at-a-time" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="the-metrics-one-at-a-time"><span class="header-section-number">5.2</span> The metrics, one at a time</h2>
+<section id="rate-of-inbreeding-and-effective-size" class="level3" data-number="5.2.1">
+<h3 data-number="5.2.1" class="anchored" data-anchor-id="rate-of-inbreeding-and-effective-size"><span class="header-section-number">5.2.1</span> Rate of inbreeding and effective size</h3>
+<p>What you manage is not <span class="math inline">\(F\)</span> but its rate of accumulation. <span class="math inline">\(F\)</span> is a stock; <span class="math inline">\(\Delta F\)</span> is a flow.</p>
+<p><span class="math display">\[\Delta F = \frac{F_t - F_{t-1}}{1 - F_{t-1}}, \qquad N_e = \frac{1}{2\Delta F}\]</span></p>
+<p>Since <span class="math inline">\(1 - F_t = (1 - \Delta F)^t\)</span>, a regression of <span class="math inline">\(\log(1 - F_t)\)</span> on <span class="math inline">\(t\)</span> has slope <span class="math inline">\(\approx -\Delta F\)</span>. <strong>The linearity of that regression is itself a diagnostic:</strong> in the paper, <span class="math inline">\(\log(1 - F_{drift})\)</span> was approximately linear under every scheme, while <span class="math inline">\(\log(1 - F_{hom})\)</span> showed marked curvature under some, notably the ROH-based one. Curvature means a non-constant rate – your <span class="math inline">\(N_e\)</span> target is not being met steadily.</p>
+<p>A tropical maize recurrent programme targeting <span class="math inline">\(N_e = 50\)</span> per cycle needs <span class="math inline">\(\Delta F = 0.01\)</span>. Measuring <span class="math inline">\(F\)</span> only at cycle 8 and dividing by 8 hides the possibility that cycles 1-3 were conservative and cycles 6-8 collapsed the base. Always fit the log-linear regression and look at the residual.</p>
+</section>
+<section id="f_hom-homozygosity-based" class="level3" data-number="5.2.2">
+<h3 data-number="5.2.2" class="anchored" data-anchor-id="f_hom-homozygosity-based"><span class="header-section-number">5.2.2</span> <code>F_hom</code>, homozygosity-based</h3>
+<p>Wright defined an inbreeding coefficient to run from 0 to 1 as heterozygosity under random mating falls from its initial state to zero. So the metric is the fraction of heterozygosity already lost relative to the base:</p>
+<p><span class="math display">\[F_{hom} = 1 - \frac{1}{N_{SNP}}\sum_k \frac{2p_{t,k}(1 - p_{t,k})}{2p_{0,k}(1 - p_{0,k})}
+          = 1 - \frac{1}{N_{SNP}}\sum_k \frac{H_{t,k}}{H_{0,k}}\]</span></p>
+<p><strong>It can be negative.</strong> If management pushes frequencies toward 0.5, heterozygosity rises above the base and the “inbreeding coefficient” goes below zero. That is not a numerical error: it is the expected behaviour of any scheme that maximises heterozygosity on the monitored panel.</p>
+<p>It protects against inbreeding depression and the expression of deleterious recessives in homozygosis. It is the right lens when the dominant risk is <em>vigour</em>.</p>
+<p>In maize, heterozygosity is the product itself. Within a heterotic pool under reciprocal recurrent selection, <code>F_hom</code> computed <strong>within pool</strong> anticipates the decline in line-per-se vigour; it says nothing about between-pool divergence, which is what generates heterosis in the hybrid. In selfing species, <code>F_hom</code> measured on fixed lines is <span class="math inline">\(\approx 1\)</span> by construction and is <strong>useless for management</strong> – it has to be computed on allele frequencies in the crossing population, not on the homozygosity of individuals.</p>
+</section>
+<section id="f_drift-drift-based" class="level3" data-number="5.2.3">
+<h3 data-number="5.2.3" class="anchored" data-anchor-id="f_drift-drift-based"><span class="header-section-number">5.2.3</span> <code>F_drift</code>, drift-based</h3>
+<p><span class="math display">\[F_{drift} = \frac{1}{N_{SNP}}\sum_k \frac{(p_{t,k} - p_{0,k})^2}{p_{0,k}(1 - p_{0,k})}\]</span></p>
+<p><strong>Never negative.</strong> It is formally analogous to Holsinger &amp; Weir’s <span class="math inline">\(F_{ST}\)</span> applied to <em>one population through time</em> rather than to a set of populations in space. It is exactly the quantity constrained when <code>G_VR2</code> goes into the optimiser.</p>
+<p>It protects against random change in phenotypic value for traits <strong>outside</strong> the selection objective, against rare deleterious recessives rising to dangerous frequencies, and against irreversible loss of rare alleles.</p>
+<p>There is also a selection-intensity reading: the term <span class="math inline">\(\delta p^2 / [p_0(1-p_0)]\)</span> approximates the <strong>squared total intensity</strong> applied at that marker, with <span class="math inline">\(i \approx \delta p / \sqrt{p_0(1-p_0)}\)</span>. Constraining <code>F_drift</code> constrains how much effective selection the whole genome underwent – including at loci you never meant to select.</p>
+<p>A wheat programme running six cycles of genomic selection with a VanRaden <span class="math inline">\(\mathbf{G}\)</span> and reporting <span class="math inline">\(\Delta F \approx 1\%\)</span> has reported <span class="math inline">\(\Delta F_{drift}\)</span> on the training panel. Quantitative disease-resistance loci not yet prioritised may have hitch-hiked to extreme frequencies alongside yield QTL, and none of that appears in the reported metric.</p>
+</section>
+</section>
+<section id="the-classical-equivalence-and-the-covariance-that-destroys-it" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="the-classical-equivalence-and-the-covariance-that-destroys-it"><span class="header-section-number">5.3</span> The classical equivalence, and the covariance that destroys it</h2>
+<p>Under purely random drift, with <span class="math inline">\(E[\delta p_t \mid p_0] = 0\)</span> for every <span class="math inline">\(p_0\)</span>,</p>
+<p><span class="math display">\[\frac{\mathrm{var}(p_{t,k})}{p_0(1-p_0)} = 1 - \frac{H_t}{H_0}
+  \;\;\Longrightarrow\;\; F_{drift} = F_{hom}.\]</span></p>
+<p>The paper’s central result quantifies the departure:</p>
+<p><span class="math display">\[F_{hom} - F_{drift} \;=\; 2\,\mathrm{cov}\!\left(
+  \frac{\delta p_{t,k}}{\sqrt{p_{0,k}(1-p_{0,k})}},\;
+  \frac{p_{0,k} - 1/2}{\sqrt{p_{0,k}(1-p_{0,k})}}\right)\]</span></p>
+<p>In words: <strong>if the direction of frequency change is correlated with the starting frequency, the two measures diverge.</strong> The non-obvious part is that this covariance is induced by the <em>diversity management itself</em>, not by directional selection – the paper demonstrates this by running the scheme with random GEBVs, and the divergence persists.</p>
+<section id="verifying-the-identity" class="level3" data-number="5.3.1">
+<h3 data-number="5.3.1" class="anchored" data-anchor-id="verifying-the-identity"><span class="header-section-number">5.3.1</span> Verifying the identity</h3>
+<p><code>freq_metrics()</code> returns all three quantities in one marker sweep. The identity is asserted in the test suite; here it is on live data:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">31</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>idx <span class="ot">&lt;-</span> <span class="fu">sample.int</span>(ctx<span class="sc">$</span>N, <span class="dv">60</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>fm <span class="ot">&lt;-</span> <span class="fu">freq_metrics</span>(idx, ctx)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(fm[<span class="fu">c</span>(<span class="st">"F_hom"</span>, <span class="st">"F_drift"</span>, <span class="st">"cov_diag"</span>)], <span class="dv">6</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    F_hom  F_drift cov_diag </span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 0.011458 0.005192 0.006267</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">F_hom_minus_F_drift =</span> <span class="fu">unname</span>(fm[[<span class="st">"F_hom"</span>]] <span class="sc">-</span> fm[[<span class="st">"F_drift"</span>]]),</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">cov_diag            =</span> <span class="fu">unname</span>(fm[[<span class="st">"cov_diag"</span>]]),</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">residual            =</span> <span class="fu">unname</span>(fm[[<span class="st">"cov_diag"</span>]] <span class="sc">-</span> (fm[[<span class="st">"F_hom"</span>]] <span class="sc">-</span> fm[[<span class="st">"F_drift"</span>]])))</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F_hom_minus_F_drift            cov_diag            residual </span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        6.266505e-03        6.266505e-03        8.673617e-18</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Exact to machine precision. And when the selection <em>is</em> the base, both lenses must read zero:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">freq_metrics</span>(<span class="fu">seq_len</span>(ctx<span class="sc">$</span>N), ctx)[<span class="fu">c</span>(<span class="st">"F_hom"</span>, <span class="st">"F_drift"</span>, <span class="st">"cov_diag"</span>)], <span class="dv">12</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    F_hom  F_drift cov_diag </span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        0        0        0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="why-each-matrix-generates-a-sign" class="level3" data-number="5.3.2">
+<h3 data-number="5.3.2" class="anchored" data-anchor-id="why-each-matrix-generates-a-sign"><span class="header-section-number">5.3.2</span> Why each matrix generates a sign</h3>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>The sign of the bias is a property of the matrix, not of the data.</caption>
+<colgroup>
+<col style="width: 3%">
+<col style="width: 10%">
+<col style="width: 85%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Matrix</th>
+<th style="text-align: left;">Covariance</th>
+<th style="text-align: left;">Mechanism</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">G_VR2</td>
+<td style="text-align: left;">positive</td>
+<td style="text-align: left;">the constraint penalises delta-p^2, so moving an allele to the <em>far</em> extreme costs more than to the near one; the optimiser pushes rare alleles to 0 and common ones to 1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">G_0.5</td>
+<td style="text-align: left;">negative</td>
+<td style="text-align: left;">frequencies are measured as deviations from 0.5, so the optimiser buys ‘diversity’ by pushing everything to intermediate frequencies</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">G_VR1</td>
+<td style="text-align: left;">positive, attenuated</td>
+<td style="text-align: left;">G_VR2 reweighted by 2p0(1-p0), giving more weight to already-intermediate loci and less room at the extremes</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">G_i(p)</td>
+<td style="text-align: left;">negative</td>
+<td style="text-align: left;">uses accumulated intensity instead of delta-p^2; since di/dp = [p(1-p)]^-1/2, moves toward the extremes get more expensive</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Your MAF spectrum decides how bad this is
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The magnitude depends on the minor-allele-frequency spectrum. The effect is dramatic with sequence data dominated by rare alleles, and much milder with SNP chips designed for intermediate MAF.</p>
+<p><strong>Directly translated to plants:</strong> GBS or skim-seq with the full MAF spectrum puts you in the severe scenario; a 20-50k chip filtered to MAF &gt; 0.05 puts you in the mild one. This is the parameter that decides whether you can live with <code>G_VR2</code>.</p>
+</div>
+</div>
+</section>
+<section id="the-signature-on-live-data" class="level3" data-number="5.3.3">
+<h3 data-number="5.3.3" class="anchored" data-anchor-id="the-signature-on-live-data"><span class="header-section-number">5.3.3</span> The signature, on live data</h3>
+<p>The pure max-diversity greedy is the <code>G_0.5</code> scheme in miniature: it constrains molecular coancestry and nothing else. It should drive <code>F_hom</code> negative while paying the largest drift bill.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>panel <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">random      =</span> <span class="fu">freq_metrics</span>(<span class="fu">sample.int</span>(ctx<span class="sc">$</span>N, <span class="dv">60</span>), ctx),</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">max_div     =</span> <span class="fu">freq_metrics</span>(<span class="fu">sel_greedy</span>(ctx, <span class="dv">60</span>, <span class="at">w =</span> <span class="dv">0</span>), ctx),</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">balanced    =</span> <span class="fu">freq_metrics</span>(<span class="fu">sel_greedy</span>(ctx, <span class="dv">60</span>, <span class="at">w =</span> <span class="dv">1</span>), ctx),</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">truncation  =</span> <span class="fu">freq_metrics</span>(<span class="fu">sel_truncation</span>(ctx, <span class="dv">60</span>), ctx)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">as.data.frame</span>(panel[, <span class="fu">c</span>(<span class="st">"He"</span>, <span class="st">"F_hom"</span>, <span class="st">"F_drift"</span>, <span class="st">"cov_diag"</span>, <span class="st">"rare_retained"</span>)]), <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">He</th>
+<th style="text-align: right;">F_hom</th>
+<th style="text-align: right;">F_drift</th>
+<th style="text-align: right;">cov_diag</th>
+<th style="text-align: right;">rare_retained</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">random</td>
+<td style="text-align: right;">0.3257</td>
+<td style="text-align: right;">0.0048</td>
+<td style="text-align: right;">0.0083</td>
+<td style="text-align: right;">-0.0034</td>
+<td style="text-align: right;">0.9286</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">max_div</td>
+<td style="text-align: right;">0.3302</td>
+<td style="text-align: right;">-0.0113</td>
+<td style="text-align: right;">0.0060</td>
+<td style="text-align: right;">-0.0174</td>
+<td style="text-align: right;">0.9481</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">balanced</td>
+<td style="text-align: right;">0.3124</td>
+<td style="text-align: right;">0.0426</td>
+<td style="text-align: right;">0.0558</td>
+<td style="text-align: right;">-0.0131</td>
+<td style="text-align: right;">0.7338</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">truncation</td>
+<td style="text-align: right;">0.3124</td>
+<td style="text-align: right;">0.0426</td>
+<td style="text-align: right;">0.0558</td>
+<td style="text-align: right;">-0.0131</td>
+<td style="text-align: right;">0.7338</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Read the <code>F_hom</code> and <code>F_drift</code> columns together. Maximising diversity on the homozygosity lens produces a <em>negative</em> <code>F_hom</code> – the selection is more heterozygous than the base – while <code>F_drift</code> is strictly positive and larger than under random sampling. The bill is real, it is being paid, and a report carrying only <code>F_hom</code> would not show it.</p>
+</section>
+</section>
+<section id="the-other-matrices-briefly" class="level2" data-number="5.4">
+<h2 data-number="5.4" class="anchored" data-anchor-id="the-other-matrices-briefly"><span class="header-section-number">5.4</span> The other matrices, briefly</h2>
+<p><strong><code>F_IBD</code> via <code>G_LA</code>.</strong> Instead of assuming a 50/50 transmission probability for each parental allele (as the pedigree matrix <span class="math inline">\(\mathbf{A}\)</span> does), linkage analysis over the markers infers which parental haplotype was actually transmitted along the chromosome. It requires pedigree <strong>and</strong> markers. It measures IBD relative to a base explicitly defined as unrelated and non-inbred, so frequency change is determined by the base population rather than by linkage disequilibrium generated during selection – and the problematic covariance disappears. It was the <strong>only scheme tested that met both the <span class="math inline">\(\Delta F_{hom}\)</span> and <span class="math inline">\(\Delta F_{drift}\)</span> targets</strong>, on the managed panel and at unmonitored neutral loci, and it converted inbreeding into gain most efficiently.</p>
+<p>For plants this is the point of greatest friction. In biparental populations and backcross families <code>G_LA</code> is natural and cheap – phase is known and the number of meioses since the base is small. In recurrent-selection populations with full pedigree (common in commercial maize) it is feasible. In germplasm panels <em>without</em> pedigree it is inapplicable, and the honest alternative is segment-based IBD.</p>
+<p><strong><code>F_ROH</code>.</strong> A run of homozygosity is an uninterrupted stretch of homozygous markers; the logic is that many consecutive markers are unlikely to be IBS by chance, so the stretch is probably IBD. The fundamental ambiguity is that <code>F_ROH</code> is IBD when runs are <strong>long</strong> (recent inbreeding) and homozygosity when they are <strong>short</strong> (ancient inbreeding, accumulated IBS). The minimum-length threshold is therefore a knob that selects the <em>age</em> of inbreeding you are measuring, and there is no well-defined reference base.</p>
+<p>Empirically, <code>G_ROH</code> behaved more like <code>G_0.5</code> than like an IBD measure. It also is <strong>not guaranteed positive semi-definite</strong> – its elements are computed pairwise – and required substantial diagonal additions for inversion, which made it diagonally dominant and artificially inflated the number of parents selected.</p>
+<p>In a soybean inbred the entire genome is one ROH: <code>F_ROH</code> <span class="math inline">\(\approx 1\)</span> and the metric saturates. In maize it is useful for diagnosing erosion of elite heterotic pools; for <em>management</em> inside an optimiser, check positive definiteness carefully.</p>
+<section id="side-by-side" class="level3" data-number="5.4.1">
+<h3 data-number="5.4.1" class="anchored" data-anchor-id="side-by-side"><span class="header-section-number">5.4.1</span> Side by side</h3>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Seven matrices in the same optimiser (Meuwissen et al.&nbsp;2020).</caption>
+<colgroup>
+<col style="width: 6%">
+<col style="width: 17%">
+<col style="width: 75%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Matrix</th>
+<th style="text-align: left;">Class</th>
+<th style="text-align: left;">Behaviour in the optimiser</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">A</td>
+<td style="text-align: left;">IBD (expectation)</td>
+<td style="text-align: left;">high gain, but exceeded targets by ~40% by not accounting for within-family LD</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">G_VR2</td>
+<td style="text-align: left;">drift</td>
+<td style="text-align: left;">meets the drift target <em>only on the managed panel</em>; F_hom runs away</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">G_VR1</td>
+<td style="text-align: left;">drift</td>
+<td style="text-align: left;">reweighted version; smaller bias, smaller gain</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">G_0.5</td>
+<td style="text-align: left;">homozygosity</td>
+<td style="text-align: left;">F_hom near zero, drift 4x the target; loses genetic variance early</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">G_i(p)</td>
+<td style="text-align: left;">drift</td>
+<td style="text-align: left;">inverts the sign of the bias; constraint only indirectly tied to F</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">G_LA</td>
+<td style="text-align: left;">IBD</td>
+<td style="text-align: left;">the only one meeting both targets; best gain per unit of inbreeding</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">G_ROH</td>
+<td style="text-align: left;">hybrid</td>
+<td style="text-align: left;">high gain, uncontrolled drift, numerical problems</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>An implementation note that is routinely ignored
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>G_VR1</code>, <code>G_VR2</code>, <code>G_0.5</code> and <code>G_i(p)</code> are only <strong>semi</strong>-definite positive (a zero eigenvalue from the centering). You must add <span class="math inline">\(\alpha\)</span> to the diagonal (<span class="math inline">\(\alpha = 0.01\)</span> in the paper) to invert them and for the optimal-contribution algorithm to work. <span class="math inline">\(\mathbf{A}\)</span> and <code>G_LA</code> are positive definite by construction.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="reference-results" class="level2" data-number="5.5">
+<h2 data-number="5.5" class="anchored" data-anchor-id="reference-results"><span class="header-section-number">5.5</span> Reference results</h2>
+<p>Target <span class="math inline">\(\Delta F = 0.005\)</span> per generation (<span class="math inline">\(N_e = 100\)</span>). Values at the <strong>unmonitored neutral loci</strong>, generation 20.</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Both rate targets are 0.005. Only G_LA meets both.</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Scheme</th>
+<th style="text-align: left;">Class</th>
+<th style="text-align: right;">dF_hom</th>
+<th style="text-align: right;">dF_drift</th>
+<th style="text-align: right;">gap</th>
+<th style="text-align: right;">gain</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">G_VR2(M,M)</td>
+<td style="text-align: left;">drift</td>
+<td style="text-align: right;">0.0103</td>
+<td style="text-align: right;">0.0068</td>
+<td style="text-align: right;">0.054</td>
+<td style="text-align: right;">7.124</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">G_VR2(M,D)</td>
+<td style="text-align: left;">drift</td>
+<td style="text-align: right;">0.0101</td>
+<td style="text-align: right;">0.0068</td>
+<td style="text-align: right;">0.050</td>
+<td style="text-align: right;">7.107</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">G_VR1(M,M)</td>
+<td style="text-align: left;">drift</td>
+<td style="text-align: right;">0.0080</td>
+<td style="text-align: right;">0.0069</td>
+<td style="text-align: right;">0.021</td>
+<td style="text-align: right;">6.680</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">G_i(p)(M,M)</td>
+<td style="text-align: left;">drift</td>
+<td style="text-align: right;">0.0065</td>
+<td style="text-align: right;">0.0077</td>
+<td style="text-align: right;">-0.031</td>
+<td style="text-align: right;">7.111</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">G_0.5(M,M)</td>
+<td style="text-align: left;">homozygosity</td>
+<td style="text-align: right;">0.0073</td>
+<td style="text-align: right;">0.0176</td>
+<td style="text-align: right;">-0.170</td>
+<td style="text-align: right;">6.734</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">G_ROH(M,M)</td>
+<td style="text-align: left;">homozygosity</td>
+<td style="text-align: right;">0.0054</td>
+<td style="text-align: right;">0.0088</td>
+<td style="text-align: right;">-0.070</td>
+<td style="text-align: right;">9.099</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">G_LA(M,M)</td>
+<td style="text-align: left;">IBD</td>
+<td style="text-align: right;">0.0043</td>
+<td style="text-align: right;">0.0049</td>
+<td style="text-align: right;">-0.010</td>
+<td style="text-align: right;">7.188</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">A(M,~)</td>
+<td style="text-align: left;">IBD</td>
+<td style="text-align: right;">0.0070</td>
+<td style="text-align: right;">0.0084</td>
+<td style="text-align: right;">-0.021</td>
+<td style="text-align: right;">9.890</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Four readings:</p>
+<ol type="1">
+<li><strong>No IBS scheme met both targets.</strong> <code>G_LA</code> did, within about 2%.</li>
+<li>Pedigree <span class="math inline">\(\mathbf{A}\)</span> gave the highest absolute gain but overshot by ~40% – neutral loci hitch-hiking with QTL through within-family LD, which the pedigree expectation of IBD cannot capture.</li>
+<li>Using a separate panel for management instead of the GEBV panel changed gain by <strong>less than 0.3%</strong>. Not worth the complexity.</li>
+<li>At equal mean inbreeding, <code>G_LA</code> beat <span class="math inline">\(\mathbf{A}\)</span> in 65 of 100 replicates and <code>G_ROH</code> in 62 of 100.</li>
+</ol>
+<section id="the-diagnostic-nobody-runs" class="level3" data-number="5.5.1">
+<h3 data-number="5.5.1" class="anchored" data-anchor-id="the-diagnostic-nobody-runs"><span class="header-section-number">5.5.1</span> The diagnostic nobody runs</h3>
+<p>Schemes based on IBD selected many parents; VanRaden-style schemes selected few.</p>
+<blockquote class="blockquote">
+<p><strong>Rule of thumb.</strong> If your optimal-contribution run is delivering high gain with a suspiciously small number of parents and <span class="math inline">\(\Delta F\)</span> on target, compute <code>F_hom</code> and <code>F_drift</code> separately on a panel <strong>not used</strong> in the management. The difference between them is your hidden bill.</p>
+</blockquote>
+<p>The book’s implementation of that diagnostic is <code>ne_parents()</code>, reported alongside the two lenses in every scenario – see <a href="12-case-study.html" class="quarto-xref"><span>Chapter 12</span></a>, where a selection meeting its diversity target while collapsing from 40 effective parents to 12 is visible in one row of the output.</p>
+</section>
+</section>
+<section id="what-to-carry-into-plant-breeding" class="level2" data-number="5.6">
+<h2 data-number="5.6" class="anchored" data-anchor-id="what-to-carry-into-plant-breeding"><span class="header-section-number">5.6</span> What to carry into plant breeding</h2>
+<p><strong>Declare the base and never redefine it.</strong> Redefining the reference frequencies every generation is common in plant pipelines because it is the <em>default</em> in several <span class="math inline">\(\mathbf{G}\)</span>-construction functions. Since frequency changes in successive cycles are positively correlated, constraining the variance <em>within</em> each cycle lets the <em>accumulated</em> variance overshoot the target. Freeze <span class="math inline">\(p_0\)</span> from the founding cycle and propagate it. In this book that is <code>ctx$p0</code>, set once in <code>build_ctx()</code> and never recomputed.</p>
+<p><strong>Do not maximise marker heterozygosity as an objective.</strong> Raising heterozygosity on the monitored panel does not raise it at unmonitored loci – and it increases real IBD, because raising an allele’s frequency means multiplying copies of a subset of base alleles.</p>
+<p><strong>Heterotic pools need a two-directional constraint.</strong> Within pool you want to limit <span class="math inline">\(\Delta F\)</span>. Between pools you want to <em>preserve</em> divergence, which is directed drift and is desirable. A single global <span class="math inline">\(\tfrac{1}{2}\mathbf{c}'\mathbf{G}\mathbf{c}\)</span> cannot express that. Use multiple matrices with simultaneous constraints, or per-subpopulation constraints – which is what <code>gd_partition()</code> measures and <a href="08-pipeline-stages.html" class="quarto-xref"><span>Chapter 8</span></a> operationalises.</p>
+<p><strong>Selfing species need inbreeding by selfing separated from inbreeding by drift.</strong> In soybean, wheat or rice, individual <span class="math inline">\(F\)</span> is <span class="math inline">\(\approx 1\)</span> by design and carries no management information. The manageable quantity is allele frequency <strong>in the crossing population</strong> and coancestry among the chosen parents. Apply the whole <code>F_hom</code>/<code>F_drift</code> framework at population level, never at line level.</p>
+<p><strong>Region-specific targets rarely earn their complexity.</strong> Causal variants are well distributed and what happens at a subset of loci does not predict what happens outside it. The legitimate plant exception is R-gene-type resistance loci, where allelic diversity has direct and known value.</p>
+<p><strong>Deleterious recessives are a load problem, not a diversity problem.</strong> If you have mapped the defect, putting it in the selection index is more efficient than controlling it indirectly through a diversity constraint.</p>
+<p><strong>In pure conservation schemes the problem is <em>worse</em>, not better.</strong> Without directional selection the inbreeding-management term dominates the optimiser and the covariance tends to be larger. The IBD recommendation is stronger there.</p>
+</section>
+<section id="limits-of-the-animal-to-plant-transposition" class="level2" data-number="5.7">
+<h2 data-number="5.7" class="anchored" data-anchor-id="limits-of-the-animal-to-plant-transposition"><span class="header-section-number">5.7</span> Limits of the animal-to-plant transposition</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 43%">
+<col style="width: 56%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Assumption in the paper</th>
+<th style="text-align: left;">Situation in plants</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">discrete generations, two sexes, one contribution per individual</td>
+<td style="text-align: left;">hermaphroditism, selfing, cloning, overlapping cycles, repeated use of the same parent</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">reliable, deep pedigree</td>
+<td style="text-align: left;">often truncated, or absent in genebanks</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">base = simulated founder population at mutation-drift equilibrium</td>
+<td style="text-align: left;">base is an administrative choice (cycle 0) with pre-existing structure</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">target Ne = 100 over 20 generations</td>
+<td style="text-align: left;">shorter cycles with GS, but effective elite Ne often below 30</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">one population, one target</td>
+<td style="text-align: left;">multiple target environments, G x E, separate heterotic pools</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">heterozygosity is always desirable</td>
+<td style="text-align: left;">in selfers transitory; in hybrids the final product; in lines undesirable</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>None of this invalidates the central conclusion. It is an <strong>algebraic</strong> property of the optimiser, not a biological property of the species. What it changes is <em>which matrix is practicable</em>.</p>
+</section>
+<section id="operational-checklist" class="level2" data-number="5.8">
+<h2 data-number="5.8" class="anchored" data-anchor-id="operational-checklist"><span class="header-section-number">5.8</span> Operational checklist</h2>
+<ul>
+<li>Is the base <span class="math inline">\(p_0\)</span> frozen at the founding cycle, and documented?</li>
+<li>Are <code>F_hom</code> and <code>F_drift</code> computed <strong>separately</strong> and reported together?</li>
+<li>Is there a panel of loci <strong>not used in management</strong>, for audit?</li>
+<li>Is the regression of <span class="math inline">\(\log(1 - F)\)</span> on cycle linear (constant rate)?</li>
+<li>Is the covariance <span class="math inline">\(2\,\mathrm{cov}(\delta p/s,\, (p_0 - \tfrac12)/s)\)</span> reported as a diagnostic?</li>
+<li>Is the number of selected parents biologically plausible?</li>
+<li>Is true genetic variance (or the best estimate of it) being tracked?</li>
+<li>Is <span class="math inline">\(\mathbf{G}\)</span> positive definite before inversion, and is the added <span class="math inline">\(\alpha\)</span> documented?</li>
+<li>Where possible, is an IBD alternative compared in parallel?</li>
+</ul>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
+<div id="ref-meuwissen2020" class="csl-entry" role="listitem">
+Meuwissen, T. H. E., A. K. Sonesson, G. Gebregiwergis, and J. A. Woolliams. 2020. <span>“Management of Genetic Diversity in the Era of Genomics.”</span> <em>Frontiers in Genetics</em> 11: 880. <a href="https://doi.org/10.3389/fgene.2020.00880">https://doi.org/10.3389/fgene.2020.00880</a>.
+</div>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./04-population-sizing.html" class="pagination-link" aria-label="Sizing a segregating population, F1 to F4">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Sizing a segregating population, F1 to F4</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./06-metric-catalogue.html" class="pagination-link" aria-label="A catalogue of metrics on `f`">
+        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">A catalogue of metrics on <code>f</code></span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

@@ -1,0 +1,1693 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>4&nbsp; Sizing a segregating population, F1 to F4 – Genetic Diversity in Hybrid Breeding</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./05-genomic-era.html" rel="next">
+<link href="./03-simulating-crosses.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-37a0ccb6f5b9899fcb884e11bb6f7458.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./03-simulating-crosses.html">Simulation</a></li><li class="breadcrumb-item"><a href="./04-population-sizing.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Sizing a segregating population, F1 to F4</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Genetic Diversity in Hybrid Breeding</a> 
+        <div class="sidebar-tools-main">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-coancestry.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Coancestry, and the two matrices</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-subdivided.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Diversity in a subdivided population</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Simulation</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-simulating-crosses.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Simulating lines, pools and crosses</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-population-sizing.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Sizing a segregating population, F1 to F4</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Metrics</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-genomic-era.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Diversity metrics in the genomic era</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-metric-catalogue.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">A catalogue of metrics on <code>f</code></span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-choosing-metrics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Choosing metrics: collapse, cost, redundancy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-pipeline-stages.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Metrics at each pipeline stage, and five traps</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Optimisation</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-optimal-contributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Optimal contributions and the <span class="math inline">\(\alpha\)</span> constraint</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-combinatorial-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Combinatorial selection</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Evidence and practice</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-plant-literature.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">What the plant literature establishes</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-case-study.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">End to end, and the operational checklist</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./90-notation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Notation and glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./91-package.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">The <code>hybdiv</code> package</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./92-verification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Verification</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./93-corpora.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">D</span>&nbsp; <span class="chapter-title">The bibliographic corpora</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./99-references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#the-simulated-space-is-ancestry-not-alleles" id="toc-the-simulated-space-is-ancestry-not-alleles" class="nav-link active" data-scroll-target="#the-simulated-space-is-ancestry-not-alleles"><span class="header-section-number">4.1</span> The simulated space is ancestry, not alleles</a></li>
+  <li><a href="#the-assumptions-one-at-a-time" id="toc-the-assumptions-one-at-a-time" class="nav-link" data-scroll-target="#the-assumptions-one-at-a-time"><span class="header-section-number">4.2</span> The assumptions, one at a time</a></li>
+  <li><a href="#verifying-the-identities-live" id="toc-verifying-the-identities-live" class="nav-link" data-scroll-target="#verifying-the-identities-live"><span class="header-section-number">4.3</span> Verifying the identities live</a></li>
+  <li><a href="#the-results" id="toc-the-results" class="nav-link" data-scroll-target="#the-results"><span class="header-section-number">4.4</span> The results</a>
+  <ul class="collapse">
+  <li><a href="#the-diversity-curve-saturates-at-0.988-not-at-1" id="toc-the-diversity-curve-saturates-at-0.988-not-at-1" class="nav-link" data-scroll-target="#the-diversity-curve-saturates-at-0.988-not-at-1"><span class="header-section-number">4.4.1</span> The diversity curve saturates at 0.988, not at 1</a></li>
+  <li><a href="#the-bulk-is-the-worst-scheme-across-the-whole-range" id="toc-the-bulk-is-the-worst-scheme-across-the-whole-range" class="nav-link" data-scroll-target="#the-bulk-is-the-worst-scheme-across-the-whole-range"><span class="header-section-number">4.4.2</span> The bulk is the worst scheme across the whole range</a></li>
+  <li><a href="#block-size-does-not-depend-on-n" id="toc-block-size-does-not-depend-on-n" class="nav-link" data-scroll-target="#block-size-does-not-depend-on-n"><span class="header-section-number">4.4.3</span> Block size does not depend on N</a></li>
+  <li><a href="#the-metrics-saturate-at-different-n" id="toc-the-metrics-saturate-at-different-n" class="nav-link" data-scroll-target="#the-metrics-saturate-at-different-n"><span class="header-section-number">4.4.4</span> The metrics saturate at different N</a></li>
+  </ul></li>
+  <li><a href="#sizing-the-f1" id="toc-sizing-the-f1" class="nav-link" data-scroll-target="#sizing-the-f1"><span class="header-section-number">4.5</span> Sizing the F1</a></li>
+  <li><a href="#working-numbers" id="toc-working-numbers" class="nav-link" data-scroll-target="#working-numbers"><span class="header-section-number">4.6</span> Working numbers</a></li>
+  <li><a href="#where-this-connects" id="toc-where-this-connects" class="nav-link" data-scroll-target="#where-this-connects"><span class="header-section-number">4.7</span> Where this connects</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./03-simulating-crosses.html">Simulation</a></li><li class="breadcrumb-item"><a href="./04-population-sizing.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Sizing a segregating population, F1 to F4</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="sec-sizing" class="quarto-section-identifier"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Sizing a segregating population, F1 to F4</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>The previous chapters took the candidate pool as given. This one asks where it comes from: a wide cross between two divergent parents, carried F1 -&gt; F2 -&gt; F3 -&gt; F4, and the question every programme has to answer before it plants anything – <strong>how many plants?</strong></p>
+<p>The answer turns out to depend entirely on what you are sizing <em>for</em>. There is no single optimal <span class="math inline">\(N\)</span>, and the most common failure is to size for the objective that saturates earliest and then be surprised when a different objective was never met.</p>
+<section id="the-simulated-space-is-ancestry-not-alleles" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="the-simulated-space-is-ancestry-not-alleles"><span class="header-section-number">4.1</span> The simulated space is ancestry, not alleles</h2>
+<p>Each genome position is coded 0 (from parent P1) or 1 (from parent P2). For a wide biparental cross between two divergent heterotic groups this is the correct abstraction: essentially every locus polymorphic between the parents is biallelic, so ancestry is a sufficient statistic. Throughout this chapter, “allele frequency” means “frequency of P1 ancestry”.</p>
+</section>
+<section id="the-assumptions-one-at-a-time" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="the-assumptions-one-at-a-time"><span class="header-section-number">4.2</span> The assumptions, one at a time</h2>
+<p>These are the assumptions the numbers rest on. Read them before trusting any of the numbers.</p>
+<p><strong>P1. Ancestry, not alleles.</strong> As above.</p>
+<p><strong>P2. Parents fully homozygous and fixed for alternative alleles.</strong> Consequently every F1 plant is genetically identical and the genetic <span class="math inline">\(N_e\)</span> of the F1 is 1. Sizing the F1 is a <strong>logistical</strong> decision, not a genetic one – unless the parents carry residual heterozygosity, which is handled separately below.</p>
+<p><strong>P3. The genetic map.</strong> Ten chromosomes, lengths from a classical composite maize map, about 1670 cM (~17 Morgans). Do <strong>not</strong> use IBM-type map lengths from intermated RILs: they are inflated 5-10x by construction and will make every answer wrong.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>map <span class="ot">&lt;-</span> <span class="fu">build_map</span>(maize_chr_len, <span class="at">spacing_cM =</span> <span class="dv">2</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">chromosomes =</span> <span class="fu">length</span>(map<span class="sc">$</span>chr_len), <span class="at">markers =</span> map<span class="sc">$</span>m,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">total_cM =</span> map<span class="sc">$</span>total_cM, <span class="at">morgans =</span> map<span class="sc">$</span>total_cM <span class="sc">/</span> <span class="dv">100</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; chromosomes     markers    total_cM     morgans </span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        10.0       846.0      1670.0        16.7</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><strong>P4. Haldane recombination, no interference,</strong> identical in male and female. The probability of a haplotype switch between adjacent markers <span class="math inline">\(d\)</span> cM apart is <span class="math inline">\(r = 0.5(1 - e^{-2d/100})\)</span>; the first marker of each chromosome gets <span class="math inline">\(r = 0.5\)</span>, which produces independent segregation between chromosomes automatically.</p>
+<p><em>Limitation:</em> without interference the variance in crossover number is inflated (Poisson). Maize has strong positive interference, so the simulated block-length distribution has a slightly longer tail than reality. Mean block lengths and allele frequencies are unaffected.</p>
+<p><strong>P5. Segregation distortion by rejection sampling,</strong> therefore exact rather than approximate. Two mechanisms: <em>gametophytic</em> (ga1/Ga1-s type, pollen incompatibility) acting only on the male gamete, and <em>zygotic</em> (hybrid lethality or subvitality) as genotype fitnesses. Because rejection acts on the <strong>whole gamete</strong>, the region linked to the distorter is dragged along – which is exactly the phenomenon of interest.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>f2_distorters</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;">chr</th>
+<th style="text-align: right;">pos_cM</th>
+<th style="text-align: left;">type</th>
+<th style="text-align: right;">k</th>
+<th style="text-align: right;">w00</th>
+<th style="text-align: right;">w01</th>
+<th style="text-align: right;">w11</th>
+<th style="text-align: left;">label</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">75</td>
+<td style="text-align: left;">gametic</td>
+<td style="text-align: right;">0.80</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: left;">ga1-like (4.05)</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">160</td>
+<td style="text-align: left;">zygotic</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.45</td>
+<td style="text-align: left;">partial lethal (1.10)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">60</td>
+<td style="text-align: left;">gametic</td>
+<td style="text-align: right;">0.68</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: left;">weak gametic (5.03)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>The distorters are plausible, not measured
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This is the parameter that moves the results most. Replace <code>f2_distorters</code> with your own F2 genotyping data before using any number here to decide field area.</p>
+</div>
+</div>
+<p><strong>P6. Five schemes,</strong> all ending with <span class="math inline">\(H = 0.125\)</span> so they are directly comparable: <code>ssd</code> (one seed per plant per generation – the neutral reference, no selection, no drift beyond the meiotic), <code>ssd_attr</code> (SSD with 15% random loss per generation: vigour, partial sterility, flowering asynchrony – common in wide crosses with exotic material), <code>bulk</code> (differential seed contribution, a Wright-Fisher model with weights <span class="math inline">\(w_i = e^{\beta(z_i - \bar z)}\)</span> where <span class="math inline">\(z_i\)</span> is the share of genome from the adapted parent – a <em>phenomenological</em> model of polygenic natural selection, not a model of adaptation loci), and <code>syn1</code>/<code>syn2</code> (one or two random intercrossing cycles in the F2 before the two selfings).</p>
+<p><strong>P7. The F4 panel is not a RIL panel.</strong> Residual heterozygosity is <span class="math inline">\(H = 0.125\)</span>, and that changes every theoretical expectation:</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Theoretical identities for an F4 panel. The commonly quoted 0.5/sqrt(N) holds only at F-infinity.</caption>
+<colgroup>
+<col style="width: 36%">
+<col style="width: 41%">
+<col style="width: 21%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Quantity</th>
+<th style="text-align: left;">Formula</th>
+<th style="text-align: left;">Value in F4</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Var(dosage per line)</td>
+<td style="text-align: left;">(1 - H) / 4</td>
+<td style="text-align: left;">0.21875</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">SE(p_hat)</td>
+<td style="text-align: left;">0.5 sqrt((1 - H) / N)</td>
+<td style="text-align: left;">0.468 / sqrt(N)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Diversity retained D</td>
+<td style="text-align: left;">1 - (1 - H) / N</td>
+<td style="text-align: left;">1 - 0.875 / N</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">P(P2 homozygote per locus)</td>
+<td style="text-align: left;">(1 - H) / 2</td>
+<td style="text-align: left;">0.4375</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Junctions per haplotype</td>
+<td style="text-align: left;">A_2 = L; A_(t+1) = A_t + L H_t</td>
+<td style="text-align: left;">1.75 L</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><strong>P8. The standard error is estimated between replicates,</strong> not between markers. This is essential: linked markers are strongly autocorrelated, so the spread across markers within one replicate is not an estimator of sampling error.</p>
+<p><strong>P9. What is not modelled,</strong> and therefore cannot be answered here: deliberate artificial selection, QTL architecture, phenotypic inbreeding depression, mutation (irrelevant on this timescale), and structural variation. If you know there is a large inversion between your parents, zero the recombination rate over that interval in <code>build_map()</code>.</p>
+<p><em>Known bias:</em> at 2 cM spacing, double crossovers within an interval are not counted. The bias is <span class="math inline">\(-2.0\%\)</span> in junction number, always downward. Use <code>spacing_cM = 1</code> if you need a faithful count.</p>
+</section>
+<section id="verifying-the-identities-live" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="verifying-the-identities-live"><span class="header-section-number">4.3</span> Verifying the identities live</h2>
+<p>The theory above is not decoration – it is checkable, and the simulator is only trustworthy if it reproduces it.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>map10 <span class="ot">&lt;-</span> <span class="fu">build_map</span>(maize_chr_len, <span class="at">spacing_cM =</span> <span class="dv">10</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>neutral <span class="ot">&lt;-</span> <span class="fu">make_distortion</span>(map10, <span class="cn">NULL</span>, <span class="at">active =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">4</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>F1 <span class="ot">&lt;-</span> <span class="fu">make_F1</span>(map10, <span class="dv">400</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>F2 <span class="ot">&lt;-</span> <span class="fu">cross_indices</span>(F1, <span class="dv">1</span><span class="sc">:</span><span class="dv">400</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">400</span>, map10, neutral)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>F3 <span class="ot">&lt;-</span> <span class="fu">cross_indices</span>(F2, <span class="dv">1</span><span class="sc">:</span><span class="dv">400</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">400</span>, map10, neutral)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>F4 <span class="ot">&lt;-</span> <span class="fu">cross_indices</span>(F3, <span class="dv">1</span><span class="sc">:</span><span class="dv">400</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">400</span>, map10, neutral)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">generation =</span> <span class="fu">c</span>(<span class="st">"F1"</span>, <span class="st">"F2"</span>, <span class="st">"F3"</span>, <span class="st">"F4"</span>),</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">H_observed =</span> <span class="fu">round</span>(<span class="fu">c</span>(<span class="fu">panel_het</span>(F1), <span class="fu">panel_het</span>(F2), <span class="fu">panel_het</span>(F3), <span class="fu">panel_het</span>(F4)), <span class="dv">4</span>),</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">H_expected =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">0.5</span>, <span class="fl">0.25</span>, <span class="fl">0.125</span>)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">generation</th>
+<th style="text-align: right;">H_observed</th>
+<th style="text-align: right;">H_expected</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">F1</td>
+<td style="text-align: right;">1.0000</td>
+<td style="text-align: right;">1.000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">F2</td>
+<td style="text-align: right;">0.4968</td>
+<td style="text-align: right;">0.500</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">F3</td>
+<td style="text-align: right;">0.2541</td>
+<td style="text-align: right;">0.250</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">F4</td>
+<td style="text-align: right;">0.1268</td>
+<td style="text-align: right;">0.125</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Heterozygosity halves at every selfing, as it must. And the diversity identity:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">5</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>check <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">c</span>(<span class="dv">20</span>, <span class="dv">50</span>, <span class="dv">100</span>, <span class="dv">200</span>), <span class="cf">function</span>(N) {</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  pop <span class="ot">&lt;-</span> <span class="fu">run_scheme</span>(<span class="st">"ssd"</span>, N, map10, neutral, f2_opt)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  H <span class="ot">&lt;-</span> <span class="fu">panel_het</span>(pop)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">N =</span> N,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>             <span class="at">D_observed =</span> <span class="fu">diversity_retained</span>(<span class="fu">panel_freq</span>(pop)),</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>             <span class="at">D_expected =</span> <span class="dv">1</span> <span class="sc">-</span> (<span class="dv">1</span> <span class="sc">-</span> H) <span class="sc">/</span> N)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>}))</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(check, <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;">N</th>
+<th style="text-align: right;">D_observed</th>
+<th style="text-align: right;">D_expected</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">0.9582</td>
+<td style="text-align: right;">0.9569</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">0.9845</td>
+<td style="text-align: right;">0.9825</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">0.9904</td>
+<td style="text-align: right;">0.9912</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">200</td>
+<td style="text-align: right;">0.9954</td>
+<td style="text-align: right;">0.9956</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Map expansion is an algebraic prediction, and the payoff is a result many programmes get wrong:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>Lm <span class="ot">&lt;-</span> map<span class="sc">$</span>total_cM <span class="sc">/</span> <span class="dv">100</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(<span class="at">SSD  =</span> <span class="fu">expected_junctions</span>(<span class="st">"ssd"</span>,  map),</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>      <span class="at">Syn1 =</span> <span class="fu">expected_junctions</span>(<span class="st">"syn1"</span>, map),</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>      <span class="at">Syn2 =</span> <span class="fu">expected_junctions</span>(<span class="st">"syn2"</span>, map))</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      junctions mean_block_cM</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; SSD     29.225      42.57489</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Syn1    37.575      35.10247</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Syn2    45.925      29.86142</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Each Syn cycle adds only <span class="math inline">\(0.5L\)</span> junctions, not <span class="math inline">\(1.0L\)</span>. The extra meiosis creates a junction only where the parent is heterozygous, and <span class="math inline">\(H = 0.5\)</span> at the F2/Syn stage. Budgeting an intercrossing cycle as “one more map length of recombination” overstates what it buys by a factor of two.</p>
+</section>
+<section id="the-results" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="the-results"><span class="header-section-number">4.4</span> The results</h2>
+<p>The full grid – five schemes, 20 population sizes, adaptive replication – takes several minutes and is shipped precomputed.</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>SSD, the neutral reference. Everything below comes from this table.</caption>
+<thead>
+<tr class="header">
+<th style="text-align: right;">N</th>
+<th style="text-align: right;">D</th>
+<th style="text-align: right;">SE(p_hat)</th>
+<th style="text-align: left;">skewed genome</th>
+<th style="text-align: right;">min(p, 1-p)</th>
+<th style="text-align: right;">N equivalent</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0.903</td>
+<td style="text-align: right;">0.148</td>
+<td style="text-align: left;">42.8%</td>
+<td style="text-align: right;">0.069</td>
+<td style="text-align: right;">9</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">0.961</td>
+<td style="text-align: right;">0.084</td>
+<td style="text-align: left;">14.4%</td>
+<td style="text-align: right;">0.187</td>
+<td style="text-align: right;">23</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">0.972</td>
+<td style="text-align: right;">0.066</td>
+<td style="text-align: left;">7.9%</td>
+<td style="text-align: right;">0.209</td>
+<td style="text-align: right;">32</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">70</td>
+<td style="text-align: right;">0.978</td>
+<td style="text-align: right;">0.056</td>
+<td style="text-align: left;">5.6%</td>
+<td style="text-align: right;">0.221</td>
+<td style="text-align: right;">40</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">90</td>
+<td style="text-align: right;">0.981</td>
+<td style="text-align: right;">0.047</td>
+<td style="text-align: left;">4.3%</td>
+<td style="text-align: right;">0.233</td>
+<td style="text-align: right;">47</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">110</td>
+<td style="text-align: right;">0.982</td>
+<td style="text-align: right;">0.044</td>
+<td style="text-align: left;">4.2%</td>
+<td style="text-align: right;">0.232</td>
+<td style="text-align: right;">48</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">150</td>
+<td style="text-align: right;">0.984</td>
+<td style="text-align: right;">0.039</td>
+<td style="text-align: left;">3.8%</td>
+<td style="text-align: right;">0.236</td>
+<td style="text-align: right;">56</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">190</td>
+<td style="text-align: right;">0.985</td>
+<td style="text-align: right;">0.032</td>
+<td style="text-align: left;">3.7%</td>
+<td style="text-align: right;">0.227</td>
+<td style="text-align: right;">60</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">290</td>
+<td style="text-align: right;">0.988</td>
+<td style="text-align: right;">0.027</td>
+<td style="text-align: left;">3.3%</td>
+<td style="text-align: right;">0.240</td>
+<td style="text-align: right;">70</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">390</td>
+<td style="text-align: right;">0.989</td>
+<td style="text-align: right;">0.023</td>
+<td style="text-align: left;">3.1%</td>
+<td style="text-align: right;">0.242</td>
+<td style="text-align: right;">77</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<section id="the-diversity-curve-saturates-at-0.988-not-at-1" class="level3" data-number="4.4.1">
+<h3 data-number="4.4.1" class="anchored" data-anchor-id="the-diversity-curve-saturates-at-0.988-not-at-1"><span class="header-section-number">4.4.1</span> The diversity curve saturates at 0.988, not at 1</h3>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>schemes <span class="ot">&lt;-</span> <span class="fu">unique</span>(f2<span class="sc">$</span>scheme)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>cols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">ssd =</span> <span class="st">"#1b6ca8"</span>, <span class="at">ssd_attr =</span> <span class="st">"#7fb3d5"</span>, <span class="at">bulk =</span> <span class="st">"#c0392b"</span>,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">syn1 =</span> <span class="st">"#27ae60"</span>, <span class="at">syn2 =</span> <span class="st">"#16a085"</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="cn">NA</span>, <span class="at">xlim =</span> <span class="fu">range</span>(f2<span class="sc">$</span>N), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="fl">0.88</span>, <span class="fl">1.0</span>),</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="fu">expression</span>(N[F2]<span class="sc">~</span><span class="st">"plants"</span>), <span class="at">ylab =</span> <span class="st">"diversity retained, D"</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="fu">grid</span>()</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (s <span class="cf">in</span> schemes) {</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  d <span class="ot">&lt;-</span> f2[f2<span class="sc">$</span>scheme <span class="sc">==</span> s, ]</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lines</span>(d<span class="sc">$</span>N, d<span class="sc">$</span>div, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">0.6</span>, <span class="at">col =</span> cols[s], <span class="at">lwd =</span> <span class="fl">1.8</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fl">0.875</span> <span class="sc">/</span> x, <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">"grey30"</span>, <span class="at">lwd =</span> <span class="fl">1.5</span>)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"bottomright"</span>, <span class="fu">c</span>(schemes, <span class="st">"theory, no distortion"</span>),</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="fu">c</span>(cols[schemes], <span class="st">"grey30"</span>), <span class="at">lwd =</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="fl">1.8</span>, <span class="fu">length</span>(schemes)), <span class="fl">1.5</span>),</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>       <span class="at">lty =</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">1</span>, <span class="fu">length</span>(schemes)), <span class="dv">2</span>), <span class="at">pch =</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">19</span>, <span class="fu">length</span>(schemes)), <span class="cn">NA</span>),</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>       <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">cex =</span> <span class="fl">0.8</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="04-population-sizing_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="1050"></p>
+<figcaption>Diversity retained against population size, five schemes. The theoretical curve is 1 - (1 - H)/N under no distortion.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The gap between the observed curve and the theoretical one is <strong>segregation distortion</strong> – a deterministic bias that does not shrink with more plants. Adding plants buys you drift protection; it does not buy you distortion protection.</p>
+</section>
+<section id="the-bulk-is-the-worst-scheme-across-the-whole-range" class="level3" data-number="4.4.2">
+<h3 data-number="4.4.2" class="anchored" data-anchor-id="the-bulk-is-the-worst-scheme-across-the-whole-range"><span class="header-section-number">4.4.2</span> The bulk is the worst scheme across the whole range</h3>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">comparison</th>
+<th style="text-align: right;">N</th>
+<th style="text-align: right;">D</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">bulk, largest N</td>
+<td style="text-align: right;">390</td>
+<td style="text-align: right;">0.954</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">SSD, N = 30</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">0.961</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Bulk at the largest population size retains <strong>less</strong> diversity than SSD at 30 plants. With a less adapted donor parent, natural selection in the bulk removes precisely the germplasm the wide cross was made to introduce. If the objective is introgression, the bulk is not a cheaper SSD – it is a different experiment.</p>
+</section>
+<section id="block-size-does-not-depend-on-n" class="level3" data-number="4.4.3">
+<h3 data-number="4.4.3" class="anchored" data-anchor-id="block-size-does-not-depend-on-n"><span class="header-section-number">4.4.3</span> Block size does not depend on N</h3>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>map4 <span class="ot">&lt;-</span> <span class="fu">build_map</span>(maize_chr_len, <span class="at">spacing_cM =</span> <span class="dv">4</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>dist <span class="ot">&lt;-</span> <span class="fu">make_distortion</span>(map4, f2_distorters)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">6</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>small <span class="ot">&lt;-</span> <span class="fu">panel_freq</span>(<span class="fu">run_scheme</span>(<span class="st">"ssd"</span>, <span class="dv">20</span>,  map4, dist, f2_opt))</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>large <span class="ot">&lt;-</span> <span class="fu">panel_freq</span>(<span class="fu">run_scheme</span>(<span class="st">"ssd"</span>, <span class="dv">300</span>, map4, dist, f2_opt))</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(small, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">col =</span> <span class="st">"#e08214"</span>, <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>),</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"genome (chromosomes 1-10)"</span>, <span class="at">ylab =</span> <span class="st">"P1 ancestry frequency"</span>, <span class="at">xaxt =</span> <span class="st">"n"</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(large, <span class="at">col =</span> <span class="st">"#1b6ca8"</span>, <span class="at">lwd =</span> <span class="fl">1.6</span>)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="fl">0.5</span>, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">"grey50"</span>)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co"># chromosome boundaries and distorter positions</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>bnd <span class="ot">&lt;-</span> <span class="fu">which</span>(map4<span class="sc">$</span>first)</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="fu">axis</span>(<span class="dv">1</span>, <span class="at">at =</span> (<span class="fu">c</span>(bnd, map4<span class="sc">$</span>m <span class="sc">+</span> <span class="dv">1</span>)[<span class="sc">-</span><span class="dv">1</span>] <span class="sc">+</span> bnd) <span class="sc">/</span> <span class="dv">2</span>, <span class="at">labels =</span> <span class="fu">seq_along</span>(map4<span class="sc">$</span>chr_len))</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> bnd[<span class="sc">-</span><span class="dv">1</span>] <span class="sc">-</span> <span class="fl">0.5</span>, <span class="at">col =</span> <span class="st">"grey85"</span>)</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_len</span>(<span class="fu">nrow</span>(f2_distorters)))</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">abline</span>(<span class="at">v =</span> <span class="fu">marker_index</span>(map4, f2_distorters<span class="sc">$</span>chr[i], f2_distorters<span class="sc">$</span>pos_cM[i]),</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>         <span class="at">col =</span> <span class="st">"#b2182b"</span>, <span class="at">lty =</span> <span class="dv">3</span>)</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topleft"</span>, <span class="fu">c</span>(<span class="st">"N = 20"</span>, <span class="st">"N = 300"</span>, <span class="st">"distorter"</span>), <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"#e08214"</span>, <span class="st">"#1b6ca8"</span>, <span class="st">"#b2182b"</span>),</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>       <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">3</span>), <span class="at">lwd =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">1.6</span>, <span class="dv">1</span>), <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">cex =</span> <span class="fl">0.8</span>, <span class="at">horiz =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="04-population-sizing_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="1050"></p>
+<figcaption>Ancestry frequency along the ten chromosomes, at N = 20 and N = 300. At N = 20 the whole curve is noisy: that is drift, and more plants remove it. At N = 300 the noise is gone and three peaks remain, exactly at the distorters. Those are the deterministic bias, and no number of plants removes them.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Block length depends only on the number of meioses. Against linkage drag the instrument is an <strong>intercrossing cycle, not field area</strong> – which is what the Syn curves in the theory table above quantify.</p>
+</section>
+<section id="the-metrics-saturate-at-different-n" class="level3" data-number="4.4.4">
+<h3 data-number="4.4.4" class="anchored" data-anchor-id="the-metrics-saturate-at-different-n"><span class="header-section-number">4.4.4</span> The metrics saturate at different N</h3>
+<p>This is the central practical result, and the reason the question “what is the optimal <span class="math inline">\(N\)</span>?” has no single answer.</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Different objectives, different answers. Size for the one that binds.</caption>
+<colgroup>
+<col style="width: 48%">
+<col style="width: 51%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Objective</th>
+<th style="text-align: left;">Saturates near</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Diversity retained (D)</td>
+<td style="text-align: left;">100-120</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Worst region of the genome, min(p, 1-p)</td>
+<td style="text-align: left;">60-80</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Precision of the panel’s p_hat</td>
+<td style="text-align: left;"><strong>never</strong> – falls as 1/sqrt(N)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Recovery of 5 loci</td>
+<td style="text-align: left;">200-260</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Recovery of 8-10 loci</td>
+<td style="text-align: left;"><strong>not saturated</strong> at the largest N tested</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>kk <span class="ot">&lt;-</span> <span class="fu">sort</span>(<span class="fu">unique</span>(ml<span class="sc">$</span>k))</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="cn">NA</span>, <span class="at">xlim =</span> <span class="fu">range</span>(ml<span class="sc">$</span>N), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">xlab =</span> <span class="fu">expression</span>(N[F2]),</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">"P(at least one line)"</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="fu">grid</span>()</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_along</span>(kk)) {</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  d <span class="ot">&lt;-</span> ml[ml<span class="sc">$</span>k <span class="sc">==</span> kk[i], ]</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lines</span>(d<span class="sc">$</span>N, d<span class="sc">$</span>P, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">0.6</span>, <span class="at">col =</span> i <span class="sc">+</span> <span class="dv">1</span>, <span class="at">lwd =</span> <span class="fl">1.8</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topright"</span>, <span class="fu">paste</span>(<span class="st">"k ="</span>, kk), <span class="at">col =</span> <span class="fu">seq_along</span>(kk) <span class="sc">+</span> <span class="dv">1</span>, <span class="at">lwd =</span> <span class="fl">1.8</span>,</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">bty =</span> <span class="st">"n"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="04-population-sizing_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="1050"></p>
+<figcaption>Multilocus recovery: P(at least one line homozygous for P2 at k loci). This is the objective that keeps paying for larger N.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The marginal gain in <span class="math inline">\(D\)</span> tells the same story from the other side:</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">step</th>
+<th style="text-align: right;">gain_in_D</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">10 -&gt; 30</td>
+<td style="text-align: right;">0.0586</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">30 -&gt; 50</td>
+<td style="text-align: right;">0.0110</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">50 -&gt; 70</td>
+<td style="text-align: right;">0.0057</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">70 -&gt; 90</td>
+<td style="text-align: right;">0.0034</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">90 -&gt; 110</td>
+<td style="text-align: right;">0.0005</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">110 -&gt; 130</td>
+<td style="text-align: right;">0.0018</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>The knee is early. Past it, twenty more plants buy thousandths.</p>
+</section>
+</section>
+<section id="sizing-the-f1" class="level2" data-number="4.5">
+<h2 data-number="4.5" class="anchored" data-anchor-id="sizing-the-f1"><span class="header-section-number">4.5</span> Sizing the F1</h2>
+<p>With fully homozygous parents the F1 is genetically uniform and the decision is logistical. With residual heterozygosity – <span class="math inline">\(F \approx 0.95\)</span> is common in programme lines – each parent still segregates at a fraction of loci, and each F1 plant receives one random gamete from each parent. At a segregating locus the chance of losing one of the two parental alleles with <span class="math inline">\(n\)</span> F1 plants is <span class="math inline">\(2(1/2)^n\)</span>.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>s <span class="ot">&lt;-</span> <span class="fu">f1_sizing</span>(<span class="at">n_F1 =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>, <span class="at">h_res =</span> <span class="fl">0.05</span>, <span class="at">n_loci_eff =</span> <span class="dv">5000</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>s[s<span class="sc">$</span>n_F1 <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">8</span>, <span class="dv">10</span>, <span class="dv">12</span>, <span class="dv">15</span>, <span class="dv">20</span>), ]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">n_F1</th>
+<th style="text-align: right;">p_loss_per_locus</th>
+<th style="text-align: right;">expected_loci_lost</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">4</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0.1250000</td>
+<td style="text-align: right;">31.2500000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">8</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">0.0078125</td>
+<td style="text-align: right;">1.9531250</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">10</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0.0019531</td>
+<td style="text-align: right;">0.4882812</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">12</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">0.0004883</td>
+<td style="text-align: right;">0.1220703</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">15</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">0.0000610</td>
+<td style="text-align: right;">0.0152588</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">20</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">0.0000019</td>
+<td style="text-align: right;">0.0004768</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Twelve selfed F1 plants already put the expected number of lost loci below one. That is the whole F1 sizing argument.</p>
+</section>
+<section id="working-numbers" class="level2" data-number="4.6">
+<h2 data-number="4.6" class="anchored" data-anchor-id="working-numbers"><span class="header-section-number">4.6</span> Working numbers</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Working numbers for a wide cross. Size for the objective that binds, not for D.</caption>
+<colgroup>
+<col style="width: 6%">
+<col style="width: 32%">
+<col style="width: 61%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Generation</th>
+<th style="text-align: left;">Plants</th>
+<th style="text-align: left;">Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">F1</td>
+<td style="text-align: left;">8-15 selfed</td>
+<td style="text-align: left;">Ne = 1, a logistical call. With 5% residual heterozygosity, 12 plants put expected lost loci below 1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">F2</td>
+<td style="text-align: left;"><strong>120</strong> to retain diversity</td>
+<td style="text-align: left;">Above this, +280 plants buy +0.005 of D</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><strong>250-400</strong> for multilocus selection or panel frequencies</td>
+<td style="text-align: left;">These are the objectives that keep gaining with N</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">F3</td>
+<td style="text-align: left;">same N (SSD, one seed per plant)</td>
+<td style="text-align: left;">Does not create diversity, only avoids losing it</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">F4</td>
+<td style="text-align: left;">lines x 3-8 plants</td>
+<td style="text-align: left;">Seed multiplication. Plants of the same line are not independent replicates: they share 87.5% of the genome</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Caution</span>On the “equivalent N”
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><span class="math inline">\(N_{eq} = (1 - H)/(1 - D)\)</span> answers “how many F4 lines without distortion would give the diversity actually observed”. It is a <strong>communication device, not a Wright effective size</strong>: it converts a deterministic bias into a drift equivalent. Use it to compare scenarios; never substitute it into an <span class="math inline">\(N_e\)</span> formula.</p>
+</div>
+</div>
+</section>
+<section id="where-this-connects" class="level2" data-number="4.7">
+<h2 data-number="4.7" class="anchored" data-anchor-id="where-this-connects"><span class="header-section-number">4.7</span> Where this connects</h2>
+<p>The panel this chapter sizes is the raw material for everything else. Its diversity is the ceiling: no selection stage downstream can recover variation that was never sampled here. <a href="08-pipeline-stages.html" class="quarto-xref"><span>Chapter 8</span></a> puts a number on how the loss is distributed across the whole pipeline, and this stage is where the cheapest insurance is available – more plants, once, at the start.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./03-simulating-crosses.html" class="pagination-link" aria-label="Simulating lines, pools and crosses">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Simulating lines, pools and crosses</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./05-genomic-era.html" class="pagination-link" aria-label="Diversity metrics in the genomic era">
+        <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Diversity metrics in the genomic era</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
