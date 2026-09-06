@@ -87,6 +87,10 @@ The cap is what makes the bound valid. Without $c_i \le 1/n$ the relaxation
 would put all weight on the single best candidate and the bound would be
 useless.
 
+Turning the relaxation into a bound on the *constrained* problem needs one more
+step, and turning it into an actual selection needs a rounding: both are in
+@sec-advanced.
+
 ```{r}
 lambdas <- 10^seq(-1, 2.5, length.out = 12)
 relax <- ocs_relaxation(ctx, n_sel, lambdas)

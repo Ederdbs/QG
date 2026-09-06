@@ -20,8 +20,12 @@ this one generates, see [null_distribution].
 }
 \seealso{
 Other selection strategies:
+\code{\link[=ocs_round]{ocs_round()}},
 \code{\link[=sel_de]{sel_de()}},
+\code{\link[=sel_de_fast]{sel_de_fast()}},
+\code{\link[=sel_exact]{sel_exact()}},
 \code{\link[=sel_greedy]{sel_greedy()}},
+\code{\link[=sel_local_search]{sel_local_search()}},
 \code{\link[=sel_truncation]{sel_truncation()}},
 \code{\link[=sel_truncation_cap]{sel_truncation_cap()}}
 }

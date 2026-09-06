@@ -17,6 +17,7 @@ stage2_select(
   B_full = 200,
   NP = 300,
   itermax = 2000,
+  max_use = NULL,
   seed = 1,
   verbose = TRUE
 )
@@ -44,6 +45,13 @@ maximum-diversity references.}
 \item{B_null, B_full}{Replicates for the cheap and full null panels.}
 
 \item{NP, itermax}{Differential-evolution population size and generations.}
+
+\item{max_use}{Maximum times any parent line may be used across the selected
+hybrids, or `NULL` (the default) for no cap. `NULL` reproduces the
+behaviour this function had before the cap was reachable here at all; the
+diversity budget was the only restriction the production route enforced.
+See `vignette`-free discussion in the book's "Advanced selection" chapter
+for when the cap binds and the budget does not.}
 
 \item{seed}{Random seed.}
 

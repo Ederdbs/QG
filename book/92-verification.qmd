@@ -174,7 +174,7 @@ knitr::kable(data.frame(
   Chapter = c("@sec-coancestry", "@sec-subdivided", "@sec-simulating-crosses",
               "@sec-sizing", "@sec-genomic-era", "@sec-catalogue",
               "@sec-choosing", "@sec-stages", "@sec-ocs", "@sec-combinatorial",
-              "@sec-case-study", "@sec-verification"),
+              "@sec-advanced", "@sec-case-study", "@sec-verification"),
   `Runs live` = c(
     "both matrices, the sum(G) demonstration, the f diagonal",
     "the whole worked example, reproduced against the published tables",
@@ -186,6 +186,7 @@ knitr::kable(data.frame(
     "all five traps, the S1 panel, the DH identities, the S4 collapse",
     "the OCS relaxation, the convergence check, the greedy frontier",
     "all baselines, the encodings, the DE, the warm-start comparison",
+    "the Gram identity and PSD check, the submatrix-sum identity, the three local-search modes, the invalid-versus-Lagrangian bound comparison, ocs_round",
     "the full two-stage pipeline",
     "the oracle comparisons"),
   check.names = FALSE))
@@ -205,7 +206,9 @@ knitr::kable(data.frame(
            "`figs/mabc_sizing.png`", "`figs/mabc_policies.png`",
            "`figs/cost_scaling.png`", "`figs/de_convergence.png`",
            "`figs/metric_redundancy.png`", "`figs/pipeline_loss.png`",
-           "`figs/metric_pitfalls.png`"),
+           "`figs/metric_pitfalls.png`", "`data/search_benchmark.csv`",
+           "`data/search_scaling.csv`", "`data/search_exact_gap.csv`",
+           "`figs/search_anytime.png`", "`figs/search_scaling.png`"),
   Why = c("the full identity sweep, 12 configurations",
           "production scale: L = 300, N = 22500, m = 10000",
           "621 selections x 17 metrics",
@@ -224,7 +227,12 @@ knitr::kable(data.frame(
           "DE convergence under four restrictions",
           "the redundancy panels",
           "the loss ledger",
-          "Traps 4 and 2 on the full simulation"),
+          "Traps 4 and 2 on the full simulation",
+          "8 methods x 2 scales x 3 seeds, production scale N = 10000",
+          "per-evaluation cost from N = 400 to N = 22500",
+          "the outer-approximation oracle, proven small and time-limited large (target `search_exact`)",
+          "anytime curves at equal wall-clock",
+          "the encoding scaling wall"),
   check.names = FALSE))
 ```
 
@@ -238,6 +246,8 @@ gitignored, so a clean clone would fail to render. Everything cached lives in
 #| eval: false
 Rscript book/scripts/regenerate.R          # everything; hours
 Rscript book/scripts/regenerate.R f2size   # one target
+Rscript book/scripts/regenerate.R search   # the advanced-selection benchmark
+Rscript book/scripts/regenerate.R search_exact  # just the exact oracle
 ```
 
 The script is the single place where the expensive computations live. It is

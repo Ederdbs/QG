@@ -54,6 +54,12 @@ build_ctx_from_stage1 <- function(X, f, hybrids, fL = NULL, weights = NULL) {
 #'   maximum-diversity references.
 #' @param B_null,B_full Replicates for the cheap and full null panels.
 #' @param NP,itermax Differential-evolution population size and generations.
+#' @param max_use Maximum times any parent line may be used across the selected
+#'   hybrids, or `NULL` (the default) for no cap. `NULL` reproduces the
+#'   behaviour this function had before the cap was reachable here at all; the
+#'   diversity budget was the only restriction the production route enforced.
+#'   See `vignette`-free discussion in the book's "Advanced selection" chapter
+#'   for when the cap binds and the budget does not.
 #' @param seed Random seed.
 #' @param verbose Print progress.
 #' @return A list with `selection` (0/1 columns per scenario), `metrics` (one
@@ -66,7 +72,7 @@ stage2_select <- function(X, f, hybrids, n_sel,
                           alphas = NULL, weights = NULL, fL = NULL,
                           include_references = TRUE,
                           B_null = 2000, B_full = 200, NP = 300, itermax = 2000,
-                          seed = 1, verbose = TRUE) {
+                          max_use = NULL, seed = 1, verbose = TRUE) {
   set.seed(seed)
   ctx <- build_ctx_from_stage1(X, f, hybrids, fL, weights)
   say <- function(...) if (verbose) cat(...)
@@ -98,13 +104,15 @@ stage2_select <- function(X, f, hybrids, n_sel,
   # 3. Warm start. Without this the DE ends up BELOW a plain greedy.
   say("[3/4] warm start (greedy) and DE per scenario...\n")
   ws <- c(0, 1e-4, 2e-4, 3e-4, 5e-4, 1e-3, 3e-3)
-  seeds <- c(lapply(ws, function(w) sel_greedy(ctx, n_sel, w = w)),
-             list(sel_truncation_cap(ctx, n_sel)))
+  seeds <- c(lapply(ws, function(w) sel_greedy(ctx, n_sel, w = w, max_use = max_use)),
+             list(sel_truncation_cap(ctx, n_sel,
+                                     cap = if (is.null(max_use))
+                                       ceiling(2 * n_sel / ctx$n_lines) + 1 else max_use)))
 
   scenarios <- list()
   for (a in alphas) {
     idx <- sel_de(ctx, n_sel, alpha_max = a, gd_ref = gd_ref,
-                  NP = NP, itermax = itermax, seeds = seeds)
+                  NP = NP, itermax = itermax, seeds = seeds, max_use = max_use)
     name <- sprintf("DE_alpha_%.2f", 100 * a)
     scenarios[[name]] <- idx
     say(sprintf("      %-16s index %.3f | alpha achieved %.3f%% | Ns %.4f | Ne_par %.1f\n",

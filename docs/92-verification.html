@@ -460,6 +460,12 @@ window.Quarto = {
  <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Combinatorial selection</span></span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10b-advanced-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Advanced selection: structure, bounds and scale</span></span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -474,13 +480,13 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./11-plant-literature.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">What the plant literature establishes</span></span></a>
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">What the plant literature establishes</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./12-case-study.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">End to end, and the operational checklist</span></span></a>
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">End to end, and the operational checklist</span></span></a>
   </div>
 </li>
       </ul>
@@ -581,12 +587,12 @@ window.Quarto = {
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>ref_theta</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (idx, ctx) </span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; mean(ctx[["f"]][idx, idx])</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x86f470a88&gt;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x7c7bd5ce8&gt;</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>theta_group</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (idx, ctx) </span></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; mean(ctx$f[idx, idx])</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x86f4afe70&gt;</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x7c74211c0&gt;</span></span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>fast_theta</span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (idx, ctx) </span></span>
@@ -598,7 +604,7 @@ window.Quarto = {
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     as.numeric(crossprod(cu, ctx$fL[u, u, drop = FALSE] %*% cu))/(s * </span></span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         s)</span></span>
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x86f4e18f8&gt;</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x7c7454c48&gt;</span></span>
 <span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Three implementations of one quantity: a literal mean over the submatrix, the packaged version, and the line-route collapse that never forms the submatrix at all. They must agree.</p>
@@ -624,48 +630,57 @@ window.Quarto = {
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">ne_parents   =</span> <span class="fu">c</span>(<span class="fu">ref_ne_parents</span>(sel, ctxp), <span class="fu">ne_parents</span>(sel, ctxp)),</span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">alleles_lost =</span> <span class="fu">c</span>(<span class="fu">ref_alleles_lost</span>(sel, ctxp), <span class="fu">alleles_lost</span>(sel, ctxp)),</span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">ENE          =</span> <span class="fu">c</span>(<span class="fu">ref_ene</span>(sel, ctxp), <span class="fu">ene</span>(sel, ctxp)),</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">ANE          =</span> <span class="fu">c</span>(<span class="fu">ref_ane</span>(sel, ctxp), <span class="fu">ane</span>(sel, ctxp))), <span class="dv">10</span>)</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[1]]</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.3291684</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[2]]</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.6708316</span></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[3]]</span></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.7453435</span></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[4]]</span></span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 26.45503</span></span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[5]]</span></span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 43</span></span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[6]]</span></span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.2581333</span></span>
-<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[7]]</span></span>
-<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.2503233</span></span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[8]]</span></span>
-<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.3291684</span></span>
-<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[9]]</span></span>
-<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.6708316</span></span>
-<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[10]]</span></span>
-<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.7453435</span></span>
-<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[11]]</span></span>
-<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 26.45503</span></span>
-<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[12]]</span></span>
-<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 43</span></span>
-<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[13]]</span></span>
-<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.2581333</span></span>
-<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[14]]</span></span>
-<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.2503233</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">ANE          =</span> <span class="fu">c</span>(<span class="fu">ref_ane</span>(sel, ctxp), <span class="fu">ane</span>(sel, ctxp))), <span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">oracle</th>
+<th style="text-align: right;">packaged</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">he_nei</td>
+<td style="text-align: right;">0.3291684</td>
+<td style="text-align: right;">0.3291684</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">theta_freq</td>
+<td style="text-align: right;">0.6708316</td>
+<td style="text-align: right;">0.6708316</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">status_num</td>
+<td style="text-align: right;">0.7453435</td>
+<td style="text-align: right;">0.7453435</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ne_parents</td>
+<td style="text-align: right;">26.4550265</td>
+<td style="text-align: right;">26.4550265</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">alleles_lost</td>
+<td style="text-align: right;">43.0000000</td>
+<td style="text-align: right;">43.0000000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ENE</td>
+<td style="text-align: right;">0.2581333</td>
+<td style="text-align: right;">0.2581333</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ANE</td>
+<td style="text-align: right;">0.2503233</td>
+<td style="text-align: right;">0.2503233</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 </section>
 <section id="the-identity-sweep" class="level2" data-number="C.2">
@@ -909,8 +924,8 @@ window.Quarto = {
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
-<col style="width: 23%">
-<col style="width: 76%">
+<col style="width: 13%">
+<col style="width: 86%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -960,10 +975,14 @@ window.Quarto = {
 <td style="text-align: left;">all baselines, the encodings, the DE, the warm-start comparison</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;"><a href="12-case-study.html" class="quarto-xref"><span>Chapter 13</span></a></td>
-<td style="text-align: left;">the full two-stage pipeline</td>
+<td style="text-align: left;"><a href="10b-advanced-selection.html" class="quarto-xref"><span>Chapter 12</span></a></td>
+<td style="text-align: left;">the Gram identity and PSD check, the submatrix-sum identity, the three local-search modes, the invalid-versus-Lagrangian bound comparison, ocs_round</td>
 </tr>
 <tr class="even">
+<td style="text-align: left;"><a href="12-case-study.html" class="quarto-xref"><span>Chapter 14</span></a></td>
+<td style="text-align: left;">the full two-stage pipeline</td>
+</tr>
+<tr class="odd">
 <td style="text-align: left;"><a href="#sec-verification" class="quarto-xref"><span>Appendix C</span></a></td>
 <td style="text-align: left;">the oracle comparisons</td>
 </tr>
@@ -978,8 +997,8 @@ window.Quarto = {
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
-<col style="width: 31%">
-<col style="width: 68%">
+<col style="width: 25%">
+<col style="width: 74%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1064,6 +1083,26 @@ window.Quarto = {
 <td style="text-align: left;"><code>figs/metric_pitfalls.png</code></td>
 <td style="text-align: left;">Traps 4 and 2 on the full simulation</td>
 </tr>
+<tr class="even">
+<td style="text-align: left;"><code>data/search_benchmark.csv</code></td>
+<td style="text-align: left;">8 methods x 2 scales x 3 seeds, production scale N = 10000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>data/search_scaling.csv</code></td>
+<td style="text-align: left;">per-evaluation cost from N = 400 to N = 22500</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>data/search_exact_gap.csv</code></td>
+<td style="text-align: left;">the outer-approximation oracle, proven small and time-limited large (target <code>search_exact</code>)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>figs/search_anytime.png</code></td>
+<td style="text-align: left;">anytime curves at equal wall-clock</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>figs/search_scaling.png</code></td>
+<td style="text-align: left;">the encoding scaling wall</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -1075,7 +1114,9 @@ window.Quarto = {
 <h2 data-number="C.5" class="anchored" data-anchor-id="regenerating-the-cached-results"><span class="header-section-number">C.5</span> Regenerating the cached results</h2>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>Rscript book<span class="sc">/</span>scripts<span class="sc">/</span>regenerate.R          <span class="co"># everything; hours</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>Rscript book<span class="sc">/</span>scripts<span class="sc">/</span>regenerate.R f2size   <span class="co"># one target</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>Rscript book<span class="sc">/</span>scripts<span class="sc">/</span>regenerate.R f2size   <span class="co"># one target</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>Rscript book<span class="sc">/</span>scripts<span class="sc">/</span>regenerate.R search   <span class="co"># the advanced-selection benchmark</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>Rscript book<span class="sc">/</span>scripts<span class="sc">/</span>regenerate.R search_exact  <span class="co"># just the exact oracle</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The script is the single place where the expensive computations live. It is never invoked by <code>quarto render</code>.</p>
 </section>

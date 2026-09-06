@@ -12,7 +12,8 @@ sel_de(
   NP = 300,
   itermax = 2000,
   seeds = NULL,
-  trace = FALSE
+  trace = FALSE,
+  max_use = NULL
 )
 }
 \arguments{
@@ -34,6 +35,12 @@ random vector is how the book demonstrates what a cold start costs; do not
 do it in production.}
 
 \item{trace}{Passed to `DEoptim` for progress reporting.}
+
+\item{max_use}{Maximum times any line may be used, or `NULL` for no cap.
+The default is `NULL`, which reproduces the behaviour this function had
+before the cap existed. Set it to make the per-line usage restriction --
+a partition matroid -- active on the production route; the violation
+enters proportionally, as the diversity budget does.}
 }
 \value{
 An integer vector of selected hybrid indices.
@@ -49,7 +56,11 @@ integer dimensions.
 }
 \seealso{
 Other selection strategies:
+\code{\link[=ocs_round]{ocs_round()}},
+\code{\link[=sel_de_fast]{sel_de_fast()}},
+\code{\link[=sel_exact]{sel_exact()}},
 \code{\link[=sel_greedy]{sel_greedy()}},
+\code{\link[=sel_local_search]{sel_local_search()}},
 \code{\link[=sel_random]{sel_random()}},
 \code{\link[=sel_truncation]{sel_truncation()}},
 \code{\link[=sel_truncation_cap]{sel_truncation_cap()}}

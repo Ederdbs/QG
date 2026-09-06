@@ -29,8 +29,12 @@ book_fig  <- function(...) file.path("figs", ...)
 
 # Rounded table helper, used wherever a metric panel is printed.
 fmt <- function(x, digits = 4) {
-  if (is.matrix(x) || is.data.frame(x)) {
-    num <- vapply(as.data.frame(x), is.numeric, logical(1))
+  # A matrix must become a data frame first: `x[num] <- lapply(...)` on a
+  # matrix recycles the logical over the flattened array and assigns a list
+  # back, silently turning the matrix into a list.
+  if (is.matrix(x)) x <- as.data.frame(x)
+  if (is.data.frame(x)) {
+    num <- vapply(x, is.numeric, logical(1))
     x[num] <- lapply(x[num], round, digits)
     x
   } else round(x, digits)

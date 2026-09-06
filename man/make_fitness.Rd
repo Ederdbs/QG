@@ -4,7 +4,7 @@
 \alias{make_fitness}
 \title{Build the constrained fitness function for differential evolution}
 \usage{
-make_fitness(ctx, n_sel, alpha_max, gd_ref, penalty = 1000)
+make_fitness(ctx, n_sel, alpha_max, gd_ref, penalty = 1000, max_use = NULL)
 }
 \arguments{
 \item{ctx}{Evaluation context, see [build_ctx].}
@@ -16,6 +16,12 @@ make_fitness(ctx, n_sel, alpha_max, gd_ref, penalty = 1000)
 \item{gd_ref}{Reference gene diversity from [null_distribution].}
 
 \item{penalty}{Penalty multiplier on the constraint violation.}
+
+\item{max_use}{Maximum times any line may be used, or `NULL` for no cap.
+The default is `NULL`, which reproduces the behaviour this function had
+before the cap existed. Set it to make the per-line usage restriction --
+a partition matroid -- active on the production route; the violation
+enters proportionally, as the diversity budget does.}
 }
 \value{
 A function of the DE parameter vector returning a value to minimise.

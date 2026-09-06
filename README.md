@@ -224,6 +224,40 @@ construction (inbred lines); `GD_WI_hyb ≈ 0.18` is the number with signal.
 `z_Ne_parents = −7.6` while `z_F_drift = +11.4`; at truncation, −15.1 vs
 +54.9. `Ne_parents` saturates, drift does not. Report both.
 
+**12. The convergence bound used before this was not a bound.** The
+relaxation at a given `lambda` maximises `c'u - lambda·c'fc`, a *penalised*
+objective — so "the best relaxation point whose own `alpha` falls inside the
+budget" is not an upper bound on the best plan inside the budget, and at tight
+budgets a discrete plan beats it. Measured at book scale, that construction was
+**invalid at 3 of 5 budgets** tested. The Lagrangian combination
+`min_lambda [V(lambda) + lambda·theta_max]` is valid at all of them and tight
+to within 1–3%. `ocs_bound()` computes it; every `lambda` gives a valid bound,
+so a coarse grid now costs tightness rather than correctness.
+
+**13. The saving is in not decoding, not in the encoding.** From
+`book/data/search_scaling.csv`, at N = 3600: the hybrid fitness costs **40 µs**,
+the line-encoded fitness **83 µs** — *slower*, because `decode_lines()` sorts all
+N candidates and is 77 µs of that — and `theta_swap()` costs **3.3 µs**. At
+N = 10000 the spread is 132 / 169 / 159 / **4.2 µs**: the swap is the only route
+that stays flat. So the line encoding buys a
+smaller search space and a smaller matrix, not a cheaper objective; the
+order-of-magnitude saving belongs to the incremental swap, which only a method
+moving in the space of *selections* can use. `theta_swap()` had been in the
+package since the line route was written, with no consumer.
+`sel_local_search()` (hill-climbing / annealing / parallel tempering) is that
+consumer, and it beats the warm-started DE at equal wall-clock. This matches
+De Beukelaer et al. (2018) on core collections and Yadav et al. (2025) on parent
+selection, where DE ranked below a plain GA at 2–3× the runtime. Numbers
+regenerate from `Rscript book/scripts/regenerate.R search`.
+
+**14. Exact is an oracle, not a route.** `sel_exact()` solves the
+quadratically-constrained problem by outer approximation (valid because `f` is
+a Gram matrix, hence PSD). It **proves** optimality at N ≈ 36 and shows the
+local search already there or within a fraction of a percent. At book scale it
+does not converge, and returns a certified interval instead — which is the
+finding, and matches Ahadi et al. (2024) reporting the same for integer
+programming on mate selection.
+
 ## Caveats
 
 - `Ns = 1/(2θ)` is a static descriptor of the group, not a drift projection.

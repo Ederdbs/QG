@@ -4,7 +4,7 @@
 \alias{sel_greedy}
 \title{Greedy selection with incremental coancestry updates}
 \usage{
-sel_greedy(ctx, n_sel, w = 0)
+sel_greedy(ctx, n_sel, w = 0, max_use = NULL)
 }
 \arguments{
 \item{ctx}{Evaluation context, see [build_ctx].}
@@ -12,9 +12,15 @@ sel_greedy(ctx, n_sel, w = 0)
 \item{n_sel}{Number of hybrids to select.}
 
 \item{w}{Weight on the index relative to coancestry.}
+
+\item{max_use}{Maximum times any line may be used, or `NULL` for no cap.
+The cap is a partition matroid, so it is enforced by making the hybrids of
+an exhausted line unavailable -- a hard feasibility test on the move,
+never a penalty.}
 }
 \value{
-An integer vector of selected row indices.
+An integer vector of selected row indices. Shorter than `n_sel` only
+  when the cap makes `n_sel` unreachable.
 }
 \description{
 Adding hybrid `j` changes the submatrix total by `2 s_j + f_jj`, where `s_j`
@@ -31,7 +37,11 @@ differential evolution does not beat greedy at any affordable budget.
 }
 \seealso{
 Other selection strategies:
+\code{\link[=ocs_round]{ocs_round()}},
 \code{\link[=sel_de]{sel_de()}},
+\code{\link[=sel_de_fast]{sel_de_fast()}},
+\code{\link[=sel_exact]{sel_exact()}},
+\code{\link[=sel_local_search]{sel_local_search()}},
 \code{\link[=sel_random]{sel_random()}},
 \code{\link[=sel_truncation]{sel_truncation()}},
 \code{\link[=sel_truncation_cap]{sel_truncation_cap()}}

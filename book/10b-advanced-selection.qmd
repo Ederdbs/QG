@@ -1,0 +1,517 @@
+# Advanced selection: structure, bounds and scale {#sec-advanced}
+
+```{r}
+#| include: false
+source("_common.R")
+ctx   <- fast_ctx(simulate_data(book_cfg))
+n_sel <- 60
+null  <- null_distribution(ctx, n_sel, B = 400, B_full = 60)
+gd    <- null$gd_ref
+am    <- 0.01
+bench <- read.csv(book_data("search_benchmark.csv"))
+scal  <- read.csv(book_data("search_scaling.csv"))
+exg   <- read.csv(book_data("search_exact_gap.csv"))
+```
+
+@sec-combinatorial stops at a warm-started differential evolution. That is a
+reasonable place to stop if the problem is a black box. It is not one. This
+chapter names the structure, and then spends it: on cheaper moves, on genuine
+approximation guarantees, on a bound that is actually a bound, and on an oracle
+that says how far from optimal the heuristics really are.
+
+The target throughout is the scale the method has to survive: **200 hybrids
+chosen from 10,000**, a full factorial of 100 by 100 lines.
+
+## Three facts about this problem
+
+Everything below follows from three properties of `f`, each of which takes
+three lines to check and none of which has been stated in this book so far.
+
+### `f` is a Gram matrix
+
+Molecular coancestry is
+$f_{ij} = \frac{1}{m}\sum_k [x_{ik}x_{jk} + (1-x_{ik})(1-x_{jk})]$, which is an
+inner product of the stacked vectors $[\mathbf{x}_i;\, \mathbf{1}-\mathbf{x}_i]$.
+So `f` is not merely symmetric, it is a **Gram matrix**, exactly:
+
+```{r}
+V <- cbind(ctx$X, 1 - ctx$X)
+c(max_abs_difference = max(abs(ctx$f - tcrossprod(V) / ctx$m)),
+  min_eigenvalue     = min(eigen(ctx$f, symmetric = TRUE, only.values = TRUE)$values))
+```
+
+Two consequences carry the rest of the chapter. First, $\mathbf{c}'\mathbf{f}\mathbf{c}$
+is a **convex** quadratic, so the diversity budget is a convex constraint --
+which is what makes the exact method of @sec-oa possible at all. Second,
+$d_{ij} = f_{ii} + f_{jj} - 2f_{ij}$ is a squared Euclidean distance, hence a
+distance of **negative type**, which is the precise hypothesis the strongest
+approximation results require.
+
+### Maximising diversity is minimising the submatrix sum
+
+$\theta_S = \frac{1}{n^2}\sum_{i,j \in S} f_{ij}$, and at fixed $n$ the
+normaliser is a constant:
+
+```{r}
+s <- sel_greedy(ctx, n_sel, w = 1)
+c(theta_times_n2 = theta_group(s, ctx) * n_sel^2,
+  submatrix_sum  = sum(ctx$f[s, s]),
+  difference     = theta_group(s, ctx) * n_sel^2 - sum(ctx$f[s, s]))
+```
+
+So the objective is $\lambda \sum_{i \in S} u_i - \sum_{i,j \in S} f_{ij}$: a
+**modular** term plus a **submodular** one, since the marginal cost of adding a
+hybrid grows with the set. Writing the same thing through $d_{ij}$,
+$\sum_{i<j} d_{ij} = n\,\mathrm{tr}(f_S) - n^2\theta_S$, identifies it as the
+**max-sum diversification** problem of @borodin2017 -- which nobody in the
+plant literature seems to have noticed it is.
+
+### The per-line cap is a partition matroid
+
+"No line may parent more than `max_use` of the selected hybrids" is one
+partition matroid per heterotic pool. Together with the cardinality constraint
+that is an intersection of matroids -- not an arbitrary combinatorial
+restriction, but the single best-understood constraint class in discrete
+optimisation.
+
+::: {.callout-note}
+## Why naming the structure is worth a section
+
+Three named properties buy three concrete things, and it is worth being blunt
+about which is which.
+
+| Property | What it buys | Worth in practice |
+|---|---|---|
+| `f` positive semi-definite | a convex constraint, hence valid gradient cuts and a valid Lagrangian bound | **large** -- @sec-bound is a correction, not an ornament |
+| submodular plus modular objective | $1 - 1/e$ under cardinality [@nemhauser1978], $1/(p+1)$ under $p$ matroids [@fisher1978]; a PTAS for negative-type distances under a matroid [@cevallos2016] | **small** -- worst-case bounds, and the measured gap is around 1% |
+| line collapse $\theta = \mathbf{w}'\mathbf{f}^L\mathbf{w}$ | memory $O(N^2) \to O(L^2)$, search dimension $N \to L$, and an $O(L)$ swap | **large** -- 0.745 GiB against 0.3 MiB, and the swap is what makes local search affordable |
+:::
+
+## What lazy greedy would not buy
+
+The obvious first move on a submodular objective is the lazy greedy of
+@nemhauser1978: keep stale marginal gains in a priority queue and re-evaluate
+only the top one. It is the standard accelerator, and here it is **worthless**.
+
+`sel_greedy()` already carries the running vector `s` of coancestry sums
+against the chosen set, so every candidate's marginal gain is $O(1)$ and the
+whole step is one vectorised pass. Lazy evaluation optimises precisely the cost
+that is already free. Reaching for it would add a heap, add bugs, and save
+nothing.
+
+The guarantee is worth stating even so, because it settles a question rather
+than improving a number: greedy under our constraints cannot do worse than
+$1/(p+1)$ of optimal. @sec-oa measures what it actually does.
+
+## The move that was already paid for {#sec-localsearch}
+
+@sec-collapse established $\theta_S = \mathbf{w}'\mathbf{f}^L\mathbf{w}$, and
+`theta_state()`/`theta_swap()` have been in the package ever since, maintaining
+group coancestry in $O(L)$ per swap. Nothing consumed them. @sec-combinatorial
+even ends with a callout recommending local search, citing @debeukelaer2018 --
+and then does not run one.
+
+```{r}
+theta_swap
+```
+
+Four rank-one column updates. No `N x N` matrix is touched, and the cost
+depends on neither $N$ nor $m$.
+
+That last property is the one that matters, and it is worth being precise about
+where the saving actually comes from, because the obvious answer is wrong. The
+line *encoding* does not make an evaluation cheaper. Taking two rows of
+@sec-scaling's table:
+
+| route | at $N = 3600$ | at $N = 10{,}000$ |
+|---|---|---|
+| hybrid encoding, `mean(f[idx, idx])` | 40 us | 132 us |
+| line encoding, full fitness | 83 us | 169 us |
+| of which `decode_lines()`, which sorts all $N$ candidates | 77 us | 159 us |
+| incremental swap, no decode at all | **3.3 us** | **4.2 us** |
+
+The line encoding is *slower* per evaluation, because decoding a weight vector
+into a selection has to rank every candidate. What it buys is a smaller search
+space, not a cheaper objective. The order-of-magnitude saving belongs to the
+swap -- and the swap is available only to a method that moves in the space of
+selections rather than decoding one from scratch each time.
+
+```{r}
+args(sel_local_search)
+```
+
+Three modes, one driver, differing only in the temperature schedule. Two design
+points are worth stopping on.
+
+**The cap is tested, not punished.** Whether a swap keeps every line under
+`max_use` is an $O(1)$ question given the count vector, so infeasible moves are
+never proposed. Penalising them instead spends the evaluation budget on being
+rejected -- with a tight cap that was the difference between the search
+improving on its warm start and not moving at all.
+
+**The temperature calibrates itself.** A constant would not transfer between
+datasets, so `t0 = NULL` samples the median absolute objective change over a
+short burn-in and uses that.
+
+```{r}
+set.seed(11)
+ls_res <- t(sapply(c("hill", "anneal", "tempering"), function(m) {
+  s <- sel_local_search(ctx, n_sel, am, gd, mode = m, iters = 20000, seed = 11)
+  c(index = mean_index(s, ctx), alpha_pct = 100 * alpha_loss(s, ctx, gd),
+    Ne_par = ne_parents(s, ctx), max_line = max_line_use(s, ctx))
+}))
+fmt(ls_res, 3)
+```
+
+The realised `alpha` sits against the 1% budget in every mode: the constraint
+is doing its job, and the search is spending the diversity it was allowed.
+
+### Against the differential evolution, at equal wall-clock
+
+Equal *evaluations* is the wrong comparison when one evaluation costs
+seventeen times what another does. The honest axis is seconds.
+
+```{r}
+#| echo: false
+#| fig-cap: "Best index reached against wall-clock seconds, at book scale under a 1% diversity budget. The dashed line is the Lagrangian bound of @sec-bound. Local search is at 1.52 within a tenth of a second; the differential evolution reaches only 1.45 after two seconds."
+knitr::include_graphics(book_fig("search_anytime.png"))
+```
+
+```{r}
+#| echo: false
+b <- bench[bench$scale == "book", ]
+agg <- aggregate(cbind(index, alpha, Ne_parents, max_line, secs, gap_pct) ~ method,
+                 b, mean)
+agg$alpha <- 100 * agg$alpha
+names(agg) <- c("method", "index", "loss %", "Ne parents", "max uses", "seconds",
+                "gap to bound %")
+knitr::kable(agg[order(-agg$index), ], digits = 3, row.names = FALSE,
+  caption = "Book scale, mean of 3 seeds, 1% diversity budget. The gap is against the certified Lagrangian bound.")
+```
+
+::: {.callout-tip}
+## What the literature says about picking a metaheuristic
+
+@debeukelaer2018, on core-collection subsets, found a plain stochastic
+hill-climber already competitive with a considerably more complex genetic
+algorithm, and parallel tempering winning by combining many simple local
+searches rather than by being individually cleverer.
+
+@yadav2025 compared GA, DE, PSO and SA head to head on parent selection in
+wheat and ranked them by convergence AUC at 0.879, 0.860, 0.820 and 0.769, with
+DE running two to three times slower than GA for a marginally worse result. The
+current tools agree: TrainSel [@akdemir2021], which drives MateR
+[@fernandezgonzalez2026], is a genetic algorithm hybridised with simulated
+annealing.
+
+So the differential evolution of @sec-combinatorial is not the obvious choice,
+and never was. What it had going for it was the warm start. What it lacked was
+a cheap move.
+:::
+
+### The encoding, wired up at last
+
+@sec-combinatorial reports that the line encoding beats the hybrid encoding by
+5.7x at equal budget, and the package has exported `decode_lines()` and
+`make_fitness_fast()` ever since -- with nothing driving them. `sel_de_fast()`
+closes that:
+
+```{r}
+sel_de_fast
+```
+
+The seeds sweep a line-diversity direction rather than a merit weight, but the
+principle is @sec-combinatorial's unchanged: `seeds = NULL` builds the sweep and
+never means "start cold".
+
+## The bound was not a bound {#sec-bound}
+
+@sec-relaxation introduces the continuous relaxation as an upper bound, and
+@sec-combinatorial checks the differential evolution against it by taking the
+best relaxation point whose own `alpha` falls inside the budget. That
+construction is **not valid**, and it is worth showing rather than asserting.
+
+The relaxation at a given $\lambda$ maximises $\mathbf{c}'\mathbf{u} - \lambda\,
+\mathbf{c}'\mathbf{f}\mathbf{c}$ -- a penalised objective, not the index. Its
+optimum happens to land at some diversity, but nothing makes it the best index
+achievable *at* that diversity. A discrete plan can beat it, and does:
+
+```{r}
+lam   <- 10^seq(-1, 3, length.out = 12)
+rel   <- ocs_relaxation(ctx, n_sel, lam, iters = 2000)
+a_rel <- (gd - rel[, "GD"]) / gd
+V     <- rel[, "index"] - lam * rel[, "theta"]     # the relaxation's dual value
+
+cmp <- do.call(rbind, lapply(c(0.0025, 0.005, 0.01, 0.02), function(a) {
+  ok  <- a_rel <= a
+  old <- if (any(ok)) max(rel[ok, "index"]) else NA_real_
+  new <- min(V + lam * (1 - gd * (1 - a)))         # what ocs_bound() computes
+  best <- max(vapply(
+    Filter(function(s) alpha_loss(s, ctx, gd) <= a + 1e-12,
+           c(list(sel_local_search(ctx, n_sel, a, gd, mode = "anneal",
+                                   iters = 8000, seed = 1)),
+             lapply(c(0, .5, 1, 2, 4, 8, 16), function(w) sel_greedy(ctx, n_sel, w = w)))),
+    mean_index, numeric(1), ctx = ctx))
+  data.frame(alpha_max = a, feasible_plan = best, old_bound = old,
+             lagrangian = new, old_valid = old >= best - 1e-9,
+             lagrangian_valid = new >= best - 1e-9)
+}))
+fmt(cmp, 4)
+```
+
+The correct statement is a Lagrangian one, and it takes a line. Any selection
+$S$ of size $n$ has an equal-weight contribution vector feasible for the
+relaxation, so with $V(\lambda)$ the relaxation's optimal value,
+
+$$V(\lambda) \;\ge\; \bar u_S - \lambda\,\theta_S \;\ge\; \bar u_S - \lambda\,\theta_{\max}$$
+
+for every $S$ meeting the budget, and therefore
+$\bar u_S \le V(\lambda) + \lambda\,\theta_{\max}$ for **every** non-negative
+$\lambda$. The tightest such statement is the minimum over $\lambda$.
+
+```{r}
+ocs_bound
+```
+
+Two practical consequences. Every $\lambda$ gives a valid bound, so a coarse
+grid costs tightness and never validity -- unlike the old construction, where a
+coarse grid could silently produce a "bound" below the achievable. And the bound
+is now usable as a stopping rule: when the gap is small, further optimiser
+effort is provably wasted.
+
+::: {.callout-warning}
+## This changes a number in @sec-combinatorial
+
+The convergence check in @sec-combinatorial uses the invalid construction. Its
+qualitative conclusion survives -- the warm-started DE does sit close to the
+frontier -- but the reported gap is not a gap. Use `ocs_bound()`.
+:::
+
+## Rounding the relaxation into a plan
+
+With a bound in hand, the relaxation stops being only a diagnostic. Solve the
+optimal-contribution programme in **line** space, where `quadprog` returns
+instantly because the dimension is $L$, round the contributions to integer line
+usage, and assign concrete crosses under both pools' caps. That two-stage shape
+-- contributions first, mate allocation second -- is exactly @waldmann2025's,
+whose mate-allocation stage solves in under 0.01 seconds.
+
+```{r}
+r <- ocs_round(ctx, n_sel, am, gd, bound = min(V + lam * (1 - gd * (1 - am))))
+fmt(c(index = r$index, alpha_pct = 100 * r$alpha, lambda = r$lambda,
+      bound = r$bound, gap_pct = 100 * r$gap), 4)
+```
+
+It is not the best method here, and it is not meant to be. What it gives is a
+plan and a certificate in one call, at a cost that does not grow with $N$ in
+the part that matters -- and a sanity check on everything else.
+
+## Exact, and how far the heuristics really are {#sec-oa}
+
+Everything so far is a heuristic with a bound. The remaining question is what
+the true optimum is, and the honest answer requires solving the problem exactly
+at a scale where that is possible.
+
+The obvious route is closed. Maximising a linear index subject to a **quadratic**
+diversity constraint over binary variables is a mixed-integer quadratically
+constrained programme, and HiGHS -- like most open solvers -- does not accept a
+quadratic term together with integer variables at all.
+
+Convexity opens a different one. Because `f` is positive semi-definite,
+$\mathbf{x}'\mathbf{f}\mathbf{x}$ is convex, so its tangent at any point is a
+valid linear *under*-estimate, and
+
+$$\bar{\mathbf{x}}'\mathbf{f}\bar{\mathbf{x}} + 2(\mathbf{f}\bar{\mathbf{x}})'(\mathbf{x} - \bar{\mathbf{x}}) \;\le\; b$$
+
+is a linear relaxation of $\mathbf{x}'\mathbf{f}\mathbf{x} \le b$. Solve the
+resulting mixed-integer **linear** programme, add a cut wherever the solution
+violates the true constraint, re-solve. This is outer approximation
+[@duran1986], it needs only a MILP solver, and it terminates: each cut strictly
+removes the infeasible point that generated it.
+
+```{r}
+args(sel_exact)
+```
+
+It also returns more than a black-box call would. The MILP objective is a valid
+upper bound at every iteration and the warm start supplies a feasible
+incumbent, so a run stopped by the clock still hands back a **certified
+interval** containing the true optimum.
+
+```{r}
+#| echo: false
+e <- exg
+e$alpha_pct <- 100 * e$alpha_max
+knitr::kable(e[, c("scale", "N", "n_sel", "alpha_pct", "heuristic", "incumbent",
+                   "dual", "status", "cuts", "secs", "gap_pct")],
+  digits = 4, row.names = FALSE,
+  col.names = c("scale", "N", "n", "budget %", "local search", "incumbent",
+                "dual bound", "status", "cuts", "seconds", "gap %"),
+  caption = "The oracle, seeded with the local-search solution so that a timed-out run still reports a real interval. `status` is \"optimal\" only where the loop proved it.")
+```
+
+Read the two halves separately, because they say opposite things.
+
+At tiny scale the loop **proves** optimality, and the local search matches the
+proven optimum to machine precision at every budget -- the gap is not small,
+it is zero. That is the result worth having: on instances where the truth is
+knowable, the heuristic is not leaving anything on the table at all.
+
+At book scale the loop does not converge, and would not at production scale
+either. Gradient cuts on a dense quadratic are weak, each MILP re-solve is
+expensive, and the number of cuts needed grows fast. @ahadi2024, solving an
+integer programme for mate selection with a commercial solver, reach the same
+conclusion and say plainly that large datasets will need decomposition and
+"sub-optimal (but good quality) feasible solutions".
+
+::: {.callout-note}
+## What the oracle is for
+
+Not production. `sel_exact()` forms the `N x N` matrix and scales like the
+mixed-integer programme it is. It belongs with the `ref_*` functions of
+@sec-verification: deliberately slow, deliberately literal, and the only way to
+know whether the fast route is right. Run it once, small, when the data
+changes; do not put it in a pipeline.
+:::
+
+## Scaling to 200 of 10,000 {#sec-scaling}
+
+```{r}
+#| echo: false
+knitr::kable(scal, digits = c(0, 0, 0, 3, 1, 1, 1, 1), row.names = FALSE,
+  col.names = c("N", "L", "n_sel", "f size (GiB)", "hybrid (us)", "line (us)",
+                "of which decode (us)", "swap (us)"),
+  caption = "Cost of one objective evaluation, by route. The line encoding's cost is dominated by the decode, which sorts all N candidates; the swap never decodes.")
+```
+
+```{r}
+#| echo: false
+#| fig-cap: "Cost per objective evaluation against the number of candidate hybrids. The hybrid encoding grows with N; the line route and the incremental swap do not."
+knitr::include_graphics(book_fig("search_scaling.png"))
+```
+
+Three things scale badly, and they are worth separating because only two of
+them are fixed by the encoding.
+
+**Memory.** `f` is $8N^2$ bytes: 0.745 GiB at $N = 10{,}000$ and 3.8 GiB at
+$N = 22{,}500$, which is why @sec-choosing's benchmark refuses to form it there.
+$\mathbf{f}^L$ is $200 \times 200$, or 0.3 MiB. **Fixed by the line route.**
+
+**Search dimension.** 10,000 against 200. **Fixed by the line encoding.**
+
+**Cost per evaluation.** `mean(f[idx, idx])` is $O(n^2)$ in the *selection*, so
+it degrades exactly as the problem gets interesting -- but `decode_lines()` is
+$O(N \log N)$, so the line encoding does not fix this and at these sizes is
+slightly worse. **Fixed only by not decoding**, which is what the swap
+neighbourhood does.
+
+```{r}
+#| echo: false
+p <- bench[bench$scale == "production", ]
+pa <- aggregate(cbind(index, alpha, Ne_parents, max_line, secs) ~ method, p, mean)
+pa$alpha <- 100 * pa$alpha
+names(pa) <- c("method", "index", "loss %", "Ne parents", "max uses", "seconds")
+knitr::kable(pa[order(-pa$index), ], digits = 3, row.names = FALSE,
+  caption = "Production scale: N = 10,000 from 100 + 100 lines, n_sel = 200, 1% budget, mean of 3 seeds.")
+```
+
+Two things in that table are worth more than the ranking.
+
+**The cap binds, the budget does not.** Every capped method lands on essentially
+the same plan, at a diversity loss far inside the 1% allowed. With
+$n = 200$ over $L = 200$ lines the mean usage is already 2, so a cap of 4 leaves
+very little to choose; the restriction that is actually deciding the plan is the
+one nobody wrote a budget for. Check `max_line` and realised `alpha` together
+before concluding that a diversity constraint is doing any work.
+
+**The certificate does not scale, and the bound is reported as uncertified.**
+`ocs_bound()` doubles its iteration count until the value stops moving. At book
+scale it converges; at $N = 10{,}000$ it does not, within any budget worth
+spending. The reason is in the step size, $1/(2\lambda \max_i \sum_j f_{ij})$,
+whose denominator grows with $N$ -- so the same iteration count that converges
+on 625 candidates is nowhere near enough on 10,000. An under-converged
+relaxation reports $V(\lambda)$ *too small*, which makes the "bound" too small,
+and it stops bounding anything.
+
+```{r}
+#| echo: false
+cert <- unique(bench[, c("scale", "N", "bound", "bound_certified")])
+knitr::kable(cert, digits = 4, row.names = FALSE,
+  col.names = c("scale", "N", "bound", "certified"),
+  caption = "Where the certificate holds.")
+```
+
+That is a finding, not a defect, and it is why the function warns instead of
+returning a number. At production scale you have heuristics that agree with each
+other and no proof that any of them is close -- which is the honest position, and
+a better one than a gap column computed from a quantity that is not a bound.
+
+## Multi-objective, and why not NSGA-II
+
+`stage2_select()` traces the frontier by sweeping `alpha_max` and running a
+full optimisation at each point. That is already the epsilon-constraint method,
+and it is the right one: each point is a plan a committee can approve, expressed
+in a budget rather than in an exchange rate (@sec-ocs).
+
+The available saving is not a Pareto algorithm. It is that consecutive budgets
+have nearly identical solutions, so the plan found at $\alpha_k$ is the obvious
+warm start for $\alpha_{k+1}$ -- which the sweep currently throws away. That is
+a `start =` argument, not a new optimiser.
+
+NSGA-II would return the whole front in one run, at worse quality per point and
+with a crowding heuristic that has nothing to say about a constraint the
+breeder has already chosen. For a one-dimensional trade-off already
+parameterised by an interpretable budget, it is machinery in search of a
+problem.
+
+## What not to reach for
+
+**Reinforcement learning.** BreedGym and its successors [@younis2024] cast the
+*breeding programme* as a Markov decision process: how to allocate resources
+across cycles, when to recycle, how many crosses to make each generation. Those
+are sequential decisions with delayed reward. Choosing 200 hybrids from a fixed
+candidate pool, once, with a closed-form objective, is not. The tool is aimed at
+a different question.
+
+**Bayesian optimisation.** For expensive black-box objectives with a handful of
+continuous inputs. Ours costs 5 microseconds and has 200 integer dimensions.
+
+**Sampling from a determinantal point process.** DPPs are the natural
+probabilistic model of a diverse subset, and $\log\det(\mathbf{I} + \beta
+\mathbf{f}_S)$ is genuinely submodular and monotone, so its greedy carries a
+$1 - 1/e$ guarantee [@chen2018]. But *sampling* from a DPP gives diversity in
+distribution when what is wanted is a single best plan, and the log-determinant
+lens is not $\theta$ -- adopting it would quietly change the quantity the
+programme is constraining. @sec-catalogue's rule applies: one diversity lens,
+chosen deliberately, reported against a null.
+
+## Which method to use
+
+```{r}
+#| echo: false
+knitr::kable(data.frame(
+  Situation = c("Any scale, first thing to run",
+                "Production scale, one budget",
+                "Production scale, several simultaneous restrictions",
+                "You need to know whether to keep optimising",
+                "You need to know the true optimum",
+                "Contributions are genuinely continuous"),
+  Use = c("`sel_greedy()` swept over w, then `sel_truncation_cap()` -- @sec-combinatorial",
+          "`sel_local_search(mode = \"tempering\")` -- cheapest move, best result per second",
+          "`sel_de_fast()` -- the line encoding, four restrictions at once",
+          "`ocs_bound()` -- a valid bound; a small gap means stop",
+          "`sel_exact()` on a subsample -- an oracle, not a pipeline",
+          "`ocs_quadprog()` -- @sec-ocs"),
+  check.names = FALSE))
+```
+
+The honest summary is that one change matters more than the rest put together,
+and it is not an algorithm. The problem was always $L$-dimensional with an
+$O(L)$ move; the hybrid encoding was a $N$-dimensional restatement of it that
+made every optimiser look harder to beat than it was. Everything else in this
+chapter -- the guarantees, the corrected bound, the oracle -- is there to tell
+you when you are done, which turns out to be much earlier than the size of the
+search space suggests.
+
+> Name the structure before choosing the algorithm. Most of the difficulty in
+> this problem was in the encoding, and none of it was in the optimiser.

@@ -22,8 +22,12 @@ parent line has been used. It usually captures most of the benefit.
 }
 \seealso{
 Other selection strategies:
+\code{\link[=ocs_round]{ocs_round()}},
 \code{\link[=sel_de]{sel_de()}},
+\code{\link[=sel_de_fast]{sel_de_fast()}},
+\code{\link[=sel_exact]{sel_exact()}},
 \code{\link[=sel_greedy]{sel_greedy()}},
+\code{\link[=sel_local_search]{sel_local_search()}},
 \code{\link[=sel_random]{sel_random()}},
 \code{\link[=sel_truncation]{sel_truncation()}}
 }

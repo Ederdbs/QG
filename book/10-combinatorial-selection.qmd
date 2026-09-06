@@ -222,19 +222,21 @@ faster -- it gives the DE something worth improving on.
 
 ### Checking convergence against the bound
 
-@sec-relaxation gives a valid upper bound. The gap between the DE and that bound
-is the convergence diagnostic:
+@sec-relaxation gives a relaxation. Turning it into a *bound* takes one more
+step, derived in @sec-bound: the relaxation at a given $\lambda$ maximises a
+penalised objective rather than the index, so the best relaxation point inside
+the budget is not an upper bound on the best plan inside the budget. The
+Lagrangian combination is.
 
 ```{r}
 relax <- ocs_relaxation(ctx, n_sel, lambdas = 10^seq(-1, 2.5, length.out = 10))
 a_relax <- (null$gd_ref - relax[, "GD"]) / null$gd_ref
-# the tightest bound at or below our diversity budget
-ok <- a_relax <= alpha_max
-bound <- if (any(ok)) max(relax[ok, "index"]) else NA_real_
+
+bound <- ocs_bound(ctx, n_sel, alpha_max, null$gd_ref)
 
 c(DE_index = mean_index(de_idx, ctx),
-  upper_bound = bound,
-  gap_pct = 100 * (bound - mean_index(de_idx, ctx)) / bound)
+  upper_bound = as.numeric(bound),
+  gap_pct = 100 * (as.numeric(bound) - mean_index(de_idx, ctx)) / as.numeric(bound))
 ```
 
 A large gap means **the optimiser has not converged**, not that the problem is
@@ -251,9 +253,10 @@ simple local searches rather than by being individually more sophisticated.
 
 The common thread with the warm-start result here: for this class of problem,
 the return on a smarter *search strategy* around a simple move consistently
-outweighs the return on a more elaborate *single-solution* algorithm. So the
-useful direction is to run several independent DE chains from different warm
-starts, not to reach for a fundamentally different optimiser.
+outweighs the return on a more elaborate *single-solution* algorithm. That
+direction is taken up in @sec-advanced, which builds the local search on the
+`O(L)` swap this package already had and measures it against the DE at equal
+wall-clock.
 :::
 
 ## The full frontier
@@ -302,7 +305,7 @@ knitr::kable(data.frame(
   Use = c("truncation -- nothing to optimise",
           "`sel_truncation_cap()` -- no matrix needed",
           "`sel_greedy()` swept over w",
-          "`sel_de()` warm-started, on the **line** encoding of @sec-collapse"),
+          "`sel_de_fast()` or `sel_local_search()` on the **line** encoding -- @sec-advanced"),
   check.names = FALSE))
 ```
 

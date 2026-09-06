@@ -4,7 +4,7 @@
 \alias{ocs_relaxation}
 \title{Continuous optimal-contribution relaxation}
 \usage{
-ocs_relaxation(ctx, n_sel, lambdas, iters = 4000)
+ocs_relaxation(ctx, n_sel, lambdas, iters = 4000, lines = NULL)
 }
 \arguments{
 \item{ctx}{Evaluation context, see [build_ctx].}
@@ -14,6 +14,11 @@ ocs_relaxation(ctx, n_sel, lambdas, iters = 4000)
 \item{lambdas}{Numeric vector of diversity weights to sweep.}
 
 \item{iters}{Projected-gradient iterations per lambda.}
+
+\item{lines}{Use the line route for the matrix-vector products, which is
+exact and costs O(N + L^2) instead of O(N^2). `NULL` auto-selects it when
+the hybrid matrix is absent, so results computed with an `N x N` `f`
+present are unchanged.}
 }
 \value{
 A matrix with one row per lambda.
