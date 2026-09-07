@@ -14,6 +14,7 @@
 #   identity     the line-collapse identity sweep
 #   search       the advanced-selection benchmark of Chapter 10b
 #   search_exact the outer-approximation oracle alone (slowest piece)
+#   cycles       the recurrent-selection trajectories of Chapter 11b
 #
 # Not regenerated here, because they are not this project's output:
 #   bibliography_animal.csv, bibliography_plant.csv  (literature screens)
@@ -36,7 +37,7 @@ dir.create(fig_dir,  showWarnings = FALSE, recursive = TRUE)
 dir.create(out_dir,  showWarnings = FALSE, recursive = TRUE)
 
 targets <- commandArgs(trailingOnly = TRUE)
-if (!length(targets)) targets <- c("f2size", "benchmark", "identity", "search")
+if (!length(targets)) targets <- c("f2size", "benchmark", "identity", "search", "cycles")
 want <- function(x) x %in% targets
 
 # --- f2size: the population-sizing grid ---------------------------------------
@@ -328,6 +329,105 @@ if (want("search")) {
   dev.off()
 
   message("search: benchmark, scaling and anytime done")
+}
+
+# --- cycles: recurrent selection, Chapter 11b ---------------------------------
+if (want("cycles")) {
+  message("cycles: recurrent-selection trajectories, a few minutes")
+  CY <- list(n_cycles = 15, seeds = 1:5, n_sel = 60, B = 200,
+             budgets = c(Inf, 0.02, 0.005))
+  lab <- function(a) if (is.finite(a)) sprintf("%.3f", a) else "unconstrained"
+
+  traj <- do.call(rbind, lapply(CY$budgets, function(am)
+    do.call(rbind, lapply(CY$seeds, function(s) {
+      r <- run_cycles(n_cycles = CY$n_cycles, alpha_max = am, n_sel = CY$n_sel,
+                      B_null = CY$B, seed = s)
+      r$budget <- lab(am); r$seed <- s; r
+    }))))
+  write.csv(traj, file.path(data_dir, "cycles_trajectory.csv"), row.names = FALSE)
+
+  # Where each budget overtakes the unconstrained run, per seed.
+  cross <- do.call(rbind, lapply(setdiff(unique(traj$budget), "unconstrained"),
+    function(b) do.call(rbind, lapply(CY$seeds, function(s) {
+      a <- traj$index[traj$budget == b & traj$seed == s]
+      u <- traj$index[traj$budget == "unconstrained" & traj$seed == s]
+      k <- which(a > u)
+      data.frame(budget = b, seed = s,
+                 crossover = if (length(k)) min(k) - 1L else NA_integer_,
+                 gain_at_5 = a[6] - u[6], gain_at_10 = a[11] - u[11],
+                 gain_at_15 = a[16] - u[16])
+    }))))
+  write.csv(cross, file.path(data_dir, "cycles_crossover.csv"), row.names = FALSE)
+
+  # The per-line usage cap, which only becomes measurable across cycles.
+  mu <- do.call(rbind, lapply(list(NULL, 6L, 3L), function(cap)
+    do.call(rbind, lapply(CY$seeds, function(s) {
+      r <- run_cycles(n_cycles = CY$n_cycles, alpha_max = 0.02, n_sel = CY$n_sel,
+                      B_null = CY$B, seed = s, max_use = cap)
+      r$max_use <- if (is.null(cap)) "none" else as.character(cap); r$seed <- s; r
+    }))))
+  write.csv(mu, file.path(data_dir, "cycles_maxuse.csv"), row.names = FALSE)
+
+  # Germplasm injection at cycle 8.
+  inj <- do.call(rbind, lapply(CY$seeds, function(s)
+    do.call(rbind, lapply(list(NULL, list(cycle = 8, n = 6)), function(iv) {
+      r <- run_cycles(n_cycles = CY$n_cycles, alpha_max = 0.02, n_sel = CY$n_sel,
+                      B_null = CY$B, seed = s, inject = iv)
+      r$regime <- if (is.null(iv)) "closed" else "injected"; r$seed <- s; r
+    }))))
+  write.csv(inj, file.path(data_dir, "cycles_injection.csv"), row.names = FALSE)
+
+  # Confirm the trend is not an artefact of the cheap selector: one budget,
+  # one seed, re-run with the differential evolution of Chapter 10.
+  de_sel <- function(ctx, n_sel, alpha_max, gd_ref, max_use)
+    suppressWarnings(sel_de(ctx, n_sel, alpha_max, gd_ref, NP = 300,
+                            itermax = 1000, max_use = max_use))
+  dechk <- do.call(rbind, lapply(c(Inf, 0.02), function(am) {
+    r <- run_cycles(n_cycles = 12, alpha_max = am, n_sel = CY$n_sel,
+                    B_null = CY$B, seed = 1, selector = de_sel)
+    r$budget <- lab(am); r$selector <- "de"; r
+  }))
+  greedy_ref <- traj[traj$seed == 1 & traj$cycle <= 12 &
+                     traj$budget %in% c("unconstrained", "0.020"), ]
+  greedy_ref$selector <- "greedy"
+  write.csv(rbind(dechk, greedy_ref[, names(dechk)]),
+            file.path(data_dir, "cycles_selector.csv"), row.names = FALSE)
+
+  # --- figures ---------------------------------------------------------------
+  cols <- c(unconstrained = "#b2182b", `0.020` = "#2166ac", `0.005` = "#1b7837")
+  ag <- aggregate(cbind(index, GD, GD_BS, F_drift) ~ budget + cycle, traj, mean)
+
+  png(file.path(fig_dir, "cycles_gain.png"), width = 1050, height = 680, res = 150)
+  plot(range(ag$cycle), range(ag$index), type = "n",
+       xlab = "cycle", ylab = "mean index of the selected hybrids (founding s.d.)")
+  for (b in names(cols)) {
+    d <- ag[ag$budget == b, ]
+    lines(d$cycle, d$index, col = cols[[b]], lwd = 2, type = "b", pch = 19, cex = 0.6)
+  }
+  legend("topleft", names(cols), col = cols, lwd = 2, bty = "n", cex = 0.8,
+         title = "diversity budget")
+  grid()
+  dev.off()
+
+  png(file.path(fig_dir, "cycles_diversity.png"), width = 1050, height = 680, res = 150)
+  op <- par(mfrow = c(1, 2), mar = c(4, 4, 2, 1))
+  plot(range(ag$cycle), range(ag$GD), type = "n", xlab = "cycle",
+       ylab = "gene diversity of the selection", main = "Within")
+  for (b in names(cols)) {
+    d <- ag[ag$budget == b, ]; lines(d$cycle, d$GD, col = cols[[b]], lwd = 2)
+  }
+  grid()
+  plot(range(ag$cycle), range(ag$F_drift), type = "n", xlab = "cycle",
+       ylab = "F_drift against the frozen p0", main = "Drift from the founders")
+  for (b in names(cols)) {
+    d <- ag[ag$budget == b, ]; lines(d$cycle, d$F_drift, col = cols[[b]], lwd = 2)
+  }
+  legend("topleft", names(cols), col = cols, lwd = 2, bty = "n", cex = 0.75)
+  grid()
+  par(op)
+  dev.off()
+
+  message("cycles: wrote 5 CSVs and 2 figures")
 }
 
 # --- search_exact: the outer-approximation oracle -----------------------------

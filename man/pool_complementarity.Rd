@@ -15,7 +15,7 @@ pool_complementarity(GL, pool, thr = 0.9)
 }
 \value{
 A named numeric vector `frac_opposite_fixed`, `frac_fixed_same`,
-  `mean_abs_delta_p`.
+  `mean_abs_delta_p`, `mean_sq_delta_p`.
 }
 \description{
 The fraction of markers at which the two pools are near-fixed for opposite
@@ -23,4 +23,10 @@ alleles. This is the quantity that actually generates heterosis under a
 dominance model, and unlike `F_ST` it does not keep rising as the pools drift
 further apart at loci that were already divergent -- which is why `F_ST` is
 the wrong thing to maximise.
+}
+\details{
+`mean_sq_delta_p` is the one of these that is exact rather than indicative:
+the divergence half of expected heterosis is `sum(d * (pA - pB)^2) / 2`, so
+`mean((p1 - p2)^2)` is the statistic that enters it, and `mean_abs_delta_p`
+and `frac_opposite_fixed` are proxies for it. See [heterosis_partition].
 }

@@ -32,3 +32,9 @@ reads those CSVs and figures from `book/data` and `book/figs` (as `mabc_*`);
 
 Generated `.html` renders have been removed: they are reproducible from the
 `.Rmd` sources, and the book replaces them.
+
+Two chapters have no `doc/` source. *Heterosis, dominance and what divergence
+buys* and *Diversity across cycles* were written directly in `book/`, against
+`R/13_dominance.R` and `R/14_cycles.R`; there is no prior document they were
+translated from. Their cached results come from
+`Rscript book/scripts/regenerate.R cycles`.

@@ -116,9 +116,11 @@ published threshold computed the other way.
 ### Trap 3: $F_{ST}$ is the wrong target to maximise
 
 $F_{ST}$ keeps rising as pools drift apart at loci that are *already* divergent,
-which buys no additional heterosis. Under a dominance model, the quantity that
-generates heterosis is the fraction of loci fixed for **opposite** alleles in
-the two pools -- and the two decouple:
+which buys no additional heterosis. @sec-heterosis makes the reason exact: under
+neutral divergence expected heterosis does not depend on $F_{ST}$ at all, because
+every unit gained in the divergence term is paid for out of the shared term. What
+does move it is divergence landing on the dominance loci. The frequency-side
+statistics decouple from $F_{ST}$ accordingly:
 
 ```{r}
 sweep_fst <- do.call(rbind, lapply(c(0.05, 0.15, 0.25, 0.40), function(fst) {
@@ -127,7 +129,8 @@ sweep_fst <- do.call(rbind, lapply(c(0.05, 0.15, 0.25, 0.40), function(fst) {
   cm <- pool_complementarity(s$GL, s$pool)
   data.frame(target_fst = fst, Fst = dd$Fst_Wright, GD_within = dd$GD_within,
              frac_opposite_fixed = cm[["frac_opposite_fixed"]],
-             mean_abs_delta_p = cm[["mean_abs_delta_p"]])
+             mean_abs_delta_p = cm[["mean_abs_delta_p"]],
+             mean_sq_delta_p = cm[["mean_sq_delta_p"]])
 }))
 fmt(sweep_fst, 4)
 ```
@@ -136,6 +139,12 @@ Buying oppositely-fixed loci costs within-pool gene diversity, and it costs a
 great deal of it. **Hold $F_{ST}$ in a band, not at a maximum,** and monitor
 complementarity directly.
 
+Of the three complementarity columns, `mean_sq_delta_p` is the one to log.
+@sec-heterosis shows it is not a proxy at all but exactly twice the divergence
+term of expected heterosis, while `frac_opposite_fixed` sits at essentially zero
+across the whole range of divergence a real dent-versus-flint pair occupies, and
+so cannot discriminate between programmes.
+
 ### The S1 monitoring panel
 
 ```{r}
@@ -143,8 +152,9 @@ fmt(s1_monitor(GL, pool, cycle = 12), 4)
 ```
 
 Log this every cycle and plot it as a time series. Defend `GD_within` per pool;
-watch `frac_opposite_fixed` for heterosis potential; treat $F_{ST}$ as a
-descriptor, not an objective.
+watch `mean_sq_delta_p` for heterosis potential; treat $F_{ST}$ as a descriptor,
+not an objective. @sec-cycles is what the time series looks like when it is
+actually run out to fifteen cycles.
 
 The empirical anchor is Kadoumi et al. (2025), who tracked diversity erosion and
 heterotic-group divergence over decades of a commercial European dent maize

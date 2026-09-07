@@ -118,7 +118,19 @@ knitr::kable(data.frame(
             "n_equivalent inverts diversity_retained",
             "a Syn cycle adds half a map length of junctions",
             "distortion shifts ancestry away from 0.5",
-            "f1_sizing halves the loss probability per plant"),
+            "f1_sizing halves the loss probability per plant",
+            "heterosis_value matches the literal oracle",
+            "additive effects cancel from the mid-parent difference",
+            "shared and divergence == GD_T and GD_BS",
+            "2 * GD_WI_hyb == GD_T + GD_BS",
+            "neutral divergence leaves expected heterosis unchanged",
+            "alignment between d and divergence is what moves heterosis",
+            "pool_freqs reproduces what its callers computed inline",
+            "the DH draw is an unbiased gamete; selfing an inbred returns it",
+            "p0 is frozen, not re-anchored, across cycles",
+            "a closed programme loses diversity and gains index",
+            "the budget is respected; alpha_max = Inf is truncation",
+            "injection raises diversity relative to a closed run"),
   `If it fails` = c(
     "**f is wrong**: centered, rescaled, or the wrong marker coding",
     "the identity underpinning every 'loss of X%' statement is broken",
@@ -152,7 +164,19 @@ knitr::kable(data.frame(
     "N_eq is not the inverse it is described as",
     "the intercrossing budget in @sec-sizing is wrong by 2x",
     "the distortion mechanism is inactive",
-    "the F1 sizing argument is wrong"),
+    "the F1 sizing argument is wrong",
+    "the fast heterosis route diverged from its definition",
+    "the derivation of @sec-heterosis is wrong, or the parents are not inbred",
+    "**the central identity of @sec-heterosis is broken**",
+    "the hybrid-level and line-level partitions have come apart",
+    "@sec-heterosis's correction is wrong and F_ST would predict heterosis",
+    "the alignment result, and the argument for @sec-cycles with it, is wrong",
+    "a pool frequency route diverged after the refactor",
+    "recycling fabricates or destroys diversity; every trajectory is wrong",
+    "**both inbreeding lenses report no loss forever** -- the trap of @sec-cycles",
+    "the cycle loop is not selecting, or not recycling what it selected",
+    "the budget is not binding across cycles",
+    "injection is not actually introducing founder material"),
   check.names = FALSE))
 ```
 
@@ -172,21 +196,23 @@ the complete accounting.
 #| echo: false
 knitr::kable(data.frame(
   Chapter = c("@sec-coancestry", "@sec-subdivided", "@sec-simulating-crosses",
-              "@sec-sizing", "@sec-genomic-era", "@sec-catalogue",
+              "@sec-sizing", "@sec-genomic-era", "@sec-heterosis", "@sec-catalogue",
               "@sec-choosing", "@sec-stages", "@sec-ocs", "@sec-combinatorial",
-              "@sec-advanced", "@sec-case-study", "@sec-verification"),
+              "@sec-advanced", "@sec-cycles", "@sec-case-study", "@sec-verification"),
   `Runs live` = c(
     "both matrices, the sum(G) demonstration, the f diagonal",
     "the whole worked example, reproduced against the published tables",
     "the simulation, the fst sweep, the contract, the sampling-bias histogram",
     "the theoretical identities, heterozygosity halving, map expansion, f1_sizing",
     "the Eq. 3 identity, the four-strategy lens panel",
+    "the heterosis oracle check, the additive cancellation, the shared/divergence identity, the fst sweep, the alignment scenarios",
     "every metric, the sampling-bias formula, the null distribution",
-    "the collapse, the swap update, cost at book scale, the fixed-theta band",
+    "the collapse, the swap update, cost at book scale, the fixed-theta band, the prediction-error sweep",
     "all five traps, the S1 panel, the DH identities, the S4 collapse",
-    "the OCS relaxation, the convergence check, the greedy frontier",
+    "the OCS relaxation, the convergence check, the greedy frontier, the marker-panel sensitivity",
     "all baselines, the encodings, the DE, the warm-start comparison",
     "the Gram identity and PSD check, the submatrix-sum identity, the three local-search modes, the invalid-versus-Lagrangian bound comparison, ocs_round",
+    "the frozen-p0 demonstration, the delta-F regression",
     "the full two-stage pipeline",
     "the oracle comparisons"),
   check.names = FALSE))
@@ -208,7 +234,11 @@ knitr::kable(data.frame(
            "`figs/metric_redundancy.png`", "`figs/pipeline_loss.png`",
            "`figs/metric_pitfalls.png`", "`data/search_benchmark.csv`",
            "`data/search_scaling.csv`", "`data/search_exact_gap.csv`",
-           "`figs/search_anytime.png`", "`figs/search_scaling.png`"),
+           "`figs/search_anytime.png`", "`figs/search_scaling.png`",
+           "`data/cycles_trajectory.csv`", "`data/cycles_crossover.csv`",
+           "`data/cycles_maxuse.csv`", "`data/cycles_injection.csv`",
+           "`data/cycles_selector.csv`", "`figs/cycles_gain.png`",
+           "`figs/cycles_diversity.png`"),
   Why = c("the full identity sweep, 12 configurations",
           "production scale: L = 300, N = 22500, m = 10000",
           "621 selections x 17 metrics",
@@ -232,7 +262,14 @@ knitr::kable(data.frame(
           "per-evaluation cost from N = 400 to N = 22500",
           "the outer-approximation oracle, proven small and time-limited large (target `search_exact`)",
           "anytime curves at equal wall-clock",
-          "the encoding scaling wall"),
+          "the encoding scaling wall",
+          "3 budgets x 16 cycles x 5 seeds (target `cycles`)",
+          "the crossover cycle, per budget per seed",
+          "3 caps x 16 cycles x 5 seeds",
+          "closed against one injection at cycle 8, 5 seeds",
+          "greedy against DE, 2 budgets x 13 cycles, seed 1",
+          "cumulative gain by budget",
+          "gene diversity and F_drift by budget"),
   check.names = FALSE))
 ```
 
@@ -248,6 +285,7 @@ Rscript book/scripts/regenerate.R          # everything; hours
 Rscript book/scripts/regenerate.R f2size   # one target
 Rscript book/scripts/regenerate.R search   # the advanced-selection benchmark
 Rscript book/scripts/regenerate.R search_exact  # just the exact oracle
+Rscript book/scripts/regenerate.R cycles   # the recurrent-selection trajectories
 ```
 
 The script is the single place where the expensive computations live. It is

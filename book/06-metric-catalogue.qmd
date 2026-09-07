@@ -246,7 +246,11 @@ worth naming because it is easy to make and produces a plausible-looking number.
 
 In hybrid maize the diversity **between** pools is the engine of heterosis and
 cannot be spent; the diversity **within** each pool is the fuel for future
-progress. Following @caballero2002, compute molecular coancestry between lines
+progress. @sec-heterosis derives the first half of that sentence -- `GD_BS`
+weighted by dominance deviations *is* the divergence half of expected heterosis --
+and qualifies it: divergence is worth having where it lands on the dominance loci,
+and worth nothing where it does not. @sec-cycles demonstrates the second half.
+Following @caballero2002, compute molecular coancestry between lines
 and weight it by each line's usage among the selected hybrids:
 
 $$\theta_A = \mathbf{w}_A' \mathbf{f}^{L} \mathbf{w}_A, \qquad
@@ -305,6 +309,14 @@ either pool into a corner*. Turning $\lambda$ into a second explicit knob
 alongside $\alpha_{\max}$ is the natural next step if pool erosion shows up in
 practice. The current implementation reports the ingredients and leaves the
 weighting to the analyst.
+
+$\lambda$ need not stay a matter of taste. @sec-heterosis shows that the value of
+between-pool divergence is not a free parameter but a $d$-weighted quantity: the
+divergence term contributes $\sum_k d_k y_k^2 / 2$ against the shared term's
+$\sum_k d_k \, 2\bar p_k (1 - \bar p_k)$. Given an estimate of the dominance
+deviations, the ratio of those two sums is what $\lambda$ is trying to express,
+and the reason a purely frequency-based partition cannot pin it down is that $d$
+does not appear in the partition at all.
 
 ## The correct baseline {#sec-baseline}
 

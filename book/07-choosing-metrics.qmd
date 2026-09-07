@@ -308,6 +308,119 @@ infeasible. At dimension 120 the recommendation is 1,200 and entirely reachable.
 The reparameterisation does not merely speed the search up -- it moves the
 problem into the regime where DE's own tuning guidance can be followed.
 
+## Finding 5: the index is not the truth, and its error is not white
+
+Findings 1 to 4 are about the diversity side of the objective. This one is about
+the other side, and it is the larger uncertainty of the two.
+
+Everywhere in this book `ctx$index` is built from *known* marker effects
+(@sec-simulating-crosses), so every result so far assumes the breeding values are
+predicted without error. Real ones are not, and the error is not white noise:
+predictions for close relatives are wrong in the same direction, because they lean
+on the same training records and share the same haplotypes. The book already has a
+matrix of exactly that structure -- the molecular coancestry $\mathbf{f}$ -- so
+the error can be simulated without inventing anything.
+
+```{r}
+n_sel <- 60
+null  <- null_distribution(ctx, n_sel, B = 400, B_full = 60)
+gd    <- null$gd_ref
+u     <- ctx$index
+Lc    <- t(chol(ctx$f + diag(1e-8, ctx$N)))
+
+# A predicted index at accuracy r. `kind` decides whether the error is
+# correlated with relatedness or independent between hybrids.
+predicted <- function(r, seed, kind = "correlated") {
+  set.seed(seed)
+  z <- rnorm(ctx$N)
+  e <- if (kind == "correlated") as.numeric(Lc %*% z) else z
+  e <- (e - mean(e)) / stats::sd(e)
+  as.numeric(scale(r * u + sqrt(1 - r^2) * e))
+}
+```
+
+Select on the prediction, then score the plan on the truth:
+
+```{r}
+run <- function(r, seed = 1, kind = "correlated") {
+  ch <- ctx; ch$index <- predicted(r, seed, kind)
+  sel <- list(truncation = sel_truncation(ch, n_sel),
+              greedy     = sel_greedy(ch, n_sel, w = 3e-4))
+  do.call(rbind, lapply(names(sel), function(nm) data.frame(
+    method = nm, r = r,
+    reported = mean(ch$index[sel[[nm]]]),
+    realised = mean(u[sel[[nm]]]),
+    alpha    = alpha_loss(sel[[nm]], ctx, gd))))
+}
+acc <- do.call(rbind, lapply(c(1, 0.9, 0.7, 0.5), run))
+fmt(acc, 4)
+```
+
+Two things move. The gap between `reported` and `realised` opens up -- at
+$r = 0.5$ truncation reports an index of
+`r fmt(acc$reported[acc$method == "truncation" & acc$r == 0.5], 2)` and delivers
+`r fmt(acc$realised[acc$method == "truncation" & acc$r == 0.5], 2)`. Selection on a
+noisy value selects partly on the noise, so the plan's own scorecard is biased
+upward. Nothing in the pipeline can detect this; it is invisible without the truth.
+
+And $\alpha$ *falls* as accuracy drops. That is not the constraint working better.
+Noisy selection is closer to random selection, and random selection is what
+$\bar H_{\text{ref}}$ is defined against -- so the plan drifts toward the baseline
+from which loss is measured.
+
+### The correlation structure matters more than the amount
+
+Hold accuracy fixed at $r = 0.6$ and change only whether the error is correlated
+with relatedness, over twenty draws:
+
+```{r}
+cmp <- do.call(rbind, lapply(c("correlated", "independent"), function(k)
+  do.call(rbind, lapply(1:20, function(s) {
+    ch <- ctx; ch$index <- predicted(0.6, s, k)
+    tr <- sel_truncation(ch, n_sel)
+    data.frame(kind = k, realised = mean(u[tr]),
+               alpha = alpha_loss(tr, ctx, gd), max_line = max_line_use(tr, ctx))
+  }))))
+fmt(aggregate(cbind(realised, alpha, max_line) ~ kind, cmp, mean), 4)
+```
+
+Same accuracy, same method, same number selected. Correlated error costs roughly
+`r fmt(with(aggregate(alpha ~ kind, cmp, mean), alpha[kind == "correlated"] / alpha[kind == "independent"]), 1)`
+times the diversity of independent error, and leans
+`r fmt(with(aggregate(max_line ~ kind, cmp, mean), max_line[kind == "correlated"] / max_line[kind == "independent"]), 1)`
+times as hard on its favourite line.
+
+The mechanism is direct. Independent error scatters the mistakes, which
+accidentally diversifies the plan. Error correlated with relatedness makes whole
+families look good together, so the plan takes families -- and a family is exactly
+what the diversity constraint exists to stop it taking.
+
+:::: {.callout-warning}
+## The worst case is not the noisiest one
+
+Truncation on a perfect index loses
+`r fmt(100 * acc$alpha[acc$method == "truncation" & acc$r == 1], 2)`% of gene
+diversity and earns every bit of the index it reports. Under correlated error at
+$r = 0.6$ it still loses
+`r fmt(100 * with(aggregate(alpha ~ kind, cmp, mean), alpha[kind == "correlated"]), 2)`%
+-- nearly the same price -- while delivering
+`r fmt(with(aggregate(realised ~ kind, cmp, mean), realised[kind == "correlated"]), 2)`
+instead of `r fmt(acc$realised[acc$method == "truncation" & acc$r == 1], 2)`.
+
+You pay the full diversity cost of aggressive selection and collect a fraction of
+the gain. That is the case to design against, and it is the ordinary case in a
+real programme.
+::::
+
+### What this does to the recommendation
+
+Nothing, for the metric set. Findings 1 to 3 are statements about $\mathbf{f}$ and
+hold whatever the index is. But it changes what the numbers in @sec-case-study
+mean, and it reorders the priorities: the choice between two diversity metrics is
+worth a fraction of a percent of index, and prediction accuracy is worth tens of
+percent. Report $\alpha$ against the plan you actually planted, validate accuracy
+before tuning the constraint, and treat a reported index as an upper bound.
+
 ## The recommendation, stated
 
 ### Inside the optimiser
