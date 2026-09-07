@@ -26,3 +26,6 @@ if (status != 0L) stop("quarto render failed (exit ", status, ")")
 cat(sprintf("done in %.1f min -> docs/\n",
             as.numeric(difftime(Sys.time(), t0, units = "mins"))))
 
+
+
+

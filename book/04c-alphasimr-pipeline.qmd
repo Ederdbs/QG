@@ -1,0 +1,168 @@
+# A realistic corn pipeline: AlphaSimR and reciprocal recurrent selection {#sec-alphasimr}
+
+```{r}
+#| include: false
+source("_common.R")
+rrs_cfg <- utils::modifyList(rrs_config,
+  list(n_pool_A = 12, n_pool_B = 12, n_dh = 3, n_sel = 6, n_testers = 2,
+       n_cycles = 4, seg_sites = 150, n_chr = 5, n_traits = 2, seed = 1))
+```
+
+@sec-simulating-crosses built the `{X, f, hybrids, fL}` contract with a
+deliberately fast simulator: Balding-Nichols allele frequencies, independent
+markers, no recombination, no dominance. That is enough to exercise the
+diversity and selection machinery, but it is not how a two-heterotic-pool corn
+programme is actually run. This chapter reproduces the real method --
+**reciprocal recurrent selection** (RRS; @comstock1949) -- with AlphaSimR's
+founder-haplotype and meiosis engine (@gaynor2021), and shows that the same
+contract comes out the other end, unchanged, so `stage2_select()` runs on it
+exactly as it does on the book's own simulated data.
+
+RRS is the standard commercial scheme for two heterotic pools: each pool is
+improved using the *other* pool as tester. Doubled-haploid lines are drawn from
+pool A, testcrossed to pool B (and vice versa), the testcross hybrids are
+phenotyped, and the lines with the best mean testcross performance -- a proxy
+for general combining ability, GCA -- are recombined to found the next cycle's
+pool. Elite lines from both pools, at the end, are crossed directly to produce
+the commercial hybrids. It is exactly the asymmetry @sec-cycles argues for:
+selection happens on the hybrid, recycling happens within pool.
+
+The engine lives in the package, `R/13_alphasimr_bridge.R`: `rrs_config`,
+`alphasimr_founder_pools()`, `alphasimr_rrs_cycle()`, `alphasimr_make_hybrids()`
+and `alphasimr_to_stage1()`, wrapped by `alphasimr_pipeline()`. AlphaSimR is a
+`Suggests` dependency, guarded exactly like `quadprog` and `highs` elsewhere in
+the package -- this chapter, and only this chapter, needs it.
+
+## Founding two pools with a real coalescent history
+
+`AlphaSimR::runMacs2(..., split = )` draws founder haplotypes from a
+population-split coalescent history: one ancestral population, then two demes
+diverging `split` generations ago. That is the realistic analogue of
+`simulate_lines()`'s Balding-Nichols draw in @sec-simulating-crosses, and it
+comes with what the book's own simulator cannot give: actual linkage and
+recombination.
+
+```{r}
+fp <- alphasimr_founder_pools(rrs_cfg)
+c(pool_A = fp$pop_A@nInd, pool_B = fp$pop_B@nInd, markers = rrs_cfg$n_chr * rrs_cfg$seg_sites)
+alphasimr_gd(fp$pop_A, fp$SP)
+alphasimr_gd(fp$pop_B, fp$SP)
+```
+
+`alphasimr_gd()` is `1 - mean(f)`, the exact definition `gene_diversity()` uses,
+computed directly from AlphaSimR's genotype pull -- so the two pools are
+already comparable to every diversity number in the rest of the book on the
+same scale.
+
+Each pool also carries an additive-and-dominance trait
+(`SP$addTraitAD(meanDD = `r rrs_cfg$mean_dd`, varDD = `r rrs_cfg$var_dd`)`).
+Dominance is what makes testcross selection meaningful at all: without it, a
+line's performance in cross would just be its own breeding value, and there
+would be nothing for RRS to exploit that plain within-pool selection could not
+already get. @sec-heterosis covers why dominance is the mechanism.
+
+## One cycle
+
+```{r}
+cy1 <- alphasimr_rrs_cycle(fp$pop_A, fp$pop_B, fp$SP, rrs_cfg)
+fmt(cy1$summary, 4)
+```
+
+`alphasimr_rrs_cycle()` draws `r rrs_cfg$n_dh` doubled-haploid lines per
+parent in each pool, testcrosses them to `r rrs_cfg$n_testers` individuals from
+the *other* pool, phenotypes the testcrosses, keeps the `r rrs_cfg$n_sel`
+lines per pool with the best mean testcross phenotype, and recombines them
+(`randCross()`) to found the next cycle's pool. `elite_A`/`elite_B` in its
+return value are exactly the lines that survive, kept for the final cross.
+
+## The trajectory across cycles
+
+```{r}
+res <- alphasimr_pipeline(rrs_cfg)
+fmt(res$cycles, 4)
+```
+
+```{r}
+#| label: fig-alphasimr-cycles
+#| echo: false
+#| fig-width: 9
+#| fig-height: 4.2
+#| fig-cap: "Reciprocal recurrent selection over four cycles, book scale. Left: mean testcross phenotype (selection response) per pool. Right: gene diversity of the elite lines retained each cycle."
+op <- par(mfrow = c(1, 2), mar = c(4.2, 4.3, 2.2, 0.8))
+cols <- c(A = "#1b6ca8", B = "#c0392b")
+cy <- res$cycles
+plot(cy$cycle, cy$mean_tc_A, type = "b", pch = 19, col = cols["A"],
+     ylim = range(cy$mean_tc_A, cy$mean_tc_B), xlab = "Cycle",
+     ylab = "Mean testcross phenotype", main = "Selection response")
+lines(cy$cycle, cy$mean_tc_B, type = "b", pch = 19, col = cols["B"])
+legend("bottomright", c("pool A tested on B", "pool B tested on A"), col = cols,
+       lwd = 2, pch = 19, bty = "n", cex = 0.8)
+plot(cy$cycle, cy$gd_A, type = "b", pch = 19, col = cols["A"],
+     ylim = c(0, max(cy$gd_A, cy$gd_B)), xlab = "Cycle",
+     ylab = "Gene diversity of the elite lines", main = "Diversity erosion")
+lines(cy$cycle, cy$gd_B, type = "b", pch = 19, col = cols["B"])
+par(op)
+```
+
+Both pools respond -- mean testcross phenotype rises -- and both pools lose
+gene diversity in their retained elite lines, cycle over cycle. Nobody pays this
+cost for its own sake: @sec-cycles makes the same point with the package's own
+faster simulator, over a longer trajectory and a grid of selection intensities.
+This chapter shows it holds with actual meiosis and dominance behind it too.
+
+## The final hybrid pool through `stage2_select()`, unchanged
+
+```{r}
+st1 <- res$stage1
+dim(st1$X)
+sel <- stage2_select(st1$X, st1$f, st1$hybrids, n_sel = 8, fL = st1$fL)
+fmt(sel$metrics[, c("scenario", "alpha", "GD", "GD_BS", "F_ST", "index")], 4)
+```
+
+Nothing here is AlphaSimR-specific: `stage2_select()` never sees where `X`,
+`f`, `hybrids` and `fL` came from, only that they satisfy the contract stage 1
+promises. `GD_BS`, the between-pool divergence that carries the heterosis
+signal (@sec-choosing), is computed from `fL` exactly as it is everywhere else
+in the book.
+
+## Assumptions, and what this adds over @sec-simulating-crosses
+
+**What is more realistic here.** Actual recombination and linkage (a genetic
+map per chromosome, not independent markers), a dominance-driven trait so
+testcross selection has something real to select on, and multi-generation
+recurrent selection rather than one static pool.
+
+**What is still simplified.** Testers are a small fixed subset of the opposite
+pool (`r rrs_cfg$n_testers` individuals), not a full single- or multi-location
+trial; there is one phenotyping environment (`setPheno()`'s error variance,
+no genotype-by-environment term); the population-split coalescent history
+(`runMacs2(split = )`) is a stylised divergence process, not calibrated to a
+named heterotic-pool pair; and doubled-haploid production is instantaneous,
+skipping the field seasons a real DH pipeline takes.
+
+**Scale.** This chapter runs live at a book scale (`r rrs_cfg$n_pool_A` +
+`r rrs_cfg$n_pool_B` founders, `r rrs_cfg$n_chr * rrs_cfg$seg_sites` markers,
+`r rrs_cfg$n_cycles` cycles) -- AlphaSimR is fast enough at this size that no
+caching is needed, unlike the MABC scans in @sec-backcross. A heavier,
+production-scale run is `inst/scripts/run_alphasimr.R`:
+
+```sh
+Rscript inst/scripts/run_alphasimr.R --test          # smoke run, ~10 s
+Rscript inst/scripts/run_alphasimr.R --out=DIR        # full run, ~2 min
+```
+
+It runs `alphasimr_pipeline()` at a larger configuration, feeds the resulting
+hybrid pool through `stage2_select()`, and writes the cycle trajectory and
+selection metrics as CSVs.
+
+## Where this connects
+
+@sec-simulating-crosses and this chapter build the same three-object contract
+from two different generative models -- the fast one and the realistic one --
+which is the point of drawing that seam where the book does: everything past
+it, `build_ctx()` through `stage2_select()`, cannot tell which one it is
+looking at. @sec-heterosis explains why the dominance term here is what makes
+testcross selection informative at all. @sec-cycles runs the same
+diversity-erosion argument at a longer horizon with the package's own faster
+simulator; this chapter is its cross-check against an engine with real
+meiosis behind it.
