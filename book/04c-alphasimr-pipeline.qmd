@@ -54,6 +54,16 @@ computed directly from AlphaSimR's genotype pull -- so the two pools are
 already comparable to every diversity number in the rest of the book on the
 same scale.
 
+`runMacs2(nInd = , nChr = , segSites = , split = )` is what actually draws the
+haplotypes: a single ancestral population runs backward-in-time coalescent
+simulation, splits into two demes `r rrs_cfg$split_gen` generations ago, and
+the requested `nInd` individuals are sampled across both demes -- the first
+`n_pool_A` become pool A, the rest pool B. There is no separate marker panel:
+`SP$addTraitAD(nQtlPerChr = seg_sites, ...)` makes every one of the
+`r rrs_cfg$seg_sites` segregating sites per chromosome a QTL, so the same
+sites that carry the trait are the ones `pullSegSiteGeno()` reads for `X`,
+`f` and `fL` throughout this chapter.
+
 Each pool also carries an additive-and-dominance trait
 (`SP$addTraitAD(meanDD = `r rrs_cfg$mean_dd`, varDD = `r rrs_cfg$var_dd`)`).
 Dominance is what makes testcross selection meaningful at all: without it, a
@@ -68,14 +78,55 @@ cy1 <- alphasimr_rrs_cycle(fp$pop_A, fp$pop_B, fp$SP, rrs_cfg)
 fmt(cy1$summary, 4)
 ```
 
-`alphasimr_rrs_cycle()` draws `r rrs_cfg$n_dh` doubled-haploid lines per
-parent in each pool, testcrosses them to `r rrs_cfg$n_testers` individuals from
-the *other* pool, phenotypes the testcrosses, keeps the `r rrs_cfg$n_sel`
-lines per pool with the best mean testcross phenotype, and recombines them
-(`randCross()`) to found the next cycle's pool. `elite_A`/`elite_B` in its
-return value are exactly the lines that survive, kept for the final cross.
+`alphasimr_rrs_cycle()` runs the same six steps for each pool, symmetrically
+(pool A tested on B, pool B tested on A):
+
+1. **Double haploids.** `makeDH()` draws `r rrs_cfg$n_dh` doubled-haploid,
+   fully homozygous lines from *each* individual in the current pool -- at
+   book scale, `r rrs_cfg$n_pool_A` parents x `r rrs_cfg$n_dh` DH each =
+   `r rrs_cfg$n_pool_A * rrs_cfg$n_dh` DH lines per pool, per cycle.
+2. **Pick reciprocal testers.** The first `r rrs_cfg$n_testers` individuals of
+   the *opposite* pool are used as testers -- a fixed slice, not a random or
+   merit-based draw. This is the RRS-defining move: a line's value is judged
+   by its cross onto the other heterotic pool, not by itself.
+3. **Testcross and phenotype.** `hybridCross()` forms the full factorial
+   between every DH line and every tester --
+   `r rrs_cfg$n_pool_A * rrs_cfg$n_dh` DH x `r rrs_cfg$n_testers` testers =
+   `r rrs_cfg$n_pool_A * rrs_cfg$n_dh * rrs_cfg$n_testers` testcross hybrids
+   per pool -- and `setPheno()` adds phenotyping error sized to hit the
+   heritability set earlier by `SP$setVarE(h2 = )`.
+4. **GCA proxy.** Testcross phenotypes are grouped by DH-line parent
+   (`tapply(pheno[, 1], mother, mean)`) and averaged across the
+   `r rrs_cfg$n_testers` testers each line was crossed to -- a general
+   combining ability (GCA) estimate, following @comstock1949. Only trait 1 is
+   used for this ranking even though this chapter's config simulates
+   `r rrs_cfg$n_traits` traits per line; the second trait rides along in
+   `X`/`hybrids` but plays no role in selection here.
+5. **Keep the elites.** The `r rrs_cfg$n_sel` DH lines per pool with the
+   highest mean testcross phenotype are kept as `elite_A`/`elite_B`.
+6. **Recombine.** `randCross()` random-mates the elites back up to
+   `r rrs_cfg$n_pool_A` individuals, founding the next cycle's pool A
+   (symmetrically for B).
+
+`elite_A`/`elite_B` are what step 6 mates -- and, in the *last* cycle, what
+the final commercial cross uses instead of being recombined again (see
+below). The cycle's `summary` mixes two different populations on purpose:
+`mean_tc_A`/`mean_tc_B` average over *all* DH lines tested that cycle (the
+population's testcross performance before selection), while `gd_A`/`gd_B`
+are gene diversity of only the `r rrs_cfg$n_sel` surviving elites (the
+population after selection). That asymmetry is exactly what the next section
+plots -- response measured pre-selection, diversity measured post-selection.
 
 ## The trajectory across cycles
+
+`alphasimr_pipeline()` just runs `alphasimr_rrs_cycle()` in a loop for
+`r rrs_cfg$n_cycles` cycles, carrying `pop_A`/`pop_B` forward from one
+cycle's output to the next's input -- there is no reseeding inside the loop,
+only the founder draw at the start is seeded, so the whole trajectory is one
+continuous random process. Only the *last* cycle's `elite_A`/`elite_B` --
+not an intermediate cycle's -- go on to found the commercial hybrid pool
+below; every earlier cycle's elites are spent entirely on `randCross()`ing
+the next cycle's pool.
 
 ```{r}
 res <- alphasimr_pipeline(rrs_cfg)
@@ -112,6 +163,20 @@ This chapter shows it holds with actual meiosis and dominance behind it too.
 
 ## The final hybrid pool through `stage2_select()`, unchanged
 
+`alphasimr_make_hybrids()` testcrosses the final cycle's elites directly
+against each other -- a full factorial diallel between the
+`r rrs_cfg$n_sel` pool-A elites and `r rrs_cfg$n_sel` pool-B elites, so
+`r rrs_cfg$n_sel * rrs_cfg$n_sel` commercial hybrids -- and phenotypes them
+the same way every testcross in this chapter was phenotyped. `alphasimr_to_stage1()`
+then does the bookkeeping that makes this look like any other stage-1 output:
+it remaps AlphaSimR's internal line ids into the `1..n_A`, `n_A+1..n_A+n_B`
+convention `hybrids$line_A`/`line_B` and `fL` use elsewhere in the book, and
+builds `fL` by stacking the elite lines from *both* pools' genotypes into one
+matrix and computing a single joint coancestry matrix over all of them --
+not two separate per-pool matrices -- which is what lets `theta_pools()` and
+the rest of the pipeline index into pool A and pool B lines with one
+consistent numbering.
+
 ```{r}
 st1 <- res$stage1
 dim(st1$X)
@@ -133,12 +198,18 @@ testcross selection has something real to select on, and multi-generation
 recurrent selection rather than one static pool.
 
 **What is still simplified.** Testers are a small fixed subset of the opposite
-pool (`r rrs_cfg$n_testers` individuals), not a full single- or multi-location
-trial; there is one phenotyping environment (`setPheno()`'s error variance,
-no genotype-by-environment term); the population-split coalescent history
+pool (`r rrs_cfg$n_testers` individuals) taken by index, not chosen at random
+or by merit, and not the single unrelated inbred tester a real programme
+would typically use -- a fixed pool slice makes the same testers reused every
+cycle, which a production programme would treat as a confound; there is one
+phenotyping environment (`setPheno()`'s error variance, no
+genotype-by-environment term); the population-split coalescent history
 (`runMacs2(split = )`) is a stylised divergence process, not calibrated to a
-named heterotic-pool pair; and doubled-haploid production is instantaneous,
-skipping the field seasons a real DH pipeline takes.
+named heterotic-pool pair; doubled-haploid production is instantaneous,
+skipping the field seasons a real DH pipeline takes; and selection acts on
+trait 1 only -- the `r rrs_cfg$n_traits` traits this chapter's config
+simulates are all carried through `X`/`hybrids`, but only the first ever
+enters the GCA ranking, so the rest are along for the ride, not selected on.
 
 **Scale.** This chapter runs live at a book scale (`r rrs_cfg$n_pool_A` +
 `r rrs_cfg$n_pool_B` founders, `r rrs_cfg$n_chr * rrs_cfg$seg_sites` markers,
