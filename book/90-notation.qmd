@@ -97,24 +97,32 @@ with $GD_T = GD_{WI} + GD_{BI} + GD_{BS}$ and $F_{ST} = GD_{BS}/GD_T$.
 ```{r}
 #| echo: false
 knitr::kable(data.frame(
-  Symbol = c("$d_k$", "$H_i$", "$\\bar p_k$", "$y_k$", "$\\lambda$", "$t$",
-             "$p_0^{(0)}$"),
+  Symbol = c("$d_k$", "$H_i$", "$\\bar p_k$", "$y_k$",
+             "$g^A_i$, $g^B_j$", "$s_{ij}$", "$\\sigma^2_{SCA}$",
+             "$\\lambda$", "$t$", "$p_0^{(0)}$"),
   Meaning = c("dominance deviation at locus $k$",
               "mid-parent heterosis of hybrid $i$; $\\sum_k d_k$ over its heterozygous loci",
               "$(p_{Ak} + p_{Bk})/2$, the merged-pool frequency",
               "$p_{Ak} - p_{Bk}$, the divergence at locus $k$",
+              "general combining ability for heterosis; weighted by the **opposite** pool's frequencies",
+              "specific combining ability; $-2\\sum_k d_k\\,\\delta u_{ik}\\,\\delta v_{jk}$",
+              "$4\\sum_k d_k^2 p_{Ak}q_{Ak}p_{Bk}q_{Bk}$; falls as $(1 - F_{ST})^2$",
               "weight on within- against between-pool diversity",
               "cycle index",
               "base frequencies, frozen at the founding cycle"),
   `Function` = c("argument to `heterosis_value()`", "`heterosis_value()`",
                  "inside `heterosis_partition()`", "`pool_complementarity()$mean_sq_delta_p` is $\\overline{y^2}$",
+                 "`heterosis_gca_sca()$gca_A`", "`heterosis_gca_sca()$sca`",
+                 "closed form; see @sec-heterosis-relocation",
                  "not implemented; see @sec-catalogue", "`run_cycles()`",
                  "`ctx$p0`, set once"),
   check.names = FALSE))
 ```
 
 Expected heterosis splits as $\sum_k d_k[\,2\bar p_k(1-\bar p_k) + y_k^2/2\,]$,
-whose two halves are $GD_T$ and $GD_{BS}$ when $d_k \equiv 1$ (@sec-heterosis).
+whose two halves are $GD_T$ and $GD_{BS}$ when $d_k \equiv 1$, and whose sum is
+$1 - \theta_{AB}$ (@sec-heterosis). Over a complete factorial the realised values
+split orthogonally as $H_{ij} = \mu + g^A_i + g^B_j + s_{ij}$.
 
 ### Inbreeding, the three lenses
 
@@ -249,6 +257,13 @@ paid for exactly out of the within-pool term. See @sec-heterosis.
 **Mid-parent heterosis.** The F1's value minus the mean of its two parents. With
 inbred parents the additive contributions cancel exactly, leaving only the
 dominance deviations at the F1's heterozygous loci.
+
+**General and specific combining ability (GCA, SCA).** The two halves of a
+hybrid's value that a two-way layout separates: what a line contributes to every
+cross it enters, and what depends on which two lines met. For heterosis both are
+exact functions of $d$ and the pool frequencies, with GCA weighted by the
+*opposite* pool's frequencies -- so combining ability is a property of a line
+against a tester pool, never of the line alone. See @sec-heterosis-gca-sca.
 
 **Reciprocal recurrent selection.** Selecting on performance *in cross* and
 recycling the winners within their own pool. Selection information crosses the

@@ -82,6 +82,80 @@ test_that("neutral divergence buys no heterosis: the two terms trade off exactly
   expect_equal(mean(hp["total", ]), 0.365, tolerance = 0.02)
 })
 
+test_that("GCA and SCA reconstruct heterosis exactly and are mean-zero", {
+  nA <- cfg$n_pool_A
+  U <- L_lines[seq_len(nA), , drop = FALSE] / 2
+  V <- L_lines[nA + seq_len(cfg$n_pool_B), , drop = FALSE] / 2
+  cs <- heterosis_gca_sca(U, V, d_eff)
+
+  H  <- heterosis_value(ctx$X, d_eff)
+  ia <- ctx$ped$a
+  ib <- ctx$ped$b - nA
+  expect_equal(H, cs$mu + cs$gca_A[ia] + cs$gca_B[ib] + cs$sca[cbind(ia, ib)],
+               tolerance = 1e-10)
+  expect_equal(cs$mu, mean(H), tolerance = 1e-10)
+  expect_equal(mean(cs$gca_A), 0, tolerance = 1e-10)
+  expect_equal(mean(cs$gca_B), 0, tolerance = 1e-10)
+  expect_equal(mean(cs$sca), 0, tolerance = 1e-10)
+})
+
+test_that("SCA is the interaction residual of the two-way additive fit", {
+  # An additive model of hybrid performance fits one effect per line. Whatever
+  # it cannot express is SCA, by construction -- so the residual of that fit
+  # must BE the sca matrix, not merely correlate with it.
+  nA <- cfg$n_pool_A
+  U <- L_lines[seq_len(nA), , drop = FALSE] / 2
+  V <- L_lines[nA + seq_len(cfg$n_pool_B), , drop = FALSE] / 2
+  cs <- heterosis_gca_sca(U, V, d_eff)
+
+  H   <- heterosis_value(ctx$X, d_eff)
+  ia  <- ctx$ped$a
+  ib  <- ctx$ped$b - nA
+  fit <- stats::lm(H ~ factor(ia) + factor(ib))
+  expect_equal(as.numeric(stats::resid(fit)), cs$sca[cbind(ia, ib)],
+               tolerance = 1e-8)
+})
+
+test_that("the closed-form variance components match", {
+  # sigma2_GCA_A = sum d^2 (1 - 2 pB)^2 pA qA, sigma2_SCA = 4 sum d^2 pA qA pB qB.
+  # These hold over lines drawn from the pool frequencies, so they are checked
+  # at a line count large enough for the sampling error to be small: the
+  # relative error of a variance estimate is sqrt(2 / n), about 5% here.
+  set.seed(21)
+  m  <- 1000
+  n  <- 800
+  pA <- stats::runif(m, 0.05, 0.95)
+  pB <- stats::runif(m, 0.05, 0.95)
+  dd <- stats::rgamma(m, 2, 4)
+  U  <- matrix(stats::rbinom(n * m, 1, rep(pA, each = n)), n)
+  V  <- matrix(stats::rbinom(n * m, 1, rep(pB, each = n)), n)
+  cs <- heterosis_gca_sca(U, V, dd)
+
+  expect_equal(stats::var(cs$gca_A), sum(dd^2 * (1 - 2 * pB)^2 * pA * (1 - pA)),
+               tolerance = 0.1)
+  expect_equal(stats::var(cs$gca_B), sum(dd^2 * (1 - 2 * pA)^2 * pB * (1 - pB)),
+               tolerance = 0.1)
+  expect_equal(stats::var(as.vector(cs$sca)),
+               4 * sum(dd^2 * pA * (1 - pA) * pB * (1 - pB)), tolerance = 0.1)
+})
+
+test_that("uniform-d heterosis is the coancestry kernel, exactly", {
+  # With d constant the count of heterozygous loci is m (1 - f_ab): the same
+  # molecular coancestry the diversity side of the package runs on, and
+  # m MRD^2. Genetic distance predicts heterosis exactly when d is flat.
+  h1 <- heterosis_value(ctx$X, rep(1, ctx$m))
+  fL <- molecular_coancestry(L_lines / 2)
+  ab <- cbind(ctx$ped$a, ctx$ped$b)
+  expect_equal(h1, ctx$m * (1 - fL[ab]), tolerance = 1e-10)
+  expect_equal(h1, ctx$m * mrd_matrix(L_lines / 2)[ab]^2, tolerance = 1e-10)
+})
+
+test_that("GD_T + GD_BS is 1 - theta_AB", {
+  gp <- gd_partition(seq_len(ctx$N), ctx)
+  tp <- theta_pools(seq_len(ctx$N), ctx)
+  expect_equal(gp[["GD_T"]] + gp[["GD_BS"]], 1 - tp[["theta_AB"]], tolerance = 1e-12)
+})
+
 test_that("what buys heterosis is divergence at the dominance loci, not F_ST", {
   # Same pools, same fst, same multiset of dominance deviations -- only their
   # placement across loci changes. F_ST is identical in all three cases.
@@ -103,4 +177,22 @@ test_that("what buys heterosis is divergence at the dominance loci, not F_ST", {
   expect_gt(tot(d), tot(anti))
   # The effect is large, not marginal.
   expect_gt(tot(aligned) / tot(anti), 1.5)
+
+  # ... but that permutation moves BOTH terms, because y^2 is itself correlated
+  # with the shared weight 2 pbar (1 - pbar). Permuting d only WITHIN groups of
+  # loci that share a value of that weight isolates the divergence channel: the
+  # shared term is then invariant by construction, exactly, and the divergence
+  # term still moves several-fold.
+  hz  <- 2 * ((pA + pB) / 2) * (1 - (pA + pB) / 2)
+  grp <- split(seq_len(cf$m), round(hz, 9))
+  strat <- function(dec) {
+    v <- numeric(cf$m)
+    for (i in grp) v[i[order(y2[i])]] <- sort(d[i], decreasing = dec)
+    v
+  }
+  hi <- heterosis_partition(pA, pB, strat(FALSE))
+  lo <- heterosis_partition(pA, pB, strat(TRUE))
+  expect_equal(hi[["shared"]], lo[["shared"]], tolerance = 1e-9)
+  expect_gt(hi[["divergence"]] / lo[["divergence"]], 2)
+  expect_gt(hi[["total"]] / lo[["total"]], 1.05)
 })

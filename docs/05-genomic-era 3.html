@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Appendix C — Verification – Genetic Diversity in Hybrid Breeding</title>
+<title>7&nbsp; Diversity metrics in the genomic era – Genetic Diversity in Hybrid Breeding</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -61,7 +61,26 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
@@ -71,8 +90,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./93-corpora.html" rel="next">
-<link href="./91-package.html" rel="prev">
+<link href="./05b-heterosis-dominance.html" rel="next">
+<link href="./04c-alphasimr-pipeline.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
@@ -318,7 +337,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./90-notation.html">Appendices</a></li><li class="breadcrumb-item"><a href="./92-verification.html"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Verification</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./05-genomic-era.html">Metrics</a></li><li class="breadcrumb-item"><a href="./05-genomic-era.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Diversity metrics in the genomic era</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -421,7 +440,7 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./05-genomic-era.html" class="sidebar-item-text sidebar-link">
+  <a href="./05-genomic-era.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Diversity metrics in the genomic era</span></span></a>
   </div>
 </li>
@@ -538,7 +557,7 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./92-verification.html" class="sidebar-item-text sidebar-link active">
+  <a href="./92-verification.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Verification</span></span></a>
   </div>
 </li>
@@ -566,17 +585,30 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#the-method-slow-oracles" id="toc-the-method-slow-oracles" class="nav-link active" data-scroll-target="#the-method-slow-oracles"><span class="header-section-number">C.1</span> The method: slow oracles</a></li>
-  <li><a href="#the-identity-sweep" id="toc-the-identity-sweep" class="nav-link" data-scroll-target="#the-identity-sweep"><span class="header-section-number">C.2</span> The identity sweep</a></li>
-  <li><a href="#the-test-suite" id="toc-the-test-suite" class="nav-link" data-scroll-target="#the-test-suite"><span class="header-section-number">C.3</span> The test suite</a></li>
-  <li><a href="#provenance-of-every-figure-and-table" id="toc-provenance-of-every-figure-and-table" class="nav-link" data-scroll-target="#provenance-of-every-figure-and-table"><span class="header-section-number">C.4</span> Provenance of every figure and table</a>
+  <li><a href="#three-lenses-not-three-synonyms" id="toc-three-lenses-not-three-synonyms" class="nav-link active" data-scroll-target="#three-lenses-not-three-synonyms"><span class="header-section-number">7.1</span> Three lenses, not three synonyms</a></li>
+  <li><a href="#the-metrics-one-at-a-time" id="toc-the-metrics-one-at-a-time" class="nav-link" data-scroll-target="#the-metrics-one-at-a-time"><span class="header-section-number">7.2</span> The metrics, one at a time</a>
   <ul class="collapse">
-  <li><a href="#computed-live-at-render" id="toc-computed-live-at-render" class="nav-link" data-scroll-target="#computed-live-at-render"><span class="header-section-number">C.4.1</span> Computed live at render</a></li>
-  <li><a href="#read-from-cache" id="toc-read-from-cache" class="nav-link" data-scroll-target="#read-from-cache"><span class="header-section-number">C.4.2</span> Read from cache</a></li>
+  <li><a href="#rate-of-inbreeding-and-effective-size" id="toc-rate-of-inbreeding-and-effective-size" class="nav-link" data-scroll-target="#rate-of-inbreeding-and-effective-size"><span class="header-section-number">7.2.1</span> Rate of inbreeding and effective size</a></li>
+  <li><a href="#f_hom-homozygosity-based" id="toc-f_hom-homozygosity-based" class="nav-link" data-scroll-target="#f_hom-homozygosity-based"><span class="header-section-number">7.2.2</span> <code>F_hom</code>, homozygosity-based</a></li>
+  <li><a href="#f_drift-drift-based" id="toc-f_drift-drift-based" class="nav-link" data-scroll-target="#f_drift-drift-based"><span class="header-section-number">7.2.3</span> <code>F_drift</code>, drift-based</a></li>
   </ul></li>
-  <li><a href="#regenerating-the-cached-results" id="toc-regenerating-the-cached-results" class="nav-link" data-scroll-target="#regenerating-the-cached-results"><span class="header-section-number">C.5</span> Regenerating the cached results</a></li>
-  <li><a href="#reproducing-the-book" id="toc-reproducing-the-book" class="nav-link" data-scroll-target="#reproducing-the-book"><span class="header-section-number">C.6</span> Reproducing the book</a></li>
-  <li><a href="#known-limitations-of-the-verification" id="toc-known-limitations-of-the-verification" class="nav-link" data-scroll-target="#known-limitations-of-the-verification"><span class="header-section-number">C.7</span> Known limitations of the verification</a></li>
+  <li><a href="#the-classical-equivalence-and-the-covariance-that-destroys-it" id="toc-the-classical-equivalence-and-the-covariance-that-destroys-it" class="nav-link" data-scroll-target="#the-classical-equivalence-and-the-covariance-that-destroys-it"><span class="header-section-number">7.3</span> The classical equivalence, and the covariance that destroys it</a>
+  <ul class="collapse">
+  <li><a href="#verifying-the-identity" id="toc-verifying-the-identity" class="nav-link" data-scroll-target="#verifying-the-identity"><span class="header-section-number">7.3.1</span> Verifying the identity</a></li>
+  <li><a href="#why-each-matrix-generates-a-sign" id="toc-why-each-matrix-generates-a-sign" class="nav-link" data-scroll-target="#why-each-matrix-generates-a-sign"><span class="header-section-number">7.3.2</span> Why each matrix generates a sign</a></li>
+  <li><a href="#the-signature-on-live-data" id="toc-the-signature-on-live-data" class="nav-link" data-scroll-target="#the-signature-on-live-data"><span class="header-section-number">7.3.3</span> The signature, on live data</a></li>
+  </ul></li>
+  <li><a href="#the-other-matrices-briefly" id="toc-the-other-matrices-briefly" class="nav-link" data-scroll-target="#the-other-matrices-briefly"><span class="header-section-number">7.4</span> The other matrices, briefly</a>
+  <ul class="collapse">
+  <li><a href="#side-by-side" id="toc-side-by-side" class="nav-link" data-scroll-target="#side-by-side"><span class="header-section-number">7.4.1</span> Side by side</a></li>
+  </ul></li>
+  <li><a href="#reference-results" id="toc-reference-results" class="nav-link" data-scroll-target="#reference-results"><span class="header-section-number">7.5</span> Reference results</a>
+  <ul class="collapse">
+  <li><a href="#the-diagnostic-nobody-runs" id="toc-the-diagnostic-nobody-runs" class="nav-link" data-scroll-target="#the-diagnostic-nobody-runs"><span class="header-section-number">7.5.1</span> The diagnostic nobody runs</a></li>
+  </ul></li>
+  <li><a href="#what-to-carry-into-plant-breeding" id="toc-what-to-carry-into-plant-breeding" class="nav-link" data-scroll-target="#what-to-carry-into-plant-breeding"><span class="header-section-number">7.6</span> What to carry into plant breeding</a></li>
+  <li><a href="#limits-of-the-animal-to-plant-transposition" id="toc-limits-of-the-animal-to-plant-transposition" class="nav-link" data-scroll-target="#limits-of-the-animal-to-plant-transposition"><span class="header-section-number">7.7</span> Limits of the animal-to-plant transposition</a></li>
+  <li><a href="#operational-checklist" id="toc-operational-checklist" class="nav-link" data-scroll-target="#operational-checklist"><span class="header-section-number">7.8</span> Operational checklist</a></li>
   </ul>
 </nav>
     </div>
@@ -584,9 +616,9 @@ window.Quarto = {
 <main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./90-notation.html">Appendices</a></li><li class="breadcrumb-item"><a href="./92-verification.html"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Verification</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./05-genomic-era.html">Metrics</a></li><li class="breadcrumb-item"><a href="./05-genomic-era.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Diversity metrics in the genomic era</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span id="sec-verification" class="quarto-section-identifier">Appendix C — Verification</span></h1>
+<h1 class="title"><span id="sec-genomic-era" class="quarto-section-identifier"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Diversity metrics in the genomic era</span></span></h1>
 </div>
 
 
@@ -603,188 +635,454 @@ window.Quarto = {
 </header>
 
 
-<p>A derivation the reader cannot re-run against a naive implementation is a claim, not a verification. This appendix says how each result in the book was checked, and how to re-run the checks.</p>
-<section id="the-method-slow-oracles" class="level2" data-number="C.1">
-<h2 data-number="C.1" class="anchored" data-anchor-id="the-method-slow-oracles"><span class="header-section-number">C.1</span> The method: slow oracles</h2>
-<p>Every fast route in the package has a <strong>deliberately slow, literal</strong> counterpart in <code>R/09_reference.R</code> that transcribes the definition with no algebraic shortcut. The fast route must match it to machine precision.</p>
+<p>In classical theory, inbreeding measured as <strong>loss of heterozygosity</strong> and inbreeding measured as <strong>drift of allele frequencies</strong> are the same thing. <span class="citation" data-cites="meuwissen2020">Meuwissen et al. (<a href="99-references.html#ref-meuwissen2020" role="doc-biblioref">2020</a>)</span> show that inside genomic optimal-contribution schemes they stop being the same thing, and can diverge badly, whenever diversity is controlled through <strong>identity by state</strong> on a marker panel. Only when control is through <strong>identity by descent</strong> is the classical equivalence restored.</p>
+<p>The practical consequence is uncomfortable:</p>
+<blockquote class="blockquote">
+<p>You hit exactly the target you wrote into the optimiser’s constraint, and you pay an unmonitored price in the metric you did not write.</p>
+</blockquote>
+<p>For a plant breeder: if you constrain <span class="math inline">\(\tfrac{1}{2}\mathbf{c}'\mathbf{G}\mathbf{c}\)</span> using a VanRaden <span class="math inline">\(\mathbf{G}\)</span>, you are constraining <strong>drift</strong>. The loss of heterozygosity in your germplasm may be running at twice the rate you believe you are controlling.</p>
+<section id="three-lenses-not-three-synonyms" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="three-lenses-not-three-synonyms"><span class="header-section-number">7.1</span> Three lenses, not three synonyms</h2>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>ref_theta</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (idx, ctx) </span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; mean(ctx[["f"]][idx, idx])</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0xa478b8858&gt;</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>theta_group</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (idx, ctx) </span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; mean(ctx$f[idx, idx])</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0xa478f7c40&gt;</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>fast_theta</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (idx, ctx) </span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; {</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     cnt &lt;- line_counts(idx, ctx)</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     u &lt;- which(cnt &gt; 0L)</span></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     cu &lt;- cnt[u]</span></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     s &lt;- sum(cu)</span></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     as.numeric(crossprod(cu, ctx$fL[u, u, drop = FALSE] %*% cu))/(s * </span></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         s)</span></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0xa479296c8&gt;</span></span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>The three lenses. G_0.5 is the matrix this book calls f – see <a href="01-coancestry.html" class="quarto-xref"><span>Chapter 1</span></a>.</caption>
+<colgroup>
+<col style="width: 11%">
+<col style="width: 45%">
+<col style="width: 16%">
+<col style="width: 26%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Lens</th>
+<th style="text-align: left;">What the metric actually sees</th>
+<th style="text-align: left;">Inbreeding metric</th>
+<th style="text-align: left;">Relationship matrix</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Drift</td>
+<td style="text-align: left;">squared allele-frequency change relative to a base</td>
+<td style="text-align: left;">F_drift</td>
+<td style="text-align: left;">G_VR2, G_VR1, G_i(p)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Homozygosity</td>
+<td style="text-align: left;">proportion of heterozygosity remaining</td>
+<td style="text-align: left;">F_hom</td>
+<td style="text-align: left;">G_0.5 (molecular coancestry)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">IBD</td>
+<td style="text-align: left;">segments inherited by descent from a defined base</td>
+<td style="text-align: left;">F_IBD</td>
+<td style="text-align: left;">A, G_LA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Hybrid</td>
+<td style="text-align: left;">haplotype homozygosity used as a proxy for IBD</td>
+<td style="text-align: left;">F_ROH</td>
+<td style="text-align: left;">G_ROH</td>
+</tr>
+</tbody>
+</table>
 </div>
-<p>Three implementations of one quantity: a literal mean over the submatrix, the packaged version, and the line-route collapse that never forms the submatrix at all. They must agree.</p>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>sim  <span class="ot">&lt;-</span> <span class="fu">simulate_pools</span>(<span class="at">n_A =</span> <span class="dv">20</span>, <span class="at">n_B =</span> <span class="dv">20</span>, <span class="at">m =</span> <span class="dv">1500</span>, <span class="at">seed =</span> <span class="dv">7</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>ctxp <span class="ot">&lt;-</span> <span class="fu">ctx_from_pools</span>(sim)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">3</span>); sel <span class="ot">&lt;-</span> <span class="fu">sample.int</span>(ctxp<span class="sc">$</span>N, <span class="dv">50</span>)</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">oracle     =</span> <span class="fu">ref_theta</span>(sel, ctxp),</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">packaged   =</span> <span class="fu">theta_group</span>(sel, ctxp),</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">line_route =</span> <span class="fu">fast_theta</span>(sel, ctxp),</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">max_dev    =</span> <span class="fu">max</span>(<span class="fu">abs</span>(<span class="fu">c</span>(<span class="fu">theta_group</span>(sel, ctxp), <span class="fu">fast_theta</span>(sel, ctxp)) <span class="sc">-</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>                       <span class="fu">ref_theta</span>(sel, ctxp))))</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       oracle     packaged   line_route      max_dev </span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6.708316e-01 6.708316e-01 6.708316e-01 1.110223e-16</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>The oracles exist so that this comparison is possible for a reader who does not trust the derivation – which is the correct posture.</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Every inbreeding metric is a ratio to a reference population
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Without explicitly declaring your base – cycle 0 of the recurrent programme? a landrace panel? the founding heterotic pool? – none of the numbers below mean anything. This is the commonest error in plant applications: using the <em>current</em> generation’s frequencies as the base, which zeroes the historical memory of erosion.</p>
+</div>
+</div>
+</section>
+<section id="the-metrics-one-at-a-time" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="the-metrics-one-at-a-time"><span class="header-section-number">7.2</span> The metrics, one at a time</h2>
+<section id="rate-of-inbreeding-and-effective-size" class="level3" data-number="7.2.1">
+<h3 data-number="7.2.1" class="anchored" data-anchor-id="rate-of-inbreeding-and-effective-size"><span class="header-section-number">7.2.1</span> Rate of inbreeding and effective size</h3>
+<p>What you manage is not <span class="math inline">\(F\)</span> but its rate of accumulation. <span class="math inline">\(F\)</span> is a stock; <span class="math inline">\(\Delta F\)</span> is a flow.</p>
+<p><span class="math display">\[\Delta F = \frac{F_t - F_{t-1}}{1 - F_{t-1}}, \qquad N_e = \frac{1}{2\Delta F}\]</span></p>
+<p>Since <span class="math inline">\(1 - F_t = (1 - \Delta F)^t\)</span>, a regression of <span class="math inline">\(\log(1 - F_t)\)</span> on <span class="math inline">\(t\)</span> has slope <span class="math inline">\(\approx -\Delta F\)</span>. <strong>The linearity of that regression is itself a diagnostic:</strong> in the paper, <span class="math inline">\(\log(1 - F_{drift})\)</span> was approximately linear under every scheme, while <span class="math inline">\(\log(1 - F_{hom})\)</span> showed marked curvature under some, notably the ROH-based one. Curvature means a non-constant rate – your <span class="math inline">\(N_e\)</span> target is not being met steadily.</p>
+<p>A tropical maize recurrent programme targeting <span class="math inline">\(N_e = 50\)</span> per cycle needs <span class="math inline">\(\Delta F = 0.01\)</span>. Measuring <span class="math inline">\(F\)</span> only at cycle 8 and dividing by 8 hides the possibility that cycles 1-3 were conservative and cycles 6-8 collapsed the base. Always fit the log-linear regression and look at the residual.</p>
+</section>
+<section id="f_hom-homozygosity-based" class="level3" data-number="7.2.2">
+<h3 data-number="7.2.2" class="anchored" data-anchor-id="f_hom-homozygosity-based"><span class="header-section-number">7.2.2</span> <code>F_hom</code>, homozygosity-based</h3>
+<p>Wright defined an inbreeding coefficient to run from 0 to 1 as heterozygosity under random mating falls from its initial state to zero. So the metric is the fraction of heterozygosity already lost relative to the base:</p>
+<p><span class="math display">\[F_{hom} = 1 - \frac{1}{N_{SNP}}\sum_k \frac{2p_{t,k}(1 - p_{t,k})}{2p_{0,k}(1 - p_{0,k})}
+          = 1 - \frac{1}{N_{SNP}}\sum_k \frac{H_{t,k}}{H_{0,k}}\]</span></p>
+<p><strong>It can be negative.</strong> If management pushes frequencies toward 0.5, heterozygosity rises above the base and the “inbreeding coefficient” goes below zero. That is not a numerical error: it is the expected behaviour of any scheme that maximises heterozygosity on the monitored panel.</p>
+<p>It protects against inbreeding depression and the expression of deleterious recessives in homozygosis. It is the right lens when the dominant risk is <em>vigour</em>.</p>
+<p>In maize, heterozygosity is the product itself. Within a heterotic pool under reciprocal recurrent selection, <code>F_hom</code> computed <strong>within pool</strong> anticipates the decline in line-per-se vigour; it says nothing about between-pool divergence, which is what generates heterosis in the hybrid. In selfing species, <code>F_hom</code> measured on fixed lines is <span class="math inline">\(\approx 1\)</span> by construction and is <strong>useless for management</strong> – it has to be computed on allele frequencies in the crossing population, not on the homozygosity of individuals.</p>
+</section>
+<section id="f_drift-drift-based" class="level3" data-number="7.2.3">
+<h3 data-number="7.2.3" class="anchored" data-anchor-id="f_drift-drift-based"><span class="header-section-number">7.2.3</span> <code>F_drift</code>, drift-based</h3>
+<p><span class="math display">\[F_{drift} = \frac{1}{N_{SNP}}\sum_k \frac{(p_{t,k} - p_{0,k})^2}{p_{0,k}(1 - p_{0,k})}\]</span></p>
+<p><strong>Never negative.</strong> It is formally analogous to Holsinger &amp; Weir’s <span class="math inline">\(F_{ST}\)</span> applied to <em>one population through time</em> rather than to a set of populations in space. It is exactly the quantity constrained when <code>G_VR2</code> goes into the optimiser.</p>
+<p>It protects against random change in phenotypic value for traits <strong>outside</strong> the selection objective, against rare deleterious recessives rising to dangerous frequencies, and against irreversible loss of rare alleles.</p>
+<p>There is also a selection-intensity reading: the term <span class="math inline">\(\delta p^2 / [p_0(1-p_0)]\)</span> approximates the <strong>squared total intensity</strong> applied at that marker, with <span class="math inline">\(i \approx \delta p / \sqrt{p_0(1-p_0)}\)</span>. Constraining <code>F_drift</code> constrains how much effective selection the whole genome underwent – including at loci you never meant to select.</p>
+<p>A wheat programme running six cycles of genomic selection with a VanRaden <span class="math inline">\(\mathbf{G}\)</span> and reporting <span class="math inline">\(\Delta F \approx 1\%\)</span> has reported <span class="math inline">\(\Delta F_{drift}\)</span> on the training panel. Quantitative disease-resistance loci not yet prioritised may have hitch-hiked to extreme frequencies alongside yield QTL, and none of that appears in the reported metric.</p>
+</section>
+</section>
+<section id="the-classical-equivalence-and-the-covariance-that-destroys-it" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="the-classical-equivalence-and-the-covariance-that-destroys-it"><span class="header-section-number">7.3</span> The classical equivalence, and the covariance that destroys it</h2>
+<p>Under purely random drift, with <span class="math inline">\(E[\delta p_t \mid p_0] = 0\)</span> for every <span class="math inline">\(p_0\)</span>,</p>
+<p><span class="math display">\[\frac{\mathrm{var}(p_{t,k})}{p_0(1-p_0)} = 1 - \frac{H_t}{H_0}
+  \;\;\Longrightarrow\;\; F_{drift} = F_{hom}.\]</span></p>
+<p>The paper’s central result quantifies the departure:</p>
+<p><span class="math display">\[F_{hom} - F_{drift} \;=\; 2\,\mathrm{cov}\!\left(
+  \frac{\delta p_{t,k}}{\sqrt{p_{0,k}(1-p_{0,k})}},\;
+  \frac{p_{0,k} - 1/2}{\sqrt{p_{0,k}(1-p_{0,k})}}\right)\]</span></p>
+<p>In words: <strong>if the direction of frequency change is correlated with the starting frequency, the two measures diverge.</strong> The non-obvious part is that this covariance is induced by the <em>diversity management itself</em>, not by directional selection – the paper demonstrates this by running the scheme with random GEBVs, and the divergence persists.</p>
+<section id="verifying-the-identity" class="level3" data-number="7.3.1">
+<h3 data-number="7.3.1" class="anchored" data-anchor-id="verifying-the-identity"><span class="header-section-number">7.3.1</span> Verifying the identity</h3>
+<p><code>freq_metrics()</code> returns all three quantities in one marker sweep. The identity is asserted in the test suite; here it is on live data:</p>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">rbind</span>(</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">he_nei       =</span> <span class="fu">c</span>(<span class="at">oracle =</span> <span class="fu">ref_he_nei</span>(sel, ctxp), <span class="at">packaged =</span> <span class="fu">he_nei</span>(sel, ctxp)),</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">theta_freq   =</span> <span class="fu">c</span>(<span class="fu">ref_theta_freq</span>(sel, ctxp), <span class="fu">theta_from_freq</span>(sel, ctxp)),</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">status_num   =</span> <span class="fu">c</span>(<span class="fu">ref_status_num</span>(sel, ctxp), <span class="fu">status_number</span>(sel, ctxp)),</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">ne_parents   =</span> <span class="fu">c</span>(<span class="fu">ref_ne_parents</span>(sel, ctxp), <span class="fu">ne_parents</span>(sel, ctxp)),</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">alleles_lost =</span> <span class="fu">c</span>(<span class="fu">ref_alleles_lost</span>(sel, ctxp), <span class="fu">alleles_lost</span>(sel, ctxp)),</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">ENE          =</span> <span class="fu">c</span>(<span class="fu">ref_ene</span>(sel, ctxp), <span class="fu">ene</span>(sel, ctxp)),</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">ANE          =</span> <span class="fu">c</span>(<span class="fu">ref_ane</span>(sel, ctxp), <span class="fu">ane</span>(sel, ctxp))), <span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">31</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>idx <span class="ot">&lt;-</span> <span class="fu">sample.int</span>(ctx<span class="sc">$</span>N, <span class="dv">60</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>fm <span class="ot">&lt;-</span> <span class="fu">freq_metrics</span>(idx, ctx)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(fm[<span class="fu">c</span>(<span class="st">"F_hom"</span>, <span class="st">"F_drift"</span>, <span class="st">"cov_diag"</span>)], <span class="dv">6</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    F_hom  F_drift cov_diag </span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 0.011458 0.005192 0.006267</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">F_hom_minus_F_drift =</span> <span class="fu">unname</span>(fm[[<span class="st">"F_hom"</span>]] <span class="sc">-</span> fm[[<span class="st">"F_drift"</span>]]),</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">cov_diag            =</span> <span class="fu">unname</span>(fm[[<span class="st">"cov_diag"</span>]]),</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">residual            =</span> <span class="fu">unname</span>(fm[[<span class="st">"cov_diag"</span>]] <span class="sc">-</span> (fm[[<span class="st">"F_hom"</span>]] <span class="sc">-</span> fm[[<span class="st">"F_drift"</span>]])))</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F_hom_minus_F_drift            cov_diag            residual </span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        6.266505e-03        6.266505e-03        8.673617e-18</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Exact to machine precision. And when the selection <em>is</em> the base, both lenses must read zero:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">freq_metrics</span>(<span class="fu">seq_len</span>(ctx<span class="sc">$</span>N), ctx)[<span class="fu">c</span>(<span class="st">"F_hom"</span>, <span class="st">"F_drift"</span>, <span class="st">"cov_diag"</span>)], <span class="dv">12</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    F_hom  F_drift cov_diag </span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        0        0        0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="why-each-matrix-generates-a-sign" class="level3" data-number="7.3.2">
+<h3 data-number="7.3.2" class="anchored" data-anchor-id="why-each-matrix-generates-a-sign"><span class="header-section-number">7.3.2</span> Why each matrix generates a sign</h3>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>The sign of the bias is a property of the matrix, not of the data.</caption>
+<colgroup>
+<col style="width: 3%">
+<col style="width: 10%">
+<col style="width: 85%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Matrix</th>
+<th style="text-align: left;">Covariance</th>
+<th style="text-align: left;">Mechanism</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">G_VR2</td>
+<td style="text-align: left;">positive</td>
+<td style="text-align: left;">the constraint penalises delta-p^2, so moving an allele to the <em>far</em> extreme costs more than to the near one; the optimiser pushes rare alleles to 0 and common ones to 1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">G_0.5</td>
+<td style="text-align: left;">negative</td>
+<td style="text-align: left;">frequencies are measured as deviations from 0.5, so the optimiser buys ‘diversity’ by pushing everything to intermediate frequencies</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">G_VR1</td>
+<td style="text-align: left;">positive, attenuated</td>
+<td style="text-align: left;">G_VR2 reweighted by 2p0(1-p0), giving more weight to already-intermediate loci and less room at the extremes</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">G_i(p)</td>
+<td style="text-align: left;">negative</td>
+<td style="text-align: left;">uses accumulated intensity instead of delta-p^2; since di/dp = [p(1-p)]^-1/2, moves toward the extremes get more expensive</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Your MAF spectrum decides how bad this is
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The magnitude depends on the minor-allele-frequency spectrum. The effect is dramatic with sequence data dominated by rare alleles, and much milder with SNP chips designed for intermediate MAF.</p>
+<p><strong>Directly translated to plants:</strong> GBS or skim-seq with the full MAF spectrum puts you in the severe scenario; a 20-50k chip filtered to MAF &gt; 0.05 puts you in the mild one. This is the parameter that decides whether you can live with <code>G_VR2</code>.</p>
+</div>
+</div>
+</section>
+<section id="the-signature-on-live-data" class="level3" data-number="7.3.3">
+<h3 data-number="7.3.3" class="anchored" data-anchor-id="the-signature-on-live-data"><span class="header-section-number">7.3.3</span> The signature, on live data</h3>
+<p>The pure max-diversity greedy is the <code>G_0.5</code> scheme in miniature: it constrains molecular coancestry and nothing else. It should drive <code>F_hom</code> negative while paying the largest drift bill.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>panel <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">random      =</span> <span class="fu">freq_metrics</span>(<span class="fu">sample.int</span>(ctx<span class="sc">$</span>N, <span class="dv">60</span>), ctx),</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">max_div     =</span> <span class="fu">freq_metrics</span>(<span class="fu">sel_greedy</span>(ctx, <span class="dv">60</span>, <span class="at">w =</span> <span class="dv">0</span>), ctx),</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">balanced    =</span> <span class="fu">freq_metrics</span>(<span class="fu">sel_greedy</span>(ctx, <span class="dv">60</span>, <span class="at">w =</span> <span class="dv">1</span>), ctx),</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">truncation  =</span> <span class="fu">freq_metrics</span>(<span class="fu">sel_truncation</span>(ctx, <span class="dv">60</span>), ctx)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">as.data.frame</span>(panel[, <span class="fu">c</span>(<span class="st">"He"</span>, <span class="st">"F_hom"</span>, <span class="st">"F_drift"</span>, <span class="st">"cov_diag"</span>, <span class="st">"rare_retained"</span>)]), <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
 <thead>
 <tr class="header">
 <th style="text-align: left;"></th>
-<th style="text-align: right;">oracle</th>
-<th style="text-align: right;">packaged</th>
+<th style="text-align: right;">He</th>
+<th style="text-align: right;">F_hom</th>
+<th style="text-align: right;">F_drift</th>
+<th style="text-align: right;">cov_diag</th>
+<th style="text-align: right;">rare_retained</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">he_nei</td>
-<td style="text-align: right;">0.3291684</td>
-<td style="text-align: right;">0.3291684</td>
+<td style="text-align: left;">random</td>
+<td style="text-align: right;">0.3257</td>
+<td style="text-align: right;">0.0048</td>
+<td style="text-align: right;">0.0083</td>
+<td style="text-align: right;">-0.0034</td>
+<td style="text-align: right;">0.9286</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">theta_freq</td>
-<td style="text-align: right;">0.6708316</td>
-<td style="text-align: right;">0.6708316</td>
+<td style="text-align: left;">max_div</td>
+<td style="text-align: right;">0.3302</td>
+<td style="text-align: right;">-0.0113</td>
+<td style="text-align: right;">0.0060</td>
+<td style="text-align: right;">-0.0174</td>
+<td style="text-align: right;">0.9481</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">status_num</td>
-<td style="text-align: right;">0.7453435</td>
-<td style="text-align: right;">0.7453435</td>
+<td style="text-align: left;">balanced</td>
+<td style="text-align: right;">0.3124</td>
+<td style="text-align: right;">0.0426</td>
+<td style="text-align: right;">0.0558</td>
+<td style="text-align: right;">-0.0131</td>
+<td style="text-align: right;">0.7338</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">ne_parents</td>
-<td style="text-align: right;">26.4550265</td>
-<td style="text-align: right;">26.4550265</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">alleles_lost</td>
-<td style="text-align: right;">43.0000000</td>
-<td style="text-align: right;">43.0000000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">ENE</td>
-<td style="text-align: right;">0.2581333</td>
-<td style="text-align: right;">0.2581333</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">ANE</td>
-<td style="text-align: right;">0.2503233</td>
-<td style="text-align: right;">0.2503233</td>
+<td style="text-align: left;">truncation</td>
+<td style="text-align: right;">0.3124</td>
+<td style="text-align: right;">0.0426</td>
+<td style="text-align: right;">0.0558</td>
+<td style="text-align: right;">-0.0131</td>
+<td style="text-align: right;">0.7338</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
 </div>
+<p>Read the <code>F_hom</code> and <code>F_drift</code> columns together. Maximising diversity on the homozygosity lens produces a <em>negative</em> <code>F_hom</code> – the selection is more heterozygous than the base – while <code>F_drift</code> is strictly positive and larger than under random sampling. The bill is real, it is being paid, and a report carrying only <code>F_hom</code> would not show it.</p>
 </section>
-<section id="the-identity-sweep" class="level2" data-number="C.2">
-<h2 data-number="C.2" class="anchored" data-anchor-id="the-identity-sweep"><span class="header-section-number">C.2</span> The identity sweep</h2>
-<p>The line-level collapse was checked across <span class="math inline">\(F_{ST} \in \{0.05, 0.15, 0.35\}\)</span>, two seeds and two selection sizes, thirty replicate selections each.</p>
+</section>
+<section id="the-other-matrices-briefly" class="level2" data-number="7.4">
+<h2 data-number="7.4" class="anchored" data-anchor-id="the-other-matrices-briefly"><span class="header-section-number">7.4</span> The other matrices, briefly</h2>
+<p><strong><code>F_IBD</code> via <code>G_LA</code>.</strong> Instead of assuming a 50/50 transmission probability for each parental allele (as the pedigree matrix <span class="math inline">\(\mathbf{A}\)</span> does), linkage analysis over the markers infers which parental haplotype was actually transmitted along the chromosome. It requires pedigree <strong>and</strong> markers. It measures IBD relative to a base explicitly defined as unrelated and non-inbred, so frequency change is determined by the base population rather than by linkage disequilibrium generated during selection – and the problematic covariance disappears. It was the <strong>only scheme tested that met both the <span class="math inline">\(\Delta F_{hom}\)</span> and <span class="math inline">\(\Delta F_{drift}\)</span> targets</strong>, on the managed panel and at unmonitored neutral loci, and it converted inbreeding into gain most efficiently.</p>
+<p>For plants this is the point of greatest friction. In biparental populations and backcross families <code>G_LA</code> is natural and cheap – phase is known and the number of meioses since the base is small. In recurrent-selection populations with full pedigree (common in commercial maize) it is feasible. In germplasm panels <em>without</em> pedigree it is inapplicable, and the honest alternative is segment-based IBD.</p>
+<p><strong><code>F_ROH</code>.</strong> A run of homozygosity is an uninterrupted stretch of homozygous markers; the logic is that many consecutive markers are unlikely to be IBS by chance, so the stretch is probably IBD. The fundamental ambiguity is that <code>F_ROH</code> is IBD when runs are <strong>long</strong> (recent inbreeding) and homozygosity when they are <strong>short</strong> (ancient inbreeding, accumulated IBS). The minimum-length threshold is therefore a knob that selects the <em>age</em> of inbreeding you are measuring, and there is no well-defined reference base.</p>
+<p>Empirically, <code>G_ROH</code> behaved more like <code>G_0.5</code> than like an IBD measure. It also is <strong>not guaranteed positive semi-definite</strong> – its elements are computed pairwise – and required substantial diagonal additions for inversion, which made it diagonally dominant and artificially inflated the number of parents selected.</p>
+<p>In a soybean inbred the entire genome is one ROH: <code>F_ROH</code> <span class="math inline">\(\approx 1\)</span> and the metric saturates. In maize it is useful for diagnosing erosion of elite heterotic pools; for <em>management</em> inside an optimiser, check positive definiteness carefully.</p>
+<section id="side-by-side" class="level3" data-number="7.4.1">
+<h3 data-number="7.4.1" class="anchored" data-anchor-id="side-by-side"><span class="header-section-number">7.4.1</span> Side by side</h3>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
-<caption>Machine precision throughout. Anything above 1e-12 would mean an error, not a rounding artefact.</caption>
+<caption>Seven matrices in the same optimiser (Meuwissen et al.&nbsp;2020).</caption>
 <colgroup>
-<col style="width: 22%">
-<col style="width: 45%">
-<col style="width: 31%">
+<col style="width: 6%">
+<col style="width: 17%">
+<col style="width: 75%">
 </colgroup>
 <thead>
 <tr class="header">
-<th style="text-align: left;"></th>
-<th style="text-align: left;">Identity</th>
-<th style="text-align: left;">Worst deviation over the sweep</th>
+<th style="text-align: left;">Matrix</th>
+<th style="text-align: left;">Class</th>
+<th style="text-align: left;">Behaviour in the optimiser</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">max_pairwise_f</td>
-<td style="text-align: left;">pairwise f: hybrid vs line formula</td>
-<td style="text-align: left;">1.1e-16</td>
+<td style="text-align: left;">A</td>
+<td style="text-align: left;">IBD (expectation)</td>
+<td style="text-align: left;">high gain, but exceeded targets by ~40% by not accounting for within-family LD</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">max_theta_sub_vs_line</td>
-<td style="text-align: left;">theta: line route vs f submatrix</td>
-<td style="text-align: left;">2.2e-16</td>
+<td style="text-align: left;">G_VR2</td>
+<td style="text-align: left;">drift</td>
+<td style="text-align: left;">meets the drift target <em>only on the managed panel</em>; F_hom runs away</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">max_theta_sub_vs_freq</td>
-<td style="text-align: left;">theta: line route vs allele-frequency route</td>
-<td style="text-align: left;">1.1e-16</td>
+<td style="text-align: left;">G_VR1</td>
+<td style="text-align: left;">drift</td>
+<td style="text-align: left;">reweighted version; smaller bias, smaller gain</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">max_pbar</td>
-<td style="text-align: left;">selection allele frequencies</td>
-<td style="text-align: left;">0 (exact)</td>
+<td style="text-align: left;">G_0.5</td>
+<td style="text-align: left;">homozygosity</td>
+<td style="text-align: left;">F_hom near zero, drift 4x the target; loses genetic variance early</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">max_He</td>
-<td style="text-align: left;">Nei He</td>
-<td style="text-align: left;">0 (exact)</td>
+<td style="text-align: left;">G_i(p)</td>
+<td style="text-align: left;">drift</td>
+<td style="text-align: left;">inverts the sign of the bias; constraint only indirectly tied to F</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">max_Neparents</td>
-<td style="text-align: left;">effective number of parents</td>
-<td style="text-align: left;">2.1e-14</td>
+<td style="text-align: left;">G_LA</td>
+<td style="text-align: left;">IBD</td>
+<td style="text-align: left;">the only one meeting both targets; best gain per unit of inbreeding</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">max_alleles_lost</td>
-<td style="text-align: left;">allele loss at MAF threshold</td>
-<td style="text-align: left;">0 (exact)</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">max_theta_pools</td>
-<td style="text-align: left;">pool decomposition</td>
-<td style="text-align: left;">1.2e-15</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">max_swap_update</td>
-<td style="text-align: left;">incremental swap vs full recompute</td>
-<td style="text-align: left;">4.4e-16</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">bitset_vs_literal</td>
-<td style="text-align: left;">bitset allelic richness vs literal count</td>
-<td style="text-align: left;">0 (exact)</td>
+<td style="text-align: left;">G_ROH</td>
+<td style="text-align: left;">hybrid</td>
+<td style="text-align: left;">high gain, uncontrolled drift, numerical problems</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>An implementation note that is routinely ignored
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>G_VR1</code>, <code>G_VR2</code>, <code>G_0.5</code> and <code>G_i(p)</code> are only <strong>semi</strong>-definite positive (a zero eigenvalue from the centering). You must add <span class="math inline">\(\alpha\)</span> to the diagonal (<span class="math inline">\(\alpha = 0.01\)</span> in the paper) to invert them and for the optimal-contribution algorithm to work. <span class="math inline">\(\mathbf{A}\)</span> and <code>G_LA</code> are positive definite by construction.</p>
+</div>
+</div>
 </section>
-<section id="the-test-suite" class="level2" data-number="C.3">
-<h2 data-number="C.3" class="anchored" data-anchor-id="the-test-suite"><span class="header-section-number">C.3</span> The test suite</h2>
-<p>The suite is <code>tests/testthat/</code>, run with <code>devtools::test()</code>. It takes about a minute. What it asserts, and why each check earns its place:</p>
+</section>
+<section id="reference-results" class="level2" data-number="7.5">
+<h2 data-number="7.5" class="anchored" data-anchor-id="reference-results"><span class="header-section-number">7.5</span> Reference results</h2>
+<p>Target <span class="math inline">\(\Delta F = 0.005\)</span> per generation (<span class="math inline">\(N_e = 100\)</span>). Values at the <strong>unmonitored neutral loci</strong>, generation 20.</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Both rate targets are 0.005. Only G_LA meets both.</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Scheme</th>
+<th style="text-align: left;">Class</th>
+<th style="text-align: right;">dF_hom</th>
+<th style="text-align: right;">dF_drift</th>
+<th style="text-align: right;">gap</th>
+<th style="text-align: right;">gain</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">G_VR2(M,M)</td>
+<td style="text-align: left;">drift</td>
+<td style="text-align: right;">0.0103</td>
+<td style="text-align: right;">0.0068</td>
+<td style="text-align: right;">0.054</td>
+<td style="text-align: right;">7.124</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">G_VR2(M,D)</td>
+<td style="text-align: left;">drift</td>
+<td style="text-align: right;">0.0101</td>
+<td style="text-align: right;">0.0068</td>
+<td style="text-align: right;">0.050</td>
+<td style="text-align: right;">7.107</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">G_VR1(M,M)</td>
+<td style="text-align: left;">drift</td>
+<td style="text-align: right;">0.0080</td>
+<td style="text-align: right;">0.0069</td>
+<td style="text-align: right;">0.021</td>
+<td style="text-align: right;">6.680</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">G_i(p)(M,M)</td>
+<td style="text-align: left;">drift</td>
+<td style="text-align: right;">0.0065</td>
+<td style="text-align: right;">0.0077</td>
+<td style="text-align: right;">-0.031</td>
+<td style="text-align: right;">7.111</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">G_0.5(M,M)</td>
+<td style="text-align: left;">homozygosity</td>
+<td style="text-align: right;">0.0073</td>
+<td style="text-align: right;">0.0176</td>
+<td style="text-align: right;">-0.170</td>
+<td style="text-align: right;">6.734</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">G_ROH(M,M)</td>
+<td style="text-align: left;">homozygosity</td>
+<td style="text-align: right;">0.0054</td>
+<td style="text-align: right;">0.0088</td>
+<td style="text-align: right;">-0.070</td>
+<td style="text-align: right;">9.099</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">G_LA(M,M)</td>
+<td style="text-align: left;">IBD</td>
+<td style="text-align: right;">0.0043</td>
+<td style="text-align: right;">0.0049</td>
+<td style="text-align: right;">-0.010</td>
+<td style="text-align: right;">7.188</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">A(M,~)</td>
+<td style="text-align: left;">IBD</td>
+<td style="text-align: right;">0.0070</td>
+<td style="text-align: right;">0.0084</td>
+<td style="text-align: right;">-0.021</td>
+<td style="text-align: right;">9.890</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Four readings:</p>
+<ol type="1">
+<li><strong>No IBS scheme met both targets.</strong> <code>G_LA</code> did, within about 2%.</li>
+<li>Pedigree <span class="math inline">\(\mathbf{A}\)</span> gave the highest absolute gain but overshot by ~40% – neutral loci hitch-hiking with QTL through within-family LD, which the pedigree expectation of IBD cannot capture.</li>
+<li>Using a separate panel for management instead of the GEBV panel changed gain by <strong>less than 0.3%</strong>. Not worth the complexity.</li>
+<li>At equal mean inbreeding, <code>G_LA</code> beat <span class="math inline">\(\mathbf{A}\)</span> in 65 of 100 replicates and <code>G_ROH</code> in 62 of 100.</li>
+</ol>
+<section id="the-diagnostic-nobody-runs" class="level3" data-number="7.5.1">
+<h3 data-number="7.5.1" class="anchored" data-anchor-id="the-diagnostic-nobody-runs"><span class="header-section-number">7.5.1</span> The diagnostic nobody runs</h3>
+<p>Schemes based on IBD selected many parents; VanRaden-style schemes selected few.</p>
+<blockquote class="blockquote">
+<p><strong>Rule of thumb.</strong> If your optimal-contribution run is delivering high gain with a suspiciously small number of parents and <span class="math inline">\(\Delta F\)</span> on target, compute <code>F_hom</code> and <code>F_drift</code> separately on a panel <strong>not used</strong> in the management. The difference between them is your hidden bill.</p>
+</blockquote>
+<p>The book’s implementation of that diagnostic is <code>ne_parents()</code>, reported alongside the two lenses in every scenario – see <a href="12-case-study.html" class="quarto-xref"><span>Chapter 18</span></a>, where a selection meeting its diversity target while collapsing from 40 effective parents to 12 is visible in one row of the output.</p>
+</section>
+</section>
+<section id="what-to-carry-into-plant-breeding" class="level2" data-number="7.6">
+<h2 data-number="7.6" class="anchored" data-anchor-id="what-to-carry-into-plant-breeding"><span class="header-section-number">7.6</span> What to carry into plant breeding</h2>
+<p><strong>Declare the base and never redefine it.</strong> Redefining the reference frequencies every generation is common in plant pipelines because it is the <em>default</em> in several <span class="math inline">\(\mathbf{G}\)</span>-construction functions. Since frequency changes in successive cycles are positively correlated, constraining the variance <em>within</em> each cycle lets the <em>accumulated</em> variance overshoot the target. Freeze <span class="math inline">\(p_0\)</span> from the founding cycle and propagate it. In this book that is <code>ctx$p0</code>, set once in <code>build_ctx()</code> and never recomputed.</p>
+<p><strong>Do not maximise marker heterozygosity as an objective.</strong> Raising heterozygosity on the monitored panel does not raise it at unmonitored loci – and it increases real IBD, because raising an allele’s frequency means multiplying copies of a subset of base alleles.</p>
+<p><strong>Heterotic pools need a two-directional constraint.</strong> Within pool you want to limit <span class="math inline">\(\Delta F\)</span>. Between pools you want to <em>preserve</em> divergence, which is directed drift and is desirable. A single global <span class="math inline">\(\tfrac{1}{2}\mathbf{c}'\mathbf{G}\mathbf{c}\)</span> cannot express that. Use multiple matrices with simultaneous constraints, or per-subpopulation constraints – which is what <code>gd_partition()</code> measures and <a href="08-pipeline-stages.html" class="quarto-xref"><span>Chapter 11</span></a> operationalises.</p>
+<p><strong>Selfing species need inbreeding by selfing separated from inbreeding by drift.</strong> In soybean, wheat or rice, individual <span class="math inline">\(F\)</span> is <span class="math inline">\(\approx 1\)</span> by design and carries no management information. The manageable quantity is allele frequency <strong>in the crossing population</strong> and coancestry among the chosen parents. Apply the whole <code>F_hom</code>/<code>F_drift</code> framework at population level, never at line level.</p>
+<p><strong>Region-specific targets rarely earn their complexity.</strong> Causal variants are well distributed and what happens at a subset of loci does not predict what happens outside it. The legitimate plant exception is R-gene-type resistance loci, where allelic diversity has direct and known value.</p>
+<p><strong>Deleterious recessives are a load problem, not a diversity problem.</strong> If you have mapped the defect, putting it in the selection index is more efficient than controlling it indirectly through a diversity constraint.</p>
+<p><strong>In pure conservation schemes the problem is <em>worse</em>, not better.</strong> Without directional selection the inbreeding-management term dominates the optimiser and the covariance tends to be larger. The IBD recommendation is stronger there.</p>
+</section>
+<section id="limits-of-the-animal-to-plant-transposition" class="level2" data-number="7.7">
+<h2 data-number="7.7" class="anchored" data-anchor-id="limits-of-the-animal-to-plant-transposition"><span class="header-section-number">7.7</span> Limits of the animal-to-plant transposition</h2>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -794,479 +1092,61 @@ window.Quarto = {
 </colgroup>
 <thead>
 <tr class="header">
-<th style="text-align: left;">Check</th>
-<th style="text-align: left;">If it fails</th>
+<th style="text-align: left;">Assumption in the paper</th>
+<th style="text-align: left;">Situation in plants</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">theta via submatrix == theta via allele frequencies</td>
-<td style="text-align: left;"><strong>f is wrong</strong>: centered, rescaled, or the wrong marker coding</td>
+<td style="text-align: left;">discrete generations, two sexes, one contribution per individual</td>
+<td style="text-align: left;">hermaphroditism, selfing, cloning, overlapping cycles, repeated use of the same parent</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">1 - theta == Nei’s He</td>
-<td style="text-align: left;">the identity underpinning every ‘loss of X%’ statement is broken</td>
+<td style="text-align: left;">reliable, deep pedigree</td>
+<td style="text-align: left;">often truncated, or absent in genebanks</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">f is bounded to [0, 1]</td>
-<td style="text-align: left;">a centered matrix is being used as coancestry</td>
+<td style="text-align: left;">base = simulated founder population at mutation-drift equilibrium</td>
+<td style="text-align: left;">base is an administrative choice (cycle 0) with pre-existing structure</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">sum(VanRaden G) == 0</td>
-<td style="text-align: left;">the demonstration in <a href="01-coancestry.html#sec-why-not-g" class="quarto-xref"><span>Section 1.2</span></a> no longer holds on this data</td>
+<td style="text-align: left;">target Ne = 100 over 20 generations</td>
+<td style="text-align: left;">shorter cycles with GS, but effective elite Ne often below 30</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">theta and Ns analytical edge cases</td>
-<td style="text-align: left;">the diagonal is being dropped somewhere</td>
+<td style="text-align: left;">one population, one target</td>
+<td style="text-align: left;">multiple target environments, G x E, separate heterotic pools</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">greedy &lt; random &lt; truncation on theta</td>
-<td style="text-align: left;">there is no trade-off to optimise; the whole benchmark is pointless</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">decode() is unique, in range, deterministic</td>
-<td style="text-align: left;">the DE fitness is noisy and cannot converge</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">fast line route == hybrid-matrix route</td>
-<td style="text-align: left;"><strong>the collapse is broken</strong>; production scale becomes infeasible</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">incremental swap == full recomputation</td>
-<td style="text-align: left;">any local search built on the state vector is wrong</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">popcount32 == naive bit count</td>
-<td style="text-align: left;">allelic richness counts are wrong</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">F_hom and F_drift are 0 when the selection is the base</td>
-<td style="text-align: left;">the base p0 is not frozen, or is being recomputed</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">cov_diag == F_hom - F_drift</td>
-<td style="text-align: left;">one of the three lens formulas is wrong</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">max-diversity drives F_hom negative, F_drift positive</td>
-<td style="text-align: left;">the two-lens argument of <a href="05-genomic-era.html" class="quarto-xref"><span>Chapter 7</span></a> does not reproduce</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">freq_metrics reproduces he_nei and alleles_lost</td>
-<td style="text-align: left;">the consolidated marker sweep changed an existing number</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">the Caballero &amp; Toro partition closes</td>
-<td style="text-align: left;">the Eq. 8 algebra is broken</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">GD_WI == 0 for inbred lines, GD_WI_hyb large for their F1s</td>
-<td style="text-align: left;">lines are not actually inbred, or the hybrid diagonal is wrong</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">eff_dim in (0, n - 1]</td>
-<td style="text-align: left;">the double-centering was dropped and eff_dim re-measures theta</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">the two-stage output contract</td>
-<td style="text-align: left;">downstream code reading <code>$selection</code> or <code>$metrics</code> will break</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">stage 2 runs without fL</td>
-<td style="text-align: left;">the optional-fL path is broken</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">stage1_build accepts both marker codings</td>
-<td style="text-align: left;">real data in the other coding would give different answers</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">MRD and coancestry are one statistic</td>
-<td style="text-align: left;">Trap 1 of <a href="08-pipeline-stages.html" class="quarto-xref"><span>Chapter 11</span></a> no longer holds</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Gst &lt; Fst always, and Gst matches the classical route</td>
-<td style="text-align: left;">Trap 2 is wrong, or the two definitions were conflated</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">the DH identities</td>
-<td style="text-align: left;">the S2 algebra is wrong and crossing plans cannot be pre-evaluated</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">hybrid theta from usage == the hybrid matrix</td>
-<td style="text-align: left;">Trap 5’s repair route is broken</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">constrained line selection meets its ceiling</td>
-<td style="text-align: left;">the constrained selection silently returns an infeasible plan</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">the oracles agree with the packaged metrics</td>
-<td style="text-align: left;">a fast route diverged from its definition</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">map length and Haldane spacing</td>
-<td style="text-align: left;">the sizing chapter’s map is not the map it claims</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">heterozygosity halves per selfing</td>
-<td style="text-align: left;">the simulator is not doing what selfing does</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">D == 1 - (1 - H)/N under neutrality</td>
-<td style="text-align: left;">the identity every sizing number rests on is broken</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">n_equivalent inverts diversity_retained</td>
-<td style="text-align: left;">N_eq is not the inverse it is described as</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">a Syn cycle adds half a map length of junctions</td>
-<td style="text-align: left;">the intercrossing budget in <a href="04-population-sizing.html" class="quarto-xref"><span>Chapter 4</span></a> is wrong by 2x</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">distortion shifts ancestry away from 0.5</td>
-<td style="text-align: left;">the distortion mechanism is inactive</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">f1_sizing halves the loss probability per plant</td>
-<td style="text-align: left;">the F1 sizing argument is wrong</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">heterosis_value matches the literal oracle</td>
-<td style="text-align: left;">the fast heterosis route diverged from its definition</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">additive effects cancel from the mid-parent difference</td>
-<td style="text-align: left;">the derivation of <a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 8</span></a> is wrong, or the parents are not inbred</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">shared and divergence == GD_T and GD_BS</td>
-<td style="text-align: left;"><strong>the central identity of <a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 8</span></a> is broken</strong></td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">2 * GD_WI_hyb == GD_T + GD_BS</td>
-<td style="text-align: left;">the hybrid-level and line-level partitions have come apart</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">neutral divergence leaves expected heterosis unchanged</td>
-<td style="text-align: left;"><a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 8</span></a>’s correction is wrong and F_ST would predict heterosis</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">alignment between d and divergence is what moves heterosis</td>
-<td style="text-align: left;">the alignment result, and the argument for <a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 17</span></a> with it, is wrong</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">GCA + SCA reconstruct heterosis exactly and are mean-zero</td>
-<td style="text-align: left;"><strong>the combining-ability decomposition of <a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 8</span></a> is not a decomposition</strong></td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">SCA is the interaction residual of the two-way additive fit</td>
-<td style="text-align: left;">SCA is a proxy for the interaction, not the interaction – the section overclaims</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">the closed-form GCA and SCA variance components match</td>
-<td style="text-align: left;">the relocation result of <a href="05b-heterosis-dominance.html#sec-heterosis-relocation" class="quarto-xref"><span>Section 8.10</span></a> rests on a wrong closed form</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">uniform-d heterosis is the coancestry kernel, exactly</td>
-<td style="text-align: left;">genetic distance no longer predicts heterosis under flat dominance</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">GD_T + GD_BS == 1 - theta_AB</td>
-<td style="text-align: left;">the between-pool coancestry reading of the identity is wrong</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">pool_freqs reproduces what its callers computed inline</td>
-<td style="text-align: left;">a pool frequency route diverged after the refactor</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">the DH draw is an unbiased gamete; selfing an inbred returns it</td>
-<td style="text-align: left;">recycling fabricates or destroys diversity; every trajectory is wrong</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">p0 is frozen, not re-anchored, across cycles</td>
-<td style="text-align: left;"><strong>both inbreeding lenses report no loss forever</strong> – the trap of <a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 17</span></a></td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">a closed programme loses diversity and gains index</td>
-<td style="text-align: left;">the cycle loop is not selecting, or not recycling what it selected</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">the budget is respected; alpha_max = Inf is truncation</td>
-<td style="text-align: left;">the budget is not binding across cycles</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">injection raises diversity relative to a closed run</td>
-<td style="text-align: left;">injection is not actually introducing founder material</td>
+<td style="text-align: left;">heterozygosity is always desirable</td>
+<td style="text-align: left;">in selfers transitory; in hybrids the final product; in lines undesirable</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>Rscript <span class="sc">-</span>e <span class="st">'devtools::test()'</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
+<p>None of this invalidates the central conclusion. It is an <strong>algebraic</strong> property of the optimiser, not a biological property of the species. What it changes is <em>which matrix is practicable</em>.</p>
 </section>
-<section id="provenance-of-every-figure-and-table" class="level2" data-number="C.4">
-<h2 data-number="C.4" class="anchored" data-anchor-id="provenance-of-every-figure-and-table"><span class="header-section-number">C.4</span> Provenance of every figure and table</h2>
-<p>The book runs light examples live and reads heavy results from cache. This is the complete accounting.</p>
-<section id="computed-live-at-render" class="level3" data-number="C.4.1">
-<h3 data-number="C.4.1" class="anchored" data-anchor-id="computed-live-at-render"><span class="header-section-number">C.4.1</span> Computed live at render</h3>
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<table class="caption-top table table-sm table-striped small">
-<colgroup>
-<col style="width: 7%">
-<col style="width: 92%">
-</colgroup>
-<thead>
-<tr class="header">
-<th style="text-align: left;">Chapter</th>
-<th style="text-align: left;">Runs live</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;"><a href="01-coancestry.html" class="quarto-xref"><span>Chapter 1</span></a></td>
-<td style="text-align: left;">both matrices, the sum(G) demonstration, the f diagonal</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><a href="02-subdivided.html" class="quarto-xref"><span>Chapter 2</span></a></td>
-<td style="text-align: left;">the whole worked example, reproduced against the published tables</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><a href="03-simulating-crosses.html" class="quarto-xref"><span>Chapter 3</span></a></td>
-<td style="text-align: left;">the simulation, the fst sweep, the contract, the sampling-bias histogram</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><a href="04-population-sizing.html" class="quarto-xref"><span>Chapter 4</span></a></td>
-<td style="text-align: left;">the theoretical identities, heterozygosity halving, map expansion, f1_sizing</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><a href="05-genomic-era.html" class="quarto-xref"><span>Chapter 7</span></a></td>
-<td style="text-align: left;">the Eq. 3 identity, the four-strategy lens panel</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 8</span></a></td>
-<td style="text-align: left;">the heterosis oracle check, the additive cancellation, the shared/divergence identity, the coancestry-kernel identity, the fst sweep and its Balding-Nichols prediction, the alignment scenarios and their stratified control, the GCA/SCA decomposition and its variance components, the SCA/GCA relocation sweep</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><a href="06-metric-catalogue.html" class="quarto-xref"><span>Chapter 9</span></a></td>
-<td style="text-align: left;">every metric, the sampling-bias formula, the null distribution</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 10</span></a></td>
-<td style="text-align: left;">the collapse, the swap update, cost at book scale, the fixed-theta band, the prediction-error sweep</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><a href="08-pipeline-stages.html" class="quarto-xref"><span>Chapter 11</span></a></td>
-<td style="text-align: left;">all five traps, the S1 panel, the DH identities, the S4 collapse</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><a href="09-optimal-contributions.html" class="quarto-xref"><span>Chapter 13</span></a></td>
-<td style="text-align: left;">the OCS relaxation, the convergence check, the greedy frontier, the marker-panel sensitivity</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><a href="10-combinatorial-selection.html" class="quarto-xref"><span>Chapter 14</span></a></td>
-<td style="text-align: left;">all baselines, the encodings, the DE, the warm-start comparison</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><a href="10b-advanced-selection.html" class="quarto-xref"><span>Chapter 15</span></a></td>
-<td style="text-align: left;">the Gram identity and PSD check, the submatrix-sum identity, the three local-search modes, the invalid-versus-Lagrangian bound comparison, ocs_round</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 17</span></a></td>
-<td style="text-align: left;">the frozen-p0 demonstration, the delta-F regression</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><a href="12-case-study.html" class="quarto-xref"><span>Chapter 18</span></a></td>
-<td style="text-align: left;">the full two-stage pipeline</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><a href="#sec-verification" class="quarto-xref"><span>Appendix C</span></a></td>
-<td style="text-align: left;">the oracle comparisons</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</section>
-<section id="read-from-cache" class="level3" data-number="C.4.2">
-<h3 data-number="C.4.2" class="anchored" data-anchor-id="read-from-cache"><span class="header-section-number">C.4.2</span> Read from cache</h3>
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<table class="caption-top table table-sm table-striped small">
-<colgroup>
-<col style="width: 25%">
-<col style="width: 74%">
-</colgroup>
-<thead>
-<tr class="header">
-<th style="text-align: left;">File</th>
-<th style="text-align: left;">Why</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;"><code>data/theta_identity_check.csv</code></td>
-<td style="text-align: left;">the full identity sweep, 12 configurations</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>data/cost_per_eval.csv</code></td>
-<td style="text-align: left;">production scale: L = 300, N = 22500, m = 10000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>data/metric_redundancy.csv</code></td>
-<td style="text-align: left;">621 selections x 17 metrics</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>data/de_constraints.csv</code></td>
-<td style="text-align: left;">9 DE runs at 60,000 evaluations each</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>data/fst_definitions.csv</code></td>
-<td style="text-align: left;">the divergence sweep</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>data/dist_vs_variance.csv</code></td>
-<td style="text-align: left;">600 candidate crosses with simulated DH</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>data/pipeline_loss_ledger.csv</code></td>
-<td style="text-align: left;">8 founder pools, four stages, two strategies</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>data/plant_metric_usage.csv</code></td>
-<td style="text-align: left;">687 screened plant records</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>data/bibliography_*.csv</code></td>
-<td style="text-align: left;">the screened corpora themselves</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>data/f2_results.csv</code></td>
-<td style="text-align: left;">5 schemes x 20 sizes, adaptive replication</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>data/f2_multilocus.csv</code></td>
-<td style="text-align: left;">multilocus recovery across the grid</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>data/mabc_*.csv</code></td>
-<td style="text-align: left;">the MABC grid: 4 policies x 4 gene numbers x 11 sizes x 3 s, 300 reps</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>figs/mabc_sizing.png</code></td>
-<td style="text-align: left;">analytical sizing by stage</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>figs/mabc_policies.png</code></td>
-<td style="text-align: left;">the four recombinant-selection policies</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>figs/cost_scaling.png</code></td>
-<td style="text-align: left;">cost scaling at production scale</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>figs/de_convergence.png</code></td>
-<td style="text-align: left;">DE convergence under four restrictions</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>figs/metric_redundancy.png</code></td>
-<td style="text-align: left;">the redundancy panels</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>figs/pipeline_loss.png</code></td>
-<td style="text-align: left;">the loss ledger</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>figs/metric_pitfalls.png</code></td>
-<td style="text-align: left;">Traps 4 and 2 on the full simulation</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>data/search_benchmark.csv</code></td>
-<td style="text-align: left;">8 methods x 2 scales x 3 seeds, production scale N = 10000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>data/search_scaling.csv</code></td>
-<td style="text-align: left;">per-evaluation cost from N = 400 to N = 22500</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>data/search_exact_gap.csv</code></td>
-<td style="text-align: left;">the outer-approximation oracle, proven small and time-limited large (target <code>search_exact</code>)</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>figs/search_anytime.png</code></td>
-<td style="text-align: left;">anytime curves at equal wall-clock</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>figs/search_scaling.png</code></td>
-<td style="text-align: left;">the encoding scaling wall</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>data/cycles_trajectory.csv</code></td>
-<td style="text-align: left;">3 budgets x 16 cycles x 5 seeds (target <code>cycles</code>)</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>data/cycles_crossover.csv</code></td>
-<td style="text-align: left;">the crossover cycle, per budget per seed</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>data/cycles_maxuse.csv</code></td>
-<td style="text-align: left;">3 caps x 16 cycles x 5 seeds</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>data/cycles_injection.csv</code></td>
-<td style="text-align: left;">closed against one injection at cycle 8, 5 seeds</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>data/cycles_selector.csv</code></td>
-<td style="text-align: left;">greedy against DE, 2 budgets x 13 cycles, seed 1</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>figs/cycles_gain.png</code></td>
-<td style="text-align: left;">cumulative gain by budget</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>figs/cycles_diversity.png</code></td>
-<td style="text-align: left;">gene diversity and F_drift by budget</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<p>Nothing is read from <code>report/</code> or <code>data/</code> at the repository root: both are gitignored, so a clean clone would fail to render. Everything cached lives in <code>book/data</code> and <code>book/figs</code>, which are tracked.</p>
-</section>
-</section>
-<section id="regenerating-the-cached-results" class="level2" data-number="C.5">
-<h2 data-number="C.5" class="anchored" data-anchor-id="regenerating-the-cached-results"><span class="header-section-number">C.5</span> Regenerating the cached results</h2>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>Rscript book<span class="sc">/</span>scripts<span class="sc">/</span>regenerate.R          <span class="co"># everything; hours</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>Rscript book<span class="sc">/</span>scripts<span class="sc">/</span>regenerate.R f2size   <span class="co"># one target</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>Rscript book<span class="sc">/</span>scripts<span class="sc">/</span>regenerate.R search   <span class="co"># the advanced-selection benchmark</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>Rscript book<span class="sc">/</span>scripts<span class="sc">/</span>regenerate.R search_exact  <span class="co"># just the exact oracle</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>Rscript book<span class="sc">/</span>scripts<span class="sc">/</span>regenerate.R cycles   <span class="co"># the recurrent-selection trajectories</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>The script is the single place where the expensive computations live. It is never invoked by <code>quarto render</code>.</p>
-</section>
-<section id="reproducing-the-book" class="level2" data-number="C.6">
-<h2 data-number="C.6" class="anchored" data-anchor-id="reproducing-the-book"><span class="header-section-number">C.6</span> Reproducing the book</h2>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'devtools::document(); devtools::load_all()'</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'devtools::test()'</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'devtools::check()'</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="ex">quarto</span> render book</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>Quarto’s <code>freeze: auto</code> means a chapter re-runs only when its source changes. To force a full recomputation, delete <code>book/_freeze/</code>.</p>
-</section>
-<section id="known-limitations-of-the-verification" class="level2" data-number="C.7">
-<h2 data-number="C.7" class="anchored" data-anchor-id="known-limitations-of-the-verification"><span class="header-section-number">C.7</span> Known limitations of the verification</h2>
-<p>Stated so they are not mistaken for oversights.</p>
-<p><strong>The oracles share the author’s understanding.</strong> They check that the fast route computes what the slow route computes. They cannot check that the slow route implements the right definition. That is what the reproduction of the published Caballero &amp; Toro tables in <a href="02-subdivided.html" class="quarto-xref"><span>Chapter 2</span></a> is for – an external check against numbers this project did not produce.</p>
-<p><strong>Monte Carlo checks have Monte Carlo error.</strong> Where a test asserts agreement with a simulated expectation rather than an algebraic identity, the tolerance is loose by necessity, and a genuinely small bias would pass.</p>
-<p><strong>Everything is verified on simulated data.</strong> The identities are algebraic and will hold on real genotypes. The <em>empirical</em> results – which metrics are redundant, how much index a constraint costs – were derived at <span class="math inline">\(F_{ST} = 0.15\)</span> with simulated markers, and <a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 10</span></a> says explicitly that they should be re-derived on real genotypes before being treated as settled.</p>
+<section id="operational-checklist" class="level2" data-number="7.8">
+<h2 data-number="7.8" class="anchored" data-anchor-id="operational-checklist"><span class="header-section-number">7.8</span> Operational checklist</h2>
+<ul>
+<li>Is the base <span class="math inline">\(p_0\)</span> frozen at the founding cycle, and documented?</li>
+<li>Are <code>F_hom</code> and <code>F_drift</code> computed <strong>separately</strong> and reported together?</li>
+<li>Is there a panel of loci <strong>not used in management</strong>, for audit?</li>
+<li>Is the regression of <span class="math inline">\(\log(1 - F)\)</span> on cycle linear (constant rate)?</li>
+<li>Is the covariance <span class="math inline">\(2\,\mathrm{cov}(\delta p/s,\, (p_0 - \tfrac12)/s)\)</span> reported as a diagnostic?</li>
+<li>Is the number of selected parents biologically plausible?</li>
+<li>Is true genetic variance (or the best estimate of it) being tracked?</li>
+<li>Is <span class="math inline">\(\mathbf{G}\)</span> positive definite before inversion, and is the added <span class="math inline">\(\alpha\)</span> documented?</li>
+<li>Where possible, is an IBD alternative compared in parallel?</li>
+</ul>
 
 
+<div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
+<div id="ref-meuwissen2020" class="csl-entry" role="listitem">
+Meuwissen, T. H. E., A. K. Sonesson, G. Gebregiwergis, and J. A. Woolliams. 2020. <span>“Management of Genetic Diversity in the Era of Genomics.”</span> <em>Frontiers in Genetics</em> 11: 880. <a href="https://doi.org/10.3389/fgene.2020.00880">https://doi.org/10.3389/fgene.2020.00880</a>.
+</div>
+</div>
 </section>
 
 </main> <!-- /main -->
@@ -1690,13 +1570,13 @@ window.Quarto = {
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./91-package.html" class="pagination-link" aria-label="The `hybdiv` package">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">The <code>hybdiv</code> package</span></span>
+      <a href="./04c-alphasimr-pipeline.html" class="pagination-link" aria-label="A realistic corn pipeline: AlphaSimR and reciprocal recurrent selection">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">A realistic corn pipeline: AlphaSimR and reciprocal recurrent selection</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./93-corpora.html" class="pagination-link" aria-label="The bibliographic corpora">
-        <span class="nav-page-text"><span class="chapter-number">D</span>&nbsp; <span class="chapter-title">The bibliographic corpora</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./05b-heterosis-dominance.html" class="pagination-link" aria-label="Heterosis, dominance, and what divergence buys">
+        <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Heterosis, dominance, and what divergence buys</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

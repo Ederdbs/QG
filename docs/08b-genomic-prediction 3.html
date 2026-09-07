@@ -1,0 +1,1693 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>12&nbsp; Predicting breeding values: GBLUP, BayesA, BayesB – Genetic Diversity in Hybrid Breeding</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./09-optimal-contributions.html" rel="next">
+<link href="./08-pipeline-stages.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-37a0ccb6f5b9899fcb884e11bb6f7458.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./05-genomic-era.html">Metrics</a></li><li class="breadcrumb-item"><a href="./08b-genomic-prediction.html"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Predicting breeding values: GBLUP, BayesA, BayesB</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Genetic Diversity in Hybrid Breeding</a> 
+        <div class="sidebar-tools-main">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-coancestry.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Coancestry, and the two matrices</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-subdivided.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Diversity in a subdivided population</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Simulation</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-simulating-crosses.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Simulating lines, pools and crosses</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-population-sizing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Sizing a segregating population, F1 to F4</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04b-backcross-introgression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Introgressing several genes by backcrossing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04c-alphasimr-pipeline.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">A realistic corn pipeline: AlphaSimR and reciprocal recurrent selection</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Metrics</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-genomic-era.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Diversity metrics in the genomic era</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05b-heterosis-dominance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Heterosis, dominance, and what divergence buys</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-metric-catalogue.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">A catalogue of metrics on <code>f</code></span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-choosing-metrics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Choosing metrics: collapse, cost, redundancy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-pipeline-stages.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Metrics at each pipeline stage, and five traps</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08b-genomic-prediction.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Predicting breeding values: GBLUP, BayesA, BayesB</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Optimisation</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-optimal-contributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Optimal contributions and the <span class="math inline">\(\alpha\)</span> constraint</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-combinatorial-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Combinatorial selection</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10b-advanced-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Advanced selection: structure, bounds and scale</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Evidence and practice</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-plant-literature.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">What the plant literature establishes</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11b-diversity-across-cycles.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Diversity across cycles</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-case-study.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">End to end, and the operational checklist</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./90-notation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Notation and glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./91-package.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">The <code>hybdiv</code> package</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./92-verification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Verification</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./93-corpora.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">D</span>&nbsp; <span class="chapter-title">The bibliographic corpora</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./99-references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#a-training-population-with-real-noise" id="toc-a-training-population-with-real-noise" class="nav-link active" data-scroll-target="#a-training-population-with-real-noise"><span class="header-section-number">12.1</span> A training population with real noise</a></li>
+  <li><a href="#sec-genpred-truth" id="toc-sec-genpred-truth" class="nav-link" data-scroll-target="#sec-genpred-truth"><span class="header-section-number">12.2</span> The truth this chapter is predicting</a>
+  <ul class="collapse">
+  <li><a href="#the-generative-model-is-gblups-own-assumption" id="toc-the-generative-model-is-gblups-own-assumption" class="nav-link" data-scroll-target="#the-generative-model-is-gblups-own-assumption"><span class="header-section-number">12.2.1</span> The generative model is GBLUP’s own assumption</a></li>
+  <li><a href="#a-hybrids-value-is-the-mean-of-two-parental-values" id="toc-a-hybrids-value-is-the-mean-of-two-parental-values" class="nav-link" data-scroll-target="#a-hybrids-value-is-the-mean-of-two-parental-values"><span class="header-section-number">12.2.2</span> A hybrid’s value is the mean of two parental values</a></li>
+  </ul></li>
+  <li><a href="#gblup-prediction-from-the-relationship-matrix" id="toc-gblup-prediction-from-the-relationship-matrix" class="nav-link" data-scroll-target="#gblup-prediction-from-the-relationship-matrix"><span class="header-section-number">12.3</span> GBLUP: prediction from the relationship matrix</a>
+  <ul class="collapse">
+  <li><a href="#where-the-mixed-model-equations-come-from" id="toc-where-the-mixed-model-equations-come-from" class="nav-link" data-scroll-target="#where-the-mixed-model-equations-come-from"><span class="header-section-number">12.3.1</span> Where the mixed model equations come from</a></li>
+  <li><a href="#sec-g-singular" id="toc-sec-g-singular" class="nav-link" data-scroll-target="#sec-g-singular"><span class="header-section-number">12.3.2</span> Why the ridge blend is not optional</a></li>
+  <li><a href="#reliability-the-accuracy-you-can-compute-without-the-truth" id="toc-reliability-the-accuracy-you-can-compute-without-the-truth" class="nav-link" data-scroll-target="#reliability-the-accuracy-you-can-compute-without-the-truth"><span class="header-section-number">12.3.3</span> Reliability: the accuracy you can compute without the truth</a></li>
+  </ul></li>
+  <li><a href="#sec-hybrid-cv" id="toc-sec-hybrid-cv" class="nav-link" data-scroll-target="#sec-hybrid-cv"><span class="header-section-number">12.4</span> What the random split was measuring</a></li>
+  <li><a href="#bayesa-and-bayesb-prediction-from-marker-effects" id="toc-bayesa-and-bayesb-prediction-from-marker-effects" class="nav-link" data-scroll-target="#bayesa-and-bayesb-prediction-from-marker-effects"><span class="header-section-number">12.5</span> BayesA and BayesB: prediction from marker effects</a>
+  <ul class="collapse">
+  <li><a href="#the-priors-explicitly" id="toc-the-priors-explicitly" class="nav-link" data-scroll-target="#the-priors-explicitly"><span class="header-section-number">12.5.1</span> The priors, explicitly</a></li>
+  <li><a href="#what-the-sampler-actually-selects" id="toc-what-the-sampler-actually-selects" class="nav-link" data-scroll-target="#what-the-sampler-actually-selects"><span class="header-section-number">12.5.2</span> What the sampler actually selects</a></li>
+  <li><a href="#what-bayesb-does-that-bayesa-cannot" id="toc-what-bayesb-does-that-bayesa-cannot" class="nav-link" data-scroll-target="#what-bayesb-does-that-bayesa-cannot"><span class="header-section-number">12.5.3</span> What BayesB does that BayesA cannot</a></li>
+  </ul></li>
+  <li><a href="#verification-two-routes-agree" id="toc-verification-two-routes-agree" class="nav-link" data-scroll-target="#verification-two-routes-agree"><span class="header-section-number">12.6</span> Verification: two routes agree</a></li>
+  <li><a href="#which-model-wins-and-when" id="toc-which-model-wins-and-when" class="nav-link" data-scroll-target="#which-model-wins-and-when"><span class="header-section-number">12.7</span> Which model wins, and when</a>
+  <ul class="collapse">
+  <li><a href="#sec-genpred-pi" id="toc-sec-genpred-pi" class="nav-link" data-scroll-target="#sec-genpred-pi"><span class="header-section-number">12.7.1</span> <code>pi</code> was fixed, not tuned</a></li>
+  </ul></li>
+  <li><a href="#from-gebvs-to-stage1_build" id="toc-from-gebvs-to-stage1_build" class="nav-link" data-scroll-target="#from-gebvs-to-stage1_build"><span class="header-section-number">12.8</span> From GEBVs to <code>stage1_build()</code></a></li>
+  <li><a href="#back-to-finding-5-a-measured-accuracy-not-an-assumed-one" id="toc-back-to-finding-5-a-measured-accuracy-not-an-assumed-one" class="nav-link" data-scroll-target="#back-to-finding-5-a-measured-accuracy-not-an-assumed-one"><span class="header-section-number">12.9</span> Back to Finding 5: a measured accuracy, not an assumed one</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./05-genomic-era.html">Metrics</a></li><li class="breadcrumb-item"><a href="./08b-genomic-prediction.html"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Predicting breeding values: GBLUP, BayesA, BayesB</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="sec-genomic-prediction" class="quarto-section-identifier"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Predicting breeding values: GBLUP, BayesA, BayesB</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Three earlier chapters flagged the same gap and moved on. <a href="03-simulating-crosses.html" class="quarto-xref"><span>Chapter 3</span></a> built <code>ctx$traits</code> from <em>known</em> marker effects and called the result “an optimistic ceiling.” <a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 10</span></a>’s Finding 5 showed what happens once the index carries real error, but manufactured that error rather than fitting a model to produce it. <a href="12-case-study.html" class="quarto-xref"><span>Chapter 18</span></a> repeats the caveat and still moves on. This chapter is where the gap closes: it fits actual prediction models to a training population with real phenotypic noise, and hands the result to the same <code>stage1_build()</code> contract every later chapter already consumes.</p>
+<p><code>vanraden_G()</code> has said since <a href="01-coancestry.html" class="quarto-xref"><span>Chapter 1</span></a> that its matrix “is the right matrix for GBLUP.” Nothing in the package has used it that way until now.</p>
+<p>The chapter also has a second job, which only became apparent once the models were fitted: an accuracy number means nothing until you say what was hidden from the model. <a href="#sec-hybrid-cv" class="quarto-xref"><span>Section 12.4</span></a> shows that the obvious split – hold out a random 40% of the hybrids – answers the easiest of the three questions a hybrid programme actually asks, and that the fit itself says so, before the truth is consulted.</p>
+<section id="a-training-population-with-real-noise" class="level2" data-number="12.1">
+<h2 data-number="12.1" class="anchored" data-anchor-id="a-training-population-with-real-noise"><span class="header-section-number">12.1</span> A training population with real noise</h2>
+<p>Everywhere else in this book, <code>ctx$index</code> <em>is</em> the truth. Here it plays a different role: it is the value a real breeding programme does not get to see, and can only estimate from phenotypes recorded on a subset of individuals.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>ctx <span class="ot">&lt;-</span> <span class="fu">simulate_data</span>(book_cfg)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>N   <span class="ot">&lt;-</span> ctx<span class="sc">$</span>N</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>g   <span class="ot">&lt;-</span> ctx<span class="sc">$</span>traits[, <span class="dv">1</span>]         <span class="co"># the true genetic value -- known only to us</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>A phenotype is the genetic value plus environmental noise, <span class="math inline">\(y = g + e\)</span>, and heritability is the fraction of phenotypic variance the genetic part accounts for, <span class="math inline">\(h^2 = \mathrm{Var}(g) / (\mathrm{Var}(g) + \mathrm{Var}(e))\)</span>. <code>traits</code> is built by <code>scale()</code>, so <span class="math inline">\(\mathrm{Var}(g) = 1\)</span> exactly, and the noise variance that delivers a target <span class="math inline">\(h^2\)</span> is <span class="math inline">\((1-h^2)/h^2\)</span>:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>h2 <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">9</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>e <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(N, <span class="dv">0</span>, <span class="fu">sqrt</span>((<span class="dv">1</span> <span class="sc">-</span> h2) <span class="sc">/</span> h2))</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> g <span class="sc">+</span> e</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Split the population into a training set, whose phenotypes the model gets to see, and a candidate set – the hybrids actually being selected among – whose phenotypes it does not:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">9</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>train <span class="ot">&lt;-</span> <span class="fu">sample.int</span>(N, <span class="fu">floor</span>(<span class="fl">0.6</span> <span class="sc">*</span> N))</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>cand  <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(<span class="fu">seq_len</span>(N), train)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">train =</span> <span class="fu">length</span>(train), <span class="at">candidates =</span> <span class="fu">length</span>(cand))</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      train candidates </span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        375        250</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="sec-genpred-truth" class="level2" data-number="12.2">
+<h2 data-number="12.2" class="anchored" data-anchor-id="sec-genpred-truth"><span class="header-section-number">12.2</span> The truth this chapter is predicting</h2>
+<p>Two properties of <span class="math inline">\(g\)</span> decide everything that follows, and both are consequences of how <a href="03-simulating-crosses.html" class="quarto-xref"><span>Chapter 3</span></a> built it rather than choices made here.</p>
+<section id="the-generative-model-is-gblups-own-assumption" class="level3" data-number="12.2.1">
+<h3 data-number="12.2.1" class="anchored" data-anchor-id="the-generative-model-is-gblups-own-assumption"><span class="header-section-number">12.2.1</span> The generative model is GBLUP’s own assumption</h3>
+<p><code>ctx$traits</code> is <code>scale(Z %*% B)</code> with the marker effects <span class="math inline">\(\mathbf{B}\)</span> drawn independently. For a single trait that is <span class="math inline">\(\mathbf{g} = \mathbf{Z}\boldsymbol\beta\)</span> with <span class="math inline">\(\mathrm{Var}(\boldsymbol\beta) = \mathbf{I}\sigma^2_\beta\)</span>, so</p>
+<p><span class="math display">\[\mathrm{Var}(\mathbf{g}) = \mathbf{Z}\mathbf{Z}'\sigma^2_\beta
+  = \mathbf{G}\,\underbrace{2\textstyle\sum_k p_k(1-p_k)\,\sigma^2_\beta}_{\sigma^2_u},\]</span></p>
+<p>because <span class="math inline">\(\mathbf{G}\)</span> is <em>defined</em> as <span class="math inline">\(\mathbf{Z}\mathbf{Z}'\)</span> over that same divisor (<a href="01-coancestry.html" class="quarto-xref"><span>Chapter 1</span></a>). The second equality is exact, not approximate:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>vr <span class="ot">&lt;-</span> <span class="fu">vanraden_G</span>(ctx<span class="sc">$</span>X <span class="sc">*</span> <span class="dv">2</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>s2 <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">sum</span>(vr<span class="sc">$</span>p <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> vr<span class="sc">$</span>p))</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">max</span>(<span class="fu">abs</span>(<span class="fu">tcrossprod</span>(vr<span class="sc">$</span>Z) <span class="sc">/</span> s2 <span class="sc">-</span> ctx<span class="sc">$</span>G))</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>So the covariance GBLUP <em>assumes</em> for the breeding values is, up to the scalar <span class="math inline">\(\sigma^2_u\)</span>, the covariance the breeding values actually have. This simulation is the infinitesimal model, exactly and not approximately, and that single fact is most of the answer to “which model wins” below. It is also the sense in which every accuracy in this chapter is a best case: no model here is misspecified.</p>
+</section>
+<section id="a-hybrids-value-is-the-mean-of-two-parental-values" class="level3" data-number="12.2.2">
+<h3 data-number="12.2.2" class="anchored" data-anchor-id="a-hybrids-value-is-the-mean-of-two-parental-values"><span class="header-section-number">12.2.2</span> A hybrid’s value is the mean of two parental values</h3>
+<p>The hybrids are F1s of homozygous lines, so a hybrid’s marker row is the average of its two parents’ rows, and averaging is linear. For <em>any</em> additive effect vector whatsoever, the hybrid’s genetic value is therefore the mean of the two parental line values – general combining ability, with no specific combining ability left over:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>L  <span class="ot">&lt;-</span> <span class="fu">simulate_lines</span>(book_cfg)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>bb <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(ctx<span class="sc">$</span>m)                    <span class="co"># any effects at all; the identity is linear</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>vL <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>((L <span class="sc">/</span> <span class="dv">2</span>) <span class="sc">%*%</span> bb)      <span class="co"># the parental line values they imply</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">max</span>(<span class="fu">abs</span>(<span class="fu">as.numeric</span>(ctx<span class="sc">$</span>X <span class="sc">%*%</span> bb) <span class="sc">-</span> (vL[ctx<span class="sc">$</span>ped<span class="sc">$</span>a] <span class="sc">+</span> vL[ctx<span class="sc">$</span>ped<span class="sc">$</span>b]) <span class="sc">/</span> <span class="dv">2</span>))</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1.563194e-13</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The residual is at machine precision because the statement is an identity. Two consequences run through the rest of the chapter. The mild one is that a “hybrid-specific” prediction has nothing to predict here: the dominance deviations of <a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 8</span></a> are absent from <code>ctx$traits</code> by construction, so SCA is not merely unmodelled, it is not in the data. The sharp one is <a href="#sec-g-singular" class="quarto-xref"><span>Section 12.3.2</span></a>.</p>
+</section>
+</section>
+<section id="gblup-prediction-from-the-relationship-matrix" class="level2" data-number="12.3">
+<h2 data-number="12.3" class="anchored" data-anchor-id="gblup-prediction-from-the-relationship-matrix"><span class="header-section-number">12.3</span> GBLUP: prediction from the relationship matrix</h2>
+<p>GBLUP treats the breeding value as a random effect <span class="math inline">\(\mathbf{u}\)</span> with covariance proportional to the genomic relationship matrix, <span class="math inline">\(\mathrm{Var}(\mathbf{u}) =
+\mathbf{G}\,\sigma_u^2\)</span>, and solves the mixed model equations.</p>
+<section id="where-the-mixed-model-equations-come-from" class="level3" data-number="12.3.1">
+<h3 data-number="12.3.1" class="anchored" data-anchor-id="where-the-mixed-model-equations-come-from"><span class="header-section-number">12.3.1</span> Where the mixed model equations come from</h3>
+<p>The model is <span class="math inline">\(\mathbf{y} = \mathbf{1}\mu + \mathbf{Z}\mathbf{u} + \mathbf{e}\)</span> with <span class="math inline">\(\mathbf{u} \sim (\mathbf{0}, \mathbf{G}\sigma^2_u)\)</span> and <span class="math inline">\(\mathbf{e} \sim
+(\mathbf{0}, \mathbf{I}\sigma^2_e)\)</span> independent. Treating <span class="math inline">\(\mathbf{u}\)</span> as a random variable rather than a parameter to be estimated, <span class="citation" data-cites="henderson1975">Henderson (<a href="99-references.html#ref-henderson1975" role="doc-biblioref">1975</a>)</span> maximises the <em>joint</em> density of what is observed and what is not,</p>
+<p><span class="math display">\[-2\log p(\mathbf{y}, \mathbf{u}) \;\propto\;
+  \frac{(\mathbf{y} - \mathbf{1}\mu - \mathbf{Z}\mathbf{u})'
+        (\mathbf{y} - \mathbf{1}\mu - \mathbf{Z}\mathbf{u})}{\sigma^2_e}
+  \;+\; \frac{\mathbf{u}'\mathbf{G}^{-1}\mathbf{u}}{\sigma^2_u},\]</span></p>
+<p>and the two stationarity conditions, multiplied through by <span class="math inline">\(\sigma^2_e\)</span>, <em>are</em></p>
+<p><span class="math display">\[\begin{bmatrix}\mathbf{1}'\mathbf{1} &amp; \mathbf{1}'\mathbf{Z} \\
+                  \mathbf{Z}'\mathbf{1} &amp; \mathbf{Z}'\mathbf{Z} + \mathbf{G}^{-1}\lambda
+    \end{bmatrix}
+    \begin{bmatrix}\hat\mu \\ \hat{\mathbf{u}}\end{bmatrix} =
+    \begin{bmatrix}\mathbf{1}'\mathbf{y} \\ \mathbf{Z}'\mathbf{y}\end{bmatrix},
+\qquad \lambda = \sigma_e^2/\sigma_u^2,\]</span></p>
+<p>with <span class="math inline">\(\mathbf{Z}\)</span> the incidence matrix mapping training records to individuals. Three things fall out of that derivation that the equations alone do not say.</p>
+<p><span class="math inline">\(\mathbf{u}\)</span> is defined over <em>all</em> <span class="math inline">\(N\)</span> individuals, training and candidates together – it enters through the prior, not through the data – so one solve produces predictions for both, and a candidate with no record of its own is predicted entirely by its <span class="math inline">\(\mathbf{G}\)</span> entries against individuals that do have one. Everything <a href="#sec-hybrid-cv" class="quarto-xref"><span>Section 12.4</span></a> finds is a consequence of that sentence.</p>
+<p><span class="math inline">\(\lambda\)</span> is a variance <em>ratio</em>, not a tuning parameter: <span class="math inline">\(\sigma^2_u = 1\)</span> because <code>traits</code> is standardised, and <code>e</code> was built with variance <span class="math inline">\((1-h^2)/h^2\)</span>, so <span class="math inline">\(\lambda = (1-h^2)/h^2\)</span> is not a coincidence but the same number entered twice. Nothing in this chapter estimates it; a real programme would, by REML.</p>
+<p>And under normality the joint maximiser is the conditional mean, <span class="math inline">\(\hat{\mathbf{u}} = \mathbb{E}[\mathbf{u} \mid \mathbf{y}]\)</span>, which is why BLUP minimises mean squared error rather than merely being a sensible shrinkage rule. Dropping normality it remains best among <em>linear</em> predictors, which is what the acronym claims.</p>
+</section>
+<section id="sec-g-singular" class="level3" data-number="12.3.2">
+<h3 data-number="12.3.2" class="anchored" data-anchor-id="sec-g-singular"><span class="header-section-number">12.3.2</span> Why the ridge blend is not optional</h3>
+<p><a href="01-coancestry.html#sec-why-not-g" class="quarto-xref"><span>Section 1.2</span></a> proves <span class="math inline">\(\mathbf{1}'\mathbf{G}\mathbf{1} = 0\)</span> and reads it as the reason <span class="math inline">\(\mathbf{G}\)</span> cannot measure diversity. It has a second consequence, for prediction. <span class="math inline">\(\mathbf{G}\)</span> is positive semi-definite, and a quadratic form of a PSD matrix vanishes only on its null space, so <span class="math inline">\(\mathbf{1}'\mathbf{G}\mathbf{1} = 0\)</span> forces</p>
+<p><span class="math display">\[\mathbf{G}\mathbf{1} = \mathbf{0}.\]</span></p>
+<p><span class="math inline">\(\mathbf{G}\)</span> is singular for <em>every</em> population, whatever <span class="math inline">\(N\)</span> and <span class="math inline">\(m\)</span> are. The blend is not insurance against an awkward case; without it <code>solve()</code> has nothing to invert.</p>
+<p>Here it is much worse than one lost dimension. By the identity of <a href="#sec-genpred-truth" class="quarto-xref"><span>Section 12.2</span></a> every hybrid row is an average of two line rows, so the whole <span class="math inline">\(N \times m\)</span> matrix lives in the span of the <span class="math inline">\(L\)</span> line genotypes. Each hybrid uses exactly one line from each pool, which makes the pool-A indicator columns sum to the pool-B ones and costs a further dimension, and centering costs one more:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">max_abs_G_times_one =</span> <span class="fu">max</span>(<span class="fu">abs</span>(ctx<span class="sc">$</span>G <span class="sc">%*%</span> <span class="fu">rep</span>(<span class="dv">1</span>, N))))</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; max_abs_G_times_one </span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         1.16334e-13</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>rank_G <span class="ot">&lt;-</span> <span class="cf">function</span>(n_per_pool) {</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  cfg <span class="ot">&lt;-</span> utils<span class="sc">::</span><span class="fu">modifyList</span>(book_cfg, <span class="fu">list</span>(<span class="at">n_pool_A =</span> n_per_pool, <span class="at">n_pool_B =</span> n_per_pool))</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  G   <span class="ot">&lt;-</span> <span class="fu">simulate_data</span>(cfg)<span class="sc">$</span>G</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="at">lines =</span> <span class="dv">2</span> <span class="sc">*</span> n_per_pool, <span class="at">hybrids =</span> <span class="fu">nrow</span>(G),</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">rank =</span> <span class="fu">sum</span>(<span class="fu">eigen</span>(G, <span class="at">only.values =</span> <span class="cn">TRUE</span>)<span class="sc">$</span>values <span class="sc">&gt;</span> <span class="fl">1e-8</span>))</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>The rank of the hybrid G is the number of parent lines minus two, whatever N and m are.</caption>
+<thead>
+<tr class="header">
+<th style="text-align: right;">lines</th>
+<th style="text-align: right;">hybrids</th>
+<th style="text-align: right;">rank</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">18</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">40</td>
+<td style="text-align: right;">400</td>
+<td style="text-align: right;">38</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">625</td>
+<td style="text-align: right;">48</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><span class="math inline">\(\mathrm{rank}(\mathbf{G}) = L - 2\)</span>, independent of both the number of hybrids and the number of markers. At the book’s scale that is 48 dimensions carrying 625 hybrids: 577 of the eigenvalues are exactly zero, and <code>0.95 * G + 0.05 * I</code> is what makes the equations solvable at all. Fifty lines were genotyped and crossed into 625 combinations, but there were only ever 48 independent dimensions to measure – and no amount of phenotyping the 625 adds a forty-ninth.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>G <span class="ot">&lt;-</span> ctx<span class="sc">$</span>G</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>gblup <span class="ot">&lt;-</span> <span class="cf">function</span>(y, train, h2) {</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  Gstar <span class="ot">&lt;-</span> <span class="fl">0.95</span> <span class="sc">*</span> G <span class="sc">+</span> <span class="fl">0.05</span> <span class="sc">*</span> <span class="fu">diag</span>(N)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  n_t <span class="ot">&lt;-</span> <span class="fu">length</span>(train)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  Z  <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, n_t, N); Z[<span class="fu">cbind</span>(<span class="fu">seq_len</span>(n_t), train)] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  X1 <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">1</span>, n_t, <span class="dv">1</span>); lambda <span class="ot">&lt;-</span> (<span class="dv">1</span> <span class="sc">-</span> h2) <span class="sc">/</span> h2</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  LHS <span class="ot">&lt;-</span> <span class="fu">rbind</span>(<span class="fu">cbind</span>(<span class="fu">crossprod</span>(X1), <span class="fu">crossprod</span>(X1, Z)),</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>               <span class="fu">cbind</span>(<span class="fu">crossprod</span>(Z, X1), <span class="fu">crossprod</span>(Z) <span class="sc">+</span> <span class="fu">solve</span>(Gstar) <span class="sc">*</span> lambda))</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  RHS <span class="ot">&lt;-</span> <span class="fu">rbind</span>(<span class="fu">crossprod</span>(X1, y[train]), <span class="fu">crossprod</span>(Z, y[train]))</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  C   <span class="ot">&lt;-</span> <span class="fu">solve</span>(LHS)                                  <span class="co"># kept: it carries the PEVs</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">u   =</span> (C <span class="sc">%*%</span> RHS)[<span class="sc">-</span><span class="dv">1</span>],</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">rel =</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">diag</span>(C)[<span class="sc">-</span><span class="dv">1</span>] <span class="sc">*</span> lambda <span class="sc">/</span> <span class="fu">diag</span>(Gstar))</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>fit   <span class="ot">&lt;-</span> <span class="fu">gblup</span>(y, train, h2)</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>u_hat <span class="ot">&lt;-</span> fit<span class="sc">$</span>u</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"GBLUP accuracy (candidates):"</span>, <span class="fu">cor</span>(u_hat[cand], g[cand]), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; GBLUP accuracy (candidates): 0.9596232</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="reliability-the-accuracy-you-can-compute-without-the-truth" class="level3" data-number="12.3.3">
+<h3 data-number="12.3.3" class="anchored" data-anchor-id="reliability-the-accuracy-you-can-compute-without-the-truth"><span class="header-section-number">12.3.3</span> Reliability: the accuracy you can compute without the truth</h3>
+<p>Inverting the coefficient matrix rather than just solving against it costs one more decomposition and returns something a breeding programme can act on. The <span class="math inline">\(\mathbf{u}\)</span> block of that inverse holds the prediction error variances, <span class="math inline">\(\mathrm{PEV}_i = \sigma^2_e\,[\mathbf{C}^{uu}]_{ii}\)</span>, and the reliability of an individual’s prediction is the fraction of its prior variance the data removed:</p>
+<p><span class="math display">\[r_i^2 \;=\; 1 - \frac{\mathrm{PEV}_i}{\sigma^2_u\,\mathbf{G}^{*}_{ii}}.\]</span></p>
+<p>This is the same <span class="math inline">\(r\)</span> as the accuracy reported everywhere in this chapter, with one difference that is the entire point: <span class="math inline">\(g\)</span> does not appear in it. A programme can compute it for candidates it has never phenotyped and never will.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">mean_reliability =</span> <span class="fu">mean</span>(fit<span class="sc">$</span>rel[cand]),</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">implied_accuracy =</span> <span class="fu">sqrt</span>(<span class="fu">mean</span>(fit<span class="sc">$</span>rel[cand])),</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">realised_accuracy =</span> <span class="fu">cor</span>(u_hat[cand], g[cand]))</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  mean_reliability  implied_accuracy realised_accuracy </span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         0.8016810         0.8953664         0.9596232</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The model under-states itself by about 0.06. Some of that is the blend’s doing: <span class="math inline">\(0.95\mathbf{G} + 0.05\mathbf{I}\)</span> tells the equations that every candidate carries 5% of variance no relative can explain, and each <span class="math inline">\(r_i^2\)</span> is computed against that inflated prior. Dialling the blend down says how much:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>blend <span class="ot">&lt;-</span> <span class="cf">function</span>(w) {</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  Gstar <span class="ot">&lt;-</span> w <span class="sc">*</span> G <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">-</span> w) <span class="sc">*</span> <span class="fu">diag</span>(N)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  n_t <span class="ot">&lt;-</span> <span class="fu">length</span>(train)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  Z  <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, n_t, N); Z[<span class="fu">cbind</span>(<span class="fu">seq_len</span>(n_t), train)] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  X1 <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">1</span>, n_t, <span class="dv">1</span>); lambda <span class="ot">&lt;-</span> (<span class="dv">1</span> <span class="sc">-</span> h2) <span class="sc">/</span> h2</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  C  <span class="ot">&lt;-</span> <span class="fu">solve</span>(<span class="fu">rbind</span>(<span class="fu">cbind</span>(<span class="fu">crossprod</span>(X1), <span class="fu">crossprod</span>(X1, Z)),</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">cbind</span>(<span class="fu">crossprod</span>(Z, X1), <span class="fu">crossprod</span>(Z) <span class="sc">+</span> <span class="fu">solve</span>(Gstar) <span class="sc">*</span> lambda)))</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sqrt</span>(<span class="fu">mean</span>((<span class="dv">1</span> <span class="sc">-</span> <span class="fu">diag</span>(C)[<span class="sc">-</span><span class="dv">1</span>] <span class="sc">*</span> lambda <span class="sc">/</span> <span class="fu">diag</span>(Gstar))[cand]))</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">implied_at_0.95 =</span> <span class="fu">blend</span>(<span class="fl">0.95</span>), <span class="at">implied_at_0.999 =</span> <span class="fu">blend</span>(<span class="fl">0.999</span>),</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">realised =</span> <span class="fu">cor</span>(u_hat[cand], g[cand]))</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  implied_at_0.95 implied_at_0.999         realised </span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        0.8953664        0.9272495        0.9596232</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Roughly half the gap, then, and the other half survives however little identity is mixed in. A mean reliability and a correlation taken across a <em>set</em> of candidates are not the same quantity: the second is helped by the spread of true values among the candidates, which the first knows nothing about. Both halves point the same way – the reliability is conservative – and <a href="#sec-hybrid-cv" class="quarto-xref"><span>Section 12.4</span></a> shows that the gap is this small only because this particular split was easy.</p>
+</section>
+</section>
+<section id="sec-hybrid-cv" class="level2" data-number="12.4">
+<h2 data-number="12.4" class="anchored" data-anchor-id="sec-hybrid-cv"><span class="header-section-number">12.4</span> What the random split was measuring</h2>
+<p>The split at the top of this chapter took a random 60% of the <em>hybrids</em>. There are 625 hybrids but only 50 lines, so a sample that size contains every line several times over: each of the 250 candidates has <strong>both of its parents</strong> sitting in the training set, in other hybrids with recorded phenotypes. Given <a href="#sec-genpred-truth" class="quarto-xref"><span>Section 12.2</span></a> – a hybrid’s value is the mean of its two parental values – that split asks the model to interpolate inside a factorial whose margins it has already seen. It is not a hard question.</p>
+<p><span class="citation" data-cites="burgueno2012">Burgueño et al. (<a href="99-references.html#ref-burgueno2012" role="doc-biblioref">2012</a>)</span> named the schemes that distinguish the cases, and <span class="citation" data-cites="technow2014">Technow et al. (<a href="99-references.html#ref-technow2014" role="doc-biblioref">2014</a>)</span> applied them to exactly this design, a factorial between two heterotic pools. Holding out <em>lines</em> rather than hybrids splits the candidates three ways: both parents seen (the random split, CV2), one parent unseen (CV1), neither parent seen (CV0). Removing 8 lines from each pool leaves 289 training hybrids and gives 272 CV1 and 64 CV0 candidates; the CV2 row below draws a random training set of the same 289, so the only thing that differs across the three rows is <em>what</em> was hidden, not how much.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>cv_split <span class="ot">&lt;-</span> <span class="cf">function</span>(seed, <span class="at">k =</span> <span class="dv">8</span>) {</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(seed)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  hoA <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">unique</span>(ctx<span class="sc">$</span>ped<span class="sc">$</span>a), k)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  hoB <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">unique</span>(ctx<span class="sc">$</span>ped<span class="sc">$</span>b), k)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  seen_a <span class="ot">&lt;-</span> <span class="sc">!</span>(ctx<span class="sc">$</span>ped<span class="sc">$</span>a <span class="sc">%in%</span> hoA)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  seen_b <span class="ot">&lt;-</span> <span class="sc">!</span>(ctx<span class="sc">$</span>ped<span class="sc">$</span>b <span class="sc">%in%</span> hoB)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  lin <span class="ot">&lt;-</span> <span class="fu">gblup</span>(y, <span class="fu">which</span>(seen_a <span class="sc">&amp;</span> seen_b), h2)         <span class="co"># lines held out</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  rnd <span class="ot">&lt;-</span> <span class="fu">sample.int</span>(N, <span class="fu">sum</span>(seen_a <span class="sc">&amp;</span> seen_b))          <span class="co"># same size, random hybrids</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  rd  <span class="ot">&lt;-</span> <span class="fu">gblup</span>(y, rnd, h2)</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  i2  <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(<span class="fu">seq_len</span>(N), rnd)</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  i1  <span class="ot">&lt;-</span> <span class="fu">which</span>(<span class="fu">xor</span>(seen_a, seen_b))</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  i0  <span class="ot">&lt;-</span> <span class="fu">which</span>(<span class="sc">!</span>seen_a <span class="sc">&amp;</span> <span class="sc">!</span>seen_b)</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="at">CV2 =</span> <span class="fu">cor</span>(rd<span class="sc">$</span>u[i2],  g[i2]),  <span class="at">r2 =</span> <span class="fu">sqrt</span>(<span class="fu">mean</span>(rd<span class="sc">$</span>rel[i2])),</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">CV1 =</span> <span class="fu">cor</span>(lin<span class="sc">$</span>u[i1], g[i1]),  <span class="at">r1 =</span> <span class="fu">sqrt</span>(<span class="fu">mean</span>(lin<span class="sc">$</span>rel[i1])),</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">CV0 =</span> <span class="fu">cor</span>(lin<span class="sc">$</span>u[i0], g[i0]),  <span class="at">r0 =</span> <span class="fu">sqrt</span>(<span class="fu">mean</span>(lin<span class="sc">$</span>rel[i0])))</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>cv <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>, cv_split))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>GBLUP over 20 line-holdout replicates at h2 = 0.5, training set fixed at 289 hybrids. <code>accuracy</code> is the realised correlation with the truth; <code>reliability</code> is the model’s own estimate of it, computed without the truth.</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">scheme</th>
+<th style="text-align: right;">accuracy</th>
+<th style="text-align: right;">sd</th>
+<th style="text-align: right;">reliability</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">CV2 – random hybrids held out</td>
+<td style="text-align: right;">0.932</td>
+<td style="text-align: right;">0.013</td>
+<td style="text-align: right;">0.873</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CV1 – one parent unseen</td>
+<td style="text-align: right;">0.653</td>
+<td style="text-align: right;">0.073</td>
+<td style="text-align: right;">0.644</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CV0 – both parents unseen</td>
+<td style="text-align: right;">0.122</td>
+<td style="text-align: right;">0.217</td>
+<td style="text-align: right;">0.128</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>The accuracy the chapter opened with survives only in the first row. Ask the model about a hybrid with one unseen parent and it drops by a third; ask about one with two unseen parents and what is left is 0.12, with a spread across replicates nearly twice that – small, and not reliably distinguishable from nothing. <span class="citation" data-cites="habier2007">Habier et al. (<a href="99-references.html#ref-habier2007" role="doc-biblioref">2007</a>)</span> separate the two things a genomic prediction can be using – the relationship between candidates and training individuals, and the marker effects estimated in their own right – and this table is that separation, measured. The first row is almost entirely relatedness. The third row is what is left when relatedness is removed, and it is the honest measure of what the 2000 markers bought.</p>
+<p>That the third row collapses is not a defect of the fit. It is <span class="math inline">\(\mathrm{rank}(\mathbf{G}) = L - 2\)</span> again: the 289 training records carry at most 34 lines’ worth of independent information, and asking them to pin down 2000 marker effects well enough to score a genotype no relative shares is asking for something that was never in the data. <span class="citation" data-cites="daetwyler2008">Daetwyler et al. (<a href="99-references.html#ref-daetwyler2008" role="doc-biblioref">2008</a>)</span> give the deterministic accuracy for exactly that regime, <span class="math inline">\(r = \sqrt{n h^2 / (n h^2 + M_e)}\)</span>, and with the units the simulation actually has – <span class="math inline">\(n\)</span> the independent <em>lines</em>, and <span class="math inline">\(M_e\)</span> the marker count, because these markers are drawn independently and carry no linkage to bundle them into segments – it agrees:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>n_lines_train <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> (book_cfg<span class="sc">$</span>n_pool_A <span class="sc">-</span> <span class="dv">8</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">deterministic =</span> <span class="fu">sqrt</span>(n_lines_train <span class="sc">*</span> h2 <span class="sc">/</span> (n_lines_train <span class="sc">*</span> h2 <span class="sc">+</span> book_cfg<span class="sc">$</span>m)),</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">measured_CV0  =</span> <span class="fu">mean</span>(cv[, <span class="st">"CV0"</span>]))</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; deterministic  measured_CV0 </span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    0.09180609    0.12191453</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The most useful column is the last one in the table. The reliabilities computed from the mixed model equations – with no access to <span class="math inline">\(g\)</span> – track the realised accuracies down the collapse, 0.64 against 0.65 for CV1 and 0.13 against 0.12 for CV0. The model knows. A programme that reports reliability alongside every GEBV does not need to discover this the way this chapter did; the warning is in the same solve that produced the prediction.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Report which parents the training set had seen
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>An accuracy figure without its cross-validation scheme is not interpretable. The same fit, the same data and the same trait give 0.93, 0.65 or 0.12 here depending only on which hybrids were withheld. In a hybrid programme this is not a technicality: CV2 is the accuracy for filling in a partly-observed factorial, CV1 for a cross onto a new line from one pool, CV0 for a cross between two new lines. They are different questions, and only the first one is easy.</p>
+</div>
+</div>
+</section>
+<section id="bayesa-and-bayesb-prediction-from-marker-effects" class="level2" data-number="12.5">
+<h2 data-number="12.5" class="anchored" data-anchor-id="bayesa-and-bayesb-prediction-from-marker-effects"><span class="header-section-number">12.5</span> BayesA and BayesB: prediction from marker effects</h2>
+<p>GBLUP assumes every marker contributes an equal, infinitesimal share of the genetic variance. The Bayesian alphabet <span class="citation" data-cites="meuwissen2001 delcampos2013">(<a href="99-references.html#ref-meuwissen2001" role="doc-biblioref">Meuwissen et al. 2001</a>; <a href="99-references.html#ref-delcampos2013" role="doc-biblioref">Campos et al. 2013</a>)</span> relaxes that one assumption at a time. <strong>BayesA</strong> gives every marker its own variance, drawn from a scaled-inverse-<span class="math inline">\(\chi^2\)</span> prior – effects are shrunk individually rather than uniformly, which matters when a few markers carry much more signal than the rest. <strong>BayesB</strong> adds a point mass at zero: each marker has prior probability <span class="math inline">\(\pi\)</span> of being excluded entirely, so the model performs variable selection as it fits. Both reduce to GBLUP’s ridge-regression solution as a special case; they differ only in how much of the genetic architecture they let the data shape.</p>
+<section id="the-priors-explicitly" class="level3" data-number="12.5.1">
+<h3 data-number="12.5.1" class="anchored" data-anchor-id="the-priors-explicitly"><span class="header-section-number">12.5.1</span> The priors, explicitly</h3>
+<p>All three models write <span class="math inline">\(\mathbf{g} = \mathbf{Z}\boldsymbol\beta\)</span> and differ only in what they assume about <span class="math inline">\(\beta_k\)</span>. Ridge regression, and therefore GBLUP, uses one variance for every marker; BayesA gives each marker its own, drawn from a scaled inverse chi-square; BayesB puts a spike at zero in front of it:</p>
+<p><span class="math display">\[\text{ridge, and so GBLUP:}\quad \beta_k \sim N(0, \sigma^2_\beta)
+  \qquad\qquad
+  \text{BayesA:}\quad \beta_k \sim N(0, \sigma^2_k), \;\; \sigma^2_k \sim \chi^{-2}(\nu, S)\]</span></p>
+<p><span class="math display">\[\text{BayesB:}\quad \beta_k \sim
+  \begin{cases} 0 &amp; \text{with probability } \pi \\[2pt]
+                N(0, \sigma^2_k) &amp; \text{otherwise.}\end{cases}\]</span></p>
+<p>The scaled inverse chi-square is the conjugate prior for a normal variance, which is the whole reason it appears: it keeps the Gibbs sampler in closed form. Its two hyperparameters are the arguments the fits below pass. <span class="math inline">\(\nu\)</span> is <code>df = 5</code>, the prior weight in pseudo-observations – small, so the prior stays vague, but not zero, because the posterior is improper at <span class="math inline">\(\nu = 0\)</span>. <span class="math inline">\(S\)</span> is set from <code>R2 = 0.5</code>, the share of phenotypic variance the prior expects the markers to explain, spread over the markers by their observed variation. Neither is fitted; both are choices, and <code>R2</code> in particular is a statement about heritability made before seeing the data.</p>
+<p>This book fits both with <code>bWGR::BayesA()</code>/<code>bWGR::BayesB()</code> <span class="citation" data-cites="xavier2019bwgr">(<a href="99-references.html#ref-xavier2019bwgr" role="doc-biblioref">Xavier et al. 2019</a>)</span> rather than by hand – unlike GBLUP, a Gibbs sampler over marker effects is not the few lines the mixed-model solve above was, and <code>bWGR</code> is exactly the tool <code>vanraden_G()</code>’s docstring pointed toward without naming:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(bWGR)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>M <span class="ot">&lt;-</span> ctx<span class="sc">$</span>X <span class="sc">*</span> <span class="dv">2</span>   <span class="co"># dosage 0/1/2, what bWGR expects</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>fitA <span class="ot">&lt;-</span> <span class="fu">BayesA</span>(y[train], M[train, ], <span class="at">it =</span> <span class="dv">1500</span>, <span class="at">bi =</span> <span class="dv">500</span>, <span class="at">df =</span> <span class="dv">5</span>, <span class="at">R2 =</span> <span class="fl">0.5</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>fitB <span class="ot">&lt;-</span> <span class="fu">BayesB</span>(y[train], M[train, ], <span class="at">it =</span> <span class="dv">1500</span>, <span class="at">bi =</span> <span class="dv">500</span>, <span class="at">pi =</span> <span class="fl">0.95</span>, <span class="at">df =</span> <span class="dv">5</span>, <span class="at">R2 =</span> <span class="fl">0.5</span>)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>predA <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(M[cand, ] <span class="sc">%*%</span> fitA<span class="sc">$</span>b)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>predB <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(M[cand, ] <span class="sc">%*%</span> fitB<span class="sc">$</span>b)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">BayesA =</span> <span class="fu">cor</span>(predA, g[cand]), <span class="at">BayesB =</span> <span class="fu">cor</span>(predB, g[cand]))</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    BayesA    BayesB </span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 0.9606263 0.9599031</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Both fits produce a marker-effect vector <code>$b</code>; a candidate’s GEBV is just its genotypes dotted with those effects. GBLUP produced the same quantity from the relationship matrix instead of the markers directly – two routes to the same thing, checked next.</p>
+</section>
+<section id="what-the-sampler-actually-selects" class="level3" data-number="12.5.2">
+<h3 data-number="12.5.2" class="anchored" data-anchor-id="what-the-sampler-actually-selects"><span class="header-section-number">12.5.2</span> What the sampler actually selects</h3>
+<p>Both fits also return the quantities the priors above are about – BayesA’s per-marker variances in <code>$vb</code>, BayesB’s posterior inclusion probabilities in <code>$d</code> – and on the polygenic trait there is nothing in them to look at. Rebuild the oligogenic architecture the cached sweep below uses, three markers of 2000 given effects and everything else exactly zero, and there is:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(book_cfg<span class="sc">$</span>seed <span class="sc">+</span> <span class="dv">42</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>qtl  <span class="ot">&lt;-</span> <span class="fu">sample.int</span>(book_cfg<span class="sc">$</span>m, <span class="dv">3</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>Bq   <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, book_cfg<span class="sc">$</span>m); Bq[qtl] <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">3</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>g_ol <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">scale</span>(vr<span class="sc">$</span>Z <span class="sc">%*%</span> Bq))</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">31</span>)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>y_ol <span class="ot">&lt;-</span> g_ol <span class="sc">+</span> <span class="fu">rnorm</span>(N, <span class="dv">0</span>, <span class="fu">sqrt</span>((<span class="dv">1</span> <span class="sc">-</span> h2) <span class="sc">/</span> h2))</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">apply</span>(vr<span class="sc">$</span>Z[, qtl], <span class="dv">2</span>, var) <span class="sc">*</span> Bq[qtl]<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">sum</span>(<span class="fu">apply</span>(vr<span class="sc">$</span>Z[, qtl], <span class="dv">2</span>, var) <span class="sc">*</span> Bq[qtl]<span class="sc">^</span><span class="dv">2</span>), <span class="dv">3</span>)   <span class="co"># share of variance each</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.962 0.038 0.001</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Worth knowing before reading anything into the sweep: the three effects were drawn from <code>rnorm(3)</code>, and this draw put 96% of the genetic variance on one of them. “Three causal markers” describes the construction; the trait is effectively monogenic, and the true <span class="math inline">\(\pi\)</span> is nearer <span class="math inline">\(1 - 1/2000\)</span> than the <span class="math inline">\(1 - 3/2000\)</span> the caption below quotes.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>oA <span class="ot">&lt;-</span> <span class="fu">BayesA</span>(y_ol[train], M[train, ], <span class="at">it =</span> <span class="dv">1500</span>, <span class="at">bi =</span> <span class="dv">500</span>, <span class="at">df =</span> <span class="dv">5</span>, <span class="at">R2 =</span> <span class="fl">0.5</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>oB <span class="ot">&lt;-</span> <span class="fu">BayesB</span>(y_ol[train], M[train, ], <span class="at">it =</span> <span class="dv">1500</span>, <span class="at">bi =</span> <span class="dv">500</span>, <span class="at">pi =</span> <span class="fl">0.95</span>, <span class="at">df =</span> <span class="dv">5</span>, <span class="at">R2 =</span> <span class="fl">0.5</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>big <span class="ot">&lt;-</span> qtl[<span class="fu">which.max</span>(<span class="fu">abs</span>(Bq[qtl]))]</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">BayesB_d_at_QTL   =</span> oB<span class="sc">$</span>d[big],  <span class="at">BayesB_d_median  =</span> <span class="fu">median</span>(oB<span class="sc">$</span>d),</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">BayesA_vb_at_QTL  =</span> oA<span class="sc">$</span>vb[big], <span class="at">BayesA_vb_median =</span> <span class="fu">median</span>(oA<span class="sc">$</span>vb))</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  BayesB_d_at_QTL  BayesB_d_median BayesA_vb_at_QTL BayesA_vb_median </span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      0.999000013      0.179000005      0.011139854      0.002957477</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">2</span>, <span class="dv">1</span>))</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (v <span class="cf">in</span> <span class="fu">list</span>(<span class="fu">list</span>(oB<span class="sc">$</span>d, <span class="st">"BayesB: posterior inclusion"</span>),</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>               <span class="fu">list</span>(oA<span class="sc">$</span>vb, <span class="st">"BayesA: marker variance"</span>))) {</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(v[[<span class="dv">1</span>]], <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">cex =</span> <span class="fl">0.3</span>, <span class="at">col =</span> <span class="st">"grey60"</span>, <span class="at">xlab =</span> <span class="st">"marker"</span>, <span class="at">ylab =</span> <span class="st">""</span>,</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">main =</span> v[[<span class="dv">2</span>]], <span class="at">cex.main =</span> <span class="fl">0.95</span>)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">points</span>(big, v[[<span class="dv">1</span>]][big], <span class="at">pch =</span> <span class="dv">1</span>, <span class="at">cex =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div id="fig-genpred-selection" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-genpred-selection-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="08b-genomic-prediction_files/figure-html/fig-genpred-selection-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="1050">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-genpred-selection-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;12.1: The two priors on the same oligogenic trait, with the marker carrying 96% of the genetic variance circled. Both find it. Only BayesB can then remove the other 1999 from the model.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="what-bayesb-does-that-bayesa-cannot" class="level3" data-number="12.5.3">
+<h3 data-number="12.5.3" class="anchored" data-anchor-id="what-bayesb-does-that-bayesa-cannot"><span class="header-section-number">12.5.3</span> What BayesB does that BayesA cannot</h3>
+<p>Both panels find the marker, which is worth saying plainly because the usual telling of this comparison implies BayesA does not: its variance for the QTL is about four times the median marker’s and sits well clear of the background band. What separates the two priors is not detection but what each can do afterwards.</p>
+<p>BayesA estimates a private variance <span class="math inline">\(\sigma^2_k\)</span> for every marker, and the only data bearing on <span class="math inline">\(\sigma^2_k\)</span> is the single effect <span class="math inline">\(\beta_k\)</span> drawn from it. One observation never overwhelms a prior, so each <span class="math inline">\(\sigma^2_k\)</span> stays near the <span class="math inline">\(\chi^{-2}(\nu, S)\)</span> it started from however many individuals are phenotyped – <span class="citation" data-cites="gianola2009">Gianola et al. (<a href="99-references.html#ref-gianola2009" role="doc-biblioref">2009</a>)</span> make this the central objection to describing the Bayesian alphabet as “learning the genetic architecture”. The cost is not the missed QTL. It is that the other 1999 markers keep a variance they have not earned, and go on absorbing signal that belongs to the one marker that has. BayesB’s spike deletes them, and it can afford to because it learns a single shared <span class="math inline">\(\pi\)</span> from all 2000 markers at once rather than 2000 private variances from one observation each.</p>
+<p>So the advantage is real but bounded, and shows up in accuracy rather than in the figure: on this architecture at <span class="math inline">\(h^2 = 0.5\)</span> the table below gives BayesB 0.952 against BayesA’s 0.931 and GBLUP’s 0.930. BayesA sits with GBLUP, not with BayesB, which is the practical summary of the paragraph above.</p>
+</section>
+</section>
+<section id="verification-two-routes-agree" class="level2" data-number="12.6">
+<h2 data-number="12.6" class="anchored" data-anchor-id="verification-two-routes-agree"><span class="header-section-number">12.6</span> Verification: two routes agree</h2>
+<p>GBLUP with a flat prior on every marker’s variance and the un-selected member of the Bayesian alphabet, Bayesian ridge regression (<code>iv = FALSE, pi = 0</code> in <code>bWGR::wgr()</code>), are the same model solved two different ways – one through the <span class="math inline">\(N \times N\)</span> relationship matrix, the other through the <span class="math inline">\(N \times m\)</span> marker matrix.</p>
+<p>They are the same model in a stronger sense than “they should agree”. Substitute <span class="math inline">\(\mathbf{u} = \mathbf{Z}\boldsymbol\beta\)</span> and <span class="math inline">\(\mathbf{G} = \mathbf{Z}\mathbf{Z}'
+/ 2\sum_k p_k(1-p_k)\)</span> into the equations above and the two solutions are related by an identity: with <span class="math inline">\(t\)</span> the training rows,</p>
+<p><span class="math display">\[\hat{\mathbf{u}} = \mathbf{G}_{\cdot t}
+    \left(\mathbf{G}_{tt} + \mathbf{I}\lambda\right)^{-1}(\mathbf{y}_t - \hat\mu)
+  \;=\; \mathbf{Z}\hat{\boldsymbol\beta},
+  \qquad
+  \hat{\boldsymbol\beta} = \mathbf{Z}_t'
+    \left(\mathbf{Z}_t\mathbf{Z}_t' + \mathbf{I}\lambda_\beta\right)^{-1}
+    (\mathbf{y}_t - \hat\mu),\]</span></p>
+<p>with the two penalties differing by exactly the divisor that defines <span class="math inline">\(\mathbf{G}\)</span>: <span class="math inline">\(\lambda_\beta = \lambda \cdot 2\sum_k p_k(1-p_k)\)</span>. Getting that scalar wrong is the usual way this equivalence is reported as “approximate”. It is not approximate:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>lambda <span class="ot">&lt;-</span> (<span class="dv">1</span> <span class="sc">-</span> h2) <span class="sc">/</span> h2</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>yc  <span class="ot">&lt;-</span> y[train] <span class="sc">-</span> <span class="fu">mean</span>(y[train])</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>u_G <span class="ot">&lt;-</span> G[, train] <span class="sc">%*%</span> <span class="fu">solve</span>(G[train, train] <span class="sc">+</span> <span class="fu">diag</span>(lambda, <span class="fu">length</span>(train)), yc)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>u_M <span class="ot">&lt;-</span> vr<span class="sc">$</span>Z <span class="sc">%*%</span> <span class="fu">crossprod</span>(vr<span class="sc">$</span>Z[train, ],</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>         <span class="fu">solve</span>(<span class="fu">tcrossprod</span>(vr<span class="sc">$</span>Z[train, ]) <span class="sc">+</span> <span class="fu">diag</span>(lambda <span class="sc">*</span> s2, <span class="fu">length</span>(train)), yc))</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="fu">max</span>(<span class="fu">abs</span>(u_G <span class="sc">-</span> u_M))</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1.354472e-14</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Machine precision, over all 625 individuals. Note this route uses the raw <span class="math inline">\(\mathbf{G}\)</span>: it needs no inverse of it, so <a href="#sec-g-singular" class="quarto-xref"><span>Section 12.3.2</span></a>’s blend never enters, which is also why it is the cleaner statement of the identity.</p>
+<p>The Gibbs sampler should land in the same place, and does, though only to sampling error – it is estimating <span class="math inline">\(\lambda\)</span> from the data rather than being told it, and the blend used in <code>gblup()</code> has no exact marker-space equivalent:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>yobs <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA_real_</span>, N); yobs[train] <span class="ot">&lt;-</span> y[train]</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>fit_brr <span class="ot">&lt;-</span> <span class="fu">wgr</span>(yobs, M, <span class="at">iv =</span> <span class="cn">FALSE</span>, <span class="at">pi =</span> <span class="dv">0</span>, <span class="at">it =</span> <span class="dv">1500</span>, <span class="at">bi =</span> <span class="dv">500</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">gblup_vs_gibbs =</span> <span class="fu">cor</span>(u_hat, fit_brr<span class="sc">$</span>hat <span class="sc">-</span> <span class="fu">mean</span>(fit_brr<span class="sc">$</span>hat)))</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; gblup_vs_gibbs </span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      0.9992759</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>That correlation, 0.999, is the weaker of the two checks and is included because it exercises the code path the Bayesian fits above actually use. The identity is what proves the two routes are one model.</p>
+</section>
+<section id="which-model-wins-and-when" class="level2" data-number="12.7">
+<h2 data-number="12.7" class="anchored" data-anchor-id="which-model-wins-and-when"><span class="header-section-number">12.7</span> Which model wins, and when</h2>
+<p><code>ctx$traits</code> is built from thousands of markers with independent, similarly sized effects – the textbook case GBLUP’s infinitesimal-model assumption was designed for. A trait controlled by a handful of large-effect loci is a different regime, and it is the one BayesB’s point-mass prior exists for. <code>book/scripts/regenerate.R genpred</code> reruns the fits above 15 times each, at two heritabilities, under both <code>ctx$traits</code>’s polygenic architecture and a book-local variant with genetic variance concentrated on three markers out of 2000:</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Mean prediction accuracy (correlation, candidates only) over 15 independent training/candidate splits.</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">arch</th>
+<th style="text-align: right;">h2</th>
+<th style="text-align: right;">GBLUP</th>
+<th style="text-align: right;">BayesA</th>
+<th style="text-align: right;">BayesB</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">oligogenic</td>
+<td style="text-align: right;">0.2</td>
+<td style="text-align: right;">0.789</td>
+<td style="text-align: right;">0.782</td>
+<td style="text-align: right;">0.788</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">polygenic</td>
+<td style="text-align: right;">0.2</td>
+<td style="text-align: right;">0.799</td>
+<td style="text-align: right;">0.795</td>
+<td style="text-align: right;">0.798</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">oligogenic</td>
+<td style="text-align: right;">0.5</td>
+<td style="text-align: right;">0.930</td>
+<td style="text-align: right;">0.931</td>
+<td style="text-align: right;">0.952</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">polygenic</td>
+<td style="text-align: right;">0.5</td>
+<td style="text-align: right;">0.935</td>
+<td style="text-align: right;">0.935</td>
+<td style="text-align: right;">0.934</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>sub <span class="ot">&lt;-</span> <span class="fu">reshape</span>(acc, <span class="at">direction =</span> <span class="st">"long"</span>, <span class="at">varying =</span> <span class="fu">c</span>(<span class="st">"GBLUP"</span>, <span class="st">"BayesA"</span>, <span class="st">"BayesB"</span>),</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>               <span class="at">v.names =</span> <span class="st">"accuracy"</span>, <span class="at">timevar =</span> <span class="st">"method"</span>,</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">times =</span> <span class="fu">c</span>(<span class="st">"GBLUP"</span>, <span class="st">"BayesA"</span>, <span class="st">"BayesB"</span>))</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>sub<span class="sc">$</span>grp <span class="ot">&lt;-</span> <span class="fu">interaction</span>(sub<span class="sc">$</span>arch, sub<span class="sc">$</span>h2, <span class="at">sep =</span> <span class="st">"</span><span class="sc">\n</span><span class="st">h2="</span>)</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="fu">boxplot</span>(accuracy <span class="sc">~</span> method <span class="sc">+</span> grp, sub, <span class="at">las =</span> <span class="dv">2</span>, <span class="at">cex.axis =</span> <span class="fl">0.7</span>,</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>        <span class="at">col =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">"grey85"</span>, <span class="st">"grey65"</span>, <span class="st">"grey45"</span>), <span class="dv">4</span>),</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>        <span class="at">ylab =</span> <span class="st">"accuracy (candidates)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div id="fig-genpred-accuracy" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-genpred-accuracy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="08b-genomic-prediction_files/figure-html/fig-genpred-accuracy-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="1050">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-genpred-accuracy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;12.2: Prediction accuracy by architecture and heritability, 15 replicate splits each.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>At <span class="math inline">\(h^2 = 0.5\)</span> under the oligogenic architecture, BayesB’s mean accuracy is 0.022 higher than GBLUP’s – the gap the model was built to close. Under the polygenic architecture the three methods are indistinguishable within replicate noise: with genetic variance spread over thousands of markers, BayesB’s variable selection has nothing to select, and its point-mass prior buys nothing GBLUP was not already doing.</p>
+<p>That result is not evidence that the alphabet rarely helps. It is <a href="#sec-genpred-truth" class="quarto-xref"><span>Section 12.2</span></a> restated: on the polygenic arm the trait was <em>generated</em> from one shared marker variance, so GBLUP’s prior is the true one and no competitor can do better than match it. What the comparison establishes is the weaker and more useful claim – that BayesA and BayesB cost nothing when they are wrong, and recover a real gap when they are right.</p>
+<section id="sec-genpred-pi" class="level3" data-number="12.7.1">
+<h3 data-number="12.7.1" class="anchored" data-anchor-id="sec-genpred-pi"><span class="header-section-number">12.7.1</span> <code>pi</code> was fixed, not tuned</h3>
+<p>A real analyst does not know the true sparsity in advance. <code>genpred</code>’s second sweep holds the oligogenic architecture and <span class="math inline">\(h^2 = 0.5\)</span> fixed and only moves <code>pi</code>:</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>BayesB accuracy as <code>pi</code> moves from far too lenient toward the true sparsity (3 causal markers of 2000, pi = 0.9985).</caption>
+<thead>
+<tr class="header">
+<th style="text-align: right;">pi</th>
+<th style="text-align: right;">BayesB</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">0.500</td>
+<td style="text-align: right;">0.948</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.900</td>
+<td style="text-align: right;">0.955</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.950</td>
+<td style="text-align: right;">0.958</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.990</td>
+<td style="text-align: right;">0.964</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.995</td>
+<td style="text-align: right;">0.967</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Accuracy improves monotonically as <code>pi</code> approaches the truth, but the degradation from being off is gradual, not catastrophic – <code>pi</code> is worth cross-validating, not agonising over.</p>
+<p>The obvious alternative is to stop choosing it. BayesC<span class="math inline">\(\pi\)</span> puts a prior on <span class="math inline">\(\pi\)</span> itself and samples it alongside the effects, which ought to make the sweep above unnecessary. Fit it to both architectures:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>cpi_poly <span class="ot">&lt;-</span> <span class="fu">BayesCpi</span>(y[train],    M[train, ], <span class="at">it =</span> <span class="dv">1500</span>, <span class="at">bi =</span> <span class="dv">500</span>, <span class="at">df =</span> <span class="dv">5</span>, <span class="at">R2 =</span> <span class="fl">0.5</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>cpi_olig <span class="ot">&lt;-</span> <span class="fu">BayesCpi</span>(y_ol[train], M[train, ], <span class="at">it =</span> <span class="dv">1500</span>, <span class="at">bi =</span> <span class="dv">500</span>, <span class="at">df =</span> <span class="dv">5</span>, <span class="at">R2 =</span> <span class="fl">0.5</span>)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">pi_hat_polygenic  =</span> cpi_poly<span class="sc">$</span>pi,   <span class="co"># truth: 0</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">pi_hat_oligogenic =</span> cpi_olig<span class="sc">$</span>pi,   <span class="co"># truth: ~0.9995</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">acc_oligogenic    =</span> <span class="fu">cor</span>(<span class="fu">as.numeric</span>(M[cand, ] <span class="sc">%*%</span> cpi_olig<span class="sc">$</span>b), g_ol[cand]),</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">acc_BayesB_at_095 =</span> <span class="fu">cor</span>(<span class="fu">as.numeric</span>(M[cand, ] <span class="sc">%*%</span> oB<span class="sc">$</span>b), g_ol[cand]))</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  pi_hat_polygenic pi_hat_oligogenic    acc_oligogenic acc_BayesB_at_095 </span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         0.4369196         0.4390892         0.9299389         0.9524220</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>It returns essentially the same <span class="math inline">\(\pi\)</span> for a trait with 2000 causal markers as for one that is effectively monogenic, and predicts the oligogenic trait slightly worse than BayesB told the right answer. With 375 records and 2000 markers there is little in the data that speaks to <span class="math inline">\(\pi\)</span> specifically – <a href="#sec-g-singular" class="quarto-xref"><span>Section 12.3.2</span></a>’s 48 dimensions again – so what comes back is close to the prior. Estimating <span class="math inline">\(\pi\)</span> is not a substitute for choosing it here; the sweep above remains the honest route.</p>
+</section>
+</section>
+<section id="from-gebvs-to-stage1_build" class="level2" data-number="12.8">
+<h2 data-number="12.8" class="anchored" data-anchor-id="from-gebvs-to-stage1_build"><span class="header-section-number">12.8</span> From GEBVs to <code>stage1_build()</code></h2>
+<p>Everything above ends where <a href="03-simulating-crosses.html" class="quarto-xref"><span>Chapter 3</span></a>‘s contract begins. The candidates’ predicted values, whichever model produced them, are exactly the <code>traits</code> argument <code>stage1_build()</code> expects – one column per trait, one row per hybrid:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>hybrids_traits <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">hybrid =</span> cand, <span class="at">trait1 =</span> predB)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(hybrids_traits)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;">hybrid</th>
+<th style="text-align: right;">trait1</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0.1398207</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0.3260893</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">-0.1489823</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">1.6891953</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">1.3072349</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">0.2173326</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Repeat the fit once per trait in the multi-trait index and this data frame is what feeds <code>stage1_build(X, ped, traits, fL)</code>. The second consumer is <code>ocs_quadprog(f, gebv, lambda, ...)</code> of <a href="09-optimal-contributions.html" class="quarto-xref"><span>Chapter 13</span></a>, whose argument is literally named <code>gebv</code> and has until now been handed the truth.</p>
+<p>Carry the reliabilities with them. <a href="#sec-hybrid-cv" class="quarto-xref"><span>Section 12.4</span></a>’s table is the argument for storing <code>fit$rel</code> next to every predicted value rather than discarding it: a candidate whose GEBV is unreliable is not a bad candidate, it is an unmeasured one, and the difference matters to a selection decision.</p>
+</section>
+<section id="back-to-finding-5-a-measured-accuracy-not-an-assumed-one" class="level2" data-number="12.9">
+<h2 data-number="12.9" class="anchored" data-anchor-id="back-to-finding-5-a-measured-accuracy-not-an-assumed-one"><span class="header-section-number">12.9</span> Back to Finding 5: a measured accuracy, not an assumed one</h2>
+<p><a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 10</span></a>’s Finding 5 assumed a prediction accuracy <code>r</code> and manufactured error correlated with relatedness to match it. The GBLUP fit above at <span class="math inline">\(h^2 = 0.5\)</span> gives a <em>measured</em> accuracy of 0.96 on the polygenic architecture, at the top of the range Finding 5 explored (<span class="math inline">\(r \in \{0.5, 0.7, 0.9, 1\}\)</span>) – but <a href="#sec-hybrid-cv" class="quarto-xref"><span>Section 12.4</span></a> is the reason not to read that as the typical case. It is the CV2 number, the accuracy for a candidate whose two parents are already phenotyped in other combinations. The CV1 row of that table, 0.65, sits near the <em>bottom</em> of Finding 5’s range, and the CV0 row falls well below anything it explored. Between them the two chapters bracket the same interval from opposite ends, and Finding 5’s pessimistic cases are the realistic ones.</p>
+<p>The errors are, in fact, structured by relatedness rather than white:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>err <span class="ot">&lt;-</span> g[cand] <span class="sc">-</span> u_hat[cand]</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>fcand <span class="ot">&lt;-</span> ctx<span class="sc">$</span>f[cand, cand]</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>ut <span class="ot">&lt;-</span> <span class="fu">upper.tri</span>(fcand)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(<span class="fu">outer</span>(err, err)[ut], fcand[ut])</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.1397751</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Pairs of candidates that are more related have more correlated prediction errors – the mechanism Finding 5 assumed, confirmed here from an actual fitted model rather than injected. It is a modest correlation, not the extreme case Finding 5 stress-tested, because <span class="math inline">\(h^2 = 0.5\)</span> with <code>r length(train)</code> training records is a comparatively favourable regime; a smaller or less related training set would push it higher.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>What this chapter still does not model
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Closing the “traits are given” gap opens several more, named here so they are not silently dropped:</p>
+<ul>
+<li><strong>Specific combining ability.</strong> <a href="#sec-genpred-truth" class="quarto-xref"><span>Section 12.2</span></a> showed there is none in <code>ctx$traits</code> to find: the trait is additive by construction, so a hybrid’s value is exactly the mean of its parents’. SCA is not merely unmodelled here, it is absent from the data. A real hybrid programme has it – <a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 8</span></a>’s dominance deviations are where it comes from – and would fit GCA and SCA jointly rather than one additive effect per marker.</li>
+<li><strong>Estimated variance components.</strong> <span class="math inline">\(h^2\)</span> is supplied to <code>gblup()</code>, never estimated. A real fit gets <span class="math inline">\(\lambda\)</span> from REML on the training data, and the reliabilities of <a href="#sec-hybrid-cv" class="quarto-xref"><span>Section 12.4</span></a> inherit that estimate’s uncertainty.</li>
+<li><strong>Multivariate prediction.</strong> <code>ctx$traits</code> has three correlated columns; this chapter predicted one. A multi-trait Bayesian model borrows information across traits and should out-predict fitting each one separately, especially for the traits with less training data.</li>
+<li><strong>Forward validation.</strong> <a href="#sec-hybrid-cv" class="quarto-xref"><span>Section 12.4</span></a> splits by line, which is the right axis for a factorial, but every scheme in it still samples training and candidates from one generation. A programme selecting for the future validates forward in time, on a later cycle than it trained on.</li>
+<li><strong>Retraining across cycles.</strong> <a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 17</span></a> runs the <em>selection</em> side of a multi-cycle programme with a fixed, perfect index. A model trained once and never updated goes stale as the population it predicts drifts from the population it was trained on.</li>
+<li><strong>Genotyping cost and marker density.</strong> Accuracy was measured here at a fixed 2000 markers; a real programme trades marker density against genotyping cost per individual, not just against training-set size.</li>
+</ul>
+</div>
+</div>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
+<div id="ref-burgueno2012" class="csl-entry" role="listitem">
+Burgueño, J., G. de los Campos, K. Weigel, and J. Crossa. 2012. <span>“Genomic Prediction of Breeding Values When Modeling Genotype <span><span class="math inline">\(\times\)</span></span> Environment Interaction Using Pedigree and Dense Molecular Markers.”</span> <em>Crop Science</em> 52 (2): 707–19. <a href="https://doi.org/10.2135/cropsci2011.06.0299">https://doi.org/10.2135/cropsci2011.06.0299</a>.
+</div>
+<div id="ref-delcampos2013" class="csl-entry" role="listitem">
+Campos, G. de los, J. M. Hickey, R. Pong-Wong, H. D. Daetwyler, and M. P. L. Calus. 2013. <span>“Whole-Genome Regression and Prediction Methods Applied to Plant and Animal Breeding.”</span> <em>Genetics</em> 193 (2): 327–45. <a href="https://doi.org/10.1534/genetics.112.143313">https://doi.org/10.1534/genetics.112.143313</a>.
+</div>
+<div id="ref-daetwyler2008" class="csl-entry" role="listitem">
+Daetwyler, H. D., B. Villanueva, and J. A. Woolliams. 2008. <span>“Accuracy of Predicting the Genetic Risk of Disease Using a Genome-Wide Approach.”</span> <em>PLoS ONE</em> 3 (10): e3395. <a href="https://doi.org/10.1371/journal.pone.0003395">https://doi.org/10.1371/journal.pone.0003395</a>.
+</div>
+<div id="ref-gianola2009" class="csl-entry" role="listitem">
+Gianola, D., G. de los Campos, W. G. Hill, E. Manfredi, and R. Fernando. 2009. <span>“Additive Genetic Variability and the <span>B</span>ayesian Alphabet.”</span> <em>Genetics</em> 183 (1): 347–63. <a href="https://doi.org/10.1534/genetics.109.103952">https://doi.org/10.1534/genetics.109.103952</a>.
+</div>
+<div id="ref-habier2007" class="csl-entry" role="listitem">
+Habier, D., R. L. Fernando, and J. C. M. Dekkers. 2007. <span>“The Impact of Genetic Relationship Information on Genome-Assisted Breeding Values.”</span> <em>Genetics</em> 177 (4): 2389–97. <a href="https://doi.org/10.1534/genetics.107.081190">https://doi.org/10.1534/genetics.107.081190</a>.
+</div>
+<div id="ref-henderson1975" class="csl-entry" role="listitem">
+Henderson, C. R. 1975. <span>“Best Linear Unbiased Estimation and Prediction Under a Selection Model.”</span> <em>Biometrics</em> 31 (2): 423–47. <a href="https://doi.org/10.2307/2529430">https://doi.org/10.2307/2529430</a>.
+</div>
+<div id="ref-meuwissen2001" class="csl-entry" role="listitem">
+Meuwissen, T. H. E., B. J. Hayes, and M. E. Goddard. 2001. <span>“Prediction of Total Genetic Value Using Genome-Wide Dense Marker Maps.”</span> <em>Genetics</em> 157 (4): 1819–29. <a href="https://doi.org/10.1093/genetics/157.4.1819">https://doi.org/10.1093/genetics/157.4.1819</a>.
+</div>
+<div id="ref-technow2014" class="csl-entry" role="listitem">
+Technow, F., T. A. Schrag, W. Schipprack, E. Bauer, H. Simianer, and A. E. Melchinger. 2014. <span>“Genome Properties and Prospects of Genomic Prediction of Hybrid Performance in a Breeding Program of Maize.”</span> <em>Genetics</em> 197 (4): 1343–55. <a href="https://doi.org/10.1534/genetics.114.165860">https://doi.org/10.1534/genetics.114.165860</a>.
+</div>
+<div id="ref-xavier2019bwgr" class="csl-entry" role="listitem">
+Xavier, A., W. M. Muir, B. Craig, and K. M. Rainey. 2019. <span>“bWGR: Bayesian Whole-Genome Regression.”</span> <em>Bioinformatics</em> 36 (6): 1957–59. <a href="https://doi.org/10.1093/bioinformatics/btz794">https://doi.org/10.1093/bioinformatics/btz794</a>.
+</div>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./08-pipeline-stages.html" class="pagination-link" aria-label="Metrics at each pipeline stage, and five traps">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Metrics at each pipeline stage, and five traps</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./09-optimal-contributions.html" class="pagination-link" aria-label="Optimal contributions and the $\alpha$ constraint">
+        <span class="nav-page-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Optimal contributions and the <span class="math inline">\(\alpha\)</span> constraint</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

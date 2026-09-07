@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Appendix C — Verification – Genetic Diversity in Hybrid Breeding</title>
+<title>3&nbsp; Simulating lines, pools and crosses – Genetic Diversity in Hybrid Breeding</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -71,8 +71,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./93-corpora.html" rel="next">
-<link href="./91-package.html" rel="prev">
+<link href="./04-population-sizing.html" rel="next">
+<link href="./02-subdivided.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
@@ -318,7 +318,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./90-notation.html">Appendices</a></li><li class="breadcrumb-item"><a href="./92-verification.html"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Verification</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./03-simulating-crosses.html">Simulation</a></li><li class="breadcrumb-item"><a href="./03-simulating-crosses.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Simulating lines, pools and crosses</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -386,7 +386,7 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./03-simulating-crosses.html" class="sidebar-item-text sidebar-link">
+  <a href="./03-simulating-crosses.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Simulating lines, pools and crosses</span></span></a>
   </div>
 </li>
@@ -538,7 +538,7 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./92-verification.html" class="sidebar-item-text sidebar-link active">
+  <a href="./92-verification.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Verification</span></span></a>
   </div>
 </li>
@@ -566,17 +566,16 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#the-method-slow-oracles" id="toc-the-method-slow-oracles" class="nav-link active" data-scroll-target="#the-method-slow-oracles"><span class="header-section-number">C.1</span> The method: slow oracles</a></li>
-  <li><a href="#the-identity-sweep" id="toc-the-identity-sweep" class="nav-link" data-scroll-target="#the-identity-sweep"><span class="header-section-number">C.2</span> The identity sweep</a></li>
-  <li><a href="#the-test-suite" id="toc-the-test-suite" class="nav-link" data-scroll-target="#the-test-suite"><span class="header-section-number">C.3</span> The test suite</a></li>
-  <li><a href="#provenance-of-every-figure-and-table" id="toc-provenance-of-every-figure-and-table" class="nav-link" data-scroll-target="#provenance-of-every-figure-and-table"><span class="header-section-number">C.4</span> Provenance of every figure and table</a>
+  <li><a href="#what-has-to-be-produced" id="toc-what-has-to-be-produced" class="nav-link active" data-scroll-target="#what-has-to-be-produced"><span class="header-section-number">3.1</span> What has to be produced</a></li>
+  <li><a href="#simulating-the-lines" id="toc-simulating-the-lines" class="nav-link" data-scroll-target="#simulating-the-lines"><span class="header-section-number">3.2</span> Simulating the lines</a>
   <ul class="collapse">
-  <li><a href="#computed-live-at-render" id="toc-computed-live-at-render" class="nav-link" data-scroll-target="#computed-live-at-render"><span class="header-section-number">C.4.1</span> Computed live at render</a></li>
-  <li><a href="#read-from-cache" id="toc-read-from-cache" class="nav-link" data-scroll-target="#read-from-cache"><span class="header-section-number">C.4.2</span> Read from cache</a></li>
+  <li><a href="#the-divergence-knob" id="toc-the-divergence-knob" class="nav-link" data-scroll-target="#the-divergence-knob"><span class="header-section-number">3.2.1</span> The divergence knob</a></li>
   </ul></li>
-  <li><a href="#regenerating-the-cached-results" id="toc-regenerating-the-cached-results" class="nav-link" data-scroll-target="#regenerating-the-cached-results"><span class="header-section-number">C.5</span> Regenerating the cached results</a></li>
-  <li><a href="#reproducing-the-book" id="toc-reproducing-the-book" class="nav-link" data-scroll-target="#reproducing-the-book"><span class="header-section-number">C.6</span> Reproducing the book</a></li>
-  <li><a href="#known-limitations-of-the-verification" id="toc-known-limitations-of-the-verification" class="nav-link" data-scroll-target="#known-limitations-of-the-verification"><span class="header-section-number">C.7</span> Known limitations of the verification</a></li>
+  <li><a href="#from-lines-to-hybrids" id="toc-from-lines-to-hybrids" class="nav-link" data-scroll-target="#from-lines-to-hybrids"><span class="header-section-number">3.3</span> From lines to hybrids</a></li>
+  <li><a href="#predicted-traits" id="toc-predicted-traits" class="nav-link" data-scroll-target="#predicted-traits"><span class="header-section-number">3.4</span> Predicted traits</a></li>
+  <li><a href="#the-two-matrices-both-built" id="toc-the-two-matrices-both-built" class="nav-link" data-scroll-target="#the-two-matrices-both-built"><span class="header-section-number">3.5</span> The two matrices, both built</a></li>
+  <li><a href="#the-stage-1-contract-in-one-call" id="toc-the-stage-1-contract-in-one-call" class="nav-link" data-scroll-target="#the-stage-1-contract-in-one-call"><span class="header-section-number">3.6</span> The stage-1 contract in one call</a></li>
+  <li><a href="#what-the-candidate-pool-looks-like" id="toc-what-the-candidate-pool-looks-like" class="nav-link" data-scroll-target="#what-the-candidate-pool-looks-like"><span class="header-section-number">3.7</span> What the candidate pool looks like</a></li>
   </ul>
 </nav>
     </div>
@@ -584,9 +583,9 @@ window.Quarto = {
 <main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./90-notation.html">Appendices</a></li><li class="breadcrumb-item"><a href="./92-verification.html"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Verification</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./03-simulating-crosses.html">Simulation</a></li><li class="breadcrumb-item"><a href="./03-simulating-crosses.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Simulating lines, pools and crosses</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span id="sec-verification" class="quarto-section-identifier">Appendix C — Verification</span></h1>
+<h1 class="title"><span id="sec-simulating-crosses" class="quarto-section-identifier"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Simulating lines, pools and crosses</span></span></h1>
 </div>
 
 
@@ -603,668 +602,402 @@ window.Quarto = {
 </header>
 
 
-<p>A derivation the reader cannot re-run against a naive implementation is a claim, not a verification. This appendix says how each result in the book was checked, and how to re-run the checks.</p>
-<section id="the-method-slow-oracles" class="level2" data-number="C.1">
-<h2 data-number="C.1" class="anchored" data-anchor-id="the-method-slow-oracles"><span class="header-section-number">C.1</span> The method: slow oracles</h2>
-<p>Every fast route in the package has a <strong>deliberately slow, literal</strong> counterpart in <code>R/09_reference.R</code> that transcribes the definition with no algebraic shortcut. The fast route must match it to machine precision.</p>
+<p>Everything downstream of this chapter consumes three objects and knows nothing about where they came from. That is deliberate: it is the seam at which a simulation is swapped for real data, and it is the only place that has to change when it is.</p>
+<p>This chapter builds those objects. It also builds the candidate pool the rest of the book selects from, so the choices made here – how divergent the pools are, how the index is constructed – determine what the later chapters have to work with.</p>
+<section id="what-has-to-be-produced" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="what-has-to-be-produced"><span class="header-section-number">3.1</span> What has to be produced</h2>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>ref_theta</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (idx, ctx) </span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; mean(ctx[["f"]][idx, idx])</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0xa478b8858&gt;</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>theta_group</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (idx, ctx) </span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; mean(ctx$f[idx, idx])</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0xa478f7c40&gt;</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>fast_theta</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (idx, ctx) </span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; {</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     cnt &lt;- line_counts(idx, ctx)</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     u &lt;- which(cnt &gt; 0L)</span></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     cu &lt;- cnt[u]</span></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     s &lt;- sum(cu)</span></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     as.numeric(crossprod(cu, ctx$fL[u, u, drop = FALSE] %*% cu))/(s * </span></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         s)</span></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0xa479296c8&gt;</span></span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>The stage-1 contract. Stage 2 runs without <code>fL</code>; it loses only the pool decomposition.</caption>
+<colgroup>
+<col style="width: 8%">
+<col style="width: 16%">
+<col style="width: 42%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Object</th>
+<th style="text-align: left;">Shape</th>
+<th style="text-align: left;">Content</th>
+<th style="text-align: left;">Needed for</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>X</code></td>
+<td style="text-align: left;">N x m</td>
+<td style="text-align: left;">hybrid marker matrix, values in 0/0.5/1</td>
+<td style="text-align: left;">every frequency-based metric</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>f</code></td>
+<td style="text-align: left;">N x N</td>
+<td style="text-align: left;">molecular coancestry of the hybrids</td>
+<td style="text-align: left;">every coancestry-based metric</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>hybrids</code></td>
+<td style="text-align: left;">N x (3 + n_traits)</td>
+<td style="text-align: left;">hybrid id, the two parent lines, predicted traits</td>
+<td style="text-align: left;">the index, and the line-usage vector</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>fL</code></td>
+<td style="text-align: left;">L x L, optional</td>
+<td style="text-align: left;">coancestry BETWEEN LINES</td>
+<td style="text-align: left;">only the heterotic-group decomposition</td>
+</tr>
+</tbody>
+</table>
 </div>
-<p>Three implementations of one quantity: a literal mean over the submatrix, the packaged version, and the line-route collapse that never forms the submatrix at all. They must agree.</p>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>sim  <span class="ot">&lt;-</span> <span class="fu">simulate_pools</span>(<span class="at">n_A =</span> <span class="dv">20</span>, <span class="at">n_B =</span> <span class="dv">20</span>, <span class="at">m =</span> <span class="dv">1500</span>, <span class="at">seed =</span> <span class="dv">7</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>ctxp <span class="ot">&lt;-</span> <span class="fu">ctx_from_pools</span>(sim)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">3</span>); sel <span class="ot">&lt;-</span> <span class="fu">sample.int</span>(ctxp<span class="sc">$</span>N, <span class="dv">50</span>)</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">oracle     =</span> <span class="fu">ref_theta</span>(sel, ctxp),</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">packaged   =</span> <span class="fu">theta_group</span>(sel, ctxp),</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">line_route =</span> <span class="fu">fast_theta</span>(sel, ctxp),</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">max_dev    =</span> <span class="fu">max</span>(<span class="fu">abs</span>(<span class="fu">c</span>(<span class="fu">theta_group</span>(sel, ctxp), <span class="fu">fast_theta</span>(sel, ctxp)) <span class="sc">-</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>                       <span class="fu">ref_theta</span>(sel, ctxp))))</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       oracle     packaged   line_route      max_dev </span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6.708316e-01 6.708316e-01 6.708316e-01 1.110223e-16</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>The oracles exist so that this comparison is possible for a reader who does not trust the derivation – which is the correct posture.</p>
+</section>
+<section id="simulating-the-lines" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="simulating-the-lines"><span class="header-section-number">3.2</span> Simulating the lines</h2>
+<p>Two heterotic pools are generated with a Balding-Nichols model. Ancestral allele frequencies are drawn uniform on <span class="math inline">\([0.05, 0.95]\)</span>, then each pool’s frequency at marker <span class="math inline">\(k\)</span> is drawn as</p>
+<p><span class="math display">\[p_{A,k} \sim \text{Beta}\!\left(p_k \frac{1 - F_{ST}}{F_{ST}},\;
+                                (1 - p_k) \frac{1 - F_{ST}}{F_{ST}}\right),\]</span></p>
+<p>and independently for pool B. The Beta has mean <span class="math inline">\(p_k\)</span> and variance <span class="math inline">\(F_{ST}\, p_k (1 - p_k)\)</span>, so the parameter <code>fst</code> in the configuration <em>is</em> the expected between-pool divergence – it is not a proxy for it.</p>
+<p>Genotypes are then drawn as <span class="math inline">\(2 \times \text{Bernoulli}(p)\)</span>, which makes every line fully homozygous, as an inbred line should be.</p>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">rbind</span>(</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">he_nei       =</span> <span class="fu">c</span>(<span class="at">oracle =</span> <span class="fu">ref_he_nei</span>(sel, ctxp), <span class="at">packaged =</span> <span class="fu">he_nei</span>(sel, ctxp)),</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">theta_freq   =</span> <span class="fu">c</span>(<span class="fu">ref_theta_freq</span>(sel, ctxp), <span class="fu">theta_from_freq</span>(sel, ctxp)),</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">status_num   =</span> <span class="fu">c</span>(<span class="fu">ref_status_num</span>(sel, ctxp), <span class="fu">status_number</span>(sel, ctxp)),</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">ne_parents   =</span> <span class="fu">c</span>(<span class="fu">ref_ne_parents</span>(sel, ctxp), <span class="fu">ne_parents</span>(sel, ctxp)),</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">alleles_lost =</span> <span class="fu">c</span>(<span class="fu">ref_alleles_lost</span>(sel, ctxp), <span class="fu">alleles_lost</span>(sel, ctxp)),</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">ENE          =</span> <span class="fu">c</span>(<span class="fu">ref_ene</span>(sel, ctxp), <span class="fu">ene</span>(sel, ctxp)),</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">ANE          =</span> <span class="fu">c</span>(<span class="fu">ref_ane</span>(sel, ctxp), <span class="fu">ane</span>(sel, ctxp))), <span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>simulate_lines</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function(cfg) {</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   set.seed(cfg$seed)</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   p_anc &lt;- stats::runif(cfg$m, 0.05, 0.95)</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   bn &lt;- function(p, fst) {</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     stats::rbeta(length(p), p * (1 - fst) / fst, (1 - p) * (1 - fst) / fst)</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   }</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   pA &lt;- bn(p_anc, cfg$fst)</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   pB &lt;- bn(p_anc, cfg$fst)</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   draw &lt;- function(n, p) {</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     matrix(2L * stats::rbinom(n * length(p), 1, rep(p, each = n)), nrow = n)</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   }</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   L &lt;- rbind(draw(cfg$n_pool_A, pA), draw(cfg$n_pool_B, pB))</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   storage.mode(L) &lt;- "double"</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   L</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>L <span class="ot">&lt;-</span> <span class="fu">simulate_lines</span>(book_cfg)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(L)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1]   50 2000</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(<span class="fu">as.vector</span>(L[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">200</span>]))</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   0   2 </span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 480 520</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Only 0 and 2 appear: no residual heterozygotes. With real data those must be imputed or dropped before this point, because the hybrid-genotype identity in <a href="01-coancestry.html" class="quarto-xref"><span>Chapter 1</span></a> assumes homozygous parents.</p>
+<section id="the-divergence-knob" class="level3" data-number="3.2.1">
+<h3 data-number="3.2.1" class="anchored" data-anchor-id="the-divergence-knob"><span class="header-section-number">3.2.1</span> The divergence knob</h3>
+<p><code>fst</code> is the single most consequential parameter in the simulation, because it controls how much heterosis there is to find and therefore how much a diversity constraint can cost. It is worth seeing directly:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>fst_grid <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.02</span>, <span class="fl">0.05</span>, <span class="fl">0.10</span>, <span class="fl">0.15</span>, <span class="fl">0.25</span>, <span class="fl">0.40</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>div <span class="ot">&lt;-</span> <span class="fu">vapply</span>(fst_grid, <span class="cf">function</span>(fst) {</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  cfg <span class="ot">&lt;-</span> <span class="fu">modifyList</span>(book_cfg, <span class="fu">list</span>(<span class="at">fst =</span> fst, <span class="at">m =</span> <span class="dv">1500</span>))</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  Lx  <span class="ot">&lt;-</span> <span class="fu">simulate_lines</span>(cfg)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  fL  <span class="ot">&lt;-</span> <span class="fu">molecular_coancestry</span>(Lx <span class="sc">/</span> <span class="dv">2</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  A   <span class="ot">&lt;-</span> <span class="fu">seq_len</span>(cfg<span class="sc">$</span>n_pool_A); B <span class="ot">&lt;-</span> cfg<span class="sc">$</span>n_pool_A <span class="sc">+</span> <span class="fu">seq_len</span>(cfg<span class="sc">$</span>n_pool_B)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># a hybrid A x B is heterozygous wherever its parents differ</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="at">between_pool_f =</span> <span class="fu">mean</span>(fL[A, B]),</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">within_pool_f  =</span> <span class="fu">mean</span>(<span class="fu">c</span>(fL[A, A], fL[B, B])),</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">het_fraction   =</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">mean</span>(fL[A, B]))</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>}, <span class="fu">numeric</span>(<span class="dv">3</span>))</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">fst =</span> fst_grid, <span class="fu">t</span>(div))</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(d<span class="sc">$</span>fst, d<span class="sc">$</span>het_fraction, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>),</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="fu">expression</span>(F[ST]<span class="sc">~</span><span class="st">"between pools"</span>),</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">"expected heterozygous fraction of the F1"</span>)</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="fu">grid</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="03-simulating-crosses_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="1050"></p>
+<figcaption>Between-pool divergence sets the hybrid heterozygous fraction, and with it the floor of the coancestry diagonal.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(d)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
 <thead>
 <tr class="header">
-<th style="text-align: left;"></th>
-<th style="text-align: right;">oracle</th>
-<th style="text-align: right;">packaged</th>
+<th style="text-align: right;">fst</th>
+<th style="text-align: right;">between_pool_f</th>
+<th style="text-align: right;">within_pool_f</th>
+<th style="text-align: right;">het_fraction</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">he_nei</td>
-<td style="text-align: right;">0.3291684</td>
-<td style="text-align: right;">0.3291684</td>
+<td style="text-align: right;">0.02</td>
+<td style="text-align: right;">0.6349</td>
+<td style="text-align: right;">0.6564</td>
+<td style="text-align: right;">0.3651</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">theta_freq</td>
-<td style="text-align: right;">0.6708316</td>
-<td style="text-align: right;">0.6708316</td>
+<td style="text-align: right;">0.05</td>
+<td style="text-align: right;">0.6362</td>
+<td style="text-align: right;">0.6684</td>
+<td style="text-align: right;">0.3638</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">status_num</td>
-<td style="text-align: right;">0.7453435</td>
-<td style="text-align: right;">0.7453435</td>
+<td style="text-align: right;">0.10</td>
+<td style="text-align: right;">0.6364</td>
+<td style="text-align: right;">0.6877</td>
+<td style="text-align: right;">0.3636</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">ne_parents</td>
-<td style="text-align: right;">26.4550265</td>
-<td style="text-align: right;">26.4550265</td>
+<td style="text-align: right;">0.15</td>
+<td style="text-align: right;">0.6326</td>
+<td style="text-align: right;">0.7052</td>
+<td style="text-align: right;">0.3674</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">alleles_lost</td>
-<td style="text-align: right;">43.0000000</td>
-<td style="text-align: right;">43.0000000</td>
+<td style="text-align: right;">0.25</td>
+<td style="text-align: right;">0.6370</td>
+<td style="text-align: right;">0.7387</td>
+<td style="text-align: right;">0.3630</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">ENE</td>
-<td style="text-align: right;">0.2581333</td>
-<td style="text-align: right;">0.2581333</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">ANE</td>
-<td style="text-align: right;">0.2503233</td>
-<td style="text-align: right;">0.2503233</td>
+<td style="text-align: right;">0.40</td>
+<td style="text-align: right;">0.6274</td>
+<td style="text-align: right;">0.7898</td>
+<td style="text-align: right;">0.3726</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
 </div>
+<p>More divergent pools give more heterozygous F1 hybrids. That is the heterosis engine, and <a href="02-subdivided.html" class="quarto-xref"><span>Chapter 2</span></a> is the reason it must be <em>held</em>, not maximised: the same divergence that raises <code>GD_BS</code> is being paid for out of within-pool diversity.</p>
 </section>
-<section id="the-identity-sweep" class="level2" data-number="C.2">
-<h2 data-number="C.2" class="anchored" data-anchor-id="the-identity-sweep"><span class="header-section-number">C.2</span> The identity sweep</h2>
-<p>The line-level collapse was checked across <span class="math inline">\(F_{ST} \in \{0.05, 0.15, 0.35\}\)</span>, two seeds and two selection sizes, thirty replicate selections each.</p>
+</section>
+<section id="from-lines-to-hybrids" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="from-lines-to-hybrids"><span class="header-section-number">3.3</span> From lines to hybrids</h2>
+<p>Every A x B combination is formed. With 25 lines per pool that is 625 candidates; at the production scale of 71 per pool it is 5041.</p>
 <div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>cfg <span class="ot">&lt;-</span> book_cfg</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>a_ids <span class="ot">&lt;-</span> <span class="fu">seq_len</span>(cfg<span class="sc">$</span>n_pool_A)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>b_ids <span class="ot">&lt;-</span> cfg<span class="sc">$</span>n_pool_A <span class="sc">+</span> <span class="fu">seq_len</span>(cfg<span class="sc">$</span>n_pool_B)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>ped <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">a =</span> a_ids, <span class="at">b =</span> b_ids)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>M   <span class="ot">&lt;-</span> (L[ped<span class="sc">$</span>a, , <span class="at">drop =</span> <span class="cn">FALSE</span>] <span class="sc">+</span> L[ped<span class="sc">$</span>b, , <span class="at">drop =</span> <span class="cn">FALSE</span>]) <span class="sc">/</span> <span class="dv">2</span>   <span class="co"># 0/1/2</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(M)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1]  625 2000</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(ped, <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
+<div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
-<caption>Machine precision throughout. Anything above 1e-12 would mean an error, not a rounding artefact.</caption>
-<colgroup>
-<col style="width: 22%">
-<col style="width: 45%">
-<col style="width: 31%">
-</colgroup>
 <thead>
 <tr class="header">
-<th style="text-align: left;"></th>
-<th style="text-align: left;">Identity</th>
-<th style="text-align: left;">Worst deviation over the sweep</th>
+<th style="text-align: right;">a</th>
+<th style="text-align: right;">b</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">max_pairwise_f</td>
-<td style="text-align: left;">pairwise f: hybrid vs line formula</td>
-<td style="text-align: left;">1.1e-16</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">26</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">max_theta_sub_vs_line</td>
-<td style="text-align: left;">theta: line route vs f submatrix</td>
-<td style="text-align: left;">2.2e-16</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">26</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">max_theta_sub_vs_freq</td>
-<td style="text-align: left;">theta: line route vs allele-frequency route</td>
-<td style="text-align: left;">1.1e-16</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">max_pbar</td>
-<td style="text-align: left;">selection allele frequencies</td>
-<td style="text-align: left;">0 (exact)</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">max_He</td>
-<td style="text-align: left;">Nei He</td>
-<td style="text-align: left;">0 (exact)</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">max_Neparents</td>
-<td style="text-align: left;">effective number of parents</td>
-<td style="text-align: left;">2.1e-14</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">max_alleles_lost</td>
-<td style="text-align: left;">allele loss at MAF threshold</td>
-<td style="text-align: left;">0 (exact)</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">max_theta_pools</td>
-<td style="text-align: left;">pool decomposition</td>
-<td style="text-align: left;">1.2e-15</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">max_swap_update</td>
-<td style="text-align: left;">incremental swap vs full recompute</td>
-<td style="text-align: left;">4.4e-16</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">bitset_vs_literal</td>
-<td style="text-align: left;">bitset allelic richness vs literal count</td>
-<td style="text-align: left;">0 (exact)</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">26</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
+</div>
+<p>The factorial structure matters more than it looks. Because every line appears in many candidate hybrids, selecting hybrids is really selecting <em>line usage</em> – and that observation, made precise in <a href="07-choosing-metrics.html#sec-collapse" class="quarto-xref"><span>Section 10.1</span></a>, is what makes the whole problem tractable at production scale.</p>
 </section>
-<section id="the-test-suite" class="level2" data-number="C.3">
-<h2 data-number="C.3" class="anchored" data-anchor-id="the-test-suite"><span class="header-section-number">C.3</span> The test suite</h2>
-<p>The suite is <code>tests/testthat/</code>, run with <code>devtools::test()</code>. It takes about a minute. What it asserts, and why each check earns its place:</p>
+<section id="predicted-traits" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="predicted-traits"><span class="header-section-number">3.4</span> Predicted traits</h2>
+<p>Marker effects are drawn correlated across traits, through a Cholesky factor of a fixed correlation matrix, and the predicted values are the centered marker matrix times those effects:</p>
 <div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(cfg<span class="sc">$</span>seed <span class="sc">+</span> <span class="dv">99</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>R <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">0.3</span>, <span class="sc">-</span><span class="fl">0.3</span>,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>              <span class="fl">0.3</span>, <span class="dv">1</span>,  <span class="fl">0.1</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>             <span class="sc">-</span><span class="fl">0.3</span>, <span class="fl">0.1</span>, <span class="dv">1</span>), <span class="dv">3</span>, <span class="dv">3</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>vr <span class="ot">&lt;-</span> <span class="fu">vanraden_G</span>(M)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>B <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(cfg<span class="sc">$</span>m <span class="sc">*</span> cfg<span class="sc">$</span>n_traits), cfg<span class="sc">$</span>m) <span class="sc">%*%</span> <span class="fu">chol</span>(R)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>traits <span class="ot">&lt;-</span> <span class="fu">scale</span>(vr<span class="sc">$</span>Z <span class="sc">%*%</span> B)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">cor</span>(traits), <span class="dv">3</span>)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        [,1]  [,2]   [,3]</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1,]  1.000 0.259 -0.440</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [2,]  0.259 1.000  0.049</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [3,] -0.440 0.049  1.000</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The realised trait correlations recover the target <code>R</code>, which is the point of the Cholesky step: without it, a multi-trait index would be a weighted sum of independent noise, and the trade-off it induces against diversity would be unrealistically easy.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>What this simulation deliberately does not model
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>These predicted values are constructed from <em>known</em> marker effects, so they carry no prediction error. Real GEBVs do. The book therefore treats <code>ctx$index</code> as given throughout, and the reader should read every gain figure as an upper bound on what a real programme would realise. The additive model also carries no dominance, so it cannot express specific combining ability – see the caveats in <a href="12-case-study.html" class="quarto-xref"><span>Chapter 18</span></a>.</p>
+</div>
+</div>
+</section>
+<section id="the-two-matrices-both-built" class="level2" data-number="3.5">
+<h2 data-number="3.5" class="anchored" data-anchor-id="the-two-matrices-both-built"><span class="header-section-number">3.5</span> The two matrices, both built</h2>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> M <span class="sc">/</span> <span class="dv">2</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>ctx <span class="ot">&lt;-</span> <span class="fu">build_ctx</span>(<span class="at">X =</span> X, <span class="at">f =</span> <span class="fu">molecular_coancestry</span>(X), <span class="at">G =</span> vr<span class="sc">$</span>G, <span class="at">traits =</span> traits,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">ped =</span> ped, <span class="at">n_lines =</span> <span class="fu">nrow</span>(L),</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">pool =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">"A"</span>, <span class="st">"B"</span>), <span class="fu">c</span>(cfg<span class="sc">$</span>n_pool_A, cfg<span class="sc">$</span>n_pool_B)),</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">fL =</span> <span class="fu">molecular_coancestry</span>(L <span class="sc">/</span> <span class="dv">2</span>), <span class="at">cfg =</span> cfg)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">N =</span> ctx<span class="sc">$</span>N, <span class="at">m =</span> ctx<span class="sc">$</span>m, <span class="at">n_lines =</span> ctx<span class="sc">$</span>n_lines,</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">sum_G =</span> <span class="fu">sum</span>(ctx<span class="sc">$</span>G), <span class="at">min_f =</span> <span class="fu">min</span>(ctx<span class="sc">$</span>f), <span class="at">max_f =</span> <span class="fu">max</span>(ctx<span class="sc">$</span>f))</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             N             m       n_lines         sum_G         min_f </span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  6.250000e+02  2.000000e+03  5.000000e+01 -4.178879e-11  6.447500e-01 </span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         max_f </span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  8.317500e-01</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><code>sum(G)</code> is zero to machine precision and <code>f</code> is inside <span class="math inline">\([0, 1]\)</span>: the two properties from <a href="01-coancestry.html" class="quarto-xref"><span>Chapter 1</span></a>, on this dataset.</p>
+<p>The context also freezes two things that must never be recomputed per scenario:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(ctx[<span class="fu">c</span>(<span class="st">"p0"</span>, <span class="st">"maf_pop"</span>, <span class="st">"index"</span>)], <span class="at">max.level =</span> <span class="dv">1</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; List of 3</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  $ p0     : num [1:2000] 0.44 0.3 0.56 0.9 0.12 0.98 0.98 0.7 0.64 0.22 ...</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  $ maf_pop: num [1:2000] 0.44 0.3 0.44 0.1 0.12 0.02 0.02 0.3 0.36 0.22 ...</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  $ index  : num [1:625] -0.291 0.498 -0.361 -0.186 -0.348 ...</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><code>p0</code> is the candidate-pool allele frequency vector. It is the <strong>base</strong> against which <code>F_hom</code> and <code>F_drift</code> are measured in <a href="05-genomic-era.html" class="quarto-xref"><span>Chapter 7</span></a>, and recomputing it per scenario would silently zero out the historical memory of erosion – the single most common error in applying these metrics.</p>
+</section>
+<section id="the-stage-1-contract-in-one-call" class="level2" data-number="3.6">
+<h2 data-number="3.6" class="anchored" data-anchor-id="the-stage-1-contract-in-one-call"><span class="header-section-number">3.6</span> The stage-1 contract in one call</h2>
+<p>All of the above is <code>stage1_simulate()</code>:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>stage1_build</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function(X, ped, traits, fL = NULL) {</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   if (max(X) &gt; 1) X &lt;- X / 2          # accepts 0/1/2 or 0/0.5/1 coding</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   stopifnot(nrow(X) == nrow(ped), nrow(X) == nrow(traits))</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   hybrids &lt;- data.frame(</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     hybrid = seq_len(nrow(X)),</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     line_A = as.integer(ped$a),</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     line_B = as.integer(ped$b),</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     traits</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   )</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   list(X = X, f = molecular_coancestry(X), hybrids = hybrids, fL = fL)</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>st1 <span class="ot">&lt;-</span> <span class="fu">stage1_simulate</span>(book_cfg)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(st1, <span class="at">max.level =</span> <span class="dv">1</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; List of 4</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  $ X      : num [1:625, 1:2000] 0.5 0.5 0 0 0 0.5 0.5 0 0 0 ...</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  $ f      : num [1:625, 1:625] 0.818 0.74 0.743 0.738 0.745 ...</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  $ hybrids:'data.frame': 625 obs. of  6 variables:</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  $ fL     : num [1:50, 1:50] 1 0.677 0.692 0.674 0.684 ...</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(st1<span class="sc">$</span>hybrids, <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
+<div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
-<colgroup>
-<col style="width: 43%">
-<col style="width: 56%">
-</colgroup>
 <thead>
 <tr class="header">
-<th style="text-align: left;">Check</th>
-<th style="text-align: left;">If it fails</th>
+<th style="text-align: right;">hybrid</th>
+<th style="text-align: right;">line_A</th>
+<th style="text-align: right;">line_B</th>
+<th style="text-align: right;">trait1</th>
+<th style="text-align: right;">trait2</th>
+<th style="text-align: right;">trait3</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">theta via submatrix == theta via allele frequencies</td>
-<td style="text-align: left;"><strong>f is wrong</strong>: centered, rescaled, or the wrong marker coding</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">26</td>
+<td style="text-align: right;">-0.6880637</td>
+<td style="text-align: right;">0.1907069</td>
+<td style="text-align: right;">0.0153955</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">1 - theta == Nei’s He</td>
-<td style="text-align: left;">the identity underpinning every ‘loss of X%’ statement is broken</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">26</td>
+<td style="text-align: right;">-0.6102738</td>
+<td style="text-align: right;">-0.0320787</td>
+<td style="text-align: right;">1.4661012</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">f is bounded to [0, 1]</td>
-<td style="text-align: left;">a centered matrix is being used as coancestry</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">sum(VanRaden G) == 0</td>
-<td style="text-align: left;">the demonstration in <a href="01-coancestry.html#sec-why-not-g" class="quarto-xref"><span>Section 1.2</span></a> no longer holds on this data</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">theta and Ns analytical edge cases</td>
-<td style="text-align: left;">the diagonal is being dropped somewhere</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">greedy &lt; random &lt; truncation on theta</td>
-<td style="text-align: left;">there is no trade-off to optimise; the whole benchmark is pointless</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">decode() is unique, in range, deterministic</td>
-<td style="text-align: left;">the DE fitness is noisy and cannot converge</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">fast line route == hybrid-matrix route</td>
-<td style="text-align: left;"><strong>the collapse is broken</strong>; production scale becomes infeasible</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">incremental swap == full recomputation</td>
-<td style="text-align: left;">any local search built on the state vector is wrong</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">popcount32 == naive bit count</td>
-<td style="text-align: left;">allelic richness counts are wrong</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">F_hom and F_drift are 0 when the selection is the base</td>
-<td style="text-align: left;">the base p0 is not frozen, or is being recomputed</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">cov_diag == F_hom - F_drift</td>
-<td style="text-align: left;">one of the three lens formulas is wrong</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">max-diversity drives F_hom negative, F_drift positive</td>
-<td style="text-align: left;">the two-lens argument of <a href="05-genomic-era.html" class="quarto-xref"><span>Chapter 7</span></a> does not reproduce</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">freq_metrics reproduces he_nei and alleles_lost</td>
-<td style="text-align: left;">the consolidated marker sweep changed an existing number</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">the Caballero &amp; Toro partition closes</td>
-<td style="text-align: left;">the Eq. 8 algebra is broken</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">GD_WI == 0 for inbred lines, GD_WI_hyb large for their F1s</td>
-<td style="text-align: left;">lines are not actually inbred, or the hybrid diagonal is wrong</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">eff_dim in (0, n - 1]</td>
-<td style="text-align: left;">the double-centering was dropped and eff_dim re-measures theta</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">the two-stage output contract</td>
-<td style="text-align: left;">downstream code reading <code>$selection</code> or <code>$metrics</code> will break</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">stage 2 runs without fL</td>
-<td style="text-align: left;">the optional-fL path is broken</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">stage1_build accepts both marker codings</td>
-<td style="text-align: left;">real data in the other coding would give different answers</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">MRD and coancestry are one statistic</td>
-<td style="text-align: left;">Trap 1 of <a href="08-pipeline-stages.html" class="quarto-xref"><span>Chapter 11</span></a> no longer holds</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Gst &lt; Fst always, and Gst matches the classical route</td>
-<td style="text-align: left;">Trap 2 is wrong, or the two definitions were conflated</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">the DH identities</td>
-<td style="text-align: left;">the S2 algebra is wrong and crossing plans cannot be pre-evaluated</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">hybrid theta from usage == the hybrid matrix</td>
-<td style="text-align: left;">Trap 5’s repair route is broken</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">constrained line selection meets its ceiling</td>
-<td style="text-align: left;">the constrained selection silently returns an infeasible plan</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">the oracles agree with the packaged metrics</td>
-<td style="text-align: left;">a fast route diverged from its definition</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">map length and Haldane spacing</td>
-<td style="text-align: left;">the sizing chapter’s map is not the map it claims</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">heterozygosity halves per selfing</td>
-<td style="text-align: left;">the simulator is not doing what selfing does</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">D == 1 - (1 - H)/N under neutrality</td>
-<td style="text-align: left;">the identity every sizing number rests on is broken</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">n_equivalent inverts diversity_retained</td>
-<td style="text-align: left;">N_eq is not the inverse it is described as</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">a Syn cycle adds half a map length of junctions</td>
-<td style="text-align: left;">the intercrossing budget in <a href="04-population-sizing.html" class="quarto-xref"><span>Chapter 4</span></a> is wrong by 2x</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">distortion shifts ancestry away from 0.5</td>
-<td style="text-align: left;">the distortion mechanism is inactive</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">f1_sizing halves the loss probability per plant</td>
-<td style="text-align: left;">the F1 sizing argument is wrong</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">heterosis_value matches the literal oracle</td>
-<td style="text-align: left;">the fast heterosis route diverged from its definition</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">additive effects cancel from the mid-parent difference</td>
-<td style="text-align: left;">the derivation of <a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 8</span></a> is wrong, or the parents are not inbred</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">shared and divergence == GD_T and GD_BS</td>
-<td style="text-align: left;"><strong>the central identity of <a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 8</span></a> is broken</strong></td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">2 * GD_WI_hyb == GD_T + GD_BS</td>
-<td style="text-align: left;">the hybrid-level and line-level partitions have come apart</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">neutral divergence leaves expected heterosis unchanged</td>
-<td style="text-align: left;"><a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 8</span></a>’s correction is wrong and F_ST would predict heterosis</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">alignment between d and divergence is what moves heterosis</td>
-<td style="text-align: left;">the alignment result, and the argument for <a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 17</span></a> with it, is wrong</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">GCA + SCA reconstruct heterosis exactly and are mean-zero</td>
-<td style="text-align: left;"><strong>the combining-ability decomposition of <a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 8</span></a> is not a decomposition</strong></td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">SCA is the interaction residual of the two-way additive fit</td>
-<td style="text-align: left;">SCA is a proxy for the interaction, not the interaction – the section overclaims</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">the closed-form GCA and SCA variance components match</td>
-<td style="text-align: left;">the relocation result of <a href="05b-heterosis-dominance.html#sec-heterosis-relocation" class="quarto-xref"><span>Section 8.10</span></a> rests on a wrong closed form</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">uniform-d heterosis is the coancestry kernel, exactly</td>
-<td style="text-align: left;">genetic distance no longer predicts heterosis under flat dominance</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">GD_T + GD_BS == 1 - theta_AB</td>
-<td style="text-align: left;">the between-pool coancestry reading of the identity is wrong</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">pool_freqs reproduces what its callers computed inline</td>
-<td style="text-align: left;">a pool frequency route diverged after the refactor</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">the DH draw is an unbiased gamete; selfing an inbred returns it</td>
-<td style="text-align: left;">recycling fabricates or destroys diversity; every trajectory is wrong</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">p0 is frozen, not re-anchored, across cycles</td>
-<td style="text-align: left;"><strong>both inbreeding lenses report no loss forever</strong> – the trap of <a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 17</span></a></td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">a closed programme loses diversity and gains index</td>
-<td style="text-align: left;">the cycle loop is not selecting, or not recycling what it selected</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">the budget is respected; alpha_max = Inf is truncation</td>
-<td style="text-align: left;">the budget is not binding across cycles</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">injection raises diversity relative to a closed run</td>
-<td style="text-align: left;">injection is not actually introducing founder material</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">26</td>
+<td style="text-align: right;">-0.3094099</td>
+<td style="text-align: right;">-0.5013539</td>
+<td style="text-align: right;">0.2137806</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
+</div>
+<p>For real data the same function is called with your own matrices:</p>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>Rscript <span class="sc">-</span>e <span class="st">'devtools::test()'</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>st1 <span class="ot">&lt;-</span> <span class="fu">stage1_build</span>(</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">X      =</span> hybrid_markers,   <span class="co"># N x m, coded 0/1/2 or 0/0.5/1 (auto-detected)</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">ped    =</span> pedigree,         <span class="co"># data.frame with columns a, b</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">traits =</span> predicted_traits, <span class="co"># N x n_traits</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">fL     =</span> line_coancestry   <span class="co"># optional</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><code>stage1_build()</code> detects the marker coding and rescales, so both conventions give an identical result:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>tr <span class="ot">&lt;-</span> st1<span class="sc">$</span>hybrids[, <span class="fu">grep</span>(<span class="st">"^trait"</span>, <span class="fu">names</span>(st1<span class="sc">$</span>hybrids))]</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>pd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">a =</span> st1<span class="sc">$</span>hybrids<span class="sc">$</span>line_A, <span class="at">b =</span> st1<span class="sc">$</span>hybrids<span class="sc">$</span>line_B)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(<span class="fu">stage1_build</span>(st1<span class="sc">$</span>X, pd, tr)<span class="sc">$</span>f,</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>          <span class="fu">stage1_build</span>(st1<span class="sc">$</span>X <span class="sc">*</span> <span class="dv">2</span>, pd, tr)<span class="sc">$</span>f)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
-<section id="provenance-of-every-figure-and-table" class="level2" data-number="C.4">
-<h2 data-number="C.4" class="anchored" data-anchor-id="provenance-of-every-figure-and-table"><span class="header-section-number">C.4</span> Provenance of every figure and table</h2>
-<p>The book runs light examples live and reads heavy results from cache. This is the complete accounting.</p>
-<section id="computed-live-at-render" class="level3" data-number="C.4.1">
-<h3 data-number="C.4.1" class="anchored" data-anchor-id="computed-live-at-render"><span class="header-section-number">C.4.1</span> Computed live at render</h3>
+<section id="what-the-candidate-pool-looks-like" class="level2" data-number="3.7">
+<h2 data-number="3.7" class="anchored" data-anchor-id="what-the-candidate-pool-looks-like"><span class="header-section-number">3.7</span> What the candidate pool looks like</h2>
 <div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="fl">4.2</span>, <span class="fl">4.2</span>, <span class="fl">2.5</span>, <span class="dv">1</span>))</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(ctx<span class="sc">$</span>index, <span class="at">breaks =</span> <span class="dv">40</span>, <span class="at">col =</span> <span class="st">"grey85"</span>, <span class="at">border =</span> <span class="st">"white"</span>,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"multi-trait index"</span>, <span class="at">xlab =</span> <span class="st">"index (s.d. units)"</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>gd_random <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">400</span>, <span class="fu">gene_diversity</span>(<span class="fu">sample.int</span>(ctx<span class="sc">$</span>N, <span class="dv">60</span>), ctx))</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(gd_random, <span class="at">breaks =</span> <span class="dv">30</span>, <span class="at">col =</span> <span class="st">"grey85"</span>, <span class="at">border =</span> <span class="st">"white"</span>,</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"GD of random subsets of 60"</span>, <span class="at">xlab =</span> <span class="st">"gene diversity"</span>)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="fu">gene_diversity</span>(<span class="fu">seq_len</span>(ctx<span class="sc">$</span>N), ctx), <span class="at">col =</span> <span class="st">"#b2182b"</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<table class="caption-top table table-sm table-striped small">
-<colgroup>
-<col style="width: 7%">
-<col style="width: 92%">
-</colgroup>
-<thead>
-<tr class="header">
-<th style="text-align: left;">Chapter</th>
-<th style="text-align: left;">Runs live</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;"><a href="01-coancestry.html" class="quarto-xref"><span>Chapter 1</span></a></td>
-<td style="text-align: left;">both matrices, the sum(G) demonstration, the f diagonal</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><a href="02-subdivided.html" class="quarto-xref"><span>Chapter 2</span></a></td>
-<td style="text-align: left;">the whole worked example, reproduced against the published tables</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><a href="03-simulating-crosses.html" class="quarto-xref"><span>Chapter 3</span></a></td>
-<td style="text-align: left;">the simulation, the fst sweep, the contract, the sampling-bias histogram</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><a href="04-population-sizing.html" class="quarto-xref"><span>Chapter 4</span></a></td>
-<td style="text-align: left;">the theoretical identities, heterozygosity halving, map expansion, f1_sizing</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><a href="05-genomic-era.html" class="quarto-xref"><span>Chapter 7</span></a></td>
-<td style="text-align: left;">the Eq. 3 identity, the four-strategy lens panel</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 8</span></a></td>
-<td style="text-align: left;">the heterosis oracle check, the additive cancellation, the shared/divergence identity, the coancestry-kernel identity, the fst sweep and its Balding-Nichols prediction, the alignment scenarios and their stratified control, the GCA/SCA decomposition and its variance components, the SCA/GCA relocation sweep</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><a href="06-metric-catalogue.html" class="quarto-xref"><span>Chapter 9</span></a></td>
-<td style="text-align: left;">every metric, the sampling-bias formula, the null distribution</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 10</span></a></td>
-<td style="text-align: left;">the collapse, the swap update, cost at book scale, the fixed-theta band, the prediction-error sweep</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><a href="08-pipeline-stages.html" class="quarto-xref"><span>Chapter 11</span></a></td>
-<td style="text-align: left;">all five traps, the S1 panel, the DH identities, the S4 collapse</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><a href="09-optimal-contributions.html" class="quarto-xref"><span>Chapter 13</span></a></td>
-<td style="text-align: left;">the OCS relaxation, the convergence check, the greedy frontier, the marker-panel sensitivity</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><a href="10-combinatorial-selection.html" class="quarto-xref"><span>Chapter 14</span></a></td>
-<td style="text-align: left;">all baselines, the encodings, the DE, the warm-start comparison</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><a href="10b-advanced-selection.html" class="quarto-xref"><span>Chapter 15</span></a></td>
-<td style="text-align: left;">the Gram identity and PSD check, the submatrix-sum identity, the three local-search modes, the invalid-versus-Lagrangian bound comparison, ocs_round</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 17</span></a></td>
-<td style="text-align: left;">the frozen-p0 demonstration, the delta-F regression</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><a href="12-case-study.html" class="quarto-xref"><span>Chapter 18</span></a></td>
-<td style="text-align: left;">the full two-stage pipeline</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><a href="#sec-verification" class="quarto-xref"><span>Appendix C</span></a></td>
-<td style="text-align: left;">the oracle comparisons</td>
-</tr>
-</tbody>
-</table>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="03-simulating-crosses_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="1050"></p>
+<figcaption>The candidate pool. Left: the index the selection maximises. Right: gene diversity of random subsets of 60, the baseline every later chapter measures against.</figcaption>
+</figure>
 </div>
 </div>
-</section>
-<section id="read-from-cache" class="level3" data-number="C.4.2">
-<h3 data-number="C.4.2" class="anchored" data-anchor-id="read-from-cache"><span class="header-section-number">C.4.2</span> Read from cache</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The red line is the gene diversity of the <em>whole</em> pool. It does not sit at the centre of the distribution of random subsets of 60 – it sits above it. That gap is pure sampling, it has nothing to do with selection, and mistaking it for a loss is the subject of <a href="06-metric-catalogue.html#sec-baseline" class="quarto-xref"><span>Section 9.9</span></a>.</p>
 <div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<table class="caption-top table table-sm table-striped small">
-<colgroup>
-<col style="width: 25%">
-<col style="width: 74%">
-</colgroup>
-<thead>
-<tr class="header">
-<th style="text-align: left;">File</th>
-<th style="text-align: left;">Why</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;"><code>data/theta_identity_check.csv</code></td>
-<td style="text-align: left;">the full identity sweep, 12 configurations</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>data/cost_per_eval.csv</code></td>
-<td style="text-align: left;">production scale: L = 300, N = 22500, m = 10000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>data/metric_redundancy.csv</code></td>
-<td style="text-align: left;">621 selections x 17 metrics</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>data/de_constraints.csv</code></td>
-<td style="text-align: left;">9 DE runs at 60,000 evaluations each</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>data/fst_definitions.csv</code></td>
-<td style="text-align: left;">the divergence sweep</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>data/dist_vs_variance.csv</code></td>
-<td style="text-align: left;">600 candidate crosses with simulated DH</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>data/pipeline_loss_ledger.csv</code></td>
-<td style="text-align: left;">8 founder pools, four stages, two strategies</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>data/plant_metric_usage.csv</code></td>
-<td style="text-align: left;">687 screened plant records</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>data/bibliography_*.csv</code></td>
-<td style="text-align: left;">the screened corpora themselves</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>data/f2_results.csv</code></td>
-<td style="text-align: left;">5 schemes x 20 sizes, adaptive replication</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>data/f2_multilocus.csv</code></td>
-<td style="text-align: left;">multilocus recovery across the grid</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>data/mabc_*.csv</code></td>
-<td style="text-align: left;">the MABC grid: 4 policies x 4 gene numbers x 11 sizes x 3 s, 300 reps</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>figs/mabc_sizing.png</code></td>
-<td style="text-align: left;">analytical sizing by stage</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>figs/mabc_policies.png</code></td>
-<td style="text-align: left;">the four recombinant-selection policies</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>figs/cost_scaling.png</code></td>
-<td style="text-align: left;">cost scaling at production scale</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>figs/de_convergence.png</code></td>
-<td style="text-align: left;">DE convergence under four restrictions</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>figs/metric_redundancy.png</code></td>
-<td style="text-align: left;">the redundancy panels</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>figs/pipeline_loss.png</code></td>
-<td style="text-align: left;">the loss ledger</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>figs/metric_pitfalls.png</code></td>
-<td style="text-align: left;">Traps 4 and 2 on the full simulation</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>data/search_benchmark.csv</code></td>
-<td style="text-align: left;">8 methods x 2 scales x 3 seeds, production scale N = 10000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>data/search_scaling.csv</code></td>
-<td style="text-align: left;">per-evaluation cost from N = 400 to N = 22500</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>data/search_exact_gap.csv</code></td>
-<td style="text-align: left;">the outer-approximation oracle, proven small and time-limited large (target <code>search_exact</code>)</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>figs/search_anytime.png</code></td>
-<td style="text-align: left;">anytime curves at equal wall-clock</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>figs/search_scaling.png</code></td>
-<td style="text-align: left;">the encoding scaling wall</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>data/cycles_trajectory.csv</code></td>
-<td style="text-align: left;">3 budgets x 16 cycles x 5 seeds (target <code>cycles</code>)</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>data/cycles_crossover.csv</code></td>
-<td style="text-align: left;">the crossover cycle, per budget per seed</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>data/cycles_maxuse.csv</code></td>
-<td style="text-align: left;">3 caps x 16 cycles x 5 seeds</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>data/cycles_injection.csv</code></td>
-<td style="text-align: left;">closed against one injection at cycle 8, 5 seeds</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>data/cycles_selector.csv</code></td>
-<td style="text-align: left;">greedy against DE, 2 budgets x 13 cycles, seed 1</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>figs/cycles_gain.png</code></td>
-<td style="text-align: left;">cumulative gain by budget</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>figs/cycles_diversity.png</code></td>
-<td style="text-align: left;">gene diversity and F_drift by budget</td>
-</tr>
-</tbody>
-</table>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">GD_population =</span> <span class="fu">gene_diversity</span>(<span class="fu">seq_len</span>(ctx<span class="sc">$</span>N), ctx),</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">GD_random_60  =</span> <span class="fu">mean</span>(gd_random),</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">apparent_loss_pct =</span> <span class="dv">100</span> <span class="sc">*</span> (<span class="fu">gene_diversity</span>(<span class="fu">seq_len</span>(ctx<span class="sc">$</span>N), ctx) <span class="sc">-</span> <span class="fu">mean</span>(gd_random)) <span class="sc">/</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>                            <span class="fu">gene_diversity</span>(<span class="fu">seq_len</span>(ctx<span class="sc">$</span>N), ctx))</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     GD_population      GD_random_60 apparent_loss_pct </span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         0.3280928         0.3259023         0.6676555</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-</div>
-<p>Nothing is read from <code>report/</code> or <code>data/</code> at the repository root: both are gitignored, so a clean clone would fail to render. Everything cached lives in <code>book/data</code> and <code>book/figs</code>, which are tracked.</p>
-</section>
-</section>
-<section id="regenerating-the-cached-results" class="level2" data-number="C.5">
-<h2 data-number="C.5" class="anchored" data-anchor-id="regenerating-the-cached-results"><span class="header-section-number">C.5</span> Regenerating the cached results</h2>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>Rscript book<span class="sc">/</span>scripts<span class="sc">/</span>regenerate.R          <span class="co"># everything; hours</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>Rscript book<span class="sc">/</span>scripts<span class="sc">/</span>regenerate.R f2size   <span class="co"># one target</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>Rscript book<span class="sc">/</span>scripts<span class="sc">/</span>regenerate.R search   <span class="co"># the advanced-selection benchmark</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>Rscript book<span class="sc">/</span>scripts<span class="sc">/</span>regenerate.R search_exact  <span class="co"># just the exact oracle</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>Rscript book<span class="sc">/</span>scripts<span class="sc">/</span>regenerate.R cycles   <span class="co"># the recurrent-selection trajectories</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>The script is the single place where the expensive computations live. It is never invoked by <code>quarto render</code>.</p>
-</section>
-<section id="reproducing-the-book" class="level2" data-number="C.6">
-<h2 data-number="C.6" class="anchored" data-anchor-id="reproducing-the-book"><span class="header-section-number">C.6</span> Reproducing the book</h2>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'devtools::document(); devtools::load_all()'</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'devtools::test()'</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'devtools::check()'</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="ex">quarto</span> render book</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>Quarto’s <code>freeze: auto</code> means a chapter re-runs only when its source changes. To force a full recomputation, delete <code>book/_freeze/</code>.</p>
-</section>
-<section id="known-limitations-of-the-verification" class="level2" data-number="C.7">
-<h2 data-number="C.7" class="anchored" data-anchor-id="known-limitations-of-the-verification"><span class="header-section-number">C.7</span> Known limitations of the verification</h2>
-<p>Stated so they are not mistaken for oversights.</p>
-<p><strong>The oracles share the author’s understanding.</strong> They check that the fast route computes what the slow route computes. They cannot check that the slow route implements the right definition. That is what the reproduction of the published Caballero &amp; Toro tables in <a href="02-subdivided.html" class="quarto-xref"><span>Chapter 2</span></a> is for – an external check against numbers this project did not produce.</p>
-<p><strong>Monte Carlo checks have Monte Carlo error.</strong> Where a test asserts agreement with a simulated expectation rather than an algebraic identity, the tolerance is loose by necessity, and a genuinely small bias would pass.</p>
-<p><strong>Everything is verified on simulated data.</strong> The identities are algebraic and will hold on real genotypes. The <em>empirical</em> results – which metrics are redundant, how much index a constraint costs – were derived at <span class="math inline">\(F_{ST} = 0.15\)</span> with simulated markers, and <a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 10</span></a> says explicitly that they should be re-derived on real genotypes before being treated as settled.</p>
 
 
 </section>
@@ -1690,13 +1423,13 @@ window.Quarto = {
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./91-package.html" class="pagination-link" aria-label="The `hybdiv` package">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">The <code>hybdiv</code> package</span></span>
+      <a href="./02-subdivided.html" class="pagination-link" aria-label="Diversity in a subdivided population">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Diversity in a subdivided population</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./93-corpora.html" class="pagination-link" aria-label="The bibliographic corpora">
-        <span class="nav-page-text"><span class="chapter-number">D</span>&nbsp; <span class="chapter-title">The bibliographic corpora</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./04-population-sizing.html" class="pagination-link" aria-label="Sizing a segregating population, F1 to F4">
+        <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Sizing a segregating population, F1 to F4</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

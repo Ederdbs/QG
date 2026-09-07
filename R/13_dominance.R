@@ -86,3 +86,50 @@ heterosis_partition <- function(pA, pB, d) {
   divergence <- sum(d * (pA - pB)^2 / 2)
   c(shared = shared, divergence = divergence, total = shared + divergence)
 }
+
+#' General and specific combining ability for heterosis
+#'
+#' The exact orthogonal decomposition of [heterosis_value] over a complete
+#' pool-A x pool-B factorial. Write a line's genotype as its pool frequency
+#' plus a deviation, `u = pA + du` and `v = pB + dv`, and expand the per-locus
+#' heterozygosity `u + v - 2 u v`. What is linear in one parent is general
+#' combining ability; what is bilinear in both is specific combining ability:
+#'
+#' `H_ij = mu + gca_A[i] + gca_B[j] + sca[i, j]`
+#'
+#' with `gca_A = sum_k d_k (1 - 2 pB_k) du_ik`, symmetrically for `gca_B`, and
+#' `sca = -2 sum_k d_k du_ik dv_jk`. Two consequences. A line's general
+#' combining ability *for heterosis* is weighted by the **opposite** pool's
+#' frequencies, so it is tester-pool specific and carries no information at
+#' loci where that pool sits at 0.5. And specific combining ability is minus
+#' twice a `d`-weighted covariance between the two parents' centred genotypes
+#' -- the formal reason parental similarity predicts it.
+#'
+#' All three components have mean zero over the factorial, and `sca` is exactly
+#' the interaction residual of the two-way additive fit. An additive model of
+#' hybrid performance can express the two `gca` terms and nothing else.
+#'
+#' @param U,V Line genotype matrices for pool A and pool B, coded 0/1, one row
+#'   per line and one column per locus. For homozygous lines these are `L / 2`.
+#' @param d Numeric vector of `ncol(U)` dominance deviations, one per locus.
+#' @return A list with `mu`, the factorial mean (see [heterosis_expected]),
+#'   `gca_A` and `gca_B`, one entry per line of each pool, and `sca`, an
+#'   `nrow(U)` x `nrow(V)` matrix.
+#' @seealso [heterosis_value] for the realised values this decomposes,
+#'   [heterosis_partition] for the frequency-level split.
+#' @export
+#' @examples
+#' U <- rbind(c(1, 0, 1), c(0, 0, 1))
+#' V <- rbind(c(0, 1, 1), c(1, 1, 0))
+#' heterosis_gca_sca(U, V, d = c(1, 2, 3))
+heterosis_gca_sca <- function(U, V, d) {
+  stopifnot(ncol(U) == ncol(V), length(d) == ncol(U))
+  pA <- colMeans(U)
+  pB <- colMeans(V)
+  cU <- sweep(U, 2, pA)
+  cV <- sweep(V, 2, pB)
+  list(mu    = heterosis_expected(pA, pB, d),
+       gca_A = drop(cU %*% (d * (1 - 2 * pB))),
+       gca_B = drop(cV %*% (d * (1 - 2 * pA))),
+       sca   = -2 * (cU * rep(d, each = nrow(U))) %*% t(cV))
+}
