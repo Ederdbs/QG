@@ -156,6 +156,44 @@ knitr::kable(data.frame(
   check.names = FALSE))
 ```
 
+### Genomic prediction
+
+```{r}
+#| echo: false
+knitr::kable(data.frame(
+  Symbol = c("$\\mathbf{u}$, $\\hat{\\mathbf{u}}$", "$\\boldsymbol\\beta$",
+             "$\\sigma^2_u$, $\\sigma^2_e$", "$\\lambda$", "$h^2$",
+             "$r$", "$r_i^2$", "$\\mathrm{PEV}_i$", "$\\pi$", "$\\nu$, $S$",
+             "$M_e$"),
+  Meaning = c("breeding values; the BLUP of them",
+              "marker effects; $\\mathbf{u} = \\mathbf{Z}\\boldsymbol\\beta$",
+              "genetic and residual variance",
+              "$\\sigma^2_e/\\sigma^2_u$ -- **not** the OCS penalty above",
+              "$\\sigma^2_u/(\\sigma^2_u + \\sigma^2_e)$",
+              "accuracy: $\\mathrm{cor}(\\hat u, g)$, needs the truth",
+              "reliability: $1 - \\mathrm{PEV}_i/(\\sigma^2_u \\mathbf{G}^*_{ii})$, does not",
+              "prediction error variance, from the inverse of the MME",
+              "prior probability a marker has no effect (BayesB)",
+              "degrees of freedom and scale of the $\\chi^{-2}$ prior; `df`, `R2`",
+              "effective number of independent chromosome segments"),
+  Note = c("defined over **all** individuals, not just the phenotyped ones",
+           "the same fit, two parametrisations -- exactly (@sec-genomic-prediction)",
+           "supplied here, never estimated; REML in practice",
+           "a variance ratio, not a tuning knob",
+           "the one number the whole fit is conditioned on",
+           "meaningless without its CV scheme (@sec-hybrid-cv)",
+           "the early warning: it collapses before the accuracy does",
+           "$\\sigma^2_e[\\mathbf{C}^{uu}]_{ii}$",
+           "BayesC$\\pi$ estimates it; at book scale, badly",
+           "hyperparameters, not fitted",
+           "unlinked markers here, so $M_e$ is the marker count"),
+  check.names = FALSE))
+```
+
+**CV0, CV1, CV2** name what the training set had already seen of a candidate
+hybrid's *parents*: neither, one, or both. In a factorial between two pools these
+are three different questions, and only CV2 is easy -- see @sec-hybrid-cv.
+
 ### Population sizing
 
 ```{r}

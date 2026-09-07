@@ -539,7 +539,8 @@ window.Quarto = {
   <li><a href="#heterosis-and-cycles" id="toc-heterosis-and-cycles" class="nav-link" data-scroll-target="#heterosis-and-cycles"><span class="header-section-number">A.1.4</span> Heterosis and cycles</a></li>
   <li><a href="#inbreeding-the-three-lenses" id="toc-inbreeding-the-three-lenses" class="nav-link" data-scroll-target="#inbreeding-the-three-lenses"><span class="header-section-number">A.1.5</span> Inbreeding, the three lenses</a></li>
   <li><a href="#selection-and-optimisation" id="toc-selection-and-optimisation" class="nav-link" data-scroll-target="#selection-and-optimisation"><span class="header-section-number">A.1.6</span> Selection and optimisation</a></li>
-  <li><a href="#population-sizing" id="toc-population-sizing" class="nav-link" data-scroll-target="#population-sizing"><span class="header-section-number">A.1.7</span> Population sizing</a></li>
+  <li><a href="#genomic-prediction" id="toc-genomic-prediction" class="nav-link" data-scroll-target="#genomic-prediction"><span class="header-section-number">A.1.7</span> Genomic prediction</a></li>
+  <li><a href="#population-sizing" id="toc-population-sizing" class="nav-link" data-scroll-target="#population-sizing"><span class="header-section-number">A.1.8</span> Population sizing</a></li>
   </ul></li>
   <li><a href="#conventions" id="toc-conventions" class="nav-link" data-scroll-target="#conventions"><span class="header-section-number">A.2</span> Conventions</a></li>
   <li><a href="#terms" id="toc-terms" class="nav-link" data-scroll-target="#terms"><span class="header-section-number">A.3</span> Terms</a></li>
@@ -991,8 +992,87 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="population-sizing" class="level3" data-number="A.1.7">
-<h3 data-number="A.1.7" class="anchored" data-anchor-id="population-sizing"><span class="header-section-number">A.1.7</span> Population sizing</h3>
+<section id="genomic-prediction" class="level3" data-number="A.1.7">
+<h3 data-number="A.1.7" class="anchored" data-anchor-id="genomic-prediction"><span class="header-section-number">A.1.7</span> Genomic prediction</h3>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 18%">
+<col style="width: 41%">
+<col style="width: 40%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Symbol</th>
+<th style="text-align: left;">Meaning</th>
+<th style="text-align: left;">Note</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\mathbf{u}\)</span>, <span class="math inline">\(\hat{\mathbf{u}}\)</span></td>
+<td style="text-align: left;">breeding values; the BLUP of them</td>
+<td style="text-align: left;">defined over <strong>all</strong> individuals, not just the phenotyped ones</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\boldsymbol\beta\)</span></td>
+<td style="text-align: left;">marker effects; <span class="math inline">\(\mathbf{u} = \mathbf{Z}\boldsymbol\beta\)</span></td>
+<td style="text-align: left;">the same fit, two parametrisations – exactly (<a href="08b-genomic-prediction.html" class="quarto-xref"><span>Chapter 12</span></a>)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\sigma^2_u\)</span>, <span class="math inline">\(\sigma^2_e\)</span></td>
+<td style="text-align: left;">genetic and residual variance</td>
+<td style="text-align: left;">supplied here, never estimated; REML in practice</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\lambda\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(\sigma^2_e/\sigma^2_u\)</span> – <strong>not</strong> the OCS penalty above</td>
+<td style="text-align: left;">a variance ratio, not a tuning knob</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(h^2\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(\sigma^2_u/(\sigma^2_u + \sigma^2_e)\)</span></td>
+<td style="text-align: left;">the one number the whole fit is conditioned on</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(r\)</span></td>
+<td style="text-align: left;">accuracy: <span class="math inline">\(\mathrm{cor}(\hat u, g)\)</span>, needs the truth</td>
+<td style="text-align: left;">meaningless without its CV scheme (<a href="08b-genomic-prediction.html#sec-hybrid-cv" class="quarto-xref"><span>Section 12.4</span></a>)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(r_i^2\)</span></td>
+<td style="text-align: left;">reliability: <span class="math inline">\(1 - \mathrm{PEV}_i/(\sigma^2_u \mathbf{G}^*_{ii})\)</span>, does not</td>
+<td style="text-align: left;">the early warning: it collapses before the accuracy does</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\mathrm{PEV}_i\)</span></td>
+<td style="text-align: left;">prediction error variance, from the inverse of the MME</td>
+<td style="text-align: left;"><span class="math inline">\(\sigma^2_e[\mathbf{C}^{uu}]_{ii}\)</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\pi\)</span></td>
+<td style="text-align: left;">prior probability a marker has no effect (BayesB)</td>
+<td style="text-align: left;">BayesC<span class="math inline">\(\pi\)</span> estimates it; at book scale, badly</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\nu\)</span>, <span class="math inline">\(S\)</span></td>
+<td style="text-align: left;">degrees of freedom and scale of the <span class="math inline">\(\chi^{-2}\)</span> prior; <code>df</code>, <code>R2</code></td>
+<td style="text-align: left;">hyperparameters, not fitted</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(M_e\)</span></td>
+<td style="text-align: left;">effective number of independent chromosome segments</td>
+<td style="text-align: left;">unlinked markers here, so <span class="math inline">\(M_e\)</span> is the marker count</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><strong>CV0, CV1, CV2</strong> name what the training set had already seen of a candidate hybrid’s <em>parents</em>: neither, one, or both. In a factorial between two pools these are three different questions, and only CV2 is easy – see <a href="08b-genomic-prediction.html#sec-hybrid-cv" class="quarto-xref"><span>Section 12.4</span></a>.</p>
+</section>
+<section id="population-sizing" class="level3" data-number="A.1.8">
+<h3 data-number="A.1.8" class="anchored" data-anchor-id="population-sizing"><span class="header-section-number">A.1.8</span> Population sizing</h3>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
