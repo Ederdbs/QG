@@ -12,6 +12,7 @@
 #   f2size       the F1->F4 sizing grid and its nine figures
 #   benchmark    the metric benchmark: null, discriminatory power, frontier
 #   identity     the line-collapse identity sweep
+#   genpred      GBLUP/BayesA/BayesB accuracy sweep of Chapter 8b
 #   search       the advanced-selection benchmark of Chapter 10b
 #   search_exact the outer-approximation oracle alone (slowest piece)
 #   cycles       the recurrent-selection trajectories of Chapter 11b
@@ -37,7 +38,7 @@ dir.create(fig_dir,  showWarnings = FALSE, recursive = TRUE)
 dir.create(out_dir,  showWarnings = FALSE, recursive = TRUE)
 
 targets <- commandArgs(trailingOnly = TRUE)
-if (!length(targets)) targets <- c("f2size", "benchmark", "identity", "search", "cycles")
+if (!length(targets)) targets <- c("f2size", "benchmark", "identity", "genpred", "search", "cycles")
 want <- function(x) x %in% targets
 
 # --- f2size: the population-sizing grid ---------------------------------------
@@ -105,6 +106,86 @@ if (want("identity")) {
   write.csv(do.call(rbind, out),
             file.path(out_dir, "identity_sweep_book.csv"), row.names = FALSE)
   message("identity: done")
+}
+
+# --- genpred: GBLUP/BayesA/BayesB accuracy sweep -------------------------------
+# Backs Chapter 8b. Compares prediction accuracy of hand-solved GBLUP against
+# bWGR's BayesA/BayesB under two genetic architectures (polygenic, the book's
+# own simulate_data() trait; oligogenic, effect mass concentrated on a few
+# markers) crossed with two heritabilities, replicated over independent
+# training/candidate splits. A separate, smaller sweep checks how a BayesB fit
+# tuned to the wrong sparsity (pi far from the truth) degrades.
+if (want("genpred")) {
+  message("genpred: GBLUP/BayesA/BayesB accuracy sweep")
+  if (!requireNamespace("bWGR", quietly = TRUE))
+    stop("genpred needs the bWGR package (book Suggests): install.packages('bWGR')")
+
+  cfg <- utils::modifyList(sim_config, list(n_pool_A = 25, n_pool_B = 25, m = 2000, seed = 1))
+  ctx <- simulate_data(cfg)
+  N <- ctx$N; M <- ctx$X * 2; G <- ctx$G
+
+  # Same line genotypes and hybrid marker matrix simulate_data() built
+  # internally, reconstructed here only to attach a different, oligogenic set
+  # of marker effects -- the hybrid population itself is identical.
+  L <- simulate_lines(cfg)
+  a_ids <- seq_len(cfg$n_pool_A); b_ids <- cfg$n_pool_A + seq_len(cfg$n_pool_B)
+  ped <- expand.grid(a = a_ids, b = b_ids)
+  vr  <- vanraden_G((L[ped$a, , drop = FALSE] + L[ped$b, , drop = FALSE]) / 2)
+  set.seed(cfg$seed + 42)
+  qtl <- sample.int(cfg$m, 3)
+  Bq  <- rep(0, cfg$m); Bq[qtl] <- stats::rnorm(3)
+  g_olig <- as.numeric(scale(vr$Z %*% Bq))
+  g_poly <- ctx$traits[, 1]
+
+  gblup_hand <- function(y, train, h2) {
+    Gstar <- 0.95 * G + 0.05 * diag(N)
+    n_t <- length(train)
+    Z  <- matrix(0, n_t, N); Z[cbind(seq_len(n_t), train)] <- 1
+    X1 <- matrix(1, n_t, 1); lambda <- (1 - h2) / h2
+    Ginv <- solve(Gstar)
+    LHS <- rbind(cbind(crossprod(X1), crossprod(X1, Z)),
+                 cbind(crossprod(Z, X1), crossprod(Z) + Ginv * lambda))
+    RHS <- rbind(crossprod(X1, y[train]), crossprod(Z, y[train]))
+    solve(LHS, RHS)[-1]
+  }
+
+  run_once <- function(g, h2, seed, train_frac = 0.6, pi = 0.95) {
+    set.seed(seed)
+    e <- stats::rnorm(N, 0, sqrt((1 - h2) / h2))
+    y <- g + e
+    train <- sample.int(N, floor(train_frac * N)); cand <- setdiff(seq_len(N), train)
+    fitA <- bWGR::BayesA(y[train], M[train, ], it = 1500, bi = 500, df = 5, R2 = 0.5)
+    fitB <- bWGR::BayesB(y[train], M[train, ], it = 1500, bi = 500, pi = pi, df = 5, R2 = 0.5)
+    u_hat <- gblup_hand(y, train, h2)
+    data.frame(GBLUP  = stats::cor(u_hat[cand], g[cand]),
+               BayesA = stats::cor(as.numeric(M[cand, ] %*% fitA$b), g[cand]),
+               BayesB = stats::cor(as.numeric(M[cand, ] %*% fitB$b), g[cand]))
+  }
+
+  archs <- list(polygenic = g_poly, oligogenic = g_olig)
+  grid  <- expand.grid(arch = names(archs), h2 = c(0.2, 0.5), rep = 1:15)
+  acc <- do.call(rbind, lapply(seq_len(nrow(grid)), function(i) {
+    r <- grid[i, ]
+    cbind(r, run_once(archs[[r$arch]], r$h2, seed = 1000 + i))
+  }))
+  write.csv(acc, file.path(data_dir, "genomic_prediction_accuracy.csv"), row.names = FALSE)
+
+  # BayesB tuned to the wrong sparsity: fixed architecture (oligogenic,
+  # h2 = 0.5), pi swept from far too lenient to close to the true 3/2000.
+  sens <- do.call(rbind, lapply(c(0.5, 0.9, 0.95, 0.99, 0.995), function(pi) {
+    do.call(rbind, lapply(1:8, function(rep) {
+      set.seed(2000 + rep)
+      e <- stats::rnorm(N, 0, sqrt((1 - 0.5) / 0.5))
+      y <- g_olig + e
+      train <- sample.int(N, floor(0.6 * N)); cand <- setdiff(seq_len(N), train)
+      fitB <- bWGR::BayesB(y[train], M[train, ], it = 1500, bi = 500, pi = pi, df = 5, R2 = 0.5)
+      data.frame(pi = pi, rep = rep,
+                 BayesB = stats::cor(as.numeric(M[cand, ] %*% fitB$b), g_olig[cand]))
+    }))
+  }))
+  write.csv(sens, file.path(data_dir, "genomic_prediction_pi_sensitivity.csv"), row.names = FALSE)
+
+  message("genpred: done")
 }
 
 

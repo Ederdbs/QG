@@ -124,7 +124,8 @@ need to change — everything else operates on `ctx`/`X`/`f`/`hybrids` and is ag
 | `R/10_stage1.R` | stage 1 — line genotypes -> X / f / hybrids contract |
 | `R/11_stage2.R` | stage 2 — per-scenario selection, metrics, 0/1 selection table |
 | `R/12_search.R` | structure-aware search: local search on the swap, line-encoded DE, the valid bound, rounding, the exact oracle |
-| `inst/scripts/` | `run_all.R`, `run_benchmark.R`, `run_mabc.R` — the CLI entry points at production scale |
+| `R/13_alphasimr_bridge.R` | AlphaSimR bridge — reciprocal recurrent selection across two heterotic pools, from founder haplotypes to the stage-1 contract (`Suggests`-only) |
+| `inst/scripts/` | `run_all.R`, `run_benchmark.R`, `run_mabc.R`, `run_alphasimr.R` — the CLI entry points at production scale |
 | `book/` | the Quarto book (see below) |
 | `doc/` | the source documents the book was built from; provenance only, see `doc/README.md` |
 
@@ -246,9 +247,13 @@ pass `--to html` while iterating, the PDF pass roughly doubles the render.
   `swap_every` moves before the next exchange and an inner counter would never reach the
   global trace interval.
 
-- **The three scripts in `inst/scripts/` are not dead weight.** They run at the *production*
-  scale (`sim_config` unmodified) while the book runs small, they write the CSVs in `report/`,
-  and `run_benchmark.R` is the only place `plot_null()`/`plot_correlation()`/`plot_frontier()`
-  are ever called. Delete them and those three exports become unexercised. `run_mabc.R` is
-  the only driver of the MABC scans and the only writer of `book/data/mabc_*.csv`.
+- **The four scripts in `inst/scripts/` are not dead weight.** `run_all.R`, `run_benchmark.R`
+  and `run_mabc.R` run at the *production* scale (`sim_config` unmodified) while the book runs
+  small, they write the CSVs in `report/`, and `run_benchmark.R` is the only place
+  `plot_null()`/`plot_correlation()`/`plot_frontier()` are ever called. Delete them and those
+  three exports become unexercised. `run_mabc.R` is the only driver of the MABC scans and the
+  only writer of `book/data/mabc_*.csv`. `run_alphasimr.R` is the heavier, production-scale
+  driver for the reciprocal-recurrent-selection pipeline in `R/13_alphasimr_bridge.R` -- the
+  book chapter itself (@sec-alphasimr / `04c-alphasimr-pipeline.qmd`) runs a smaller
+  configuration live, with no caching, because AlphaSimR is fast enough at that scale.
 - **Package code must stay ASCII.** `R CMD check` warns otherwise. Use `--` not an em dash.

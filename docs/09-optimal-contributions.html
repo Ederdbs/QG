@@ -2,20 +2,23 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.38">
+<meta name="generator" content="quarto-1.10.18">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>11&nbsp; Optimal contributions and the \alpha constraint – Genetic Diversity in Hybrid Breeding</title>
+<title>13&nbsp; Optimal contributions and the \alpha constraint – Genetic Diversity in Hybrid Breeding</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
 */
-code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
@@ -88,21 +91,21 @@ div.csl-indent {
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
 <link href="./10-combinatorial-selection.html" rel="next">
-<link href="./08-pipeline-stages.html" rel="prev">
+<link href="./08b-genomic-prediction.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-0a6b7249c26820e032cb0bd839ff02b1.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-5ccb035bea26c1e21f80f44cf7c27909.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-aa873432a3c62897e6c2091c0d30a948.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-5ccb035bea26c1e21f80f44cf7c27909.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-37a0ccb6f5b9899fcb884e11bb6f7458.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -132,7 +135,7 @@ div.csl-indent {
 }</script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 const typesetMath = (el) => {
@@ -334,7 +337,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./09-optimal-contributions.html">Optimisation</a></li><li class="breadcrumb-item"><a href="./09-optimal-contributions.html"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Optimal contributions and the <span class="math inline">\(\alpha\)</span> constraint</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./09-optimal-contributions.html">Optimisation</a></li><li class="breadcrumb-item"><a href="./09-optimal-contributions.html"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Optimal contributions and the <span class="math inline">\(\alpha\)</span> constraint</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -418,6 +421,12 @@ window.Quarto = {
  <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Introgressing several genes by backcrossing</span></span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04c-alphasimr-pipeline.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">A realistic corn pipeline: AlphaSimR and reciprocal recurrent selection</span></span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -432,31 +441,37 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./05-genomic-era.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Diversity metrics in the genomic era</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Diversity metrics in the genomic era</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./05b-heterosis-dominance.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Heterosis, dominance, and what divergence buys</span></span></a>
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Heterosis, dominance, and what divergence buys</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./06-metric-catalogue.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">A catalogue of metrics on <code>f</code></span></span></a>
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">A catalogue of metrics on <code>f</code></span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./07-choosing-metrics.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Choosing metrics: collapse, cost, redundancy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Choosing metrics: collapse, cost, redundancy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./08-pipeline-stages.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Metrics at each pipeline stage, and five traps</span></span></a>
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Metrics at each pipeline stage, and five traps</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08b-genomic-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Predicting breeding values: GBLUP, BayesA, BayesB</span></span></a>
   </div>
 </li>
       </ul>
@@ -473,19 +488,19 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./09-optimal-contributions.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Optimal contributions and the <span class="math inline">\(\alpha\)</span> constraint</span></span></a>
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Optimal contributions and the <span class="math inline">\(\alpha\)</span> constraint</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./10-combinatorial-selection.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Combinatorial selection</span></span></a>
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Combinatorial selection</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./10b-advanced-selection.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Advanced selection: structure, bounds and scale</span></span></a>
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Advanced selection: structure, bounds and scale</span></span></a>
   </div>
 </li>
       </ul>
@@ -502,19 +517,19 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./11-plant-literature.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">What the plant literature establishes</span></span></a>
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">What the plant literature establishes</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./11b-diversity-across-cycles.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Diversity across cycles</span></span></a>
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Diversity across cycles</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./12-case-study.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">End to end, and the operational checklist</span></span></a>
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">End to end, and the operational checklist</span></span></a>
   </div>
 </li>
       </ul>
@@ -570,18 +585,18 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#constraint-not-a-weighted-sum" id="toc-constraint-not-a-weighted-sum" class="nav-link active" data-scroll-target="#constraint-not-a-weighted-sum"><span class="header-section-number">11.1</span> Constraint, not a weighted sum</a></li>
-  <li><a href="#relation-to-the-standard-ocs-formulation" id="toc-relation-to-the-standard-ocs-formulation" class="nav-link" data-scroll-target="#relation-to-the-standard-ocs-formulation"><span class="header-section-number">11.2</span> Relation to the standard OCS formulation</a>
+  <li><a href="#constraint-not-a-weighted-sum" id="toc-constraint-not-a-weighted-sum" class="nav-link active" data-scroll-target="#constraint-not-a-weighted-sum"><span class="header-section-number">13.1</span> Constraint, not a weighted sum</a></li>
+  <li><a href="#relation-to-the-standard-ocs-formulation" id="toc-relation-to-the-standard-ocs-formulation" class="nav-link" data-scroll-target="#relation-to-the-standard-ocs-formulation"><span class="header-section-number">13.2</span> Relation to the standard OCS formulation</a>
   <ul class="collapse">
-  <li><a href="#sec-relaxation" id="toc-sec-relaxation" class="nav-link" data-scroll-target="#sec-relaxation"><span class="header-section-number">11.2.1</span> The continuous relaxation as an upper bound</a></li>
+  <li><a href="#sec-relaxation" id="toc-sec-relaxation" class="nav-link" data-scroll-target="#sec-relaxation"><span class="header-section-number">13.2.1</span> The continuous relaxation as an upper bound</a></li>
   </ul></li>
-  <li><a href="#setting-alpha_max" id="toc-setting-alpha_max" class="nav-link" data-scroll-target="#setting-alpha_max"><span class="header-section-number">11.3</span> Setting <span class="math inline">\(\alpha_{\max}\)</span></a>
+  <li><a href="#setting-alpha_max" id="toc-setting-alpha_max" class="nav-link" data-scroll-target="#setting-alpha_max"><span class="header-section-number">13.3</span> Setting <span class="math inline">\(\alpha_{\max}\)</span></a>
   <ul class="collapse">
-  <li><a href="#how-far-alpha_max-moves-when-mathbff-moves" id="toc-how-far-alpha_max-moves-when-mathbff-moves" class="nav-link" data-scroll-target="#how-far-alpha_max-moves-when-mathbff-moves"><span class="header-section-number">11.3.1</span> How far <span class="math inline">\(\alpha_{\max}\)</span> moves when <span class="math inline">\(\mathbf{f}\)</span> moves</a></li>
+  <li><a href="#how-far-alpha_max-moves-when-mathbff-moves" id="toc-how-far-alpha_max-moves-when-mathbff-moves" class="nav-link" data-scroll-target="#how-far-alpha_max-moves-when-mathbff-moves"><span class="header-section-number">13.3.1</span> How far <span class="math inline">\(\alpha_{\max}\)</span> moves when <span class="math inline">\(\mathbf{f}\)</span> moves</a></li>
   </ul></li>
-  <li><a href="#a-caveat-carried-over-from-the-ocs-literature" id="toc-a-caveat-carried-over-from-the-ocs-literature" class="nav-link" data-scroll-target="#a-caveat-carried-over-from-the-ocs-literature"><span class="header-section-number">11.4</span> A caveat carried over from the OCS literature</a></li>
-  <li><a href="#quadratic-programming-when-contributions-are-continuous" id="toc-quadratic-programming-when-contributions-are-continuous" class="nav-link" data-scroll-target="#quadratic-programming-when-contributions-are-continuous"><span class="header-section-number">11.5</span> Quadratic programming, when contributions are continuous</a></li>
-  <li><a href="#what-belongs-in-the-inner-loop" id="toc-what-belongs-in-the-inner-loop" class="nav-link" data-scroll-target="#what-belongs-in-the-inner-loop"><span class="header-section-number">11.6</span> What belongs in the inner loop</a></li>
+  <li><a href="#a-caveat-carried-over-from-the-ocs-literature" id="toc-a-caveat-carried-over-from-the-ocs-literature" class="nav-link" data-scroll-target="#a-caveat-carried-over-from-the-ocs-literature"><span class="header-section-number">13.4</span> A caveat carried over from the OCS literature</a></li>
+  <li><a href="#quadratic-programming-when-contributions-are-continuous" id="toc-quadratic-programming-when-contributions-are-continuous" class="nav-link" data-scroll-target="#quadratic-programming-when-contributions-are-continuous"><span class="header-section-number">13.5</span> Quadratic programming, when contributions are continuous</a></li>
+  <li><a href="#what-belongs-in-the-inner-loop" id="toc-what-belongs-in-the-inner-loop" class="nav-link" data-scroll-target="#what-belongs-in-the-inner-loop"><span class="header-section-number">13.6</span> What belongs in the inner loop</a></li>
   </ul>
 </nav>
     </div>
@@ -589,9 +604,9 @@ window.Quarto = {
 <main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./09-optimal-contributions.html">Optimisation</a></li><li class="breadcrumb-item"><a href="./09-optimal-contributions.html"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Optimal contributions and the <span class="math inline">\(\alpha\)</span> constraint</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./09-optimal-contributions.html">Optimisation</a></li><li class="breadcrumb-item"><a href="./09-optimal-contributions.html"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Optimal contributions and the <span class="math inline">\(\alpha\)</span> constraint</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span id="sec-ocs" class="quarto-section-identifier"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Optimal contributions and the <span class="math inline">\(\alpha\)</span> constraint</span></span></h1>
+<h1 class="title"><span id="sec-ocs" class="quarto-section-identifier"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Optimal contributions and the <span class="math inline">\(\alpha\)</span> constraint</span></span></h1>
 </div>
 
 
@@ -608,9 +623,9 @@ window.Quarto = {
 </header>
 
 
-<p>Everything so far has been measurement. This chapter turns the measurement into a constraint an optimiser can respect, and connects it to the optimal-contribution literature it specialises.</p>
-<section id="constraint-not-a-weighted-sum" class="level2" data-number="11.1">
-<h2 data-number="11.1" class="anchored" data-anchor-id="constraint-not-a-weighted-sum"><span class="header-section-number">11.1</span> Constraint, not a weighted sum</h2>
+<p>Everything so far has been measurement. This chapter turns the measurement into a constraint an optimiser can respect, and connects it to the optimal-contribution literature it specialises. <code>ctx$index</code> below is still the known-marker-effects version built in <a href="03-simulating-crosses.html" class="quarto-xref"><span>Chapter 3</span></a>; <a href="08b-genomic-prediction.html" class="quarto-xref"><span>Chapter 12</span></a> shows how a real programme gets a <code>traits</code> matrix to hand <code>stage1_build()</code> in the first place, and what accuracy it can expect once it does.</p>
+<section id="constraint-not-a-weighted-sum" class="level2" data-number="13.1">
+<h2 data-number="13.1" class="anchored" data-anchor-id="constraint-not-a-weighted-sum"><span class="header-section-number">13.1</span> Constraint, not a weighted sum</h2>
 <p>With <span class="math inline">\(\mathbf{u}\)</span> the multi-trait index and <span class="math inline">\(S\)</span> the selected set of size <span class="math inline">\(n\)</span>:</p>
 <p><span class="math display">\[\max_{S,\; |S| = n} \; \frac{1}{n}\sum_{i \in S} u_i
   \qquad \text{subject to} \qquad \alpha(S) \le \alpha_{\max}.\]</span></p>
@@ -637,13 +652,13 @@ window.Quarto = {
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         -(mean(ix[idx]) - penalty * viol)</span></span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     }</span></span>
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x9b8c12e08&gt;</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x7470379a0&gt;</span></span>
 <span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The violation enters as a <em>proportional</em> penalty, so a plan that overshoots by 10% of the budget is penalised in units the budget defines, whatever the absolute value of <span class="math inline">\(\alpha_{\max}\)</span>.</p>
 </section>
-<section id="relation-to-the-standard-ocs-formulation" class="level2" data-number="11.2">
-<h2 data-number="11.2" class="anchored" data-anchor-id="relation-to-the-standard-ocs-formulation"><span class="header-section-number">11.2</span> Relation to the standard OCS formulation</h2>
+<section id="relation-to-the-standard-ocs-formulation" class="level2" data-number="13.2">
+<h2 data-number="13.2" class="anchored" data-anchor-id="relation-to-the-standard-ocs-formulation"><span class="header-section-number">13.2</span> Relation to the standard OCS formulation</h2>
 <p><span class="citation" data-cites="gomezromano2016">Gómez-Romano et al. (<a href="99-references.html#ref-gomezromano2016" role="doc-biblioref">2016</a>)</span> write the general optimal-contribution problem, for a vector of continuous contributions <span class="math inline">\(\mathbf{c}\)</span>, as</p>
 <p><span class="math display">\[\text{minimise} \quad \mathbf{c}'\mathbf{G}\mathbf{c}
   \qquad \text{subject to} \qquad
@@ -664,8 +679,8 @@ window.Quarto = {
 <p>The per-sex sum constraint disappears in hermaphrodite and monoecious species (a single sum to 1) and reappears in dioecious crops and in schemes using cytoplasmic male sterility. In hybrid maize the natural problem is not OCS but <strong>optimal cross selection</strong>: <span class="math inline">\(\mathbf{c}\)</span> stops being an individual contribution and becomes a weight per cross, with the between-pool covariance entering explicitly. And there is an extra restriction the animal literature does not have – the <strong>maximum number of crosses executable in a field</strong>, which makes the problem mixed-integer.</p>
 </div>
 </div>
-<section id="sec-relaxation" class="level3" data-number="11.2.1">
-<h3 data-number="11.2.1" class="anchored" data-anchor-id="sec-relaxation"><span class="header-section-number">11.2.1</span> The continuous relaxation as an upper bound</h3>
+<section id="sec-relaxation" class="level3" data-number="13.2.1">
+<h3 data-number="13.2.1" class="anchored" data-anchor-id="sec-relaxation"><span class="header-section-number">13.2.1</span> The continuous relaxation as an upper bound</h3>
 <p>Dropping <span class="math inline">\(c_i \in \{0, 1/n\}\)</span> back to <span class="math inline">\(0 \le c_i \le 1/n\)</span> gives the continuous relaxation of <em>this</em> restricted problem. Every discrete solution is feasible under the relaxation, so the relaxation’s optimum is a valid <strong>upper bound</strong>.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>project_capped_simplex</span>
@@ -681,11 +696,11 @@ window.Quarto = {
 <span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     }</span></span>
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     pmin(pmax(v - (lo + hi)/2, 0), cap)</span></span>
 <span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x9b70d0510&gt;</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x7454f53b8&gt;</span></span>
 <span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The cap is what makes the bound valid. Without <span class="math inline">\(c_i \le 1/n\)</span> the relaxation would put all weight on the single best candidate and the bound would be useless.</p>
-<p>Turning the relaxation into a bound on the <em>constrained</em> problem needs one more step, and turning it into an actual selection needs a rounding: both are in <a href="10b-advanced-selection.html" class="quarto-xref"><span>Chapter 13</span></a>.</p>
+<p>Turning the relaxation into a bound on the <em>constrained</em> problem needs one more step, and turning it into an actual selection needs a rounding: both are in <a href="10b-advanced-selection.html" class="quarto-xref"><span>Chapter 15</span></a>.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>lambdas <span class="ot">&lt;-</span> <span class="dv">10</span><span class="sc">^</span><span class="fu">seq</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="fl">2.5</span>, <span class="at">length.out =</span> <span class="dv">12</span>)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>relax <span class="ot">&lt;-</span> <span class="fu">ocs_relaxation</span>(ctx, n_sel, lambdas)</span>
@@ -834,8 +849,8 @@ window.Quarto = {
 </div>
 </section>
 </section>
-<section id="setting-alpha_max" class="level2" data-number="11.3">
-<h2 data-number="11.3" class="anchored" data-anchor-id="setting-alpha_max"><span class="header-section-number">11.3</span> Setting <span class="math inline">\(\alpha_{\max}\)</span></h2>
+<section id="setting-alpha_max" class="level2" data-number="13.3">
+<h2 data-number="13.3" class="anchored" data-anchor-id="setting-alpha_max"><span class="header-section-number">13.3</span> Setting <span class="math inline">\(\alpha_{\max}\)</span></h2>
 <p>The limit <strong>should not be chosen a priori</strong>. Pure truncation – the greediest possible selection – defines the maximum attainable <span class="math inline">\(\alpha\)</span>. If that ceiling sits below your intended limit, the constraint restricts nothing.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>attainable <span class="ot">&lt;-</span> <span class="fu">alpha_loss</span>(<span class="fu">sel_truncation</span>(ctx, n_sel), ctx, null<span class="sc">$</span>gd_ref)</span>
@@ -956,9 +971,9 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<section id="how-far-alpha_max-moves-when-mathbff-moves" class="level3" data-number="11.3.1">
-<h3 data-number="11.3.1" class="anchored" data-anchor-id="how-far-alpha_max-moves-when-mathbff-moves"><span class="header-section-number">11.3.1</span> How far <span class="math inline">\(\alpha_{\max}\)</span> moves when <span class="math inline">\(\mathbf{f}\)</span> moves</h3>
-<p>The ceiling above is quoted to four decimals, which invites more confidence than the marker panel supports. <a href="05-genomic-era.html" class="quarto-xref"><span>Chapter 6</span></a> showed that the MAF spectrum decides how badly the two inbreeding lenses disagree; the same spectrum feeds <span class="math inline">\(\mathbf{f}\)</span>, and therefore <span class="math inline">\(\bar H_{\text{ref}}\)</span> and the ceiling. It is worth knowing which choices move the budget and which only look as though they should.</p>
+<section id="how-far-alpha_max-moves-when-mathbff-moves" class="level3" data-number="13.3.1">
+<h3 data-number="13.3.1" class="anchored" data-anchor-id="how-far-alpha_max-moves-when-mathbff-moves"><span class="header-section-number">13.3.1</span> How far <span class="math inline">\(\alpha_{\max}\)</span> moves when <span class="math inline">\(\mathbf{f}\)</span> moves</h3>
+<p>The ceiling above is quoted to four decimals, which invites more confidence than the marker panel supports. <a href="05-genomic-era.html" class="quarto-xref"><span>Chapter 7</span></a> showed that the MAF spectrum decides how badly the two inbreeding lenses disagree; the same spectrum feeds <span class="math inline">\(\mathbf{f}\)</span>, and therefore <span class="math inline">\(\bar H_{\text{ref}}\)</span> and the ceiling. It is worth knowing which choices move the budget and which only look as though they should.</p>
 <p>Rebuild everything downstream of the marker panel – <span class="math inline">\(\mathbf{f}\)</span>, the null, the ceiling – under a filter, a density and an ascertainment scenario:</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>ceiling_for <span class="ot">&lt;-</span> <span class="cf">function</span>(keep, label, <span class="at">B =</span> <span class="dv">250</span>) {</span>
@@ -1100,19 +1115,19 @@ window.Quarto = {
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>A budget is not a property of the germplasm. It is a property of the germplasm <em>and</em> the marker panel, and only the second of those changes when the genotyping platform does. Re-derive the ceiling whenever the panel changes, and do not compare an <span class="math inline">\(\alpha\)</span> across two studies genotyped differently – <a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 9</span></a> Finding 3’s caveat on transfer applies here with more force, because this one is a constraint rather than a diagnostic.</p>
+<p>A budget is not a property of the germplasm. It is a property of the germplasm <em>and</em> the marker panel, and only the second of those changes when the genotyping platform does. Re-derive the ceiling whenever the panel changes, and do not compare an <span class="math inline">\(\alpha\)</span> across two studies genotyped differently – <a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 10</span></a> Finding 3’s caveat on transfer applies here with more force, because this one is a constraint rather than a diagnostic.</p>
 </div>
 </div>
 </section>
 </section>
-<section id="a-caveat-carried-over-from-the-ocs-literature" class="level2" data-number="11.4">
-<h2 data-number="11.4" class="anchored" data-anchor-id="a-caveat-carried-over-from-the-ocs-literature"><span class="header-section-number">11.4</span> A caveat carried over from the OCS literature</h2>
+<section id="a-caveat-carried-over-from-the-ocs-literature" class="level2" data-number="13.4">
+<h2 data-number="13.4" class="anchored" data-anchor-id="a-caveat-carried-over-from-the-ocs-literature"><span class="header-section-number">13.4</span> A caveat carried over from the OCS literature</h2>
 <p><span class="citation" data-cites="gomezromano2016">Gómez-Romano et al. (<a href="99-references.html#ref-gomezromano2016" role="doc-biblioref">2016</a>)</span> show that the <em>predicted</em> rate of coancestry in the next generation, <span class="math inline">\(E(\Delta f_{t+1}) = (\mathbf{c}'\mathbf{G}_t\mathbf{c} - f_t)/(1 - f_t)\)</span>, is systematically <strong>biased downward</strong> relative to the coancestry actually realised after offspring are generated – by roughly a factor of two in their simulations with small candidate pools, shrinking as the pool grows. The bias arises because <span class="math inline">\(\mathbf{c}'\mathbf{G}\mathbf{c}\)</span> is an expectation over Mendelian segregation, and the realised draw carries its own sampling variance on top of that expectation.</p>
 <p>This does <strong>not</strong> affect the <span class="math inline">\(\theta_S\)</span> computed in this book. <span class="math inline">\(\mathbf{f}\)</span> is measured on real marker genotypes of an already-realised hybrid population; there is no forward-prediction step to bias.</p>
 <p>It becomes relevant the moment the pipeline is extended to <em>plan a further generation</em> from the selected hybrids – to predict <em>their</em> offspring’s coancestry from a contribution vector. At that point the naive <span class="math inline">\(\mathbf{c}'\mathbf{f}\mathbf{c}\)</span> prediction should be expected to underestimate realised coancestry, and the margin built into <span class="math inline">\(\alpha_{\max}\)</span> must account for it.</p>
 </section>
-<section id="quadratic-programming-when-contributions-are-continuous" class="level2" data-number="11.5">
-<h2 data-number="11.5" class="anchored" data-anchor-id="quadratic-programming-when-contributions-are-continuous"><span class="header-section-number">11.5</span> Quadratic programming, when contributions are continuous</h2>
+<section id="quadratic-programming-when-contributions-are-continuous" class="level2" data-number="13.5">
+<h2 data-number="13.5" class="anchored" data-anchor-id="quadratic-programming-when-contributions-are-continuous"><span class="header-section-number">13.5</span> Quadratic programming, when contributions are continuous</h2>
 <p>Where the problem genuinely is continuous – composing a synthetic, assembling a core collection, setting seed proportions – solve it as a quadratic programme rather than with a metaheuristic. That is <a href="02-subdivided.html" class="quarto-xref"><span>Chapter 2</span></a>’s <code>optimal_contributions()</code>, with <code>ocs_quadprog()</code> adding the merit term:</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>sub <span class="ot">&lt;-</span> <span class="fu">sample.int</span>(ctx<span class="sc">$</span>n_lines, <span class="dv">20</span>)</span>
@@ -1190,11 +1205,11 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>Note the <code>upper = 0.20</code> cap: an operational ceiling on how much any single line may contribute. Caps of this kind are usually easier to defend than the <span class="math inline">\(\lambda\)</span> that produced them, and they are the continuous analogue of the per-line usage cap that <a href="10-combinatorial-selection.html" class="quarto-xref"><span>Chapter 12</span></a> enforces in the decoder.</p>
+<p>Note the <code>upper = 0.20</code> cap: an operational ceiling on how much any single line may contribute. Caps of this kind are usually easier to defend than the <span class="math inline">\(\lambda\)</span> that produced them, and they are the continuous analogue of the per-line usage cap that <a href="10-combinatorial-selection.html" class="quarto-xref"><span>Chapter 14</span></a> enforces in the decoder.</p>
 <p>As <span class="math inline">\(\lambda\)</span> falls the solution concentrates on fewer sources – the same mechanism, in continuous form, that makes <span class="math inline">\(N_{e,\text{par}}\)</span> a necessary second constraint in the discrete problem.</p>
 </section>
-<section id="what-belongs-in-the-inner-loop" class="level2" data-number="11.6">
-<h2 data-number="11.6" class="anchored" data-anchor-id="what-belongs-in-the-inner-loop"><span class="header-section-number">11.6</span> What belongs in the inner loop</h2>
+<section id="what-belongs-in-the-inner-loop" class="level2" data-number="13.6">
+<h2 data-number="13.6" class="anchored" data-anchor-id="what-belongs-in-the-inner-loop"><span class="header-section-number">13.6</span> What belongs in the inner loop</h2>
 <p>The optimiser performs on the order of <span class="math inline">\(10^5\)</span> to <span class="math inline">\(10^6\)</span> evaluations, so the cost per call decides what goes into the objective and what waits for post-hoc validation.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">cost_per_eval</span>(ctx, n_sel, <span class="at">reps =</span> <span class="dv">20</span>), <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -1222,11 +1237,11 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td style="text-align: left;">alleles_lost</td>
-<td style="text-align: right;">100</td>
+<td style="text-align: right;">150</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">ENE</td>
-<td style="text-align: right;">50</td>
+<td style="text-align: right;">0</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">ANE</td>
@@ -1238,14 +1253,14 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td style="text-align: left;">Gst</td>
-<td style="text-align: right;">1350</td>
+<td style="text-align: right;">1250</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
 </div>
-<p><span class="math inline">\(\theta\)</span> by the matrix route (or, better, the line route of <a href="07-choosing-metrics.html#sec-collapse" class="quarto-xref"><span>Section 9.1</span></a>) and <span class="math inline">\(N_{e,\text{par}}\)</span> go into the objective. Allelic richness, A-NE and <span class="math inline">\(G_{st}\)</span> are computed <strong>once</strong>, on the final solution. This is the same conclusion <a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 9</span></a> reached from the production-scale benchmark, reproduced here at book scale so it can be re-run on your own data.</p>
+<p><span class="math inline">\(\theta\)</span> by the matrix route (or, better, the line route of <a href="07-choosing-metrics.html#sec-collapse" class="quarto-xref"><span>Section 10.1</span></a>) and <span class="math inline">\(N_{e,\text{par}}\)</span> go into the objective. Allelic richness, A-NE and <span class="math inline">\(G_{st}\)</span> are computed <strong>once</strong>, on the final solution. This is the same conclusion <a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 10</span></a> reached from the production-scale benchmark, reproduced here at book scale so it can be re-run on your own data.</p>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
@@ -1676,13 +1691,13 @@ Gómez-Romano, F., B. Villanueva, J. Fernández, J. A. Woolliams, and R. Pong-Wo
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./08-pipeline-stages.html" class="pagination-link" aria-label="Metrics at each pipeline stage, and five traps">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Metrics at each pipeline stage, and five traps</span></span>
+      <a href="./08b-genomic-prediction.html" class="pagination-link" aria-label="Predicting breeding values: GBLUP, BayesA, BayesB">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Predicting breeding values: GBLUP, BayesA, BayesB</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
       <a href="./10-combinatorial-selection.html" class="pagination-link" aria-label="Combinatorial selection">
-        <span class="nav-page-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Combinatorial selection</span></span> <i class="bi bi-arrow-right-short"></i>
+        <span class="nav-page-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Combinatorial selection</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
