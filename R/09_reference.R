@@ -167,3 +167,31 @@ ref_theta_pools <- function(idx, ctx) {
     theta_B  = if (sB > 0) as.numeric(t(wB / sB) %*% ctx$fL %*% (wB / sB)) else NA,
     theta_AB = if (sA > 0 && sB > 0) as.numeric(t(wA / sA) %*% ctx$fL %*% (wB / sB)) else NA)
 }
+
+#' Reference heterosis oracle
+#'
+#' The literal definition: form each F1 explicitly from its two inbred parents,
+#' scan its loci one at a time, and add up the dominance deviations at the
+#' heterozygous ones. Two nested loops, no vectorisation, no algebra.
+#'
+#' [heterosis_value] must reproduce this to machine precision.
+#'
+#' @param L Line genotype matrix, lines in rows, coded 0/2 as returned by
+#'   [simulate_lines].
+#' @param ped Data frame with columns `a` and `b`, the parent line ids.
+#' @param d Numeric vector of dominance deviations, one per locus.
+#' @return Numeric vector of length `nrow(ped)`.
+#' @export
+ref_heterosis <- function(L, ped, d) {
+  out <- numeric(nrow(ped))
+  for (i in seq_len(nrow(ped))) {
+    ga <- L[ped$a[i], ]
+    gb <- L[ped$b[i], ]
+    tot <- 0
+    for (k in seq_along(d)) {
+      if (ga[k] != gb[k]) tot <- tot + d[k]    # inbred parents: differ <=> F1 het
+    }
+    out[i] <- tot
+  }
+  out
+}

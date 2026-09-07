@@ -3,7 +3,7 @@
 ## 📖 [**Read the book online**](https://ederdbs.github.io/QG/)
 
 *Genetic Diversity in Hybrid Breeding* — measuring it, constraining it, and
-optimising against it, with R. Twelve chapters and four appendices, every
+optimising against it, with R. Sixteen chapters and five appendices, every
 derivation runnable. Also available as a
 [PDF](https://ederdbs.github.io/QG/Genetic-Diversity-in-Hybrid-Breeding.pdf) (~280 pp).
 
@@ -108,10 +108,13 @@ Current configuration: 50+50 lines -> 2500 hybrids, 5000 markers, selecting 100
 | `R/09_reference.R` | slow literal oracles, for verification |
 | `R/10_stage1.R` | stage 1 — X / f / hybrids output contract |
 | `R/11_stage2.R` | stage 2 — per-scenario selection, metrics, 0/1 table |
+| `R/12_search.R` | structure-aware search: local search, the bound, the exact oracle |
+| `R/13_dominance.R` | heterosis under a dominance model, and its link to the partition |
+| `R/14_cycles.R` | recurrent selection across cycles |
 | `inst/scripts/` | the two runnable pipelines, at production scale |
 | `book/` | the Quarto book |
 | `doc/` | the source documents the book was built from (provenance; see `doc/README.md`) |
-| `tests/testthat/` | 184 checks |
+| `tests/testthat/` | 307 checks |
 
 ## Results (simulated data)
 

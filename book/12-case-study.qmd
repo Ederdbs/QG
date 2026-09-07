@@ -163,16 +163,16 @@ Stated plainly, because the numbers above are precise and precision invites more
 confidence than the model supports.
 
 **The GEBVs carry no prediction error.** The traits are built from *known* marker
-effects (@sec-simulating-crosses). Real predicted values have error, that error
-is correlated with relatedness to the training set, and it will erode the index
-advantage of every strategy here -- probably truncation most, since it selects
-hardest on the predicted value.
+effects (@sec-simulating-crosses). @sec-choosing Finding 5 measures what happens
+when they do not: the reported index is biased upward, and error *correlated with
+relatedness* costs several times the diversity that independent error of the same
+size does. The plans below should be read as an optimistic ceiling.
 
 **The model is additive.** An additive $\mathbf{G}$ misses heterosis and specific
 combining ability, which is precisely what a hybrid programme sells. The
 diversity constraint does not need a dominance model; the *mean-performance
-ranking* does. Do not conflate them, and do not use these `index` values as
-performance predictions.
+ranking* does (@sec-heterosis). Do not conflate them, and do not use these `index`
+values as performance predictions.
 
 **The pools are symmetric by construction.** Both are simulated from the same
 ancestral frequencies at the same $F_{ST}$. Real heterotic pools differ in size,
@@ -185,12 +185,15 @@ faster than the other -- which is why `ne_lines_pool()` is reported per pool.
 **One cycle, not a trajectory.** Every result here is a single round of hybrid
 selection. @sec-stages showed that a constraint applied at one stage buys
 stage-level diversity, not end-of-pipeline richness -- and the same logic applies
-across cycles. A one-cycle constraint is not a multi-cycle policy.
+across cycles. A one-cycle constraint is not a multi-cycle policy: @sec-cycles
+runs fifteen of them and finds the unconstrained programme ahead for eight cycles
+and behind for the rest.
 
 **$p_0$ must be frozen.** In this book it is set once in `build_ctx()`. In a real
 multi-cycle programme it must be the founder cycle's frequencies, propagated
 forward -- the single most common error in applying `F_hom` and `F_drift`
-(@sec-genomic-era).
+(@sec-genomic-era). @sec-cycles shows the failure directly: re-anchored, five
+generations of real drift are reported as exactly none.
 
 ## The operational checklist
 
@@ -250,13 +253,19 @@ forward -- the single most common error in applying `F_hom` and `F_drift`
 Three extensions the material here supports but does not cover, each needing new
 work rather than new derivation:
 
-**Genomic prediction of the index.** The book treats `ctx$index` as given. How it
-is predicted, and what its error does to the selection, closes the loop.
-
-**Heterosis and specific combining ability.** An additive `G` misses the product.
-A dominance-informed mean model would change which crosses are ranked highest,
-without reopening the diversity term.
-
 **Real data ingestion.** `load_data()` is the single swap point and is currently
 a stub. A worked path from a VCF to the `X`/`f`/`hybrids` contract is what most
-readers will need first.
+readers will need first, and it is the one extension here that is pure
+engineering rather than new derivation.
+
+**Estimating the dominance deviations.** @sec-heterosis shows that expected
+heterosis depends on the alignment between divergence and $d$, and that no
+frequency-based statistic can see $d$. Everything downstream of that -- ranking
+crosses on more than the mean, putting a number on the $\lambda$ of
+@sec-catalogue -- waits on an estimate of $d$ the book does not attempt.
+
+**Prediction error compounded across cycles.** @sec-choosing Finding 5 measures it
+within one cycle and @sec-cycles assumes it away (C7). The two have not been run
+together, and the interaction is not obviously benign: correlated error
+concentrates the selection, and @sec-cycles shows concentration is what erodes the
+programme's future.

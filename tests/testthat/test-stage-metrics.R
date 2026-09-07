@@ -54,3 +54,19 @@ test_that("the reference oracles agree with the packaged metrics", {
   expect_equal(unname(ref_theta_pools(sel, ctxp)),
                unname(fast_theta_pools(sel, ctxp)), tolerance = 1e-10)
 })
+
+test_that("pool_freqs is the frequency matrix its callers used to rebuild", {
+  sim <- simulate_pools(n_A = 12, n_B = 12, m = 500, seed = 9)
+  P <- pool_freqs(sim$GL, sim$pool)
+  expect_equal(dim(P), c(2L, 500L))
+  expect_equal(rownames(P), levels(as.factor(sim$pool)))
+  expect_equal(P[1, ], colMeans(sim$GL[sim$pool == rownames(P)[1], , drop = FALSE]))
+
+  # mean_sq_delta_p is the statistic that enters the divergence half of
+  # expected heterosis; mean_abs_delta_p is only a proxy for it.
+  cm <- pool_complementarity(sim$GL, sim$pool)
+  expect_equal(unname(cm[["mean_sq_delta_p"]]), mean((P[1, ] - P[2, ])^2))
+  expect_equal(2 * heterosis_partition(P[1, ], P[2, ], rep(1, 500))[["divergence"]] / 500,
+               unname(cm[["mean_sq_delta_p"]]))
+  expect_true("mean_sq_delta_p" %in% names(s1_monitor(sim$GL, sim$pool, cycle = 3)))
+})

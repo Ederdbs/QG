@@ -86,11 +86,35 @@ knitr::kable(data.frame(
                            "0 for inbred lines; use `GD_WI_hyb` for the F1s",
                            "segregating variation available to selection",
                            "what erodes -- defend it",
-                           "the heterosis engine -- **maintain**, do not maximise"),
+                           "the heterosis engine -- **maintain**, do not maximise (@sec-heterosis)"),
   check.names = FALSE))
 ```
 
 with $GD_T = GD_{WI} + GD_{BI} + GD_{BS}$ and $F_{ST} = GD_{BS}/GD_T$.
+
+### Heterosis and cycles
+
+```{r}
+#| echo: false
+knitr::kable(data.frame(
+  Symbol = c("$d_k$", "$H_i$", "$\\bar p_k$", "$y_k$", "$\\lambda$", "$t$",
+             "$p_0^{(0)}$"),
+  Meaning = c("dominance deviation at locus $k$",
+              "mid-parent heterosis of hybrid $i$; $\\sum_k d_k$ over its heterozygous loci",
+              "$(p_{Ak} + p_{Bk})/2$, the merged-pool frequency",
+              "$p_{Ak} - p_{Bk}$, the divergence at locus $k$",
+              "weight on within- against between-pool diversity",
+              "cycle index",
+              "base frequencies, frozen at the founding cycle"),
+  `Function` = c("argument to `heterosis_value()`", "`heterosis_value()`",
+                 "inside `heterosis_partition()`", "`pool_complementarity()$mean_sq_delta_p` is $\\overline{y^2}$",
+                 "not implemented; see @sec-catalogue", "`run_cycles()`",
+                 "`ctx$p0`, set once"),
+  check.names = FALSE))
+```
+
+Expected heterosis splits as $\sum_k d_k[\,2\bar p_k(1-\bar p_k) + y_k^2/2\,]$,
+whose two halves are $GD_T$ and $GD_{BS}$ when $d_k \equiv 1$ (@sec-heterosis).
 
 ### Inbreeding, the three lenses
 
@@ -180,7 +204,17 @@ individual twice.
 
 **Heterotic group / pool.** A set of lines maintained as a breeding unit,
 crossed to lines of a complementary group to produce hybrids. Divergence between
-groups is what generates heterosis.
+groups is where heterosis comes from -- but only the divergence that coincides
+with dominance. Divergence produced by drift alone generates none, because it is
+paid for exactly out of the within-pool term. See @sec-heterosis.
+
+**Mid-parent heterosis.** The F1's value minus the mean of its two parents. With
+inbred parents the additive contributions cancel exactly, leaving only the
+dominance deviations at the F1's heterozygous loci.
+
+**Reciprocal recurrent selection.** Selecting on performance *in cross* and
+recycling the winners within their own pool. Selection information crosses the
+pool boundary; germplasm does not. See @sec-cycles.
 
 **Identity by state (IBS) vs by descent (IBD).** IBS is what markers observe:
 two alleles are the same allele. IBD adds the requirement of common ancestry

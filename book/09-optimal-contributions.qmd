@@ -181,6 +181,101 @@ grid()
 fmt(front, 4)
 ```
 
+### How far $\alpha_{\max}$ moves when $\mathbf{f}$ moves
+
+The ceiling above is quoted to four decimals, which invites more confidence than
+the marker panel supports. @sec-genomic-era showed that the MAF spectrum decides
+how badly the two inbreeding lenses disagree; the same spectrum feeds
+$\mathbf{f}$, and therefore $\bar H_{\text{ref}}$ and the ceiling. It is worth
+knowing which choices move the budget and which only look as though they should.
+
+Rebuild everything downstream of the marker panel -- $\mathbf{f}$, the null, the
+ceiling -- under a filter, a density and an ascertainment scenario:
+
+```{r}
+ceiling_for <- function(keep, label, B = 250) {
+  Xs <- ctx$X[, keep, drop = FALSE]
+  ck <- build_ctx(X = Xs, f = molecular_coancestry(Xs), G = NULL,
+                  traits = ctx$traits, ped = ctx$ped, n_lines = ctx$n_lines,
+                  pool = ctx$pool, fL = NULL, cfg = ctx$cfg)
+  nl <- null_distribution(ck, n_sel, B = B, B_full = 20)
+  data.frame(panel = label, markers = ncol(Xs), gd_ref = nl$gd_ref,
+             alpha_max = alpha_loss(sel_truncation(ck, n_sel), ck, nl$gd_ref))
+}
+maf <- pmin(ctx$p0, 1 - ctx$p0)
+polyA <- colMeans(simulate_lines(book_cfg)[seq_len(book_cfg$n_pool_A), ] / 2)
+sens <- rbind(
+  do.call(rbind, lapply(c(0, 0.01, 0.05, 0.10),
+    function(t) ceiling_for(maf >= t, sprintf("MAF >= %.2f", t)))),
+  ceiling_for(polyA > 0 & polyA < 1, "ascertained in pool A"))
+fmt(sens, 4)
+```
+
+$\bar H_{\text{ref}}$ moves by
+`r fmt(100 * (max(sens$gd_ref) / min(sens$gd_ref) - 1), 0)`% across these panels.
+$\alpha_{\max}$ moves by
+`r fmt(100 * (max(sens$alpha_max) / min(sens$alpha_max) - 1), 1)`%. That is not a
+coincidence: $\alpha$ is a *ratio* of diversities measured on the same panel, so a
+filter that shifts the absolute level shifts numerator and denominator together
+and largely cancels out. **Filtering choices move the diversity level; they do not
+move the budget.**
+
+Density does not move it either, but it does something worse: it makes the
+estimate noisy without making it wrong. Thinning the panel and averaging over six
+independent draws of which markers survive:
+
+```{r}
+# Every subset is drawn BEFORE the loop. `null_distribution()` calls set.seed()
+# internally, so a `sample.int()` written inside the loop would hand every
+# replicate after the first the very same markers -- see the warning below.
+set.seed(4)
+subs <- lapply(c(250, 500, 1000),
+               function(mm) lapply(1:6, function(i) sort(sample.int(ctx$m, mm))))
+dens <- do.call(rbind, lapply(subs, function(sl) {
+  v <- vapply(sl, function(k) ceiling_for(k, "", B = 200)$alpha_max, numeric(1))
+  data.frame(markers = length(sl[[1]]), alpha_max = mean(v), sd = stats::sd(v))
+}))
+fmt(rbind(dens, data.frame(markers = ctx$m, alpha_max = attainable, sd = NA)), 4)
+```
+
+The means sit within one standard deviation of the full-panel ceiling all the way
+down to 250 markers. The standard deviation does not: at 250 it is about
+`r fmt(100 * dens$sd[1] / dens$alpha_max[1], 0)`% of the estimate itself. A budget
+set from a thin panel is not biased, it is a coin flip -- and a single thin-panel
+study has no way to tell which side it landed on.
+
+So all three axes leave $\alpha_{\max}$ where it was. That is the useful finding,
+and it is worth stating positively: **the budget is a more portable quantity than
+the diversity level it is computed from.** $\bar H_{\text{ref}}$ is not
+comparable across panels; $\alpha$ largely is, provided the panel is dense enough
+for the estimate to be stable.
+
+:::: {.callout-warning}
+## `null_distribution()` reseeds, and will freeze a resampling loop
+
+It calls `set.seed(seed)` on entry, with `seed = 7` by default, so the random
+stream is reset every time it is invoked. Any `sample()` written *after* it inside
+a loop therefore draws the same values on every pass but the first, and a
+replication study silently becomes one replicate reported with a fabricated
+standard deviation.
+
+This is not hypothetical: the table above returned two different wrong answers --
+once suggesting thin panels understate the ceiling, once that they overstate it --
+before the subsets were hoisted out of the loop. Draw randomisation up front, or
+pass an explicit varying `seed`.
+::::
+
+:::: {.callout-tip}
+## Quote $\alpha_{\max}$ with the panel that produced it
+
+A budget is not a property of the germplasm. It is a property of the germplasm
+*and* the marker panel, and only the second of those changes when the genotyping
+platform does. Re-derive the ceiling whenever the panel changes, and do not
+compare an $\alpha$ across two studies genotyped differently -- @sec-choosing
+Finding 3's caveat on transfer applies here with more force, because this one is a
+constraint rather than a diagnostic.
+::::
+
 ## A caveat carried over from the OCS literature
 
 @gomezromano2016 show that the *predicted* rate of coancestry in the next

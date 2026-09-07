@@ -81,6 +81,24 @@ theta_decompose <- function(GL, pool, f = NULL) {
        Ns_within = setNames(1 / (2 * diag(th)), lv))
 }
 
+#' Allele frequencies per pool
+#'
+#' One row per pool, one column per marker. Three functions here used to compute
+#' this and throw it away; the between-pool quantities that matter for heterosis
+#' are functions of these rows, so they are worth returning.
+#'
+#' @inheritParams theta_decompose
+#' @return A matrix, `nlevels(pool)` x `ncol(GL)`, rows named by pool label.
+#' @seealso [pool_complementarity], [heterosis_partition].
+#' @export
+pool_freqs <- function(GL, pool) {
+  pool <- as.factor(pool)
+  P <- do.call(rbind, lapply(levels(pool),
+                             function(l) colMeans(GL[pool == l, , drop = FALSE])))
+  rownames(P) <- levels(pool)
+  P
+}
+
 #' Nei's Gst from allele frequencies
 #'
 #' Computed the classical way, so the identity
@@ -92,8 +110,7 @@ theta_decompose <- function(GL, pool, f = NULL) {
 #' @export
 gst_nei <- function(GL, pool) {
   pool <- as.factor(pool)
-  P  <- do.call(rbind, lapply(levels(pool),
-                              function(l) colMeans(GL[pool == l, , drop = FALSE])))
+  P  <- pool_freqs(GL, pool)
   w  <- as.vector(table(pool)) / length(pool)
   Hs <- sum(w * rowMeans(2 * P * (1 - P)))
   pT <- as.vector(w %*% P); Ht <- mean(2 * pT * (1 - pT))
@@ -108,19 +125,25 @@ gst_nei <- function(GL, pool) {
 #' further apart at loci that were already divergent -- which is why `F_ST` is
 #' the wrong thing to maximise.
 #'
+#' `mean_sq_delta_p` is the one of these that is exact rather than indicative:
+#' the divergence half of expected heterosis is `sum(d * (pA - pB)^2) / 2`, so
+#' `mean((p1 - p2)^2)` is the statistic that enters it, and `mean_abs_delta_p`
+#' and `frac_opposite_fixed` are proxies for it. See [heterosis_partition].
+#'
 #' @inheritParams theta_decompose
 #' @param thr Frequency above which a pool counts as fixed.
 #' @return A named numeric vector `frac_opposite_fixed`, `frac_fixed_same`,
-#'   `mean_abs_delta_p`.
+#'   `mean_abs_delta_p`, `mean_sq_delta_p`.
 #' @export
 pool_complementarity <- function(GL, pool, thr = 0.9) {
-  pool <- as.factor(pool); lv <- levels(pool)
-  stopifnot(length(lv) == 2)
-  p1 <- colMeans(GL[pool == lv[1], , drop = FALSE])
-  p2 <- colMeans(GL[pool == lv[2], , drop = FALSE])
+  pool <- as.factor(pool)
+  stopifnot(nlevels(pool) == 2)
+  P <- pool_freqs(GL, pool)
+  p1 <- P[1, ]; p2 <- P[2, ]
   c(frac_opposite_fixed = mean((p1 > thr & p2 < 1 - thr) | (p1 < 1 - thr & p2 > thr)),
     frac_fixed_same     = mean((p1 > thr & p2 > thr) | (p1 < 1 - thr & p2 < 1 - thr)),
-    mean_abs_delta_p    = mean(abs(p1 - p2)))
+    mean_abs_delta_p    = mean(abs(p1 - p2)),
+    mean_sq_delta_p     = mean((p1 - p2)^2))
 }
 
 #' Stage 1 monitoring panel
@@ -142,6 +165,7 @@ s1_monitor <- function(GL, pool, cycle = NA) {
              t(setNames(1 - diag(d$theta), paste0("GD_", names(d$w)))),
              frac_opposite_fixed = cm[["frac_opposite_fixed"]],
              mean_abs_delta_p = cm[["mean_abs_delta_p"]],
+             mean_sq_delta_p = cm[["mean_sq_delta_p"]],
              row.names = NULL)
 }
 
