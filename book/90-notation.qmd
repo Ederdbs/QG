@@ -219,6 +219,36 @@ knitr::kable(data.frame(
   check.names = FALSE))
 ```
 
+### Response to selection
+
+```{r}
+#| echo: false
+knitr::kable(data.frame(
+  Symbol = c("$R$", "$i$", "$r$", "$\\sigma_A$", "$V_{genic}$",
+             "$\\beta_k$", "$d_k$", "$ID$", "$\\mathbf{b}$", "$\\mathbf{a}$",
+             "$\\mathbf{R}$", "$2 N_e R_1$"),
+  Meaning = c("response to one cycle of selection",
+              "selection intensity for a selected fraction",
+              "accuracy of the selection criterion",
+              "additive standard deviation",
+              "variance if the loci were independent; the realised variance minus this is the disequilibrium term",
+              "marker effect at locus k",
+              "dominance deviation at locus k",
+              "inbreeding depression, $2F\\sum d_k p_k q_k$; a **constant** with fully inbred parents",
+              "selection index weights",
+              "economic weights on the aggregate genotype",
+              "restriction matrix: directions held at zero expected gain",
+              "Robertson's limit; half-life $1.4 N_e$"),
+  `In the code` = c("-", "`sel_intensity()`", "-", "-", "`genic_var()`",
+                    "`sim$beta`", "`d`", "`inbreeding_depression()`",
+                    "`index_smith_hazel()`", "-", "`index_restricted()`", "-"),
+  check.names = FALSE))
+```
+
+$R = i\,r\,\sigma_A$ is a bivariate-normal result and runs above the realised
+response in a structured hybrid population -- see @sec-response, which measures
+the size of the gap rather than assuming it away.
+
 ## Conventions
 
 **Coancestry always includes the diagonal.** Group coancestry in the sense of

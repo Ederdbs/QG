@@ -594,5 +594,52 @@ The converted lines this chapter produces re-enter the pool the rest of the book
 optimises over. A conversion programme run for its own sake reduces diversity by
 construction: it makes an elite line into a near-copy of itself. If several
 conversions are run in parallel off the same recurrent parent, the resulting
-lines are close to each other, and @sec-choosing and @sec-stages are where that
-cost becomes visible.
+lines are close to each other.
+
+That has been asserted for a chapter and a half. It is cheap to measure, and the
+size of it is the argument. Eight BC3 conversions off one recurrent parent,
+against eight unrelated elite lines, put through the kernel of @sec-coancestry:
+
+```{r}
+set.seed(11)
+m_c  <- 2000
+elite <- matrix(rbinom(40 * m_c, 1, 0.5), 40, m_c)   # unrelated elite lines
+rec   <- elite[1, ]                                   # one recurrent parent
+donor <- elite[40, ]
+ibd   <- expected_ibd(3, 0.5)                         # recurrent genome at BC3
+
+conv <- t(sapply(1:8, function(i)
+  ifelse(rbinom(m_c, 1, ibd) == 1, rec, donor)))
+
+cost <- data.frame(
+  panel = c("8 BC3 conversions, one recurrent parent", "8 unrelated elite lines"),
+  theta = c(mean(molecular_coancestry(conv)),
+            mean(molecular_coancestry(elite[1:8, ]))))
+cost$GD <- 1 - cost$theta
+fmt(cost, 4)
+```
+
+The converted panel carries about
+`r fmt((1 - mean(molecular_coancestry(conv))) / (1 - mean(molecular_coancestry(elite[1:8, ]))), 2)`
+times the gene diversity of the unrelated one -- not a marginal erosion but a
+different order of magnitude, and it follows directly from
+`expected_ibd(3, 0.5) =` `r fmt(ibd, 3)`. Conversion is *designed* to make lines
+identical everywhere except the target, and it succeeds.
+
+Two consequences for the rest of the book. A conversion programme must be counted
+against the diversity budget of @sec-ocs rather than run alongside it, because
+$\theta$ cannot distinguish eight conversions from one line entered eight times.
+And @sec-stages' per-line usage cap is the mechanism that already handles this:
+capping how often a line is used caps how often its near-copies are, provided
+the conversions are recognised as near-copies rather than entered as eight
+independent parents.
+
+::: {.callout-warning}
+## Do not enter a converted panel as independent lines
+
+The failure mode is administrative, not statistical. Conversions arrive with
+distinct line codes and distinct pedigree entries, so a pipeline that trusts the
+codes will treat them as eight parents. The coancestry matrix will not, and
+@sec-choosing's recommendation to compute $\theta$ on markers rather than on
+pedigree is what protects against exactly this.
+:::

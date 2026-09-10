@@ -195,3 +195,59 @@ ref_heterosis <- function(L, ped, d) {
   }
   out
 }
+
+#' Reference genic variance oracle
+#'
+#' The literal definition: take the variance of each marker column one at a
+#' time, weight it by the squared effect, and add them up. No shortcut for the
+#' column variances, and no matrix algebra.
+#'
+#' [genic_var] must reproduce this to machine precision.
+#'
+#' @param X Marker matrix, individuals in rows.
+#' @param beta Numeric vector of `ncol(X)` marker effects.
+#' @return A single number.
+#' @export
+ref_genic_var <- function(X, beta) {
+  tot <- 0
+  for (k in seq_along(beta)) tot <- tot + beta[k]^2 * stats::var(X[, k])
+  tot
+}
+
+#' Reference inbreeding depression oracle
+#'
+#' A different route rather than a slower transcription. [inbreeding_depression]
+#' is a closed form; this one simulates. It draws genotypes at the requested
+#' inbreeding coefficient using the standard mixture -- with probability
+#' `F_coef` the individual is homozygous for an allele drawn at frequency `p`,
+#' otherwise its two alleles are drawn independently -- scores each genotype
+#' under the dominance model, and returns the observed decline in the mean from
+#' the non-inbred case.
+#'
+#' Being Monte Carlo, this agrees with the closed form to sampling error, not to
+#' machine precision. That is the point: the closed form is checked against
+#' genotypes that were actually generated, not against a rearrangement of its
+#' own algebra.
+#'
+#' @inheritParams inbreeding_depression
+#' @param n Individuals to simulate.
+#' @param seed Random seed.
+#' @return A single number, comparable to [inbreeding_depression].
+#' @export
+ref_inbreeding_depression <- function(p, d, F_coef = 1, n = 20000, seed = 1) {
+  set.seed(seed)
+  m <- length(p)
+  # Genotype value under the a/d parameterisation with the midpoint at zero:
+  # the additive part is unaffected by F, so only the d term is scored here.
+  mean_at <- function(f) {
+    tot <- numeric(n)
+    for (k in seq_len(m)) {
+      ibd <- stats::rbinom(n, 1, f) == 1
+      a1  <- stats::rbinom(n, 1, p[k])
+      a2  <- ifelse(ibd, a1, stats::rbinom(n, 1, p[k]))
+      tot <- tot + d[k] * (a1 != a2)
+    }
+    mean(tot)
+  }
+  mean_at(0) - mean_at(F_coef)
+}

@@ -90,8 +90,11 @@ cycle_ctx <- function(GL, pool, beta, p0, centre, scale_) {
 #' @param seed Seed for the founding population and the recycling draws.
 #' @return A data frame, one row per cycle, with the realised index (on the
 #'   founding cycle's scale), gene diversity, the realised `alpha`, both
-#'   inbreeding lenses against the frozen `p0`, the pool partition, and the
-#'   maximum line usage.
+#'   inbreeding lenses against the frozen `p0`, the pool partition, the maximum
+#'   line usage, and the candidate pool's realised (`var_g`) and genic
+#'   (`var_genic`) variance. The gap between the last two is the disequilibrium
+#'   term of [genic_var]; see the note on assumption C1 in the book, which the
+#'   two columns exist to test rather than to assume.
 #' @seealso [next_pool] for the recycling step, [line_weights] for the usage
 #'   vector that drives it.
 #' @export
@@ -143,6 +146,11 @@ run_cycles <- function(n_A = 25, n_B = 25, m = 2000, n_cycles = 10, n_sel = 60,
       theta_A = tp[["theta_A"]], theta_B = tp[["theta_B"]],
       Ns = status_number(idx, ctx),
       max_line = max_line_use(idx, ctx),
+      # Both on the index scale, so they are comparable to `index` above. Their
+      # difference is the gametic-phase disequilibrium among the candidates,
+      # which no allele-frequency metric in this data frame can see.
+      var_g = stats::var(ctx$index),
+      var_genic = genic_var(ctx$X, beta / scale_),
       row.names = NULL)
 
     if (t == n_cycles) break

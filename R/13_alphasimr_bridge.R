@@ -48,6 +48,18 @@ rrs_config <- list(
 #' an additive + dominance trait per `cfg$n_traits`. Dominance is what makes
 #' testcross selection meaningful -- see `05b-heterosis-dominance`.
 #'
+#' `cfg$seed` does **not** make this function reproducible, and the `set.seed()`
+#' below is easy to misread as a promise that it does. `AlphaSimR::runMacs2()`
+#' hands the coalescent off to MaCS, which seeds itself outside R's RNG, so two
+#' calls with the same `cfg` return different founder haplotypes. Everything
+#' downstream of the founders -- the doubled haploids, the testcrosses, the
+#' recycling -- *is* controlled by `set.seed()`; the founders are not.
+#'
+#' The consequence for any experiment comparing two schemes: found the pools
+#' once and branch both arms off that single result. Calling this twice with the
+#' same seed gives two different populations, and the comparison then measures
+#' the founders as much as the schemes.
+#'
 #' @param cfg A configuration list, see [rrs_config].
 #' @return A list with `pop_A`, `pop_B` (AlphaSimR `Pop-class`) and `SP`
 #'   (the `SimParam`).
@@ -95,12 +107,19 @@ alphasimr_gd <- function(pop, SP) {
 #' @param pop_A,pop_B This cycle's pools (AlphaSimR `Pop-class`).
 #' @param SP The `SimParam`.
 #' @param cfg A configuration list, see [rrs_config].
+#' @param random_elite Draw the elite lines at random instead of by testcross
+#'   rank. `FALSE`, the default, is the real scheme and reproduces the previous
+#'   behaviour exactly. `TRUE` is the no-selection control: everything else
+#'   about the cycle -- the doubled haploids, the testcrosses, the recombination
+#'   -- is identical, so any difference between the two arms is attributable to
+#'   selection and not to drift, the mating design or the map.
 #' @return A list with `pop_A`, `pop_B` (next cycle's pools), `elite_A`,
 #'   `elite_B` (the selected doubled-haploid lines, for [alphasimr_make_hybrids])
 #'   and `summary` (one-row data frame: mean testcross phenotype and gene
 #'   diversity of the elite lines in each pool).
 #' @export
-alphasimr_rrs_cycle <- function(pop_A, pop_B, SP, cfg = rrs_config) {
+alphasimr_rrs_cycle <- function(pop_A, pop_B, SP, cfg = rrs_config,
+                                random_elite = FALSE) {
   if (!requireNamespace("AlphaSimR", quietly = TRUE))
     stop("Package 'AlphaSimR' is required for alphasimr_rrs_cycle().")
 
@@ -114,8 +133,10 @@ alphasimr_rrs_cycle <- function(pop_A, pop_B, SP, cfg = rrs_config) {
 
   gca_A <- sort(tapply(tc_A@pheno[, 1], tc_A@mother, mean), decreasing = TRUE)
   gca_B <- sort(tapply(tc_B@pheno[, 1], tc_B@mother, mean), decreasing = TRUE)
-  elite_A <- dh_A[dh_A@id %in% names(gca_A)[seq_len(cfg$n_sel)]]
-  elite_B <- dh_B[dh_B@id %in% names(gca_B)[seq_len(cfg$n_sel)]]
+  pick <- function(g) if (random_elite) sample(names(g), cfg$n_sel)
+                      else names(g)[seq_len(cfg$n_sel)]
+  elite_A <- dh_A[dh_A@id %in% pick(gca_A)]
+  elite_B <- dh_B[dh_B@id %in% pick(gca_B)]
 
   list(pop_A = AlphaSimR::randCross(elite_A, nCrosses = cfg$n_pool_A, simParam = SP),
        pop_B = AlphaSimR::randCross(elite_B, nCrosses = cfg$n_pool_B, simParam = SP),

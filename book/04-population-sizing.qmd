@@ -359,8 +359,48 @@ formula.
 
 ## Where this connects
 
-The panel this chapter sizes is the raw material for everything else. Its
-diversity is the ceiling: no selection stage downstream can recover variation
-that was never sampled here. @sec-stages puts a number on how the loss is
-distributed across the whole pipeline, and this stage is where the cheapest
-insurance is available -- more plants, once, at the start.
+The panel this chapter sizes is the raw material for everything else, and the
+claim that its diversity is a *ceiling* should be measured rather than asserted.
+The rest of the book works on one kernel -- molecular coancestry $f$ and
+$GD = 1 - \theta$ (@sec-coancestry). The F4 panel can be pushed straight into it:
+
+```{r}
+set.seed(3)
+map4  <- build_map(spacing_cM = 10)
+dist4 <- make_distortion(map4, active = TRUE)
+
+bridge <- do.call(rbind, lapply(c(30, 120, 480), function(n) {
+  pop <- run_scheme("SSD", n, map4, dist4, opt = f2_opt)
+  X   <- t((pop$H1 + pop$H2) / 2)          # lines x markers, 0/0.5/1
+  th  <- mean(molecular_coancestry(X))
+  data.frame(n_F2 = n, D = diversity_retained(panel_freq(pop)),
+             theta = th, GD = 1 - th)
+}))
+fmt(bridge, 4)
+```
+
+$D$, the chapter's own diversity-retained statistic, and $GD$, the quantity every
+later chapter constrains, move together: they are the same loss in two coordinate
+systems. The sizing decision made here therefore sets the $GD$ that
+@sec-choosing, @sec-ocs and @sec-combinatorial spend the rest of the book
+budgeting, and it sets it *once*. An optimiser cannot select back up to variation
+the panel never sampled; the best it can do is spend what is left more slowly.
+
+::: {.callout-note}
+## $N_s$ is not informative inside a biparental cross
+
+Computing the status number on these panels returns approximately 1 whatever the
+sizing, and that is correct rather than broken. Every line descends from two
+parents, so the panel has the genetic base of a single diploid individual, which
+is exactly what $N_s = 1/(2\theta)$ reports. @sec-ns warns that $N_s$ describes a
+base rather than projecting drift; here the base is genuinely one cross.
+
+Use $D$ and $GD$ to compare sizing scenarios within a cross, and $N_s$ only once
+material from several crosses has been pooled.
+:::
+
+@sec-stages puts a number on how the loss is distributed across the whole
+pipeline, and this stage is where the cheapest insurance is available -- more
+plants, once, at the start. @sec-limits is where the same argument is made about
+the *variance* rather than the frequencies, and reaches a different conclusion
+about what is recoverable.

@@ -41,6 +41,42 @@ The violation enters as a *proportional* penalty, so a plan that overshoots by
 10% of the budget is penalised in units the budget defines, whatever the
 absolute value of $\alpha_{\max}$.
 
+### This argument is older than it looks
+
+The paragraphs above read as a claim about human decision-making: budgets are
+approvable, exchange rates are not. That is true, and it undersells the case.
+Kempthorne & Nordskog [-@kempthorne1959] posed the identical problem for
+selection indices -- maximise aggregate gain subject to **zero expected change**
+in a specified direction -- and solved it in closed form. @sec-response derives
+their solution; `index_restricted()` implements it. The distinguishing property
+is not softness:
+
+```{r}
+P <- matrix(c(4.0, 1.2, 1.2, 1.0), 2)
+G <- matrix(c(2.0, 0.9, 0.9, 0.3), 2)
+a <- c(1, 1); R <- cbind(c(0, 1))
+c(unrestricted = drop(crossprod(R, G %*% index_smith_hazel(P, G, a))),
+  restricted   = drop(crossprod(R, G %*% index_restricted(P, G, a, R))))
+```
+
+Exactly zero, not approximately. A penalty trades the restricted direction away
+at some price; a restriction refuses to trade it at any price. That is the
+distinction this section is drawing, and it has stood since 1959.
+
+::: {.callout-note}
+## What is actually new here
+
+Not restriction over pricing. What is new is *what* is being restricted.
+Kempthorne and Nordskog restricted a trait -- something with a genetic variance,
+an economic weight and a row in $\mathbf{G}$. The $\alpha$ constraint restricts
+the loss of molecular gene diversity, which has none of those: it is a property
+of a matrix, not of a phenotype, and it is bounded relative to a resampling
+baseline rather than held at zero.
+
+The algebra of restriction carries over. The object being restricted does not,
+which is why the rest of this chapter cannot simply cite 1959 and stop.
+:::
+
 ## Relation to the standard OCS formulation
 
 @gomezromano2016 write the general optimal-contribution problem, for a vector of

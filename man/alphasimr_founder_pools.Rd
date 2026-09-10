@@ -20,3 +20,16 @@ realistic analogue of [simulate_lines]'s Balding-Nichols draw, and attaches
 an additive + dominance trait per `cfg$n_traits`. Dominance is what makes
 testcross selection meaningful -- see `05b-heterosis-dominance`.
 }
+\details{
+`cfg$seed` does **not** make this function reproducible, and the `set.seed()`
+below is easy to misread as a promise that it does. `AlphaSimR::runMacs2()`
+hands the coalescent off to MaCS, which seeds itself outside R's RNG, so two
+calls with the same `cfg` return different founder haplotypes. Everything
+downstream of the founders -- the doubled haploids, the testcrosses, the
+recycling -- *is* controlled by `set.seed()`; the founders are not.
+
+The consequence for any experiment comparing two schemes: found the pools
+once and branch both arms off that single result. Calling this twice with the
+same seed gives two different populations, and the comparison then measures
+the founders as much as the schemes.
+}

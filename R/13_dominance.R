@@ -87,6 +87,58 @@ heterosis_partition <- function(pA, pB, d) {
   c(shared = shared, divergence = divergence, total = shared + divergence)
 }
 
+#' Inbreeding depression of a pool
+#'
+#' Under the same dominance model as [heterosis_value], a locus at frequency `p`
+#' in a population with inbreeding coefficient `F_coef` is heterozygous with
+#' probability `2 p q (1 - F_coef)`, so the mean falls linearly in `F_coef`:
+#'
+#' `ID = 2 F_coef sum_k d_k p_k q_k`
+#'
+#' Note what this is identical to. `heterosis_partition(p, p, d)["shared"]` is
+#' `sum_k d_k 2 p_k q_k`, so the depression of a pool driven to complete
+#' homozygosity is *exactly* the expected heterosis of a cross made within that
+#' same pool. Heterosis on crossing and depression on inbreeding are one
+#' quantity seen from two sides, which is why this function takes the same `d`
+#' the heterosis functions take and needs nothing new.
+#'
+#' Do **not** read this as the current-cycle price of the diversity budget. It
+#' is tempting to, and the algebra says otherwise. A fully inbred line has no
+#' heterozygous loci, so its dominance contribution is exactly zero whatever the
+#' pool's allele frequencies are: `heterosis_value()` of a homozygous line
+#' returns 0 by construction. In a programme whose parents are inbred lines the
+#' depression is therefore a *constant*, paid in full the moment the lines were
+#' made, and it does not vary with how much gene diversity the pool has since
+#' lost. It is the same fact that makes `GD_WI` exactly zero in [gd_partition].
+#'
+#' Where `F_coef` between 0 and 1 is the live quantity is line *development* --
+#' F2, F3, F4, where the population is partially inbred and the depression is
+#' still accumulating -- and in any programme whose parents are not fully
+#' inbred.
+#'
+#' Only loci with `d != 0` contribute. An additive trait shows no inbreeding
+#' depression at all, however much diversity is lost, which is the same reason
+#' the additive pipeline elsewhere in this package never needs a `d`.
+#'
+#' @param p Numeric vector of reference-allele frequencies in the pool, one
+#'   entry per locus, taken at the base against which `F_coef` is measured.
+#' @param d Numeric vector of dominance deviations, one per locus.
+#' @param F_coef Inbreeding coefficient relative to that base. The default, 1,
+#'   is complete homozygosity and gives the maximum depression.
+#' @return A single number, the decline in the population mean on the trait
+#'   scale. Positive when the `d` are predominantly positive.
+#' @seealso [heterosis_partition], whose `shared` term this equals at
+#'   `F_coef = 1`; [ref_inbreeding_depression] for the Monte Carlo oracle.
+#' @export
+#' @examples
+#' p <- c(0.5, 0.2, 0.8); d <- c(1, 2, 3)
+#' inbreeding_depression(p, d)
+#' heterosis_partition(p, p, d)[["shared"]]   # the same number
+inbreeding_depression <- function(p, d, F_coef = 1) {
+  stopifnot(length(p) == length(d))
+  2 * F_coef * sum(d * p * (1 - p))
+}
+
 #' General and specific combining ability for heterosis
 #'
 #' The exact orthogonal decomposition of [heterosis_value] over a complete

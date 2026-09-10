@@ -16,6 +16,7 @@
 #   search       the advanced-selection benchmark of Chapter 10b
 #   search_exact the outer-approximation oracle alone (slowest piece)
 #   cycles       the recurrent-selection trajectories of Chapter 11b
+#   limits       genic vs realised variance, with a no-selection control (Ch 11c)
 #
 # Not regenerated here, because they are not this project's output:
 #   bibliography_animal.csv, bibliography_plant.csv  (literature screens)
@@ -38,7 +39,7 @@ dir.create(fig_dir,  showWarnings = FALSE, recursive = TRUE)
 dir.create(out_dir,  showWarnings = FALSE, recursive = TRUE)
 
 targets <- commandArgs(trailingOnly = TRUE)
-if (!length(targets)) targets <- c("f2size", "benchmark", "identity", "genpred", "search", "cycles")
+if (!length(targets)) targets <- c("f2size", "benchmark", "identity", "genpred", "search", "cycles", "limits")
 want <- function(x) x %in% targets
 
 # --- f2size: the population-sizing grid ---------------------------------------
@@ -556,6 +557,81 @@ if (want("search") || want("search_exact")) {
             row.names = FALSE)
 
   message("search_exact: done")
+}
+
+# --- limits: genic vs realised variance, with a no-selection control ----------
+if (want("limits")) {
+  message("limits: variance trajectories, unlinked arm")
+
+  # The gap between realised and genic variance is NOT the Bulmer effect on its
+  # own. A finite founder base leaves disequilibrium in the very first cycle,
+  # before anything is selected, and two divergent pools add more. Only the
+  # difference between a selected arm and an otherwise identical unselected one
+  # isolates what selection did, which is why every regime below is run against
+  # the same seeds and the random arm exists at all.
+  LM <- list(n_cycles = 12, seeds = 1:8, n_sel = 60, B = 200)
+  regimes <- list(
+    random        = list(alpha_max = Inf,   selector = function(ctx, n_sel, alpha_max, gd_ref, max_use)
+                                                         sel_random(ctx, n_sel)),
+    unconstrained = list(alpha_max = Inf,   selector = NULL),
+    constrained   = list(alpha_max = 0.02,  selector = NULL))
+
+  var_traj <- do.call(rbind, lapply(names(regimes), function(rg) {
+    r <- regimes[[rg]]
+    do.call(rbind, lapply(LM$seeds, function(s) {
+      out <- run_cycles(n_cycles = LM$n_cycles, alpha_max = r$alpha_max,
+                        n_sel = LM$n_sel, selector = r$selector,
+                        B_null = LM$B, seed = s)
+      out$regime <- rg; out$seed <- s
+      out$gap <- out$var_g - out$var_genic
+      out
+    }))
+  }))
+  write.csv(var_traj, file.path(data_dir, "limits_variance.csv"), row.names = FALSE)
+
+  message("limits: linked arm via AlphaSimR")
+  if (!requireNamespace("AlphaSimR", quietly = TRUE)) {
+    message("limits: AlphaSimR not installed, skipping the linked arm")
+  } else {
+    # Same question with real meiosis behind it. genParam() reports varA (which
+    # carries the disequilibrium) and genicVarA (which does not), so the linked
+    # arm needs no variance code of its own.
+    lk_cfg <- modifyList(rrs_config, list(n_cycles = 8))
+    # The founders are generated ONCE per replicate and both arms branch off
+    # that same result. alphasimr_founder_pools() is not reproducible from
+    # cfg$seed -- runMacs2 seeds MaCS outside R's RNG -- so calling it once per
+    # arm would have compared two different base populations and charged the
+    # difference to selection. set.seed() before each chain then gives both arms
+    # the same downstream stream, leaving the choice of elite lines as the only
+    # difference between them.
+    linked <- do.call(rbind, lapply(1:4, function(s) {
+      fp <- alphasimr_founder_pools(lk_cfg)
+      do.call(rbind, lapply(c(FALSE, TRUE), function(rnd) {
+        set.seed(1000 + s)
+        pA <- fp$pop_A; pB <- fp$pop_B; SP <- fp$SP
+        rows <- vector("list", lk_cfg$n_cycles + 1L)
+        for (t in 0:lk_cfg$n_cycles) {
+          gA <- AlphaSimR::genParam(pA, simParam = SP)
+          gB <- AlphaSimR::genParam(pB, simParam = SP)
+          rows[[t + 1L]] <- data.frame(
+            cycle = t, seed = s, regime = if (rnd) "random" else "selected",
+            # genParam() returns trait-named values; as.numeric() strips the
+            # names, which would otherwise overwrite the column names here.
+            varA_A = as.numeric(gA$varA), genicVarA_A = as.numeric(gA$genicVarA),
+            varA_B = as.numeric(gB$varA), genicVarA_B = as.numeric(gB$genicVarA),
+            gv_A = as.numeric(AlphaSimR::meanG(pA)),
+            gv_B = as.numeric(AlphaSimR::meanG(pB)))
+          if (t == lk_cfg$n_cycles) break
+          cy <- alphasimr_rrs_cycle(pA, pB, SP, lk_cfg, random_elite = rnd)
+          pA <- cy$pop_A; pB <- cy$pop_B
+        }
+        do.call(rbind, rows)
+      }))
+    }))
+    write.csv(linked, file.path(data_dir, "limits_linked.csv"), row.names = FALSE)
+  }
+
+  message("limits: done")
 }
 
 message("regenerate: complete")

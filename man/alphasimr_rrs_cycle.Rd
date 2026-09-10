@@ -4,7 +4,7 @@
 \alias{alphasimr_rrs_cycle}
 \title{One cycle of reciprocal recurrent selection}
 \usage{
-alphasimr_rrs_cycle(pop_A, pop_B, SP, cfg = rrs_config)
+alphasimr_rrs_cycle(pop_A, pop_B, SP, cfg = rrs_config, random_elite = FALSE)
 }
 \arguments{
 \item{pop_A, pop_B}{This cycle's pools (AlphaSimR `Pop-class`).}
@@ -12,6 +12,13 @@ alphasimr_rrs_cycle(pop_A, pop_B, SP, cfg = rrs_config)
 \item{SP}{The `SimParam`.}
 
 \item{cfg}{A configuration list, see [rrs_config].}
+
+\item{random_elite}{Draw the elite lines at random instead of by testcross
+rank. `FALSE`, the default, is the real scheme and reproduces the previous
+behaviour exactly. `TRUE` is the no-selection control: everything else
+about the cycle -- the doubled haploids, the testcrosses, the recombination
+-- is identical, so any difference between the two arms is attributable to
+selection and not to drift, the mating design or the map.}
 }
 \value{
 A list with `pop_A`, `pop_B` (next cycle's pools), `elite_A`,

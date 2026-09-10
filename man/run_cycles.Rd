@@ -50,8 +50,11 @@ of each pool with lines drawn from the founding generation.}
 \value{
 A data frame, one row per cycle, with the realised index (on the
   founding cycle's scale), gene diversity, the realised `alpha`, both
-  inbreeding lenses against the frozen `p0`, the pool partition, and the
-  maximum line usage.
+  inbreeding lenses against the frozen `p0`, the pool partition, the maximum
+  line usage, and the candidate pool's realised (`var_g`) and genic
+  (`var_genic`) variance. The gap between the last two is the disequilibrium
+  term of [genic_var]; see the note on assumption C1 in the book, which the
+  two columns exist to test rather than to assume.
 }
 \description{
 One cycle is: form every A x B hybrid, select `n_sel` of them under a gene

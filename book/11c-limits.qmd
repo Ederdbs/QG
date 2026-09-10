@@ -1,0 +1,238 @@
+# The limit, and what the metrics cannot see {#sec-limits}
+
+```{r}
+#| include: false
+source("_common.R")
+traj <- read.csv(book_data("cycles_trajectory.csv"))
+vr   <- read.csv(book_data("limits_variance.csv"))
+lk   <- read.csv(book_data("limits_linked.csv"))
+```
+
+@sec-cycles ran the programme forward and found the crossover: a constrained
+programme trails an unconstrained one for about eight cycles and leads
+thereafter. That is a measurement. This chapter asks the two questions a
+measurement leaves open -- could it have been *predicted*, and is the quantity
+being managed the quantity that actually matters.
+
+The answers are yes-with-a-condition, and no-not-entirely.
+
+## Robertson's limit
+
+@sec-response wrote down the response to one cycle of selection. Robertson
+[-@robertson1960] wrote down the sum of all of them. Selection fixes alleles; a
+finite population fixes some of the favourable ones in the wrong direction; and
+the total advance before everything is fixed is approximately
+
+$$R_{\text{total}} \;\approx\; 2 N_e R_1$$
+
+with a half-life of about $1.4 N_e$ generations. The result is the theoretical
+ancestor of every optimal-contribution scheme in this book: it is *why* $N_e$ is
+the thing to manage, and it says exactly what a unit of $N_e$ is worth in units
+of cumulative gain.
+
+Both inputs are already in @sec-cycles' trajectory. $R_1$ is the first cycle's
+response, and $N_e$ comes from the rate of inbreeding, exactly as @sec-cycles
+computed it:
+
+```{r}
+rob <- do.call(rbind, lapply(unique(traj$budget), function(b) {
+  d  <- aggregate(cbind(index, F_drift) ~ cycle, traj[traj$budget == b, ], mean)
+  f  <- lm(log(1 - F_drift) ~ cycle, d[-1, ])
+  Ne <- 1 / (-2 * coef(f)[["cycle"]])
+  R1 <- d$index[2] - d$index[1]
+  data.frame(budget = b, R2 = summary(f)$r.squared, Ne = Ne, R1 = R1,
+             limit = 2 * Ne * R1, half_life = 1.4 * Ne,
+             observed_15 = d$index[16] - d$index[1],
+             predicted_15 = 2 * Ne * R1 * (1 - (1 - 1 / (2 * Ne))^15))
+}))
+fmt(rob, 3)
+```
+
+Read the last two columns against each other, and then read both against the
+first.
+
+## The $R^2$ column decides whether the theory applies
+
+For the tightest budget the prediction is
+`r fmt(rob$predicted_15[rob$budget == "0.005"], 2)` and the observation is
+`r fmt(rob$observed_15[rob$budget == "0.005"], 2)`. Robertson's theory, published
+in 1960 and derived for a single locus under idealised drift, predicts fifteen
+cycles of a genomic hybrid programme to better than one percent.
+
+For the unconstrained programme it predicts
+`r fmt(rob$predicted_15[rob$budget == "unconstrained"], 2)` against an observed
+`r fmt(rob$observed_15[rob$budget == "unconstrained"], 2)` -- too high by about
+half.
+
+The theory did not fail arbitrarily, and @sec-cycles already said why. Robertson
+assumes a *constant* rate of inbreeding, and the regression of $\log(1-F)$ on
+cycle is where that assumption is testable. Its $R^2$ is
+`r fmt(rob$R2[rob$budget == "0.005"], 3)` for the tightest budget and
+`r fmt(rob$R2[rob$budget == "unconstrained"], 3)` for the unconstrained run,
+whose drift decelerates because there is progressively less left to lose. That
+low $R^2$ is not a nuisance. It is the theory declining to apply, in advance,
+and in a column you can read before you trust the number.
+
+::: {.callout-important}
+## Do not quote a Robertson limit without its $R^2$
+
+$N_e$ here is a *fitted* quantity, and @sec-cycles showed the fit is meaningless
+for a saturating series -- its fitted $\Delta F$ comes out lowest for the run
+that is actually losing diversity fastest, which is backwards. Feeding that
+$N_e$ into $2 N_e R_1$ propagates the error into a number that looks like a
+long-term plan.
+
+Report the $R^2$ next to every limit, and treat a limit computed from a fit
+below about 0.99 as an illustration rather than a projection.
+:::
+
+That yields an argument for the constraint that this book did not previously
+have. @sec-cycles justified $\alpha$ by where the trajectories cross. The table
+above adds: the constrained programme is the one whose future can be *computed*.
+An unconstrained programme is not merely worse after cycle 8, it is
+unforecastable, because the theory that would forecast it needs a constant
+$\Delta F$ that it does not have.
+
+## What the metrics cannot see
+
+Now the second question. Every diversity metric in this book -- $\theta$, $GD$,
+$N_s$, allelic richness, `F_hom`, `F_drift` -- is a function of allele
+frequencies **one locus at a time**. @sec-response showed that additive variance
+is not:
+
+$$\operatorname{Var}(\mathbf{X}\boldsymbol\beta) \;=\; V_{\text{genic}}
+\;+\; 2\sum_{k<l}\beta_k\beta_l\operatorname{Cov}(x_k, x_l)$$
+
+Directional selection drives that covariance term negative (Bulmer
+[-@bulmer1971]): it couples loci with like effects in repulsion, hiding genic
+variance from the next generation without moving a single allele frequency. No
+metric in the catalogue can detect it.
+
+@sec-cycles assumed the effect away, in assumption **C1**: *loci are unlinked, so
+no linkage disequilibrium builds up and there is no Bulmer effect on the genic
+side.* That is worth testing rather than assuming, because Bulmer's 1971
+treatment covers unlinked loci explicitly -- free recombination halves the
+disequilibrium each generation, but selection regenerates it every generation,
+and the equilibrium is not zero.
+
+### The experiment
+
+The gap $\operatorname{Var}(\mathbf{X}\boldsymbol\beta) - V_{\text{genic}}$ is
+**not** on its own a measure of the Bulmer effect. A finite founder base leaves
+disequilibrium in the very first cycle, and two divergent pools add more. So the
+comparison is against a control: an arm identical in every respect -- same
+founders, same seeds, same recycling, same population sizes -- in which the
+hybrids are chosen at random instead of on the index.
+
+```{r}
+gapc <- aggregate(gap ~ regime + cycle, vr, mean)
+w <- reshape(gapc, idvar = "cycle", timevar = "regime", direction = "wide")
+names(w) <- sub("gap.", "", names(w))
+w$selection_effect <- w$unconstrained - w$random
+fmt(head(w[, c("cycle", "random", "unconstrained", "constrained",
+               "selection_effect")], 7), 4)
+```
+
+Cycle 0 is identical across all three arms, to the digit. Nothing has been
+selected yet, so the control is doing its job.
+
+From cycle 1 the arms separate. Paired within seed and cycle:
+
+```{r}
+p  <- reshape(aggregate(gap ~ regime + seed + cycle, vr, mean),
+              idvar = c("seed", "cycle"), timevar = "regime", direction = "wide")
+p  <- p[p$cycle > 0, ]
+dd <- p$gap.unconstrained - p$gap.random
+c(mean_effect = mean(dd), se = sd(dd) / sqrt(length(dd)),
+  t = mean(dd) / (sd(dd) / sqrt(length(dd))), n_pairs = length(dd))
+```
+
+::: {.callout-warning}
+## Assumption C1 of @sec-cycles is too strong, and is restated here
+
+Selection builds negative disequilibrium among **unlinked** loci, at
+$t = `r fmt(mean(dd) / (sd(dd) / sqrt(length(dd))), 2)`$ over
+`r length(dd)` paired observations. Unlinked loci do not prevent the Bulmer
+effect; they make it decay fast.
+
+What C1 should say is that with free recombination the disequilibrium is halved
+every generation, so it reaches a low equilibrium and does not accumulate across
+cycles the way frequency change does. That is what makes @sec-cycles' *frequency*
+trajectories trustworthy, and it is the correct reason -- not the absence of the
+effect.
+:::
+
+The effect is largest in the early cycles and decays toward zero late, which is
+the expected shape: it is proportional to the genic variance still available to
+be hidden, and by cycle 12 there is much less of it.
+
+### With real linkage
+
+The same question with real meiosis behind it. @sec-alphasimr's reciprocal
+recurrent selection runs on a coalescent founder history with a genetic map, and
+AlphaSimR reports `varA` (which carries the disequilibrium) and `genicVarA`
+(which does not), so this arm needs no variance code of its own.
+
+```{r}
+lk$rel <- ((lk$varA_A - lk$genicVarA_A) + (lk$varA_B - lk$genicVarA_B)) /
+          (lk$genicVarA_A + lk$genicVarA_B)
+pl  <- reshape(lk[, c("regime", "seed", "cycle", "rel")],
+               idvar = c("seed", "cycle"), timevar = "regime", direction = "wide")
+pl  <- pl[pl$cycle > 0, ]
+ddl <- pl$rel.selected - pl$rel.random
+c(mean_effect = mean(ddl), se = sd(ddl) / sqrt(length(ddl)),
+  t = mean(ddl) / (sd(ddl) / sqrt(length(ddl))), n_pairs = length(ddl))
+```
+
+Same sign, larger in magnitude, and measured with fewer replicates so the
+evidence is weaker. Linkage does what linkage should: it slows the decay, so the
+disequilibrium selection creates persists longer than it does under free
+recombination.
+
+::: {.callout-note}
+## A reproducibility trap in the linked arm
+
+`alphasimr_founder_pools()` is **not** reproducible from `cfg$seed`.
+`AlphaSimR::runMacs2()` hands the coalescent to MaCS, which seeds itself outside
+R's RNG, so two calls with the same configuration return different founder
+haplotypes. Everything downstream of the founders is seeded normally.
+
+The consequence for an experiment like this one is severe: founding the pools
+separately for each arm would have compared two different base populations and
+charged the difference to selection. `book/scripts/regenerate.R` founds once per
+replicate and branches both arms off that single result, which is why cycle 0 of
+the table above matches exactly.
+:::
+
+## The two costs of selection
+
+The chapter's result stated once.
+
+Selection pays for gain twice. It builds negative covariance between loci, which
+is a real loss of usable variance, and **recombination repays it** -- halved
+every generation under free recombination, more slowly under linkage. And it
+changes allele frequencies, moving them toward fixation, and **nothing repays
+that** short of mutation or migration.
+
+The first cost is invisible to every metric in this book and is largely
+self-correcting. The second is what every metric in this book measures, and is
+permanent.
+
+That is the justification for constraining the second and ignoring the first,
+and it is a stronger statement than "the constraint is what we can compute". It
+is worth being explicit that this ordering is a *consequence* of the two decay
+rates, not an assumption: if the disequilibrium did not decay -- tight linkage,
+few chromosomes, short cycle times -- the ranking would change, and a constraint
+written on allele frequencies would be managing the smaller of the two bills.
+
+## Where this connects
+
+@sec-response supplies the variance decomposition and the breeder's equation
+this chapter runs forward. @sec-cycles supplies the trajectories, and has one
+assumption restated as a result of the test above. @sec-alphasimr supplies the
+linked arm, which is the only place in the book where a genetic map, rather than
+an assumption about one, decides how fast disequilibrium decays.
+
+@sec-case-study's checklist gains one line from this chapter: report the $R^2$ of
+the $\log(1-F)$ regression next to any projection built on $N_e$, and treat a
+projection from a poor fit as an illustration.

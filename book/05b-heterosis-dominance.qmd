@@ -212,6 +212,77 @@ once. On a *selected* subset it holds only approximately -- the gap is the pairi
 structure the selection imposed, and `tests/testthat/test-dominance.R` pins it at
 both scales.
 
+## Inbreeding depression, and why it does not price $\alpha$ {#sec-heterosis-id}
+
+The same model run backwards gives inbreeding depression. A locus at frequency
+$p$ in a population with inbreeding coefficient $F$ is heterozygous with
+probability $2pq(1-F)$, so the mean declines linearly in $F$:
+
+$$ID \;=\; 2F\sum_k d_k \, p_k q_k$$
+
+At $F = 1$ that is exactly the *shared* term of `heterosis_partition()`. So the
+depression of a pool driven to complete homozygosity and the expected heterosis
+of a cross made *within* that same pool are one quantity seen from two sides --
+Falconer's symmetry, and it needs no new machinery here:
+
+```{r}
+c(inbreeding_depression = inbreeding_depression(pA, d),
+  shared_term           = heterosis_partition(pA, pA, d)[["shared"]],
+  deviation             = abs(inbreeding_depression(pA, d) -
+                                heterosis_partition(pA, pA, d)[["shared"]]))
+```
+
+It is checked against simulated genotypes rather than against its own algebra,
+which is what `ref_inbreeding_depression()` exists for -- Monte Carlo, so the
+agreement is to sampling error:
+
+```{r}
+k <- 1:300
+c(closed_form = inbreeding_depression(pA[k], d[k], 0.6),
+  simulated   = ref_inbreeding_depression(pA[k], d[k], 0.6, n = 20000, seed = 2))
+```
+
+Now the part that matters, because the obvious next step is wrong.
+
+It is very tempting to say: $\alpha$ budgets a loss of within-pool gene
+diversity, gene diversity is $\sum p q$, inbreeding depression is $\sum d\,pq$,
+therefore spending $\alpha$ costs yield in the current cycle and *that* is what
+prices the budget. The algebra does not support it.
+
+```{r}
+c(max_dominance_contribution_of_an_inbred_line = max(abs(heterosis_value(U, d))))
+```
+
+Zero, exactly. A fully inbred line has no heterozygous loci, so its dominance
+contribution is zero **whatever the pool's allele frequencies are**. In a
+programme whose parents are inbred lines the depression is a constant, paid in
+full at the moment the lines were made, and it does not move when the pool
+subsequently loses diversity.
+
+::: {.callout-important}
+## Inbreeding depression is not the current-cycle price of the diversity budget
+
+This is the same fact that makes $GD_{WI}$ exactly zero in @sec-catalogue's
+partition, and it has the same cause: with inbred parents there is no
+within-individual variation left to lose. Two consequences.
+
+The cost of $\alpha$ in this system remains what @sec-cycles measures -- an
+option value, realised cycles later through the variance available to select on
+(@sec-response), not a yield loss booked this season.
+
+And inbreeding depression **is** the live quantity wherever the population is
+only partially inbred: F2, F3 and F4 in @sec-sizing, where $F$ is still climbing
+and the depression is still accumulating. That is the chapter it belongs to, not
+this one.
+:::
+
+Note also what this does *not* say. Expected heterosis in the product is a
+separate question, and @sec-heterosis-flat answers it: under neutral drift the
+shared term lost and the divergence term gained cancel exactly, so hybrid
+heterosis is invariant. Neither the parent side nor the product side turns
+diversity loss into an immediate dominance cost. The bill arrives later, and it
+arrives in the additive variance.
+
 ## When genetic distance predicts heterosis exactly {#sec-heterosis-distance}
 
 Before the corrections start, one special case is worth having, because it
