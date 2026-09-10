@@ -1,8 +1,9 @@
-# A realistic corn pipeline: AlphaSimR and reciprocal recurrent selection {#sec-alphasimr}
+# Simulating a breeding programme: AlphaSimR from the ground up {#sec-alphasimr}
 
 ```{r}
 #| include: false
 source("_common.R")
+library(AlphaSimR)
 rrs_cfg <- utils::modifyList(rrs_config,
   list(n_pool_A = 12, n_pool_B = 12, n_dh = 3, n_sel = 6, n_testers = 2,
        n_cycles = 4, seg_sites = 150, n_chr = 5, n_traits = 2, seed = 1))
@@ -11,40 +12,499 @@ rrs_cfg <- utils::modifyList(rrs_config,
 @sec-simulating-crosses built the `{X, f, hybrids, fL}` contract with a
 deliberately fast simulator: Balding-Nichols allele frequencies, independent
 markers, no recombination, no dominance. That is enough to exercise the
-diversity and selection machinery, but it is not how a two-heterotic-pool corn
-programme is actually run. This chapter reproduces the real method --
-**reciprocal recurrent selection** (RRS; @comstock1949) -- with AlphaSimR's
-founder-haplotype and meiosis engine (@gaynor2021), and shows that the same
-contract comes out the other end, unchanged, so `stage2_select()` runs on it
-exactly as it does on the book's own simulated data.
+diversity and selection machinery, but it is not how a breeding programme is
+actually run, and it is not how anyone would build one from scratch.
 
-RRS is the standard commercial scheme for two heterotic pools: each pool is
-improved using the *other* pool as tester. Doubled-haploid lines are drawn from
-pool A, testcrossed to pool B (and vice versa), the testcross hybrids are
-phenotyped, and the lines with the best mean testcross performance -- a proxy
-for general combining ability, GCA -- are recombined to found the next cycle's
-pool. Elite lines from both pools, at the end, are crossed directly to produce
-the commercial hybrids. It is exactly the asymmetry @sec-cycles argues for:
-selection happens on the hybrid, recycling happens within pool.
+This chapter does both. Steps 1 to 7 are a **step-by-step construction of a
+simulation** with AlphaSimR (@gaynor2021), written out in the primitive calls --
+`runMacs()`, `SimParam`, `addTraitA()`, `makeCross()`, `makeDH()`, `setPheno()`,
+`selectInd()` -- with a plant breeder's reading of each argument. Step 8 then
+assembles those primitives into **reciprocal recurrent selection** (RRS;
+@comstock1949), the standard commercial scheme for two heterotic pools, and
+shows that the same stage-1 contract comes out the other end, unchanged, so
+`stage2_select()` runs on it exactly as it does on the book's own simulated data.
 
-The engine lives in the package, `R/13_alphasimr_bridge.R`: `rrs_config`,
-`alphasimr_founder_pools()`, `alphasimr_rrs_cycle()`, `alphasimr_make_hybrids()`
-and `alphasimr_to_stage1()`, wrapped by `alphasimr_pipeline()`. AlphaSimR is a
-`Suggests` dependency, guarded exactly like `quadprog` and `highs` elsewhere in
-the package -- this chapter, and only this chapter, needs it.
+The order matters. Everything in Step 8 is a wrapper in
+`R/13_alphasimr_bridge.R` -- `rrs_config`, `alphasimr_founder_pools()`,
+`alphasimr_rrs_cycle()`, `alphasimr_make_hybrids()`, `alphasimr_to_stage1()`,
+`alphasimr_pipeline()` -- and a wrapper is only readable once you know what it
+is wrapping. AlphaSimR is a `Suggests` dependency, guarded exactly like
+`quadprog` and `highs` elsewhere in the package; this chapter, and
+@sec-programme, are the only ones that need it.
 
-## Founding two pools with a real coalescent history
+@sec-programme takes the same primitives in the other direction: a complete
+*inbred-line* programme with staged yield trials, rather than a hybrid one.
 
-`AlphaSimR::runMacs2(..., split = )` draws founder haplotypes from a
-population-split coalescent history: one ancestral population, then two demes
-diverging `split` generations ago. That is the realistic analogue of
-`simulate_lines()`'s Balding-Nichols draw in @sec-simulating-crosses, and it
-comes with what the book's own simulator cannot give: actual linkage and
-recombination.
+## Step 1 -- Founder genomes, and which engine to use
+
+Every AlphaSimR simulation starts with founder haplotypes. There are two
+engines, and the choice is not cosmetic.
+
+`runMacs()` runs a backward-in-time coalescent (@chen2009) under a
+species-specific demography -- `species = "MAIZE"`, `"WHEAT"`, `"CATTLE"` --
+so the founders carry a realistic allele-frequency spectrum and realistic
+linkage disequilibrium. `quickHaplo()` samples 0s and 1s directly: instant, and
+with no history behind it.
+
+`inbred = TRUE` is the argument a plant breeder almost always wants. It makes
+every founder fully homozygous, which is what a panel of inbred lines or
+released varieties actually is. Without it the founders are outbred individuals,
+which is the right model for cattle and the wrong one for wheat.
+
+```{r}
+tm <- function(expr) round(as.numeric(system.time(expr)["elapsed"]), 2)
+
+set.seed(7); t_q <- tm(qa <- quickHaplo(nInd = 20, nChr = 10, segSites = 50,
+                                        inbred = TRUE))
+set.seed(7);        qb <- quickHaplo(nInd = 20, nChr = 10, segSites = 50,
+                                     inbred = TRUE)
+
+set.seed(7); t_m <- tm(ma <- runMacs(nInd = 20, nChr = 10, segSites = 50,
+                                     inbred = TRUE, species = "MAIZE"))
+set.seed(7);        mb <- runMacs(nInd = 20, nChr = 10, segSites = 50,
+                                  inbred = TRUE, species = "MAIZE")
+
+fmt(data.frame(engine     = c("quickHaplo", "runMacs"),
+               seconds    = c(t_q, t_m),
+               same_twice = c(identical(qa@geno, qb@geno),
+                              identical(ma@geno, mb@geno))))
+```
+
+Read the third column again. **`runMacs()` is not reproducible from
+`set.seed()`.** It hands the coalescent off to the MaCS binary, which seeds
+itself outside R's random number stream, so two calls with an identical seed
+return different founders. `quickHaplo()` is pure R sampling and is exactly
+reproducible.
+
+(The `seconds` column is wall clock and will differ on your machine and between
+renders; the ratio between the two engines is the part that transfers.)
+
+::: {.callout-warning}
+## The founders are not seeded, and everything downstream is
+
+This is the single most expensive trap in AlphaSimR, because it fails silently:
+the code looks reproducible, runs without complaint, and returns different
+numbers. It is already documented in `alphasimr_founder_pools()`'s help page --
+the note there says `runMacs2()`, and the table above shows it is not
+`runMacs2`-specific but true of MaCS generally.
+
+Two consequences:
+
+1. **Found once, then branch.** Any experiment comparing two schemes must draw
+   the founders a single time and start both arms from that one object. Draw
+   them twice and the comparison measures the founders as much as the schemes.
+   @sec-limits' linked arm is built this way for exactly this reason.
+2. **Save what you cannot reseed.** `saveRDS(founderGenomes, ...)` is the only
+   way to get the same coalescent history back in a later session.
+
+Everything after the founders -- the crosses, the doubled haploids, the
+phenotyping error, the recombination -- *is* controlled by `set.seed()`.
+:::
+
+So what does `quickHaplo()` give up? Linkage disequilibrium among the founders.
+The honest way to measure that is against the sampling floor: with `n`
+individuals, two completely independent loci still show `r^2` of about
+`1 / (n - 1)` by chance alone.
+
+```{r}
+ldstat <- function(fg) {
+  SPx <- SimParam$new(fg)
+  g <- pullSegSiteGeno(newPop(fg, simParam = SPx), simParam = SPx)
+  g <- g[, apply(g, 2, stats::sd) > 0, drop = FALSE]
+  r <- stats::cor(g)
+  c(adjacent = mean(diag(r[-nrow(r), -1])^2),   # neighbouring sites
+    overall  = mean(r[upper.tri(r)]^2),         # all pairs, mostly distant
+    noise    = 1 / (nrow(g) - 1))               # what pure chance gives
+}
+set.seed(3); lq <- ldstat(quickHaplo(nInd = 100, nChr = 5, segSites = 200,
+                                     inbred = TRUE))
+set.seed(3); lm_ <- ldstat(runMacs(nInd = 100, nChr = 5, segSites = 200,
+                                   inbred = TRUE, species = "MAIZE"))
+fmt(rbind(quickHaplo = lq, runMacs = lm_))
+```
+
+`quickHaplo()`'s adjacent-site `r^2` sits exactly on the noise floor: there is
+no founder LD at all, as designed. `runMacs()`'s is an order of magnitude above
+it, and its *overall* `r^2` is barely above the floor -- so the LD it creates is
+local, decaying with map distance, which is what real LD does.
+
+The `runMacs` row of that table is itself not reproducible, for the reason the
+row above it establishes; the `quickHaplo` row is, to the last digit.
+
+That contamination spreads further than it looks. `runMacs()` consumes an
+unpredictable amount of R's own random stream on its way to and from the MaCS
+binary, so *everything executed after it in the same session* inherits an
+unpredictable seed -- an earlier draft of this chapter had reproducible-looking
+Steps 2 to 7 that quietly moved whenever Step 1 was re-executed. The remedy is
+the rule stated above, applied to the chapter itself: each of the steps below
+calls `set.seed()` immediately before drawing its own founders, rather than
+trusting a seed set once at the top. With that in place, two independent
+executions agree on every number in Steps 1 to 7 except the wall-clock seconds
+and the `runMacs` row itself.
+
+That measurement decides the policy this chapter follows:
+
+- **`quickHaplo(inbred = TRUE)` for Steps 2--7 and all of @sec-programme.** They
+  teach polygenic response arithmetic, where founder LD is not the point, and
+  in exchange every number printed is reproducible from a clean clone.
+  AlphaSimR still applies a real genetic map and real meiosis to every
+  descendant, so linkage and the Bulmer effect of @sec-limits still operate --
+  only the founders' *history* is stylised.
+- **`runMacs2(split = )` in Step 8.** There the divergence between two heterotic
+  pools *is* the object of study, and no amount of speed compensates for not
+  having it.
+
+Founder LD does matter where marker-QTL association is the mechanism, which is
+genomic prediction -- see @sec-genomic-prediction, and note that the accuracies
+there are computed on a different simulator for this reason.
+
+## Step 2 -- `SimParam`, and defining a trait
+
+`SimParam` holds everything global: the genetic map, which sites are QTL, the
+trait effects, the error variances. It is an R6 object, so its methods are
+called with `$`, and a variable named `SP` is picked up automatically by every
+AlphaSimR function that needs it.
+
+```{r}
+# Seeded here, not once at the top of the chapter: the runMacs() calls in Step 1
+# consume an unpredictable amount of R's random stream, so anything downstream of
+# them is only reproducible by accident unless the seed is reset. This is the
+# "found once, then branch" rule of Step 1 applied to the chapter itself.
+set.seed(101)
+founders <- quickHaplo(nInd = 60, nChr = 10, segSites = 100, inbred = TRUE)
+SP <- SimParam$new(founders)
+SP$addTraitA(nQtlPerChr = 100, mean = 10, var = 1)
+SP$setVarE(h2 = 0.4)
+```
+
+There are four trait constructors, and choosing between them is choosing a model
+of gene action:
+
+| Method | Adds | When a plant programme needs it |
+|---|---|---|
+| `SP$addTraitA()` | additive only | line per se performance; the default teaching case |
+| `SP$addTraitAD()` | + dominance | testcross and hybrid value. Without dominance a line's cross performance is just its own breeding value and there is nothing for RRS to exploit (@sec-heterosis). This is what Step 8 uses |
+| `SP$addTraitAG()` | + genotype-by-environment | multi-location yield trials, where the same genotype is scored in several places. @sec-programme uses it |
+| `SP$addTraitADE()` | + epistasis | available; used nowhere in this book |
+
+`nQtlPerChr` sets how polygenic the trait is. Setting it equal to `segSites`
+makes *every* segregating site a QTL, which is what @sec-alphasimr's own
+configuration does -- convenient, because then the marker matrix and the causal
+loci are the same set and there is no marker-versus-QTL gap to reason about.
+Real programmes have that gap; @sec-genomic-era is where the book takes it
+seriously.
+
+`mean` and `var` fix the trait's mean and *genetic* variance in the founder
+population by rescaling the sampled effects. `corA` (Step 7) sets the genetic
+correlation between traits.
+
+The environmental variance has two routes, and plant breeders use the second:
+
+- `SP$setVarE(h2 = 0.4)` fixes an error variance once, from the founders' genetic
+  variance, and every later `setPheno()` reuses it.
+- `setPheno(varE = , reps = )` sets it per call. **`reps` is the plant idiom for
+  locations**: a genotype scored in `reps` environments has its error variance
+  divided by `reps`. That is how a staged programme raises selection accuracy
+  from one stage to the next without ever changing the trait's heritability --
+  the mechanism @sec-programme is built on.
+
+## Step 3 -- The base population, and where the variance components live
+
+`newPop()` turns founder haplotypes into individuals and, because a trait is
+now defined, computes their genetic values immediately.
+
+```{r}
+pop <- setPheno(newPop(founders, simParam = SP), simParam = SP)
+c(n = pop@nInd, meanG = as.numeric(meanG(pop)), varG = as.numeric(varG(pop)),
+  varP = as.numeric(varP(pop)),
+  h2_realised = as.numeric(varG(pop) / varP(pop))) |> fmt(3)
+```
+
+The realised heritability is near but not equal to the requested 0.4:
+`setVarE()` fixes a variance, and the ratio it produces in any finite sample is
+itself a random variable. This is a general and useful habit -- **check what the
+simulation realised, do not assume what you requested.**
+
+`genParam()` returns the full decomposition, and two of its fields are the ones
+this book cares about most:
+
+```{r}
+mixed <- pop
+for (k in 1:3) mixed <- randCross(mixed, nCrosses = 1000, simParam = SP)
+
+vrow <- function(p, lab) {
+  g <- genParam(p, simParam = SP)
+  data.frame(population = lab,
+             varA      = as.numeric(g$varA),
+             genicVarA = as.numeric(g$genicVarA),
+             ratio     = as.numeric(g$varA / g$genicVarA))
+}
+fmt(rbind(vrow(pop,   "founders (fully inbred)"),
+          vrow(mixed, "after 3 random matings")))
+```
+
+`varA` is the realised additive variance; `genicVarA` is what it would be if the
+loci were independent and in Hardy-Weinberg proportions. Their ratio is the
+whole subject of @sec-limits, and the package's `genic_var()` computes the same
+quantity from a marker matrix directly.
+
+The founders' ratio above 1 is not disequilibrium -- it is **inbreeding**. A
+fully homozygous population has per-locus genotypic variance `4pq` where a
+Hardy-Weinberg one has `2pq`, so `varA` runs up to twice the genic value by
+construction. Three rounds of random mating restore Hardy-Weinberg and pull the
+ratio back towards 1; what remains is the disequilibrium among only 60 founders'
+worth of gametes. A ratio away from 1 in an *outbred* population is the
+gametic-phase disequilibrium @sec-response defines and @sec-limits measures; a
+ratio away from 1 in an inbred one is mostly just the homozygosity.
+
+## Step 4 -- The DNA lottery, and why an F1 is not a family
+
+The course this chapter's structure follows demonstrates Mendelian sampling by
+crossing outbred founders and showing that full sibs vary. With **inbred**
+parents the result is different, and it is the fact plant breeding is organised
+around.
+
+```{r}
+lottery <- do.call(rbind, lapply(list(c(1, 2), c(1, 3), c(2, 3)), function(ij) {
+  plan <- matrix(ij, ncol = 2)
+  f1 <- makeCross(pop, plan, nProgeny = 200, simParam = SP)
+  dh <- makeDH(makeCross(pop, plan, nProgeny = 1, simParam = SP),
+               nDH = 200, simParam = SP)
+  better <- max(gv(pop)[ij])
+  data.frame(cross         = paste(ij, collapse = " x "),
+             parent_mean   = mean(gv(pop)[ij]),
+             better_parent = better,
+             f1_sd         = as.numeric(sqrt(varG(f1))),
+             dh_sd         = as.numeric(sqrt(varG(dh))),
+             dh_best       = max(gv(dh)),
+             transgressive = mean(gv(dh) > better))
+}))
+fmt(lottery, 3)
+```
+
+`f1_sd` is **exactly zero**. Two fully inbred parents are homozygous everywhere,
+so every gamete each one makes is identical, and every F1 is the same
+heterozygote. Two hundred F1 plants from a cross of two inbred lines are two
+hundred copies of one genotype. There is no lottery yet.
+
+The lottery starts one meiosis later. `dh_sd` is the standard deviation among
+doubled haploids drawn from that F1, and it is substantial -- this is the
+segregation that F2, DH and RIL populations exist to sample. It is also why
+@sec-sizing is a chapter: the number of DH lines you pull from a cross is the
+number of tickets you buy, and no downstream selection stage can recover a
+combination that was never sampled.
+
+`transgressive` is the fraction of DH lines exceeding the *better* parent. It is
+not small. Crossing two mediocre parents whose favourable alleles sit at
+different loci produces progeny beyond either of them -- transgressive
+segregation, which @mackay2020 argues is the same phenomenon as heterosis and
+inbreeding depression viewed from a third angle. @sec-heterosis is where this
+book takes up that argument.
+
+## Step 5 -- Selfing, doubled haploids, and what the shortcut buys
+
+A plant breeder has to get from a heterozygous F1 to a homozygous line. There
+are two routes, and AlphaSimR implements both.
+
+```{r}
+homozygosity <- function(p)
+  mean(pullSegSiteGeno(p, simParam = SP) %in% c(0, 2))
+
+f1 <- makeCross(pop, matrix(c(1, 2), ncol = 2), nProgeny = 200, simParam = SP)
+
+gen <- f1
+traj <- data.frame(generation = "F1", homozygosity = homozygosity(f1))
+for (k in 2:7) {
+  gen <- self(gen, nProgeny = 1, simParam = SP)
+  traj <- rbind(traj, data.frame(generation = paste0("F", k),
+                                 homozygosity = homozygosity(gen)))
+}
+traj <- rbind(traj, data.frame(generation = "DH",
+                               homozygosity = homozygosity(makeDH(f1, nDH = 1,
+                                                                  simParam = SP))))
+fmt(traj)
+```
+
+`self()` halves the remaining heterozygosity every generation -- the familiar
+`1 - (1/2)^(t-1)` approach to fixation, which never quite arrives. `makeDH()`
+gets there in one step, at 1.0 exactly, by doubling a haploid gamete.
+
+The saving is seasons, and seasons are the currency of a breeding programme:
+six or seven selfing generations against one DH cycle. @sec-programme's scheme
+uses `makeDH()` for precisely this reason, and the cost that never shows up in
+the simulation is that DH production is a laboratory operation with its own
+failure rate and its own genotype-dependent response.
+
+The other operations a scheme needs are all one call each: `randCross()` for
+random mating within a pool, `makeCross()` for a specified crossing plan,
+`hybridCross()` for a full factorial between two groups (Step 8), and
+`mergePops()` or `c()` to combine populations.
+
+## Step 6 -- Phenotyping, selection, and checking the breeder's equation
+
+Selection needs a criterion. `setPheno()` supplies the noisy one; `selectInd()`
+acts on it.
+
+```{r}
+mixed <- setPheno(mixed, simParam = SP)
+
+sweep_q <- do.call(rbind, lapply(c(0.05, 0.10, 0.20), function(q) {
+  n_sel <- round(q * mixed@nInd)
+  sel   <- selectInd(mixed, nInd = n_sel, use = "pheno", simParam = SP)
+  prog  <- randCross(sel, nCrosses = 1000, simParam = SP)
+
+  S     <- as.numeric(meanP(sel) - meanP(mixed))
+  vA    <- as.numeric(varA(mixed, simParam = SP))
+  h2r   <- vA / as.numeric(varP(mixed))
+  i_emp <- S / sqrt(as.numeric(varP(mixed)))
+  r_emp <- stats::cor(gv(mixed)[, 1], pheno(mixed)[, 1])
+
+  data.frame(q = q,
+             i_empirical = i_emp, i_normal = sel_intensity(q),
+             R_S_h2      = S * h2r,
+             R_i_r_sdA   = i_emp * r_emp * sqrt(vA),
+             R_observed  = as.numeric(meanG(prog) - meanG(mixed)))
+}))
+fmt(sweep_q)
+```
+
+Both forms of the breeder's equation are here. `R = S * h2` uses the selection
+differential directly; `R = i * r * sigma_A` decomposes it into intensity,
+accuracy and available variation -- the form @sec-response builds the book's
+objective side on. `R_observed` is the realised change in *genetic* mean between
+the selected parents' progeny and the starting population, which is what the
+prediction is a prediction of.
+
+They agree to a few percent, and the agreement degrades as `q` rises, which is
+the expected direction: the normal-theory intensity assumes an infinite
+population and a normal criterion, and a 20% selected fraction of a finite
+population departs from both.
+
+The book exports its own selection intensity, and AlphaSimR exports one too.
+They are independent implementations of `phi(z) / q`:
+
+```{r}
+q <- 0.05
+c(hybdiv = sel_intensity(q), AlphaSimR = selInt(q),
+  difference = abs(sel_intensity(q) - selInt(q))) |> fmt(10)
+```
+
+`selectInd()` takes `use = "pheno"`, `"gv"` or `"ebv"`. Selecting on `"gv"` is
+selecting with perfect accuracy -- impossible in a real programme, and the
+correct way to compute the ceiling a scheme is being measured against.
+`use = "ebv"` selects on whatever has been written into the population's `ebv`
+slot, which is how genomic selection enters a simulation (@sec-programme).
+`selectTop = FALSE` selects downwards, for traits where less is better.
+
+`selectWithinFam()` is the plant-specific one. A programme that truncates
+globally on a set of families will take every entry from the two best crosses
+and nothing from the rest; capping the number retained per family holds the
+programme's genetic base open at some cost in immediate gain. It is the same
+trade-off as the `max_use` parental cap of @sec-combinatorial, applied one stage
+earlier.
+
+## Step 7 -- Two traits, and what equal weighting assumes
+
+`corA` makes the traits genetically correlated, which is where selection stops
+being one-dimensional.
+
+```{r}
+set.seed(202)
+f2 <- quickHaplo(nInd = 80, nChr = 10, segSites = 100, inbred = TRUE)
+SP2 <- SimParam$new(f2)
+SP2$addTraitA(nQtlPerChr = 100, mean = c(10, 10), var = c(1, 4),
+              corA = matrix(c(1, -0.4, -0.4, 1), 2, 2))
+SP2$setVarE(h2 = c(0.6, 0.1))
+
+mt <- newPop(f2, simParam = SP2)
+for (k in 1:3) mt <- randCross(mt, nCrosses = 1000, simParam = SP2)
+mt <- setPheno(mt, simParam = SP2)
+
+G <- varG(mt); P <- varP(mt); a <- c(1, 1)
+c(cor_genetic = stats::cov2cor(G)[2, 1],
+  cor_pheno   = stats::cov2cor(P)[2, 1],
+  h2_trait1   = as.numeric(diag(G)[1] / diag(P)[1]),
+  h2_trait2   = as.numeric(diag(G)[2] / diag(P)[2])) |> fmt(3)
+```
+
+The genetic correlation lands near the requested `-0.4`; the phenotypic one is
+much weaker, because the environmental components were left uncorrelated
+(`SP$setCorE()` is where that would change). The two traits differ in variance
+and, sharply, in heritability -- the ordinary situation.
+
+The book's pipeline defaults to `weights = NULL`, meaning equal weight on every
+trait. Step 7 is where that default gets examined, using the index functions
+@sec-response introduced:
+
+```{r}
+cor_with_H <- function(w)
+  drop(crossprod(w, G %*% a)) /
+    sqrt(drop(crossprod(w, P %*% w)) * drop(crossprod(a, G %*% a)))
+
+B <- rbind(equal       = a,
+           smith_hazel = index_smith_hazel(P, G, a),
+           restricted  = index_restricted(P, G, a, R = cbind(c(0, 1))))
+dG <- t(apply(B, 1, function(w) drop(G %*% w)))
+colnames(dG) <- c("gain_trait1", "gain_trait2")
+fmt(cbind(B, dG, cor_with_H = apply(B, 1, cor_with_H)))
+```
+
+Three readings, in the order they matter:
+
+1. **Equal weights are not the Smith-Hazel solution.** Smith-Hazel puts 0.46
+   units of weight on trait 2 for every unit on trait 1, not 1.00. Equal
+   weighting is optimal only when `P^-1 G` is proportional to the identity,
+   which needs the traits equally variable, equally heritable and uncorrelated.
+   None of that holds here, and it rarely holds anywhere.
+2. **The cost of getting it wrong is modest here, and the direction of the
+   error is not.** Equal weighting loses about 2% of the attainable correlation
+   with the aggregate genotype, but it drives a large unintended gain in trait 2
+   simply because trait 2 has four times the variance. An index that is nearly
+   as good on the objective can still be badly wrong about where the gain lands.
+3. **The restricted index holds trait 2 at exactly zero.** That is
+   Kempthorne and Nordskog's construction (@kempthorne1959) and, as
+   @sec-response argues, the classical ancestor of this book's `alpha`
+   constraint -- restrict a direction rather than price it.
+
+Smith-Hazel is defined as the weight vector maximising that correlation, so the
+claim is checkable against a numerical optimum rather than taken on faith:
+
+```{r}
+opt <- stats::optim(c(1, 1), function(w) -cor_with_H(w), method = "BFGS")
+c(numerical = -opt$value, smith_hazel = cor_with_H(B["smith_hazel", ]),
+  difference = abs(-opt$value - cor_with_H(B["smith_hazel", ]))) |> fmt(10)
+```
+
+Multi-trait genomic selection in wheat, balancing yield against protein content
+and quality, is the standing plant example -- @michel2019.
+
+## Step 8 -- The parts assembled: reciprocal recurrent selection
+
+Everything above was one operation at a time. A breeding scheme is those
+operations in a loop, and the loop for two heterotic pools is reciprocal
+recurrent selection: each pool is improved using the *other* pool as tester.
+Doubled-haploid lines are drawn from pool A, testcrossed to pool B (and vice
+versa), the testcross hybrids are phenotyped, and the lines with the best mean
+testcross performance -- a proxy for general combining ability, GCA -- are
+recombined to found the next cycle's pool. Elite lines from both pools, at the
+end, are crossed directly to produce the commercial hybrids. It is exactly the
+asymmetry @sec-cycles argues for: selection happens on the hybrid, recycling
+happens within pool.
+
+### Founding two pools with a real coalescent history
+
+This is the one place the chapter pays for `runMacs2()` rather than
+`quickHaplo()`. `AlphaSimR::runMacs2(..., split = )` draws founder haplotypes
+from a population-split coalescent history: one ancestral population, then two
+demes diverging `split` generations ago. That is the realistic analogue of
+`simulate_lines()`'s Balding-Nichols draw in @sec-simulating-crosses, and
+between-pool divergence is the entire subject of @sec-subdivided, so a stylised
+substitute would not do.
 
 ```{r}
 fp <- alphasimr_founder_pools(rrs_cfg)
-c(pool_A = fp$pop_A@nInd, pool_B = fp$pop_B@nInd, markers = rrs_cfg$n_chr * rrs_cfg$seg_sites)
+c(pool_A = fp$pop_A@nInd, pool_B = fp$pop_B@nInd,
+  markers = rrs_cfg$n_chr * rrs_cfg$seg_sites)
 alphasimr_gd(fp$pop_A, fp$SP)
 alphasimr_gd(fp$pop_B, fp$SP)
 ```
@@ -54,24 +514,23 @@ computed directly from AlphaSimR's genotype pull -- so the two pools are
 already comparable to every diversity number in the rest of the book on the
 same scale.
 
-`runMacs2(nInd = , nChr = , segSites = , split = )` is what actually draws the
-haplotypes: a single ancestral population runs backward-in-time coalescent
-simulation, splits into two demes `r rrs_cfg$split_gen` generations ago, and
-the requested `nInd` individuals are sampled across both demes -- the first
-`n_pool_A` become pool A, the rest pool B. There is no separate marker panel:
-`SP$addTraitAD(nQtlPerChr = seg_sites, ...)` makes every one of the
-`r rrs_cfg$seg_sites` segregating sites per chromosome a QTL, so the same
-sites that carry the trait are the ones `pullSegSiteGeno()` reads for `X`,
-`f` and `fL` throughout this chapter.
+Reading `alphasimr_founder_pools()` against Steps 1 and 2, it is
+`runMacs2(nInd = , nChr = , segSites = , split = )` followed by
+`SP$addTraitAD(nQtlPerChr = seg_sites, meanDD = `r rrs_cfg$mean_dd`,
+varDD = `r rrs_cfg$var_dd`)` and `SP$setVarE(h2 = )`. The requested `nInd`
+individuals are sampled across both demes -- the first `n_pool_A` become pool A,
+the rest pool B. There is no separate marker panel: every one of the
+`r rrs_cfg$seg_sites` segregating sites per chromosome is a QTL, so the sites
+that carry the trait are the ones `pullSegSiteGeno()` reads for `X`, `f` and
+`fL` throughout. And per Step 2's table, the trait is `addTraitAD` because
+without dominance there is nothing for testcross selection to exploit that
+within-pool selection could not already get.
 
-Each pool also carries an additive-and-dominance trait
-(`SP$addTraitAD(meanDD = `r rrs_cfg$mean_dd`, varDD = `r rrs_cfg$var_dd`)`).
-Dominance is what makes testcross selection meaningful at all: without it, a
-line's performance in cross would just be its own breeding value, and there
-would be nothing for RRS to exploit that plain within-pool selection could not
-already get. @sec-heterosis covers why dominance is the mechanism.
+Because these founders come from MaCS, the numbers in the rest of this section
+change whenever the chapter is re-executed -- see Step 1's warning. The numbers
+in Steps 1 to 7, and in @sec-programme, do not.
 
-## One cycle
+### One cycle
 
 ```{r}
 cy1 <- alphasimr_rrs_cycle(fp$pop_A, fp$pop_B, fp$SP, rrs_cfg)
@@ -79,45 +538,47 @@ fmt(cy1$summary, 4)
 ```
 
 `alphasimr_rrs_cycle()` runs the same six steps for each pool, symmetrically
-(pool A tested on B, pool B tested on A):
+(pool A tested on B, pool B tested on A), and every one is a primitive from
+above:
 
-1. **Double haploids.** `makeDH()` draws `r rrs_cfg$n_dh` doubled-haploid,
-   fully homozygous lines from *each* individual in the current pool -- at
-   book scale, `r rrs_cfg$n_pool_A` parents x `r rrs_cfg$n_dh` DH each =
+1. **Double haploids** (Step 5). `makeDH()` draws `r rrs_cfg$n_dh` fully
+   homozygous lines from *each* individual in the current pool -- at book scale,
+   `r rrs_cfg$n_pool_A` parents x `r rrs_cfg$n_dh` DH each =
    `r rrs_cfg$n_pool_A * rrs_cfg$n_dh` DH lines per pool, per cycle.
 2. **Pick reciprocal testers.** The first `r rrs_cfg$n_testers` individuals of
    the *opposite* pool are used as testers -- a fixed slice, not a random or
    merit-based draw. This is the RRS-defining move: a line's value is judged
    by its cross onto the other heterotic pool, not by itself.
-3. **Testcross and phenotype.** `hybridCross()` forms the full factorial
-   between every DH line and every tester --
+3. **Testcross and phenotype** (Step 5, Step 6). `hybridCross()` forms the full
+   factorial between every DH line and every tester --
    `r rrs_cfg$n_pool_A * rrs_cfg$n_dh` DH x `r rrs_cfg$n_testers` testers =
    `r rrs_cfg$n_pool_A * rrs_cfg$n_dh * rrs_cfg$n_testers` testcross hybrids
    per pool -- and `setPheno()` adds phenotyping error sized to hit the
-   heritability set earlier by `SP$setVarE(h2 = )`.
+   heritability set by `SP$setVarE(h2 = )`.
 4. **GCA proxy.** Testcross phenotypes are grouped by DH-line parent
    (`tapply(pheno[, 1], mother, mean)`) and averaged across the
    `r rrs_cfg$n_testers` testers each line was crossed to -- a general
-   combining ability (GCA) estimate, following @comstock1949. Only trait 1 is
+   combining ability estimate, following @comstock1949. Only trait 1 is
    used for this ranking even though this chapter's config simulates
    `r rrs_cfg$n_traits` traits per line; the second trait rides along in
-   `X`/`hybrids` but plays no role in selection here.
-5. **Keep the elites.** The `r rrs_cfg$n_sel` DH lines per pool with the
-   highest mean testcross phenotype are kept as `elite_A`/`elite_B`.
-6. **Recombine.** `randCross()` random-mates the elites back up to
+   `X`/`hybrids` but plays no role in selection here. Step 7 is what it would
+   take to use both.
+5. **Keep the elites** (Step 6). The `r rrs_cfg$n_sel` DH lines per pool with
+   the highest mean testcross phenotype are kept as `elite_A`/`elite_B`.
+6. **Recombine** (Step 5). `randCross()` random-mates the elites back up to
    `r rrs_cfg$n_pool_A` individuals, founding the next cycle's pool A
    (symmetrically for B).
 
 `elite_A`/`elite_B` are what step 6 mates -- and, in the *last* cycle, what
-the final commercial cross uses instead of being recombined again (see
-below). The cycle's `summary` mixes two different populations on purpose:
-`mean_tc_A`/`mean_tc_B` average over *all* DH lines tested that cycle (the
-population's testcross performance before selection), while `gd_A`/`gd_B`
-are gene diversity of only the `r rrs_cfg$n_sel` surviving elites (the
-population after selection). That asymmetry is exactly what the next section
-plots -- response measured pre-selection, diversity measured post-selection.
+the final commercial cross uses instead of being recombined again. The cycle's
+`summary` mixes two different populations on purpose: `mean_tc_A`/`mean_tc_B`
+average over *all* DH lines tested that cycle (the population's testcross
+performance before selection), while `gd_A`/`gd_B` are gene diversity of only
+the `r rrs_cfg$n_sel` surviving elites (the population after selection). That
+asymmetry is exactly what the next section plots -- response measured
+pre-selection, diversity measured post-selection.
 
-## The trajectory across cycles
+### The trajectory across cycles
 
 `alphasimr_pipeline()` just runs `alphasimr_rrs_cycle()` in a loop for
 `r rrs_cfg$n_cycles` cycles, carrying `pop_A`/`pop_B` forward from one
@@ -158,10 +619,11 @@ par(op)
 Both pools respond -- mean testcross phenotype rises -- and both pools lose
 gene diversity in their retained elite lines, cycle over cycle. Nobody pays this
 cost for its own sake: @sec-cycles makes the same point with the package's own
-faster simulator, over a longer trajectory and a grid of selection intensities.
-This chapter shows it holds with actual meiosis and dominance behind it too.
+faster simulator, over a longer trajectory and a grid of selection intensities,
+and @sec-programme makes it a third time in an inbred-line programme. This
+section shows it holds with actual meiosis and dominance behind it too.
 
-## The final hybrid pool through `stage2_select()`, unchanged
+### The final hybrid pool through `stage2_select()`, unchanged
 
 `alphasimr_make_hybrids()` testcrosses the final cycle's elites directly
 against each other -- a full factorial diallel between the
@@ -203,10 +665,10 @@ or by merit, and not the single unrelated inbred tester a real programme
 would typically use -- a fixed pool slice makes the same testers reused every
 cycle, which a production programme would treat as a confound; there is one
 phenotyping environment (`setPheno()`'s error variance, no
-genotype-by-environment term); the population-split coalescent history
-(`runMacs2(split = )`) is a stylised divergence process, not calibrated to a
-named heterotic-pool pair; doubled-haploid production is instantaneous,
-skipping the field seasons a real DH pipeline takes; and selection acts on
+genotype-by-environment term -- @sec-programme adds one); the population-split
+coalescent history (`runMacs2(split = )`) is a stylised divergence process, not
+calibrated to a named heterotic-pool pair; doubled-haploid production is
+instantaneous, skipping the field seasons Step 5 counted; and selection acts on
 trait 1 only -- the `r rrs_cfg$n_traits` traits this chapter's config
 simulates are all carried through `X`/`hybrids`, but only the first ever
 enters the GCA ranking, so the rest are along for the ride, not selected on.
@@ -228,12 +690,19 @@ selection metrics as CSVs.
 
 ## Where this connects
 
-@sec-simulating-crosses and this chapter build the same three-object contract
+@sec-simulating-crosses and Step 8 build the same three-object contract
 from two different generative models -- the fast one and the realistic one --
 which is the point of drawing that seam where the book does: everything past
 it, `build_ctx()` through `stage2_select()`, cannot tell which one it is
 looking at. @sec-heterosis explains why the dominance term here is what makes
-testcross selection informative at all. @sec-cycles runs the same
-diversity-erosion argument at a longer horizon with the package's own faster
-simulator; this chapter is its cross-check against an engine with real
-meiosis behind it.
+testcross selection informative at all. @sec-response supplies the breeder's
+equation Step 6 checks and the index theory Step 7 uses; @sec-limits is where
+Step 3's `varA`-against-`genicVarA` gap becomes the subject rather than a
+diagnostic. @sec-cycles runs the same diversity-erosion argument at a longer
+horizon with the package's own faster simulator; this chapter is its cross-check
+against an engine with real meiosis behind it.
+
+@sec-programme is the other half of the method: the same primitives assembled
+into an inbred-line programme with staged yield trials, where the question is
+not which hybrids to sell but how fast a variety pipeline can run and what it
+spends to run faster.

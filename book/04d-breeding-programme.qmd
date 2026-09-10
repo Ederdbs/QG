@@ -1,0 +1,427 @@
+# A complete plant breeding programme, and what it costs in diversity {#sec-programme}
+
+```{r}
+#| include: false
+source("_common.R")
+library(AlphaSimR)
+```
+
+@sec-alphasimr assembled AlphaSimR's primitives into a *hybrid* scheme: two
+heterotic pools, reciprocal testers, a commercial cross at the end. This chapter
+assembles the same primitives into the other kind of programme -- an
+**inbred-line** pipeline, where the product is a variety rather than a hybrid,
+and where the organising problem is not which cross to sell but how many
+genotypes to carry through how many stages of field testing.
+
+The scheme is the wheat programme of @gaynor2017, reduced in scale. It is worth
+building because it is the shape most public and many commercial line-breeding
+programmes actually have, and because it exposes something the hybrid chapter
+cannot: **the trade between the number of genotypes tested and the precision
+with which each is measured.** A breeder has a fixed number of plots. Spending
+them on more entries at one location or fewer entries at eight locations is the
+same budget spent two ways, and the staged trial is the standard compromise.
+
+Then the chapter does what the course this scheme comes from does not: it puts
+the book's diversity machinery over the result, and asks what the faster
+programme spends to be faster.
+
+## The scheme
+
+```{r}
+#| echo: false
+#| fig-width: 9.5
+#| fig-height: 3.6
+#| fig-cap: "The staged inbred-line programme. Entries fall by roughly an order of magnitude at each stage while replication -- the number of locations each entry is scored in -- rises. Parents for the next cycle are recycled from the late trials (solid) or, under genomic selection, from the preliminary trial as well (dashed)."
+op <- par(mar = c(0, 0, 0, 0)); plot.new(); plot.window(c(0, 100), c(0, 40))
+box_ <- function(x, y, w, h, lab, fill, cex = 0.66) {
+  rect(x, y, x + w, y + h, col = fill, border = "grey40")
+  text(x + w / 2, y + h / 2, lab, cex = cex)
+}
+arr <- function(x0, y0, x1, y1, lty = 1, col = "grey30")
+  arrows(x0, y0, x1, y1, length = 0.06, col = col, lty = lty, lwd = 1.5)
+
+stages <- list(c(1, "Parents", "#d1e5f0"), c(14.5, "F1\n20 crosses", "#d1e5f0"),
+               c(28, "DH\n400 lines", "#f7f7f7"), c(41.5, "Headrows\n400, 1/4 rep", "#f7f7f7"),
+               c(55, "PYT\n60, 1 loc", "#fddbc7"), c(68.5, "AYT\n12, 4 loc", "#fddbc7"),
+               c(82, "EYT\n4, 8 loc", "#fddbc7"))
+for (s in stages) box_(as.numeric(s[1]), 16, 12, 11, s[2], s[3])
+box_(93, 16, 6, 11, "Variety", "#b8e0b8")
+for (x in c(13, 26.5, 40, 53.5, 67, 80.5, 92.5)) arr(x, 21.5, x + 1.4, 21.5)
+
+arr(88, 16, 88, 6, lty = 1, col = "#b2182b"); arr(88, 6, 8, 6, lty = 1, col = "#b2182b")
+arr(7, 6, 7, 16, lty = 1, col = "#b2182b")
+arr(61, 16, 61, 10.5, lty = 2, col = "#1b6ca8")
+arr(61, 10.5, 9, 10.5, lty = 2, col = "#1b6ca8")
+text(46, 4, "recycle parents from EYT + AYT (phenotypic selection)",
+     cex = 0.6, col = "#b2182b")
+text(36, 12.4, "genomic selection also recycles from PYT -- one year sooner",
+     cex = 0.6, col = "#1b6ca8")
+text(50, 31, "entries fall, replication rises", cex = 0.72, col = "grey25")
+arr(30, 29, 78, 29, col = "grey55")
+par(op)
+```
+
+Seven stages, and the logic connecting them is a single idea: **at every step,
+entries fall and replication rises.** Four hundred doubled-haploid lines are
+scored once, cheaply, in unreplicated headrows; sixty survive into a preliminary
+yield trial at one location; twelve into an advanced trial at four; four into an
+elite trial at eight. Selection accuracy at the last stage is high because the
+error variance has been divided by eight locations -- not because the trait
+became more heritable.
+
+That is what `reps` does in `setPheno()`, and it is the argument @sec-alphasimr's
+Step 2 flagged as the plant idiom. The configuration:
+
+```{r}
+sch <- list(
+  n_founders = 40, n_chr = 10, n_qtl = 60,   # founder genomes
+  n_crosses  = 20, n_dh = 20, fam_max = 5,   # crossing and DH production
+  n_pyt = 60, n_ayt = 12, n_eyt = 4,         # entries per yield trial
+  rep_hdrw = 1/4, rep_pyt = 1, rep_ayt = 4, rep_eyt = 8,   # locations per stage
+  var_e = 0.4, gs_boost = 3, n_burn = 7, n_years = 15
+)
+```
+
+`rep_hdrw = 1/4` is the course's device for a stage *less* precise than a single
+plot: headrows are scored visually on a short row, which carries less
+information than one replicated plot, so the error variance is multiplied by
+four. `fam_max` caps how many DH lines any one cross may contribute to the
+preliminary trial -- `selectWithinFam()` from @sec-alphasimr's Step 6, holding
+the genetic base open against a truncation that would otherwise take the whole
+trial from the two best crosses.
+
+## Why a breeding programme needs a burn-in
+
+The loop below advances every stage by one year, simultaneously. That only means
+something if all seven stages are already *occupied*, by cohorts of different
+ages: this year's elite trial entered the programme six years ago, this year's
+headrows entered last year. Starting the loop from an empty programme would
+compare a year-1 elite trial that does not exist against a year-1 headrow that
+does.
+
+The fix is the staggered fill in the course's vignette, and it is the most
+confusing seven lines in it:
+
+```r
+for (year in 1:7) {
+  F1 <- randCross(Parents, n_crosses)
+  if (year < 7) DH   <- makeDH(F1, n_dh)
+  if (year < 6) HDRW <- setPheno(DH, reps = rep_hdrw)
+  if (year < 5) PYT  <- ...
+  if (year < 4) AYT  <- ...
+  if (year < 3) EYT  <- ...
+}
+```
+
+Read it as a triangle rather than a loop. On the first pass every stage runs, so
+every stage holds a cohort. On the second pass the elite trial is skipped, so
+the cohort sitting in it is a year older than the one behind it. By the seventh
+pass only the crossing block still runs. What comes out is a programme in which
+each stage holds a cohort of the right age relative to its neighbours -- a
+*steady state*, which is the only state in which a per-year genetic gain is a
+meaningful number.
+
+## One programme, fifteen years
+
+The whole scheme is one function. It is written out rather than packaged
+because the loop is the thing being taught, and because a reader adapting it to
+their own programme will edit the loop, not call it.
+
+```{r}
+gd_of <- function(pop, SP)
+  1 - mean(molecular_coancestry(pullSegSiteGeno(pop, simParam = SP) / 2))
+
+run_programme <- function(cfg, seed, genomic = FALSE, gs_from = 1) {
+  set.seed(seed)
+  fg <- quickHaplo(nInd = cfg$n_founders, nChr = cfg$n_chr,
+                   segSites = cfg$n_qtl, inbred = TRUE)
+  SP <- SimParam$new(fg)
+  SP$addTraitAG(nQtlPerChr = cfg$n_qtl, mean = 4, var = 0.1, varGxE = 0.2)
+  ph <- function(p, r) setPheno(p, varE = cfg$var_e, reps = r, simParam = SP)
+
+  # --- burn-in: fill every stage with a cohort of the right age ---
+  Parents <- newPop(fg, simParam = SP)
+  for (year in 1:cfg$n_burn) {
+    F1 <- randCross(Parents, cfg$n_crosses, simParam = SP)
+    if (year < 7) DH   <- makeDH(F1, cfg$n_dh, simParam = SP)
+    if (year < 6) HDRW <- ph(DH, cfg$rep_hdrw)
+    if (year < 5) {
+      PYT <- selectWithinFam(HDRW, nInd = cfg$fam_max, use = "pheno", simParam = SP)
+      PYT <- ph(selectInd(PYT, nInd = cfg$n_pyt, use = "pheno", simParam = SP),
+                cfg$rep_pyt)
+    }
+    if (year < 4)
+      AYT <- ph(selectInd(PYT, nInd = cfg$n_ayt, use = "pheno", simParam = SP),
+                cfg$rep_ayt)
+    if (year < 3)
+      EYT <- ph(selectInd(AYT, nInd = cfg$n_eyt, use = "pheno", simParam = SP),
+                cfg$rep_eyt)
+  }
+
+  # --- advancing years, last stage first so each reads the previous cohort ---
+  out <- data.frame(year = 1:cfg$n_years, meanG = NA_real_, varG = NA_real_,
+                    acc_pyt = NA_real_, gd_pyt = NA_real_, gd_parents = NA_real_)
+  for (year in 1:cfg$n_years) {
+    gs <- genomic && year >= gs_from
+
+    Variety <- selectInd(EYT, nInd = 1, use = "pheno", simParam = SP)
+    EYT <- ph(selectInd(AYT, nInd = cfg$n_eyt, use = "pheno", simParam = SP),
+              cfg$rep_eyt)
+
+    if (gs) {            # lever 1: a more accurate criterion at the PYT stage
+      PYT@ebv <- setPheno(PYT, varE = cfg$var_e,
+                          reps = cfg$rep_pyt * cfg$gs_boost,
+                          onlyPheno = TRUE, simParam = SP)
+      AYT <- ph(selectInd(PYT, nInd = cfg$n_ayt, use = "ebv", simParam = SP),
+                cfg$rep_ayt)
+    } else {
+      AYT <- ph(selectInd(PYT, nInd = cfg$n_ayt, use = "pheno", simParam = SP),
+                cfg$rep_ayt)
+    }
+
+    PYT <- selectWithinFam(HDRW, nInd = cfg$fam_max, use = "pheno", simParam = SP)
+    PYT <- ph(selectInd(PYT, nInd = cfg$n_pyt, use = "pheno", simParam = SP),
+              cfg$rep_pyt)
+    HDRW <- ph(DH, cfg$rep_hdrw)
+    DH   <- makeDH(F1, cfg$n_dh, simParam = SP)
+
+    if (gs) {            # lever 2: recycle parents a year earlier, from the PYT
+      PYT@ebv <- setPheno(PYT, varE = cfg$var_e,
+                          reps = cfg$rep_pyt * cfg$gs_boost,
+                          onlyPheno = TRUE, simParam = SP)
+      EYT@ebv <- pheno(EYT); AYT@ebv <- pheno(AYT)
+      Parents <- selectInd(c(EYT, AYT, PYT), nInd = cfg$n_eyt + cfg$n_ayt,
+                           use = "ebv", simParam = SP)
+    } else {
+      Parents <- c(EYT, AYT)
+    }
+    F1 <- randCross(Parents, cfg$n_crosses, simParam = SP)
+
+    out$meanG[year]      <- meanG(PYT)
+    out$varG[year]       <- varG(PYT)
+    out$acc_pyt[year]    <- stats::cor(PYT@gv[, 1], PYT@pheno[, 1])
+    out$gd_pyt[year]     <- gd_of(PYT, SP)
+    out$gd_parents[year] <- gd_of(Parents, SP)
+  }
+  out
+}
+```
+
+Two details are worth pausing on.
+
+**The advancing loop runs backwards.** The elite trial is filled *before* the
+advanced trial is refilled, which is before the preliminary trial is refilled.
+Written in the other order, `EYT` would be selected from an `AYT` that had
+already been overwritten with this year's cohort, and the programme would
+advance two stages per year without anyone noticing. Ordering is the whole
+correctness argument of a staged simulation.
+
+**Progress is reported at the PYT.** It is the first stage with a yield
+phenotype and the last with enough entries for a variance to mean anything --
+`meanG` on four elite lines is noise. This is the course's choice and it is the
+right one.
+
+```{r}
+ps <- run_programme(sch, seed = 1, genomic = FALSE)
+fmt(ps[c(1, 5, 10, 15), ])
+```
+
+Genetic mean rises, genetic variance falls, and gene diversity of the
+preliminary trial falls with it. Nothing here is surprising; what matters is
+that all three are now being measured on the same run.
+
+::: {.callout-note}
+## These numbers are reproducible
+
+The founders come from `quickHaplo()`, which is seeded by `set.seed()`, so
+`run_programme(sch, seed = 1)` returns the same data frame every time -- unlike
+@sec-alphasimr's Step 8, whose `runMacs2()` founders are not reproducible.
+That is what makes the paired comparison below legitimate: the phenotypic and
+genomic arms are run from the *same* seed, so they share founders, and every
+difference between them is attributable to the scheme.
+:::
+
+## Genomic selection: two levers, not one
+
+Genomic selection is usually described as buying accuracy. It buys two things,
+and the second is normally the larger (@gaynor2017; @meuwissen2001):
+
+1. **Accuracy earlier in the cycle.** A prediction is available on a line that
+   has been genotyped but barely phenotyped, so the advance from preliminary to
+   advanced trial can be made on better information than one location's yield.
+2. **A shorter generation interval.** Parents can be recycled from the
+   preliminary trial instead of waiting for the elite trial -- and the breeder's
+   equation of @sec-response is a rate *per unit time*, so cutting years off the
+   cycle raises gain per year even at unchanged accuracy per selection.
+
+This chapter mimics the prediction rather than fitting one: `ebv` is filled with
+a phenotype simulated at `gs_boost` times the replication, which is a stand-in
+for a genomic prediction of the corresponding accuracy. @sec-genomic-prediction
+is where the book actually fits prediction models and measures what accuracy is
+attainable; the honest statement here is that this chapter *assumes* an accuracy
+and studies its consequences, rather than earning it.
+
+```{r}
+gs <- run_programme(sch, seed = 1, genomic = TRUE, gs_from = 6)
+fmt(gs[c(1, 5, 10, 15), ])
+```
+
+Years 1 to 5 are identical to the phenotypic arm, digit for digit, because
+genomic selection only switches on in year 6. That is a matched control in the
+sense @sec-limits uses the term: the two arms share a history, so the comparison
+is paired rather than between two independent runs.
+
+## The comparison, replicated
+
+One run of one seed is an anecdote. Both arms are cheap enough to replicate.
+
+```{r}
+seeds <- 1:24
+reps <- do.call(rbind, lapply(seeds, function(s) {
+  a <- run_programme(sch, s, genomic = FALSE)
+  b <- run_programme(sch, s, genomic = TRUE, gs_from = 6)
+  rate <- function(d) stats::coef(stats::lm(meanG ~ year,
+                                            data = d[d$year >= 6, ]))[2]
+  data.frame(seed = s,
+             gain_ps = rate(a),      gain_gs = rate(b),
+             gd_ps   = a$gd_pyt[nrow(a)], gd_gs = b$gd_pyt[nrow(b)],
+             end_ps  = a$meanG[nrow(a)],  end_gs = b$meanG[nrow(b)])
+}))
+
+paired <- function(x, y) {
+  d <- y - x
+  c(mean_difference = mean(d), t = mean(d) / (stats::sd(d) / sqrt(length(d))))
+}
+fmt(rbind(`gain per year`      = paired(reps$gain_ps, reps$gain_gs),
+          `gene diversity, yr 15` = paired(reps$gd_ps, reps$gd_gs),
+          `genetic mean, yr 15`   = paired(reps$end_ps, reps$end_gs)))
+```
+
+```{r}
+#| label: fig-programme-arms
+#| echo: false
+#| fig-width: 9
+#| fig-height: 4.2
+#| fig-cap: "Twenty-four paired runs, genomic selection switched on in year 6. Left: genetic mean of the preliminary yield trial. Right: gene diversity of the same population. The faster programme is also the one spending diversity faster."
+traj <- lapply(seeds, function(s)
+  list(ps = run_programme(sch, s, FALSE), gs = run_programme(sch, s, TRUE, gs_from = 6)))
+avg <- function(arm, col) rowMeans(sapply(traj, function(t) t[[arm]][[col]]))
+yr <- seq_len(sch$n_years)
+cols <- c(ps = "#1b1b1b", gs = "#7b3294")
+op <- par(mfrow = c(1, 2), mar = c(4.2, 4.3, 2.2, 0.8))
+for (v in c("meanG", "gd_pyt")) {
+  a <- avg("ps", v); b <- avg("gs", v)
+  plot(yr, a, type = "l", lwd = 2.4, col = cols["ps"], ylim = range(a, b),
+       xlab = "Year", ylab = if (v == "meanG") "Genetic mean (PYT)" else "Gene diversity (PYT)",
+       main = if (v == "meanG") "Response" else "Diversity")
+  lines(yr, b, lwd = 2.4, lty = 2, col = cols["gs"])
+  abline(v = 6, col = "grey70", lty = 3)
+  legend(if (v == "meanG") "topleft" else "topright",
+         c("phenotypic", "genomic (from yr 6)"), col = cols, lwd = 2.4,
+         lty = c(1, 2), bty = "n", cex = 0.78)
+}
+par(op)
+```
+
+Genomic selection raises the rate of gain by roughly half, and the paired
+`t`-statistic leaves no doubt about the sign. That is the result @gaynor2017
+reports and the reason two-part strategies were adopted.
+
+The second row is the one this book exists for. **Gene diversity in the
+preliminary trial is significantly lower under genomic selection at year 15**,
+and it is lower for a reason that is structural rather than incidental:
+recycling parents from the preliminary trial means recycling them a year before
+the trial data could have distinguished full sibs, so the parents chosen are
+more closely related than the ones the phenotypic arm would have chosen. A
+shorter generation interval is a higher rate of coancestry accumulation per unit
+time, not merely per cycle.
+
+## The diversity ledger
+
+The measurement above used gene diversity of the preliminary trial. The parent
+set is the population that actually transmits, and it is the one an optimal
+contribution scheme would act on:
+
+```{r}
+ledger <- data.frame(
+  year       = yr,
+  gd_pyt_ps  = avg("ps", "gd_pyt"),  gd_pyt_gs  = avg("gs", "gd_pyt"),
+  gd_par_ps  = avg("ps", "gd_parents"), gd_par_gs = avg("gs", "gd_parents"))
+fmt(ledger[c(1, 5, 10, 15), ])
+```
+
+```{r}
+loss <- function(v) (ledger[[v]][1] - ledger[[v]][nrow(ledger)]) / ledger[[v]][1]
+fmt(c(`PYT, phenotypic`   = loss("gd_pyt_ps"), `PYT, genomic`   = loss("gd_pyt_gs"),
+      `parents, phenotypic` = loss("gd_par_ps"), `parents, genomic` = loss("gd_par_gs")))
+```
+
+Those four numbers are exactly the quantity this book calls `alpha`: the
+proportional loss of gene diversity, here measured against the programme's own
+starting point rather than against a random-selection baseline of the same size
+(@sec-baseline is where that distinction is made, and it matters -- a
+same-size random baseline would attribute part of this loss to drift rather
+than to selection).
+
+::: {.callout-note}
+## Status number, and why it is not the headline here
+
+`status_number()` on a set of fully inbred lines returns a value near or below
+1, because a homozygous line has self-coancestry `f_ii = 1` and the diagonal
+dominates the mean. That is the same arithmetic @sec-sizing explains for a
+biparental cross, and it is correct rather than broken -- but it makes `N_s` an
+unhelpful headline for a line-breeding programme. Gene diversity is the metric
+that stays interpretable across both inbred and outbred populations, which is
+why the ledger is written in it.
+:::
+
+What would an `alpha` budget mean here? Not a constraint on which hybrids to
+sell, as in @sec-combinatorial, but a constraint on **which parents to recycle**:
+the same optimal-contribution problem of @sec-ocs, applied to the
+`c(EYT, AYT, PYT)` candidate set that the genomic arm selects from. The
+candidate set is small, the coancestry matrix is cheap, and the choice being
+constrained is annual. @sec-cycles is the argument for why that constraint pays
+back, and @sec-limits is where the payback is predicted rather than observed.
+
+## Assumptions
+
+**What this models.** Staged testing with replication rising across stages,
+genotype-by-environment interaction as a variance component
+(`SP$addTraitAG(varGxE = )`), doubled-haploid line development, within-family
+caps, a steady-state programme reached through a burn-in, and two distinct
+genomic-selection levers separated so their effects can be told apart.
+
+**What it does not.** Genomic prediction is *mimicked* by adding replication,
+not fitted -- so the accuracy is assumed rather than earned, and the training
+population, its size, and its relationship to the selection candidates play no
+role (@sec-genomic-prediction is where they do). There is one trait, so the
+index questions of @sec-alphasimr's Step 7 do not arise. Locations differ only
+through a variance component: there is no correlated environment structure, no
+year effect, and no location-by-year term, so a "location" here is an
+independent draw rather than a place. Doubled-haploid production is
+instantaneous and never fails. Founders come from `quickHaplo()`, so they carry
+no linkage disequilibrium -- @sec-alphasimr's Step 1 measures what that costs
+and argues it is the right trade for a chapter about response rather than about
+marker-QTL association.
+
+**Scale.** `r sch$n_founders` founders, `r sch$n_chr * sch$n_qtl` loci,
+`r sch$n_years` years, `r length(seeds)` paired seeds, all live at render.
+@gaynor2017's programme is an order of magnitude larger in every dimension; the
+qualitative results here are the ones that survive the reduction, and the
+absolute rates are not comparable to a real wheat programme.
+
+## Where this connects
+
+@sec-alphasimr supplies every primitive this chapter uses and builds them into
+the hybrid scheme instead; the two chapters are the same toolkit pointed at the
+two kinds of programme. @sec-response is where the breeder's equation says why a
+shorter generation interval raises gain per year. @sec-genomic-prediction is
+where the accuracy this chapter assumes is actually measured, and
+@sec-genomic-era is where marker-versus-QTL, the reason that accuracy is finite,
+is taken seriously.
+
+The diversity result belongs to the book's spine. @sec-cycles shows the same
+tension -- faster response, faster erosion -- with the package's own simulator
+over a longer horizon; @sec-limits explains why the erosion is what bounds the
+programme and when it can be predicted; @sec-ocs is the machinery for spending
+the budget deliberately rather than discovering afterwards what was spent.

@@ -3,17 +3,17 @@
 ## 📖 [**Read the book online**](https://ederdbs.github.io/QG/)
 
 *Genetic Diversity in Hybrid Breeding* — measuring it, constraining it, and
-optimising against it, with R. Sixteen chapters and five appendices, every
+optimising against it, with R. Twenty-one chapters and five appendices, every
 derivation runnable. Also available as a
-[PDF](https://ederdbs.github.io/QG/Genetic-Diversity-in-Hybrid-Breeding.pdf) (~280 pp).
+[PDF](https://ederdbs.github.io/QG/Genetic-Diversity-in-Hybrid-Breeding.pdf) (247 pp).
 
 | Part | Chapters |
 |---|---|
-| **Foundations** | [Coancestry and the two matrices](https://ederdbs.github.io/QG/01-coancestry.html) · [Diversity in a subdivided population](https://ederdbs.github.io/QG/02-subdivided.html) |
-| **Simulation** | [Simulating lines, pools and crosses](https://ederdbs.github.io/QG/03-simulating-crosses.html) · [Sizing a segregating population](https://ederdbs.github.io/QG/04-population-sizing.html) |
-| **Metrics** | [Diversity metrics in the genomic era](https://ederdbs.github.io/QG/05-genomic-era.html) · [A catalogue of metrics](https://ederdbs.github.io/QG/06-metric-catalogue.html) · [Choosing metrics](https://ederdbs.github.io/QG/07-choosing-metrics.html) · [Metrics at each pipeline stage](https://ederdbs.github.io/QG/08-pipeline-stages.html) |
-| **Optimisation** | [Optimal contributions and the alpha constraint](https://ederdbs.github.io/QG/09-optimal-contributions.html) · [Combinatorial selection](https://ederdbs.github.io/QG/10-combinatorial-selection.html) |
-| **Evidence and practice** | [What the plant literature establishes](https://ederdbs.github.io/QG/11-plant-literature.html) · [End to end, and the checklist](https://ederdbs.github.io/QG/12-case-study.html) |
+| **Foundations** | [Coancestry and the two matrices](https://ederdbs.github.io/QG/01-coancestry.html) · [Diversity in a subdivided population](https://ederdbs.github.io/QG/02-subdivided.html) · [Response to selection](https://ederdbs.github.io/QG/02b-response.html) |
+| **Simulation** | [Simulating lines, pools and crosses](https://ederdbs.github.io/QG/03-simulating-crosses.html) · [Sizing a segregating population](https://ederdbs.github.io/QG/04-population-sizing.html) · [Introgressing several genes by backcrossing](https://ederdbs.github.io/QG/04b-backcross-introgression.html) · [AlphaSimR from the ground up](https://ederdbs.github.io/QG/04c-alphasimr-pipeline.html) · [A complete plant breeding programme](https://ederdbs.github.io/QG/04d-breeding-programme.html) |
+| **Metrics** | [Diversity metrics in the genomic era](https://ederdbs.github.io/QG/05-genomic-era.html) · [Heterosis, dominance and what divergence buys](https://ederdbs.github.io/QG/05b-heterosis-dominance.html) · [A catalogue of metrics](https://ederdbs.github.io/QG/06-metric-catalogue.html) · [Choosing metrics](https://ederdbs.github.io/QG/07-choosing-metrics.html) · [Metrics at each pipeline stage](https://ederdbs.github.io/QG/08-pipeline-stages.html) · [Predicting breeding values](https://ederdbs.github.io/QG/08b-genomic-prediction.html) |
+| **Optimisation** | [Optimal contributions and the alpha constraint](https://ederdbs.github.io/QG/09-optimal-contributions.html) · [Combinatorial selection](https://ederdbs.github.io/QG/10-combinatorial-selection.html) · [Advanced selection: structure, bounds and scale](https://ederdbs.github.io/QG/10b-advanced-selection.html) |
+| **Evidence and practice** | [What the plant literature establishes](https://ederdbs.github.io/QG/11-plant-literature.html) · [Diversity across cycles](https://ederdbs.github.io/QG/11b-diversity-across-cycles.html) · [The limit, and what the metrics cannot see](https://ederdbs.github.io/QG/11c-limits.html) · [End to end, and the checklist](https://ederdbs.github.io/QG/12-case-study.html) |
 
 ---
 
@@ -31,24 +31,36 @@ This repository is two things:
 ## Building the book
 
 ```sh
-quarto render book --to html    # ~80 s, writes to docs/
-quarto render book --to typst   # the PDF (Typst, no LaTeX needed)
-cd book && quarto preview       # live reload while editing
+Rscript inst/scripts/render_book.R   # HTML + Typst PDF, both into docs/
+quarto render book --to html         # HTML only, while iterating
+cd book && quarto preview            # live reload while editing
 ```
 
+The book renders against the **installed** package, so run
+`Rscript -e 'devtools::install()'` after any change to `R/` that a chapter
+calls — otherwise a new export is invisible and the chapter fails with
+`object 'foo' not found`.
+
 Light examples run live at render; expensive results are cached in `book/data`
-and `book/figs` and refreshed with `book/scripts/regenerate.R`.
+and `book/figs` and refreshed with `book/scripts/regenerate.R`. `docs/` is
+committed, because GitHub Pages serves it straight from `main`.
 
 ## The package
 
 ```sh
 Rscript -e 'devtools::document(); devtools::load_all()'
-Rscript -e 'devtools::test()'     # 184 checks, ~1 min
-Rscript -e 'devtools::check()'    # 0 errors, 0 warnings, 0 notes
+Rscript -e 'devtools::test()'     # 390 checks, ~1 min
+Rscript -e 'devtools::check()'    # 0 errors, 0 warnings, 1 known note
 ```
 
-Only `DEoptim` is a hard dependency (used solely by `sel_de()`); `quadprog` is
-suggested. Everything else, plots included, is base R.
+The one note is `.cursorignore`: tracked, but absent from `.Rbuildignore`, so
+`R CMD check` flags it as a stray hidden file. Adding `^\.cursorignore$` there
+(or untracking it) restores 0/0/0.
+
+Only `DEoptim` is a hard dependency (used solely by `sel_de()`/`sel_de_fast()`).
+`quadprog`, `highs`, `bWGR` and `AlphaSimR` are suggested, each guarded by
+`requireNamespace()` and each needed by exactly one area. Everything else, plots
+included, is base R.
 
 ### Runnable pipelines
 
@@ -58,9 +70,11 @@ same work at the production scale of `sim_config` and write to `report/`:
 ```sh
 Rscript inst/scripts/run_all.R          # two-stage pipeline, ~4 min
 Rscript inst/scripts/run_benchmark.R    # metrics benchmark + plots, ~6 min
+Rscript inst/scripts/run_mabc.R         # MABC scans + figures, ~3 min
+Rscript inst/scripts/run_alphasimr.R    # reciprocal recurrent selection, ~2 min
 ```
 
-`run_benchmark.R` produces the numeric results quoted below. Both ship with the
+`run_benchmark.R` produces the numeric results quoted below. All ship with the
 installed package, so `system.file("scripts", "run_all.R", package = "hybdiv")`
 finds them from anywhere.
 
@@ -105,16 +119,19 @@ Current configuration: 50+50 lines -> 2500 hybrids, 5000 markers, selecting 100
 | `R/05_pipeline_metrics.R` | stage-specific metrics, S1 to S4 |
 | `R/06_f2size.R` | F1 -> F4 population-sizing simulator |
 | `R/07_caballero_toro.R` | subdivided-population partition, optimal contributions |
+| `R/08_mabc.R` | marker-assisted backcrossing: linkage drag, the selection index, sizing |
 | `R/09_reference.R` | slow literal oracles, for verification |
 | `R/10_stage1.R` | stage 1 — X / f / hybrids output contract |
 | `R/11_stage2.R` | stage 2 — per-scenario selection, metrics, 0/1 table |
 | `R/12_search.R` | structure-aware search: local search, the bound, the exact oracle |
 | `R/13_dominance.R` | heterosis under a dominance model, and its link to the partition |
+| `R/13_alphasimr_bridge.R` | AlphaSimR bridge: reciprocal recurrent selection to the stage-1 contract |
 | `R/14_cycles.R` | recurrent selection across cycles |
-| `inst/scripts/` | the two runnable pipelines, at production scale |
+| `R/15_response.R` | the objective side: genic variance, Smith-Hazel and restricted indices |
+| `inst/scripts/` | the runnable pipelines at production scale, plus the book render wrapper |
 | `book/` | the Quarto book |
-| `doc/` | the source documents the book was built from (provenance; see `doc/README.md`) |
-| `tests/testthat/` | 307 checks |
+| `reference/` | the source documents the book was built from (provenance, gitignored) |
+| `tests/testthat/` | 390 checks |
 
 ## Results (simulated data)
 
@@ -124,14 +141,20 @@ between them do not.
 
 Each is derived in the book, and every derivation there runs live:
 
+Chapters are named rather than numbered here: the book inserts chapters
+(`02b`, `04c`, `11c`, ...) rather than renumbering, because `docs/` URLs are
+served directly by GitHub Pages.
+
 | Result | Book chapter |
 |---|---|
-| 1, 2, 3 -- the two matrices, the `theta`/`He` identity, the off-diagonal metric | 1 *Coancestry*, 6 *A catalogue of metrics* |
-| 4, 5 -- the baseline, and the attainable alpha ceiling | 6 *The correct baseline*, 9 *Optimal contributions* |
-| 6 -- which metrics survive, and what each costs | 7 *Choosing metrics* |
-| 7 -- the warm start | 10 *Combinatorial selection* |
-| 8, 9, 11 -- the two lenses and the covariance diagnostic | 5 *The genomic era* |
-| 10 -- between-pool divergence | 2 *Subdivided populations*, 8 *Pipeline stages* |
+| 1, 2, 3 -- the two matrices, the `theta`/`He` identity, the off-diagonal metric | *Coancestry*, *A catalogue of metrics* |
+| 4, 5 -- the baseline, and the attainable alpha ceiling | *A catalogue of metrics*, *Optimal contributions* |
+| 6 -- which metrics survive, and what each costs | *Choosing metrics* |
+| 7 -- the warm start | *Combinatorial selection* |
+| 8, 9, 11 -- the two lenses and the covariance diagnostic | *Diversity metrics in the genomic era* |
+| 10 -- between-pool divergence | *Diversity in a subdivided population*, *Metrics at each pipeline stage* |
+| 12, 13, 14 -- the valid bound, the incremental swap, the exact oracle | *Advanced selection* |
+| 15 -- what a faster programme spends | *A complete plant breeding programme* |
 
 **1. Use `f` (molecular coancestry), not VanRaden `G`, for diversity.**
 With `Z` centered on its own population, `sum(G) == 0` exactly — measured:
@@ -261,6 +284,20 @@ does not converge, and returns a certified interval instead — which is the
 finding, and matches Ahadi et al. (2024) reporting the same for integer
 programming on mate selection.
 
+**15. A faster breeding programme is a programme spending diversity faster.**
+In a staged inbred-line programme (Gaynor et al. 2017's wheat scheme, reduced
+scale, 24 paired seeds), switching on genomic selection in year 6 raises genetic
+gain by **+0.0285 per year (t = 8.1)**, about 49% faster — and lowers gene
+diversity of the preliminary yield trial at year 15 by **−0.0280 (t = −2.8)**.
+Over 15 years the phenotypic arm spends **17.9%** of its parents' gene
+diversity, the genomic arm **24.7%**. Both arms share founders and years 1--5
+are identical digit for digit, so the difference is the scheme and not the draw.
+The mechanism is structural: recycling parents from the preliminary trial means
+choosing them a year before the trial could separate full sibs, so a shorter
+generation interval is a higher rate of coancestry accumulation *per unit time*,
+not merely per cycle. This is result 8's tension in a line programme rather than
+a hybrid one.
+
 ## Caveats
 
 - `Ns = 1/(2θ)` is a static descriptor of the group, not a drift projection.
@@ -284,3 +321,13 @@ programming on mate selection.
   `ref_max_div` has *low* `F_drift` (0.0053) because it barely selects. The
   comparison that means something is between scenarios at **equal `alpha`**,
   not across the whole table.
+- **`AlphaSimR::runMacs()`/`runMacs2()` are not reproducible from `set.seed()`**
+  — MaCS seeds itself outside R's RNG — and they consume an unpredictable amount
+  of R's random stream, so anything drawn after them in the same session is
+  unseeded too. Seed immediately before each founder draw, and found once and
+  branch when comparing two schemes. `quickHaplo()` is exactly reproducible, at
+  the cost of founders with no linkage disequilibrium.
+- Result 15's rates are not comparable to a real wheat programme: the scheme
+  runs an order of magnitude below Gaynor et al. in every dimension, and the
+  genomic prediction is *mimicked* by adding replication rather than fitted.
+  What survives the reduction is the sign and the mechanism, not the magnitude.

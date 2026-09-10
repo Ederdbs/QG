@@ -55,6 +55,12 @@ rrs_config <- list(
 #' downstream of the founders -- the doubled haploids, the testcrosses, the
 #' recycling -- *is* controlled by `set.seed()`; the founders are not.
 #'
+#' This is a property of MaCS, not of `runMacs2()` in particular:
+#' `AlphaSimR::runMacs()` behaves the same way, measured in
+#' `04c-alphasimr-pipeline`. `AlphaSimR::quickHaplo()` is pure R sampling and
+#' *is* reproducible from `set.seed()`, at the cost of founders that carry no
+#' linkage disequilibrium.
+#'
 #' The consequence for any experiment comparing two schemes: found the pools
 #' once and branch both arms off that single result. Calling this twice with the
 #' same seed gives two different populations, and the comparison then measures
