@@ -67,11 +67,11 @@ imputed or dropped before this point, because the hybrid-genotype identity in
 ### The divergence knob
 
 `fst` is the single most consequential parameter in the simulation, because it
-controls how much heterosis there is to find and therefore how much a diversity
-constraint can cost. It is worth seeing directly:
+sets how much of the pools' diversity sits *between* them rather than within.
+What that buys is less obvious than it looks:
 
 ```{r}
-#| fig-cap: "Between-pool divergence sets the hybrid heterozygous fraction, and with it the floor of the coancestry diagonal."
+#| fig-cap: "Driving the pools apart leaves the expected heterozygous fraction of the F1 flat. What moves is the within-pool coancestry, which climbs throughout. @sec-heterosis-flat derives why the two terms must trade one for one."
 fst_grid <- c(0.02, 0.05, 0.10, 0.15, 0.25, 0.40)
 div <- vapply(fst_grid, function(fst) {
   cfg <- modifyList(book_cfg, list(fst = fst, m = 1500))
@@ -95,10 +95,17 @@ grid()
 fmt(d)
 ```
 
-More divergent pools give more heterozygous F1 hybrids. That is the heterosis
-engine, and @sec-subdivided is the reason it must be *held*, not maximised: the
-same divergence that raises `GD_BS` is being paid for out of within-pool
-diversity.
+The heterozygous fraction does not move. It is flat across a twentyfold range of
+`fst`, while `within_pool_f` climbs steadily: the divergence is being paid for
+out of within-pool diversity, unit for unit.
+
+That is not an artefact of this grid. The expected heterozygous fraction of an
+A x B hybrid is exactly `1 - theta_AB`, and @sec-heterosis-flat shows that under
+neutral drift every unit gained by the between-pool term is subtracted from the
+shared one, leaving the total fixed. Neutral divergence relocates diversity; it
+does not create heterosis. @sec-subdivided is why `GD_BS` is nonetheless held
+rather than minimised, and @sec-heterosis-alignment is what has to be true of
+the divergence for it to be worth anything.
 
 ## From lines to hybrids
 

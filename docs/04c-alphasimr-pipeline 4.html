@@ -1,0 +1,1944 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>7&nbsp; Simulating a breeding programme: AlphaSimR from the ground up – Genetic Diversity in Hybrid Breeding</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./04d-breeding-programme.html" rel="next">
+<link href="./04b-backcross-introgression.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-37a0ccb6f5b9899fcb884e11bb6f7458.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./03-simulating-crosses.html">Simulation</a></li><li class="breadcrumb-item"><a href="./04c-alphasimr-pipeline.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Simulating a breeding programme: AlphaSimR from the ground up</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Genetic Diversity in Hybrid Breeding</a> 
+        <div class="sidebar-tools-main">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-coancestry.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Coancestry, and the two matrices</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-subdivided.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Diversity in a subdivided population</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02b-response.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Response to selection: the other half of the objective</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Simulation</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-simulating-crosses.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Simulating lines, pools and crosses</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-population-sizing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Sizing a segregating population, F1 to F4</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04b-backcross-introgression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Introgressing several genes by backcrossing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04c-alphasimr-pipeline.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Simulating a breeding programme: AlphaSimR from the ground up</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04d-breeding-programme.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">A complete plant breeding programme, and what it costs in diversity</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Metrics</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-genomic-era.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Diversity metrics in the genomic era</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05b-heterosis-dominance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Heterosis, dominance, and what divergence buys</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-metric-catalogue.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">A catalogue of metrics on <code>f</code></span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-choosing-metrics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Choosing metrics: collapse, cost, redundancy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-pipeline-stages.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Metrics at each pipeline stage, and five traps</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08b-genomic-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Predicting breeding values: GBLUP, BayesA, BayesB</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Optimisation</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-optimal-contributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Optimal contributions and the <span class="math inline">\(\alpha\)</span> constraint</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-combinatorial-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Combinatorial selection</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10b-advanced-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Advanced selection: structure, bounds and scale</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Evidence and practice</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-plant-literature.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">What the plant literature establishes</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11b-diversity-across-cycles.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Diversity across cycles</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11c-limits.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">The limit, and what the metrics cannot see</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-case-study.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">End to end, and the operational checklist</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./90-notation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Notation and glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./91-package.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">The <code>hybdiv</code> package</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./92-verification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Verification</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./93-corpora.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">D</span>&nbsp; <span class="chapter-title">The bibliographic corpora</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./99-references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#step-1-founder-genomes-and-which-engine-to-use" id="toc-step-1-founder-genomes-and-which-engine-to-use" class="nav-link active" data-scroll-target="#step-1-founder-genomes-and-which-engine-to-use"><span class="header-section-number">7.1</span> Step 1 – Founder genomes, and which engine to use</a></li>
+  <li><a href="#step-2-simparam-and-defining-a-trait" id="toc-step-2-simparam-and-defining-a-trait" class="nav-link" data-scroll-target="#step-2-simparam-and-defining-a-trait"><span class="header-section-number">7.2</span> Step 2 – <code>SimParam</code>, and defining a trait</a></li>
+  <li><a href="#step-3-the-base-population-and-where-the-variance-components-live" id="toc-step-3-the-base-population-and-where-the-variance-components-live" class="nav-link" data-scroll-target="#step-3-the-base-population-and-where-the-variance-components-live"><span class="header-section-number">7.3</span> Step 3 – The base population, and where the variance components live</a></li>
+  <li><a href="#step-4-the-dna-lottery-and-why-an-f1-is-not-a-family" id="toc-step-4-the-dna-lottery-and-why-an-f1-is-not-a-family" class="nav-link" data-scroll-target="#step-4-the-dna-lottery-and-why-an-f1-is-not-a-family"><span class="header-section-number">7.4</span> Step 4 – The DNA lottery, and why an F1 is not a family</a></li>
+  <li><a href="#step-5-selfing-doubled-haploids-and-what-the-shortcut-buys" id="toc-step-5-selfing-doubled-haploids-and-what-the-shortcut-buys" class="nav-link" data-scroll-target="#step-5-selfing-doubled-haploids-and-what-the-shortcut-buys"><span class="header-section-number">7.5</span> Step 5 – Selfing, doubled haploids, and what the shortcut buys</a></li>
+  <li><a href="#step-6-phenotyping-selection-and-checking-the-breeders-equation" id="toc-step-6-phenotyping-selection-and-checking-the-breeders-equation" class="nav-link" data-scroll-target="#step-6-phenotyping-selection-and-checking-the-breeders-equation"><span class="header-section-number">7.6</span> Step 6 – Phenotyping, selection, and checking the breeder’s equation</a></li>
+  <li><a href="#step-7-two-traits-and-what-equal-weighting-assumes" id="toc-step-7-two-traits-and-what-equal-weighting-assumes" class="nav-link" data-scroll-target="#step-7-two-traits-and-what-equal-weighting-assumes"><span class="header-section-number">7.7</span> Step 7 – Two traits, and what equal weighting assumes</a></li>
+  <li><a href="#step-8-the-parts-assembled-reciprocal-recurrent-selection" id="toc-step-8-the-parts-assembled-reciprocal-recurrent-selection" class="nav-link" data-scroll-target="#step-8-the-parts-assembled-reciprocal-recurrent-selection"><span class="header-section-number">7.8</span> Step 8 – The parts assembled: reciprocal recurrent selection</a>
+  <ul class="collapse">
+  <li><a href="#founding-two-pools-with-a-real-coalescent-history" id="toc-founding-two-pools-with-a-real-coalescent-history" class="nav-link" data-scroll-target="#founding-two-pools-with-a-real-coalescent-history"><span class="header-section-number">7.8.1</span> Founding two pools with a real coalescent history</a></li>
+  <li><a href="#one-cycle" id="toc-one-cycle" class="nav-link" data-scroll-target="#one-cycle"><span class="header-section-number">7.8.2</span> One cycle</a></li>
+  <li><a href="#the-trajectory-across-cycles" id="toc-the-trajectory-across-cycles" class="nav-link" data-scroll-target="#the-trajectory-across-cycles"><span class="header-section-number">7.8.3</span> The trajectory across cycles</a></li>
+  <li><a href="#the-final-hybrid-pool-through-stage2_select-unchanged" id="toc-the-final-hybrid-pool-through-stage2_select-unchanged" class="nav-link" data-scroll-target="#the-final-hybrid-pool-through-stage2_select-unchanged"><span class="header-section-number">7.8.4</span> The final hybrid pool through <code>stage2_select()</code>, unchanged</a></li>
+  </ul></li>
+  <li><a href="#assumptions-and-what-this-adds-over-sec-simulating-crosses" id="toc-assumptions-and-what-this-adds-over-sec-simulating-crosses" class="nav-link" data-scroll-target="#assumptions-and-what-this-adds-over-sec-simulating-crosses"><span class="header-section-number">7.9</span> Assumptions, and what this adds over <span>Chapter 4</span></a></li>
+  <li><a href="#where-this-connects" id="toc-where-this-connects" class="nav-link" data-scroll-target="#where-this-connects"><span class="header-section-number">7.10</span> Where this connects</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./03-simulating-crosses.html">Simulation</a></li><li class="breadcrumb-item"><a href="./04c-alphasimr-pipeline.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Simulating a breeding programme: AlphaSimR from the ground up</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="sec-alphasimr" class="quarto-section-identifier"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Simulating a breeding programme: AlphaSimR from the ground up</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><a href="03-simulating-crosses.html" class="quarto-xref"><span>Chapter 4</span></a> built the <code>{X, f, hybrids, fL}</code> contract with a deliberately fast simulator: Balding-Nichols allele frequencies, independent markers, no recombination, no dominance. That is enough to exercise the diversity and selection machinery, but it is not how a breeding programme is actually run, and it is not how anyone would build one from scratch.</p>
+<p>This chapter does both. Steps 1 to 7 are a <strong>step-by-step construction of a simulation</strong> with AlphaSimR (<span class="citation" data-cites="gaynor2021">Gaynor et al. (<a href="99-references.html#ref-gaynor2021" role="doc-biblioref">2021</a>)</span>), written out in the primitive calls – <code>runMacs()</code>, <code>SimParam</code>, <code>addTraitA()</code>, <code>makeCross()</code>, <code>makeDH()</code>, <code>setPheno()</code>, <code>selectInd()</code> – with a plant breeder’s reading of each argument. Step 8 then assembles those primitives into <strong>reciprocal recurrent selection</strong> (RRS; <span class="citation" data-cites="comstock1949">Comstock et al. (<a href="99-references.html#ref-comstock1949" role="doc-biblioref">1949</a>)</span>), the standard commercial scheme for two heterotic pools, and shows that the same stage-1 contract comes out the other end, unchanged, so <code>stage2_select()</code> runs on it exactly as it does on the book’s own simulated data.</p>
+<p>The order matters. Everything in Step 8 is a wrapper in <code>R/13_alphasimr_bridge.R</code> – <code>rrs_config</code>, <code>alphasimr_founder_pools()</code>, <code>alphasimr_rrs_cycle()</code>, <code>alphasimr_make_hybrids()</code>, <code>alphasimr_to_stage1()</code>, <code>alphasimr_pipeline()</code> – and a wrapper is only readable once you know what it is wrapping. AlphaSimR is a <code>Suggests</code> dependency, guarded exactly like <code>quadprog</code> and <code>highs</code> elsewhere in the package; this chapter, and <a href="04d-breeding-programme.html" class="quarto-xref"><span>Chapter 8</span></a>, are the only ones that need it.</p>
+<p><a href="04d-breeding-programme.html" class="quarto-xref"><span>Chapter 8</span></a> takes the same primitives in the other direction: a complete <em>inbred-line</em> programme with staged yield trials, rather than a hybrid one.</p>
+<section id="step-1-founder-genomes-and-which-engine-to-use" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="step-1-founder-genomes-and-which-engine-to-use"><span class="header-section-number">7.1</span> Step 1 – Founder genomes, and which engine to use</h2>
+<p>Every AlphaSimR simulation starts with founder haplotypes. There are two engines, and the choice is not cosmetic.</p>
+<p><code>runMacs()</code> runs a backward-in-time coalescent (<span class="citation" data-cites="chen2009">Chen et al. (<a href="99-references.html#ref-chen2009" role="doc-biblioref">2009</a>)</span>) under a species-specific demography – <code>species = "MAIZE"</code>, <code>"WHEAT"</code>, <code>"CATTLE"</code> – so the founders carry a realistic allele-frequency spectrum and realistic linkage disequilibrium. <code>quickHaplo()</code> samples 0s and 1s directly: instant, and with no history behind it.</p>
+<p><code>inbred = TRUE</code> is the argument a plant breeder almost always wants. It makes every founder fully homozygous, which is what a panel of inbred lines or released varieties actually is. Without it the founders are outbred individuals, which is the right model for cattle and the wrong one for wheat.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>tm <span class="ot">&lt;-</span> <span class="cf">function</span>(expr) <span class="fu">round</span>(<span class="fu">as.numeric</span>(<span class="fu">system.time</span>(expr)[<span class="st">"elapsed"</span>]), <span class="dv">2</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">7</span>); t_q <span class="ot">&lt;-</span> <span class="fu">tm</span>(qa <span class="ot">&lt;-</span> <span class="fu">quickHaplo</span>(<span class="at">nInd =</span> <span class="dv">20</span>, <span class="at">nChr =</span> <span class="dv">10</span>, <span class="at">segSites =</span> <span class="dv">50</span>,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">inbred =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">7</span>);        qb <span class="ot">&lt;-</span> <span class="fu">quickHaplo</span>(<span class="at">nInd =</span> <span class="dv">20</span>, <span class="at">nChr =</span> <span class="dv">10</span>, <span class="at">segSites =</span> <span class="dv">50</span>,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>                                     <span class="at">inbred =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">7</span>); t_m <span class="ot">&lt;-</span> <span class="fu">tm</span>(ma <span class="ot">&lt;-</span> <span class="fu">runMacs</span>(<span class="at">nInd =</span> <span class="dv">20</span>, <span class="at">nChr =</span> <span class="dv">10</span>, <span class="at">segSites =</span> <span class="dv">50</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>                                     <span class="at">inbred =</span> <span class="cn">TRUE</span>, <span class="at">species =</span> <span class="st">"MAIZE"</span>))</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">7</span>);        mb <span class="ot">&lt;-</span> <span class="fu">runMacs</span>(<span class="at">nInd =</span> <span class="dv">20</span>, <span class="at">nChr =</span> <span class="dv">10</span>, <span class="at">segSites =</span> <span class="dv">50</span>,</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">inbred =</span> <span class="cn">TRUE</span>, <span class="at">species =</span> <span class="st">"MAIZE"</span>)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">data.frame</span>(<span class="at">engine     =</span> <span class="fu">c</span>(<span class="st">"quickHaplo"</span>, <span class="st">"runMacs"</span>),</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>               <span class="at">seconds    =</span> <span class="fu">c</span>(t_q, t_m),</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>               <span class="at">same_twice =</span> <span class="fu">c</span>(<span class="fu">identical</span>(qa<span class="sc">@</span>geno, qb<span class="sc">@</span>geno),</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>                              <span class="fu">identical</span>(ma<span class="sc">@</span>geno, mb<span class="sc">@</span>geno))))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">engine</th>
+<th style="text-align: right;">seconds</th>
+<th style="text-align: left;">same_twice</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">quickHaplo</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: left;">TRUE</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">runMacs</td>
+<td style="text-align: right;">2.81</td>
+<td style="text-align: left;">FALSE</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Read the third column again. <strong><code>runMacs()</code> is not reproducible from <code>set.seed()</code>.</strong> It hands the coalescent off to the MaCS binary, which seeds itself outside R’s random number stream, so two calls with an identical seed return different founders. <code>quickHaplo()</code> is pure R sampling and is exactly reproducible.</p>
+<p>(The <code>seconds</code> column is wall clock and will differ on your machine and between renders; the ratio between the two engines is the part that transfers.)</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>The founders are not seeded, and everything downstream is
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This is the single most expensive trap in AlphaSimR, because it fails silently: the code looks reproducible, runs without complaint, and returns different numbers. It is already documented in <code>alphasimr_founder_pools()</code>’s help page – the note there says <code>runMacs2()</code>, and the table above shows it is not <code>runMacs2</code>-specific but true of MaCS generally.</p>
+<p>Two consequences:</p>
+<ol type="1">
+<li><strong>Found once, then branch.</strong> Any experiment comparing two schemes must draw the founders a single time and start both arms from that one object. Draw them twice and the comparison measures the founders as much as the schemes. <a href="11c-limits.html" class="quarto-xref"><span>Chapter 20</span></a>’ linked arm is built this way for exactly this reason.</li>
+<li><strong>Save what you cannot reseed.</strong> <code>saveRDS(founderGenomes, ...)</code> is the only way to get the same coalescent history back in a later session.</li>
+</ol>
+<p>Everything after the founders – the crosses, the doubled haploids, the phenotyping error, the recombination – <em>is</em> controlled by <code>set.seed()</code>.</p>
+</div>
+</div>
+<p>So what does <code>quickHaplo()</code> give up? Linkage disequilibrium among the founders. The honest way to measure that is against the sampling floor: with <code>n</code> individuals, two completely independent loci still show <code>r^2</code> of about <code>1 / (n - 1)</code> by chance alone.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>ldstat <span class="ot">&lt;-</span> <span class="cf">function</span>(fg) {</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  SPx <span class="ot">&lt;-</span> SimParam<span class="sc">$</span><span class="fu">new</span>(fg)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  g <span class="ot">&lt;-</span> <span class="fu">pullSegSiteGeno</span>(<span class="fu">newPop</span>(fg, <span class="at">simParam =</span> SPx), <span class="at">simParam =</span> SPx)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  g <span class="ot">&lt;-</span> g[, <span class="fu">apply</span>(g, <span class="dv">2</span>, stats<span class="sc">::</span>sd) <span class="sc">&gt;</span> <span class="dv">0</span>, drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  r <span class="ot">&lt;-</span> stats<span class="sc">::</span><span class="fu">cor</span>(g)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="at">adjacent =</span> <span class="fu">mean</span>(<span class="fu">diag</span>(r[<span class="sc">-</span><span class="fu">nrow</span>(r), <span class="sc">-</span><span class="dv">1</span>])<span class="sc">^</span><span class="dv">2</span>),   <span class="co"># neighbouring sites</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">overall  =</span> <span class="fu">mean</span>(r[<span class="fu">upper.tri</span>(r)]<span class="sc">^</span><span class="dv">2</span>),         <span class="co"># all pairs, mostly distant</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">noise    =</span> <span class="dv">1</span> <span class="sc">/</span> (<span class="fu">nrow</span>(g) <span class="sc">-</span> <span class="dv">1</span>))               <span class="co"># what pure chance gives</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">3</span>); lq <span class="ot">&lt;-</span> <span class="fu">ldstat</span>(<span class="fu">quickHaplo</span>(<span class="at">nInd =</span> <span class="dv">100</span>, <span class="at">nChr =</span> <span class="dv">5</span>, <span class="at">segSites =</span> <span class="dv">200</span>,</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>                                     <span class="at">inbred =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">3</span>); lm_ <span class="ot">&lt;-</span> <span class="fu">ldstat</span>(<span class="fu">runMacs</span>(<span class="at">nInd =</span> <span class="dv">100</span>, <span class="at">nChr =</span> <span class="dv">5</span>, <span class="at">segSites =</span> <span class="dv">200</span>,</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">inbred =</span> <span class="cn">TRUE</span>, <span class="at">species =</span> <span class="st">"MAIZE"</span>))</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">rbind</span>(<span class="at">quickHaplo =</span> lq, <span class="at">runMacs =</span> lm_))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">adjacent</th>
+<th style="text-align: right;">overall</th>
+<th style="text-align: right;">noise</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">quickHaplo</td>
+<td style="text-align: right;">0.0103</td>
+<td style="text-align: right;">0.0101</td>
+<td style="text-align: right;">0.0101</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">runMacs</td>
+<td style="text-align: right;">0.1294</td>
+<td style="text-align: right;">0.0118</td>
+<td style="text-align: right;">0.0101</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p><code>quickHaplo()</code>’s adjacent-site <code>r^2</code> sits exactly on the noise floor: there is no founder LD at all, as designed. <code>runMacs()</code>’s is an order of magnitude above it, and its <em>overall</em> <code>r^2</code> is barely above the floor – so the LD it creates is local, decaying with map distance, which is what real LD does.</p>
+<p>The <code>runMacs</code> row of that table is itself not reproducible, for the reason the row above it establishes; the <code>quickHaplo</code> row is, to the last digit.</p>
+<p>That contamination spreads further than it looks. <code>runMacs()</code> consumes an unpredictable amount of R’s own random stream on its way to and from the MaCS binary, so <em>everything executed after it in the same session</em> inherits an unpredictable seed – an earlier draft of this chapter had reproducible-looking Steps 2 to 7 that quietly moved whenever Step 1 was re-executed. The remedy is the rule stated above, applied to the chapter itself: each of the steps below calls <code>set.seed()</code> immediately before drawing its own founders, rather than trusting a seed set once at the top. With that in place, two independent executions agree on every number in Steps 1 to 7 except the wall-clock seconds and the <code>runMacs</code> row itself.</p>
+<p>That measurement decides the policy this chapter follows:</p>
+<ul>
+<li><strong><code>quickHaplo(inbred = TRUE)</code> for Steps 2–7 and all of <a href="04d-breeding-programme.html" class="quarto-xref"><span>Chapter 8</span></a>.</strong> They teach polygenic response arithmetic, where founder LD is not the point, and in exchange every number printed is reproducible from a clean clone. AlphaSimR still applies a real genetic map and real meiosis to every descendant, so linkage and the Bulmer effect of <a href="11c-limits.html" class="quarto-xref"><span>Chapter 20</span></a> still operate – only the founders’ <em>history</em> is stylised.</li>
+<li><strong><code>runMacs2(split = )</code> in Step 8.</strong> There the divergence between two heterotic pools <em>is</em> the object of study, and no amount of speed compensates for not having it.</li>
+</ul>
+<p>Founder LD does matter where marker-QTL association is the mechanism, which is genomic prediction – see <a href="08b-genomic-prediction.html" class="quarto-xref"><span>Chapter 14</span></a>, and note that the accuracies there are computed on a different simulator for this reason.</p>
+</section>
+<section id="step-2-simparam-and-defining-a-trait" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="step-2-simparam-and-defining-a-trait"><span class="header-section-number">7.2</span> Step 2 – <code>SimParam</code>, and defining a trait</h2>
+<p><code>SimParam</code> holds everything global: the genetic map, which sites are QTL, the trait effects, the error variances. It is an R6 object, so its methods are called with <code>$</code>, and a variable named <code>SP</code> is picked up automatically by every AlphaSimR function that needs it.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Seeded here, not once at the top of the chapter: the runMacs() calls in Step 1</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># consume an unpredictable amount of R's random stream, so anything downstream of</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># them is only reproducible by accident unless the seed is reset. This is the</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># "found once, then branch" rule of Step 1 applied to the chapter itself.</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">101</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>founders <span class="ot">&lt;-</span> <span class="fu">quickHaplo</span>(<span class="at">nInd =</span> <span class="dv">60</span>, <span class="at">nChr =</span> <span class="dv">10</span>, <span class="at">segSites =</span> <span class="dv">100</span>, <span class="at">inbred =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>SP <span class="ot">&lt;-</span> SimParam<span class="sc">$</span><span class="fu">new</span>(founders)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>SP<span class="sc">$</span><span class="fu">addTraitA</span>(<span class="at">nQtlPerChr =</span> <span class="dv">100</span>, <span class="at">mean =</span> <span class="dv">10</span>, <span class="at">var =</span> <span class="dv">1</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>SP<span class="sc">$</span><span class="fu">setVarE</span>(<span class="at">h2 =</span> <span class="fl">0.4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>There are four trait constructors, and choosing between them is choosing a model of gene action:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Adds</th>
+<th>When a plant programme needs it</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>SP$addTraitA()</code></td>
+<td>additive only</td>
+<td>line per se performance; the default teaching case</td>
+</tr>
+<tr class="even">
+<td><code>SP$addTraitAD()</code></td>
+<td>+ dominance</td>
+<td>testcross and hybrid value. Without dominance a line’s cross performance is just its own breeding value and there is nothing for RRS to exploit (<a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 10</span></a>). This is what Step 8 uses</td>
+</tr>
+<tr class="odd">
+<td><code>SP$addTraitAG()</code></td>
+<td>+ genotype-by-environment</td>
+<td>multi-location yield trials, where the same genotype is scored in several places. <a href="04d-breeding-programme.html" class="quarto-xref"><span>Chapter 8</span></a> uses it</td>
+</tr>
+<tr class="even">
+<td><code>SP$addTraitADE()</code></td>
+<td>+ epistasis</td>
+<td>available; used nowhere in this book</td>
+</tr>
+</tbody>
+</table>
+<p><code>nQtlPerChr</code> sets how polygenic the trait is. Setting it equal to <code>segSites</code> makes <em>every</em> segregating site a QTL, which is what <a href="#sec-alphasimr" class="quarto-xref"><span>Chapter 7</span></a>’s own configuration does – convenient, because then the marker matrix and the causal loci are the same set and there is no marker-versus-QTL gap to reason about. Real programmes have that gap; <a href="05-genomic-era.html" class="quarto-xref"><span>Chapter 9</span></a> is where the book takes it seriously.</p>
+<p><code>mean</code> and <code>var</code> fix the trait’s mean and <em>genetic</em> variance in the founder population by rescaling the sampled effects. <code>corA</code> (Step 7) sets the genetic correlation between traits.</p>
+<p>The environmental variance has two routes, and plant breeders use the second:</p>
+<ul>
+<li><code>SP$setVarE(h2 = 0.4)</code> fixes an error variance once, from the founders’ genetic variance, and every later <code>setPheno()</code> reuses it.</li>
+<li><code>setPheno(varE = , reps = )</code> sets it per call. <strong><code>reps</code> is the plant idiom for locations</strong>: a genotype scored in <code>reps</code> environments has its error variance divided by <code>reps</code>. That is how a staged programme raises selection accuracy from one stage to the next without ever changing the trait’s heritability – the mechanism <a href="04d-breeding-programme.html" class="quarto-xref"><span>Chapter 8</span></a> is built on.</li>
+</ul>
+</section>
+<section id="step-3-the-base-population-and-where-the-variance-components-live" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="step-3-the-base-population-and-where-the-variance-components-live"><span class="header-section-number">7.3</span> Step 3 – The base population, and where the variance components live</h2>
+<p><code>newPop()</code> turns founder haplotypes into individuals and, because a trait is now defined, computes their genetic values immediately.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>pop <span class="ot">&lt;-</span> <span class="fu">setPheno</span>(<span class="fu">newPop</span>(founders, <span class="at">simParam =</span> SP), <span class="at">simParam =</span> SP)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">n =</span> pop<span class="sc">@</span>nInd, <span class="at">meanG =</span> <span class="fu">as.numeric</span>(<span class="fu">meanG</span>(pop)), <span class="at">varG =</span> <span class="fu">as.numeric</span>(<span class="fu">varG</span>(pop)),</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">varP =</span> <span class="fu">as.numeric</span>(<span class="fu">varP</span>(pop)),</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">h2_realised =</span> <span class="fu">as.numeric</span>(<span class="fu">varG</span>(pop) <span class="sc">/</span> <span class="fu">varP</span>(pop))) <span class="sc">|&gt;</span> <span class="fu">fmt</span>(<span class="dv">3</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           n       meanG        varG        varP h2_realised </span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      60.000      10.000       1.000       3.376       0.296</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The realised heritability is near but not equal to the requested 0.4: <code>setVarE()</code> fixes a variance, and the ratio it produces in any finite sample is itself a random variable. This is a general and useful habit – <strong>check what the simulation realised, do not assume what you requested.</strong></p>
+<p><code>genParam()</code> returns the full decomposition, and two of its fields are the ones this book cares about most:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>mixed <span class="ot">&lt;-</span> pop</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>) mixed <span class="ot">&lt;-</span> <span class="fu">randCross</span>(mixed, <span class="at">nCrosses =</span> <span class="dv">1000</span>, <span class="at">simParam =</span> SP)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>vrow <span class="ot">&lt;-</span> <span class="cf">function</span>(p, lab) {</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  g <span class="ot">&lt;-</span> <span class="fu">genParam</span>(p, <span class="at">simParam =</span> SP)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">population =</span> lab,</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>             <span class="at">varA      =</span> <span class="fu">as.numeric</span>(g<span class="sc">$</span>varA),</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>             <span class="at">genicVarA =</span> <span class="fu">as.numeric</span>(g<span class="sc">$</span>genicVarA),</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>             <span class="at">ratio     =</span> <span class="fu">as.numeric</span>(g<span class="sc">$</span>varA <span class="sc">/</span> g<span class="sc">$</span>genicVarA))</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">rbind</span>(<span class="fu">vrow</span>(pop,   <span class="st">"founders (fully inbred)"</span>),</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>          <span class="fu">vrow</span>(mixed, <span class="st">"after 3 random matings"</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">population</th>
+<th style="text-align: right;">varA</th>
+<th style="text-align: right;">genicVarA</th>
+<th style="text-align: right;">ratio</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">founders (fully inbred)</td>
+<td style="text-align: right;">1.000</td>
+<td style="text-align: right;">0.4247</td>
+<td style="text-align: right;">2.3544</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">after 3 random matings</td>
+<td style="text-align: right;">0.462</td>
+<td style="text-align: right;">0.4240</td>
+<td style="text-align: right;">1.0895</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p><code>varA</code> is the realised additive variance; <code>genicVarA</code> is what it would be if the loci were independent and in Hardy-Weinberg proportions. Their ratio is the whole subject of <a href="11c-limits.html" class="quarto-xref"><span>Chapter 20</span></a>, and the package’s <code>genic_var()</code> computes the same quantity from a marker matrix directly.</p>
+<p>The founders’ ratio above 1 is not disequilibrium – it is <strong>inbreeding</strong>. A fully homozygous population has per-locus genotypic variance <code>4pq</code> where a Hardy-Weinberg one has <code>2pq</code>, so <code>varA</code> runs up to twice the genic value by construction. Three rounds of random mating restore Hardy-Weinberg and pull the ratio back towards 1; what remains is the disequilibrium among only 60 founders’ worth of gametes. A ratio away from 1 in an <em>outbred</em> population is the gametic-phase disequilibrium <a href="02b-response.html" class="quarto-xref"><span>Chapter 3</span></a> defines and <a href="11c-limits.html" class="quarto-xref"><span>Chapter 20</span></a> measures; a ratio away from 1 in an inbred one is mostly just the homozygosity.</p>
+</section>
+<section id="step-4-the-dna-lottery-and-why-an-f1-is-not-a-family" class="level2" data-number="7.4">
+<h2 data-number="7.4" class="anchored" data-anchor-id="step-4-the-dna-lottery-and-why-an-f1-is-not-a-family"><span class="header-section-number">7.4</span> Step 4 – The DNA lottery, and why an F1 is not a family</h2>
+<p>The course this chapter’s structure follows demonstrates Mendelian sampling by crossing outbred founders and showing that full sibs vary. With <strong>inbred</strong> parents the result is different, and it is the fact plant breeding is organised around.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>lottery <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">list</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>), <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>)), <span class="cf">function</span>(ij) {</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  plan <span class="ot">&lt;-</span> <span class="fu">matrix</span>(ij, <span class="at">ncol =</span> <span class="dv">2</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  f1 <span class="ot">&lt;-</span> <span class="fu">makeCross</span>(pop, plan, <span class="at">nProgeny =</span> <span class="dv">200</span>, <span class="at">simParam =</span> SP)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  dh <span class="ot">&lt;-</span> <span class="fu">makeDH</span>(<span class="fu">makeCross</span>(pop, plan, <span class="at">nProgeny =</span> <span class="dv">1</span>, <span class="at">simParam =</span> SP),</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>               <span class="at">nDH =</span> <span class="dv">200</span>, <span class="at">simParam =</span> SP)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  better <span class="ot">&lt;-</span> <span class="fu">max</span>(<span class="fu">gv</span>(pop)[ij])</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">cross         =</span> <span class="fu">paste</span>(ij, <span class="at">collapse =</span> <span class="st">" x "</span>),</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>             <span class="at">parent_mean   =</span> <span class="fu">mean</span>(<span class="fu">gv</span>(pop)[ij]),</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>             <span class="at">better_parent =</span> better,</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>             <span class="at">f1_sd         =</span> <span class="fu">as.numeric</span>(<span class="fu">sqrt</span>(<span class="fu">varG</span>(f1))),</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>             <span class="at">dh_sd         =</span> <span class="fu">as.numeric</span>(<span class="fu">sqrt</span>(<span class="fu">varG</span>(dh))),</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>             <span class="at">dh_best       =</span> <span class="fu">max</span>(<span class="fu">gv</span>(dh)),</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>             <span class="at">transgressive =</span> <span class="fu">mean</span>(<span class="fu">gv</span>(dh) <span class="sc">&gt;</span> better))</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>}))</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(lottery, <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 18%">
+<col style="width: 21%">
+<col style="width: 9%">
+<col style="width: 9%">
+<col style="width: 12%">
+<col style="width: 21%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">cross</th>
+<th style="text-align: right;">parent_mean</th>
+<th style="text-align: right;">better_parent</th>
+<th style="text-align: right;">f1_sd</th>
+<th style="text-align: right;">dh_sd</th>
+<th style="text-align: right;">dh_best</th>
+<th style="text-align: right;">transgressive</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1 x 2</td>
+<td style="text-align: right;">10.655</td>
+<td style="text-align: right;">12.193</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.765</td>
+<td style="text-align: right;">12.697</td>
+<td style="text-align: right;">0.015</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1 x 3</td>
+<td style="text-align: right;">10.912</td>
+<td style="text-align: right;">12.193</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.548</td>
+<td style="text-align: right;">12.384</td>
+<td style="text-align: right;">0.010</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2 x 3</td>
+<td style="text-align: right;">9.374</td>
+<td style="text-align: right;">9.632</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.684</td>
+<td style="text-align: right;">11.789</td>
+<td style="text-align: right;">0.340</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p><code>f1_sd</code> is <strong>exactly zero</strong>. Two fully inbred parents are homozygous everywhere, so every gamete each one makes is identical, and every F1 is the same heterozygote. Two hundred F1 plants from a cross of two inbred lines are two hundred copies of one genotype. There is no lottery yet.</p>
+<p>The lottery starts one meiosis later. <code>dh_sd</code> is the standard deviation among doubled haploids drawn from that F1, and it is substantial – this is the segregation that F2, DH and RIL populations exist to sample. It is also why <a href="04-population-sizing.html" class="quarto-xref"><span>Chapter 5</span></a> is a chapter: the number of DH lines you pull from a cross is the number of tickets you buy, and no downstream selection stage can recover a combination that was never sampled.</p>
+<p><code>transgressive</code> is the fraction of DH lines exceeding the <em>better</em> parent. It is not small. Crossing two mediocre parents whose favourable alleles sit at different loci produces progeny beyond either of them – transgressive segregation, which <span class="citation" data-cites="mackay2020">Mackay et al. (<a href="99-references.html#ref-mackay2020" role="doc-biblioref">2021</a>)</span> argues is the same phenomenon as heterosis and inbreeding depression viewed from a third angle. <a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 10</span></a> is where this book takes up that argument.</p>
+</section>
+<section id="step-5-selfing-doubled-haploids-and-what-the-shortcut-buys" class="level2" data-number="7.5">
+<h2 data-number="7.5" class="anchored" data-anchor-id="step-5-selfing-doubled-haploids-and-what-the-shortcut-buys"><span class="header-section-number">7.5</span> Step 5 – Selfing, doubled haploids, and what the shortcut buys</h2>
+<p>A plant breeder has to get from a heterozygous F1 to a homozygous line. There are two routes, and AlphaSimR implements both.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>homozygosity <span class="ot">&lt;-</span> <span class="cf">function</span>(p)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(<span class="fu">pullSegSiteGeno</span>(p, <span class="at">simParam =</span> SP) <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">2</span>))</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>f1 <span class="ot">&lt;-</span> <span class="fu">makeCross</span>(pop, <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">ncol =</span> <span class="dv">2</span>), <span class="at">nProgeny =</span> <span class="dv">200</span>, <span class="at">simParam =</span> SP)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>gen <span class="ot">&lt;-</span> f1</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>traj <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">generation =</span> <span class="st">"F1"</span>, <span class="at">homozygosity =</span> <span class="fu">homozygosity</span>(f1))</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span><span class="dv">7</span>) {</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  gen <span class="ot">&lt;-</span> <span class="fu">self</span>(gen, <span class="at">nProgeny =</span> <span class="dv">1</span>, <span class="at">simParam =</span> SP)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  traj <span class="ot">&lt;-</span> <span class="fu">rbind</span>(traj, <span class="fu">data.frame</span>(<span class="at">generation =</span> <span class="fu">paste0</span>(<span class="st">"F"</span>, k),</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">homozygosity =</span> <span class="fu">homozygosity</span>(gen)))</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>traj <span class="ot">&lt;-</span> <span class="fu">rbind</span>(traj, <span class="fu">data.frame</span>(<span class="at">generation =</span> <span class="st">"DH"</span>,</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>                               <span class="at">homozygosity =</span> <span class="fu">homozygosity</span>(<span class="fu">makeDH</span>(f1, <span class="at">nDH =</span> <span class="dv">1</span>,</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>                                                                  <span class="at">simParam =</span> SP))))</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(traj)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">generation</th>
+<th style="text-align: right;">homozygosity</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">F1</td>
+<td style="text-align: right;">0.5010</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">F2</td>
+<td style="text-align: right;">0.7493</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">F3</td>
+<td style="text-align: right;">0.8755</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">F4</td>
+<td style="text-align: right;">0.9374</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">F5</td>
+<td style="text-align: right;">0.9692</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">F6</td>
+<td style="text-align: right;">0.9849</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">F7</td>
+<td style="text-align: right;">0.9927</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">DH</td>
+<td style="text-align: right;">1.0000</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p><code>self()</code> halves the remaining heterozygosity every generation – the familiar <code>1 - (1/2)^(t-1)</code> approach to fixation, which never quite arrives. <code>makeDH()</code> gets there in one step, at 1.0 exactly, by doubling a haploid gamete.</p>
+<p>The saving is seasons, and seasons are the currency of a breeding programme: six or seven selfing generations against one DH cycle. <a href="04d-breeding-programme.html" class="quarto-xref"><span>Chapter 8</span></a>’s scheme uses <code>makeDH()</code> for precisely this reason, and the cost that never shows up in the simulation is that DH production is a laboratory operation with its own failure rate and its own genotype-dependent response.</p>
+<p>The other operations a scheme needs are all one call each: <code>randCross()</code> for random mating within a pool, <code>makeCross()</code> for a specified crossing plan, <code>hybridCross()</code> for a full factorial between two groups (Step 8), and <code>mergePops()</code> or <code>c()</code> to combine populations.</p>
+</section>
+<section id="step-6-phenotyping-selection-and-checking-the-breeders-equation" class="level2" data-number="7.6">
+<h2 data-number="7.6" class="anchored" data-anchor-id="step-6-phenotyping-selection-and-checking-the-breeders-equation"><span class="header-section-number">7.6</span> Step 6 – Phenotyping, selection, and checking the breeder’s equation</h2>
+<p>Selection needs a criterion. <code>setPheno()</code> supplies the noisy one; <code>selectInd()</code> acts on it.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>mixed <span class="ot">&lt;-</span> <span class="fu">setPheno</span>(mixed, <span class="at">simParam =</span> SP)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>sweep_q <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">c</span>(<span class="fl">0.05</span>, <span class="fl">0.10</span>, <span class="fl">0.20</span>), <span class="cf">function</span>(q) {</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  n_sel <span class="ot">&lt;-</span> <span class="fu">round</span>(q <span class="sc">*</span> mixed<span class="sc">@</span>nInd)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  sel   <span class="ot">&lt;-</span> <span class="fu">selectInd</span>(mixed, <span class="at">nInd =</span> n_sel, <span class="at">use =</span> <span class="st">"pheno"</span>, <span class="at">simParam =</span> SP)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  prog  <span class="ot">&lt;-</span> <span class="fu">randCross</span>(sel, <span class="at">nCrosses =</span> <span class="dv">1000</span>, <span class="at">simParam =</span> SP)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  S     <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">meanP</span>(sel) <span class="sc">-</span> <span class="fu">meanP</span>(mixed))</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  vA    <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">varA</span>(mixed, <span class="at">simParam =</span> SP))</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  h2r   <span class="ot">&lt;-</span> vA <span class="sc">/</span> <span class="fu">as.numeric</span>(<span class="fu">varP</span>(mixed))</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  i_emp <span class="ot">&lt;-</span> S <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">as.numeric</span>(<span class="fu">varP</span>(mixed)))</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  r_emp <span class="ot">&lt;-</span> stats<span class="sc">::</span><span class="fu">cor</span>(<span class="fu">gv</span>(mixed)[, <span class="dv">1</span>], <span class="fu">pheno</span>(mixed)[, <span class="dv">1</span>])</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">q =</span> q,</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>             <span class="at">i_empirical =</span> i_emp, <span class="at">i_normal =</span> <span class="fu">sel_intensity</span>(q),</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>             <span class="at">R_S_h2      =</span> S <span class="sc">*</span> h2r,</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>             <span class="at">R_i_r_sdA   =</span> i_emp <span class="sc">*</span> r_emp <span class="sc">*</span> <span class="fu">sqrt</span>(vA),</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>             <span class="at">R_observed  =</span> <span class="fu">as.numeric</span>(<span class="fu">meanG</span>(prog) <span class="sc">-</span> <span class="fu">meanG</span>(mixed)))</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>}))</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(sweep_q)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;">q</th>
+<th style="text-align: right;">i_empirical</th>
+<th style="text-align: right;">i_normal</th>
+<th style="text-align: right;">R_S_h2</th>
+<th style="text-align: right;">R_i_r_sdA</th>
+<th style="text-align: right;">R_observed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">0.05</td>
+<td style="text-align: right;">2.0325</td>
+<td style="text-align: right;">2.0627</td>
+<td style="text-align: right;">0.6671</td>
+<td style="text-align: right;">0.6358</td>
+<td style="text-align: right;">0.7256</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.10</td>
+<td style="text-align: right;">1.7512</td>
+<td style="text-align: right;">1.7550</td>
+<td style="text-align: right;">0.5748</td>
+<td style="text-align: right;">0.5478</td>
+<td style="text-align: right;">0.5674</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.20</td>
+<td style="text-align: right;">1.4209</td>
+<td style="text-align: right;">1.3998</td>
+<td style="text-align: right;">0.4664</td>
+<td style="text-align: right;">0.4445</td>
+<td style="text-align: right;">0.4488</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Both forms of the breeder’s equation are here. <code>R = S * h2</code> uses the selection differential directly; <code>R = i * r * sigma_A</code> decomposes it into intensity, accuracy and available variation – the form <a href="02b-response.html" class="quarto-xref"><span>Chapter 3</span></a> builds the book’s objective side on. <code>R_observed</code> is the realised change in <em>genetic</em> mean between the selected parents’ progeny and the starting population, which is what the prediction is a prediction of.</p>
+<p>They agree to a few percent, and the agreement degrades as <code>q</code> rises, which is the expected direction: the normal-theory intensity assumes an infinite population and a normal criterion, and a 20% selected fraction of a finite population departs from both.</p>
+<p>The book exports its own selection intensity, and AlphaSimR exports one too. They are independent implementations of <code>phi(z) / q</code>:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>q <span class="ot">&lt;-</span> <span class="fl">0.05</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">hybdiv =</span> <span class="fu">sel_intensity</span>(q), <span class="at">AlphaSimR =</span> <span class="fu">selInt</span>(q),</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">difference =</span> <span class="fu">abs</span>(<span class="fu">sel_intensity</span>(q) <span class="sc">-</span> <span class="fu">selInt</span>(q))) <span class="sc">|&gt;</span> <span class="fu">fmt</span>(<span class="dv">10</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     hybdiv  AlphaSimR difference </span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   2.062713   2.062713   0.000000</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><code>selectInd()</code> takes <code>use = "pheno"</code>, <code>"gv"</code> or <code>"ebv"</code>. Selecting on <code>"gv"</code> is selecting with perfect accuracy – impossible in a real programme, and the correct way to compute the ceiling a scheme is being measured against. <code>use = "ebv"</code> selects on whatever has been written into the population’s <code>ebv</code> slot, which is how genomic selection enters a simulation (<a href="04d-breeding-programme.html" class="quarto-xref"><span>Chapter 8</span></a>). <code>selectTop = FALSE</code> selects downwards, for traits where less is better.</p>
+<p><code>selectWithinFam()</code> is the plant-specific one. A programme that truncates globally on a set of families will take every entry from the two best crosses and nothing from the rest; capping the number retained per family holds the programme’s genetic base open at some cost in immediate gain. It is the same trade-off as the <code>max_use</code> parental cap of <a href="10-combinatorial-selection.html" class="quarto-xref"><span>Chapter 16</span></a>, applied one stage earlier.</p>
+</section>
+<section id="step-7-two-traits-and-what-equal-weighting-assumes" class="level2" data-number="7.7">
+<h2 data-number="7.7" class="anchored" data-anchor-id="step-7-two-traits-and-what-equal-weighting-assumes"><span class="header-section-number">7.7</span> Step 7 – Two traits, and what equal weighting assumes</h2>
+<p><code>corA</code> makes the traits genetically correlated, which is where selection stops being one-dimensional.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">202</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>f2 <span class="ot">&lt;-</span> <span class="fu">quickHaplo</span>(<span class="at">nInd =</span> <span class="dv">80</span>, <span class="at">nChr =</span> <span class="dv">10</span>, <span class="at">segSites =</span> <span class="dv">100</span>, <span class="at">inbred =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>SP2 <span class="ot">&lt;-</span> SimParam<span class="sc">$</span><span class="fu">new</span>(f2)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>SP2<span class="sc">$</span><span class="fu">addTraitA</span>(<span class="at">nQtlPerChr =</span> <span class="dv">100</span>, <span class="at">mean =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">10</span>), <span class="at">var =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">4</span>),</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>              <span class="at">corA =</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="sc">-</span><span class="fl">0.4</span>, <span class="sc">-</span><span class="fl">0.4</span>, <span class="dv">1</span>), <span class="dv">2</span>, <span class="dv">2</span>))</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>SP2<span class="sc">$</span><span class="fu">setVarE</span>(<span class="at">h2 =</span> <span class="fu">c</span>(<span class="fl">0.6</span>, <span class="fl">0.1</span>))</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>mt <span class="ot">&lt;-</span> <span class="fu">newPop</span>(f2, <span class="at">simParam =</span> SP2)</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>) mt <span class="ot">&lt;-</span> <span class="fu">randCross</span>(mt, <span class="at">nCrosses =</span> <span class="dv">1000</span>, <span class="at">simParam =</span> SP2)</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>mt <span class="ot">&lt;-</span> <span class="fu">setPheno</span>(mt, <span class="at">simParam =</span> SP2)</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>G <span class="ot">&lt;-</span> <span class="fu">varG</span>(mt); P <span class="ot">&lt;-</span> <span class="fu">varP</span>(mt); a <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">cor_genetic =</span> stats<span class="sc">::</span><span class="fu">cov2cor</span>(G)[<span class="dv">2</span>, <span class="dv">1</span>],</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">cor_pheno   =</span> stats<span class="sc">::</span><span class="fu">cov2cor</span>(P)[<span class="dv">2</span>, <span class="dv">1</span>],</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">h2_trait1   =</span> <span class="fu">as.numeric</span>(<span class="fu">diag</span>(G)[<span class="dv">1</span>] <span class="sc">/</span> <span class="fu">diag</span>(P)[<span class="dv">1</span>]),</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">h2_trait2   =</span> <span class="fu">as.numeric</span>(<span class="fu">diag</span>(G)[<span class="dv">2</span>] <span class="sc">/</span> <span class="fu">diag</span>(P)[<span class="dv">2</span>])) <span class="sc">|&gt;</span> <span class="fu">fmt</span>(<span class="dv">3</span>)</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; cor_genetic   cor_pheno   h2_trait1   h2_trait2 </span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      -0.416      -0.084       0.470       0.072</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The genetic correlation lands near the requested <code>-0.4</code>; the phenotypic one is much weaker, because the environmental components were left uncorrelated (<code>SP$setCorE()</code> is where that would change). The two traits differ in variance and, sharply, in heritability – the ordinary situation.</p>
+<p>The book’s pipeline defaults to <code>weights = NULL</code>, meaning equal weight on every trait. Step 7 is where that default gets examined, using the index functions <a href="02b-response.html" class="quarto-xref"><span>Chapter 3</span></a> introduced:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>cor_with_H <span class="ot">&lt;-</span> <span class="cf">function</span>(w)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">drop</span>(<span class="fu">crossprod</span>(w, G <span class="sc">%*%</span> a)) <span class="sc">/</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sqrt</span>(<span class="fu">drop</span>(<span class="fu">crossprod</span>(w, P <span class="sc">%*%</span> w)) <span class="sc">*</span> <span class="fu">drop</span>(<span class="fu">crossprod</span>(a, G <span class="sc">%*%</span> a)))</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>B <span class="ot">&lt;-</span> <span class="fu">rbind</span>(<span class="at">equal       =</span> a,</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>           <span class="at">smith_hazel =</span> <span class="fu">index_smith_hazel</span>(P, G, a),</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>           <span class="at">restricted  =</span> <span class="fu">index_restricted</span>(P, G, a, <span class="at">R =</span> <span class="fu">cbind</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>))))</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>dG <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">apply</span>(B, <span class="dv">1</span>, <span class="cf">function</span>(w) <span class="fu">drop</span>(G <span class="sc">%*%</span> w)))</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(dG) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"gain_trait1"</span>, <span class="st">"gain_trait2"</span>)</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">cbind</span>(B, dG, <span class="at">cor_with_H =</span> <span class="fu">apply</span>(B, <span class="dv">1</span>, cor_with_H)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">Trait1</th>
+<th style="text-align: right;">Trait2</th>
+<th style="text-align: right;">gain_trait1</th>
+<th style="text-align: right;">gain_trait2</th>
+<th style="text-align: right;">cor_with_H</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">equal</td>
+<td style="text-align: right;">1.0000</td>
+<td style="text-align: right;">1.0000</td>
+<td style="text-align: right;">0.0677</td>
+<td style="text-align: right;">2.2681</td>
+<td style="text-align: right;">0.2434</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">smith_hazel</td>
+<td style="text-align: right;">0.0789</td>
+<td style="text-align: right;">0.0589</td>
+<td style="text-align: right;">0.0163</td>
+<td style="text-align: right;">0.1226</td>
+<td style="text-align: right;">0.2438</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">restricted</td>
+<td style="text-align: right;">0.1986</td>
+<td style="text-align: right;">0.0386</td>
+<td style="text-align: right;">0.1011</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.2080</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Three readings, in the order they matter:</p>
+<ol type="1">
+<li><strong>Equal weights are not the Smith-Hazel solution.</strong> Smith-Hazel puts 0.46 units of weight on trait 2 for every unit on trait 1, not 1.00. Equal weighting is optimal only when <code>P^-1 G</code> is proportional to the identity, which needs the traits equally variable, equally heritable and uncorrelated. None of that holds here, and it rarely holds anywhere.</li>
+<li><strong>The cost of getting it wrong is modest here, and the direction of the error is not.</strong> Equal weighting loses about 2% of the attainable correlation with the aggregate genotype, but it drives a large unintended gain in trait 2 simply because trait 2 has four times the variance. An index that is nearly as good on the objective can still be badly wrong about where the gain lands.</li>
+<li><strong>The restricted index holds trait 2 at exactly zero.</strong> That is Kempthorne and Nordskog’s construction (<span class="citation" data-cites="kempthorne1959">Kempthorne and Nordskog (<a href="99-references.html#ref-kempthorne1959" role="doc-biblioref">1959</a>)</span>) and, as <a href="02b-response.html" class="quarto-xref"><span>Chapter 3</span></a> argues, the classical ancestor of this book’s <code>alpha</code> constraint – restrict a direction rather than price it.</li>
+</ol>
+<p>Smith-Hazel is defined as the weight vector maximising that correlation, so the claim is checkable against a numerical optimum rather than taken on faith:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>opt <span class="ot">&lt;-</span> stats<span class="sc">::</span><span class="fu">optim</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>), <span class="cf">function</span>(w) <span class="sc">-</span><span class="fu">cor_with_H</span>(w), <span class="at">method =</span> <span class="st">"BFGS"</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">numerical =</span> <span class="sc">-</span>opt<span class="sc">$</span>value, <span class="at">smith_hazel =</span> <span class="fu">cor_with_H</span>(B[<span class="st">"smith_hazel"</span>, ]),</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">difference =</span> <span class="fu">abs</span>(<span class="sc">-</span>opt<span class="sc">$</span>value <span class="sc">-</span> <span class="fu">cor_with_H</span>(B[<span class="st">"smith_hazel"</span>, ]))) <span class="sc">|&gt;</span> <span class="fu">fmt</span>(<span class="dv">10</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   numerical smith_hazel  difference </span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   0.2438417   0.2438417   0.0000000</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Multi-trait genomic selection in wheat, balancing yield against protein content and quality, is the standing plant example – <span class="citation" data-cites="michel2019">Michel et al. (<a href="99-references.html#ref-michel2019" role="doc-biblioref">2019</a>)</span>.</p>
+</section>
+<section id="step-8-the-parts-assembled-reciprocal-recurrent-selection" class="level2" data-number="7.8">
+<h2 data-number="7.8" class="anchored" data-anchor-id="step-8-the-parts-assembled-reciprocal-recurrent-selection"><span class="header-section-number">7.8</span> Step 8 – The parts assembled: reciprocal recurrent selection</h2>
+<p>Everything above was one operation at a time. A breeding scheme is those operations in a loop, and the loop for two heterotic pools is reciprocal recurrent selection: each pool is improved using the <em>other</em> pool as tester. Doubled-haploid lines are drawn from pool A, testcrossed to pool B (and vice versa), the testcross hybrids are phenotyped, and the lines with the best mean testcross performance – a proxy for general combining ability, GCA – are recombined to found the next cycle’s pool. Elite lines from both pools, at the end, are crossed directly to produce the commercial hybrids. It is exactly the asymmetry <a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 19</span></a> argues for: selection happens on the hybrid, recycling happens within pool.</p>
+<section id="founding-two-pools-with-a-real-coalescent-history" class="level3" data-number="7.8.1">
+<h3 data-number="7.8.1" class="anchored" data-anchor-id="founding-two-pools-with-a-real-coalescent-history"><span class="header-section-number">7.8.1</span> Founding two pools with a real coalescent history</h3>
+<p>This is the one place the chapter pays for <code>runMacs2()</code> rather than <code>quickHaplo()</code>. <code>AlphaSimR::runMacs2(..., split = )</code> draws founder haplotypes from a population-split coalescent history: one ancestral population, then two demes diverging <code>split</code> generations ago. That is the realistic analogue of <code>simulate_lines()</code>’s Balding-Nichols draw in <a href="03-simulating-crosses.html" class="quarto-xref"><span>Chapter 4</span></a>, and between-pool divergence is the entire subject of <a href="02-subdivided.html" class="quarto-xref"><span>Chapter 2</span></a>, so a stylised substitute would not do.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>fp <span class="ot">&lt;-</span> <span class="fu">alphasimr_founder_pools</span>(rrs_cfg)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">pool_A =</span> fp<span class="sc">$</span>pop_A<span class="sc">@</span>nInd, <span class="at">pool_B =</span> fp<span class="sc">$</span>pop_B<span class="sc">@</span>nInd,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">markers =</span> rrs_cfg<span class="sc">$</span>n_chr <span class="sc">*</span> rrs_cfg<span class="sc">$</span>seg_sites)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  pool_A  pool_B markers </span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      12      12     750</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="fu">alphasimr_gd</span>(fp<span class="sc">$</span>pop_A, fp<span class="sc">$</span>SP)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.2135787</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="fu">alphasimr_gd</span>(fp<span class="sc">$</span>pop_B, fp<span class="sc">$</span>SP)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.2184954</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><code>alphasimr_gd()</code> is <code>1 - mean(f)</code>, the exact definition <code>gene_diversity()</code> uses, computed directly from AlphaSimR’s genotype pull – so the two pools are already comparable to every diversity number in the rest of the book on the same scale.</p>
+<p>Reading <code>alphasimr_founder_pools()</code> against Steps 1 and 2, it is <code>runMacs2(nInd = , nChr = , segSites = , split = )</code> followed by <code>SP$addTraitAD(nQtlPerChr = seg_sites, meanDD = 0.4, varDD = 0.1)</code> and <code>SP$setVarE(h2 = )</code>. The requested <code>nInd</code> individuals are sampled across both demes – the first <code>n_pool_A</code> become pool A, the rest pool B. There is no separate marker panel: every one of the 150 segregating sites per chromosome is a QTL, so the sites that carry the trait are the ones <code>pullSegSiteGeno()</code> reads for <code>X</code>, <code>f</code> and <code>fL</code> throughout. And per Step 2’s table, the trait is <code>addTraitAD</code> because without dominance there is nothing for testcross selection to exploit that within-pool selection could not already get.</p>
+<p>Because these founders come from MaCS, the numbers in the rest of this section change whenever the chapter is re-executed – see Step 1’s warning. The numbers in Steps 1 to 7, and in <a href="04d-breeding-programme.html" class="quarto-xref"><span>Chapter 8</span></a>, do not.</p>
+</section>
+<section id="one-cycle" class="level3" data-number="7.8.2">
+<h3 data-number="7.8.2" class="anchored" data-anchor-id="one-cycle"><span class="header-section-number">7.8.2</span> One cycle</h3>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>cy1 <span class="ot">&lt;-</span> <span class="fu">alphasimr_rrs_cycle</span>(fp<span class="sc">$</span>pop_A, fp<span class="sc">$</span>pop_B, fp<span class="sc">$</span>SP, rrs_cfg)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(cy1<span class="sc">$</span>summary, <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;">mean_tc_A</th>
+<th style="text-align: right;">mean_tc_B</th>
+<th style="text-align: right;">gd_A</th>
+<th style="text-align: right;">gd_B</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">3.3847</td>
+<td style="text-align: right;">2.9512</td>
+<td style="text-align: right;">0.1853</td>
+<td style="text-align: right;">0.1841</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p><code>alphasimr_rrs_cycle()</code> runs the same six steps for each pool, symmetrically (pool A tested on B, pool B tested on A), and every one is a primitive from above:</p>
+<ol type="1">
+<li><strong>Double haploids</strong> (Step 5). <code>makeDH()</code> draws 3 fully homozygous lines from <em>each</em> individual in the current pool – at book scale, 12 parents x 3 DH each = 36 DH lines per pool, per cycle.</li>
+<li><strong>Pick reciprocal testers.</strong> The first 2 individuals of the <em>opposite</em> pool are used as testers – a fixed slice, not a random or merit-based draw. This is the RRS-defining move: a line’s value is judged by its cross onto the other heterotic pool, not by itself.</li>
+<li><strong>Testcross and phenotype</strong> (Step 5, Step 6). <code>hybridCross()</code> forms the full factorial between every DH line and every tester – 36 DH x 2 testers = 72 testcross hybrids per pool – and <code>setPheno()</code> adds phenotyping error sized to hit the heritability set by <code>SP$setVarE(h2 = )</code>.</li>
+<li><strong>GCA proxy.</strong> Testcross phenotypes are grouped by DH-line parent (<code>tapply(pheno[, 1], mother, mean)</code>) and averaged across the 2 testers each line was crossed to – a general combining ability estimate, following <span class="citation" data-cites="comstock1949">Comstock et al. (<a href="99-references.html#ref-comstock1949" role="doc-biblioref">1949</a>)</span>. Only trait 1 is used for this ranking even though this chapter’s config simulates 2 traits per line; the second trait rides along in <code>X</code>/<code>hybrids</code> but plays no role in selection here. Step 7 is what it would take to use both.</li>
+<li><strong>Keep the elites</strong> (Step 6). The 6 DH lines per pool with the highest mean testcross phenotype are kept as <code>elite_A</code>/<code>elite_B</code>.</li>
+<li><strong>Recombine</strong> (Step 5). <code>randCross()</code> random-mates the elites back up to 12 individuals, founding the next cycle’s pool A (symmetrically for B).</li>
+</ol>
+<p><code>elite_A</code>/<code>elite_B</code> are what step 6 mates – and, in the <em>last</em> cycle, what the final commercial cross uses instead of being recombined again. The cycle’s <code>summary</code> mixes two different populations on purpose: <code>mean_tc_A</code>/<code>mean_tc_B</code> average over <em>all</em> DH lines tested that cycle (the population’s testcross performance before selection), while <code>gd_A</code>/<code>gd_B</code> are gene diversity of only the 6 surviving elites (the population after selection). That asymmetry is exactly what the next section plots – response measured pre-selection, diversity measured post-selection.</p>
+</section>
+<section id="the-trajectory-across-cycles" class="level3" data-number="7.8.3">
+<h3 data-number="7.8.3" class="anchored" data-anchor-id="the-trajectory-across-cycles"><span class="header-section-number">7.8.3</span> The trajectory across cycles</h3>
+<p><code>alphasimr_pipeline()</code> just runs <code>alphasimr_rrs_cycle()</code> in a loop for 4 cycles, carrying <code>pop_A</code>/<code>pop_B</code> forward from one cycle’s output to the next’s input – there is no reseeding inside the loop, only the founder draw at the start is seeded, so the whole trajectory is one continuous random process. Only the <em>last</em> cycle’s <code>elite_A</code>/<code>elite_B</code> – not an intermediate cycle’s – go on to found the commercial hybrid pool below; every earlier cycle’s elites are spent entirely on <code>randCross()</code>ing the next cycle’s pool.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">alphasimr_pipeline</span>(rrs_cfg)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(res<span class="sc">$</span>cycles, <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;">cycle</th>
+<th style="text-align: right;">mean_tc_A</th>
+<th style="text-align: right;">mean_tc_B</th>
+<th style="text-align: right;">gd_A</th>
+<th style="text-align: right;">gd_B</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2.2535</td>
+<td style="text-align: right;">3.2155</td>
+<td style="text-align: right;">0.1596</td>
+<td style="text-align: right;">0.1974</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">4.1481</td>
+<td style="text-align: right;">4.1177</td>
+<td style="text-align: right;">0.1299</td>
+<td style="text-align: right;">0.1292</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">5.5807</td>
+<td style="text-align: right;">5.7768</td>
+<td style="text-align: right;">0.0981</td>
+<td style="text-align: right;">0.1163</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">6.5378</td>
+<td style="text-align: right;">7.1342</td>
+<td style="text-align: right;">0.0859</td>
+<td style="text-align: right;">0.1013</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div id="fig-alphasimr-cycles" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-alphasimr-cycles-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="04c-alphasimr-pipeline_files/figure-html/fig-alphasimr-cycles-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="1350">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-alphasimr-cycles-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.1: Reciprocal recurrent selection over four cycles, book scale. Left: mean testcross phenotype (selection response) per pool. Right: gene diversity of the elite lines retained each cycle.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Both pools respond – mean testcross phenotype rises – and both pools lose gene diversity in their retained elite lines, cycle over cycle. Nobody pays this cost for its own sake: <a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 19</span></a> makes the same point with the package’s own faster simulator, over a longer trajectory and a grid of selection intensities, and <a href="04d-breeding-programme.html" class="quarto-xref"><span>Chapter 8</span></a> makes it a third time in an inbred-line programme. This section shows it holds with actual meiosis and dominance behind it too.</p>
+</section>
+<section id="the-final-hybrid-pool-through-stage2_select-unchanged" class="level3" data-number="7.8.4">
+<h3 data-number="7.8.4" class="anchored" data-anchor-id="the-final-hybrid-pool-through-stage2_select-unchanged"><span class="header-section-number">7.8.4</span> The final hybrid pool through <code>stage2_select()</code>, unchanged</h3>
+<p><code>alphasimr_make_hybrids()</code> testcrosses the final cycle’s elites directly against each other – a full factorial diallel between the 6 pool-A elites and 6 pool-B elites, so 36 commercial hybrids – and phenotypes them the same way every testcross in this chapter was phenotyped. <code>alphasimr_to_stage1()</code> then does the bookkeeping that makes this look like any other stage-1 output: it remaps AlphaSimR’s internal line ids into the <code>1..n_A</code>, <code>n_A+1..n_A+n_B</code> convention <code>hybrids$line_A</code>/<code>line_B</code> and <code>fL</code> use elsewhere in the book, and builds <code>fL</code> by stacking the elite lines from <em>both</em> pools’ genotypes into one matrix and computing a single joint coancestry matrix over all of them – not two separate per-pool matrices – which is what lets <code>theta_pools()</code> and the rest of the pipeline index into pool A and pool B lines with one consistent numbering.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>st1 <span class="ot">&lt;-</span> res<span class="sc">$</span>stage1</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(st1<span class="sc">$</span>X)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1]  36 750</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>sel <span class="ot">&lt;-</span> <span class="fu">stage2_select</span>(st1<span class="sc">$</span>X, st1<span class="sc">$</span>f, st1<span class="sc">$</span>hybrids, <span class="at">n_sel =</span> <span class="dv">8</span>, <span class="at">fL =</span> st1<span class="sc">$</span>fL)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1/4] null distribution by resampling (B = 2000 cheap, 200 full)...</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       GD reference = 0.24347 (sd 0.00366)</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       Monte-Carlo s.e. 8.2e-05 -&gt; alpha differences below 0.034% are noise</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       bias if using the population as reference: 1.83%</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [2/4] maximum attainable alpha (pure truncation) = 1.97%</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [3/4] warm start (greedy) and DE per scenario...</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       DE_alpha_0.00    index 1.085 | alpha achieved -0.236% | Ns 0.6614 | Ne_par 8.5</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       DE_alpha_0.49    index 1.085 | alpha achieved -0.236% | Ns 0.6614 | Ne_par 8.5</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       DE_alpha_0.98    index 1.090 | alpha achieved 0.958% | Ns 0.6589 | Ne_par 7.5</span></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       DE_alpha_1.48    index 1.111 | alpha achieved 1.407% | Ns 0.6579 | Ne_par 9.1</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       DE_alpha_1.97    index 1.140 | alpha achieved 1.968% | Ns 0.6568 | Ne_par 7.5</span></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [4/4] metrics per scenario...</span></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       F_hom is what the constraint pins; F_drift is what it does not:</span></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       DE_alpha_0.00    F_hom +0.0272 | F_drift 0.0155 | gap +0.0117 | GD_BS 0.1605</span></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       DE_alpha_0.49    F_hom +0.0272 | F_drift 0.0155 | gap +0.0117 | GD_BS 0.1605</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       DE_alpha_0.98    F_hom +0.0485 | F_drift 0.0245 | gap +0.0241 | GD_BS 0.1660</span></span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       DE_alpha_1.48    F_hom +0.0695 | F_drift 0.0184 | gap +0.0511 | GD_BS 0.1648</span></span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       DE_alpha_1.97    F_hom +0.0764 | F_drift 0.0275 | gap +0.0488 | GD_BS 0.1674</span></span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       ref_truncation   F_hom +0.0764 | F_drift 0.0275 | gap +0.0488 | GD_BS 0.1674</span></span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       ref_trunc_cap    F_hom +0.0695 | F_drift 0.0184 | gap +0.0511 | GD_BS 0.1648</span></span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       ref_max_div      F_hom -0.0489 | F_drift 0.0131 | gap -0.0620 | GD_BS 0.1523</span></span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       ref_random       F_hom +0.0249 | F_drift 0.0158 | gap +0.0092 | GD_BS 0.1610</span></span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(sel<span class="sc">$</span>metrics[, <span class="fu">c</span>(<span class="st">"scenario"</span>, <span class="st">"alpha"</span>, <span class="st">"GD"</span>, <span class="st">"GD_BS"</span>, <span class="st">"F_ST"</span>, <span class="st">"index"</span>)], <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">scenario</th>
+<th style="text-align: right;">alpha</th>
+<th style="text-align: right;">GD</th>
+<th style="text-align: right;">GD_BS</th>
+<th style="text-align: right;">F_ST</th>
+<th style="text-align: right;">index</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">DE_alpha_0.00</td>
+<td style="text-align: right;">-0.0024</td>
+<td style="text-align: right;">0.2440</td>
+<td style="text-align: right;">0.1605</td>
+<td style="text-align: right;">0.6575</td>
+<td style="text-align: right;">1.0845</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">DE_alpha_0.49</td>
+<td style="text-align: right;">-0.0024</td>
+<td style="text-align: right;">0.2440</td>
+<td style="text-align: right;">0.1605</td>
+<td style="text-align: right;">0.6575</td>
+<td style="text-align: right;">1.0845</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">DE_alpha_0.98</td>
+<td style="text-align: right;">0.0096</td>
+<td style="text-align: right;">0.2411</td>
+<td style="text-align: right;">0.1660</td>
+<td style="text-align: right;">0.6884</td>
+<td style="text-align: right;">1.0899</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">DE_alpha_1.48</td>
+<td style="text-align: right;">0.0141</td>
+<td style="text-align: right;">0.2400</td>
+<td style="text-align: right;">0.1648</td>
+<td style="text-align: right;">0.6867</td>
+<td style="text-align: right;">1.1107</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">DE_alpha_1.97</td>
+<td style="text-align: right;">0.0197</td>
+<td style="text-align: right;">0.2387</td>
+<td style="text-align: right;">0.1674</td>
+<td style="text-align: right;">0.7016</td>
+<td style="text-align: right;">1.1396</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ref_truncation</td>
+<td style="text-align: right;">0.0197</td>
+<td style="text-align: right;">0.2387</td>
+<td style="text-align: right;">0.1674</td>
+<td style="text-align: right;">0.7016</td>
+<td style="text-align: right;">1.1396</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ref_trunc_cap</td>
+<td style="text-align: right;">0.0141</td>
+<td style="text-align: right;">0.2400</td>
+<td style="text-align: right;">0.1648</td>
+<td style="text-align: right;">0.6867</td>
+<td style="text-align: right;">1.1107</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ref_max_div</td>
+<td style="text-align: right;">-0.0352</td>
+<td style="text-align: right;">0.2520</td>
+<td style="text-align: right;">0.1523</td>
+<td style="text-align: right;">0.6043</td>
+<td style="text-align: right;">0.1572</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ref_random</td>
+<td style="text-align: right;">-0.0031</td>
+<td style="text-align: right;">0.2442</td>
+<td style="text-align: right;">0.1610</td>
+<td style="text-align: right;">0.6593</td>
+<td style="text-align: right;">0.1018</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Nothing here is AlphaSimR-specific: <code>stage2_select()</code> never sees where <code>X</code>, <code>f</code>, <code>hybrids</code> and <code>fL</code> came from, only that they satisfy the contract stage 1 promises. <code>GD_BS</code>, the between-pool divergence that carries the heterosis signal (<a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 12</span></a>), is computed from <code>fL</code> exactly as it is everywhere else in the book.</p>
+</section>
+</section>
+<section id="assumptions-and-what-this-adds-over-sec-simulating-crosses" class="level2" data-number="7.9">
+<h2 data-number="7.9" class="anchored" data-anchor-id="assumptions-and-what-this-adds-over-sec-simulating-crosses"><span class="header-section-number">7.9</span> Assumptions, and what this adds over <a href="03-simulating-crosses.html" class="quarto-xref"><span>Chapter 4</span></a></h2>
+<p><strong>What is more realistic here.</strong> Actual recombination and linkage (a genetic map per chromosome, not independent markers), a dominance-driven trait so testcross selection has something real to select on, and multi-generation recurrent selection rather than one static pool.</p>
+<p><strong>What is still simplified.</strong> Testers are a small fixed subset of the opposite pool (2 individuals) taken by index, not chosen at random or by merit, and not the single unrelated inbred tester a real programme would typically use – a fixed pool slice makes the same testers reused every cycle, which a production programme would treat as a confound; there is one phenotyping environment (<code>setPheno()</code>’s error variance, no genotype-by-environment term – <a href="04d-breeding-programme.html" class="quarto-xref"><span>Chapter 8</span></a> adds one); the population-split coalescent history (<code>runMacs2(split = )</code>) is a stylised divergence process, not calibrated to a named heterotic-pool pair; doubled-haploid production is instantaneous, skipping the field seasons Step 5 counted; and selection acts on trait 1 only – the 2 traits this chapter’s config simulates are all carried through <code>X</code>/<code>hybrids</code>, but only the first ever enters the GCA ranking, so the rest are along for the ride, not selected on.</p>
+<p><strong>Scale.</strong> This chapter runs live at a book scale (12 + 12 founders, 750 markers, 4 cycles) – AlphaSimR is fast enough at this size that no caching is needed, unlike the MABC scans in <a href="04b-backcross-introgression.html" class="quarto-xref"><span>Chapter 6</span></a>. A heavier, production-scale run is <code>inst/scripts/run_alphasimr.R</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Rscript</span> inst/scripts/run_alphasimr.R <span class="at">--test</span>          <span class="co"># smoke run, ~10 s</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="ex">Rscript</span> inst/scripts/run_alphasimr.R <span class="at">--out</span><span class="op">=</span>DIR        <span class="co"># full run, ~2 min</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>It runs <code>alphasimr_pipeline()</code> at a larger configuration, feeds the resulting hybrid pool through <code>stage2_select()</code>, and writes the cycle trajectory and selection metrics as CSVs.</p>
+</section>
+<section id="where-this-connects" class="level2" data-number="7.10">
+<h2 data-number="7.10" class="anchored" data-anchor-id="where-this-connects"><span class="header-section-number">7.10</span> Where this connects</h2>
+<p><a href="03-simulating-crosses.html" class="quarto-xref"><span>Chapter 4</span></a> and Step 8 build the same three-object contract from two different generative models – the fast one and the realistic one – which is the point of drawing that seam where the book does: everything past it, <code>build_ctx()</code> through <code>stage2_select()</code>, cannot tell which one it is looking at. <a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 10</span></a> explains why the dominance term here is what makes testcross selection informative at all. <a href="02b-response.html" class="quarto-xref"><span>Chapter 3</span></a> supplies the breeder’s equation Step 6 checks and the index theory Step 7 uses; <a href="11c-limits.html" class="quarto-xref"><span>Chapter 20</span></a> is where Step 3’s <code>varA</code>-against-<code>genicVarA</code> gap becomes the subject rather than a diagnostic. <a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 19</span></a> runs the same diversity-erosion argument at a longer horizon with the package’s own faster simulator; this chapter is its cross-check against an engine with real meiosis behind it.</p>
+<p><a href="04d-breeding-programme.html" class="quarto-xref"><span>Chapter 8</span></a> is the other half of the method: the same primitives assembled into an inbred-line programme with staged yield trials, where the question is not which hybrids to sell but how fast a variety pipeline can run and what it spends to run faster.</p>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
+<div id="ref-chen2009" class="csl-entry" role="listitem">
+Chen, Gary K., Paul Marjoram, and Jeffrey D. Wall. 2009. <span>“Fast and Flexible Simulation of <span>DNA</span> Sequence Data.”</span> <em>Genome Research</em> 19 (1): 136–42. <a href="https://doi.org/10.1101/gr.083634.108">https://doi.org/10.1101/gr.083634.108</a>.
+</div>
+<div id="ref-comstock1949" class="csl-entry" role="listitem">
+Comstock, R. E., H. F. Robinson, and P. H. Harvey. 1949. <span>“A Breeding Procedure Designed to Make Maximum Use of Both General and Specific Combining Ability.”</span> <em>Agronomy Journal</em> 41 (8): 360–67. <a href="https://doi.org/10.2134/agronj1949.00021962004100080006x">https://doi.org/10.2134/agronj1949.00021962004100080006x</a>.
+</div>
+<div id="ref-gaynor2021" class="csl-entry" role="listitem">
+Gaynor, R. C., G. Gorjanc, and J. M. Hickey. 2021. <span>“<span>AlphaSimR</span>: An <span>R</span> Package for Breeding Program Simulations.”</span> <em>G3: Genes, Genomes, Genetics</em> 11 (2). <a href="https://doi.org/10.1093/g3journal/jkaa017">https://doi.org/10.1093/g3journal/jkaa017</a>.
+</div>
+<div id="ref-kempthorne1959" class="csl-entry" role="listitem">
+Kempthorne, Oscar, and Arne W. Nordskog. 1959. <span>“Restricted Selection Indices.”</span> <em>Biometrics</em> 15 (1): 10–19. <a href="https://doi.org/10.2307/2527598">https://doi.org/10.2307/2527598</a>.
+</div>
+<div id="ref-mackay2020" class="csl-entry" role="listitem">
+Mackay, Ian J., James Cockram, and Phil Howell. 2021. <span>“Understanding the Classics: The Unifying Concepts of Transgressive Segregation, Inbreeding Depression and Heterosis and Their Central Relevance for Crop Breeding.”</span> <em>Plant Biotechnology Journal</em> 19 (1): 26–34. <a href="https://doi.org/10.1111/pbi.13481">https://doi.org/10.1111/pbi.13481</a>.
+</div>
+<div id="ref-michel2019" class="csl-entry" role="listitem">
+Michel, Sebastian, Franziska Löschenberger, Christian Ametz, Bernadette Pachler, Ellen Sparry, and Hermann Bürstmayr. 2019. <span>“Combining Grain Yield, Protein Content and Protein Quality by Multi-Trait Genomic Selection in Bread Wheat.”</span> <em>Theoretical and Applied Genetics</em> 132 (10): 2767–80. <a href="https://doi.org/10.1007/s00122-019-03386-1">https://doi.org/10.1007/s00122-019-03386-1</a>.
+</div>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./04b-backcross-introgression.html" class="pagination-link" aria-label="Introgressing several genes by backcrossing">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Introgressing several genes by backcrossing</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./04d-breeding-programme.html" class="pagination-link" aria-label="A complete plant breeding programme, and what it costs in diversity">
+        <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">A complete plant breeding programme, and what it costs in diversity</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

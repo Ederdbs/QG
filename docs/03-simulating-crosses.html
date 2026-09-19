@@ -681,23 +681,26 @@ window.Quarto = {
 <p>Genotypes are then drawn as <span class="math inline">\(2 \times \text{Bernoulli}(p)\)</span>, which makes every line fully homozygous, as an inbred line should be.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>simulate_lines</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function(cfg) {</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   set.seed(cfg$seed)</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   p_anc &lt;- stats::runif(cfg$m, 0.05, 0.95)</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   bn &lt;- function(p, fst) {</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     stats::rbeta(length(p), p * (1 - fst) / fst, (1 - p) * (1 - fst) / fst)</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   }</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   pA &lt;- bn(p_anc, cfg$fst)</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   pB &lt;- bn(p_anc, cfg$fst)</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   draw &lt;- function(n, p) {</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     matrix(2L * stats::rbinom(n * length(p), 1, rep(p, each = n)), nrow = n)</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   }</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   L &lt;- rbind(draw(cfg$n_pool_A, pA), draw(cfg$n_pool_B, pB))</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   storage.mode(L) &lt;- "double"</span></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   L</span></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (cfg) </span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; {</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     set.seed(cfg$seed)</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     p_anc &lt;- stats::runif(cfg$m, 0.05, 0.95)</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     bn &lt;- function(p, fst) {</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         stats::rbeta(length(p), p * (1 - fst)/fst, (1 - p) * </span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             (1 - fst)/fst)</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     }</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     pA &lt;- bn(p_anc, cfg$fst)</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     pB &lt;- bn(p_anc, cfg$fst)</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     draw &lt;- function(n, p) {</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         matrix(2L * stats::rbinom(n * length(p), 1, rep(p, each = n)), </span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             nrow = n)</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     }</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     L &lt;- rbind(draw(cfg$n_pool_A, pA), draw(cfg$n_pool_B, pB))</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     storage.mode(L) &lt;- "double"</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     L</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0xaf2d53118&gt;</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>L <span class="ot">&lt;-</span> <span class="fu">simulate_lines</span>(book_cfg)</span>
@@ -711,7 +714,7 @@ window.Quarto = {
 <p>Only 0 and 2 appear: no residual heterozygotes. With real data those must be imputed or dropped before this point, because the hybrid-genotype identity in <a href="01-coancestry.html" class="quarto-xref"><span>Chapter 1</span></a> assumes homozygous parents.</p>
 <section id="the-divergence-knob" class="level3" data-number="4.2.1">
 <h3 data-number="4.2.1" class="anchored" data-anchor-id="the-divergence-knob"><span class="header-section-number">4.2.1</span> The divergence knob</h3>
-<p><code>fst</code> is the single most consequential parameter in the simulation, because it controls how much heterosis there is to find and therefore how much a diversity constraint can cost. It is worth seeing directly:</p>
+<p><code>fst</code> is the single most consequential parameter in the simulation, because it sets how much of the pools’ diversity sits <em>between</em> them rather than within. What that buys is less obvious than it looks:</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>fst_grid <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.02</span>, <span class="fl">0.05</span>, <span class="fl">0.10</span>, <span class="fl">0.15</span>, <span class="fl">0.25</span>, <span class="fl">0.40</span>)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>div <span class="ot">&lt;-</span> <span class="fu">vapply</span>(fst_grid, <span class="cf">function</span>(fst) {</span>
@@ -734,7 +737,7 @@ window.Quarto = {
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="03-simulating-crosses_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="1050"></p>
-<figcaption>Between-pool divergence sets the hybrid heterozygous fraction, and with it the floor of the coancestry diagonal.</figcaption>
+<figcaption>Driving the pools apart leaves the expected heterozygous fraction of the F1 flat. What moves is the within-pool coancestry, which climbs throughout. <a href="05b-heterosis-dominance.html#sec-heterosis-flat" class="quarto-xref"><span>Section 10.7</span></a> derives why the two terms must trade one for one.</figcaption>
 </figure>
 </div>
 </div>
@@ -794,7 +797,8 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>More divergent pools give more heterozygous F1 hybrids. That is the heterosis engine, and <a href="02-subdivided.html" class="quarto-xref"><span>Chapter 2</span></a> is the reason it must be <em>held</em>, not maximised: the same divergence that raises <code>GD_BS</code> is being paid for out of within-pool diversity.</p>
+<p>The heterozygous fraction does not move. It is flat across a twentyfold range of <code>fst</code>, while <code>within_pool_f</code> climbs steadily: the divergence is being paid for out of within-pool diversity, unit for unit.</p>
+<p>That is not an artefact of this grid. The expected heterozygous fraction of an A x B hybrid is exactly <code>1 - theta_AB</code>, and <a href="05b-heterosis-dominance.html#sec-heterosis-flat" class="quarto-xref"><span>Section 10.7</span></a> shows that under neutral drift every unit gained by the between-pool term is subtracted from the shared one, leaving the total fixed. Neutral divergence relocates diversity; it does not create heterosis. <a href="02-subdivided.html" class="quarto-xref"><span>Chapter 2</span></a> is why <code>GD_BS</code> is nonetheless held rather than minimised, and <a href="05b-heterosis-dominance.html#sec-heterosis-alignment" class="quarto-xref"><span>Section 10.8</span></a> is what has to be true of the divergence for it to be worth anything.</p>
 </section>
 </section>
 <section id="from-lines-to-hybrids" class="level2" data-number="4.3">
@@ -902,20 +906,18 @@ window.Quarto = {
 <p>All of the above is <code>stage1_simulate()</code>:</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>stage1_build</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function(X, ped, traits, fL = NULL) {</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   if (max(X) &gt; 1) X &lt;- X / 2          # accepts 0/1/2 or 0/0.5/1 coding</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   stopifnot(nrow(X) == nrow(ped), nrow(X) == nrow(traits))</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   hybrids &lt;- data.frame(</span></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     hybrid = seq_len(nrow(X)),</span></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     line_A = as.integer(ped$a),</span></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     line_B = as.integer(ped$b),</span></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     traits</span></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   )</span></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   list(X = X, f = molecular_coancestry(X), hybrids = hybrids, fL = fL)</span></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (X, ped, traits, fL = NULL) </span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; {</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     if (max(X) &gt; 1) </span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         X &lt;- X/2</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     stopifnot(nrow(X) == nrow(ped), nrow(X) == nrow(traits))</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     hybrids &lt;- data.frame(hybrid = seq_len(nrow(X)), line_A = as.integer(ped$a), </span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         line_B = as.integer(ped$b), traits)</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     list(X = X, f = molecular_coancestry(X), hybrids = hybrids, </span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         fL = fL)</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0xaf4855b98&gt;</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>st1 <span class="ot">&lt;-</span> <span class="fu">stage1_simulate</span>(book_cfg)</span>
