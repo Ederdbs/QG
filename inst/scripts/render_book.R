@@ -16,16 +16,20 @@
 fmt <- commandArgs(trailingOnly = TRUE)[1]
 args <- c("render", "book", if (!is.na(fmt)) c("--to", fmt))
 
-if (Sys.which("quarto") == "") stop("quarto not found on PATH")
-if (!dir.exists("book")) stop("run this from the repository root")
+if (Sys.which("quarto") == "") {
+    stop("quarto not found on PATH")
+}
+if (!dir.exists("book")) {
+    stop("run this from the repository root")
+}
 
 t0 <- Sys.time()
 status <- system2("quarto", args)
-if (status != 0L) stop("quarto render failed (exit ", status, ")")
+if (status != 0L) {
+    stop("quarto render failed (exit ", status, ")")
+}
 
-cat(sprintf("done in %.1f min -> docs/\n",
-            as.numeric(difftime(Sys.time(), t0, units = "mins"))))
-
-
-
-
+cat(sprintf(
+    "done in %.1f min -> docs/\n",
+    as.numeric(difftime(Sys.time(), t0, units = "mins"))
+))
