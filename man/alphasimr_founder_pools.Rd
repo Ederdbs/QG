@@ -23,10 +23,13 @@ testcross selection meaningful -- see `05b-heterosis-dominance`.
 \details{
 `cfg$seed` does **not** make this function reproducible, and the `set.seed()`
 below is easy to misread as a promise that it does. `AlphaSimR::runMacs2()`
-hands the coalescent off to MaCS, which seeds itself outside R's RNG, so two
-calls with the same `cfg` return different founder haplotypes. Everything
-downstream of the founders -- the doubled haploids, the testcrosses, the
-recycling -- *is* controlled by `set.seed()`; the founders are not.
+hands the coalescent off to MaCS with a seed drawn from R's stream
+(`sample.int(1e8, 1)` per chromosome), but the MaCS output is not a
+deterministic function of that seed: two calls with the same `cfg` return
+different founder haplotypes (measured on AlphaSimR 2.1.0). R's own stream is
+consumed by a fixed amount, so everything downstream of the founders -- the
+doubled haploids, the testcrosses, the recycling -- *is* controlled by
+`set.seed()`; only the founders, and whatever is computed from them, move.
 
 This is a property of MaCS, not of `runMacs2()` in particular:
 `AlphaSimR::runMacs()` behaves the same way, measured in

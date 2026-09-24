@@ -25,11 +25,33 @@ the model. @sec-hybrid-cv shows that the obvious split -- hold out a random 40%
 of the hybrids -- answers the easiest of the three questions a hybrid programme
 actually asks, and that the fit itself says so, before the truth is consulted.
 
+Every model fitted below follows the same two-step logic, and it is worth
+stating plainly before any equation appears, because it is the entire
+economic case for genomic selection in an outcrossing, hybrid crop. **Step
+one, training:** markers and phenotypes recorded on a historical
+population -- lines or hybrids already evaluated in earlier trials -- are used
+to estimate a relationship between genotype and phenotype, either as marker
+effects (BayesA/BayesB/ridge) or as a variance structure over relatives
+(GBLUP). **Step two, prediction:** that same relationship is applied to the
+markers of candidate hybrids that have never been phenotyped, to rank them
+before any resource is committed to growing them out. In a self-pollinated
+crop the second step is a convenience; in a cross-pollinated, hybrid crop it
+is transformative, because @sec-genpred-truth below shows that a hybrid's
+value is additive in its two parents' genotypes, so step two can score a
+line-by-line combination that has never even been made as a physical cross.
+Genotyping two parent lines already on hand is enough to rank a candidate that
+would otherwise cost a full generation to phenotype -- the saving @sec-stages
+calls hybrid mining (S4).
+
 ## A training population with real noise
 
 Everywhere else in this book, `ctx$index` *is* the truth. Here it plays a
 different role: it is the value a real breeding programme does not get to see,
 and can only estimate from phenotypes recorded on a subset of individuals.
+Building that subset takes three steps: manufacture a phenotype by adding
+noise to the true genetic value, split the population into the individuals
+that will carry a phenotype and those that will not, then hand only the first
+group's records to the models fitted below.
 
 ```{r}
 ctx <- simulate_data(book_cfg)
@@ -52,7 +74,10 @@ y <- g + e
 
 Split the population into a training set, whose phenotypes the model gets to
 see, and a candidate set -- the hybrids actually being selected among -- whose
-phenotypes it does not:
+phenotypes it does not. This mirrors the two roles a real programme's
+germplasm plays at any one time: training stands in for hybrids already
+phenotyped in earlier trials, and candidates stand in for this cycle's
+untested combinations, ranked here purely from markers:
 
 ```{r}
 set.seed(9)
@@ -112,11 +137,31 @@ deviations of @sec-heterosis are absent from `ctx$traits` by construction, so
 SCA is not merely unmodelled, it is not in the data. The sharp one is
 @sec-g-singular.
 
+There is a third consequence, and it is the operational payoff of everything
+in this chapter. Because a hybrid's value is a fixed linear function of its
+two parents' marker genotypes, once marker effects are estimated from a
+training population of phenotyped hybrids (or lines), that same estimate
+scores *any* line A x line B combination -- including combinations of lines
+that have never been crossed. Ranking a candidate hybrid this way costs a
+genotyping assay on two lines that are typically already on hand from earlier
+pipeline stages; the alternative, growing out the actual hybrid to phenotype
+it, costs a full crossing and evaluation cycle. That difference is what makes
+genomic selection valuable specifically in a cross-pollinated, hybrid crop,
+where the space of candidate combinations is combinatorially larger than the
+number of lines ever phenotyped as hybrids.
+
 ## GBLUP: prediction from the relationship matrix
 
 GBLUP treats the breeding value as a random effect $\mathbf{u}$ with covariance
 proportional to the genomic relationship matrix, $\mathrm{Var}(\mathbf{u}) =
-\mathbf{G}\,\sigma_u^2$, and solves the mixed model equations.
+\mathbf{G}\,\sigma_u^2$, and solves the mixed model equations. Fitting and
+using it is three operational steps, in this order: first write down the
+mixed model equations linking phenotypes, a relationship matrix and a variance
+ratio; second, solve that linear system once, for every individual in the
+population at the same time, training and candidates alike; third, convert the
+same solve's by-product -- the inverse of its coefficient matrix -- into a
+reliability for each prediction, which is the only part of the output a
+programme can trust without knowing the truth.
 
 ### Where the mixed model equations come from
 
@@ -226,9 +271,11 @@ cat("GBLUP accuracy (candidates):", cor(u_hat[cand], g[cand]), "\n")
 
 ### Reliability: the accuracy you can compute without the truth
 
-Inverting the coefficient matrix rather than just solving against it costs one
-more decomposition and returns something a breeding programme can act on. The
-$\mathbf{u}$ block of that inverse holds the prediction error variances,
+This is the third step promised above. Inverting the coefficient matrix rather
+than just solving against it costs one more decomposition and returns
+something a breeding programme can act on: a per-candidate confidence figure
+computed the same day the GEBV is, with no field trial required to check it.
+The $\mathbf{u}$ block of that inverse holds the prediction error variances,
 $\mathrm{PEV}_i = \sigma^2_e\,[\mathbf{C}^{uu}]_{ii}$, and the reliability of an
 individual's prediction is the fraction of its prior variance the data removed:
 
@@ -380,6 +427,18 @@ performs variable selection as it fits. Both reduce to GBLUP's ridge-regression
 solution as a special case; they differ only in how much of the genetic
 architecture they let the data shape.
 
+Fitting either is a different computational route to the same train-then-predict
+logic as GBLUP, in four steps rather than one linear solve: (1) declare a prior
+distribution for each marker effect $\beta_k$, the thing that separates the
+three models; (2) run a Gibbs sampler that alternates between drawing each
+$\beta_k$ given the current residuals and every other parameter, and drawing
+the variance components given the current effects, on the training records
+only; (3) average the post-burn-in draws into a single point estimate
+$\hat{\boldsymbol\beta}$; (4) predict any candidate, phenotyped or not, by
+multiplying its marker dosages by $\hat{\boldsymbol\beta}$ -- exactly the same
+last step as scoring a hybrid from GBLUP's $\hat{\mathbf{u}}$, just reached
+through markers instead of a relationship matrix.
+
 ### The priors, explicitly
 
 All three models write $\mathbf{g} = \mathbf{Z}\boldsymbol\beta$ and differ only
@@ -500,7 +559,10 @@ GBLUP with a flat prior on every marker's variance and the un-selected member
 of the Bayesian alphabet, Bayesian ridge regression (`iv = FALSE, pi = 0` in
 `bWGR::wgr()`), are the same model solved two different ways -- one through
 the $N \times N$ relationship matrix, the other through the $N \times m$
-marker matrix.
+marker matrix. The check below has three steps: substitute the marker-space
+model into the mixed model equations algebraically, read off the penalty each
+route implies, and then confirm numerically that the two solutions coincide to
+machine precision -- not merely correlate.
 
 They are the same model in a stronger sense than "they should agree". Substitute
 $\mathbf{u} = \mathbf{Z}\boldsymbol\beta$ and $\mathbf{G} = \mathbf{Z}\mathbf{Z}'
@@ -608,9 +670,13 @@ Accuracy improves monotonically as `pi` approaches the truth, but the
 degradation from being off is gradual, not catastrophic -- `pi` is worth
 cross-validating, not agonising over.
 
-The obvious alternative is to stop choosing it. BayesC$\pi$ puts a prior on $\pi$
-itself and samples it alongside the effects, which ought to make the sweep above
-unnecessary. Fit it to both architectures:
+The obvious alternative is to stop choosing it. BayesC$\pi$ keeps BayesB's
+spike-and-slab prior but adds one more level: instead of fixing $\pi$ before
+the fit, it treats $\pi$ itself as unknown and updates it by
+Metropolis-Hastings at every iteration, jointly with the marker effects and
+their inclusion indicators [@xavier2019bwgr]. In principle that removes the
+sweep above entirely, since the training data are left to say how sparse the
+architecture is. Fit it to both architectures:
 
 ```{r}
 cpi_poly <- BayesCpi(y[train],    M[train, ], it = 1500, bi = 500, df = 5, R2 = 0.5)
@@ -630,8 +696,14 @@ not a substitute for choosing it here; the sweep above remains the honest route.
 
 ## From GEBVs to `stage1_build()`
 
-Everything above ends where @sec-simulating-crosses's contract begins. The
-candidates' predicted values, whichever model produced them, are exactly the
+Everything above ends where @sec-simulating-crosses's contract begins, and
+this is where the opening paragraph's two steps close the loop. Training
+happened once, on the historical population's markers and phenotypes; the
+candidates below never contributed a phenotype to that fit, and their row in
+`hybrids_traits` is produced entirely from marker dosages -- the same
+computation that, for a line-by-line combination not yet made as a physical
+cross, would score it before any seed exists. The candidates'
+predicted values, whichever model produced them, are exactly the
 `traits` argument `stage1_build()` expects -- one column per trait, one row
 per hybrid:
 

@@ -11,6 +11,19 @@ am    <- 0.01
 bench <- read.csv(book_data("search_benchmark.csv"))
 scal  <- read.csv(book_data("search_scaling.csv"))
 exg   <- read.csv(book_data("search_exact_gap.csv"))
+bmean <- function(scale, method)
+  mean(bench$index[bench$scale == scale & bench$method == method])
+bsec <- function(scale, method)
+  mean(bench$secs[bench$scale == scale & bench$method == method])
+# Rank by mean index WITHIN its own group. Capped rows solve a strictly harder
+# problem and are never ranked against uncapped ones.
+brank <- function(scale, method) {
+  grp <- unique(bench$method[bench$scale == scale])
+  grp <- grp[grepl("_cap$", grp) == grepl("_cap$", method)]
+  v <- vapply(grp, bmean, numeric(1), scale = scale)
+  c(rank = unname(which(names(sort(v, decreasing = TRUE)) == method)),
+    n = length(grp))
+}
 ```
 
 @sec-combinatorial stops at a warm-started differential evolution. That is a
@@ -20,7 +33,45 @@ approximation guarantees, on a bound that is actually a bound, and on an oracle
 that says how far from optimal the heuristics really are.
 
 The target throughout is the scale the method has to survive: **200 hybrids
-chosen from 10,000**, a full factorial of 100 by 100 lines.
+chosen from 10,000**, a full factorial of 100 by 100 lines. That is an ordinary
+size for a hybrid maize programme at the end of a cycle: two heterotic pools of
+a hundred inbred or doubled-haploid lines each, every cross between them a
+legitimate candidate, and a few hundred of them going into the next round of
+multi-location testing.
+
+That is a different -- and deliberately larger -- "production scale" from the
+one @sec-combinatorial quotes. There, production means the real dataset this
+package was written for, 71 + 71 lines and $N = 5041$ candidates, which is the
+size the encoding argument is made at. Here it is the 100 + 100 factorial the
+scaling study and the head-to-head benchmark are run at, because a cost curve
+needs a span of $N$ wider than one point provides. Neither is wrong and they
+are not interchangeable: every per-evaluation cost and every memory figure in
+this chapter is at $N = 10{,}000$, and the dimension counts in
+@sec-combinatorial are at $N = 5041$.
+
+**What has to be in hand**, beyond @sec-combinatorial's three objects, is the
+line-level route: `fast_ctx()` adds `ctx$parents`, the $N \times 2$ matrix of
+parent indices, to a context that already carries `ctx$fL`, the $L \times L$
+coancestry *between lines*. Everything in this chapter that scales is a
+function of those two and of nothing else.
+
+```{r}
+#| label: contract
+c(candidates_N = ctx$N,
+  lines_L      = ctx$n_lines,
+  hybrids_kept = n_sel,
+  budget_pct   = 100 * am,
+  gd_ref       = gd,
+  f_MiB        = as.numeric(object.size(ctx[["f"]])) / 2^20,
+  fL_MiB       = as.numeric(object.size(ctx$fL)) / 2^20)
+```
+
+The assumptions are @sec-combinatorial's, unchanged and worth restating because
+two of them are load-bearing here: parent lines are homozygous, which is what
+makes $f_{ij}$ a function of the four parental coancestries and hence collapses
+the problem to $L$ dimensions (@sec-collapse); and `f` is molecular coancestry
+in $[0, 1]$, not a centred relationship matrix, which is what makes it a Gram
+matrix with the properties the next section needs.
 
 ## Three facts about this problem
 
@@ -35,10 +86,21 @@ inner product of the stacked vectors $[\mathbf{x}_i;\, \mathbf{1}-\mathbf{x}_i]$
 So `f` is not merely symmetric, it is a **Gram matrix**, exactly:
 
 ```{r}
-V <- cbind(ctx$X, 1 - ctx$X)
-c(max_abs_difference = max(abs(ctx$f - tcrossprod(V) / ctx$m)),
-  min_eigenvalue     = min(eigen(ctx$f, symmetric = TRUE, only.values = TRUE)$values))
+#| label: gram-check
+V  <- cbind(ctx[["X"]], 1 - ctx[["X"]])
+ev <- eigen(ctx[["f"]], symmetric = TRUE, only.values = TRUE)$values
+c(max_abs_difference = max(abs(ctx[["f"]] - tcrossprod(V) / ctx$m)),
+  min_eigenvalue     = min(ev),
+  min_over_max_eig   = min(ev) / max(ev))
 ```
+
+The check is the whole argument: the difference is exactly zero, and the
+smallest eigenvalue is zero to the eigensolver's own rounding -- its sign is
+arbitrary `r round(-log10(abs(min(ev) / max(ev))))` orders of magnitude below
+the largest eigenvalue. A negative eigenvalue large enough to see on that scale
+would mean `f` had been centred, rescaled, or built on the wrong marker
+coding -- and every method in this chapter would silently lose its
+justification.
 
 Two consequences carry the rest of the chapter. First, $\mathbf{c}'\mathbf{f}\mathbf{c}$
 is a **convex** quadratic, so the diversity budget is a convex constraint --
@@ -55,16 +117,25 @@ normaliser is a constant:
 ```{r}
 s <- sel_greedy(ctx, n_sel, w = 1)
 c(theta_times_n2 = theta_group(s, ctx) * n_sel^2,
-  submatrix_sum  = sum(ctx$f[s, s]),
-  difference     = theta_group(s, ctx) * n_sel^2 - sum(ctx$f[s, s]))
+  submatrix_sum  = sum(ctx[["f"]][s, s]),
+  difference     = theta_group(s, ctx) * n_sel^2 - sum(ctx[["f"]][s, s]))
 ```
 
 So the objective is $\lambda \sum_{i \in S} u_i - \sum_{i,j \in S} f_{ij}$: a
 **modular** term plus a **submodular** one, since the marginal cost of adding a
 hybrid grows with the set. Writing the same thing through $d_{ij}$,
 $\sum_{i<j} d_{ij} = n\,\mathrm{tr}(f_S) - n^2\theta_S$, identifies it as the
-**max-sum diversification** problem of @borodin2017 -- which nobody in the
-plant literature seems to have noticed it is.
+**max-sum diversification** problem of @borodin2017. I have not found it named
+that way in the plant-breeding literature, and this book makes no claim about
+what a systematic screen would find -- no such screen was run. The structural
+identity is the load-bearing part, and it holds whether or not anyone has
+written it down before.
+
+The practical content of "fixed $n$" is worth spelling out: it is *only* at a
+fixed set size that maximising gene diversity and minimising the submatrix sum
+are the same instruction. Comparing $\theta$ across selections of different
+sizes compares two different things, which is the same reason `gd_ref` has to
+be resampled at the size actually being used (@sec-baseline).
 
 ### The per-line cap is a partition matroid
 
@@ -73,6 +144,29 @@ partition matroid per heterotic pool. Together with the cardinality constraint
 that is an intersection of matroids -- not an arbitrary combinatorial
 restriction, but the single best-understood constraint class in discrete
 optimisation.
+
+The structure comes from the mating design, not from the mathematics. Every
+candidate is a cross between one pool-A line and one pool-B line, so each
+selected hybrid contributes exactly one use to a pool-A line and one to a
+pool-B line, and the counts within each pool sum to $n$ by construction:
+
+```{r}
+#| label: matroid-check
+cnt <- line_counts(s, ctx)
+c(uses_pool_A     = sum(cnt[ctx$pool == "A"]),
+  uses_pool_B     = sum(cnt[ctx$pool == "B"]),
+  n_sel           = n_sel,
+  distinct_A_used = sum(cnt[ctx$pool == "A"] > 0),
+  distinct_B_used = sum(cnt[ctx$pool == "B"] > 0))
+```
+
+That is exactly the ground-set partition a partition matroid needs. It also
+gives the feasibility condition for any cap $c$ directly: a plan of $n$ crosses
+exists under the cap only if $n \le L_A c$ and $n \le L_B c$. In a programme the
+cap is rarely chosen for theoretical reasons -- it is set by how many
+seed-production fields a female line can support -- and the point of naming the
+structure is that a constraint arriving from the field turns out to be the one
+class of constraint discrete optimisation handles best.
 
 ::: {.callout-note}
 ## Why naming the structure is worth a section
@@ -84,14 +178,19 @@ about which is which.
 |---|---|---|
 | `f` positive semi-definite | a convex constraint, hence valid gradient cuts and a valid Lagrangian bound | **large** -- @sec-bound is a correction, not an ornament |
 | submodular plus modular objective | $1 - 1/e$ under cardinality [@nemhauser1978], $1/(p+1)$ under $p$ matroids [@fisher1978]; a PTAS for negative-type distances under a matroid [@cevallos2016] | **small** -- worst-case bounds, and the measured gap is around 1% |
-| line collapse $\theta = \mathbf{w}'\mathbf{f}^L\mathbf{w}$ | memory $O(N^2) \to O(L^2)$, search dimension $N \to L$, and an $O(L)$ swap | **large** -- 0.745 GiB against 0.3 MiB, and the swap is what makes local search affordable |
+| line collapse $\theta = \mathbf{w}'\mathbf{f}^L\mathbf{w}$ | memory $O(N^2) \to O(L^2)$, an $O(L)$ swap, and an $L$-dimensional contributions programme in place of an $N$-dimensional one | **large** -- 0.745 GiB against 0.3 MiB, and the swap is what makes local search affordable |
 :::
 
 ## What lazy greedy would not buy
 
-The obvious first move on a submodular objective is the lazy greedy of
-@nemhauser1978: keep stale marginal gains in a priority queue and re-evaluate
-only the top one. It is the standard accelerator, and here it is **worthless**.
+The obvious first move on a submodular objective is the accelerated, or "lazy",
+greedy of @minoux1978: keep stale marginal gains in a priority queue and
+re-evaluate only the top one, which is valid precisely because submodularity
+makes a stale gain an upper bound on the current one. Two distinct results are
+easy to conflate here, so name them apart: the acceleration is Minoux's, while
+the worst-case guarantee for the plain greedy it accelerates is @nemhauser1978's
+and is quoted separately below. It is the standard accelerator for this
+objective class, and here it is **worthless**.
 
 `sel_greedy()` already carries the running vector `s` of coancestry sums
 against the chosen set, so every candidate's marginal gain is $O(1)$ and the
@@ -101,7 +200,19 @@ nothing.
 
 The guarantee is worth stating even so, because it settles a question rather
 than improving a number: greedy under our constraints cannot do worse than
-$1/(p+1)$ of optimal. @sec-oa measures what it actually does.
+$1/(p+1)$ of optimal, with $p$ the number of matroids intersected -- here the
+cardinality constraint plus one partition matroid per pool.
+
+State it with its hypotheses, though, because they are not all met. The
+$1 - 1/e$ and $1/(p+1)$ results of @nemhauser1978 and @fisher1978 are proved
+for **monotone, non-negative** submodular functions. Our objective is neither
+in general: the index is standardised to mean zero over the candidate pool, so
+$\bar u_S$ can be negative, and adding a hybrid increases the coancestry term,
+so the objective is monotone only where the merit term dominates. The guarantee
+therefore belongs in this chapter as a statement about the *constraint class* --
+the cap is not an arbitrary restriction -- and not as a certificate for any
+particular run. The certificate this chapter actually uses is the Lagrangian
+bound of @sec-bound, and @sec-oa measures what greedy does in fact achieve.
 
 ## The move that was already paid for {#sec-localsearch}
 
@@ -116,7 +227,30 @@ theta_swap
 ```
 
 Four rank-one column updates. No `N x N` matrix is touched, and the cost
-depends on neither $N$ nor $m$.
+depends on neither $N$ nor $m$. The state it maintains is three objects: the
+line-count vector `cnt`, the product `v = fL %*% cnt`, and their inner product
+divided by $s^2$, which is $\theta$. Removing a hybrid subtracts the two
+columns of `fL` belonging to its parents; adding one adds the two columns of
+the entrant's parents. Because a swap keeps the set size fixed, the normaliser
+$s = 2n$ never changes.
+
+It is an exact update, not an approximation, and that is checkable in three
+lines:
+
+```{r}
+#| label: swap-identity
+st    <- theta_state(s, ctx)
+out_h <- s[1]
+in_h  <- setdiff(seq_len(ctx$N), s)[1]
+st2   <- theta_swap(st, out_h, in_h, ctx)
+after <- c(setdiff(s, out_h), in_h)
+stopifnot(isTRUE(all.equal(st2$theta, theta_group(after, ctx))))
+c(incremental = st2$theta, recomputed = theta_group(after, ctx))
+```
+
+If that identity ever fails, the state and the selection have drifted apart --
+the usual cause being a move that was accepted in the selection vector but not
+applied to the state, or the reverse.
 
 That last property is the one that matters, and it is worth being precise about
 where the saving actually comes from, because the obvious answer is wrong. The
@@ -140,8 +274,56 @@ selections rather than decoding one from scratch each time.
 args(sel_local_search)
 ```
 
-Three modes, one driver, differing only in the temperature schedule. Two design
-points are worth stopping on.
+Three modes, one driver, differing only in the temperature schedule. The driver
+does the following, and each step is a decision a breeder can inspect:
+
+1. **Start from a plan, never from noise.** `start = NULL` builds a warm start:
+   capped truncation, plus the greedy sweep whenever an $N \times N$ `f` is
+   present. The test is literally `nrow(ctx[["f"]]) == ctx$N`, and it is worth
+   being accurate about which branch produced the numbers in this chapter: the
+   production benchmark of @sec-scaling deliberately forms the 0.745 GiB matrix
+   so that the routes needing it can be timed at all, so **its rows took the
+   greedy branch**. Among the candidates it takes the highest-index one that
+   *meets the budget*, and if none does, the one with the smallest loss. As in
+   `sel_de()`, `NULL` never means "start cold".
+
+   The greedy branch is guarded, but the ranking that follows it is not: the
+   warm start scores every candidate with `alpha_loss()`, which reads `ctx$f`.
+   So `start = NULL` needs the $N \times N$ matrix whichever branch it takes,
+   and on a context built without one it fails -- `subscript out of bounds`,
+   measured in @sec-ffree. Supplying an explicit `start =` skips the whole
+   function, and from there the search is `fL`-only; that is the call to make
+   if `f` does not fit in memory, and @sec-ffree is where the two are run side
+   by side.
+2. **Build the state.** `theta_state()` on the starting selection, plus the
+   running index sum and a logical membership vector, so that every later
+   question is $O(1)$ or $O(L)$.
+3. **Calibrate the temperature.** With `t0 = NULL` and a stochastic mode, the
+   driver proposes up to 200 random swaps, records the median absolute change
+   in the objective, and uses that as the starting temperature. Nothing about
+   the scale of the index is assumed, so the same call transfers between
+   datasets. `mode = "hill"` skips this entirely, since it never accepts a
+   worsening move.
+4. **Propose a feasible move.** Pick one of the $n$ selected crosses at random
+   to leave; draw entrants at random until one is found whose parents stay
+   under `max_use` once the leaving cross is removed, giving up after 20
+   attempts. The cap is tested, never punished.
+5. **Score it in $O(L)$.** `theta_swap()` for the new $\theta$, one addition
+   and one subtraction for the new index sum, and the objective is
+   $\bar u_S$ minus `penalty` times the budget violation *expressed in units of
+   the budget itself* -- the violation is divided by `alpha_max`, so a 5
+   becomes an effective slope of 500 index standard deviations per unit of
+   relative loss at a 1% budget, and 5000 at 0.1%. The tighter the budget, the
+   harder a violation is punished, which is the behaviour you want and is not
+   what `make_fitness()`'s fixed multiplier of 1000 on the *absolute* violation
+   does.
+6. **Accept or reject.** Improving moves are always accepted; worsening ones
+   with probability $\exp(\Delta / t_k)$ at the current temperature. The
+   best-ever selection is tracked separately from the current one and is what
+   is returned -- so a chain that wanders away at high temperature loses
+   nothing.
+
+Two design points are worth stopping on.
 
 **The cap is tested, not punished.** Whether a swap keeps every line under
 `max_use` is an $O(1)$ question given the count vector, so infeasible moves are
@@ -153,18 +335,78 @@ improving on its warm start and not moving at all.
 datasets, so `t0 = NULL` samples the median absolute objective change over a
 short burn-in and uses that.
 
+One run of each is not a comparison. Three seeds -- 1, 2 and 3, the same three
+the cached benchmark two subsections below uses, so the two panels are read
+against the same draws:
+
 ```{r}
-set.seed(11)
-ls_res <- t(sapply(c("hill", "anneal", "tempering"), function(m) {
-  s <- sel_local_search(ctx, n_sel, am, gd, mode = m, iters = 20000, seed = 11)
-  c(index = mean_index(s, ctx), alpha_pct = 100 * alpha_loss(s, ctx, gd),
-    Ne_par = ne_parents(s, ctx), max_line = max_line_use(s, ctx))
+#| label: ls-modes
+modes <- c("hill", "anneal", "tempering")
+ls_raw <- do.call(rbind, lapply(1:3, function(sd_) {
+  do.call(rbind, lapply(modes, function(m) {
+    # sel_local_search() sets the seed itself, immediately before its own draws.
+    s <- sel_local_search(ctx, n_sel, am, gd, mode = m, iters = 20000, seed = sd_)
+    data.frame(seed = sd_, mode = m, index = mean_index(s, ctx),
+               alpha_pct = 100 * alpha_loss(s, ctx, gd),
+               Ne_par = ne_parents(s, ctx), max_line = max_line_use(s, ctx))
+  }))
 }))
+ls_res <- do.call(rbind, lapply(modes, function(m) {
+  d <- ls_raw[ls_raw[["mode"]] == m, ]
+  data.frame(mode = m, index = mean(d[["index"]]), index_sd = sd(d[["index"]]),
+             alpha_pct = mean(d[["alpha_pct"]]), Ne_par = mean(d[["Ne_par"]]),
+             max_line = max(d[["max_line"]]))
+}))
+# The same three modes and the same three seeds in the cached benchmark below,
+# which runs 30,000 moves instead of 20,000.
+bmode <- vapply(modes, function(m)
+  mean(bench$index[bench$scale == "book" & bench$method == m]), numeric(1))
 fmt(ls_res, 3)
+fmt(rbind(here_20000 = setNames(ls_res[["index"]], modes),
+          benchmark_30000 = bmode), 4)
 ```
+
+Note that `iters` is the total number of proposed moves *summed over chains*,
+so the three modes cost about the same wall-clock at equal `iters` and the
+comparison above is a fair one. In tempering mode those 20,000 moves are split
+across `n_chains` replicas on a geometric temperature ladder spanning three
+decades, exchanging adjacent rungs every `swap_every` moves.
 
 The realised `alpha` sits against the 1% budget in every mode: the constraint
 is doing its job, and the search is spending the diversity it was allowed.
+
+Three checks before a plan from this function is used, in this order: realised
+$\alpha$ against the budget (a plan far inside it means the search never
+reached the boundary, or the penalty was too steep); `max_line` against the cap
+you set; and $N_{e,\text{par}}$, which is free and catches the case where
+$\theta$ is satisfied by a handful of lines used many times each.
+
+Result. Over the three seeds the three schedules span
+`r fmt(100 * diff(range(ls_res[["index"]])) / max(ls_res[["index"]]), 1)`% of
+index, against a within-mode seed-to-seed standard deviation of at most
+`r fmt(100 * max(ls_res[["index_sd"]]) / max(ls_res[["index"]]), 2)`% -- so
+the ordering at this iteration count, `"hill"` and `"anneal"` within
+`r fmt(100 * abs(ls_res[["index"]][1] - ls_res[["index"]][2]) / max(ls_res[["index"]]), 1)`%
+of each other and `"tempering"` behind both, is not a seed artefact.
+
+Interpretation, and what limits it. Splitting a fixed move budget across
+tempering's replicas costs more than the exchanges return at this size -- a
+statement about `iters = 20000` on `r ctx$N` candidates, not about parallel
+tempering. The hill-versus-anneal ordering in particular does **not** survive a
+change in budget, which is why the second panel prints both: at 20,000 moves
+`"hill"` leads `"anneal"` by
+`r fmt(1000 * (ls_res[["index"]][1] - ls_res[["index"]][2]), 1)` thousandths of
+an index unit -- more than the
+`r fmt(1000 * max(ls_res[["index_sd"]]), 1)`-thousandth within-mode standard
+deviation, so not noise at that budget -- while at the benchmark's 30,000 moves
+the sign flips to
+`r fmt(1000 * (bmode[["anneal"]] - bmode[["hill"]]), 1)` thousandths in
+`"anneal"`'s favour. That ordering is therefore a property of the move budget
+and not of the schedule. Read this panel as evidence that the
+temperature schedule is a second-order choice at fixed move budget -- not as a
+ranking of the three, and not as a claim that the move rather than the schedule
+is what buys the index. That claim is a comparison against the other methods
+and it belongs to the benchmark below, which has the dispersion to support it.
 
 ### Against the differential evolution, at equal wall-clock
 
@@ -185,9 +427,71 @@ agg <- aggregate(cbind(index, alpha, Ne_parents, max_line, secs, gap_pct) ~ meth
 agg$alpha <- 100 * agg$alpha
 names(agg) <- c("method", "index", "loss %", "Ne parents", "max uses", "seconds",
                 "gap to bound %")
+g_row   <- agg[agg[["method"]] == "greedy", ]
+top_row <- agg[which.max(agg[["index"]]), ]
 knitr::kable(agg[order(-agg$index), ], digits = 3, row.names = FALSE,
   caption = "Book scale, mean of 3 seeds, 1% diversity budget. The gap is against the certified Lagrangian bound.")
 ```
+
+Read that table by columns rather than by rank. `index` orders the methods;
+`loss %` says which of them actually spent the budget; `max uses` says which
+were capped, since the capped variants are solving a strictly harder problem
+and must not be compared with the uncapped ones on index alone; `seconds` is
+the axis the ranking is conditional on; and `gap to bound %` is the only column
+that says whether the leader is near optimal or merely ahead of the others. The
+greedy row is the one to keep in view: swept finely over $w$ it reaches index
+`r fmt(g_row[["index"]], 3)` in `r round(1000 * g_row[["seconds"]])` ms, which
+is `r fmt(100 * (1 - g_row[["index"]] / top_row[["index"]]), 1)`% below the
+leading method at about
+`r round(top_row[["seconds"]] / g_row[["seconds"]])`x less wall-clock. Whether
+that shortfall is worth `r fmt(top_row[["seconds"]], 2)` seconds is a question
+about the programme, not about the algorithm -- at production scale the same
+ratio is what decides whether a frontier of ten budgets is an afternoon or a
+minute.
+
+This table is also where the move-versus-schedule question can actually be
+settled, because it has replication on both sides of it and both scales:
+
+```{r}
+#| label: move-vs-schedule
+mv <- do.call(rbind, lapply(c("book", "production"), function(sc) {
+  d   <- bench[bench$scale == sc, ]
+  m   <- aggregate(index ~ method, d, mean)
+  ls_ <- m[["index"]][m[["method"]] %in% modes]
+  de_ <- m[["index"]][m[["method"]] %in% c("de_hybrid", "de_lines")]
+  sds <- aggregate(index ~ method, d[d$method %in% modes, ], sd)
+  data.frame(scale = sc, schedule_spread = diff(range(ls_)),
+             best_swap_minus_best_de = max(ls_) - max(de_),
+             ratio = (max(ls_) - max(de_)) / diff(range(ls_)),
+             max_seed_sd = max(sds[["index"]]),
+             hill_minus_anneal =
+               mean(d[["index"]][d[["method"]] == "hill"]) -
+               mean(d[["index"]][d[["method"]] == "anneal"]))
+}))
+fmt(mv, 4)
+```
+
+Result. The three temperature schedules share one move and span
+`r fmt(mv[["schedule_spread"]][1], 3)` index units at book scale and
+`r fmt(mv[["schedule_spread"]][2], 3)` at production, with a within-mode
+seed-to-seed standard deviation of at most
+`r fmt(max(mv[["max_seed_sd"]]), 4)`. The best of them sits
+`r fmt(mv[["best_swap_minus_best_de"]][1], 3)` units above the better of the
+two differential evolutions at book scale and
+`r fmt(mv[["best_swap_minus_best_de"]][2], 3)` at production --
+`r fmt(mv[["ratio"]][1], 1)`x and `r fmt(mv[["ratio"]][2], 1)`x the spread
+among the schedules respectively, and in a fraction of the wall-clock in both
+cases -- the `seconds` column above at book scale, and the production panel of
+@sec-scaling at the other.
+
+Interpretation. What moves the index at both scales measured is the
+neighbourhood the search moves in -- the $O(L)$ swap, available only to a
+method that does not decode a selection from scratch -- rather than the
+schedule wrapped around it. Two things limit that: the ratio is
+`r fmt(mv[["ratio"]][1] / mv[["ratio"]][2], 1)` times smaller at production
+than at book scale, so it narrows with $N$ rather than holding constant; and
+it rests on three seeds per cell, where the DE arms carry the larger
+dispersion. It is a comparison of two families at two sizes, not a law.
 
 ::: {.callout-tip}
 ## What the literature says about picking a metaheuristic
@@ -211,25 +515,128 @@ a cheap move.
 
 ### The encoding, wired up at last
 
-@sec-combinatorial reports that the line encoding beats the hybrid encoding by
-5.7x at equal budget, and the package has exported `decode_lines()` and
-`make_fitness_fast()` ever since -- with nothing driving them. `sel_de_fast()`
-closes that:
+@sec-combinatorial measures the line encoding against a fully $N$-dimensional
+one -- one random key per hybrid -- and finds a 5.7x margin in the line
+encoding's favour at equal budget. That is a verdict on $N$-dimensional
+encodings, not a verdict on `sel_de()`, whose search space is $n_{sel}$
+coordinates wide; the head-to-head between the two encodings the package
+actually ships is in this chapter's own benchmark below, and it goes the other
+way. What is true regardless is that `decode_lines()` and `make_fitness_fast()`
+have been exported since the line route was written with nothing driving them.
+`sel_de_fast()` closes that:
 
 ```{r}
 sel_de_fast
 ```
 
+What the call does, in order:
+
+1. Builds the fast fitness: decode the line weights into a selection, tabulate
+   the parent counts, evaluate $\theta = \mathbf{w}'\mathbf{f}^L\mathbf{w}$ on
+   the used lines only, and add one proportional penalty per active
+   restriction -- diversity budget, minimum $N_{e,\text{par}}$, per-line cap,
+   pool balance. No $N \times N$ matrix is formed or indexed anywhere.
+2. Builds the seeds. They sweep a **line-diversity direction**, not a merit
+   weight: `p` proportional to the negated mean coancestry of each line, at
+   eight increasing strengths from zero to one.
+3. Searches the box $[0, 1]^L$ with `DEoptim`, and decodes the best member.
+
+The zero-strength seed is worth isolating, because it is the natural origin of
+the encoding: with every line weight at zero the decoder ranks on index alone
+and takes crosses greedily under the cap, which is capped truncation exactly.
+
+```{r}
+#| label: zero-weight-decode
+cap <- ceiling(2 * n_sel / ctx$n_lines) + 1
+zero_w <- decode_lines(rep(0, ctx$n_lines), ctx, n_sel, max_use = cap)
+stopifnot(identical(as.integer(zero_w),
+                    as.integer(sel_truncation_cap(ctx, n_sel, cap = cap))))
+c(cap = cap, index = mean_index(zero_w, ctx),
+  alpha_pct = 100 * alpha_loss(zero_w, ctx, gd),
+  max_line = max_line_use(zero_w, ctx))
+```
+
 The seeds sweep a line-diversity direction rather than a merit weight, but the
 principle is @sec-combinatorial's unchanged: `seeds = NULL` builds the sweep and
-never means "start cold".
+never means "start cold". The practical consequence of the identity above is
+that the population always contains at least one plan that respects the cap by
+construction, whatever the diversity penalty later does.
+
+#### What it is actually for {#sec-defast-restrictions}
+
+`sel_de_fast()` is the only route in this package that accepts more than a
+budget and a cap, so the case for it has to be made where those extra
+restrictions are active. Here they are, all four at once, run rather than
+described:
+
+```{r}
+#| label: de-fast-four
+cap4  <- ceiling(4 * n_sel / ctx$n_lines)     # the benchmark's cap, not the default
+pool_share <- function(s) mean(ctx$pool[as.vector(ctx$parents[s, ])] == "A")
+
+de_fast <- do.call(rbind, lapply(c(20, 25, 30), function(nemin) {
+  set.seed(7)
+  s <- suppressWarnings(
+    sel_de_fast(ctx, n_sel, gd, am, ne_par_min = nemin, max_use = cap4,
+                pool_tol = 0.05, NP = 100, itermax = 300))
+  data.frame(Ne_floor = nemin, index = mean_index(s, ctx),
+             alpha_pct = 100 * alpha_loss(s, ctx, gd),
+             Ne_par = ne_parents(s, ctx), max_line = max_line_use(s, ctx),
+             pool_A = pool_share(s))
+}))
+fmt(de_fast, 4)
+c(distinct_plans_over_the_three_floors =
+    length(unique(round(de_fast[["index"]], 12))))
+```
+
+```{r}
+#| label: de-fast-vs-local
+set.seed(7)
+ls_capped <- sel_local_search(ctx, n_sel, am, gd, mode = "anneal",
+                              iters = 20000, max_use = cap4, seed = 7)
+fmt(c(de_fast_index          = de_fast[["index"]][de_fast[["Ne_floor"]] == 25],
+      local_search_index     = mean_index(ls_capped, ctx),
+      local_search_alpha_pct = 100 * alpha_loss(ls_capped, ctx, gd),
+      local_search_Ne        = ne_parents(ls_capped, ctx),
+      local_search_max_line  = max_line_use(ls_capped, ctx)), 4)
+```
+
+Three readings, in the order they narrow the recommendation.
+
+**The cap is satisfied by construction and the pool balance is free.**
+`max_line` equals the cap in every row, because the decoder never proposes a
+plan that breaks it. `pool_A` is exactly 0.5 in every row, and not because the
+search found it: in a complete factorial every cross spends one pool-A slot and
+one pool-B slot, so the `matroid-check` panel above already forced it. Of the
+four restrictions `make_fitness_fast()` accepts, one is structural and cannot
+bind in this mating design.
+
+**The $N_{e,\text{par}}$ floor does not shape the plan either.** All three
+floors return the *same* selection, at $N_{e,\text{par}} =$
+`r fmt(de_fast[["Ne_par"]][1], 2)`: met with room to spare at 20 and 25, missed
+at 30 with a penalty that does not recover it. The restriction that is actually
+deciding the plan is the cap -- `r 2 * n_sel` parent slots over
+`r ctx$n_lines` lines is a mean usage of
+`r fmt(2 * n_sel / ctx$n_lines, 2)`, against a cap of `r cap4`. That is the
+diagnosis of @sec-scaling arriving early: compare $2n/L$ with the cap before
+crediting any other restriction with the shape of a plan.
+
+**And it still does not lead on index.** Under the same budget and the same
+cap, a plain annealed local search reaches
+`r fmt(mean_index(ls_capped, ctx), 3)` against `sel_de_fast()`'s
+`r fmt(de_fast[["index"]][de_fast[["Ne_floor"]] == 25], 3)`. The honest recommendation is
+therefore narrow: reach for `sel_de_fast()` when a restriction exists that the
+swap neighbourhood cannot test -- an $N_{e,\text{par}}$ floor that actually
+binds, or an incomplete factorial where pool balance is a real degree of
+freedom -- and not because it optimises better, because on every number in this
+chapter it does not.
 
 ## The bound was not a bound {#sec-bound}
 
-@sec-relaxation introduces the continuous relaxation as an upper bound, and
-@sec-combinatorial checks the differential evolution against it by taking the
-best relaxation point whose own `alpha` falls inside the budget. That
-construction is **not valid**, and it is worth showing rather than asserting.
+@sec-relaxation introduces the continuous relaxation as an upper bound, and the
+convergence check of @sec-combinatorial was originally written to take the best
+relaxation point whose own `alpha` falls inside the budget. That construction
+is **not valid**, and it is worth showing rather than asserting.
 
 The relaxation at a given $\lambda$ maximises $\mathbf{c}'\mathbf{u} - \lambda\,
 \mathbf{c}'\mathbf{f}\mathbf{c}$ -- a penalised objective, not the index. Its
@@ -245,7 +652,7 @@ V     <- rel[, "index"] - lam * rel[, "theta"]     # the relaxation's dual value
 cmp <- do.call(rbind, lapply(c(0.0025, 0.005, 0.01, 0.02), function(a) {
   ok  <- a_rel <= a
   old <- if (any(ok)) max(rel[ok, "index"]) else NA_real_
-  new <- min(V + lam * (1 - gd * (1 - a)))         # what ocs_bound() computes
+  new <- min(V + lam * (1 - gd * (1 - a)))  # the Lagrangian form, under-converged
   best <- max(vapply(
     Filter(function(s) alpha_loss(s, ctx, gd) <= a + 1e-12,
            c(list(sel_local_search(ctx, n_sel, a, gd, mode = "anneal",
@@ -253,11 +660,24 @@ cmp <- do.call(rbind, lapply(c(0.0025, 0.005, 0.01, 0.02), function(a) {
              lapply(c(0, .5, 1, 2, 4, 8, 16), function(w) sel_greedy(ctx, n_sel, w = w)))),
     mean_index, numeric(1), ctx = ctx))
   data.frame(alpha_max = a, feasible_plan = best, old_bound = old,
-             lagrangian = new, old_valid = old >= best - 1e-9,
+             lagrangian_2000 = new, old_valid = old >= best - 1e-9,
              lagrangian_valid = new >= best - 1e-9)
 }))
 fmt(cmp, 4)
 ```
+
+The experiment is a falsification, not an illustration. `feasible_plan` is the
+best plan any method in this book could find *inside* the stated budget;
+`old_bound` is what the discarded construction would have reported; a valid
+upper bound must be at least `feasible_plan` in every row. The `old_valid`
+column is FALSE at all four budgets tested -- the "bound" is below a plan that
+exists, which is a contradiction and not a tight bound.
+
+`lagrangian_2000` is the correct *form* evaluated at a deliberately cheap
+setting -- 12 multipliers, 2,000 projected-gradient iterations -- and it is
+here only to show that the form survives where the construction does not.
+**It is not a certified bound and nothing downstream of this chunk quotes it.**
+The certified value comes from `ocs_bound()` below.
 
 The correct statement is a Lagrangian one, and it takes a line. Any selection
 $S$ of size $n$ has an equal-weight contribution vector feasible for the
@@ -273,6 +693,36 @@ $\lambda$. The tightest such statement is the minimum over $\lambda$.
 ocs_bound
 ```
 
+To use it: translate the budget into
+$\theta_{\max} = 1 - \text{gd\_ref}(1 - \alpha_{\max})$; solve the relaxation
+at each $\lambda$ to get $V(\lambda)$; take the minimum of
+$V(\lambda) + \lambda\,\theta_{\max}$; and **read the `converged` attribute
+before quoting anything**. The function doubles its iteration count until the
+value stops moving because the value rises monotonically with iterations, so an
+under-converged run reports the bound too small -- the one failure mode that
+turns a bound into a wrong number rather than a loose one.
+
+```{r}
+#| label: certified-bound
+bound <- ocs_bound(ctx, n_sel, am, gd)
+fmt(c(hand_12_lambdas_2000_iters = min(V + lam * (1 - gd * (1 - am))),
+      ocs_bound                  = as.numeric(bound),
+      lambda_star                = attr(bound, "lambda"),
+      iterations                 = attr(bound, "iters"),
+      theta_max                  = 1 - gd * (1 - am)), 4)
+attr(bound, "converged")
+```
+
+The two numbers in the first two rows are the same formula at two iteration
+counts, and the gap between them is the failure mode named in the paragraph
+above, measured. The cheap sweep reports
+`r fmt(min(V + lam * (1 - gd * (1 - am))), 4)`; the converged run reports
+`r fmt(as.numeric(bound), 4)`, higher by
+`r fmt(100 * (as.numeric(bound) / min(V + lam * (1 - gd * (1 - am))) - 1), 2)`%.
+Under-convergence pushes a Lagrangian bound *down*, which is the one direction
+that turns it into a wrong number rather than a loose one. Everything this
+chapter quotes as a bound from here on is `bound`, the certified object.
+
 Two practical consequences. Every $\lambda$ gives a valid bound, so a coarse
 grid costs tightness and never validity -- unlike the old construction, where a
 coarse grid could silently produce a "bound" below the achievable. And the bound
@@ -282,9 +732,23 @@ effort is provably wasted.
 ::: {.callout-warning}
 ## This changes a number in @sec-combinatorial
 
-The convergence check in @sec-combinatorial uses the invalid construction. Its
-qualitative conclusion survives -- the warm-started DE does sit close to the
-frontier -- but the reported gap is not a gap. Use `ocs_bound()`.
+The convergence check in @sec-combinatorial once used the invalid
+construction, and the gap it reported was not a gap. That chapter now calls
+`ocs_bound()`, and the number there is the Lagrangian one; its qualitative
+conclusion survived the correction -- the warm-started DE does sit below the
+frontier, and the size of the shortfall is what @sec-localsearch closes. The
+lesson is the one that generalises: a quantity is only a bound if a feasible
+solution can never exceed it, and that is a property to test, not to assume.
+
+**@sec-relaxation has not been rewritten to match, and the contradiction is
+named here rather than left to be discovered.** That section still describes
+each row of its $\lambda$ sweep as "an upper bound on what any discrete plan of
+the same diversity can achieve", and its figure caption still says discrete
+strategies must sit below and to the left of the curve. Both statements are the
+construction falsified above. Until that text is corrected, read
+@sec-relaxation's curve as a relaxation -- a penalised optimum at each
+$\lambda$, nothing more -- and take every bound in this book from
+`ocs_bound()`.
 :::
 
 ## Rounding the relaxation into a plan
@@ -296,11 +760,105 @@ usage, and assign concrete crosses under both pools' caps. That two-stage shape
 -- contributions first, mate allocation second -- is exactly @waldmann2025's,
 whose mate-allocation stage solves in under 0.01 seconds.
 
+The five steps inside `ocs_round()`, in the order they run:
+
+1. **Line merit.** Each line is scored by the mean index of the hybrids it
+   parents in the candidate set. That quantity is a general combining ability:
+   a property of the line *against the opposite pool as represented in this
+   factorial*, never a property of the line alone (@sec-heterosis-gca-sca).
+   Change the tester pool and the score changes.
+2. **Contributions.** `ocs_quadprog()` on `ctx$fL` with those merits, at a
+   given $\lambda$, with each line's contribution capped at
+   $\texttt{max\_use} / 2n$ -- the cap expressed as a share of the $2n$ parent
+   slots.
+3. **Rounding.** Contributions times $2n$, floored, and the shortfall handed to
+   the largest remainders; then clipped at `max_use` again.
+4. **Mate allocation.** Walk the candidates in decreasing index and take each
+   cross whose two parents still have quota and are under the cap -- a greedy
+   b-matching. If quota runs out before $n$ crosses are found, top up on the
+   cap alone, because the quota is a rounding artefact and the cap is the real
+   restriction.
+5. **Choose $\lambda$ by budget, not by preference.** The whole sweep is
+   evaluated and the plan returned is the best-index one whose realised
+   $\alpha$ respects `alpha_max`. The exchange rate stays an internal detail;
+   the budget remains the interface.
+
 ```{r}
-r <- ocs_round(ctx, n_sel, am, gd, bound = min(V + lam * (1 - gd * (1 - am))))
-fmt(c(index = r$index, alpha_pct = 100 * r$alpha, lambda = r$lambda,
-      bound = r$bound, gap_pct = 100 * r$gap), 4)
+r <- ocs_round(ctx, n_sel, am, gd, bound = as.numeric(bound))
+fmt(c(index = r[["index"]], alpha_pct = 100 * r[["alpha"]],
+      lambda = r[["lambda"]], bound = r[["bound"]],
+      gap_pct = 100 * r[["gap"]]), 4)
 ```
+
+```{r}
+#| label: round-reconcile
+#| echo: false
+br <- bench[bench$scale == "book" & bench$method == "ocs_round", ][1, ]
+fmt(c(here_index     = r[["index"]],
+      benchmark_index = br[["index"]],
+      here_gd_ref    = gd,
+      here_bound     = as.numeric(bound),
+      benchmark_bound = br[["bound"]],
+      here_gap_pct   = 100 * r[["gap"]],
+      benchmark_gap_pct = br[["gap_pct"]]), 5)
+```
+
+That second panel exists because the benchmark table of @sec-localsearch
+reports this same method and does not report exactly this gap. The plan is
+identical -- both reach index `r fmt(r[["index"]], 6)` -- and the whole
+difference is in `gd_ref`: this chapter resamples the random reference at
+$B = 400$ and the cached benchmark at $B = 500$, so
+$\theta_{\max} = 1 - \text{gd\_ref}(1 - \alpha_{\max})$ differs in the fourth
+decimal and the bound with it. Two draws of the same reference, not two
+results. What would be a real discrepancy, and was one until this section was
+corrected, is a gap computed against an *uncertified* bound: the cheap sweep
+above would have reported
+`r fmt(100 * (min(V + lam * (1 - gd * (1 - am))) - r[["index"]]) / min(V + lam * (1 - gd * (1 - am))), 2)`%
+here, more than a point tighter than the truth, because the quantity it divides
+by is too small.
+
+```{r}
+#| label: round-frontier
+fmt(r[["frontier"]], 4)
+```
+
+The frontier table is the step-5 diagnostic: at small $\lambda$ the programme
+puts everything on the best lines and the realised loss exceeds the budget; at
+large $\lambda$ it spreads contributions and the loss goes negative -- more
+diverse than a random subset. The plan returned is the highest-index row that
+respects the budget, which because index falls monotonically with $\lambda$ is
+the smallest feasible $\lambda$ on the grid. If *no* row is feasible the
+function falls back to the least-loss one, which is a result to notice rather
+than to use -- the returned `alpha` is then above `alpha_max` and nothing in
+the call will say so.
+
+The rounding is visible in the plan itself. Line usage should track combining
+ability, and it does:
+
+```{r}
+#| label: merit-vs-usage
+merit <- tapply(rep(ctx$index, 2),
+                factor(c(ctx$parents[, 1], ctx$parents[, 2]),
+                       levels = seq_len(ctx$n_lines)), mean)
+used  <- line_counts(r[["idx"]], ctx)
+isA   <- ctx$pool == "A"
+c(cor_merit_usage_A = cor(merit[isA], used[isA]),
+  cor_merit_usage_B = cor(merit[!isA], used[!isA]),
+  lines_used_A      = sum(used[isA] > 0),
+  lines_used_B      = sum(used[!isA] > 0),
+  max_line          = max(used))
+```
+
+Result: usage correlates with line merit at `r fmt(cor(merit[isA], used[isA]), 2)`
+in pool A and `r fmt(cor(merit[!isA], used[!isA]), 2)` in pool B, over
+`r sum(used > 0)` lines of `r ctx$n_lines` actually used.
+Interpretation: the quadratic programme is doing what an
+optimal-contribution scheme is supposed to do -- allocate more crosses to
+better general combiners and stop where relatedness makes the next cross
+expensive. Note that this call passes no `max_use`, so the plan's
+`max_line` is whatever the coancestry term alone permits; with a cap set, the
+bound stays valid but goes loose, because the relaxation it comes from carries
+no cap and therefore bounds an easier problem.
 
 It is not the best method here, and it is not meant to be. What it gives is a
 plan and a certificate in one call, at a cost that does not grow with $N$ in
@@ -331,6 +889,36 @@ removes the infeasible point that generated it.
 
 ```{r}
 args(sel_exact)
+```
+
+The loop, step by step:
+
+1. **Translate the budget.** The diversity constraint becomes
+   $\mathbf{x}'\mathbf{f}\mathbf{x} \le n^2\,\theta_{\max}$ with
+   $\theta_{\max} = 1 - \text{gd\_ref}(1 - \alpha_{\max})$ -- the same quantity
+   as in the Lagrangian bound, expressed in submatrix-sum units because that is
+   what the solver sees.
+2. **Write the structural rows.** One cardinality row summing to $n$, and one
+   row per line for the partition matroid when `max_use` is set. Those are
+   linear and exact; only the quadratic needs approximating.
+3. **Carry an incumbent from the start.** The warm start is the same
+   `sel_local_search()` warm start; if it satisfies the budget it becomes the
+   incumbent and is handed to the solver as a starting point, so that a run
+   stopped by the clock still reports a real interval.
+4. **Solve, cut, repeat.** If the MILP solution satisfies the true quadratic
+   constraint, it is optimal for the current relaxation and the loop can stop;
+   otherwise a gradient cut at that point is added and the MILP re-solved.
+5. **Read the dual bound from the right field.** `objective_value` is an upper
+   bound only for a MILP solved to optimality; the moment the solver hits its
+   own time limit the bound must come from `mip_dual_bound`. Cuts only tighten
+   the relaxation, so the running minimum over iterations stays valid.
+
+```{r}
+#| label: exact-budget
+c(theta_max       = 1 - gd * (1 - am),
+  budget_xfx      = n_sel^2 * (1 - gd * (1 - am)),
+  binary_vars     = ctx$N,
+  structural_rows = 1 + ctx$n_lines)
 ```
 
 It also returns more than a black-box call would. The MILP objective is a valid
@@ -364,6 +952,13 @@ integer programme for mate selection with a commercial solver, reach the same
 conclusion and say plainly that large datasets will need decomposition and
 "sub-optimal (but good quality) feasible solutions".
 
+The scale caveat cuts both ways and belongs here rather than in a footnote:
+"the heuristic is exactly optimal" is measured at $N = 36$, on instances small
+enough to prove. It is evidence that the move and the objective are right, not
+evidence that the same holds at 625 or at 10,000, where the true optimum is
+unknown and only the interval between the best plan and the certified bound is
+reportable.
+
 ::: {.callout-note}
 ## What the oracle is for
 
@@ -381,29 +976,165 @@ changes; do not put it in a pipeline.
 knitr::kable(scal, digits = c(0, 0, 0, 3, 1, 1, 1, 1), row.names = FALSE,
   col.names = c("N", "L", "n_sel", "f size (GiB)", "hybrid (us)", "line (us)",
                 "of which decode (us)", "swap (us)"),
-  caption = "Cost of one objective evaluation, by route. The line encoding's cost is dominated by the decode, which sorts all N candidates; the swap never decodes.")
+  caption = "Cost of one objective evaluation, by route. n_sel is 2 percent of N by construction in this sweep, so the hybrid route's column mixes growth in N with growth in the size of the selection; the line route's is dominated by the decode, which sorts all N candidates; the swap never decodes. The matrix-size column is GiB (bytes / 2^30) throughout, despite being named f_GB in the cached CSV.")
+```
+
+```{r}
+#| label: scaling-growth
+#| echo: false
+sc <- scal[is.finite(scal$us_hybrid), ]
+gr <- function(v) v[nrow(sc)] / v[1]
+fmt(c(N_from = sc$N[1], N_to = sc$N[nrow(sc)],
+      n_sel_from = sc$n_sel[1], n_sel_to = sc$n_sel[nrow(sc)],
+      growth_hybrid = gr(sc$us_hybrid), growth_lines = gr(sc$us_lines),
+      growth_decode = gr(sc$us_decode), growth_swap = gr(sc$us_swap)), 2)
 ```
 
 ```{r}
 #| echo: false
-#| fig-cap: "Cost per objective evaluation against the number of candidate hybrids. The hybrid encoding grows with N; the line route and the incremental swap do not."
+#| fig-cap: "Cost per objective evaluation against the number of candidate hybrids. Only the incremental swap is flat. Both encodings grow: the line route by 9.4x, dominated by decode_lines()'s O(N log N) sort over all candidates, and the hybrid route by 20x -- but that arm is confounded, because the sweep sets n_sel to 2 percent of N (20 crosses at N = 400, 200 at N = 10,000) and mean(f[idx, idx]) is quadratic in the selection, not in N."
 knitr::include_graphics(book_fig("search_scaling.png"))
 ```
 
-Three things scale badly, and they are worth separating because only two of
-them are fixed by the encoding.
+Three things scale badly, and they are worth separating because only one of the
+three is fixed by the line encoding.
 
 **Memory.** `f` is $8N^2$ bytes: 0.745 GiB at $N = 10{,}000$ and 3.8 GiB at
 $N = 22{,}500$, which is why @sec-choosing's benchmark refuses to form it there.
 $\mathbf{f}^L$ is $200 \times 200$, or 0.3 MiB. **Fixed by the line route.**
 
-**Search dimension.** 10,000 against 200. **Fixed by the line encoding.**
+**Search dimension.** Not what the line encoding fixes -- not for the two
+differential evolutions, at any rate. `sel_de()` searches $n_{sel}$ continuous
+coordinates and `sel_de_fast()` searches $L$; at this chapter's target both are
+**200**, which is also the figure @sec-notreach quotes. The 10,000-dimensional
+alternative is one key per hybrid, the encoding @sec-combinatorial rejects and
+no route in this package uses. What the collapse genuinely moves to $L$ is the
+*contributions* space: `ocs_quadprog()` inside `ocs_round()` solves a
+200-variable quadratic programme where `ocs_relaxation()` works on a
+10,000-variable contribution vector, which is why `ocs_round()` (uncapped, no
+`max_use`) sweeps its ten $\lambda$ values and returns a *plan* in
+`r round(1000 * bsec("production", "ocs_round"))`
+ms at production scale. That number is the rounding and nothing else: the
+benchmark passes `bound =` a value computed once, outside the timed block, and
+at $N = 10{,}000$ that value comes back **uncertified**, so the plan is what is
+fast here and there is no certificate at this scale to be fast about. The
+paragraph after the table below is where that is measured.
+**Fixed for the quadratic programme; already true for the DE.**
 
 **Cost per evaluation.** `mean(f[idx, idx])` is $O(n^2)$ in the *selection*, so
 it degrades exactly as the problem gets interesting -- but `decode_lines()` is
 $O(N \log N)$, so the line encoding does not fix this and at these sizes is
 slightly worse. **Fixed only by not decoding**, which is what the swap
 neighbourhood does.
+
+Scaling up is therefore not a matter of buying time. It is a matter of not
+forming `f` at all: build `ctx$fL` and `ctx$parents`, and use the routes that
+read only those. That last clause is a real restriction and not a formality,
+because most of this package still reaches for the $N \times N$ matrix, and
+`fast_ctx()` does not change that -- it *adds* `parents` to whatever context it
+is handed and neither builds `f` nor drops it. The constructor with the switch
+is `ctx_from_pools(sim, with_f = FALSE)`, and the next section is what actually
+happens on the context it returns.
+
+### Which routes actually run without `f` {#sec-ffree}
+
+```{r}
+#| label: f-free-routes
+sim <- simulate_pools(n_A = 10, n_B = 10, m = 400, seed = 1)
+cxF <- ctx_from_pools(sim, with_f = FALSE)   # fL + parents, no N x N matrix
+cxT <- ctx_from_pools(sim, with_f = TRUE)    # the same data, f as well
+k   <- 12
+gdk <- null_distribution(cxT, k, B = 50, B_full = 10)$gd_ref
+st  <- sel_truncation_cap(cxF, k, cap = 3)   # a valid starting selection
+set.seed(1); wts <- runif(cxF$n_lines)
+# Line merit as ocs_round() defines it: mean index of the hybrids a line parents.
+merit <- vapply(seq_len(cxF$n_lines), function(l)
+  mean(cxF$index[cxF$parents[, 1] == l | cxF$parents[, 2] == l]), numeric(1))
+
+runs <- function(e) tryCatch({ force(e); "runs" },
+                             error = function(err) paste0("ERROR: ", conditionMessage(err)))
+knitr::kable(data.frame(
+  Route = c("`theta_state()` / `theta_swap()`", "`fast_theta()`",
+            "`sel_truncation_cap()`", "`decode_lines()`", "`sel_de_fast()`",
+            "`ocs_quadprog()`", "`ocs_bound()`",
+            "`sel_local_search(start = st)`", "`sel_local_search(start = NULL)`",
+            "`theta_group()` / `alpha_loss()`", "`null_distribution()`",
+            "`sel_greedy()`", "`ocs_round()`"),
+  `On a ctx with no f` = c(
+    runs(theta_swap(theta_state(st, cxF), st[1], setdiff(seq_len(cxF$N), st)[1], cxF)),
+    runs(fast_theta(st, cxF)),
+    runs(sel_truncation_cap(cxF, k, cap = 3)),
+    runs(decode_lines(wts, cxF, k)),
+    runs(suppressWarnings(sel_de_fast(cxF, k, gdk, am, NP = 20, itermax = 10))),
+    runs(ocs_quadprog(cxF$fL, merit, lambda = 1, upper = 1)),
+    runs(suppressWarnings(ocs_bound(cxF, k, am, gdk, iters = 200, max_doublings = 1L))),
+    runs(sel_local_search(cxF, k, am, gdk, start = st, iters = 500, seed = 1)),
+    runs(sel_local_search(cxF, k, am, gdk, iters = 500, seed = 1)),
+    runs(theta_group(st, cxF)),
+    runs(null_distribution(cxF, k, B = 20, B_full = 5)),
+    runs(sel_greedy(cxF, k, w = 1)),
+    runs(ocs_round(cxF, k, am, gdk, bound = NA_real_))),
+  check.names = FALSE), row.names = FALSE,
+  caption = "Every route in this chapter, run on a context carrying fL and parents but no N x N f.")
+
+# The f-free replacement for null_distribution(): the same resampling, scored
+# with fast_theta() instead of theta_group(). Same seed, same draws, same gd_ref.
+set.seed(7)
+gd_free <- mean(replicate(50, 1 - fast_theta(sample.int(cxF$N, k), cxF)))
+stopifnot(all.equal(gd_free, gdk))
+
+# What the matrix was buying the local search: only the starting point.
+objs <- c(
+  with_f_start_NULL = attr(sel_local_search(cxT, k, am, gdk, iters = 500, seed = 1),
+                           "objective"),
+  no_f_start_given  = attr(sel_local_search(cxF, k, am, gdk, start = st, iters = 500,
+                                            seed = 1), "objective"))
+```
+
+Read the second column before designing a pipeline around the paragraph above
+it. The incremental swap, the line decoder, the line-space quadratic programme
+and the Lagrangian bound are genuinely `f`-free, and so is `sel_local_search()`
+**once it is given an explicit `start =`**: on this instance it reaches
+`r fmt(objs[["no_f_start_given"]], 4)` against
+`r fmt(objs[["with_f_start_NULL"]], 4)` for the default warm start with `f`
+present, so at this size the matrix was buying the starting point and nothing
+else. That is one instance, not a guarantee -- the greedy warm start is there
+because at book and production scale it is worth having.
+
+`sel_greedy()` is the honest failure: it opens with `f <- ctx[["f"]]` and dies
+on a `NULL`. The rest are the trap `ctx$f` is. `theta_group()` is
+`mean(ctx$f[idx, idx])`, and with no `f` in the list that `$` *partial-matches*
+`ctx$fL` -- an $L \times L$ matrix, then indexed with hybrid subscripts, so
+what surfaces is `subscript out of bounds` and not a missing object. Through
+`gene_diversity()` and `alpha_loss()` that reaches `null_distribution()`,
+`ocs_round()`'s per-$\lambda$ frontier, and `sel_local_search()` at its
+documented default of `start = NULL`: `ls_warm_start()` does guard the greedy
+branch with `nrow(ctx[["f"]]) == ctx$N`, but the ranking that follows it scores
+every candidate with `alpha_loss()`, and that call is unguarded. Had the
+selection been small enough to index a $20 \times 20$ matrix legally, the same
+line would have returned a diversity computed from the wrong matrix, silently.
+
+So the honest scaling recipe has two branches. If `f` fits, form it: the
+benchmark below does, on purpose, and the whole chapter's numbers come from
+that branch. If it does not fit, the `f`-free subset is the *whole* pipeline
+you get -- `sel_truncation_cap()` for a starting plan, `fast_theta()` over
+random subsets for `gd_ref` in place of `null_distribution()` (same seed, same
+draws, the same `gd_ref` to machine precision, which the chunk above asserts),
+`sel_local_search(start = ...)` and `sel_de_fast()` for the search,
+`ocs_quadprog()` and `ocs_bound()` for the contributions and the bound -- and
+the greedy sweep, the resampled null and the rounding route are simply not
+available.
+
+### The head-to-head at production scale
+
+Nothing broke at 10,000 and nothing here claims it did: the
+benchmark below forms the 0.745 GiB matrix on purpose, and the hybrid route
+still evaluates in
+`r fmt(scal$us_hybrid[scal$N == 10000], 0)` us. The wall is further out, and
+it is documented rather than predicted -- at $N = 22{,}500$ the matrix is
+`r fmt(scal$f_GB[scal$N == 22500], 1)` GiB and @sec-choosing's cost benchmark
+declines to form it at all, so every metric that needs it has no timing entry
+at that scale. The line route has one.
 
 ```{r}
 #| echo: false
@@ -423,6 +1154,33 @@ $n = 200$ over $L = 200$ lines the mean usage is already 2, so a cap of 4 leaves
 very little to choose; the restriction that is actually deciding the plan is the
 one nobody wrote a budget for. Check `max_line` and realised `alpha` together
 before concluding that a diversity constraint is doing any work.
+
+Read down the capped rows only, as the rule above the book-scale table
+requires, and the ordering inverts. `greedy` ranks
+`r brank("production", "greedy")[["rank"]]` of
+`r brank("production", "greedy")[["n"]]` among the uncapped rows and
+`r brank("production", "greedy_cap")[["rank"]]` of
+`r brank("production", "greedy_cap")[["n"]]` among the capped ones: it tops them
+at `r sprintf("%.5f", bmean("production", "greedy_cap"))` in
+`r fmt(bsec("production", "greedy_cap"), 3)` s, ahead of `tempering_cap` at
+`r sprintf("%.5f", bmean("production", "tempering_cap"))` in
+`r fmt(bsec("production", "tempering_cap"), 3)` s and of both capped
+differential evolutions and of `ocs_round_cap`, all three of which land on the
+identical plan to the tempering here. The same
+holds at book scale, ranks
+`r brank("book", "greedy")[["rank"]]` uncapped and
+`r brank("book", "greedy_cap")[["rank"]]` capped, where `greedy_cap` reaches
+`r sprintf("%.5f", bmean("book", "greedy_cap"))` in
+`r fmt(bsec("book", "greedy_cap"), 3)` s against `tempering_cap`'s
+`r sprintf("%.5f", bmean("book", "tempering_cap"))` in
+`r fmt(bsec("book", "tempering_cap"), 3)` s. A cap this tight leaves the
+optimiser nothing to find that a capped greedy sweep does not already reach.
+
+The diagnosis is arithmetic and takes a minute: compare $2n/L$, the mean number
+of uses per line, against the cap. If the cap is a small multiple of the mean,
+it is the binding restriction and the diversity budget is decoration. Raising
+the cap, or enlarging the candidate pool, changes the plan; tightening the
+budget does not.
 
 **The certificate does not scale, and the bound is reported as uncertified.**
 `ocs_bound()` doubles its iteration count until the value stops moving. At book
@@ -464,7 +1222,7 @@ breeder has already chosen. For a one-dimensional trade-off already
 parameterised by an interpretable budget, it is machinery in search of a
 problem.
 
-## What not to reach for
+## What not to reach for {#sec-notreach}
 
 **Reinforcement learning.** BreedGym and its successors [@younis2024] cast the
 *breeding programme* as a Markov decision process: how to allocate resources
@@ -491,27 +1249,86 @@ chosen deliberately, reported against a null.
 #| echo: false
 knitr::kable(data.frame(
   Situation = c("Any scale, first thing to run",
-                "Production scale, one budget",
-                "Production scale, several simultaneous restrictions",
+                "Production scale, a budget and a per-line cap",
+                "A restriction the swap cannot test (Ne floor, pool balance)",
                 "You need to know whether to keep optimising",
                 "You need to know the true optimum",
                 "Contributions are genuinely continuous"),
   Use = c("`sel_greedy()` swept over w, then `sel_truncation_cap()` -- @sec-combinatorial",
-          "`sel_local_search(mode = \"tempering\")` -- cheapest move, best result per second",
-          "`sel_de_fast()` -- the line encoding, four restrictions at once",
-          "`ocs_bound()` -- a valid bound; a small gap means stop",
+          sprintf(paste("`sel_greedy(max_use = cap)` swept over w -- highest index of any",
+                        "*capped* route at both scales (%s in %s s at book scale, %s in %s s",
+                        "at production); `sel_local_search(max_use = cap, mode = \"tempering\")`",
+                        "comes close without matching it -- %s thousandths of an index unit",
+                        "short at book scale, %s at production -- and is the only mode",
+                        "measured under a cap"),
+                  fmt(bmean("book", "greedy_cap"), 3), fmt(bsec("book", "greedy_cap"), 3),
+                  fmt(bmean("production", "greedy_cap"), 3),
+                  fmt(bsec("production", "greedy_cap"), 3),
+                  fmt(1000 * (bmean("book", "greedy_cap") -
+                                bmean("book", "tempering_cap")), 1),
+                  fmt(1000 * (bmean("production", "greedy_cap") -
+                                bmean("production", "tempering_cap")), 1)),
+          "`sel_de_fast()` -- the only route that accepts them; it trails the capped greedy on index (@sec-defast-restrictions)",
+          "`ocs_bound()` -- a valid bound, but check `converged`; a small gap means stop",
           "`sel_exact()` on a subsample -- an oracle, not a pipeline",
           "`ocs_quadprog()` -- @sec-ocs"),
   check.names = FALSE))
 ```
 
-The honest summary is that one change matters more than the rest put together,
-and it is not an algorithm. The problem was always $L$-dimensional with an
-$O(L)$ move; the hybrid encoding was a $N$-dimensional restatement of it that
-made every optimiser look harder to beat than it was. Everything else in this
-chapter -- the guarantees, the corrected bound, the oracle -- is there to tell
-you when you are done, which turns out to be much earlier than the size of the
-search space suggests.
+As a protocol at production scale:
 
-> Name the structure before choosing the algorithm. Most of the difficulty in
-> this problem was in the encoding, and none of it was in the optimiser.
+1. Build `ctx` through `fast_ctx()`, and decide up front whether the
+   $N \times N$ matrix is going to exist, because that decision selects the
+   rest of the protocol (@sec-ffree). `ctx$fL` and `ctx$parents` are required
+   by every fast route; `f` is required by `null_distribution()`,
+   `sel_greedy()`, `ocs_round()` and `sel_local_search()`'s automatic warm
+   start. At $8N^2$ bytes it fits at $N = 10{,}000$ and the benchmark above
+   forms it. If it does not fit, steps 2-4 change as noted, and the `f`-free
+   subset is what you have.
+2. Get `gd_ref` from a resampling at the target `n_sel`, and set
+   $\alpha_{\max}$ below the attainable ceiling (@sec-ocs). With no `f`,
+   `null_distribution()` is unavailable and the resampling has to be
+   `mean(replicate(B, 1 - fast_theta(sample.int(ctx$N, n_sel), ctx)))`, which
+   is `fL`-only and returns the same `gd_ref` at the same seed (@sec-ffree).
+3. Run the sweeps that cost milliseconds -- `sel_truncation_cap()` and, when
+   `f` exists, `sel_greedy()` over a $w$ grid spanning your data's crossover,
+   passing `max_use` if a cap applies -- and record what they achieve. They are
+   the baseline every later number is judged against, and under a cap they are
+   also, at both scales measured here, the winner (the table above).
+4. Run `sel_local_search()` for as many seconds as you are willing to spend,
+   with the cap passed as `max_use` rather than enforced afterwards. With `f`
+   present, leave `start = NULL` and let it build the warm start; with no `f`,
+   pass `start = sel_truncation_cap(...)` explicitly, which is the only
+   configuration of this route that runs without the matrix. The mode is the
+   least consequential choice in this list: on the benchmark above `"hill"` and
+   `"anneal"` are
+   `r fmt(1000 * abs(mv[["hill_minus_anneal"]][1]), 1)` thousandths of an index
+   unit apart at book scale and
+   `r fmt(1000 * abs(mv[["hill_minus_anneal"]][2]), 1)` at production, with the
+   sign of the difference changing between them, while `"tempering"` trails at
+   both. Take the simplest one unless your own data says otherwise -- but note
+   that those three are the *uncapped* rows, and the only mode benchmarked
+   under a cap is `"tempering"`.
+5. Compute `ocs_bound()` and check its `converged` attribute. Certified and the
+   gap small: stop. Certified and the gap large: keep going. Uncertified:
+   report no gap at all, and judge the plan by agreement between independent
+   methods instead.
+6. Validate the returned plan on the lens the constraint does not pin --
+   `F_drift` and allelic richness -- and on the pool decomposition, before it
+   is used (@sec-case-study).
+
+The honest summary is that one change matters more than the rest put together,
+and it is not an algorithm and not an encoding either. The problem was always
+$L$-dimensional in its *state* -- $\theta$ is a function of the line-usage
+vector and of nothing else -- and that is what buys the $O(L)$ swap, the 0.3
+MiB matrix and the 200-variable contributions programme. What it does not buy
+is a better parameter vector for a population method: `sel_de()` at
+$n_{sel} = 200$ and `sel_de_fast()` at $L = 200$ search boxes of the same
+width, and the measured difference between them is small and runs the other
+way. Everything else in this chapter -- the guarantees, the corrected bound,
+the oracle -- is there to tell you when you are done, which turns out to be
+much earlier than the size of the candidate set suggests.
+
+> Name the structure before choosing the algorithm. The difficulty in this
+> problem was in the state, not in the optimiser -- and a claim about an
+> encoding is only as good as the two things it was actually measured between.

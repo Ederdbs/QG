@@ -94,6 +94,24 @@ test_that("with no restriction the restricted index is Smith-Hazel", {
                index_smith_hazel(P, G, a), tolerance = 1e-10)
 })
 
+test_that("equal weights are Smith-Hazel iff a is an eigenvector of P^-1 G", {
+  # G = c P: same heritability on every trait and r_G == r_P. The traits are
+  # neither equally variable nor uncorrelated, and b is still proportional to a.
+  P <- matrix(c(4, 1, 0.5, 1, 1, 0.2, 0.5, 0.2, 9), 3)
+  a <- c(1, 1, 1)
+  b <- index_smith_hazel(P, 0.3 * P, a)
+  expect_equal(b / b[1], a, tolerance = 1e-12)
+  # The reviewer's counterexample to the old roxygen: uncorrelated genetics on
+  # correlated phenotypes, and (1, 1) is an eigenvector of P^-1 by symmetry.
+  P2 <- matrix(c(2, 0.5, 0.5, 2), 2)
+  b2 <- index_smith_hazel(P2, diag(2), c(1, 1))
+  expect_equal(b2 / b2[1], c(1, 1), tolerance = 1e-12)
+  # And equal heritability alone is not enough once r_G != r_P.
+  G3 <- 0.3 * diag(diag(P))
+  b3 <- index_smith_hazel(P, G3, a)
+  expect_gt(max(abs(b3 / b3[1] - a)), 1e-3)
+})
+
 test_that("run_cycles reports both variances and they are ordered sanely", {
   cy <- run_cycles(n_A = 8, n_B = 8, m = 300, n_cycles = 2, n_sel = 12,
                    alpha_max = 0.02, n_qtl = 60, B_null = 30, seed = 5)

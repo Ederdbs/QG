@@ -430,7 +430,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./04c-alphasimr-pipeline.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Simulating a breeding programme: AlphaSimR from the ground up</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Simulating a hybrid breeding programme: AlphaSimR from the ground up</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -607,7 +607,7 @@ window.Quarto = {
   <li><a href="#greedy-with-incremental-updates" id="toc-greedy-with-incremental-updates" class="nav-link" data-scroll-target="#greedy-with-incremental-updates"><span class="header-section-number">16.2</span> Greedy, with incremental updates</a></li>
   <li><a href="#the-encoding-problem" id="toc-the-encoding-problem" class="nav-link" data-scroll-target="#the-encoding-problem"><span class="header-section-number">16.3</span> The encoding problem</a>
   <ul class="collapse">
-  <li><a href="#the-better-encoding" id="toc-the-better-encoding" class="nav-link" data-scroll-target="#the-better-encoding"><span class="header-section-number">16.3.1</span> The better encoding</a></li>
+  <li><a href="#a-third-encoding-one-weight-per-line" id="toc-a-third-encoding-one-weight-per-line" class="nav-link" data-scroll-target="#a-third-encoding-one-weight-per-line"><span class="header-section-number">16.3.1</span> A third encoding: one weight per line</a></li>
   </ul></li>
   <li><a href="#differential-evolution" id="toc-differential-evolution" class="nav-link" data-scroll-target="#differential-evolution"><span class="header-section-number">16.4</span> Differential evolution</a>
   <ul class="collapse">
@@ -643,23 +643,51 @@ window.Quarto = {
 
 
 <p>The problem is: choose <span class="math inline">\(n\)</span> of <span class="math inline">\(N\)</span> hybrids, maximising mean index subject to a diversity budget. This chapter builds up the strategies that solve it, from the two that need no optimiser at all to the differential evolution that beats them – and explains why the DE only beats them under one specific condition.</p>
+<p>The decision is a concrete one, and it is the last of a cycle in a cross-pollinated crop. Two heterotic pools, A and B, hold <span class="math inline">\(L_A\)</span> and <span class="math inline">\(L_B\)</span> inbred (or doubled-haploid) lines. Every candidate is one cross <span class="math inline">\(A_a \times B_b\)</span>, so the candidate set is the factorial <span class="math inline">\(N = L_A \times L_B\)</span> – in maize, the set of single crosses that could be made from the current elite lines without introducing anything new. The <span class="math inline">\(n\)</span> you keep are the crosses that go forward: into multi-location testing, into seed increase, and – through their parents – into the next recycling cycle. Keeping too few distinct parents is not a statistical inconvenience, it is a decision to narrow the pool that the programme will breed from next.</p>
+<p><strong>What has to be in hand before any line of this chapter runs</strong> is the three-object contract of <a href="08-pipeline-stages.html" class="quarto-xref"><span>Chapter 13</span></a>:</p>
+<ul>
+<li><code>X</code>, the <span class="math inline">\(N \times m\)</span> hybrid marker matrix, coded <span class="math inline">\(\{0, 0.5, 1\}\)</span> as the average of the two homozygous parents;</li>
+<li><code>f</code>, the <span class="math inline">\(N \times N\)</span> molecular coancestry of <span class="citation" data-cites="caballero2002">Caballero and Toro (<a href="99-references.html#ref-caballero2002" role="doc-biblioref">2002</a>)</span>, values in <span class="math inline">\([0, 1]\)</span>, built from <code>X</code> and never from a centred genomic relationship matrix (<a href="01-coancestry.html#sec-why-not-g" class="quarto-xref"><span>Section 1.2</span></a>);</li>
+<li><code>hybrids</code>, carrying each cross’s parents and its predicted traits, from which <code>build_ctx()</code> forms the single index <code>ctx$index</code>, standardised to unit variance over the candidate pool (<a href="08b-genomic-prediction.html" class="quarto-xref"><span>Chapter 14</span></a>).</li>
+</ul>
+<p><strong>Assumptions, declared once and not violated afterwards.</strong> Parent lines are homozygous, so a hybrid’s genotype is the mean of its parents and <code>X</code> takes only the three values above. Markers are treated as neutral. The index is <em>frozen</em> before selection: nothing is re-predicted inside the optimiser, which matters because the index carries error that is correlated with relatedness (<a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 12</span></a>, finding 5). The allele-frequency base <code>ctx$p0</code> is the candidate pool and is set once in <code>build_ctx()</code>. Diversity loss <span class="math inline">\(\alpha\)</span> is always measured against a random subset of <em>the same size</em> <code>n_sel</code> (<a href="06-metric-catalogue.html#sec-baseline" class="quarto-xref"><span>Section 11.9</span></a>), never against the whole pool. Dominance appears nowhere in the objective: it is already inside the predicted hybrid performance, and the between-pool divergence that generates heterosis is a quantity to <em>preserve</em>, not to minimise (<a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 10</span></a>).</p>
+<p>The instance this chapter runs on:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">candidates_N      =</span> ctx<span class="sc">$</span>N,</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">lines_A           =</span> <span class="fu">sum</span>(ctx<span class="sc">$</span>pool <span class="sc">==</span> <span class="st">"A"</span>),</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">lines_B           =</span> <span class="fu">sum</span>(ctx<span class="sc">$</span>pool <span class="sc">==</span> <span class="st">"B"</span>),</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">markers_m         =</span> ctx<span class="sc">$</span>m,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">hybrids_kept      =</span> n_sel,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">uses_per_line     =</span> <span class="dv">2</span> <span class="sc">*</span> n_sel <span class="sc">/</span> ctx<span class="sc">$</span>n_lines,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">gd_ref            =</span> null<span class="sc">$</span>gd_ref,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">gd_ref_sd         =</span> null<span class="sc">$</span>gd_sd,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">alpha_ceiling_pct =</span> <span class="dv">100</span> <span class="sc">*</span> <span class="fu">alpha_loss</span>(<span class="fu">sel_truncation</span>(ctx, n_sel), ctx, null<span class="sc">$</span>gd_ref))</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      candidates_N           lines_A           lines_B         markers_m </span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      6.250000e+02      2.500000e+01      2.500000e+01      2.000000e+03 </span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      hybrids_kept     uses_per_line            gd_ref         gd_ref_sd </span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      6.000000e+01      2.400000e+00      3.258386e-01      7.654486e-04 </span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; alpha_ceiling_pct </span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      4.121618e+00</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Read it as a breeder would. 60 crosses are kept out of 625, which is 9.6% of the factorial. The 60 crosses consume <span class="math inline">\(2n =\)</span> 120 parent slots spread over 50 lines, so a perfectly even plan would use each line 2.4 times – the scale against which any per-line cap has to be set. <code>gd_ref</code> is the gene diversity of a random subset of exactly this size, with its resampling standard deviation next to it, and the last row is the <strong>attainable ceiling</strong>: pure truncation loses 4.12% of it. Any <span class="math inline">\(\alpha_{\max}\)</span> above that ceiling constrains nothing at all, which is the first thing to check and the subject of <a href="09-optimal-contributions.html" class="quarto-xref"><span>Chapter 15</span></a>.</p>
 <section id="four-baselines-before-any-optimiser" class="level2" data-number="16.1">
 <h2 data-number="16.1" class="anchored" data-anchor-id="four-baselines-before-any-optimiser"><span class="header-section-number">16.1</span> Four baselines before any optimiser</h2>
+<p>Four families – random, truncation, truncation under a per-line cap, and greedy – in six rows, because greedy is shown at three merit weights.</p>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>sels <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">random     =</span> <span class="fu">sel_random</span>(ctx, n_sel),</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">truncation =</span> <span class="fu">sel_truncation</span>(ctx, n_sel),</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">trunc_cap  =</span> <span class="fu">sel_truncation_cap</span>(ctx, n_sel),</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">greedy_div =</span> <span class="fu">sel_greedy</span>(ctx, n_sel, <span class="at">w =</span> <span class="dv">0</span>),</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">greedy_w1  =</span> <span class="fu">sel_greedy</span>(ctx, n_sel, <span class="at">w =</span> <span class="dv">1</span>),</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">greedy_w3  =</span> <span class="fu">sel_greedy</span>(ctx, n_sel, <span class="at">w =</span> <span class="dv">3</span>)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">t</span>(<span class="fu">sapply</span>(sels, <span class="cf">function</span>(s) <span class="fu">c</span>(</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">index      =</span> <span class="fu">mean_index</span>(s, ctx),</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">alpha_pct  =</span> <span class="dv">100</span> <span class="sc">*</span> <span class="fu">alpha_loss</span>(s, ctx, null<span class="sc">$</span>gd_ref),</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">Ns         =</span> <span class="fu">status_number</span>(s, ctx),</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">Ne_parents =</span> <span class="fu">ne_parents</span>(s, ctx),</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">max_line   =</span> <span class="fu">max_line_use</span>(s, ctx)))), <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>sels <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">random     =</span> <span class="fu">sel_random</span>(ctx, n_sel),</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">truncation =</span> <span class="fu">sel_truncation</span>(ctx, n_sel),</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">trunc_cap  =</span> <span class="fu">sel_truncation_cap</span>(ctx, n_sel),</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">greedy_div =</span> <span class="fu">sel_greedy</span>(ctx, n_sel, <span class="at">w =</span> <span class="dv">0</span>),</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">greedy_w1  =</span> <span class="fu">sel_greedy</span>(ctx, n_sel, <span class="at">w =</span> <span class="dv">1</span>),</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">greedy_w3  =</span> <span class="fu">sel_greedy</span>(ctx, n_sel, <span class="at">w =</span> <span class="dv">3</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">t</span>(<span class="fu">sapply</span>(sels, <span class="cf">function</span>(s) <span class="fu">c</span>(</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">index      =</span> <span class="fu">mean_index</span>(s, ctx),</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">alpha_pct  =</span> <span class="dv">100</span> <span class="sc">*</span> <span class="fu">alpha_loss</span>(s, ctx, null<span class="sc">$</span>gd_ref),</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">Ns         =</span> <span class="fu">status_number</span>(s, ctx),</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">Ne_parents =</span> <span class="fu">ne_parents</span>(s, ctx),</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">max_line   =</span> <span class="fu">max_line_use</span>(s, ctx)))), <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -727,144 +755,359 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p><strong>Truncation</strong> is the ceiling on gain and the floor on diversity. It is what every programme does by default, and the interesting question is not whether it loses diversity but how <em>little</em> index a constrained plan has to give up relative to it.</p>
-<p><strong>Truncation with a per-line cap</strong> is the cheap baseline that deserves more attention than it gets. It needs no coancestry matrix at all – only counting – and it usually captures most of the benefit:</p>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>sel_truncation_cap</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (ctx, n_sel, cap = ceiling(2 * n_sel/ctx$n_lines) + </span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     1) </span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; {</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     ord &lt;- order(ctx$index, decreasing = TRUE)</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     used &lt;- integer(ctx$n_lines)</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     out &lt;- integer(0)</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     for (i in ord) {</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         a &lt;- ctx$ped$a[i]</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         b &lt;- ctx$ped$b[i]</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         if (used[a] &lt; cap &amp;&amp; used[b] &lt; cap) {</span></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             out &lt;- c(out, i)</span></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             used[a] &lt;- used[a] + 1L</span></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             used[b] &lt;- used[b] + 1L</span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             if (length(out) == n_sel) </span></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                 break</span></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         }</span></span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     }</span></span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     out</span></span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0xbf6db99a0&gt;</span></span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">w1_is_truncation =</span> <span class="fu">setequal</span>(sels[[<span class="st">"greedy_w1"</span>]], sels[[<span class="st">"truncation"</span>]]),</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">w3_is_truncation =</span> <span class="fu">setequal</span>(sels[[<span class="st">"greedy_w3"</span>]], sels[[<span class="st">"truncation"</span>]]))</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; w1_is_truncation w3_is_truncation </span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             TRUE             TRUE</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Three of those six rows are the same plan. <code>greedy_w1</code> and <code>greedy_w3</code> return <em>exactly</em> the truncation set – same index, same <span class="math inline">\(\alpha\)</span>, same <code>max_line</code> – because both weights sit far above the crossover measured in the <code>w-units</code> chunk below, where the merit term swamps the coancestry term and the greedy argmax degenerates to the index ranking. Read them as one row until that measurement has been made; it is the reason a <span class="math inline">\(w\)</span> grid of round numbers is a trap.</p>
+<p>Read the columns in this order, because each answers a different question and three of them are routinely skipped:</p>
+<ol type="1">
+<li><code>index</code>, in standard deviations of the candidate pool – what the plan is worth.</li>
+<li><code>alpha_pct</code>, the loss of gene diversity relative to a random subset of the same size – what it costs, on the lens the constraint will pin. Negative means <em>more</em> diverse than random.</li>
+<li><code>Ns</code>, the status number <span class="math inline">\(1/(2\theta)\)</span> (<a href="06-metric-catalogue.html#sec-ns" class="quarto-xref"><span>Section 11.3</span></a>) – the same information as <span class="math inline">\(\alpha\)</span> on an absolute scale, kept because it is what the animal literature quotes.</li>
+<li><code>Ne_parents</code>, the effective number of parent lines, which is computed from counts alone and is the metric that catches “<span class="math inline">\(\theta\)</span> looks fine but twelve lines did all the work”.</li>
+<li><code>max_line</code>, the largest number of selected crosses sharing one parent – the operational number, because that line is a seed parent and has to be increased, maintained and, in a CMS system, converted.</li>
+</ol>
+<p><strong>Truncation</strong> is the ceiling on gain and the floor on diversity. It is what every programme does by default, and the interesting question is not whether it loses diversity but how <em>little</em> index a constrained plan has to give up relative to it. Its <code>max_line</code> here is 23: one line parents that many of the 60 selected crosses, against 2.4 under even use. That is the concentration a cap is meant to remove, and it is visible without any coancestry matrix.</p>
+<p><strong>Truncation with a per-line cap</strong> is the cheap baseline that deserves more attention than it gets. It needs no coancestry matrix at all – only counting:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>sel_truncation_cap</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (ctx, n_sel, cap = ceiling(2 * n_sel/ctx$n_lines) + </span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     1) </span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; {</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     ord &lt;- order(ctx$index, decreasing = TRUE)</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     used &lt;- integer(ctx$n_lines)</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     out &lt;- integer(0)</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     for (i in ord) {</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         a &lt;- ctx$ped$a[i]</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         b &lt;- ctx$ped$b[i]</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         if (used[a] &lt; cap &amp;&amp; used[b] &lt; cap) {</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             out &lt;- c(out, i)</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             used[a] &lt;- used[a] + 1L</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             used[b] &lt;- used[b] + 1L</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             if (length(out) == n_sel) </span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                 break</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         }</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     }</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     out</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0xacb8922e0&gt;</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The procedure, stated as a breeder would run it:</p>
+<ol type="1">
+<li>Rank all 625 candidate crosses by index, best first.</li>
+<li>Walk down the ranking. Admit a cross only if <em>both</em> its parents are still below the cap.</li>
+<li>Stop when <code>n_sel</code> crosses have been admitted, or when the ranking is exhausted – in which case the returned vector is <strong>shorter than <code>n_sel</code></strong> and the cap was infeasible for this set size.</li>
+<li>Feasibility is arithmetic, not luck: with <span class="math inline">\(L_A\)</span> lines in pool A a cap of <span class="math inline">\(c\)</span> admits at most <span class="math inline">\(L_A c\)</span> crosses, so the condition is <span class="math inline">\(n \le \min(L_A, L_B)\,c\)</span> – here 60 against
+<ol start="100" type="1">
+<li></li>
+</ol></li>
+</ol>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">index_truncation =</span> <span class="fu">mean_index</span>(sels<span class="sc">$</span>truncation, ctx),</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">index_capped     =</span> <span class="fu">mean_index</span>(sels<span class="sc">$</span>trunc_cap, ctx),</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">index_retained_pct =</span> <span class="dv">100</span> <span class="sc">*</span> <span class="fu">mean_index</span>(sels<span class="sc">$</span>trunc_cap, ctx) <span class="sc">/</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>                             <span class="fu">mean_index</span>(sels<span class="sc">$</span>truncation, ctx),</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">Ne_par_truncation =</span> <span class="fu">ne_parents</span>(sels<span class="sc">$</span>truncation, ctx),</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">Ne_par_capped     =</span> <span class="fu">ne_parents</span>(sels<span class="sc">$</span>trunc_cap, ctx))</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   index_truncation       index_capped index_retained_pct  Ne_par_truncation </span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          1.9919371          0.8203555         41.1838050         13.0198915 </span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      Ne_par_capped </span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         31.0344828</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">index_truncation =</span> <span class="fu">mean_index</span>(sels<span class="sc">$</span>truncation, ctx),</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">index_capped     =</span> <span class="fu">mean_index</span>(sels<span class="sc">$</span>trunc_cap, ctx),</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">index_retained_pct =</span> <span class="dv">100</span> <span class="sc">*</span> <span class="fu">mean_index</span>(sels<span class="sc">$</span>trunc_cap, ctx) <span class="sc">/</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>                             <span class="fu">mean_index</span>(sels<span class="sc">$</span>truncation, ctx),</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">Ne_par_truncation =</span> <span class="fu">ne_parents</span>(sels<span class="sc">$</span>truncation, ctx),</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">Ne_par_capped     =</span> <span class="fu">ne_parents</span>(sels<span class="sc">$</span>trunc_cap, ctx))</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   index_truncation       index_capped index_retained_pct  Ne_par_truncation </span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          1.9919371          0.8203555         41.1838050         13.0198915 </span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      Ne_par_capped </span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         31.0344828</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>cap <span class="ot">&lt;-</span> <span class="fu">ceiling</span>(<span class="dv">2</span> <span class="sc">*</span> n_sel <span class="sc">/</span> ctx<span class="sc">$</span>n_lines) <span class="sc">+</span> <span class="dv">1</span>          <span class="co"># the function's default</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>ord <span class="ot">&lt;-</span> <span class="fu">order</span>(ctx<span class="sc">$</span>index, <span class="at">decreasing =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>lines_used <span class="ot">&lt;-</span> <span class="cf">function</span>(s) <span class="fu">sum</span>(<span class="fu">tabulate</span>(<span class="fu">c</span>(ctx<span class="sc">$</span>ped<span class="sc">$</span>a[s], ctx<span class="sc">$</span>ped<span class="sc">$</span>b[s]),</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>                                       ctx<span class="sc">$</span>n_lines) <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">cap                    =</span> cap,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">reached_n_sel          =</span> <span class="fu">length</span>(sels[[<span class="st">"trunc_cap"</span>]]) <span class="sc">==</span> n_sel,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">candidates_scanned     =</span> <span class="fu">max</span>(<span class="fu">match</span>(sels[[<span class="st">"trunc_cap"</span>]], ord)),</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">shared_with_truncation =</span> <span class="fu">length</span>(<span class="fu">intersect</span>(sels[[<span class="st">"truncation"</span>]],</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>                                            sels[[<span class="st">"trunc_cap"</span>]])),</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">lines_used_truncation  =</span> <span class="fu">lines_used</span>(sels[[<span class="st">"truncation"</span>]]),</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">lines_used_capped      =</span> <span class="fu">lines_used</span>(sels[[<span class="st">"trunc_cap"</span>]]))</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                    cap          reached_n_sel     candidates_scanned </span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                      4                      1                    413 </span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; shared_with_truncation  lines_used_truncation      lines_used_capped </span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                     16                     33                     32</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>Before reaching for an optimiser, run this. If a per-line cap already meets your constraint at an acceptable index, you are done.</p>
+<p>The default cap is <code>ceiling(2 * n_sel / ctx$n_lines) + 1</code>, one above even use, which is 4 here. Filling 60 slots under it required scanning 413 of the 625 ranked candidates, and only 16 of the resulting crosses are also in the truncation set: the cap does not trim the top of the ranking, it reshuffles most of it. The last two rows count the same reshuffling in lines rather than in crosses, and they are the reason <span class="math inline">\(N_{e,\text{par}}\)</span> is not a line count: the capped plan touches 32 distinct parent lines against truncation’s 33, out of 50 available – to within one line, the same set size – while its effective number of parents is 31 against 13. What the cap changes is how evenly the 120 parent slots are spread over the lines that are used, not how many lines are used at all.</p>
+<p>What that buys and what it costs, separately. The cap cuts the diversity loss from 4.12% to 0.33% and raises the effective number of parents from 13 to 31, at 41% of truncation’s index. Whether that is a good trade is a programme decision, not a statistical one – but note that the capped plan is <em>feasible</em> at a 1% budget while truncation is not, and it was found by counting alone.</p>
+<p>Before reaching for an optimiser, run this. If a per-line cap already meets your constraint at an acceptable index, you are done. The failure mode at this step is silent: a returned vector shorter than <code>n_sel</code>, which every downstream metric will happily evaluate on the wrong set size – <code>length()</code> it.</p>
 </section>
 <section id="greedy-with-incremental-updates" class="level2" data-number="16.2">
 <h2 data-number="16.2" class="anchored" data-anchor-id="greedy-with-incremental-updates"><span class="header-section-number">16.2</span> Greedy, with incremental updates</h2>
 <p>Adding hybrid <span class="math inline">\(j\)</span> to an existing set changes the submatrix total by <span class="math inline">\(2 s_j + f_{jj}\)</span>, where <span class="math inline">\(s_j\)</span> is the sum of <span class="math inline">\(f_{ij}\)</span> over the already-chosen. That makes each step <span class="math inline">\(O(N)\)</span> instead of <span class="math inline">\(O(n^2)\)</span>, and the whole construction affordable.</p>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>sel_greedy</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (ctx, n_sel, w = 0, max_use = NULL) </span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; {</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     f &lt;- ctx[["f"]]</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     d &lt;- diag(f)</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     s &lt;- numeric(ctx$N)</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     avail &lt;- rep(TRUE, ctx$N)</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     out &lt;- integer(n_sel)</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     total &lt;- 0</span></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     if (!is.null(max_use)) {</span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         pa &lt;- as.integer(ctx$ped$a)</span></span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         pb &lt;- as.integer(ctx$ped$b)</span></span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         cnt &lt;- integer(ctx$n_lines)</span></span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     }</span></span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     for (k in seq_len(n_sel)) {</span></span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         theta_new &lt;- (total + 2 * s + d)/k^2</span></span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         score &lt;- w * ctx$index - theta_new</span></span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         score[!avail] &lt;- -Inf</span></span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         j &lt;- which.max(score)</span></span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         if (!is.finite(score[j])) {</span></span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             out &lt;- out[seq_len(k - 1L)]</span></span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             break</span></span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         }</span></span>
-<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         out[k] &lt;- j</span></span>
-<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         avail[j] &lt;- FALSE</span></span>
-<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         total &lt;- total + 2 * s[j] + d[j]</span></span>
-<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         s &lt;- s + f[, j]</span></span>
-<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         if (!is.null(max_use)) {</span></span>
-<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             for (a in c(pa[j], pb[j])) {</span></span>
-<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                 cnt[a] &lt;- cnt[a] + 1L</span></span>
-<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                 if (cnt[a] &gt;= max_use) </span></span>
-<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                   avail[pa == a | pb == a] &lt;- FALSE</span></span>
-<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             }</span></span>
-<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         }</span></span>
-<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     }</span></span>
-<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     out</span></span>
-<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
-<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0xbf6e5d9a0&gt;</span></span>
-<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>S <span class="ot">&lt;-</span> <span class="fu">sel_greedy</span>(ctx, <span class="at">n_sel =</span> <span class="dv">10</span>, <span class="at">w =</span> <span class="dv">1</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>j <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(<span class="fu">seq_len</span>(ctx<span class="sc">$</span>N), S)[<span class="dv">1</span>]</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> ctx[[<span class="st">"f"</span>]]</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>recomputed  <span class="ot">&lt;-</span> <span class="fu">sum</span>(f[<span class="fu">c</span>(S, j), <span class="fu">c</span>(S, j)])                 <span class="co"># O(n^2), from scratch</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>incremental <span class="ot">&lt;-</span> <span class="fu">sum</span>(f[S, S]) <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">sum</span>(f[S, j]) <span class="sc">+</span> f[j, j] <span class="co"># O(n), the update</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">isTRUE</span>(<span class="fu">all.equal</span>(recomputed, incremental)))</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">recomputed =</span> recomputed, <span class="at">incremental =</span> incremental)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  recomputed incremental </span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    87.07925    87.07925</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>The score is <span class="math inline">\(w \cdot \text{index} - \theta\)</span>. At <span class="math inline">\(w = 0\)</span> this is pure diversity – the ceiling on diversity and near-zero gain. As <span class="math inline">\(w \to \infty\)</span> it converges to truncation. Sweeping <span class="math inline">\(w\)</span> traces a frontier:</p>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>ws <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">0.75</span>, <span class="dv">1</span>, <span class="fl">1.5</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">8</span>, <span class="dv">15</span>, <span class="dv">30</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>gf <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(ws, <span class="cf">function</span>(w) {</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  s <span class="ot">&lt;-</span> <span class="fu">sel_greedy</span>(ctx, n_sel, <span class="at">w =</span> w)</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">w =</span> w, <span class="at">alpha =</span> <span class="fu">alpha_loss</span>(s, ctx, null<span class="sc">$</span>gd_ref),</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>             <span class="at">index =</span> <span class="fu">mean_index</span>(s, ctx))</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>}))</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(gf<span class="sc">$</span>alpha <span class="sc">*</span> <span class="dv">100</span>, gf<span class="sc">$</span>index, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="st">"#2166ac"</span>,</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"gene diversity loss, alpha (%)"</span>, <span class="at">ylab =</span> <span class="st">"mean index (s.d.)"</span>)</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(<span class="fu">alpha_loss</span>(sels<span class="sc">$</span>truncation, ctx, null<span class="sc">$</span>gd_ref) <span class="sc">*</span> <span class="dv">100</span>,</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>       <span class="fu">mean_index</span>(sels<span class="sc">$</span>truncation, ctx), <span class="at">pch =</span> <span class="dv">4</span>, <span class="at">cex =</span> <span class="fl">1.5</span>, <span class="at">col =</span> <span class="st">"#b2182b"</span>)</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="fu">alpha_loss</span>(sels<span class="sc">$</span>truncation, ctx, null<span class="sc">$</span>gd_ref) <span class="sc">*</span> <span class="dv">100</span>,</span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>     <span class="fu">mean_index</span>(sels<span class="sc">$</span>truncation, ctx), <span class="st">"truncation"</span>, <span class="at">pos =</span> <span class="dv">2</span>, <span class="at">cex =</span> <span class="fl">0.75</span>)</span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="dv">0</span>, <span class="at">lty =</span> <span class="dv">3</span>); <span class="fu">grid</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>sel_greedy</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (ctx, n_sel, w = 0, max_use = NULL) </span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; {</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     f &lt;- ctx[["f"]]</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     d &lt;- diag(f)</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     s &lt;- numeric(ctx$N)</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     avail &lt;- rep(TRUE, ctx$N)</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     out &lt;- integer(n_sel)</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     total &lt;- 0</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     if (!is.null(max_use)) {</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         pa &lt;- as.integer(ctx$ped$a)</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         pb &lt;- as.integer(ctx$ped$b)</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         cnt &lt;- integer(ctx$n_lines)</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     }</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     for (k in seq_len(n_sel)) {</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         theta_new &lt;- (total + 2 * s + d)/k^2</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         score &lt;- w * ctx$index - theta_new</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         score[!avail] &lt;- -Inf</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         j &lt;- which.max(score)</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         if (!is.finite(score[j])) {</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             out &lt;- out[seq_len(k - 1L)]</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             break</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         }</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         out[k] &lt;- j</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         avail[j] &lt;- FALSE</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         total &lt;- total + 2 * s[j] + d[j]</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         s &lt;- s + f[, j]</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         if (!is.null(max_use)) {</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             for (a in c(pa[j], pb[j])) {</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                 cnt[a] &lt;- cnt[a] + 1L</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                 if (cnt[a] &gt;= max_use) </span></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                   avail[pa == a | pb == a] &lt;- FALSE</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             }</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         }</span></span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     }</span></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     out</span></span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0xacafafcb0&gt;</span></span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>One step <span class="math inline">\(k\)</span>, in the order the code performs it:</p>
+<ol type="1">
+<li><code>theta_new &lt;- (total + 2 * s + d) / k^2</code> is the group coancestry the set <em>would</em> have, for every candidate at once, with <code>total</code> the current submatrix sum, <code>s</code> the running vector of coancestry sums against the chosen set and <code>d = diag(f)</code>. The normaliser is <span class="math inline">\(k^2\)</span>, the size after the addition.</li>
+<li><code>score &lt;- w * ctx$index - theta_new</code> – merit against relatedness.</li>
+<li>Candidates already chosen are set to <code>-Inf</code>; with <code>max_use</code> set, so is every hybrid of a line that has reached its cap. The cap is therefore a <strong>feasibility test on the move</strong>, never a penalty on the result – the partition-matroid treatment of <a href="10b-advanced-selection.html" class="quarto-xref"><span>Chapter 17</span></a>.</li>
+<li>The argmax is taken, <code>total</code> and <code>s</code> are updated in <span class="math inline">\(O(N)\)</span>, and the parent counts incremented.</li>
+<li>If no finite score remains, the loop exits early and the returned vector is short – the same check as for the capped truncation.</li>
+</ol>
+<p>The score is <span class="math inline">\(w \cdot \text{index} - \theta\)</span>. At <span class="math inline">\(w = 0\)</span> this is pure diversity – the ceiling on diversity and near-zero gain. As <span class="math inline">\(w \to \infty\)</span> it converges to truncation. Sweeping <span class="math inline">\(w\)</span> traces a frontier – but <strong>only if the grid is in the right units</strong>, and that is the trap at this step.</p>
+<p><span class="math inline">\(w\)</span> is an exchange rate: index standard deviations per unit of group coancestry. The two quantities it converts between differ by four orders of magnitude, and that ratio is measurable before any sweep is run:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>S30 <span class="ot">&lt;-</span> <span class="fu">sel_greedy</span>(ctx, <span class="dv">30</span>, <span class="at">w =</span> <span class="dv">0</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>theta_if_added <span class="ot">&lt;-</span> (<span class="fu">sum</span>(f[S30, S30]) <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">colSums</span>(f[S30, ]) <span class="sc">+</span> <span class="fu">diag</span>(f)) <span class="sc">/</span> <span class="dv">31</span><span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">index_spread =</span> <span class="fu">diff</span>(<span class="fu">range</span>(ctx<span class="sc">$</span>index)),</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">theta_spread =</span> <span class="fu">diff</span>(<span class="fu">range</span>(theta_if_added)),</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">w_crossover  =</span> <span class="fu">diff</span>(<span class="fu">range</span>(theta_if_added)) <span class="sc">/</span> <span class="fu">diff</span>(<span class="fu">range</span>(ctx<span class="sc">$</span>index)))</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; index_spread theta_spread  w_crossover </span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6.055856e+00 3.293444e-04 5.438446e-05</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><code>w_crossover</code> is the weight at which the two terms of the score have equal range. Below it the sweep returns the diversity solution; a decade or two above it, every point collapses onto truncation. A grid of <span class="math inline">\(w \in \{0.25, 0.5, \dots, 30\}\)</span> – the obvious one, and the one this chapter used before it was measured – sits entirely above the transition and returns the <em>same</em> selection at every point, which makes greedy look an order of magnitude worse than it is. The grid below spans six decades around the crossover and is the one <code>book/scripts/regenerate.R</code> uses for the benchmark of <a href="10b-advanced-selection.html" class="quarto-xref"><span>Chapter 17</span></a>, so the two chapters report the same greedy.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>ws <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">10</span><span class="sc">^</span><span class="fu">seq</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="dv">1</span>, <span class="at">length.out =</span> <span class="dv">19</span>))</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>gf <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(ws, <span class="cf">function</span>(w) {</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  s <span class="ot">&lt;-</span> <span class="fu">sel_greedy</span>(ctx, n_sel, <span class="at">w =</span> w)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">w =</span> w, <span class="at">alpha =</span> <span class="fu">alpha_loss</span>(s, ctx, null<span class="sc">$</span>gd_ref),</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>             <span class="at">index =</span> <span class="fu">mean_index</span>(s, ctx))</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>}))</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(gf<span class="sc">$</span>alpha <span class="sc">*</span> <span class="dv">100</span>, gf<span class="sc">$</span>index, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="st">"#2166ac"</span>,</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"gene diversity loss, alpha (%)"</span>, <span class="at">ylab =</span> <span class="st">"mean index (s.d.)"</span>)</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(<span class="fu">alpha_loss</span>(sels<span class="sc">$</span>truncation, ctx, null<span class="sc">$</span>gd_ref) <span class="sc">*</span> <span class="dv">100</span>,</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>       <span class="fu">mean_index</span>(sels<span class="sc">$</span>truncation, ctx), <span class="at">pch =</span> <span class="dv">4</span>, <span class="at">cex =</span> <span class="fl">1.5</span>, <span class="at">col =</span> <span class="st">"#b2182b"</span>)</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="fu">alpha_loss</span>(sels<span class="sc">$</span>truncation, ctx, null<span class="sc">$</span>gd_ref) <span class="sc">*</span> <span class="dv">100</span>,</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>     <span class="fu">mean_index</span>(sels<span class="sc">$</span>truncation, ctx), <span class="st">"truncation"</span>, <span class="at">pos =</span> <span class="dv">2</span>, <span class="at">cex =</span> <span class="fl">0.75</span>)</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="dv">0</span>, <span class="at">lty =</span> <span class="dv">3</span>); <span class="fu">grid</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="10-combinatorial-selection_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="1050"></p>
-<figcaption>The greedy frontier. w = 0 is maximum diversity; large w converges to truncation.</figcaption>
+<p><img src="10-combinatorial-selection_files/figure-html/greedy-frontier-1.png" class="img-fluid figure-img" width="1050"></p>
+<figcaption>The greedy frontier. w = 0 is maximum diversity; large w converges to truncation. The useful range of w spans roughly 1e-5 to 1e-2 on this dataset, the same window the prose and the sweep table below quote: below it the sweep returns the maximum-diversity plan, above it the truncation plan, and every row outside the window is a duplicate of one of those two.</figcaption>
 </figure>
 </div>
 </div>
 </div>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(gf[gf<span class="sc">$</span>w <span class="sc">&lt;=</span> <span class="fl">0.01</span>, ], <span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;">w</th>
+<th style="text-align: right;">alpha</th>
+<th style="text-align: right;">index</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">-0.01352</td>
+<td style="text-align: right;">0.13431</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.00001</td>
+<td style="text-align: right;">-0.01347</td>
+<td style="text-align: right;">0.20982</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.00002</td>
+<td style="text-align: right;">-0.01317</td>
+<td style="text-align: right;">0.30454</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.00005</td>
+<td style="text-align: right;">-0.01197</td>
+<td style="text-align: right;">0.49867</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.00010</td>
+<td style="text-align: right;">-0.00755</td>
+<td style="text-align: right;">0.86717</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.00022</td>
+<td style="text-align: right;">0.00555</td>
+<td style="text-align: right;">1.37820</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.00046</td>
+<td style="text-align: right;">0.02089</td>
+<td style="text-align: right;">1.75058</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.00100</td>
+<td style="text-align: right;">0.03107</td>
+<td style="text-align: right;">1.88486</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.00215</td>
+<td style="text-align: right;">0.03672</td>
+<td style="text-align: right;">1.98253</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.00464</td>
+<td style="text-align: right;">0.03848</td>
+<td style="text-align: right;">1.99043</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.01000</td>
+<td style="text-align: right;">0.03952</td>
+<td style="text-align: right;">1.99123</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>step <span class="ot">&lt;-</span> <span class="fu">which.max</span>(gf<span class="sc">$</span>alpha <span class="sc">&gt;</span> <span class="dv">0</span>)          <span class="co"># first grid point that loses diversity</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>jump <span class="ot">&lt;-</span> gf[<span class="fu">c</span>(step <span class="sc">-</span> <span class="dv">1</span>L, step), ]</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(jump, <span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">w</th>
+<th style="text-align: right;">alpha</th>
+<th style="text-align: right;">index</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">5</td>
+<td style="text-align: right;">0.00010</td>
+<td style="text-align: right;">-0.00755</td>
+<td style="text-align: right;">0.86717</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">6</td>
+<td style="text-align: right;">0.00022</td>
+<td style="text-align: right;">0.00555</td>
+<td style="text-align: right;">1.37820</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The upper edge of the useful window: the smallest w whose plan is already the</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co"># truncation plan, above which every row of the sweep is a duplicate.</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>flat_from <span class="ot">&lt;-</span> <span class="fu">min</span>(gf<span class="sc">$</span>w[gf<span class="sc">$</span>index <span class="sc">&gt;=</span> <span class="fu">max</span>(gf<span class="sc">$</span>index) <span class="sc">-</span> <span class="fl">1e-12</span>])</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">flat_from =</span> flat_from, <span class="at">rows_above =</span> <span class="fu">sum</span>(gf<span class="sc">$</span>w <span class="sc">&gt;</span> flat_from))</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  flat_from rows_above </span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 0.02154435 8.00000000</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Two readings, and the second is the argument for everything that follows. First, the whole frontier lives in the three decades between <span class="math inline">\(w = 10^{-5}\)</span> – where the sweep is still moving, 0.13 at <span class="math inline">\(w = 0\)</span> against 0.21 at the first non-zero grid point – and <span class="math inline">\(w \approx 10^{-2}\)</span>, by which the plan is within 0.04% of truncation’s index. From <span class="math inline">\(w =\)</span> 0.0215 upward every one of the remaining 8 rows is the <em>identical</em> selection, and a sweep whose rows are all the same selection is a sweep in the wrong units, not a flat frontier. Second, the sweep is parameterised by <span class="math inline">\(w\)</span> and <em>the breeder’s constraint is not</em>. Between the two adjacent grid points printed above, <span class="math inline">\(\alpha\)</span> jumps from -0.76% to 0.56% and the index from 0.87 to 1.38; a budget falling inside that interval cannot be requested of a greedy sweep at all, only stumbled upon. An optimiser parameterised by <span class="math inline">\(\alpha_{\max}\)</span> can be asked for it directly.</p>
 <p>Greedy solutions are also what warm-start the differential evolution. That is not an optimisation detail – it is the difference between the DE working and not working.</p>
 </section>
 <section id="the-encoding-problem" class="level2" data-number="16.3">
 <h2 data-number="16.3" class="anchored" data-anchor-id="the-encoding-problem"><span class="header-section-number">16.3</span> The encoding problem</h2>
 <p>An <span class="math inline">\(N\)</span>-dimensional 0/1 encoding is infeasible for differential evolution at this scale: at production size that is 5041 binary dimensions. Instead, encode <span class="math inline">\(n_{sel}\)</span> continuous values in <span class="math inline">\([1, N]\)</span> and decode them to unique indices.</p>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>decode</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (par, N, n_sel) </span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; {</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     k &lt;- as.integer(par)</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     k[k &lt; 1L] &lt;- 1L</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     k[k &gt; N] &lt;- N</span></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     dup &lt;- duplicated(k)</span></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     if (any(dup)) </span></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         k[dup] &lt;- setdiff(seq_len(N), k[!dup])[seq_len(sum(dup))]</span></span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     k</span></span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0xbf843e8c8&gt;</span></span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>decode</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (par, N, n_sel) </span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; {</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     k &lt;- as.integer(par)</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     k[k &lt; 1L] &lt;- 1L</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     k[k &gt; N] &lt;- N</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     dup &lt;- duplicated(k)</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     if (any(dup)) </span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         k[dup] &lt;- setdiff(seq_len(N), k[!dup])[seq_len(sum(dup))]</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     k</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0xacf74a938&gt;</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The decode, step by step:</p>
+<ol type="1">
+<li><code>as.integer(par)</code> truncates each coordinate toward zero, so the real interval <span class="math inline">\([i, i+1)\)</span> maps to candidate <span class="math inline">\(i\)</span>. <code>sel_de()</code> searches the box <span class="math inline">\([1,\, N + 0.999]\)</span>, so candidates <span class="math inline">\(1\)</span> to <span class="math inline">\(N-1\)</span> each own a full unit interval and candidate <span class="math inline">\(N\)</span> owns <span class="math inline">\([N,\, N + 0.999]\)</span> – narrower by one part in a thousand, because the upper bound stops just short of <span class="math inline">\(N + 1\)</span> instead of reaching it.</li>
+<li>Coordinates outside the box are clamped to the ends.</li>
+<li><code>duplicated()</code> marks every coordinate after the first that lands on an already-used candidate.</li>
+<li>Each duplicate is replaced by the lowest index not otherwise in use, so the result always has exactly <code>n_sel</code> distinct candidates.</li>
+</ol>
+<p>A worked case, small enough to check by hand:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">decode</span>(<span class="fu">c</span>(<span class="fl">3.9</span>, <span class="fl">3.2</span>, <span class="fl">1.1</span>, <span class="fl">7.5</span>), <span class="at">N =</span> <span class="dv">10</span>, <span class="at">n_sel =</span> <span class="dv">4</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">all</span>(d <span class="sc">==</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">7</span>)))</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>d</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 3 2 1 7</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Truncation gives <span class="math inline">\((3, 3, 1, 7)\)</span>; the second coordinate is the duplicate; the lowest index not in <span class="math inline">\(\{3, 1, 7\}\)</span> is 2; the repair returns <span class="math inline">\((3, 2, 1, 7)\)</span>. The same mechanism is what lets a warm start be injected exactly: a seed is written into the population as <code>index + 0.5</code>, the middle of its own interval, and decodes back to itself.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>s0 <span class="ot">&lt;-</span> <span class="fu">sel_greedy</span>(ctx, n_sel, <span class="at">w =</span> <span class="dv">1</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">box_lower      =</span> <span class="dv">1</span>,</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">box_upper      =</span> ctx<span class="sc">$</span>N <span class="sc">+</span> <span class="fl">0.999</span>,</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">width_typical  =</span> <span class="dv">2</span> <span class="sc">-</span> <span class="dv">1</span>,                       <span class="co"># candidate 1 owns [1, 2)</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">width_last     =</span> (ctx<span class="sc">$</span>N <span class="sc">+</span> <span class="fl">0.999</span>) <span class="sc">-</span> ctx<span class="sc">$</span>N,     <span class="co"># candidate N owns [N, N+0.999]</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed_roundtrip =</span> <span class="fu">all</span>(<span class="fu">decode</span>(s0 <span class="sc">+</span> <span class="fl">0.5</span>, ctx<span class="sc">$</span>N, n_sel) <span class="sc">==</span> s0))</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      box_lower      box_upper  width_typical     width_last seed_roundtrip </span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          1.000        625.999          1.000          0.999          1.000</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Duplicates are repaired <strong>deterministically</strong>. A stochastic repair would make the fitness noisy, and a noisy fitness stops DE converging – the same parameter vector must always score the same.</p>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">3</span>)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>d1 <span class="ot">&lt;-</span> <span class="fu">decode</span>(<span class="fu">runif</span>(n_sel, <span class="dv">1</span>, ctx<span class="sc">$</span>N <span class="sc">+</span> <span class="dv">1</span>), ctx<span class="sc">$</span>N, n_sel)</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>d2 <span class="ot">&lt;-</span> <span class="fu">decode</span>(<span class="fu">runif</span>(n_sel, <span class="dv">1</span>, ctx<span class="sc">$</span>N <span class="sc">+</span> <span class="dv">1</span>), ctx<span class="sc">$</span>N, n_sel)</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">unique_1 =</span> <span class="fu">length</span>(<span class="fu">unique</span>(d1)), <span class="at">unique_2 =</span> <span class="fu">length</span>(<span class="fu">unique</span>(d2)),</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">in_range =</span> <span class="fu">all</span>(<span class="fu">c</span>(d1, d2) <span class="sc">&gt;=</span> <span class="dv">1</span> <span class="sc">&amp;</span> <span class="fu">c</span>(d1, d2) <span class="sc">&lt;=</span> ctx<span class="sc">$</span>N),</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">deterministic =</span> <span class="fu">identical</span>(d1, <span class="fu">decode</span>(<span class="fu">sort</span>(<span class="fu">c</span>(d1)) <span class="sc">-</span> <span class="fl">0.5</span> <span class="sc">+</span> <span class="dv">1</span>, ctx<span class="sc">$</span>N, n_sel) <span class="sc">*</span> <span class="dv">0</span>L <span class="sc">+</span> d1))</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      unique_1      unique_2      in_range deterministic </span></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;            60            60             1             1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">3</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">runif</span>(n_sel, <span class="dv">1</span>, ctx<span class="sc">$</span>N <span class="sc">+</span> <span class="dv">1</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> <span class="fu">runif</span>(n_sel, <span class="dv">1</span>, ctx<span class="sc">$</span>N <span class="sc">+</span> <span class="dv">1</span>)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>d1 <span class="ot">&lt;-</span> <span class="fu">decode</span>(p1, ctx<span class="sc">$</span>N, n_sel)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>d2 <span class="ot">&lt;-</span> <span class="fu">decode</span>(p2, ctx<span class="sc">$</span>N, n_sel)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">unique_1 =</span> <span class="fu">length</span>(<span class="fu">unique</span>(d1)), <span class="at">unique_2 =</span> <span class="fu">length</span>(<span class="fu">unique</span>(d2)),</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">in_range =</span> <span class="fu">all</span>(<span class="fu">c</span>(d1, d2) <span class="sc">&gt;=</span> <span class="dv">1</span> <span class="sc">&amp;</span> <span class="fu">c</span>(d1, d2) <span class="sc">&lt;=</span> ctx<span class="sc">$</span>N),</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">collisions_repaired =</span> <span class="fu">sum</span>(<span class="fu">duplicated</span>(<span class="fu">as.integer</span>(p1))),</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">deterministic =</span> <span class="fu">identical</span>(d1, <span class="fu">decode</span>(p1, ctx<span class="sc">$</span>N, n_sel)))</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;            unique_1            unique_2            in_range collisions_repaired </span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                  60                  60                   1                   2 </span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       deterministic </span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                   1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -879,52 +1122,72 @@ window.Quarto = {
 <p>The repair fills in the lowest free indices, which introduces a slight bias toward low-numbered candidates. It is marked in the source with a <code>ponytail:</code> comment naming the ceiling and the upgrade path – switch to “nearest free” if the DE ever stalls. It has not mattered at these scales, but it is the kind of thing that should be written down rather than discovered later.</p>
 </div>
 </div>
-<section id="the-better-encoding" class="level3" data-number="16.3.1">
-<h3 data-number="16.3.1" class="anchored" data-anchor-id="the-better-encoding"><span class="header-section-number">16.3.1</span> The better encoding</h3>
-<p><a href="07-choosing-metrics.html#sec-collapse" class="quarto-xref"><span>Section 12.1</span></a> showed that <span class="math inline">\(\theta\)</span> depends only on the line-usage vector. That makes a far better encoding available: one weight per <strong>line</strong>, dimension <span class="math inline">\(L\)</span> instead of <span class="math inline">\(N\)</span>.</p>
+<section id="a-third-encoding-one-weight-per-line" class="level3" data-number="16.3.1">
+<h3 data-number="16.3.1" class="anchored" data-anchor-id="a-third-encoding-one-weight-per-line"><span class="header-section-number">16.3.1</span> A third encoding: one weight per line</h3>
+<p><a href="07-choosing-metrics.html#sec-collapse" class="quarto-xref"><span>Section 12.1</span></a> showed that <span class="math inline">\(\theta\)</span> depends only on the line-usage vector. That makes a third encoding available, and one that changes what the coordinates <em>mean</em>: one weight per <strong>line</strong>, dimension <span class="math inline">\(L\)</span>. Against the <span class="math inline">\(N\)</span>-dimensional key vector that is a collapse from 3600 coordinates to 120 in the run below. Against the <span class="math inline">\(n_{sel}\)</span> coordinates <code>sel_de()</code> actually searches it is close to a wash, and the numbers below say which of those two comparisons is which.</p>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>decode_lines</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (p, ctx, n_sel, max_use = NULL, w_div = 3) </span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; {</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     par &lt;- ctx$parents</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     sc &lt;- ctx$index + w_div * (p[par[, 1]] + p[par[, 2]])</span></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     ord &lt;- order(-sc)</span></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     if (is.null(max_use)) </span></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         return(ord[seq_len(n_sel)])</span></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     sel &lt;- integer(n_sel)</span></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     cnt &lt;- integer(ctx$n_lines)</span></span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     k &lt;- 0L</span></span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     for (h in ord) {</span></span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         a &lt;- par[h, 1]</span></span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         b &lt;- par[h, 2]</span></span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         if (cnt[a] &lt; max_use &amp;&amp; cnt[b] &lt; max_use) {</span></span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             k &lt;- k + 1L</span></span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             sel[k] &lt;- h</span></span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             cnt[a] &lt;- cnt[a] + 1L</span></span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             cnt[b] &lt;- cnt[b] + 1L</span></span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             if (k == n_sel) </span></span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                 break</span></span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         }</span></span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     }</span></span>
-<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     if (k &lt; n_sel) {</span></span>
-<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         rest &lt;- setdiff(ord, sel[seq_len(k)])</span></span>
-<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         sel[(k + 1L):n_sel] &lt;- rest[seq_len(n_sel - k)]</span></span>
-<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     }</span></span>
-<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     sel</span></span>
-<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
-<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0xbf793fea8&gt;</span></span>
-<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>decode_lines</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (p, ctx, n_sel, max_use = NULL, w_div = 3) </span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; {</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     par &lt;- ctx$parents</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     sc &lt;- ctx$index + w_div * (p[par[, 1]] + p[par[, 2]])</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     ord &lt;- order(-sc)</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     if (is.null(max_use)) </span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         return(ord[seq_len(n_sel)])</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     sel &lt;- integer(n_sel)</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     cnt &lt;- integer(ctx$n_lines)</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     k &lt;- 0L</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     for (h in ord) {</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         a &lt;- par[h, 1]</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         b &lt;- par[h, 2]</span></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         if (cnt[a] &lt; max_use &amp;&amp; cnt[b] &lt; max_use) {</span></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             k &lt;- k + 1L</span></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             sel[k] &lt;- h</span></span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             cnt[a] &lt;- cnt[a] + 1L</span></span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             cnt[b] &lt;- cnt[b] + 1L</span></span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             if (k == n_sel) </span></span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                 break</span></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         }</span></span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     }</span></span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     if (k &lt; n_sel) {</span></span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         rest &lt;- setdiff(ord, sel[seq_len(k)])</span></span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         sel[(k + 1L):n_sel] &lt;- rest[seq_len(n_sel - k)]</span></span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     }</span></span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     sel</span></span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0xad0374f90&gt;</span></span>
+<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>The line weight shifts each hybrid’s score by the weights of its two parents, and hybrids are taken greedily subject to the per-line usage cap – so the cap is satisfied <strong>by construction</strong> rather than by penalty.</p>
-<p>The comparison at equal evaluation budget is the sharpest single result in this book:</p>
+<p>The line weight shifts each hybrid’s score by the weights of its two parents, and hybrids are taken greedily subject to the per-line usage cap – so the cap is satisfied <strong>by construction</strong> rather than by penalty. In detail:</p>
+<ol type="1">
+<li>Each candidate scores <code>ctx$index + w_div * (p[a] + p[b])</code>, with <code>p</code> the line-weight vector being searched and <code>w_div = 3</code> by default. A line’s weight therefore moves every cross it parents, which is what makes the decision a <em>line</em> decision.</li>
+<li>Candidates are taken in decreasing score, skipping any whose parents have reached <code>max_use</code>.</li>
+<li>If the cap makes <code>n_sel</code> unreachable, the selection is topped up ignoring it, and the fitness function’s penalty term then sees the violation – so an infeasible cap degrades gracefully instead of returning a short vector.</li>
+</ol>
+<p>At <code>p = 0</code> the decoder is exactly capped truncation, which is the natural zero of the encoding; <a href="10b-advanced-selection.html" class="quarto-xref"><span>Chapter 17</span></a> verifies that identity numerically where the encoding is actually driven.</p>
+<p>The claim this chapter opened with – that an <span class="math inline">\(N\)</span>-dimensional encoding is infeasible for DE at this scale – is measured rather than asserted, and the measurement is cached in <code>data/de_constraints.csv</code>. It is worth being exact about what it compares, because <strong>neither arm of it is <code>sel_de()</code></strong>. Both are driven through <code>make_fitness_fast()</code>, on a pool of <span class="math inline">\(N = 3600\)</span> crosses from <span class="math inline">\(L = 120\)</span> lines, under the four simultaneous restrictions of <a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 12</span></a>: diversity loss <span class="math inline">\(\le 0.5\%\)</span>, <span class="math inline">\(N_{e,\text{par}} \ge 50\)</span>, at most 6 uses per line, and heterotic-pool balance within 5%. One arm is <code>decode_rank()</code> – one random key per <em>hybrid</em>, dimension 3600, the <span class="math inline">\(N\)</span>-dimensional encoding under indictment. The other is <code>decode_lines()</code>, dimension 120.</p>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
-<caption>60,000 evaluations, four simultaneous restrictions, mean of 3 seeds.</caption>
+<caption>60,000 evaluations per run, four simultaneous restrictions (<a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 12</span></a>), three seeds. index_min and index_max are the seed-to-seed range, not a confidence interval.</caption>
+<colgroup>
+<col style="width: 25%">
+<col style="width: 5%">
+<col style="width: 6%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 7%">
+<col style="width: 12%">
+<col style="width: 10%">
+<col style="width: 9%">
+</colgroup>
 <thead>
 <tr class="header">
 <th style="text-align: left;">encoding</th>
+<th style="text-align: right;">dim</th>
 <th style="text-align: right;">index</th>
+<th style="text-align: right;">index_min</th>
+<th style="text-align: right;">index_max</th>
 <th style="text-align: right;">loss %</th>
 <th style="text-align: right;">Ne parents</th>
 <th style="text-align: right;">max uses</th>
@@ -934,7 +1197,10 @@ window.Quarto = {
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">hybrid keys / penalty</td>
+<td style="text-align: right;">3600</td>
 <td style="text-align: right;">0.351</td>
+<td style="text-align: right;">0.343</td>
+<td style="text-align: right;">0.358</td>
 <td style="text-align: right;">0.060</td>
 <td style="text-align: right;">76.634</td>
 <td style="text-align: right;">5.667</td>
@@ -942,7 +1208,10 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td style="text-align: left;">hybrid keys / repair</td>
+<td style="text-align: right;">3600</td>
 <td style="text-align: right;">0.351</td>
+<td style="text-align: right;">0.343</td>
+<td style="text-align: right;">0.358</td>
 <td style="text-align: right;">0.060</td>
 <td style="text-align: right;">76.634</td>
 <td style="text-align: right;">5.667</td>
@@ -950,7 +1219,10 @@ window.Quarto = {
 </tr>
 <tr class="odd">
 <td style="text-align: left;">line weights / repair</td>
+<td style="text-align: right;">120</td>
 <td style="text-align: right;">1.988</td>
+<td style="text-align: right;">1.956</td>
+<td style="text-align: right;">2.017</td>
 <td style="text-align: right;">0.448</td>
 <td style="text-align: right;">50.084</td>
 <td style="text-align: right;">6.000</td>
@@ -960,107 +1232,272 @@ window.Quarto = {
 </table>
 </div>
 </div>
-<p>Dimension 3600 reaches index 0.351. Dimension 120 reaches 1.988 – <strong>5.7x better at the same budget</strong>. Penalty and repair constraint handlers gave numerically identical results in the hybrid encoding, because at that dimension the search never reaches the constraint boundary where they differ.</p>
+<div class="cell" data-layout-align="center">
+<pre><code>#&gt;   hybrid_keys_mean  hybrid_keys_range  line_weights_mean line_weights_range 
+#&gt;              0.351              0.014              1.988              0.061 
+#&gt;     ratio_of_means 
+#&gt;              5.667</code></pre>
+</div>
+<p>At dimension 3600 the search reaches index 0.351, at dimension 120 it reaches 1.988, and the seed-to-seed range within each arm (0.014 and 0.061) is an order of magnitude smaller than the distance between them, so the ordering is not a seed effect. Penalty and repair constraint handlers returned <em>numerically identical</em> plans at dimension 3600, because at that dimension the search never travels far enough from its random start to reach the boundary where the two handlers differ.</p>
+<p>Three things that result does <strong>not</strong> say, each of which it has been used to say:</p>
+<ul>
+<li>It is not a comparison against the encoding this chapter runs. <code>sel_de()</code> searches <span class="math inline">\(n_{sel}\)</span> coordinates, not <span class="math inline">\(N\)</span>; in the book’s own head-to-head benchmark (<a href="10b-advanced-selection.html" class="quarto-xref"><span>Chapter 17</span></a>) <code>sel_de()</code> finishes <em>ahead</em> of the line-encoded <code>sel_de_fast()</code> at both scales – 1.36 against 1.059 at book scale, and 1.446 against 1.336 at production scale. The line encoding beats the <em>N</em>-dimensional encoding; it does not beat this one.</li>
+<li>It is not a claim that one evaluation is cheaper. It is not, and <a href="10b-advanced-selection.html#sec-scaling" class="quarto-xref"><span>Section 17.7</span></a> measures both.</li>
+<li>It is not a clean like-for-like. Four restrictions were active at once and the line decoder satisfies one of them – the per-line cap – by construction, so part of the margin is a penalty the other arm had to pay and the line arm did not.</li>
+</ul>
+<p>The selected-set size of that cached run was not recorded alongside it, which is worth naming rather than papering over: the table is reproducible in direction, not to the digit.</p>
 <blockquote class="blockquote">
-<p>The encoding decides whether the optimiser works. The constraint handler does not.</p>
+<p>The encoding decides whether the optimiser works. The constraint handler does not. Neither decides which of two <em>viable</em> encodings wins – that has to be measured, and <a href="10b-advanced-selection.html" class="quarto-xref"><span>Chapter 17</span></a> measures it.</p>
 </blockquote>
 </section>
 </section>
 <section id="differential-evolution" class="level2" data-number="16.4">
 <h2 data-number="16.4" class="anchored" data-anchor-id="differential-evolution"><span class="header-section-number">16.4</span> Differential evolution</h2>
+<p>The run, as a procedure:</p>
+<ol type="1">
+<li>Fix <code>n_sel</code> first, then obtain <code>gd_ref</code> from <code>null_distribution()</code> <strong>at that same size</strong>. A reference computed at another size is a different quantity and every <span class="math inline">\(\alpha\)</span> downstream is wrong by a fixed factor.</li>
+<li>Choose <span class="math inline">\(\alpha_{\max}\)</span> below the attainable ceiling printed at the top of this chapter, by the procedure of <a href="09-optimal-contributions.html" class="quarto-xref"><span>Chapter 15</span></a>.</li>
+<li>Call <code>sel_de()</code>. It builds its warm start, injects it into the initial population, and hands <code>DEoptim</code> the fitness <span class="math inline">\(-(\bar u_S - 1000 \cdot \text{violation})\)</span> to minimise.</li>
+<li>Check the returned plan before using it: realised <span class="math inline">\(\alpha\)</span> against the budget, <code>max_line</code>, <span class="math inline">\(N_{e,\text{par}}\)</span>, and the gap to the bound. The diversity constraint is a <strong>penalty</strong>, so a returned plan is not guaranteed feasible – the violation is only made expensive.</li>
+</ol>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>sel_de</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (ctx, n_sel, alpha_max, gd_ref, NP = 300, itermax = 2000, </span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     seeds = NULL, trace = FALSE, max_use = NULL) </span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; {</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     fit &lt;- make_fitness(ctx, n_sel, alpha_max, gd_ref, max_use = max_use)</span></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     if (is.null(seeds)) </span></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         seeds &lt;- lapply(c(0, 0.25, 0.5, 1, 2, 4, 8, 16), function(w) sel_greedy(ctx, </span></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             n_sel, w = w, max_use = max_use))</span></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     seeds &lt;- Filter(function(s) length(s) == n_sel, seeds)</span></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     initial &lt;- matrix(runif(NP * n_sel, 1, ctx$N + 1), NP, n_sel)</span></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     for (i in seq_len(min(length(seeds), NP))) initial[i, ] &lt;- seeds[[i]] + </span></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         0.5</span></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     ctrl &lt;- DEoptim::DEoptim.control(NP = NP, itermax = itermax, </span></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         trace = trace, initialpop = initial)</span></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     res &lt;- DEoptim::DEoptim(fit, lower = rep(1, n_sel), upper = rep(ctx$N + </span></span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         0.999, n_sel), control = ctrl)</span></span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     decode(res$optim$bestmem, ctx$N, n_sel)</span></span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0xbf6a83268&gt;</span></span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>sel_de</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (ctx, n_sel, alpha_max, gd_ref, NP = 300, itermax = 2000, </span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     seeds = NULL, trace = FALSE, max_use = NULL) </span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; {</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     fit &lt;- make_fitness(ctx, n_sel, alpha_max, gd_ref, max_use = max_use)</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     if (is.null(seeds)) </span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         seeds &lt;- lapply(c(0, 0.25, 0.5, 1, 2, 4, 8, 16), function(w) sel_greedy(ctx, </span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             n_sel, w = w, max_use = max_use))</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     seeds &lt;- Filter(function(s) length(s) == n_sel, seeds)</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     initial &lt;- matrix(runif(NP * n_sel, 1, ctx$N + 1), NP, n_sel)</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     for (i in seq_len(min(length(seeds), NP))) initial[i, ] &lt;- seeds[[i]] + </span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         0.5</span></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     ctrl &lt;- DEoptim::DEoptim.control(NP = NP, itermax = itermax, </span></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         trace = trace, initialpop = initial)</span></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     res &lt;- DEoptim::DEoptim(fit, lower = rep(1, n_sel), upper = rep(ctx$N + </span></span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         0.999, n_sel), control = ctrl)</span></span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     decode(res$optim$bestmem, ctx$N, n_sel)</span></span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0xac9c6b700&gt;</span></span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>alpha_max <span class="ot">&lt;-</span> <span class="fl">0.01</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">9</span>)</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>de_idx <span class="ot">&lt;-</span> <span class="fu">suppressWarnings</span>(</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sel_de</span>(ctx, n_sel, <span class="at">alpha_max =</span> alpha_max, <span class="at">gd_ref =</span> null<span class="sc">$</span>gd_ref,</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">NP =</span> <span class="dv">120</span>, <span class="at">itermax =</span> <span class="dv">250</span>))</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">c</span>(<span class="at">index      =</span> <span class="fu">mean_index</span>(de_idx, ctx),</span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">alpha_pct  =</span> <span class="dv">100</span> <span class="sc">*</span> <span class="fu">alpha_loss</span>(de_idx, ctx, null<span class="sc">$</span>gd_ref),</span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">budget_pct =</span> <span class="dv">100</span> <span class="sc">*</span> alpha_max,</span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>      <span class="at">Ns         =</span> <span class="fu">status_number</span>(de_idx, ctx),</span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>      <span class="at">Ne_parents =</span> <span class="fu">ne_parents</span>(de_idx, ctx)), <span class="dv">3</span>)</span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      index  alpha_pct budget_pct         Ns Ne_parents </span></span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      1.330      0.978      1.000      0.738     22.857</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>alpha_max <span class="ot">&lt;-</span> <span class="fl">0.01</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">9</span>)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>de_idx <span class="ot">&lt;-</span> <span class="fu">suppressWarnings</span>(</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sel_de</span>(ctx, n_sel, <span class="at">alpha_max =</span> alpha_max, <span class="at">gd_ref =</span> null<span class="sc">$</span>gd_ref,</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">NP =</span> <span class="dv">120</span>, <span class="at">itermax =</span> <span class="dv">250</span>))</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">c</span>(<span class="at">index      =</span> <span class="fu">mean_index</span>(de_idx, ctx),</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">alpha_pct  =</span> <span class="dv">100</span> <span class="sc">*</span> <span class="fu">alpha_loss</span>(de_idx, ctx, null<span class="sc">$</span>gd_ref),</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">budget_pct =</span> <span class="dv">100</span> <span class="sc">*</span> alpha_max,</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>      <span class="at">Ns         =</span> <span class="fu">status_number</span>(de_idx, ctx),</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>      <span class="at">Ne_parents =</span> <span class="fu">ne_parents</span>(de_idx, ctx)), <span class="dv">3</span>)</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      index  alpha_pct budget_pct         Ns Ne_parents </span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      1.330      0.978      1.000      0.738     22.857</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+<p>The realised loss sits just inside the budget, which is the sign that the constraint is active and the penalty correctly scaled: with <code>penalty = 1000</code> multiplying the <em>absolute</em> violation, one tenth of a percentage point of excess loss costs a full index standard deviation. A plan that comes back well inside the budget at a low index usually means the opposite – that the penalty dominated and the search never approached the boundary.</p>
 <section id="the-warm-start-is-not-optional" class="level3" data-number="16.4.1">
 <h3 data-number="16.4.1" class="anchored" data-anchor-id="the-warm-start-is-not-optional"><span class="header-section-number">16.4.1</span> The warm start is not optional</h3>
-<p>Without seeding the initial population with greedy solutions, the DE ends up <em>below</em> a plain greedy – at any affordable budget.</p>
+<p>The strong form of this claim was measured at the package’s own simulation scale – 2500 candidates from 50 + 50 lines, <span class="math inline">\(n = 100\)</span>, <span class="math inline">\(4.5 \times 10^5\)</span> evaluations, recorded as finding 7 of <code>README.md</code> – where a cold-started DE finishes <em>below</em> the greedy solutions it was supposed to improve on. That run is not reproduced here; this chapter runs 625 candidates and <span class="math inline">\(3 \times 10^4\)</span> evaluations, and the conclusion at this scale is weaker. What follows is the same comparison, measured rather than asserted.</p>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>budget <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">NP =</span> <span class="dv">120</span>, <span class="at">itermax =</span> <span class="dv">250</span>)</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">21</span>)</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>cold <span class="ot">&lt;-</span> <span class="fu">suppressWarnings</span>(</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sel_de</span>(ctx, n_sel, alpha_max, null<span class="sc">$</span>gd_ref, <span class="at">NP =</span> budget<span class="sc">$</span>NP,</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">itermax =</span> budget<span class="sc">$</span>itermax, <span class="at">seeds =</span> <span class="fu">list</span>(<span class="fu">sample.int</span>(ctx<span class="sc">$</span>N, n_sel))))</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co"># `seeds = NULL`, the default, would have built the greedy sweep for us.</span></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>feasible_greedy <span class="ot">&lt;-</span> {</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  cand <span class="ot">&lt;-</span> <span class="fu">lapply</span>(ws, <span class="cf">function</span>(w) <span class="fu">sel_greedy</span>(ctx, n_sel, <span class="at">w =</span> w))</span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  ok <span class="ot">&lt;-</span> <span class="fu">vapply</span>(cand, <span class="cf">function</span>(s) <span class="fu">alpha_loss</span>(s, ctx, null<span class="sc">$</span>gd_ref) <span class="sc">&lt;=</span> alpha_max, <span class="fu">logical</span>(<span class="dv">1</span>))</span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>  cand[ok][[<span class="fu">which.max</span>(<span class="fu">vapply</span>(cand[ok], mean_index, <span class="fu">numeric</span>(<span class="dv">1</span>), <span class="at">ctx =</span> ctx))]]</span>
-<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">`</span><span class="at">cold DE</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">mean_index</span>(cold, ctx),</span>
-<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">best feasible greedy</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">mean_index</span>(feasible_greedy, ctx),</span>
-<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">warm DE</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">mean_index</span>(de_idx, ctx))</span>
-<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>bp <span class="ot">&lt;-</span> <span class="fu">barplot</span>(res, <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"grey70"</span>, <span class="st">"#2166ac"</span>, <span class="st">"#b2182b"</span>), <span class="at">ylab =</span> <span class="st">"mean index (s.d.)"</span>,</span>
-<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>              <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">max</span>(res) <span class="sc">*</span> <span class="fl">1.2</span>))</span>
-<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(bp, res, <span class="fu">sprintf</span>(<span class="st">"%.3f"</span>, res), <span class="at">pos =</span> <span class="dv">3</span>, <span class="at">cex =</span> <span class="fl">0.8</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>budget <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">NP =</span> <span class="dv">120</span>, <span class="at">itermax =</span> <span class="dv">250</span>)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">21</span>)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>cold <span class="ot">&lt;-</span> <span class="fu">suppressWarnings</span>(</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sel_de</span>(ctx, n_sel, alpha_max, null<span class="sc">$</span>gd_ref, <span class="at">NP =</span> budget<span class="sc">$</span>NP,</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">itermax =</span> budget<span class="sc">$</span>itermax, <span class="at">seeds =</span> <span class="fu">list</span>(<span class="fu">sample.int</span>(ctx<span class="sc">$</span>N, n_sel))))</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="co"># `seeds = NULL`, the default, would have built the greedy sweep for us.</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>feasible_greedy <span class="ot">&lt;-</span> {</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>  cand <span class="ot">&lt;-</span> <span class="fu">lapply</span>(ws, <span class="cf">function</span>(w) <span class="fu">sel_greedy</span>(ctx, n_sel, <span class="at">w =</span> w))</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>  ok <span class="ot">&lt;-</span> <span class="fu">vapply</span>(cand, <span class="cf">function</span>(s) <span class="fu">alpha_loss</span>(s, ctx, null<span class="sc">$</span>gd_ref) <span class="sc">&lt;=</span> alpha_max, <span class="fu">logical</span>(<span class="dv">1</span>))</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>  cand[ok][[<span class="fu">which.max</span>(<span class="fu">vapply</span>(cand[ok], mean_index, <span class="fu">numeric</span>(<span class="dv">1</span>), <span class="at">ctx =</span> ctx))]]</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">`</span><span class="at">cold DE</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">mean_index</span>(cold, ctx),</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">best feasible greedy</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">mean_index</span>(feasible_greedy, ctx),</span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">warm DE</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">mean_index</span>(de_idx, ctx))</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>bp <span class="ot">&lt;-</span> <span class="fu">barplot</span>(res, <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"grey70"</span>, <span class="st">"#2166ac"</span>, <span class="st">"#b2182b"</span>), <span class="at">ylab =</span> <span class="st">"mean index (s.d.)"</span>,</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>              <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">max</span>(res) <span class="sc">*</span> <span class="fl">1.2</span>))</span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(bp, res, <span class="fu">sprintf</span>(<span class="st">"%.3f"</span>, res), <span class="at">pos =</span> <span class="dv">3</span>, <span class="at">cex =</span> <span class="fl">0.8</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="10-combinatorial-selection_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="1050"></p>
-<figcaption>With and without a greedy warm start, at identical evaluation budget. Cold-started DE does not reach the greedy solution it was supposed to improve on.</figcaption>
+<p><img src="10-combinatorial-selection_files/figure-html/warm-start-1.png" class="img-fluid figure-img" width="1050"></p>
+<figcaption>With and without a greedy warm start, at identical evaluation budget, at book scale. The cold start finishes below the best feasible greedy solution; the warm start finishes above the cold start but does not overtake greedy at this budget.</figcaption>
 </figure>
 </div>
 </div>
 </div>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(res, <span class="dv">4</span>)</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;              cold DE best feasible greedy              warm DE </span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;               1.2289               0.1343               1.3299</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(res, <span class="dv">4</span>)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;              cold DE best feasible greedy              warm DE </span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;               1.2289               1.3782               1.3299</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+<p>One run of each is not a comparison. Three seeds, with the cold and warm arms branched off the <em>same</em> seed so that the two differ only in the initial population:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>reps <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">c</span>(<span class="dv">9</span>, <span class="dv">21</span>, <span class="dv">33</span>), <span class="cf">function</span>(sd_) {</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(sd_)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  warm <span class="ot">&lt;-</span> <span class="fu">suppressWarnings</span>(</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sel_de</span>(ctx, n_sel, alpha_max, null<span class="sc">$</span>gd_ref, <span class="at">NP =</span> <span class="dv">120</span>, <span class="at">itermax =</span> <span class="dv">250</span>))</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(sd_)</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  cold <span class="ot">&lt;-</span> <span class="fu">suppressWarnings</span>(</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sel_de</span>(ctx, n_sel, alpha_max, null<span class="sc">$</span>gd_ref, <span class="at">NP =</span> <span class="dv">120</span>, <span class="at">itermax =</span> <span class="dv">250</span>,</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>           <span class="at">seeds =</span> <span class="fu">list</span>(<span class="fu">sample.int</span>(ctx<span class="sc">$</span>N, n_sel))))</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">seed =</span> sd_, <span class="at">warm =</span> <span class="fu">mean_index</span>(warm, ctx),</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>             <span class="at">cold =</span> <span class="fu">mean_index</span>(cold, ctx))</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>}))</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(reps, <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;">seed</th>
+<th style="text-align: right;">warm</th>
+<th style="text-align: right;">cold</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">1.3299</td>
+<td style="text-align: right;">1.1589</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">1.3282</td>
+<td style="text-align: right;">1.2289</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">33</td>
+<td style="text-align: right;">1.3327</td>
+<td style="text-align: right;">1.2016</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">c</span>(<span class="at">warm_mean =</span> <span class="fu">mean</span>(reps<span class="sc">$</span>warm), <span class="at">warm_sd =</span> <span class="fu">sd</span>(reps<span class="sc">$</span>warm),</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>      <span class="at">cold_mean =</span> <span class="fu">mean</span>(reps<span class="sc">$</span>cold), <span class="at">cold_sd =</span> <span class="fu">sd</span>(reps<span class="sc">$</span>cold)), <span class="dv">4</span>)</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; warm_mean   warm_sd cold_mean   cold_sd </span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    1.3303    0.0023    1.1965    0.0353</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Result: over three seeds the warm start averages 1.33 with a standard deviation of 0.0023, the cold start 1.196 with 0.0353. Interpretation: the warm start is worth about 11% of mean index at equal evaluation budget, and rather more importantly it shrinks the run-to-run spread by an order of magnitude. A single cold run is not reportable: three cold runs span 0.07 index units against 0.004 for three warm ones – a spread that is 52% of the very difference being measured.</p>
+<p>What the warm start actually contains at this scale is worth looking at, because it is weaker than the name suggests:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">make_fitness</span>(ctx, n_sel, alpha_max, null<span class="sc">$</span>gd_ref)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>seed_w <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">8</span>, <span class="dv">16</span>)        <span class="co"># the grid sel_de() hard-codes</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>seeds <span class="ot">&lt;-</span> <span class="fu">lapply</span>(seed_w, <span class="cf">function</span>(w) <span class="fu">sel_greedy</span>(ctx, n_sel, <span class="at">w =</span> w))</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">data.frame</span>(</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">w         =</span> seed_w,</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">index     =</span> <span class="fu">vapply</span>(seeds, mean_index, <span class="fu">numeric</span>(<span class="dv">1</span>), <span class="at">ctx =</span> ctx),</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">alpha_pct =</span> <span class="dv">100</span> <span class="sc">*</span> <span class="fu">vapply</span>(seeds, alpha_loss, <span class="fu">numeric</span>(<span class="dv">1</span>), <span class="at">ctx =</span> ctx,</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>                           <span class="at">gd_ref =</span> null<span class="sc">$</span>gd_ref),</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">fitness   =</span> <span class="fu">vapply</span>(seeds, <span class="cf">function</span>(s) <span class="fu">fit</span>(s <span class="sc">+</span> <span class="fl">0.5</span>), <span class="fu">numeric</span>(<span class="dv">1</span>))), <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;">w</th>
+<th style="text-align: right;">index</th>
+<th style="text-align: right;">alpha_pct</th>
+<th style="text-align: right;">fitness</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.1343</td>
+<td style="text-align: right;">-1.3520</td>
+<td style="text-align: right;">-0.1343</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.25</td>
+<td style="text-align: right;">1.9919</td>
+<td style="text-align: right;">4.1216</td>
+<td style="text-align: right;">29.2242</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.50</td>
+<td style="text-align: right;">1.9919</td>
+<td style="text-align: right;">4.1216</td>
+<td style="text-align: right;">29.2242</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.9919</td>
+<td style="text-align: right;">4.1216</td>
+<td style="text-align: right;">29.2242</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2.00</td>
+<td style="text-align: right;">1.9919</td>
+<td style="text-align: right;">4.1216</td>
+<td style="text-align: right;">29.2242</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">4.00</td>
+<td style="text-align: right;">1.9919</td>
+<td style="text-align: right;">4.1216</td>
+<td style="text-align: right;">29.2242</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">8.00</td>
+<td style="text-align: right;">1.9919</td>
+<td style="text-align: right;">4.1216</td>
+<td style="text-align: right;">29.2242</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">16.00</td>
+<td style="text-align: right;">1.9919</td>
+<td style="text-align: right;">4.1216</td>
+<td style="text-align: right;">29.2242</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Seven of the eight seeds are the <em>same</em> selection – truncation – because the hard-coded grid lies entirely above the crossover measured earlier, and at a 1% budget all seven are infeasible, which the penalty converts into a fitness of about 29 on a scale where a random row scores near zero. The one feasible seed is the <span class="math inline">\(w = 0\)</span> diversity solution at index 0.134. So at this scale the warm start installs one feasible plan and seven copies of an infeasible one, and is still worth the difference measured above. Widening that grid is a change to the package rather than to the call, and it is not made here: every number in this book was produced with <code>sel_de()</code> as it stands.</p>
 <p>The mechanism is dimensional. At roughly 60 integer dimensions the search space is far too large for 30,000 evaluations to find anything a construction heuristic has not already found. The warm start does not help the DE converge faster – it gives the DE something worth improving on.</p>
 <p><code>sel_de()</code> builds the warm start automatically from a greedy sweep, and <strong>removing it will silently degrade every result in this book.</strong></p>
+<p>The limitation, stated where the result is: at book scale the warm-started DE (1.33) is still below the best feasible greedy solution of the finely swept grid (1.378) at this budget. The DE’s advantage here is not raw index but that it is parameterised by <span class="math inline">\(\alpha_{\max}\)</span>, so it can be asked for a budget the greedy grid does not happen to land on. The method that beats both on index, at a fraction of the wall-clock, is in <a href="10b-advanced-selection.html" class="quarto-xref"><span>Chapter 17</span></a>.</p>
 </section>
 <section id="checking-convergence-against-the-bound" class="level3" data-number="16.4.2">
 <h3 data-number="16.4.2" class="anchored" data-anchor-id="checking-convergence-against-the-bound"><span class="header-section-number">16.4.2</span> Checking convergence against the bound</h3>
 <p><a href="09-optimal-contributions.html#sec-relaxation" class="quarto-xref"><span>Section 15.2.1</span></a> gives a relaxation. Turning it into a <em>bound</em> takes one more step, derived in <a href="10b-advanced-selection.html#sec-bound" class="quarto-xref"><span>Section 17.4</span></a>: the relaxation at a given <span class="math inline">\(\lambda\)</span> maximises a penalised objective rather than the index, so the best relaxation point inside the budget is not an upper bound on the best plan inside the budget. The Lagrangian combination is.</p>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>relax <span class="ot">&lt;-</span> <span class="fu">ocs_relaxation</span>(ctx, n_sel, <span class="at">lambdas =</span> <span class="dv">10</span><span class="sc">^</span><span class="fu">seq</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="fl">2.5</span>, <span class="at">length.out =</span> <span class="dv">10</span>))</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>a_relax <span class="ot">&lt;-</span> (null<span class="sc">$</span>gd_ref <span class="sc">-</span> relax[, <span class="st">"GD"</span>]) <span class="sc">/</span> null<span class="sc">$</span>gd_ref</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>bound <span class="ot">&lt;-</span> <span class="fu">ocs_bound</span>(ctx, n_sel, alpha_max, null<span class="sc">$</span>gd_ref)</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">DE_index =</span> <span class="fu">mean_index</span>(de_idx, ctx),</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">upper_bound =</span> <span class="fu">as.numeric</span>(bound),</span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">gap_pct =</span> <span class="dv">100</span> <span class="sc">*</span> (<span class="fu">as.numeric</span>(bound) <span class="sc">-</span> <span class="fu">mean_index</span>(de_idx, ctx)) <span class="sc">/</span> <span class="fu">as.numeric</span>(bound))</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    DE_index upper_bound     gap_pct </span></span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    1.329921    1.552420   14.332431</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>relax <span class="ot">&lt;-</span> <span class="fu">ocs_relaxation</span>(ctx, n_sel, <span class="at">lambdas =</span> <span class="dv">10</span><span class="sc">^</span><span class="fu">seq</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="fl">2.5</span>, <span class="at">length.out =</span> <span class="dv">10</span>))</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>a_relax <span class="ot">&lt;-</span> (null<span class="sc">$</span>gd_ref <span class="sc">-</span> relax[, <span class="st">"GD"</span>]) <span class="sc">/</span> null<span class="sc">$</span>gd_ref</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>bound <span class="ot">&lt;-</span> <span class="fu">ocs_bound</span>(ctx, n_sel, alpha_max, null<span class="sc">$</span>gd_ref)</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">DE_index =</span> <span class="fu">mean_index</span>(de_idx, ctx),</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">upper_bound =</span> <span class="fu">as.numeric</span>(bound),</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">gap_pct =</span> <span class="dv">100</span> <span class="sc">*</span> (<span class="fu">as.numeric</span>(bound) <span class="sc">-</span> <span class="fu">mean_index</span>(de_idx, ctx)) <span class="sc">/</span> <span class="fu">as.numeric</span>(bound))</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    DE_index upper_bound     gap_pct </span></span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    1.329921    1.553244   14.377862</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>A large gap means <strong>the optimiser has not converged</strong>, not that the problem is intrinsically hard. A small gap means further optimiser effort is wasted.</p>
+<p>The four steps behind that one call, and the check that has to accompany it:</p>
+<ol type="1">
+<li>The budget is translated into group coancestry, <span class="math inline">\(\theta_{\max} = 1 - \text{gd\_ref}(1 - \alpha_{\max})\)</span> – the largest <span class="math inline">\(\theta\)</span> a plan may have.</li>
+<li>The relaxation is solved at each <span class="math inline">\(\lambda\)</span> on the grid, giving <span class="math inline">\(V(\lambda)\)</span>, its optimal penalised value.</li>
+<li>The bound is <span class="math inline">\(\min_\lambda [V(\lambda) + \lambda\,\theta_{\max}]\)</span>. Every <span class="math inline">\(\lambda\)</span> gives a valid bound, so a coarse grid costs tightness, not validity.</li>
+<li><code>ocs_bound()</code> doubles its iteration count until the value stops moving and records whether it succeeded. <strong>Read that flag before quoting any gap</strong>: an under-converged relaxation reports <span class="math inline">\(V(\lambda)\)</span> too small, which makes the “bound” too small, and then it is not a bound at all (<a href="10b-advanced-selection.html#sec-scaling" class="quarto-xref"><span>Section 17.7</span></a>).</li>
+</ol>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">lambda_star =</span> <span class="fu">attr</span>(bound, <span class="st">"lambda"</span>),</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">iterations  =</span> <span class="fu">attr</span>(bound, <span class="st">"iters"</span>),</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">theta_max   =</span> <span class="dv">1</span> <span class="sc">-</span> null<span class="sc">$</span>gd_ref <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> alpha_max))</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  lambda_star   iterations    theta_max </span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   68.1292069 8000.0000000    0.6774198</span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a><span class="fu">attr</span>(bound, <span class="st">"converged"</span>)</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>A large gap means <strong>the optimiser has not converged</strong>, not that the problem is intrinsically hard. A small gap means further optimiser effort is wasted. The gap here is 14.4%, against a bound the function certifies as converged; <a href="10b-advanced-selection.html" class="quarto-xref"><span>Chapter 17</span></a> closes most of it at the same budget with a cheaper move, which settles which of the two readings applies.</p>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1071,45 +1508,47 @@ window.Quarto = {
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><span class="citation" data-cites="debeukelaer2018">De Beukelaer et al. (<a href="99-references.html#ref-debeukelaer2018" role="doc-biblioref">2018</a>)</span>, optimising core-collection subsets with local search rather than DE, found that a basic stochastic hill-climber was already competitive, that a considerably more complex genetic algorithm did <em>not</em> reliably beat it, and that the method which won – parallel tempering – won by combining many simple local searches rather than by being individually more sophisticated.</p>
-<p>The common thread with the warm-start result here: for this class of problem, the return on a smarter <em>search strategy</em> around a simple move consistently outweighs the return on a more elaborate <em>single-solution</em> algorithm. That direction is taken up in <a href="10b-advanced-selection.html" class="quarto-xref"><span>Chapter 17</span></a>, which builds the local search on the <code>O(L)</code> swap this package already had and measures it against the DE at equal wall-clock.</p>
+<p><span class="citation" data-cites="debeukelaer2018">De Beukelaer et al. (<a href="99-references.html#ref-debeukelaer2018" role="doc-biblioref">2018</a>)</span>, optimising core-collection subsets with local search rather than DE, rank three stochastic searches on the same objective across four crop datasets – rice, coconut, maize and pea – in the Results section “Optimizing E-NE and A-NE with local searches”: parallel tempering first, a genetic algorithm second, and random descent – a plain stochastic hill-climber – third, with all twelve pairwise comparisons significant under a Holm-adjusted Wilcoxon test. The genetic algorithm therefore <em>does</em> beat the hill-climber on raw score. What it does not do is win, and the method that wins is the one assembled from many simple local searches run in parallel, not the one with the more elaborate update rule.</p>
+<p>The inference, stated separately from that result and limited by it: extra sophistication inside a <em>single-solution</em> algorithm bought a rank there and not the win, which is a weak reason to spend complexity on the optimiser and no reason at all to expect a DE to be the right one. It is one application, on an allele-coverage objective rather than an index under a coancestry budget, so it transfers as a prior about where effort pays and not as a result. That direction is taken up in <a href="10b-advanced-selection.html" class="quarto-xref"><span>Chapter 17</span></a>, which builds the local search on the <code>O(L)</code> swap this package already had and measures it against the DE at equal wall-clock.</p>
 </div>
 </div>
 </section>
 </section>
 <section id="the-full-frontier" class="level2" data-number="16.5">
 <h2 data-number="16.5" class="anchored" data-anchor-id="the-full-frontier"><span class="header-section-number">16.5</span> The full frontier</h2>
+<p>One optimisation per budget, which is the epsilon-constraint method: each point is a plan that can be put in front of a committee, described by the budget it respects rather than by an exchange rate nobody can interpret.</p>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>alphas <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.0025</span>, <span class="fl">0.005</span>, <span class="fl">0.01</span>, <span class="fl">0.02</span>)</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>front <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(alphas, <span class="cf">function</span>(a) {</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  r <span class="ot">&lt;-</span> <span class="fu">suppressWarnings</span>(<span class="fu">sel_de</span>(ctx, n_sel, a, null<span class="sc">$</span>gd_ref, <span class="at">NP =</span> <span class="dv">100</span>, <span class="at">itermax =</span> <span class="dv">180</span>))</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">alpha_max =</span> a, <span class="at">alpha =</span> <span class="fu">alpha_loss</span>(r, ctx, null<span class="sc">$</span>gd_ref),</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>             <span class="at">index =</span> <span class="fu">mean_index</span>(r, ctx), <span class="at">Ne_par =</span> <span class="fu">ne_parents</span>(r, ctx))</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>}))</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(front<span class="sc">$</span>alpha <span class="sc">*</span> <span class="dv">100</span>, front<span class="sc">$</span>index, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">"#b2182b"</span>,</span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"gene diversity loss, alpha (%)"</span>, <span class="at">ylab =</span> <span class="st">"mean index (s.d.)"</span>,</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlim =</span> <span class="fu">range</span>(<span class="fu">c</span>(front<span class="sc">$</span>alpha, gf<span class="sc">$</span>alpha, a_relax) <span class="sc">*</span> <span class="dv">100</span>),</span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylim =</span> <span class="fu">range</span>(<span class="fu">c</span>(front<span class="sc">$</span>index, gf<span class="sc">$</span>index, relax[, <span class="st">"index"</span>])))</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(gf<span class="sc">$</span>alpha <span class="sc">*</span> <span class="dv">100</span>, gf<span class="sc">$</span>index, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">pch =</span> <span class="dv">17</span>, <span class="at">col =</span> <span class="st">"#2166ac"</span>, <span class="at">cex =</span> <span class="fl">0.7</span>)</span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="fu">sort</span>(a_relax) <span class="sc">*</span> <span class="dv">100</span>, relax[<span class="fu">order</span>(a_relax), <span class="st">"index"</span>], <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">pch =</span> <span class="dv">1</span>,</span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">"grey55"</span>, <span class="at">cex =</span> <span class="fl">0.7</span>)</span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="dv">0</span>, <span class="at">lty =</span> <span class="dv">3</span>)</span>
-<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"bottomright"</span>, <span class="fu">c</span>(<span class="st">"constrained DE"</span>, <span class="st">"greedy sweep"</span>, <span class="st">"continuous OCS bound"</span>),</span>
-<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"#b2182b"</span>, <span class="st">"#2166ac"</span>, <span class="st">"grey55"</span>), <span class="at">pch =</span> <span class="fu">c</span>(<span class="dv">19</span>, <span class="dv">17</span>, <span class="dv">1</span>),</span>
-<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>       <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>), <span class="at">lwd =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">1</span>), <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">cex =</span> <span class="fl">0.8</span>)</span>
-<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a><span class="fu">grid</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>alphas <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.0025</span>, <span class="fl">0.005</span>, <span class="fl">0.01</span>, <span class="fl">0.02</span>)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">45</span>)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>front <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(alphas, <span class="cf">function</span>(a) {</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  r <span class="ot">&lt;-</span> <span class="fu">suppressWarnings</span>(<span class="fu">sel_de</span>(ctx, n_sel, a, null<span class="sc">$</span>gd_ref, <span class="at">NP =</span> <span class="dv">100</span>, <span class="at">itermax =</span> <span class="dv">180</span>))</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">alpha_max =</span> a, <span class="at">alpha =</span> <span class="fu">alpha_loss</span>(r, ctx, null<span class="sc">$</span>gd_ref),</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>             <span class="at">index =</span> <span class="fu">mean_index</span>(r, ctx), <span class="at">Ne_par =</span> <span class="fu">ne_parents</span>(r, ctx))</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>}))</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(front<span class="sc">$</span>alpha <span class="sc">*</span> <span class="dv">100</span>, front<span class="sc">$</span>index, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">"#b2182b"</span>,</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"gene diversity loss, alpha (%)"</span>, <span class="at">ylab =</span> <span class="st">"mean index (s.d.)"</span>,</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlim =</span> <span class="fu">range</span>(<span class="fu">c</span>(front<span class="sc">$</span>alpha, gf<span class="sc">$</span>alpha, a_relax) <span class="sc">*</span> <span class="dv">100</span>),</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylim =</span> <span class="fu">range</span>(<span class="fu">c</span>(front<span class="sc">$</span>index, gf<span class="sc">$</span>index, relax[, <span class="st">"index"</span>])))</span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(gf<span class="sc">$</span>alpha <span class="sc">*</span> <span class="dv">100</span>, gf<span class="sc">$</span>index, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">pch =</span> <span class="dv">17</span>, <span class="at">col =</span> <span class="st">"#2166ac"</span>, <span class="at">cex =</span> <span class="fl">0.7</span>)</span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="fu">sort</span>(a_relax) <span class="sc">*</span> <span class="dv">100</span>, relax[<span class="fu">order</span>(a_relax), <span class="st">"index"</span>], <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">pch =</span> <span class="dv">1</span>,</span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>      <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">"grey55"</span>, <span class="at">cex =</span> <span class="fl">0.7</span>)</span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="dv">0</span>, <span class="at">lty =</span> <span class="dv">3</span>)</span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"bottomright"</span>, <span class="fu">c</span>(<span class="st">"constrained DE"</span>, <span class="st">"greedy sweep"</span>, <span class="st">"continuous OCS relaxation"</span>),</span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"#b2182b"</span>, <span class="st">"#2166ac"</span>, <span class="st">"grey55"</span>), <span class="at">pch =</span> <span class="fu">c</span>(<span class="dv">19</span>, <span class="dv">17</span>, <span class="dv">1</span>),</span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a>       <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>), <span class="at">lwd =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">1</span>), <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">cex =</span> <span class="fl">0.8</span>)</span>
+<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a><span class="fu">grid</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="10-combinatorial-selection_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="1050"></p>
-<figcaption>Everything together. The constrained DE, the greedy sweep, the continuous upper bound, and the fixed reference strategies.</figcaption>
+<p><img src="10-combinatorial-selection_files/figure-html/full-frontier-1.png" class="img-fluid figure-img" width="1050"></p>
+<figcaption>Everything together. The constrained DE, the greedy sweep, and the continuous OCS relaxation – which is a relaxation, not a bound at matched diversity (<a href="10b-advanced-selection.html#sec-bound" class="quarto-xref"><span>Section 17.4</span></a>).</figcaption>
 </figure>
 </div>
 </div>
 </div>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(front, <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(front, <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1124,40 +1563,98 @@ window.Quarto = {
 <tbody>
 <tr class="odd">
 <td style="text-align: right;">0.0000</td>
-<td style="text-align: right;">-0.0001</td>
-<td style="text-align: right;">0.9700</td>
+<td style="text-align: right;">-0.0005</td>
+<td style="text-align: right;">0.9553</td>
 <td style="text-align: right;">29.8755</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">0.0025</td>
-<td style="text-align: right;">0.0022</td>
-<td style="text-align: right;">1.0980</td>
-<td style="text-align: right;">27.4809</td>
+<td style="text-align: right;">0.0020</td>
+<td style="text-align: right;">1.0812</td>
+<td style="text-align: right;">28.2353</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">0.0050</td>
-<td style="text-align: right;">0.0048</td>
-<td style="text-align: right;">1.2015</td>
-<td style="text-align: right;">25.0871</td>
+<td style="text-align: right;">0.0047</td>
+<td style="text-align: right;">1.1833</td>
+<td style="text-align: right;">25.7143</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">0.0100</td>
 <td style="text-align: right;">0.0099</td>
-<td style="text-align: right;">1.3024</td>
-<td style="text-align: right;">23.3010</td>
+<td style="text-align: right;">1.3184</td>
+<td style="text-align: right;">22.9299</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">0.0200</td>
-<td style="text-align: right;">0.0199</td>
-<td style="text-align: right;">1.5591</td>
-<td style="text-align: right;">18.9474</td>
+<td style="text-align: right;">0.0200</td>
+<td style="text-align: right;">1.6310</td>
+<td style="text-align: right;">18.2741</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
 </div>
-<p>Two things to read. The DE sits above the greedy sweep at every budget – that is what it is for. And the realised <code>alpha</code> tracks <code>alpha_max</code> closely, which is the constraint doing its job: at each budget the optimiser spends the diversity it was allowed and no more.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>best_greedy <span class="ot">&lt;-</span> <span class="fu">vapply</span>(front<span class="sc">$</span>alpha_max, <span class="cf">function</span>(a) {</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  ok <span class="ot">&lt;-</span> gf<span class="sc">$</span>alpha <span class="sc">&lt;=</span> a</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">any</span>(ok)) <span class="fu">max</span>(gf<span class="sc">$</span>index[ok]) <span class="cf">else</span> <span class="cn">NA_real_</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>}, <span class="fu">numeric</span>(<span class="dv">1</span>))</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">data.frame</span>(<span class="at">alpha_max =</span> front<span class="sc">$</span>alpha_max, <span class="at">DE =</span> front<span class="sc">$</span>index,</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">greedy_sweep =</span> best_greedy,</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>               <span class="at">DE_minus_greedy =</span> front<span class="sc">$</span>index <span class="sc">-</span> best_greedy), <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;">alpha_max</th>
+<th style="text-align: right;">DE</th>
+<th style="text-align: right;">greedy_sweep</th>
+<th style="text-align: right;">DE_minus_greedy</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.9553</td>
+<td style="text-align: right;">0.8672</td>
+<td style="text-align: right;">0.0881</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.0025</td>
+<td style="text-align: right;">1.0812</td>
+<td style="text-align: right;">0.8672</td>
+<td style="text-align: right;">0.2140</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.0050</td>
+<td style="text-align: right;">1.1833</td>
+<td style="text-align: right;">0.8672</td>
+<td style="text-align: right;">0.3162</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.0100</td>
+<td style="text-align: right;">1.3184</td>
+<td style="text-align: right;">1.3782</td>
+<td style="text-align: right;">-0.0598</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.0200</td>
+<td style="text-align: right;">1.6310</td>
+<td style="text-align: right;">1.3782</td>
+<td style="text-align: right;">0.2528</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Three things to read, in this order.</p>
+<p><strong>The constraint does its job.</strong> Realised <code>alpha</code> tracks <code>alpha_max</code> at every budget: the optimiser spends the diversity it was allowed and no more. A plan that lands far inside its budget has not been constrained by it, and whatever else is limiting it – the cap, the penalty scale, an unconverged search – has to be identified before the frontier is read as a price list.</p>
+<p><strong>The comparison against greedy is budget-dependent.</strong> The DE is ahead at 4 of the 5 budgets and behind at the rest. Where it is ahead, the greedy grid simply has no point near that budget – between two consecutive values of <span class="math inline">\(w\)</span> the sweep steps over the whole interval, and the best <em>feasible</em> greedy plan is then one from far inside it. Where the grid does land well, greedy is at least as good for a fraction of the cost. Interpretation: at this scale the DE buys the ability to hit a requested budget, not a better plan; the statement that it dominates greedy on index was an artefact of a coarse <span class="math inline">\(w\)</span> grid, and does not survive measurement.</p>
+<p><strong>The dashed curve is a relaxation, not a ceiling.</strong> It sits above the discrete points over most of the range, which is exactly what makes it tempting to read its height at a given <span class="math inline">\(\alpha\)</span> as an upper bound on what a plan there could be worth. It is not one: the best relaxation point whose own <span class="math inline">\(\alpha\)</span> falls inside the 1% budget reaches 1.129, <em>below</em> both the DE plan and the best feasible greedy plan at that budget, because each point maximises a penalised objective rather than the index at its own diversity. <a href="10b-advanced-selection.html#sec-bound" class="quarto-xref"><span>Section 17.4</span></a> falsifies that construction and gives the Lagrangian statement that is a ceiling – 1.553 here – and the vertical distance to <em>that</em> at <span class="math inline">\(\alpha_{\max}\)</span> is what <a href="10b-advanced-selection.html" class="quarto-xref"><span>Chapter 17</span></a> spends its effort on. Note that this figure runs one DE per budget with a fixed seed; the seed-to-seed spread measured above (0.002 for the warm start) is small against the steps between budgets here, but it is not zero and it should be quoted whenever two methods are compared at one budget.</p>
 </section>
 <section id="which-strategy-to-use" class="level2" data-number="16.6">
 <h2 data-number="16.6" class="anchored" data-anchor-id="which-strategy-to-use"><span class="header-section-number">16.6</span> Which strategy to use</h2>
@@ -1165,8 +1662,8 @@ window.Quarto = {
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
-<col style="width: 39%">
-<col style="width: 60%">
+<col style="width: 7%">
+<col style="width: 92%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1188,17 +1685,33 @@ window.Quarto = {
 <td style="text-align: left;"><code>sel_greedy()</code> swept over w</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">Production scale, several simultaneous restrictions</td>
-<td style="text-align: left;"><code>sel_de_fast()</code> or <code>sel_local_search()</code> on the <strong>line</strong> encoding – <a href="10b-advanced-selection.html" class="quarto-xref"><span>Chapter 17</span></a></td>
+<td style="text-align: left;">Production scale, a budget and a per-line cap</td>
+<td style="text-align: left;"><code>sel_greedy(max_use = cap)</code> swept over w – the highest index of any <em>capped</em> route at both scales of <a href="10b-advanced-selection.html" class="quarto-xref"><span>Chapter 17</span></a>’s benchmark (1.112 at book scale, 1.123 at production), and cheap at both: at book scale it and <code>ocs_round(max_use = cap)</code> both cost milliseconds (0.008 s and 0.01 s, means of 3 seeds that single-call timing cannot separate – neither is reliably the cheaper), and at production it is second cheapest (0.329 s, behind <code>ocs_round(max_use = cap)</code>’s 0.214 s in every seed). <code>sel_local_search(max_use = cap, mode = "tempering")</code> – the only capped local-search mode in that benchmark – comes close without matching it: 2.5 thousandths of an index unit short at book scale, for roughly 36x the wall-clock, and 0.2 thousandths short at production</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">A restriction a swap cannot test (Ne floor, pool balance)</td>
+<td style="text-align: left;"><code>sel_de_fast()</code> – the only route that accepts them; it trails the capped greedy on index (<a href="10b-advanced-selection.html" class="quarto-xref"><span>Chapter 17</span></a>)</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-<p>The honest summary is that the optimiser earns its place only in the last row. In the first three, something simpler is either exactly as good or good enough, and <a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 12</span></a>’s cost table is the reason to check which row you are in before writing any optimisation code.</p>
+<p>As an order of operations at the end of a cycle:</p>
+<ol type="1">
+<li>Build the contract objects and print the instance panel at the top of this chapter. Confirm <code>gd_ref</code> was computed at the <code>n_sel</code> you will actually use.</li>
+<li>Compute the attainable ceiling from truncation. If it is below your intended <span class="math inline">\(\alpha_{\max}\)</span>, stop: the constraint is inactive and truncation is the answer.</li>
+<li>Run <code>sel_truncation_cap()</code>. It costs nothing and needs no matrix. If it meets the budget at an acceptable index, stop.</li>
+<li>Sweep <code>sel_greedy()</code> over a <span class="math inline">\(w\)</span> grid spanning the crossover measured from your own data, not a grid of round numbers. Read the frontier and locate the knee.</li>
+<li>Only if a specific budget has to be hit, or several restrictions apply at once, run an optimiser – and warm-start it.</li>
+<li>Whatever returned the plan, validate it on the second lens and on allelic richness before it leaves the analysis (<a href="12-case-study.html" class="quarto-xref"><span>Chapter 21</span></a>).</li>
+</ol>
+<p>The honest summary is that an optimiser earns its place only in the last row, where a restriction rules the cheap routes out. In the first four – including the capped production case, once the capped benchmark is read on capped methods only – something simpler is either exactly as good or good enough, and <a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 12</span></a>’s cost table is the reason to check which row you are in before writing any optimisation code.</p>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
+<div id="ref-caballero2002" class="csl-entry" role="listitem">
+Caballero, A., and M. A. Toro. 2002. <span>“Analysis of Genetic Diversity for the Management of Conserved Subdivided Populations.”</span> <em>Conservation Genetics</em> 3 (3): 289–99. <a href="https://doi.org/10.1023/A:1019956205473">https://doi.org/10.1023/A:1019956205473</a>.
+</div>
 <div id="ref-debeukelaer2018" class="csl-entry" role="listitem">
 De Beukelaer, H., G. F. Davenport, and V. Fack. 2018. <span>“Core <span>H</span>unter 3: Flexible Core Subset Selection.”</span> <em>BMC Bioinformatics</em> 19 (1): 203. <a href="https://doi.org/10.1186/s12859-018-2209-z">https://doi.org/10.1186/s12859-018-2209-z</a>.
 </div>

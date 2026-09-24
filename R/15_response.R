@@ -59,11 +59,15 @@ genic_var <- function(X, beta) {
 #' (Smith 1936; Hazel 1943).
 #'
 #' The book's pipeline defaults to `weights = NULL`, meaning equal weight on
-#' every trait. That is a choice, not a neutral default: equal weights are the
-#' Smith-Hazel solution only when `P^-1 G` is proportional to the identity,
-#' which requires the traits to be equally variable, equally heritable and
-#' mutually uncorrelated. Nothing guarantees that, and when it fails the index
-#' being maximised is not the index anyone wanted.
+#' every trait. That is a choice, not a neutral default: `b = P^-1 G a` is
+#' proportional to `a` if and only if `a` is an eigenvector of `P^-1 G`. A
+#' sufficient condition is `G = c P` -- every trait with the same heritability
+#' `c` and the genetic correlations equal to the phenotypic ones -- which says
+#' nothing about the traits being equally variable or uncorrelated: with
+#' `G = I`, `P = [[2, 0.5], [0.5, 2]]` and `a = (1, 1)`, `b` is proportional to
+#' `(1, 1)` although the traits are correlated. Nothing guarantees the
+#' condition, and when it fails the index being maximised is not the index
+#' anyone wanted.
 #'
 #' @param P Phenotypic covariance matrix of the measured traits, `t x t`.
 #' @param G Genetic covariance matrix between measured traits and the traits in
