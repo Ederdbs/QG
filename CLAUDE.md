@@ -156,7 +156,8 @@ is the only source of truth for the order. A suffixed number (`02b`, `04b`, `04c
 `05b`, `08b`, `10b`, `11b`, `11c`) is the established naming for a chapter inserted after the fact —
 renumbering the whole book would break every `docs/` URL, which GitHub Pages serves directly.
 The Simulation part is the largest at five chapters (`03`, `04`, `04b`, `04c`, `04d`).
-The Mating design part is one chapter (`04e`); its headline sweep is cached from an external
+The Mating and testing design part holds `04e` (which crosses) and, once written, `04f` (which
+locations; `R/17_sparse_testing.R`). For 04e, its headline sweep is cached from an external
 study (`sparsex`, AlphaSimR + sommer) that is not in the repo -- `book/data/mating_*.csv` and
 `book/figs/mating_*.png` cannot be regenerated here. `regenerate.R mating` re-runs only its
 phenotypic core (`mating_core_sweep.csv`) with `R/16_mating_design.R`. Do not present the
