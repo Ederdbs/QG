@@ -251,3 +251,37 @@ ref_inbreeding_depression <- function(p, d, F_coef = 1, n = 20000, seed = 1) {
   }
   mean_at(0) - mean_at(F_coef)
 }
+
+#' Literal BLUP and PEV for a sparse multi-location trial
+#'
+#' The oracle of [sparse_blup]: builds the phenotypic covariance
+#' `V = sum_t Z_t G_t Z_t' s2_t + I s2res` explicitly, takes the GLS estimate
+#' `b = (X' V^-1 X)^-1 X' V^-1 y`, predicts `u = G Z' V^-1 (y - X b)`, and
+#' gets the prediction error covariance from `G - G Z' P Z G` with
+#' `P = V^-1 - V^-1 X (X' V^-1 X)^-1 X' V^-1`. No mixed-model equations.
+#'
+#' @inheritParams sparse_blup
+#' @return A list with `blup` and `pev`, as in [sparse_blup].
+#' @export
+ref_sparse_blup <- function(pheno, nF, nM, nLoc, vc, Af = diag(nF), Am = diag(nM)) {
+  d <- sparse_terms(pheno, nF, nM, nLoc, vc, Af, Am)
+  Z <- do.call(cbind, lapply(d$terms, `[[`, "Z"))
+  sizes <- vapply(d$terms, function(t) ncol(t$Z), numeric(1))
+  G <- matrix(0, sum(sizes), sum(sizes))
+  off <- 0
+  for (t in d$terms) {
+    ix <- off + seq_len(ncol(t$Z))
+    G[ix, ix] <- t$G * t$s2
+    off <- off + ncol(t$Z)
+  }
+  V <- Z %*% G %*% t(Z) + diag(vc$s2res, nrow(Z))
+  Vi <- solve(V)
+  X <- d$X
+  XViX <- t(X) %*% Vi %*% X
+  b <- solve(XViX, t(X) %*% Vi %*% pheno$y)
+  u <- G %*% t(Z) %*% Vi %*% (pheno$y - X %*% b)
+  P <- Vi - Vi %*% X %*% solve(XViX) %*% t(X) %*% Vi
+  PEVu <- G - G %*% t(Z) %*% P %*% Z %*% G
+  K <- sparse_target_map(nF, nM, nLoc, d$pix)
+  list(blup = drop(K %*% u), pev = diag(K %*% PEVu %*% t(K)))
+}

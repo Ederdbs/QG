@@ -18,6 +18,7 @@
 #   cycles       the recurrent-selection trajectories of Chapter 11b
 #   limits       genic vs realised variance, with a no-selection control (Ch 11c)
 #   mating       the phenotypic core of the mating-design sweep (Ch 4e)
+#   sparse       the phenotypic core of the sparse-testing study (Ch 4f)
 #
 # Not regenerated here, because they are not this project's output:
 #   bibliography_animal.csv, bibliography_plant.csv  (literature screens)
@@ -27,6 +28,14 @@
 #                         (the external `sparsex` study: AlphaSimR founders,
 #                          AI-REML, GBLUP, CDmean; Chapter 4e says so. The
 #                          `mating` target below reproduces its phenotypic core.)
+#   sparse_scenarios.csv, sparse_min_allocation.csv, sparse_contrasts.csv,
+#   sparse_two_stage.csv, sparse_genomic_layer.csv, sparse_validation.csv
+#                         (an external study: REML by `sommer`, AlphaSimR for
+#                          the genomic layer, copied with the strategy labels
+#                          translated; Chapter 4f says so. The `sparse` target
+#                          below reproduces its phenotypic core.)
+#   sparse_primary_studies.csv, sparse_literature_parameters.csv
+#                         (hand-extracted from the six primary papers)
 
 suppressMessages(pkgload::load_all(quiet = TRUE))
 
@@ -45,7 +54,7 @@ dir.create(fig_dir,  showWarnings = FALSE, recursive = TRUE)
 dir.create(out_dir,  showWarnings = FALSE, recursive = TRUE)
 
 targets <- commandArgs(trailingOnly = TRUE)
-if (!length(targets)) targets <- c("f2size", "benchmark", "identity", "genpred", "search", "cycles", "limits", "mating")
+if (!length(targets)) targets <- c("f2size", "benchmark", "identity", "genpred", "search", "cycles", "limits", "mating", "sparse")
 want <- function(x) x %in% targets
 
 # --- f2size: the population-sizing grid ---------------------------------------
@@ -685,6 +694,92 @@ if (want("mating")) {
   names(agg) <- sub("^acc\\.", "acc_", names(agg))
   write.csv(agg, file.path(data_dir, "mating_core_sweep.csv"), row.names = FALSE)
   message("mating: done")
+}
+
+# --- sparse: the phenotypic core of the sparse-testing study ------------------
+if (want("sparse")) {
+  message("sparse: spreading plots, allocation strategy, overlap x family size")
+  # The cached study estimated components by REML on every replicate. Here they
+  # are KNOWN, so this isolates what the allocation does from what estimating
+  # the components costs. Scale and calibration are the cached run's: 20 x 20
+  # hybrids, half-sib families of 4, 20% of hybrids never tested (CV1).
+  nF <- 20; nM <- 20; nH <- nF * nM
+  one_fit <- function(M, vc, Af, Am) {
+    sim <- sparse_simulate(M, nF, nM, vc, Af, Am)
+    fit <- sparse_blup(sim$pheno, nF, nM, ncol(M), vc, Af, Am)
+    obs <- rowSums(M) > 0
+    miss <- M == 0 & obs                                  # CV2 cells
+    top <- function(x) rank(-x) <= 0.05 * nH
+    cn <- sparse_connectivity(M, nF, nM)
+    data.frame(n_plots = sum(M),
+               acc_all = cor(fit$blup, sim$g_target),
+               acc_cv1 = if (any(!obs)) cor(fit$blup[!obs], sim$g_target[!obs]) else NA,
+               acc_cv2 = if (sum(miss) > 2) cor(fit$blup_loc[miss], sim$g_loc[miss]) else NA,
+               b1 = unname(coef(lm(sim$g_target ~ fit$blup))[2]),
+               coinc_t5 = mean(top(fit$blup)[top(sim$g_target)]),
+               pev = mean(fit$pev),
+               fem_cover = cn$fem_cover,
+               conc_hmean = if (is.null(cn$conc_hmean)) NA else cn$conc_hmean)
+  }
+  mask <- function(M) { M[sample.int(nH, 0.2 * nH), ] <- 0L; M }
+  Af <- relmat_halfsib(nF, 5); Am <- relmat_halfsib(nM, 5)
+  set.seed(4040)
+  # (a) Two plots per hybrid, spread over 2 to 10 locations; (b) one plot per
+  # hybrid, random against parentage.
+  grid <- rbind(
+    data.frame(part = "spread", nLoc = 2, k = 2, strategy = "complete"),
+    expand.grid(part = "spread", nLoc = c(4, 6, 10), k = 2,
+                strategy = c("random", "parentage"), stringsAsFactors = FALSE),
+    expand.grid(part = "k1", nLoc = c(4, 6, 10), k = 1,
+                strategy = c("random", "parentage"), stringsAsFactors = FALSE))
+  core <- do.call(rbind, lapply(c(0.2, 0.4), function(h2) {
+    vc <- sparse_vc(h2)
+    do.call(rbind, lapply(seq_len(nrow(grid)), function(g) {
+      do.call(rbind, lapply(seq_len(30), function(rep) {
+        M <- mask(sparse_alloc(nF, nM, grid$nLoc[g], grid$k[g], grid$strategy[g]))
+        cbind(grid[g, ], h2_plot = h2, rep = rep, one_fit(M, vc, Af, Am))
+      }))
+    }))
+  }))
+  # (c) The overlap hypothesis of the chapter: a fixed training set of 80
+  # hybrids per location over 4 locations, of which a fraction `overlap` is a
+  # core common to all four. More overlap at a fixed size means fewer distinct
+  # hybrids observed. Family size runs from unrelated lines (20 families of 1)
+  # to 2 families of 10.
+  vc <- sparse_vc(0.4)
+  ov <- do.call(rbind, lapply(c(20, 5, 2), function(nfam) {
+    A <- relmat_halfsib(nF, nfam)
+    do.call(rbind, lapply(c(0, 0.25, 0.5, 0.75, 1), function(o) {
+      do.call(rbind, lapply(seq_len(30), function(rep) {
+        n_core <- round(o * 80); n_uniq <- 80 - n_core
+        pick <- sample.int(nH, n_core + 4 * n_uniq)
+        M <- matrix(0L, nH, 4)
+        M[pick[seq_len(n_core)], ] <- 1L
+        for (l in 1:4) M[pick[n_core + (l - 1) * n_uniq + seq_len(n_uniq)], l] <- 1L
+        cbind(part = "overlap", family_size = nF / nfam, overlap = o,
+              n_distinct = n_core + 4 * n_uniq, rep = rep, one_fit(M, vc, A, A))
+      }))
+    }))
+  }))
+  agg <- function(d, by) {
+    vars <- c("acc_all", "acc_cv1", "acc_cv2", "b1", "coinc_t5", "pev",
+              "fem_cover", "conc_hmean", "n_plots")
+    out <- aggregate(d[vars], d[by], function(x) mean(x, na.rm = TRUE), na.action = na.pass)
+    se <- aggregate(d[c("acc_all", "acc_cv1")], d[by],
+                    function(x) sd(x, na.rm = TRUE) / sqrt(sum(!is.na(x))), na.action = na.pass)
+    names(se)[-seq_along(by)] <- paste0(names(se)[-seq_along(by)], "_se")
+    merge(out, se)
+  }
+  write.csv(rbind(
+    cbind(agg(core, c("part", "nLoc", "k", "strategy", "h2_plot")),
+          family_size = 4, overlap = NA, n_distinct = NA),
+    cbind(agg(ov, c("part", "family_size", "overlap", "n_distinct")),
+          nLoc = 4, k = NA, strategy = "overlap_core", h2_plot = 0.4)[
+      , c("part", "nLoc", "k", "strategy", "h2_plot", "acc_all", "acc_cv1", "acc_cv2",
+          "b1", "coinc_t5", "pev", "fem_cover", "conc_hmean", "n_plots", "acc_all_se",
+          "acc_cv1_se", "family_size", "overlap", "n_distinct")]),
+    file.path(data_dir, "sparse_core_sweep.csv"), row.names = FALSE)
+  message("sparse: done")
 }
 
 message("regenerate: complete")
