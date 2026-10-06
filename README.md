@@ -6,7 +6,7 @@
 
 **[📖 Read the book online](https://ederdbs.github.io/QG/)** · **[⬇️ Download the PDF](https://ederdbs.github.io/QG/Genetic-Diversity-in-Hybrid-Breeding.pdf)** · **[📦 Install the R package](#-install-the-package)**
 
-*22 chapters · 5 appendices · 335 pages · every derivation runnable in R*
+*23 chapters · 5 appendices · 369 pages · every derivation runnable in R*
 
 </div>
 
@@ -35,8 +35,8 @@ It combines three things that don't usually sit in one repository:
 
 Every number quoted in the book is reproduced live from the code in this
 repository — nothing here is a black box, with one declared exception: the
-mating-design sweep of Chapter 9 comes from an external simulation study, and the
-chapter says so and re-runs its phenotypic core in-repo.
+mating-design and sparse-testing sweeps come from external simulation studies, and
+both chapters say so and re-run their phenotypic core in-repo.
 
 ## What's inside the book
 
@@ -44,7 +44,7 @@ chapter says so and re-runs its phenotypic core in-repo.
 |---|---|
 | 🧩 **Foundations** | The coancestry matrix vs. the genomic relationship matrix — and why conflating them silently breaks your diversity metric · gene diversity in a subdivided population · the classical response-to-selection machinery, rebuilt from first principles |
 | 🌱 **Simulation** | Simulating founder lines, heterotic pools and crosses from scratch · sizing a segregating population (F1→F4) · introgressing several genes by backcrossing · AlphaSimR from the ground up · a complete, staged plant breeding programme end to end |
-| 🌽 **Mating and testing design** | How few hybrids are enough: testers vs. sparse factorials at equal field budget · connectivity and what a crossing plan can estimate · why least squares ruins a sparse factorial and BLUP rescues it · where genomic information pays · what the nursery costs |
+| 🌽 **Mating and testing design** | How few hybrids are enough: testers vs. sparse factorials at equal field budget · connectivity and what a crossing plan can estimate · why least squares ruins a sparse factorial and BLUP rescues it · where genomic information pays · what the nursery costs · sparse testing: which hybrids go to which locations, and why spreading plots beats concentrating them |
 | 📊 **Metrics** | A full catalogue of diversity metrics, benchmarked against a random-sampling null so you know which ones actually discriminate · heterosis and dominance, and what pool divergence buys you · metrics mapped onto every stage of a real pipeline · genomic prediction |
 | ⚙️ **Optimisation** | Optimal contribution selection and the alpha diversity constraint · differential evolution for combinatorial selection · structure-aware search, certified bounds, and an exact oracle that proves optimality at small scale |
 | 🔬 **Evidence & practice** | What the plant breeding literature actually establishes (and what it doesn't) · how diversity erodes across recurrent selection cycles · the limits of every metric here · a worked, end-to-end case study with a checklist you can reuse |

@@ -764,9 +764,9 @@ if (want("sparse")) {
   agg <- function(d, by) {
     vars <- c("acc_all", "acc_cv1", "acc_cv2", "b1", "coinc_t5", "pev",
               "fem_cover", "conc_hmean", "n_plots")
-    out <- aggregate(d[vars], d[by], function(x) mean(x, na.rm = TRUE), na.action = na.pass)
+    out <- aggregate(d[vars], d[by], function(x) mean(x, na.rm = TRUE))
     se <- aggregate(d[c("acc_all", "acc_cv1")], d[by],
-                    function(x) sd(x, na.rm = TRUE) / sqrt(sum(!is.na(x))), na.action = na.pass)
+                    function(x) sd(x, na.rm = TRUE) / sqrt(sum(!is.na(x))))
     names(se)[-seq_along(by)] <- paste0(names(se)[-seq_along(by)], "_se")
     merge(out, se)
   }

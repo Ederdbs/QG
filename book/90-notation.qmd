@@ -242,6 +242,27 @@ knitr::kable(data.frame(
 $r$ here is plots per cross; in the next table it is the accuracy of a selection
 criterion. @sec-mating keeps $\rho$ for accuracy to avoid the clash.
 
+### Sparse testing
+
+```{r}
+#| echo: false
+knitr::kable(data.frame(
+  Symbol = c("$L$", "$k$", "$p$", "CV1 / CV2 / CV0 / CV00",
+             "PEV", "$b_1$", "$\\sigma^2_{res}$"),
+  Meaning = c("locations in the trial",
+              "locations per hybrid (plots per hybrid, one plot per cell)",
+              "share of hybrid x location cells observed, $k / L$",
+              "new genotype / missing cell of a tested genotype / new environment / both new",
+              "prediction error variance of a hybrid's target value",
+              "slope of truth on prediction; 1 = no dispersion bias",
+              "residual of the analysis model, $\\sigma^2_{SCA \\times L} + \\sigma^2_e$ under one plot per cell"),
+  `In the code` = c("`nLoc`", "`sparse_alloc(k =)`", "`p_real`", "`acc_cv1`, `acc_cv2`",
+                    "`sparse_blup()$pev`", "`b1`", "`sparse_vc()$s2res`"),
+  check.names = FALSE))
+```
+
+Here $k$ counts locations per hybrid; in @sec-mating it counts testers per pool.
+
 ### Response to selection
 
 ```{r}
