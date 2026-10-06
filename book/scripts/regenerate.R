@@ -17,10 +17,16 @@
 #   search_exact the outer-approximation oracle alone (slowest piece)
 #   cycles       the recurrent-selection trajectories of Chapter 11b
 #   limits       genic vs realised variance, with a no-selection control (Ch 11c)
+#   mating       the phenotypic core of the mating-design sweep (Ch 4e)
 #
 # Not regenerated here, because they are not this project's output:
 #   bibliography_animal.csv, bibliography_plant.csv  (literature screens)
 #   plant_metric_usage.csv                           (derived from those)
+#   mating_scenarios_summary.csv, mating_optimizer_frontier.csv,
+#   mating_validation.csv, mating_core_findings.csv, figs/mating_*.png
+#                         (the external `sparsex` study: AlphaSimR founders,
+#                          AI-REML, GBLUP, CDmean; Chapter 4e says so. The
+#                          `mating` target below reproduces its phenotypic core.)
 
 suppressMessages(pkgload::load_all(quiet = TRUE))
 
@@ -39,7 +45,7 @@ dir.create(fig_dir,  showWarnings = FALSE, recursive = TRUE)
 dir.create(out_dir,  showWarnings = FALSE, recursive = TRUE)
 
 targets <- commandArgs(trailingOnly = TRUE)
-if (!length(targets)) targets <- c("f2size", "benchmark", "identity", "genpred", "search", "cycles", "limits")
+if (!length(targets)) targets <- c("f2size", "benchmark", "identity", "genpred", "search", "cycles", "limits", "mating")
 want <- function(x) x %in% targets
 
 # --- f2size: the population-sizing grid ---------------------------------------
@@ -632,6 +638,53 @@ if (want("limits")) {
   }
 
   message("limits: done")
+}
+
+# --- mating: the phenotypic core of the mating-design sweep -------------------
+if (want("mating")) {
+  message("mating: tester vs sparse vs NC II, least squares vs BLUP")
+  # The cached sweep (mating_scenarios_summary.csv) came from AlphaSimR founders
+  # with REML-estimated components. This reruns its phenotypic core with the
+  # package's i.i.d. model and the components treated as KNOWN, set to the true
+  # factorial values the cached run reported, so the two can be compared
+  # directly. The 200 x 200 scale and the plot budgets are the cached run's.
+  n <- 200; s2A <- 8.185; s2B <- 7.158; s2S <- 2.899
+  s2e <- (s2A + s2B + s2S) * (1 - 0.3) / 0.3          # plot h2 = 0.3
+  designs <- list(
+    "tester k=1"        = function() design_tester(n, n, 1),
+    "tester k=2"        = function() design_tester(n, n, 2),
+    "tester k=4"        = function() design_tester(n, n, 4),
+    "circulant c=2"     = function() design_circulant(n, n, 2),
+    "circulant c=3"     = function() design_circulant(n, n, 3),
+    "circulant c=5"     = function() design_circulant(n, n, 5),
+    "circulant c=10"    = function() design_circulant(n, n, 10),
+    "random sparse c=2" = function() design_random_sparse(n, n, 2),
+    "random sparse c=5" = function() design_random_sparse(n, n, 5),
+    "random sparse c=10"= function() design_random_sparse(n, n, 10),
+    "NC II 10x10 sets"  = function() design_nc2(n, n, 10, 10))
+  set.seed(4242)
+  sweep <- do.call(rbind, lapply(c(1000, 2000, 3000), function(budget) {
+    do.call(rbind, lapply(names(designs), function(nm) {
+      do.call(rbind, lapply(seq_len(30), function(rep) {
+        p <- designs[[nm]]()
+        if (nrow(p) > budget) return(NULL)
+        tr <- simulate_factorial(n, n, s2A, s2B, s2S)
+        p <- simulate_cross_means(design_reps(p, budget), tr, s2e)
+        do.call(rbind, lapply(c("ls", "blup"), function(m) {
+          f <- fit_gca(p, n, n, s2A, s2B, s2S, s2e, m)
+          data.frame(budget_plots = budget, scenario = nm, method = m, rep = rep,
+                     n_crosses = nrow(p), n_plots = sum(p$reps),
+                     acc = mean(c(cor(f$gA, tr$gA), cor(f$gB, tr$gB))))
+        }))
+      }))
+    }))
+  }))
+  agg <- aggregate(acc ~ budget_plots + scenario + method + n_crosses, sweep,
+                   function(x) c(mean = mean(x), se = sd(x) / sqrt(length(x))))
+  agg <- do.call(data.frame, agg)
+  names(agg) <- sub("^acc\\.", "acc_", names(agg))
+  write.csv(agg, file.path(data_dir, "mating_core_sweep.csv"), row.names = FALSE)
+  message("mating: done")
 }
 
 message("regenerate: complete")

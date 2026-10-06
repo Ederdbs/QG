@@ -141,7 +141,11 @@ knitr::kable(data.frame(
             "p0 is frozen, not re-anchored, across cycles",
             "a closed programme loses diversity and gains index",
             "the budget is respected; alpha_max = Inf is truncation",
-            "injection raises diversity relative to a closed run"),
+            "injection raises diversity relative to a closed run",
+            "GCA rank == n' - components for every design family",
+            "NC II: between-set GCA contrast not estimable",
+            "k = 1 tester leaves zero df for SCA",
+            "LS GCA error == s2s/k + s2e/(k r)"),
   `If it fails` = c(
     "**f is wrong**: centered, rescaled, or the wrong marker coding",
     "the identity underpinning every 'loss of X%' statement is broken",
@@ -198,7 +202,11 @@ knitr::kable(data.frame(
     "**both inbreeding lenses report no loss forever** -- the trap of @sec-cycles",
     "the cycle loop is not selecting, or not recycling what it selected",
     "the budget is not binding across cycles",
-    "injection is not actually introducing founder material"),
+    "injection is not actually introducing founder material",
+    "**the connectivity argument of @sec-mating is wrong**, or a generator is",
+    "the estimability check accepts what it should reject",
+    "the tester saturation claim of @sec-mating-tester is wrong",
+    "the Sprague-Tatum closed form no longer describes `fit_gca()`"),
   check.names = FALSE))
 ```
 
@@ -219,7 +227,7 @@ the complete accounting.
 knitr::kable(data.frame(
   Chapter = c("@sec-coancestry", "@sec-subdivided", "@sec-response", "@sec-simulating-crosses",
               "@sec-sizing", "@sec-alphasimr", "@sec-programme",
-              "@sec-genomic-era", "@sec-heterosis", "@sec-catalogue",
+              "@sec-mating", "@sec-genomic-era", "@sec-heterosis", "@sec-catalogue",
               "@sec-choosing", "@sec-stages", "@sec-ocs", "@sec-combinatorial",
               "@sec-advanced", "@sec-cycles", "@sec-limits", "@sec-case-study",
               "@sec-verification"),
@@ -231,6 +239,7 @@ knitr::kable(data.frame(
     "the theoretical identities, heterozygosity halving, map expansion, f1_sizing",
     "the founder-engine reproducibility and LD comparison, the varA-against-genicVarA trajectory, the zero F1 variance of inbred parents, the selfing-versus-DH homozygosity trajectory, the breeder's equation over a selected-fraction sweep, sel_intensity against AlphaSimR selInt, Smith-Hazel against a numerical optimum, the RRS trajectory and the stage-2 metrics",
     "the staged programme in both arms, the paired phenotypic-versus-genomic comparison over 24 seeds, the gene-diversity ledger",
+    "the design grids, the GCA-from-frequencies identity, the connectivity table and estimability check, the tester accuracy curve against its closed form, one LS-versus-BLUP replicate, the cost table, the decision tree",
     "the Eq. 3 identity, the four-strategy lens panel",
     "the heterosis oracle check, the additive cancellation, the shared/divergence identity, the coancestry-kernel identity, the fst sweep and its Balding-Nichols prediction, the alignment scenarios and their stratified control, the GCA/SCA decomposition and its variance components, the SCA/GCA relocation sweep",
     "every metric, the sampling-bias formula, the null distribution",
@@ -266,7 +275,8 @@ knitr::kable(data.frame(
            "`data/cycles_trajectory.csv`", "`data/cycles_crossover.csv`",
            "`data/cycles_maxuse.csv`", "`data/cycles_injection.csv`",
            "`data/cycles_selector.csv`", "`figs/cycles_gain.png`",
-           "`figs/cycles_diversity.png`"),
+           "`figs/cycles_diversity.png`", "`data/mating_core_sweep.csv`",
+           "`data/mating_scenarios_summary.csv`, `data/mating_optimizer_frontier.csv`, `data/mating_validation.csv`, `figs/mating_*.png`"),
   Why = c("the full identity sweep, 12 configurations",
           "production scale: L = 300, N = 22500, m = 10000",
           "621 selections x 17 metrics",
@@ -297,7 +307,9 @@ knitr::kable(data.frame(
           "closed against one injection at cycle 8, 5 seeds",
           "greedy against DE, 2 budgets x 13 cycles, seed 1",
           "cumulative gain by budget",
-          "gene diversity and F_drift by budget"),
+          "gene diversity and F_drift by budget",
+          "11 designs x 3 budgets x 30 reps, LS and BLUP (target `mating`)",
+          "**not regenerable here**: the external `sparsex` study (AlphaSimR founders, AI-REML, GBLUP, CDmean), 24 designs x 3 budgets x 30 reps x 3 models; its phenotypic core is the row above"),
   check.names = FALSE))
 ```
 
@@ -314,6 +326,7 @@ Rscript book/scripts/regenerate.R f2size   # one target
 Rscript book/scripts/regenerate.R search   # the advanced-selection benchmark
 Rscript book/scripts/regenerate.R search_exact  # just the exact oracle
 Rscript book/scripts/regenerate.R cycles   # the recurrent-selection trajectories
+Rscript book/scripts/regenerate.R mating   # the mating-design core sweep (~6 min)
 ```
 
 The script is the single place where the expensive computations live. It is
@@ -351,3 +364,10 @@ will hold on real genotypes. The *empirical* results -- which metrics are
 redundant, how much index a constraint costs -- were derived at $F_{ST} = 0.15$
 with simulated markers, and @sec-choosing says explicitly that they should be
 re-derived on real genotypes before being treated as settled.
+
+**One chapter's headline results come from outside this repository.** The
+mating-design sweep of @sec-mating (`mating_scenarios_summary.csv` and its
+siblings) was produced by an external study whose code needs AlphaSimR and
+`sommer`; it shipped with its own 37-check validation report, summarised in that
+chapter, but it is not re-run by anything here. What is re-run is its phenotypic
+core (`regenerate.R mating`), and @sec-mating-reproduce compares the two.

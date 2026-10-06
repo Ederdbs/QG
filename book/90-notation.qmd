@@ -219,6 +219,29 @@ knitr::kable(data.frame(
   check.names = FALSE))
 ```
 
+### Mating design
+
+```{r}
+#| echo: false
+knitr::kable(data.frame(
+  Symbol = c("$g^A_i$, $g^B_j$", "$s_{ij}$", "$k$", "$c$", "$r$",
+             "$\\rho$", "T0 / T1 / T2"),
+  Meaning = c("general combining ability of a pool-A / pool-B line",
+              "specific combining ability of the cross",
+              "testers per pool",
+              "crosses per line in a sparse factorial",
+              "plots per cross",
+              "least-squares GCA accuracy, $\\sqrt{\\sigma^2_g / (\\sigma^2_g + \\sigma^2_s/c + \\sigma^2_e/(c r))}$",
+              "untested hybrids with neither / one / both parents in the training set"),
+  `In the code` = c("`fit_gca()$gA`, `$gB`", "`simulate_factorial()$S`",
+                    "`design_tester(k =)`", "`design_circulant(c =)`",
+                    "`design_reps()`", "`gca_accuracy_theory()`", "-"),
+  check.names = FALSE))
+```
+
+$r$ here is plots per cross; in the next table it is the accuracy of a selection
+criterion. @sec-mating keeps $\rho$ for accuracy to avoid the clash.
+
 ### Response to selection
 
 ```{r}
