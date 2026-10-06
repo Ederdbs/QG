@@ -15,8 +15,8 @@ and a continuous OCS relaxation (upper bound).
 
 ```
 Rscript -e 'devtools::document()'   # after ANY roxygen change; regenerates NAMESPACE and man/
-Rscript -e 'devtools::test()'       # 423 checks (~1 min) — run after any change to R/
-Rscript -e 'devtools::check()'      # 0 errors, 0 warnings; 1 known NOTE (see below)
+Rscript -e 'devtools::test()'       # 442 checks (~1 min) — run after any change to R/
+Rscript -e 'devtools::check()'      # 0 errors, 0 warnings, 0 notes
 Rscript -e 'devtools::install()'    # REQUIRED before rendering the book after any R/ change
 Rscript inst/scripts/run_all.R                   # two-stage pipeline -> report/ (~4 min)
 Rscript inst/scripts/run_benchmark.R             # metrics benchmark + plots -> report/ (~6 min)
@@ -31,9 +31,8 @@ quarto render book --to html        # HTML only, while iterating
 Render cost depends entirely on `_freeze`: ~17 s when every chapter is frozen, a few minutes
 when several re-execute. The PDF pass roughly doubles whatever the HTML pass cost.
 
-`check()` currently reports one NOTE: `.cursorignore` is tracked but absent from
-`.Rbuildignore`, so it is flagged as a stray hidden file. Everything else must stay at zero --
-adding `^\.cursorignore$` to `.Rbuildignore` (or untracking the file) would restore 0/0/0.
+`check()` reports 0/0/0 and must stay there. (`.cursorignore` is tracked; it is listed in
+`.Rbuildignore`, which is what keeps it from being flagged as a stray hidden file.)
 
 **The repo root IS the R package `hybdiv`.** `R/` and `tests/` are the package's own
 directories; `DESCRIPTION`, `NAMESPACE` and `man/` sit at the root. `NAMESPACE` and `man/`
