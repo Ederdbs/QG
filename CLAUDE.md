@@ -231,7 +231,7 @@ invoked by `quarto render`.
 
 **PDF is Typst, not LaTeX.** `_quarto.yml` declares a `typst:` format; Quarto bundles the
 Typst compiler, so `quarto render book --to typst` needs no TeX install and writes
-`docs/Genetic-Diversity-in-Hybrid-Breeding.pdf` (247 pp). A `pdf:` block would pull in
+`docs/Genetic-Diversity-in-Hybrid-Breeding.pdf` (335 pp). A `pdf:` block would pull in
 `quarto install tinytex` -- do not add one. A bare `quarto render book` builds both formats;
 pass `--to html` while iterating, the PDF pass roughly doubles the render.
 

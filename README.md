@@ -6,7 +6,7 @@
 
 **[📖 Read the book online](https://ederdbs.github.io/QG/)** · **[⬇️ Download the PDF](https://ederdbs.github.io/QG/Genetic-Diversity-in-Hybrid-Breeding.pdf)** · **[📦 Install the R package](#-install-the-package)**
 
-*22 chapters · 5 appendices · 247 pages · every derivation runnable in R*
+*22 chapters · 5 appendices · 335 pages · every derivation runnable in R*
 
 </div>
 
