@@ -39,7 +39,7 @@ knitr::kable(data.frame(
            "`R/09_reference.R`",
            "`R/10_stage1.R`", "`R/11_stage2.R`", "`R/12_search.R`",
            "`R/13_dominance.R`", "`R/14_cycles.R`", "`R/15_response.R`",
-           "`R/16_mating_design.R`"),
+           "`R/16_mating_design.R`", "`R/17_sparse_testing.R`"),
   Role = c("simulation, the two matrices, the `ctx` builder",
            "the diversity metrics, all `f(idx, ctx) -> scalar`",
            "null distribution, discriminatory power, cost, plots",
@@ -56,14 +56,15 @@ knitr::kable(data.frame(
            "heterosis under a dominance model, and its link to the partition",
            "recurrent selection across cycles",
            "genic variance, and the Smith-Hazel and restricted indices",
-           "mating designs: generators, connectivity, LS/BLUP GCA, seed cost"),
+           "mating designs: generators, connectivity, LS/BLUP GCA, seed cost",
+           "sparse testing: allocation, connectivity, MME BLUP/PEV"),
   Chapter = c("@sec-simulating-crosses", "@sec-catalogue", "@sec-catalogue",
               "@sec-combinatorial", "@sec-choosing", "@sec-stages",
               "@sec-sizing", "@sec-subdivided", "@sec-backcross",
               "@sec-verification",
               "@sec-simulating-crosses", "@sec-case-study", "@sec-advanced",
               "@sec-heterosis", "@sec-cycles", "@sec-response",
-              "@sec-mating"),
+              "@sec-mating", "@sec-sparse"),
   check.names = FALSE))
 ```
 
@@ -263,6 +264,20 @@ idx(
   c("`simulate_factorial()` / `simulate_cross_means()`", "true GCA/SCA and the cross means a plan produces"),
   c("`fit_gca()`", "least squares or BLUP with known components"),
   c("`cross_cost_par()` / `cross_cost()`", "seed production and cost; **placeholder** levels")
+)
+```
+
+### Sparse testing
+
+```{r}
+#| echo: false
+idx(
+  c("`sparse_alloc()`", "hybrid x location allocation: complete, random, parentage"),
+  c("`sparse_connectivity()`", "parent coverage per location, concurrence, disconnected pairs"),
+  c("`sparse_vc()` / `relmat_halfsib()`", "calibrated variance components; half-sib relationships"),
+  c("`sparse_simulate()`", "true values and plot phenotypes for an allocation"),
+  c("`sparse_blup()`", "mixed-model BLUP and PEV with known components"),
+  c("`ref_sparse_blup()`", "the literal GLS oracle of `sparse_blup()`")
 )
 ```
 
