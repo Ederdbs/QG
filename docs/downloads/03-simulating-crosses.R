@@ -1,0 +1,295 @@
+#' # Simulating lines, pools and crosses {#sec-simulating-crosses}
+#' 
+# 03-simulating-crosses -- standalone script of the chapter 03-simulating-crosses.qmd
+# Book: https://ederdbs.github.io/QG/03-simulating-crosses.html
+#
+# Reproduces every analysis of the chapter, in order; the chapter text is kept
+# as comments (#') so the script reads as the chapter does.
+#
+# Requirements: R >= 4.1 and the 'hybdiv' package (this repository's root):
+#   install.packages('remotes'); remotes::install_github('Ederdbs/QG')
+# Run it top to bottom in an empty working directory.
+
+library(hybdiv)
+set.seed(2026)
+
+# The teaching scale. Every live example in the book runs at this size: small
+# enough that a full render takes minutes, large enough that none of the
+# identities hold by accident. The production scale is n_pool_A = n_pool_B = 71
+# and m = 25000; see the note in each chapter where the difference matters.
+book_cfg <- utils::modifyList(
+  hybdiv::sim_config,
+  list(n_pool_A = 25, n_pool_B = 25, m = 2000, seed = 1)
+)
+
+# Paths to the cached artefacts, so chapters never guess.
+
+# Rounded table helper, used wherever a metric panel is printed.
+fmt <- function(x, digits = 4) {
+  # A matrix must become a data frame first: `x[num] <- lapply(...)` on a
+  # matrix recycles the logical over the flattened array and assigns a list
+  # back, silently turning the matrix into a list.
+  if (is.matrix(x)) x <- as.data.frame(x)
+  if (is.data.frame(x)) {
+    num <- vapply(x, is.numeric, logical(1))
+    x[num] <- lapply(x[num], round, digits)
+    x
+  } else round(x, digits)
+}
+
+# Cached artefacts (expensive sweeps) are fetched from the repository on first use.
+.book_get <- function(dir, ...) {
+  f <- file.path(dir, ...)
+  if (!file.exists(f)) {
+    dir.create(dirname(f), showWarnings = FALSE, recursive = TRUE)
+    utils::download.file(paste0('https://raw.githubusercontent.com/Ederdbs/QG/main/book/', f), f, quiet = TRUE, mode = 'wb')
+  }
+  f
+}
+book_data <- function(...) .book_get('data', ...)
+book_fig  <- function(...) .book_get('figs', ...)
+
+#' 
+#' Everything downstream of this chapter consumes three objects and knows nothing
+#' about where they came from. That is deliberate: it is the seam at which a
+#' simulation is swapped for real data, and it is the only place that has to change
+#' when it is.
+#' 
+#' This chapter builds those objects. It also builds the candidate pool the rest of
+#' the book selects from, so the choices made here -- how divergent the pools are,
+#' how the index is constructed -- determine what the later chapters have to work
+#' with.
+#' 
+#' ## What has to be produced
+#' 
+## -----------------------------------------------------------------------------
+#| echo: false
+knitr::kable(data.frame(
+  Object = c("`X`", "`f`", "`hybrids`", "`fL`"),
+  Shape = c("N x m", "N x N", "N x (3 + n_traits)", "L x L, optional"),
+  Content = c("hybrid marker matrix, values in 0/0.5/1",
+              "molecular coancestry of the hybrids",
+              "hybrid id, the two parent lines, predicted traits",
+              "coancestry BETWEEN LINES"),
+  `Needed for` = c("every frequency-based metric",
+                   "every coancestry-based metric",
+                   "the index, and the line-usage vector",
+                   "only the heterotic-group decomposition"),
+  check.names = FALSE),
+  caption = "The stage-1 contract. Stage 2 runs without `fL`; it loses only the pool decomposition.")
+
+#' 
+#' ## Simulating the lines
+#' 
+#' Two heterotic pools are generated with a Balding-Nichols model. Ancestral allele
+#' frequencies are drawn uniform on $[0.05, 0.95]$, then each pool's frequency at
+#' marker $k$ is drawn as
+#' 
+#' $$p_{A,k} \sim \text{Beta}\!\left(p_k \frac{1 - F_{ST}}{F_{ST}},\;
+#'                                 (1 - p_k) \frac{1 - F_{ST}}{F_{ST}}\right),$$
+#' 
+#' and independently for pool B. The Beta has mean $p_k$ and variance
+#' $F_{ST}\, p_k (1 - p_k)$, so the parameter `fst` in the configuration *is* the
+#' expected between-pool divergence -- it is not a proxy for it.
+#' 
+#' Genotypes are then drawn as $2 \times \text{Bernoulli}(p)$, which makes every
+#' line fully homozygous, as an inbred line should be.
+#' 
+## -----------------------------------------------------------------------------
+simulate_lines
+
+#' 
+## -----------------------------------------------------------------------------
+L <- simulate_lines(book_cfg)
+dim(L)
+table(as.vector(L[1:5, 1:200]))
+
+#' 
+#' Only 0 and 2 appear: no residual heterozygotes. With real data those must be
+#' imputed or dropped before this point, because the hybrid-genotype identity in
+#' @sec-coancestry assumes homozygous parents.
+#' 
+#' ### The divergence knob
+#' 
+#' `fst` is the single most consequential parameter in the simulation, because it
+#' sets how much of the pools' diversity sits *between* them rather than within.
+#' What that buys is less obvious than it looks:
+#' 
+## -----------------------------------------------------------------------------
+#| fig-cap: "Driving the pools apart leaves the expected heterozygous fraction of the F1 flat. What moves is the within-pool coancestry, which climbs throughout. @sec-heterosis-flat derives why the two terms must trade one for one."
+fst_grid <- c(0.02, 0.05, 0.10, 0.15, 0.25, 0.40)
+div <- vapply(fst_grid, function(fst) {
+  cfg <- modifyList(book_cfg, list(fst = fst, m = 1500))
+  Lx  <- simulate_lines(cfg)
+  fL  <- molecular_coancestry(Lx / 2)
+  A   <- seq_len(cfg$n_pool_A); B <- cfg$n_pool_A + seq_len(cfg$n_pool_B)
+  # a hybrid A x B is heterozygous wherever its parents differ
+  c(between_pool_f = mean(fL[A, B]),
+    within_pool_f  = mean(c(fL[A, A], fL[B, B])),
+    het_fraction   = 1 - mean(fL[A, B]))
+}, numeric(3))
+
+d <- data.frame(fst = fst_grid, t(div))
+plot(d$fst, d$het_fraction, type = "b", pch = 19, ylim = c(0, 1),
+     xlab = expression(F[ST]~"between pools"),
+     ylab = "expected heterozygous fraction of the F1")
+grid()
+
+#' 
+## -----------------------------------------------------------------------------
+fmt(d)
+
+#' 
+#' The heterozygous fraction does not move. It is flat across a twentyfold range of
+#' `fst`, while `within_pool_f` climbs steadily: the divergence is being paid for
+#' out of within-pool diversity, unit for unit.
+#' 
+#' That is not an artefact of this grid. The expected heterozygous fraction of an
+#' A x B hybrid is exactly `1 - theta_AB`, and @sec-heterosis-flat shows that under
+#' neutral drift every unit gained by the between-pool term is subtracted from the
+#' shared one, leaving the total fixed. Neutral divergence relocates diversity; it
+#' does not create heterosis. @sec-subdivided is why `GD_BS` is nonetheless held
+#' rather than minimised, and @sec-heterosis-alignment is what has to be true of
+#' the divergence for it to be worth anything.
+#' 
+#' ## From lines to hybrids
+#' 
+#' Every A x B combination is formed. With 25 lines per pool that is 625
+#' candidates; at the production scale of 71 per pool it is 5041.
+#' 
+## -----------------------------------------------------------------------------
+cfg <- book_cfg
+a_ids <- seq_len(cfg$n_pool_A)
+b_ids <- cfg$n_pool_A + seq_len(cfg$n_pool_B)
+ped <- expand.grid(a = a_ids, b = b_ids)
+M   <- (L[ped$a, , drop = FALSE] + L[ped$b, , drop = FALSE]) / 2   # 0/1/2
+dim(M)
+head(ped, 3)
+
+#' 
+#' The factorial structure matters more than it looks. Because every line appears
+#' in many candidate hybrids, selecting hybrids is really selecting *line usage* --
+#' and that observation, made precise in @sec-collapse, is what makes the whole
+#' problem tractable at production scale.
+#' 
+#' ## Predicted traits
+#' 
+#' Marker effects are drawn correlated across traits, through a Cholesky factor of
+#' a fixed correlation matrix, and the predicted values are the centered marker
+#' matrix times those effects:
+#' 
+## -----------------------------------------------------------------------------
+set.seed(cfg$seed + 99)
+R <- matrix(c(1, 0.3, -0.3,
+              0.3, 1,  0.1,
+             -0.3, 0.1, 1), 3, 3)
+vr <- vanraden_G(M)
+B <- matrix(rnorm(cfg$m * cfg$n_traits), cfg$m) %*% chol(R)
+traits <- scale(vr$Z %*% B)
+round(cor(traits), 3)
+
+#' 
+#' The realised trait correlations recover the target `R`, which is the point of
+#' the Cholesky step: without it, a multi-trait index would be a weighted sum of
+#' independent noise, and the trade-off it induces against diversity would be
+#' unrealistically easy.
+#' 
+#' ::: {.callout-note}
+#' ## What this simulation deliberately does not model
+#' 
+#' These predicted values are constructed from *known* marker effects, so they
+#' carry no prediction error. Real GEBVs do. The book therefore treats `ctx$index`
+#' as given throughout, and the reader should read every gain figure as an upper
+#' bound on what a real programme would realise. The additive model also carries no
+#' dominance, so it cannot express specific combining ability -- see the caveats in
+#' @sec-case-study.
+#' :::
+#' 
+#' ## The two matrices, both built
+#' 
+## -----------------------------------------------------------------------------
+X <- M / 2
+ctx <- build_ctx(X = X, f = molecular_coancestry(X), G = vr$G, traits = traits,
+                 ped = ped, n_lines = nrow(L),
+                 pool = rep(c("A", "B"), c(cfg$n_pool_A, cfg$n_pool_B)),
+                 fL = molecular_coancestry(L / 2), cfg = cfg)
+
+c(N = ctx$N, m = ctx$m, n_lines = ctx$n_lines,
+  sum_G = sum(ctx$G), min_f = min(ctx$f), max_f = max(ctx$f))
+
+#' 
+#' `sum(G)` is zero to machine precision and `f` is inside $[0, 1]$: the two
+#' properties from @sec-coancestry, on this dataset.
+#' 
+#' The context also freezes two things that must never be recomputed per scenario:
+#' 
+## -----------------------------------------------------------------------------
+str(ctx[c("p0", "maf_pop", "index")], max.level = 1)
+
+#' 
+#' `p0` is the candidate-pool allele frequency vector. It is the **base** against
+#' which `F_hom` and `F_drift` are measured in @sec-genomic-era, and recomputing it
+#' per scenario would silently zero out the historical memory of erosion -- the
+#' single most common error in applying these metrics.
+#' 
+#' ## The stage-1 contract in one call
+#' 
+#' All of the above is `stage1_simulate()`:
+#' 
+## -----------------------------------------------------------------------------
+stage1_build
+
+#' 
+## -----------------------------------------------------------------------------
+st1 <- stage1_simulate(book_cfg)
+str(st1, max.level = 1)
+head(st1$hybrids, 3)
+
+#' 
+#' For real data the same function is called with your own matrices:
+#' 
+## -----------------------------------------------------------------------------
+#| eval: false
+# st1 <- stage1_build(
+#   X      = hybrid_markers,   # N x m, coded 0/1/2 or 0/0.5/1 (auto-detected)
+#   ped    = pedigree,         # data.frame with columns a, b
+#   traits = predicted_traits, # N x n_traits
+#   fL     = line_coancestry   # optional
+# )
+
+#' 
+#' `stage1_build()` detects the marker coding and rescales, so both conventions
+#' give an identical result:
+#' 
+## -----------------------------------------------------------------------------
+tr <- st1$hybrids[, grep("^trait", names(st1$hybrids))]
+pd <- data.frame(a = st1$hybrids$line_A, b = st1$hybrids$line_B)
+identical(stage1_build(st1$X, pd, tr)$f,
+          stage1_build(st1$X * 2, pd, tr)$f)
+
+#' 
+#' ## What the candidate pool looks like
+#' 
+## -----------------------------------------------------------------------------
+#| fig-cap: "The candidate pool. Left: the index the selection maximises. Right: gene diversity of random subsets of 60, the baseline every later chapter measures against."
+op <- par(mfrow = c(1, 2), mar = c(4.2, 4.2, 2.5, 1))
+hist(ctx$index, breaks = 40, col = "grey85", border = "white",
+     main = "multi-trait index", xlab = "index (s.d. units)")
+gd_random <- replicate(400, gene_diversity(sample.int(ctx$N, 60), ctx))
+hist(gd_random, breaks = 30, col = "grey85", border = "white",
+     main = "GD of random subsets of 60", xlab = "gene diversity")
+abline(v = gene_diversity(seq_len(ctx$N), ctx), col = "#b2182b", lwd = 2)
+par(op)
+
+#' 
+#' The red line is the gene diversity of the *whole* pool. It does not sit at the
+#' centre of the distribution of random subsets of 60 -- it sits above it. That gap
+#' is pure sampling, it has nothing to do with selection, and mistaking it for a
+#' loss is the subject of @sec-baseline.
+#' 
+## -----------------------------------------------------------------------------
+c(GD_population = gene_diversity(seq_len(ctx$N), ctx),
+  GD_random_60  = mean(gd_random),
+  apparent_loss_pct = 100 * (gene_diversity(seq_len(ctx$N), ctx) - mean(gd_random)) /
+                            gene_diversity(seq_len(ctx$N), ctx))
+
