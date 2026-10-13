@@ -92,20 +92,21 @@ div.csl-indent {
 <meta name="quarto:offset" content="./">
 <link href="./09-optimal-contributions.html" rel="next">
 <link href="./08-pipeline-stages.html" rel="prev">
+<link href="./favicon.svg" rel="icon" type="image/svg+xml">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9ef9d4760de657dc918b81d25b42b59f.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-58115a419e540697b7ccd904e8efcd2d.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9ef9d4760de657dc918b81d25b42b59f.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-37a0ccb6f5b9899fcb884e11bb6f7458.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-da8b26c7a017495cabf78e5d2792d1d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-b192ecda6a457e66a32e528cd3cc1fbc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-da8b26c7a017495cabf78e5d2792d1d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -686,25 +687,34 @@ window.Quarto = {
 <h2 data-number="16.1" class="anchored" data-anchor-id="a-training-population-with-real-noise"><span class="header-section-number">16.1</span> A training population with real noise</h2>
 <p>Everywhere else in this book, <code>ctx$index</code> <em>is</em> the truth. Here it plays a different role: it is the value a real breeding programme does not get to see, and can only estimate from phenotypes recorded on a subset of individuals. Building that subset takes three steps: manufacture a phenotype by adding noise to the true genetic value, split the population into the individuals that will carry a phenotype and those that will not, then hand only the first group’s records to the models fitted below.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>ctx <span class="ot">&lt;-</span> <span class="fu">simulate_data</span>(book_cfg)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>N   <span class="ot">&lt;-</span> ctx<span class="sc">$</span>N</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>g   <span class="ot">&lt;-</span> ctx<span class="sc">$</span>traits[, <span class="dv">1</span>]         <span class="co"># the true genetic value -- known only to us</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>A phenotype is the genetic value plus environmental noise, <span class="math inline">\(y = g + e\)</span>, and heritability is the fraction of phenotypic variance the genetic part accounts for, <span class="math inline">\(h^2 = \mathrm{Var}(g) / (\mathrm{Var}(g) + \mathrm{Var}(e))\)</span>. <code>traits</code> is built by <code>scale()</code>, so <span class="math inline">\(\mathrm{Var}(g) = 1\)</span> exactly, and the noise variance that delivers a target <span class="math inline">\(h^2\)</span> is <span class="math inline">\((1-h^2)/h^2\)</span>:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>h2 <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">9</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>e <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(N, <span class="dv">0</span>, <span class="fu">sqrt</span>((<span class="dv">1</span> <span class="sc">-</span> h2) <span class="sc">/</span> h2))</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> g <span class="sc">+</span> e</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>Split the population into a training set, whose phenotypes the model gets to see, and a candidate set – the hybrids actually being selected among – whose phenotypes it does not. This mirrors the two roles a real programme’s germplasm plays at any one time: training stands in for hybrids already phenotyped in earlier trials, and candidates stand in for this cycle’s untested combinations, ranked here purely from markers:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">9</span>)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>train <span class="ot">&lt;-</span> <span class="fu">sample.int</span>(N, <span class="fu">floor</span>(<span class="fl">0.6</span> <span class="sc">*</span> N))</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>cand  <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(<span class="fu">seq_len</span>(N), train)</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">train =</span> <span class="fu">length</span>(train), <span class="at">candidates =</span> <span class="fu">length</span>(cand))</span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      train candidates </span></span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        375        250</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 </section>
 <section id="sec-genpred-truth" class="level2" data-number="16.2">
@@ -717,10 +727,13 @@ window.Quarto = {
   = \mathbf{G}\,\underbrace{2\textstyle\sum_k p_k(1-p_k)\,\sigma^2_\beta}_{\sigma^2_u},\]</span></p>
 <p>because <span class="math inline">\(\mathbf{G}\)</span> is <em>defined</em> as <span class="math inline">\(\mathbf{Z}\mathbf{Z}'\)</span> over that same divisor (<a href="01-coancestry.html" class="quarto-xref"><span>Chapter 1</span></a>). The second equality is exact, not approximate:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>vr <span class="ot">&lt;-</span> <span class="fu">vanraden_G</span>(ctx<span class="sc">$</span>X <span class="sc">*</span> <span class="dv">2</span>)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>s2 <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">sum</span>(vr<span class="sc">$</span>p <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> vr<span class="sc">$</span>p))</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">max</span>(<span class="fu">abs</span>(<span class="fu">tcrossprod</span>(vr<span class="sc">$</span>Z) <span class="sc">/</span> s2 <span class="sc">-</span> ctx<span class="sc">$</span>G))</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>So the covariance GBLUP <em>assumes</em> for the breeding values is, up to the scalar <span class="math inline">\(\sigma^2_u\)</span>, the covariance the breeding values actually have. This simulation is the infinitesimal model, exactly and not approximately, and that single fact is most of the answer to “which model wins” below. It is also the sense in which every accuracy in this chapter is a best case: no model here is misspecified.</p>
 </section>
@@ -728,11 +741,14 @@ window.Quarto = {
 <h3 data-number="16.2.2" class="anchored" data-anchor-id="a-hybrids-value-is-the-mean-of-two-parental-values"><span class="header-section-number">16.2.2</span> A hybrid’s value is the mean of two parental values</h3>
 <p>The hybrids are F1s of homozygous lines, so a hybrid’s marker row is the average of its two parents’ rows, and averaging is linear. For <em>any</em> additive effect vector whatsoever, the hybrid’s genetic value is therefore the mean of the two parental line values – general combining ability, with no specific combining ability left over:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>L  <span class="ot">&lt;-</span> <span class="fu">simulate_lines</span>(book_cfg)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>bb <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(ctx<span class="sc">$</span>m)                    <span class="co"># any effects at all; the identity is linear</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>vL <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>((L <span class="sc">/</span> <span class="dv">2</span>) <span class="sc">%*%</span> bb)      <span class="co"># the parental line values they imply</span></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">max</span>(<span class="fu">abs</span>(<span class="fu">as.numeric</span>(ctx<span class="sc">$</span>X <span class="sc">%*%</span> bb) <span class="sc">-</span> (vL[ctx<span class="sc">$</span>ped<span class="sc">$</span>a] <span class="sc">+</span> vL[ctx<span class="sc">$</span>ped<span class="sc">$</span>b]) <span class="sc">/</span> <span class="dv">2</span>))</span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1.563194e-13</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>The residual is at machine precision because the statement is an identity. Two consequences run through the rest of the chapter. The mild one is that a “hybrid-specific” prediction has nothing to predict here: the dominance deviations of <a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 12</span></a> are absent from <code>ctx$traits</code> by construction, so SCA is not merely unmodelled, it is not in the data. The sharp one is <a href="#sec-g-singular" class="quarto-xref"><span>Section 16.3.2</span></a>.</p>
 <p>There is a third consequence, and it is the operational payoff of everything in this chapter. Because a hybrid’s value is a fixed linear function of its two parents’ marker genotypes, once marker effects are estimated from a training population of phenotyped hybrids (or lines), that same estimate scores <em>any</em> line A x line B combination – including combinations of lines that have never been crossed. Ranking a candidate hybrid this way costs a genotyping assay on two lines that are typically already on hand from earlier pipeline stages; the alternative, growing out the actual hybrid to phenotype it, costs a full crossing and evaluation cycle. That difference is what makes genomic selection valuable specifically in a cross-pollinated, hybrid crop, where the space of candidate combinations is combinatorially larger than the number of lines ever phenotyped as hybrids.</p>
@@ -769,6 +785,8 @@ window.Quarto = {
 <p><span class="math inline">\(\mathbf{G}\)</span> is singular for <em>every</em> population, whatever <span class="math inline">\(N\)</span> and <span class="math inline">\(m\)</span> are. The blend is not insurance against an awkward case; without it <code>solve()</code> has nothing to invert.</p>
 <p>Here it is much worse than one lost dimension. By the identity of <a href="#sec-genpred-truth" class="quarto-xref"><span>Section 16.2</span></a> every hybrid row is an average of two line rows, so the whole <span class="math inline">\(N \times m\)</span> matrix lives in the span of the <span class="math inline">\(L\)</span> line genotypes. Each hybrid uses exactly one line from each pool, which makes the pool-A indicator columns sum to the pool-B ones and costs a further dimension, and centering costs one more:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">max_abs_G_times_one =</span> <span class="fu">max</span>(<span class="fu">abs</span>(ctx<span class="sc">$</span>G <span class="sc">%*%</span> <span class="fu">rep</span>(<span class="dv">1</span>, N))))</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; max_abs_G_times_one </span></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         1.16334e-13</span></span>
@@ -779,6 +797,7 @@ window.Quarto = {
 <span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="at">lines =</span> <span class="dv">2</span> <span class="sc">*</span> n_per_pool, <span class="at">hybrids =</span> <span class="fu">nrow</span>(G),</span>
 <span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">rank =</span> <span class="fu">sum</span>(<span class="fu">eigen</span>(G, <span class="at">only.values =</span> <span class="cn">TRUE</span>)<span class="sc">$</span>values <span class="sc">&gt;</span> <span class="fl">1e-8</span>))</span>
 <span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
@@ -813,6 +832,8 @@ window.Quarto = {
 </div>
 <p><span class="math inline">\(\mathrm{rank}(\mathbf{G}) = L - 2\)</span>, independent of both the number of hybrids and the number of markers. At the book’s scale that is 48 dimensions carrying 625 hybrids: 577 of the eigenvalues are exactly zero, and <code>0.95 * G + 0.05 * I</code> is what makes the equations solvable at all. Fifty lines were genotyped and crossed into 625 combinations, but there were only ever 48 independent dimensions to measure – and no amount of phenotyping the 625 adds a forty-ninth.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>G <span class="ot">&lt;-</span> ctx<span class="sc">$</span>G</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>gblup <span class="ot">&lt;-</span> <span class="cf">function</span>(y, train, h2) {</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  Gstar <span class="ot">&lt;-</span> <span class="fl">0.95</span> <span class="sc">*</span> G <span class="sc">+</span> <span class="fl">0.05</span> <span class="sc">*</span> <span class="fu">diag</span>(N)</span>
@@ -830,6 +851,7 @@ window.Quarto = {
 <span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>u_hat <span class="ot">&lt;-</span> fit<span class="sc">$</span>u</span>
 <span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"GBLUP accuracy (candidates):"</span>, <span class="fu">cor</span>(u_hat[cand], g[cand]), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
 <span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; GBLUP accuracy (candidates): 0.9596232</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 </section>
 <section id="reliability-the-accuracy-you-can-compute-without-the-truth" class="level3" data-number="16.3.3">
@@ -838,14 +860,19 @@ window.Quarto = {
 <p><span class="math display">\[r_i^2 \;=\; 1 - \frac{\mathrm{PEV}_i}{\sigma^2_u\,\mathbf{G}^{*}_{ii}}.\]</span></p>
 <p>This is the same <span class="math inline">\(r\)</span> as the accuracy reported everywhere in this chapter, with one difference that is the entire point: <span class="math inline">\(g\)</span> does not appear in it. A programme can compute it for candidates it has never phenotyped and never will.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">mean_reliability =</span> <span class="fu">mean</span>(fit<span class="sc">$</span>rel[cand]),</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">implied_accuracy =</span> <span class="fu">sqrt</span>(<span class="fu">mean</span>(fit<span class="sc">$</span>rel[cand])),</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">realised_accuracy =</span> <span class="fu">cor</span>(u_hat[cand], g[cand]))</span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  mean_reliability  implied_accuracy realised_accuracy </span></span>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         0.8016810         0.8953664         0.9596232</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>The model under-states itself by about 0.06. Some of that is the blend’s doing: <span class="math inline">\(0.95\mathbf{G} + 0.05\mathbf{I}\)</span> tells the equations that every candidate carries 5% of variance no relative can explain, and each <span class="math inline">\(r_i^2\)</span> is computed against that inflated prior. Dialling the blend down says how much:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>blend <span class="ot">&lt;-</span> <span class="cf">function</span>(w) {</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  Gstar <span class="ot">&lt;-</span> w <span class="sc">*</span> G <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">-</span> w) <span class="sc">*</span> <span class="fu">diag</span>(N)</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  n_t <span class="ot">&lt;-</span> <span class="fu">length</span>(train)</span>
@@ -859,6 +886,7 @@ window.Quarto = {
 <span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">realised =</span> <span class="fu">cor</span>(u_hat[cand], g[cand]))</span>
 <span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  implied_at_0.95 implied_at_0.999         realised </span></span>
 <span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        0.8953664        0.9272495        0.9596232</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>Roughly half the gap, then, and the other half survives however little identity is mixed in. A mean reliability and a correlation taken across a <em>set</em> of candidates are not the same quantity: the second is helped by the spread of true values among the candidates, which the first knows nothing about. Both halves point the same way – the reliability is conservative – and <a href="#sec-hybrid-cv" class="quarto-xref"><span>Section 16.4</span></a> shows that the gap is this small only because this particular split was easy.</p>
 </section>
@@ -868,6 +896,8 @@ window.Quarto = {
 <p>The split at the top of this chapter took a random 60% of the <em>hybrids</em>. There are 625 hybrids but only 50 lines, so a sample that size contains every line several times over: each of the 250 candidates has <strong>both of its parents</strong> sitting in the training set, in other hybrids with recorded phenotypes. Given <a href="#sec-genpred-truth" class="quarto-xref"><span>Section 16.2</span></a> – a hybrid’s value is the mean of its two parental values – that split asks the model to interpolate inside a factorial whose margins it has already seen. It is not a hard question.</p>
 <p><span class="citation" data-cites="burgueno2012">Burgueño et al. (<a href="99-references.html#ref-burgueno2012" role="doc-biblioref">2012</a>)</span> named the schemes that distinguish the cases, and <span class="citation" data-cites="technow2014">Technow et al. (<a href="99-references.html#ref-technow2014" role="doc-biblioref">2014</a>)</span> applied them to exactly this design, a factorial between two heterotic pools. Holding out <em>lines</em> rather than hybrids splits the candidates three ways: both parents seen (the random split, CV2), one parent unseen (CV1), neither parent seen (CV0). Removing 8 lines from each pool leaves 289 training hybrids and gives 272 CV1 and 64 CV0 candidates; the CV2 row below draws a random training set of the same 289, so the only thing that differs across the three rows is <em>what</em> was hidden, not how much.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>cv_split <span class="ot">&lt;-</span> <span class="cf">function</span>(seed, <span class="at">k =</span> <span class="dv">8</span>) {</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(seed)</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  hoA <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">unique</span>(ctx<span class="sc">$</span>ped<span class="sc">$</span>a), k)</span>
@@ -885,6 +915,7 @@ window.Quarto = {
 <span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">CV0 =</span> <span class="fu">cor</span>(lin<span class="sc">$</span>u[i0], g[i0]),  <span class="at">r0 =</span> <span class="fu">sqrt</span>(<span class="fu">mean</span>(lin<span class="sc">$</span>rel[i0])))</span>
 <span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>cv <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>, cv_split))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
@@ -924,14 +955,17 @@ window.Quarto = {
 <p>The accuracy the chapter opened with survives only in the first row. Ask the model about a hybrid with one unseen parent and it drops by a third; ask about one with two unseen parents and what is left is 0.12, with a spread across replicates nearly twice that – small, and not reliably distinguishable from nothing. <span class="citation" data-cites="habier2007">Habier et al. (<a href="99-references.html#ref-habier2007" role="doc-biblioref">2007</a>)</span> separate the two things a genomic prediction can be using – the relationship between candidates and training individuals, and the marker effects estimated in their own right – and this table is that separation, measured. The first row is almost entirely relatedness. The third row is what is left when relatedness is removed, and it is the honest measure of what the 2000 markers bought.</p>
 <p>That the third row collapses is not a defect of the fit. It is <span class="math inline">\(\mathrm{rank}(\mathbf{G}) = L - 2\)</span> again: the 289 training records carry at most 34 lines’ worth of independent information, and asking them to pin down 2000 marker effects well enough to score a genotype no relative shares is asking for something that was never in the data. <span class="citation" data-cites="daetwyler2008">Daetwyler et al. (<a href="99-references.html#ref-daetwyler2008" role="doc-biblioref">2008</a>)</span> give the deterministic accuracy for exactly that regime, <span class="math inline">\(r = \sqrt{n h^2 / (n h^2 + M_e)}\)</span>, and with the units the simulation actually has – <span class="math inline">\(n\)</span> the independent <em>lines</em>, and <span class="math inline">\(M_e\)</span> the marker count, because these markers are drawn independently and carry no linkage to bundle them into segments – it agrees:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>n_lines_train <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> (book_cfg<span class="sc">$</span>n_pool_A <span class="sc">-</span> <span class="dv">8</span>)</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">deterministic =</span> <span class="fu">sqrt</span>(n_lines_train <span class="sc">*</span> h2 <span class="sc">/</span> (n_lines_train <span class="sc">*</span> h2 <span class="sc">+</span> book_cfg<span class="sc">$</span>m)),</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">measured_CV0  =</span> <span class="fu">mean</span>(cv[, <span class="st">"CV0"</span>]))</span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; deterministic  measured_CV0 </span></span>
 <span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    0.09180609    0.12191453</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>The most useful column is the last one in the table. The reliabilities computed from the mixed model equations – with no access to <span class="math inline">\(g\)</span> – track the realised accuracies down the collapse, 0.64 against 0.65 for CV1 and 0.13 against 0.12 for CV0. The model knows. A programme that reports reliability alongside every GEBV does not need to discover this the way this chapter did; the warning is in the same solve that produced the prediction.</p>
-<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout callout-style-simple callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -961,6 +995,8 @@ window.Quarto = {
 <p>The scaled inverse chi-square is the conjugate prior for a normal variance, which is the whole reason it appears: it keeps the Gibbs sampler in closed form. Its two hyperparameters are the arguments the fits below pass. <span class="math inline">\(\nu\)</span> is <code>df = 5</code>, the prior weight in pseudo-observations – small, so the prior stays vague, but not zero, because the posterior is improper at <span class="math inline">\(\nu = 0\)</span>. <span class="math inline">\(S\)</span> is set from <code>R2 = 0.5</code>, the share of phenotypic variance the prior expects the markers to explain, spread over the markers by their observed variation. Neither is fitted; both are choices, and <code>R2</code> in particular is a statement about heritability made before seeing the data.</p>
 <p>This book fits both with <code>bWGR::BayesA()</code>/<code>bWGR::BayesB()</code> <span class="citation" data-cites="xavier2019bwgr">(<a href="99-references.html#ref-xavier2019bwgr" role="doc-biblioref">Xavier et al. 2019</a>)</span> rather than by hand – unlike GBLUP, a Gibbs sampler over marker effects is not the few lines the mixed-model solve above was, and <code>bWGR</code> is exactly the tool <code>vanraden_G()</code>’s docstring pointed toward without naming:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(bWGR)</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>M <span class="ot">&lt;-</span> ctx<span class="sc">$</span>X <span class="sc">*</span> <span class="dv">2</span>   <span class="co"># dosage 0/1/2, what bWGR expects</span></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>fitA <span class="ot">&lt;-</span> <span class="fu">BayesA</span>(y[train], M[train, ], <span class="at">it =</span> <span class="dv">1500</span>, <span class="at">bi =</span> <span class="dv">500</span>, <span class="at">df =</span> <span class="dv">5</span>, <span class="at">R2 =</span> <span class="fl">0.5</span>)</span>
@@ -970,6 +1006,7 @@ window.Quarto = {
 <span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">BayesA =</span> <span class="fu">cor</span>(predA, g[cand]), <span class="at">BayesB =</span> <span class="fu">cor</span>(predB, g[cand]))</span>
 <span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    BayesA    BayesB </span></span>
 <span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 0.9606263 0.9599031</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>Both fits produce a marker-effect vector <code>$b</code>; a candidate’s GEBV is just its genotypes dotted with those effects. GBLUP produced the same quantity from the relationship matrix instead of the markers directly – two routes to the same thing, checked next.</p>
 </section>
@@ -977,6 +1014,8 @@ window.Quarto = {
 <h3 data-number="16.5.2" class="anchored" data-anchor-id="what-the-sampler-actually-selects"><span class="header-section-number">16.5.2</span> What the sampler actually selects</h3>
 <p>Both fits also return the quantities the priors above are about – BayesA’s per-marker variances in <code>$vb</code>, BayesB’s posterior inclusion probabilities in <code>$d</code> – and on the polygenic trait there is nothing in them to look at. Rebuild the oligogenic architecture the cached sweep below uses, three markers of 2000 given effects and everything else exactly zero, and there is:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(book_cfg<span class="sc">$</span>seed <span class="sc">+</span> <span class="dv">42</span>)</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>qtl  <span class="ot">&lt;-</span> <span class="fu">sample.int</span>(book_cfg<span class="sc">$</span>m, <span class="dv">3</span>)</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>Bq   <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, book_cfg<span class="sc">$</span>m); Bq[qtl] <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">3</span>)</span>
@@ -986,9 +1025,12 @@ window.Quarto = {
 <span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">apply</span>(vr<span class="sc">$</span>Z[, qtl], <span class="dv">2</span>, var) <span class="sc">*</span> Bq[qtl]<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span></span>
 <span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">sum</span>(<span class="fu">apply</span>(vr<span class="sc">$</span>Z[, qtl], <span class="dv">2</span>, var) <span class="sc">*</span> Bq[qtl]<span class="sc">^</span><span class="dv">2</span>), <span class="dv">3</span>)   <span class="co"># share of variance each</span></span>
 <span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.962 0.038 0.001</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>Worth knowing before reading anything into the sweep: the three effects were drawn from <code>rnorm(3)</code>, and this draw put 96% of the genetic variance on one of them. “Three causal markers” describes the construction; the trait is effectively monogenic, and the true <span class="math inline">\(\pi\)</span> is nearer <span class="math inline">\(1 - 1/2000\)</span> than the <span class="math inline">\(1 - 3/2000\)</span> the caption below quotes.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>oA <span class="ot">&lt;-</span> <span class="fu">BayesA</span>(y_ol[train], M[train, ], <span class="at">it =</span> <span class="dv">1500</span>, <span class="at">bi =</span> <span class="dv">500</span>, <span class="at">df =</span> <span class="dv">5</span>, <span class="at">R2 =</span> <span class="fl">0.5</span>)</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>oB <span class="ot">&lt;-</span> <span class="fu">BayesB</span>(y_ol[train], M[train, ], <span class="at">it =</span> <span class="dv">1500</span>, <span class="at">bi =</span> <span class="dv">500</span>, <span class="at">pi =</span> <span class="fl">0.95</span>, <span class="at">df =</span> <span class="dv">5</span>, <span class="at">R2 =</span> <span class="fl">0.5</span>)</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>big <span class="ot">&lt;-</span> qtl[<span class="fu">which.max</span>(<span class="fu">abs</span>(Bq[qtl]))]</span>
@@ -996,8 +1038,11 @@ window.Quarto = {
 <span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">BayesA_vb_at_QTL  =</span> oA<span class="sc">$</span>vb[big], <span class="at">BayesA_vb_median =</span> <span class="fu">median</span>(oA<span class="sc">$</span>vb))</span>
 <span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  BayesB_d_at_QTL  BayesB_d_median BayesA_vb_at_QTL BayesA_vb_median </span></span>
 <span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      0.999000013      0.179000005      0.011139854      0.002957477</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">2</span>, <span class="dv">1</span>))</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (v <span class="cf">in</span> <span class="fu">list</span>(<span class="fu">list</span>(oB<span class="sc">$</span>d, <span class="st">"BayesB: posterior inclusion"</span>),</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>               <span class="fu">list</span>(oA<span class="sc">$</span>vb, <span class="st">"BayesA: marker variance"</span>))) {</span>
@@ -1005,11 +1050,12 @@ window.Quarto = {
 <span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">main =</span> v[[<span class="dv">2</span>]], <span class="at">cex.main =</span> <span class="fl">0.95</span>)</span>
 <span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">points</span>(big, v[[<span class="dv">1</span>]][big], <span class="at">pch =</span> <span class="dv">1</span>, <span class="at">cex =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
 <span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
-<div id="fig-genpred-selection" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<div id="fig-genpred-selection" class="quarto-float quarto-figure quarto-figure-center anchored" alt="The two priors on the same oligogenic trait, with the marker carrying 96% of the genetic variance circled" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-genpred-selection-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="08b-genomic-prediction_files/figure-html/fig-genpred-selection-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="1050">
+<img src="08b-genomic-prediction_files/figure-html/fig-genpred-selection-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="The two priors on the same oligogenic trait, with the marker carrying 96% of the genetic variance circled" width="1050">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-genpred-selection-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;16.1: The two priors on the same oligogenic trait, with the marker carrying 96% of the genetic variance circled. Both find it. Only BayesB can then remove the other 1999 from the model.
@@ -1040,6 +1086,8 @@ Figure&nbsp;16.1: The two priors on the same oligogenic trait, with the marker c
     (\mathbf{y}_t - \hat\mu),\]</span></p>
 <p>with the two penalties differing by exactly the divisor that defines <span class="math inline">\(\mathbf{G}\)</span>: <span class="math inline">\(\lambda_\beta = \lambda \cdot 2\sum_k p_k(1-p_k)\)</span>. Getting that scalar wrong is the usual way this equivalence is reported as “approximate”. It is not approximate:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>lambda <span class="ot">&lt;-</span> (<span class="dv">1</span> <span class="sc">-</span> h2) <span class="sc">/</span> h2</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>yc  <span class="ot">&lt;-</span> y[train] <span class="sc">-</span> <span class="fu">mean</span>(y[train])</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>u_G <span class="ot">&lt;-</span> G[, train] <span class="sc">%*%</span> <span class="fu">solve</span>(G[train, train] <span class="sc">+</span> <span class="fu">diag</span>(lambda, <span class="fu">length</span>(train)), yc)</span>
@@ -1047,15 +1095,19 @@ Figure&nbsp;16.1: The two priors on the same oligogenic trait, with the marker c
 <span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>         <span class="fu">solve</span>(<span class="fu">tcrossprod</span>(vr<span class="sc">$</span>Z[train, ]) <span class="sc">+</span> <span class="fu">diag</span>(lambda <span class="sc">*</span> s2, <span class="fu">length</span>(train)), yc))</span>
 <span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="fu">max</span>(<span class="fu">abs</span>(u_G <span class="sc">-</span> u_M))</span>
 <span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1.354472e-14</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>Machine precision, over all 625 individuals. Note this route uses the raw <span class="math inline">\(\mathbf{G}\)</span>: it needs no inverse of it, so <a href="#sec-g-singular" class="quarto-xref"><span>Section 16.3.2</span></a>’s blend never enters, which is also why it is the cleaner statement of the identity.</p>
 <p>The Gibbs sampler should land in the same place, and does, though only to sampling error – it is estimating <span class="math inline">\(\lambda\)</span> from the data rather than being told it, and the blend used in <code>gblup()</code> has no exact marker-space equivalent:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>yobs <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA_real_</span>, N); yobs[train] <span class="ot">&lt;-</span> y[train]</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>fit_brr <span class="ot">&lt;-</span> <span class="fu">wgr</span>(yobs, M, <span class="at">iv =</span> <span class="cn">FALSE</span>, <span class="at">pi =</span> <span class="dv">0</span>, <span class="at">it =</span> <span class="dv">1500</span>, <span class="at">bi =</span> <span class="dv">500</span>)</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">gblup_vs_gibbs =</span> <span class="fu">cor</span>(u_hat, fit_brr<span class="sc">$</span>hat <span class="sc">-</span> <span class="fu">mean</span>(fit_brr<span class="sc">$</span>hat)))</span>
 <span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; gblup_vs_gibbs </span></span>
 <span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      0.9992759</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>That correlation, 0.999, is the weaker of the two checks and is included because it exercises the code path the Bayesian fits above actually use. The identity is what proves the two routes are one model.</p>
 </section>
@@ -1109,6 +1161,8 @@ Figure&nbsp;16.1: The two priors on the same oligogenic trait, with the marker c
 </div>
 </div>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>sub <span class="ot">&lt;-</span> <span class="fu">reshape</span>(acc, <span class="at">direction =</span> <span class="st">"long"</span>, <span class="at">varying =</span> <span class="fu">c</span>(<span class="st">"GBLUP"</span>, <span class="st">"BayesA"</span>, <span class="st">"BayesB"</span>),</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>               <span class="at">v.names =</span> <span class="st">"accuracy"</span>, <span class="at">timevar =</span> <span class="st">"method"</span>,</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">times =</span> <span class="fu">c</span>(<span class="st">"GBLUP"</span>, <span class="st">"BayesA"</span>, <span class="st">"BayesB"</span>))</span>
@@ -1116,11 +1170,12 @@ Figure&nbsp;16.1: The two priors on the same oligogenic trait, with the marker c
 <span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="fu">boxplot</span>(accuracy <span class="sc">~</span> method <span class="sc">+</span> grp, sub, <span class="at">las =</span> <span class="dv">2</span>, <span class="at">cex.axis =</span> <span class="fl">0.7</span>,</span>
 <span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>        <span class="at">col =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">"grey85"</span>, <span class="st">"grey65"</span>, <span class="st">"grey45"</span>), <span class="dv">4</span>),</span>
 <span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>        <span class="at">ylab =</span> <span class="st">"accuracy (candidates)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
-<div id="fig-genpred-accuracy" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<div id="fig-genpred-accuracy" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Prediction accuracy by architecture and heritability, 15 replicate splits each" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-genpred-accuracy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="08b-genomic-prediction_files/figure-html/fig-genpred-accuracy-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="1050">
+<img src="08b-genomic-prediction_files/figure-html/fig-genpred-accuracy-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Prediction accuracy by architecture and heritability, 15 replicate splits each" width="1050">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-genpred-accuracy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;16.2: Prediction accuracy by architecture and heritability, 15 replicate splits each.
@@ -1172,6 +1227,8 @@ Figure&nbsp;16.2: Prediction accuracy by architecture and heritability, 15 repli
 <p>Accuracy improves monotonically as <code>pi</code> approaches the truth, but the degradation from being off is gradual, not catastrophic – <code>pi</code> is worth cross-validating, not agonising over.</p>
 <p>The obvious alternative is to stop choosing it. BayesC<span class="math inline">\(\pi\)</span> keeps BayesB’s spike-and-slab prior but adds one more level: instead of fixing <span class="math inline">\(\pi\)</span> before the fit, it treats <span class="math inline">\(\pi\)</span> itself as unknown and updates it by Metropolis-Hastings at every iteration, jointly with the marker effects and their inclusion indicators <span class="citation" data-cites="xavier2019bwgr">(<a href="99-references.html#ref-xavier2019bwgr" role="doc-biblioref">Xavier et al. 2019</a>)</span>. In principle that removes the sweep above entirely, since the training data are left to say how sparse the architecture is. Fit it to both architectures:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>cpi_poly <span class="ot">&lt;-</span> <span class="fu">BayesCpi</span>(y[train],    M[train, ], <span class="at">it =</span> <span class="dv">1500</span>, <span class="at">bi =</span> <span class="dv">500</span>, <span class="at">df =</span> <span class="dv">5</span>, <span class="at">R2 =</span> <span class="fl">0.5</span>)</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>cpi_olig <span class="ot">&lt;-</span> <span class="fu">BayesCpi</span>(y_ol[train], M[train, ], <span class="at">it =</span> <span class="dv">1500</span>, <span class="at">bi =</span> <span class="dv">500</span>, <span class="at">df =</span> <span class="dv">5</span>, <span class="at">R2 =</span> <span class="fl">0.5</span>)</span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">pi_hat_polygenic  =</span> cpi_poly<span class="sc">$</span>pi,   <span class="co"># truth: 0</span></span>
@@ -1180,6 +1237,7 @@ Figure&nbsp;16.2: Prediction accuracy by architecture and heritability, 15 repli
 <span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">acc_BayesB_at_095 =</span> <span class="fu">cor</span>(<span class="fu">as.numeric</span>(M[cand, ] <span class="sc">%*%</span> oB<span class="sc">$</span>b), g_ol[cand]))</span>
 <span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  pi_hat_polygenic pi_hat_oligogenic    acc_oligogenic acc_BayesB_at_095 </span></span>
 <span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         0.4369196         0.4390892         0.9299389         0.9524220</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>It returns essentially the same <span class="math inline">\(\pi\)</span> for a trait with 2000 causal markers as for one that is effectively monogenic, and predicts the oligogenic trait slightly worse than BayesB told the right answer. With 375 records and 2000 markers there is little in the data that speaks to <span class="math inline">\(\pi\)</span> specifically – <a href="#sec-g-singular" class="quarto-xref"><span>Section 16.3.2</span></a>’s 48 dimensions again – so what comes back is close to the prior. Estimating <span class="math inline">\(\pi\)</span> is not a substitute for choosing it here; the sweep above remains the honest route.</p>
 </section>
@@ -1188,8 +1246,11 @@ Figure&nbsp;16.2: Prediction accuracy by architecture and heritability, 15 repli
 <h2 data-number="16.8" class="anchored" data-anchor-id="from-gebvs-to-stage1_build"><span class="header-section-number">16.8</span> From GEBVs to <code>stage1_build()</code></h2>
 <p>Everything above ends where <a href="03-simulating-crosses.html" class="quarto-xref"><span>Chapter 4</span></a>‘s contract begins, and this is where the opening paragraph’s two steps close the loop. Training happened once, on the historical population’s markers and phenotypes; the candidates below never contributed a phenotype to that fit, and their row in <code>hybrids_traits</code> is produced entirely from marker dosages – the same computation that, for a line-by-line combination not yet made as a physical cross, would score it before any seed exists. The candidates’ predicted values, whichever model produced them, are exactly the <code>traits</code> argument <code>stage1_build()</code> expects – one column per trait, one row per hybrid:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>hybrids_traits <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">hybrid =</span> cand, <span class="at">trait1 =</span> predB)</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(hybrids_traits)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1237,14 +1298,17 @@ Figure&nbsp;16.2: Prediction accuracy by architecture and heritability, 15 repli
 <p><a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 14</span></a>’s Finding 5 assumed a prediction accuracy <code>r</code> and manufactured error correlated with relatedness to match it. The GBLUP fit above at <span class="math inline">\(h^2 = 0.5\)</span> gives a <em>measured</em> accuracy of 0.96 on the polygenic architecture, at the top of the range Finding 5 explored (<span class="math inline">\(r \in \{0.5, 0.7, 0.9, 1\}\)</span>) – but <a href="#sec-hybrid-cv" class="quarto-xref"><span>Section 16.4</span></a> is the reason not to read that as the typical case. It is the CV2 number, the accuracy for a candidate whose two parents are already phenotyped in other combinations. The CV1 row of that table, 0.65, sits near the <em>bottom</em> of Finding 5’s range, and the CV0 row falls well below anything it explored. Between them the two chapters bracket the same interval from opposite ends, and Finding 5’s pessimistic cases are the realistic ones.</p>
 <p>The errors are, in fact, structured by relatedness rather than white:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>err <span class="ot">&lt;-</span> g[cand] <span class="sc">-</span> u_hat[cand]</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>fcand <span class="ot">&lt;-</span> ctx<span class="sc">$</span>f[cand, cand]</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>ut <span class="ot">&lt;-</span> <span class="fu">upper.tri</span>(fcand)</span>
 <span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(<span class="fu">outer</span>(err, err)[ut], fcand[ut])</span>
 <span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.1397751</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>Pairs of candidates that are more related have more correlated prediction errors – the mechanism Finding 5 assumed, confirmed here from an actual fitted model rather than injected. It is a modest correlation, not the extreme case Finding 5 stress-tested, because <span class="math inline">\(h^2 = 0.5\)</span> with <code>r length(train)</code> training records is a comparatively favourable regime; a smaller or less related training set would push it higher.</p>
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-simple callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>

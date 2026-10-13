@@ -73,20 +73,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta name="quarto:offset" content="./">
 <link href="./93-corpora.html" rel="next">
 <link href="./91-package.html" rel="prev">
+<link href="./favicon.svg" rel="icon" type="image/svg+xml">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9ef9d4760de657dc918b81d25b42b59f.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-58115a419e540697b7ccd904e8efcd2d.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9ef9d4760de657dc918b81d25b42b59f.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-37a0ccb6f5b9899fcb884e11bb6f7458.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-da8b26c7a017495cabf78e5d2792d1d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-b192ecda6a457e66a32e528cd3cc1fbc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-da8b26c7a017495cabf78e5d2792d1d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -649,6 +650,8 @@ window.Quarto = {
 <h2 data-number="C.1" class="anchored" data-anchor-id="the-method-slow-oracles"><span class="header-section-number">C.1</span> The method: slow oracles</h2>
 <p>Every fast route in the package has a <strong>deliberately slow, literal</strong> counterpart in <code>R/09_reference.R</code> that transcribes the definition with no algebraic shortcut. The fast route must match it to machine precision.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>ref_theta</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (idx, ctx) </span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; mean(ctx[["f"]][idx, idx])</span></span>
@@ -671,9 +674,12 @@ window.Quarto = {
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
 <span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x789355a900&gt;</span></span>
 <span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>Three implementations of one quantity: a literal mean over the submatrix, the packaged version, and the line-route collapse that never forms the submatrix at all. They must agree.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>sim  <span class="ot">&lt;-</span> <span class="fu">simulate_pools</span>(<span class="at">n_A =</span> <span class="dv">20</span>, <span class="at">n_B =</span> <span class="dv">20</span>, <span class="at">m =</span> <span class="dv">1500</span>, <span class="at">seed =</span> <span class="dv">7</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>ctxp <span class="ot">&lt;-</span> <span class="fu">ctx_from_pools</span>(sim)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">3</span>); sel <span class="ot">&lt;-</span> <span class="fu">sample.int</span>(ctxp<span class="sc">$</span>N, <span class="dv">50</span>)</span>
@@ -685,9 +691,12 @@ window.Quarto = {
 <span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>                       <span class="fu">ref_theta</span>(sel, ctxp))))</span>
 <span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       oracle     packaged   line_route      max_dev </span></span>
 <span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6.708316e-01 6.708316e-01 6.708316e-01 1.110223e-16</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>The oracles exist so that this comparison is possible for a reader who does not trust the derivation – which is the correct posture.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">rbind</span>(</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">he_nei       =</span> <span class="fu">c</span>(<span class="at">oracle =</span> <span class="fu">ref_he_nei</span>(sel, ctxp), <span class="at">packaged =</span> <span class="fu">he_nei</span>(sel, ctxp)),</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">theta_freq   =</span> <span class="fu">c</span>(<span class="fu">ref_theta_freq</span>(sel, ctxp), <span class="fu">theta_from_freq</span>(sel, ctxp)),</span>
@@ -696,6 +705,7 @@ window.Quarto = {
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">alleles_lost =</span> <span class="fu">c</span>(<span class="fu">ref_alleles_lost</span>(sel, ctxp), <span class="fu">alleles_lost</span>(sel, ctxp)),</span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">ENE          =</span> <span class="fu">c</span>(<span class="fu">ref_ene</span>(sel, ctxp), <span class="fu">ene</span>(sel, ctxp)),</span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">ANE          =</span> <span class="fu">c</span>(<span class="fu">ref_ane</span>(sel, ctxp), <span class="fu">ane</span>(sel, ctxp))), <span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1097,7 +1107,10 @@ window.Quarto = {
 </div>
 </div>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>Rscript <span class="sc">-</span>e <span class="st">'devtools::test()'</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 </section>
 <section id="provenance-of-every-figure-and-table" class="level2" data-number="C.4">
@@ -1378,6 +1391,8 @@ window.Quarto = {
 <section id="regenerating-the-cached-results" class="level2" data-number="C.5">
 <h2 data-number="C.5" class="anchored" data-anchor-id="regenerating-the-cached-results"><span class="header-section-number">C.5</span> Regenerating the cached results</h2>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>Rscript book<span class="sc">/</span>scripts<span class="sc">/</span>regenerate.R          <span class="co"># everything; hours</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>Rscript book<span class="sc">/</span>scripts<span class="sc">/</span>regenerate.R f2size   <span class="co"># one target</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>Rscript book<span class="sc">/</span>scripts<span class="sc">/</span>regenerate.R search   <span class="co"># the advanced-selection benchmark</span></span>
@@ -1385,16 +1400,20 @@ window.Quarto = {
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>Rscript book<span class="sc">/</span>scripts<span class="sc">/</span>regenerate.R cycles   <span class="co"># the recurrent-selection trajectories</span></span>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>Rscript book<span class="sc">/</span>scripts<span class="sc">/</span>regenerate.R mating   <span class="co"># the mating-design core sweep (~6 min)</span></span>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>Rscript book<span class="sc">/</span>scripts<span class="sc">/</span>regenerate.R sparse   <span class="co"># the sparse-testing core sweep (~5 min)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>The script is the single place where the expensive computations live. It is never invoked by <code>quarto render</code>.</p>
 </section>
 <section id="reproducing-the-book" class="level2" data-number="C.6">
 <h2 data-number="C.6" class="anchored" data-anchor-id="reproducing-the-book"><span class="header-section-number">C.6</span> Reproducing the book</h2>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'devtools::document(); devtools::load_all()'</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'devtools::test()'</span></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'devtools::check()'</span></span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="ex">quarto</span> render book</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>Quarto’s <code>freeze: auto</code> means a chapter re-runs only when its source changes. To force a full recomputation, delete <code>book/_freeze/</code>.</p>
 </section>

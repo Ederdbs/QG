@@ -521,6 +521,7 @@ c(BayesB_d_at_QTL   = oB$d[big],  BayesB_d_median  = median(oB$d),
 ```{r}
 #| label: fig-genpred-selection
 #| fig-cap: "The two priors on the same oligogenic trait, with the marker carrying 96% of the genetic variance circled. Both find it. Only BayesB can then remove the other 1999 from the model."
+#| fig-alt: "The two priors on the same oligogenic trait, with the marker carrying 96% of the genetic variance circled"
 par(mfrow = c(1, 2), mar = c(4, 4, 2, 1))
 for (v in list(list(oB$d, "BayesB: posterior inclusion"),
                list(oA$vb, "BayesA: marker variance"))) {
@@ -630,6 +631,7 @@ knitr::kable(fmt(aggregate(cbind(GBLUP, BayesA, BayesB) ~ arch + h2, acc, mean),
 ```{r}
 #| label: fig-genpred-accuracy
 #| fig-cap: "Prediction accuracy by architecture and heritability, 15 replicate splits each."
+#| fig-alt: "Prediction accuracy by architecture and heritability, 15 replicate splits each"
 sub <- reshape(acc, direction = "long", varying = c("GBLUP", "BayesA", "BayesB"),
                v.names = "accuracy", timevar = "method",
                times = c("GBLUP", "BayesA", "BayesB"))

@@ -42,6 +42,7 @@ step.
 #| fig-width: 10
 #| fig-height: 7.4
 #| fig-cap: "The MABC operation. Left column: the cross made in each generation. Right column: what is genotyped and selected on, and the population size that criterion demands. The recurrent parent E re-enters at every backcross; the fork at the bottom is the fixation step, where doubled haploids and selfing differ by more than an order of magnitude in plants required."
+#| fig-alt: "The MABC operation"
 box <- function(x, y, w, h, lab, fill = "white", border = "grey25", cex = 0.95,
                 font = 1) {
   rect(x - w/2, y - h/2, x + w/2, y + h/2, col = fill, border = border, lwd = 1.6)
@@ -58,7 +59,7 @@ note <- function(y, txt, col = "grey20")
 op <- par(mar = c(0.2, 0.2, 0.2, 0.2))
 plot(NA, xlim = c(0, 13.2), ylim = c(0, 10.4), axes = FALSE, xlab = "", ylab = "")
 
-elite <- "#1b6ca8"; donor <- "#c0392b"; dh <- "#2e7d32"
+elite <- "#1f5f8b"; donor <- "#c0392b"; dh <- "#2e7d32"
 
 # --- parents ---------------------------------------------------------------
 box(2.2, 9.6, 3.0, 0.8, "Donor D\nk target alleles, coupling phase",
@@ -257,6 +258,7 @@ happens to carry less donor genome somewhere irrelevant.
 #| fig-width: 9
 #| fig-height: 4.4
 #| fig-cap: "Paired comparison (common random numbers, 300 replicates, s = 0.60) of the two-stage background-priority index against the drag-priority index. Bars are Clopper-Pearson 95% intervals. The criterion is drag <= 30 cM per gene AND IBD >= 0.90 at BC3."
+#| fig-alt: "Paired comparison (common random numbers, 300 replicates, s = 0.60) of the two-stage background-priority index against the drag-priority index"
 op <- par(mfrow = c(1, 2), mar = c(4.3, 4.4, 2.6, 0.8))
 cols <- c(script = "#c0392b", drag = "#2e7d32")
 for (k in c(3, 4)) {
@@ -305,6 +307,7 @@ split in two. **The wall was a property of the index, not of maize.**
 #| label: fig-bc-policies
 #| echo: false
 #| fig-cap: "Linkage drag at BC3 (left) and probability of meeting the ceiling (right) under the four policies, s = 0.60. Solid = 1 gene, dashed = 3 genes. Extending recombinant selection into BC3 costs no extra plants, only the flanking markers on plants that are being genotyped anyway."
+#| fig-alt: "Linkage drag at BC3 (left) and probability of meeting the ceiling (right) under the four policies, s = 0.60. Solid = 1 gene, dashed = 3 genes"
 knitr::include_graphics(book_fig("mabc_policies.png"))
 ```
 
@@ -326,9 +329,10 @@ three backcrosses?
 #| fig-width: 9
 #| fig-height: 4.4
 #| fig-cap: "P(criterion met) against the share of a fixed budget spent early, for 1 and 3 genes, binned by total plants. Front-loading BC1 is the worst use of a fixed budget."
+#| fig-alt: "P(criterion met) against the share of a fixed budget spent early, for 1 and 3 genes, binned by total plants"
 op <- par(mfrow = c(1, 2), mar = c(4.3, 4.4, 2.6, 0.8))
 brk <- c(0, 150, 300, 500, Inf); lab <- c("< 150", "150-300", "300-500", "> 500")
-cols <- c("#c0392b", "#e67e22", "#27ae60", "#1b6ca8")
+cols <- c("#c0392b", "#e67e22", "#27ae60", "#1f5f8b")
 for (k in sort(unique(mb_alloc$genes))) {
   d <- mb_alloc[mb_alloc$genes == k, ]
   d$frac <- (d$bc1 + d$bc2) / d$total
@@ -395,8 +399,9 @@ knitr::kable(mb_sz[, c("genes", "q_F2", "n_F2_3plants", "q_DH", "n_DH_3lines")],
 #| fig-width: 8
 #| fig-height: 4.6
 #| fig-cap: "Points: simulation. Dashed: the cumulative binomial. Log scale. Each extra gene multiplies the BC3F2 requirement by four."
+#| fig-alt: "Points: simulation"
 op <- par(mar = c(4.4, 4.6, 1.2, 0.8))
-kcol <- c("#1b6ca8", "#27ae60", "#e67e22", "#c0392b")
+kcol <- c("#1f5f8b", "#27ae60", "#e67e22", "#c0392b")
 plot(NA, xlim = range(mb_f2$n_f2), ylim = c(0, 1), log = "x",
      xlab = "Genotyped BC3F2 plants",
      ylab = sprintf("P( >= %d homozygotes at all targets )", MB$n_keep))
@@ -416,6 +421,7 @@ par(op)
 #| label: fig-bc-sizing
 #| echo: false
 #| fig-cap: "Analytical sizing by stage, log scale. The two blue bars are backcross generations; red is fixation by selfing; green is fixation by doubled haploids."
+#| fig-alt: "Analytical sizing by stage, log scale"
 knitr::include_graphics(book_fig("mabc_sizing.png"))
 ```
 

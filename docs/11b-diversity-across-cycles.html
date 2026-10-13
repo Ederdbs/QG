@@ -92,20 +92,21 @@ div.csl-indent {
 <meta name="quarto:offset" content="./">
 <link href="./11c-limits.html" rel="next">
 <link href="./11-plant-literature.html" rel="prev">
+<link href="./favicon.svg" rel="icon" type="image/svg+xml">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9ef9d4760de657dc918b81d25b42b59f.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-58115a419e540697b7ccd904e8efcd2d.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9ef9d4760de657dc918b81d25b42b59f.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-37a0ccb6f5b9899fcb884e11bb6f7458.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-da8b26c7a017495cabf78e5d2792d1d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-b192ecda6a457e66a32e528cd3cc1fbc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-da8b26c7a017495cabf78e5d2792d1d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -674,7 +675,7 @@ window.Quarto = {
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="11b-diversity-across-cycles_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="1350"></p>
+<p><img src="11b-diversity-across-cycles_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" alt="One cycle" width="1350"></p>
 <figcaption>One cycle. Hybrids are evaluated across the pool boundary; lines are recycled inside it. The usage weights are the only channel between the two, and they are what <code>line_weights()</code> returns.</figcaption>
 </figure>
 </div>
@@ -695,6 +696,8 @@ window.Quarto = {
 <p><code>build_ctx()</code> sets <code>p0 &lt;- colMeans(X)</code> on every call. Run it fresh each cycle and the drift lens is re-anchored to the population it is supposed to be measuring drift <em>away from</em>, which reports approximately zero loss forever while the pool erodes underneath.</p>
 <p>The demonstration needs two generations and nothing else:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="fu">simulate_pools</span>(<span class="at">n_A =</span> <span class="dv">25</span>, <span class="at">n_B =</span> <span class="dv">25</span>, <span class="at">m =</span> <span class="dv">2000</span>, <span class="at">seed =</span> <span class="dv">1</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>p0  <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(sim<span class="sc">$</span>X)                       <span class="co"># the founding base, frozen here</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>GL5 <span class="ot">&lt;-</span> sim<span class="sc">$</span>GL</span>
@@ -714,9 +717,10 @@ window.Quarto = {
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">reanchored  =</span> <span class="fu">drift</span>(X5, <span class="fu">colMeans</span>(X5)))</span>
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  frozen_p0 reanchored </span></span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 0.08693168 0.00000000</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>The second number is zero by construction: a population is never drifted from itself. Five generations of real drift have been reported as none.</p>
-<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout callout-style-simple callout-important callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -737,7 +741,7 @@ window.Quarto = {
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="figs/cycles_gain.png" class="img-fluid figure-img" width="336"></p>
+<p><img src="figs/cycles_gain.png" class="img-fluid figure-img" alt="Mean index of the selected hybrids, in founding-cycle standard deviations, averaged over five seeds" width="336"></p>
 <figcaption>Mean index of the selected hybrids, in founding-cycle standard deviations, averaged over five seeds. The unconstrained programme leads for eight cycles and then stops climbing. Neither constrained programme has stopped by cycle 15.</figcaption>
 </figure>
 </div>
@@ -808,7 +812,7 @@ window.Quarto = {
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="figs/cycles_diversity.png" class="img-fluid figure-img" width="336"></p>
+<p><img src="figs/cycles_diversity.png" class="img-fluid figure-img" alt="Left: gene diversity of the selection" width="336"></p>
 <figcaption>Left: gene diversity of the selection. Right: F_drift against the frozen founding base. The unconstrained programme spends nearly its whole diversity endowment by cycle 8 and has little left to convert afterwards.</figcaption>
 </figure>
 </div>
@@ -872,6 +876,8 @@ window.Quarto = {
 <h2 data-number="21.4" class="anchored" data-anchor-id="the-rate-of-inbreeding-and-what-n_s-is-not"><span class="header-section-number">21.4</span> The rate of inbreeding, and what <span class="math inline">\(N_s\)</span> is not</h2>
 <p><a href="12-case-study.html" class="quarto-xref"><span>Chapter 23</span></a>’s checklist says to regress <span class="math inline">\(\log(1 - F)\)</span> on cycle and check that it is linear, because curvature means a non-constant rate. Doing it:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>rate <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">unique</span>(traj<span class="sc">$</span>budget), <span class="cf">function</span>(b) {</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  d <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(F_drift <span class="sc">~</span> cycle, traj[traj<span class="sc">$</span>budget <span class="sc">==</span> b, ], mean)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  f <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="fu">log</span>(<span class="dv">1</span> <span class="sc">-</span> F_drift) <span class="sc">~</span> cycle, d[<span class="sc">-</span><span class="dv">1</span>, ])</span>
@@ -879,6 +885,7 @@ window.Quarto = {
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>             <span class="at">Ne =</span> <span class="dv">1</span> <span class="sc">/</span> (<span class="sc">-</span><span class="dv">2</span> <span class="sc">*</span> <span class="fu">coef</span>(f)[[<span class="st">"cycle"</span>]]), <span class="at">R2 =</span> <span class="fu">summary</span>(f)<span class="sc">$</span>r.squared)</span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>}))</span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(rate, <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -915,7 +922,7 @@ window.Quarto = {
 </div>
 </div>
 <p>The diagnostic fires, and it fires on the unconstrained run: <span class="math inline">\(R^2 =\)</span> 0.853 against 0.998 for the tightest budget. The unconstrained rate is not constant because it is decelerating – there is progressively less left to lose. Read naively its fitted <span class="math inline">\(\Delta F\)</span> is the <em>lowest</em> of the three, which is exactly backwards; the fit is meaningless for a saturating series, and the <span class="math inline">\(R^2\)</span> column is what says so.</p>
-<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout callout-style-simple callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>

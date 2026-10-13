@@ -1608,7 +1608,7 @@ fig_cap <- paste0("Reciprocal recurrent selection over ", rrs_cfg[["n_cycles"]],
 arm_stat <- function(arm, m, f) sapply(seq_len(rrs_cfg[["n_cycles"]]), function(i)
   f(vapply(arms, function(a) a[[arm]][[m]][i + 1], numeric(1))))
 cyc  <- seq_len(rrs_cfg[["n_cycles"]])
-cols <- c(A = "#1b6ca8", B = "#c0392b")
+cols <- c(A = "#1f5f8b", B = "#c0392b")
 panel <- function(mA, mB, ylab, main, legend_pos) {
   st <- lapply(c(sel = "sel", ctl = "ctl"), function(arm)
     list(A = arm_stat(arm, mA, mean), B = arm_stat(arm, mB, mean),

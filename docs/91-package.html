@@ -73,20 +73,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta name="quarto:offset" content="./">
 <link href="./92-verification.html" rel="next">
 <link href="./90-notation.html" rel="prev">
+<link href="./favicon.svg" rel="icon" type="image/svg+xml">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9ef9d4760de657dc918b81d25b42b59f.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-58115a419e540697b7ccd904e8efcd2d.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9ef9d4760de657dc918b81d25b42b59f.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-37a0ccb6f5b9899fcb884e11bb6f7458.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-da8b26c7a017495cabf78e5d2792d1d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-b192ecda6a457e66a32e528cd3cc1fbc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-da8b26c7a017495cabf78e5d2792d1d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -664,9 +665,12 @@ window.Quarto = {
 <section id="installation" class="level2" data-number="B.1">
 <h2 data-number="B.1" class="anchored" data-anchor-id="installation"><span class="header-section-number">B.1</span> Installation</h2>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="fu">c</span>(<span class="st">"DEoptim"</span>, <span class="st">"quadprog"</span>))</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">install</span>(<span class="st">"."</span>)        <span class="co"># from the repository root</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(hybdiv)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>Only <code>DEoptim</code> is a hard dependency, used solely by <code>sel_de()</code>. <code>quadprog</code> is suggested and needed only for <code>optimal_contributions()</code> and <code>ocs_quadprog()</code>. Everything else, including every plot, is base R.</p>
 </section>
@@ -788,6 +792,8 @@ window.Quarto = {
 <h2 data-number="B.3" class="anchored" data-anchor-id="the-two-stage-contract"><span class="header-section-number">B.3</span> The two-stage contract</h2>
 <p>Everything downstream of stage 1 talks only through three objects. This is the seam for swapping in real data.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>st1 <span class="ot">&lt;-</span> <span class="fu">stage1_simulate</span>()                 <span class="co"># or stage1_build(X, ped, traits, fL)</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   $X        N x m hybrid markers, 0/0.5/1</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   $f        N x N molecular coancestry</span></span>
@@ -799,6 +805,7 @@ window.Quarto = {
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">#   $metrics    one row per scenario</span></span>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">#   $z_scores   each metric in s.d. from the random null</span></span>
 <span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">#   $ref        gd_ref, its Monte Carlo s.e., alpha_max, n_sel</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 </section>
 <section id="function-index" class="level2" data-number="B.4">
@@ -1142,7 +1149,10 @@ window.Quarto = {
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="ex">Rscript</span> inst/scripts/run_mabc.R         <span class="co"># the MABC scans, ~3 min</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><code>run_benchmark.R</code> is the source of the numeric results quoted in <code>README.md</code>, and the only place the three <code>plot_*</code> helpers above are exercised. From an installed copy of the package:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="fu">system.file</span>(<span class="st">"scripts"</span>, <span class="st">"run_all.R"</span>, <span class="at">package =</span> <span class="st">"hybdiv"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <section id="pipeline-stages-s1-s4" class="level3" data-number="B.5.1">
 <h3 data-number="B.5.1" class="anchored" data-anchor-id="pipeline-stages-s1-s4"><span class="header-section-number">B.5.1</span> Pipeline stages S1-S4</h3>

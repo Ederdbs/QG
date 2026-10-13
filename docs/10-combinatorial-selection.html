@@ -92,20 +92,21 @@ div.csl-indent {
 <meta name="quarto:offset" content="./">
 <link href="./10b-advanced-selection.html" rel="next">
 <link href="./09-optimal-contributions.html" rel="prev">
+<link href="./favicon.svg" rel="icon" type="image/svg+xml">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9ef9d4760de657dc918b81d25b42b59f.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-58115a419e540697b7ccd904e8efcd2d.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9ef9d4760de657dc918b81d25b42b59f.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-37a0ccb6f5b9899fcb884e11bb6f7458.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-da8b26c7a017495cabf78e5d2792d1d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-b192ecda6a457e66a32e528cd3cc1fbc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-da8b26c7a017495cabf78e5d2792d1d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -676,6 +677,8 @@ window.Quarto = {
 <p><strong>Assumptions, declared once and not violated afterwards.</strong> Parent lines are homozygous, so a hybrid’s genotype is the mean of its parents and <code>X</code> takes only the three values above. Markers are treated as neutral. The index is <em>frozen</em> before selection: nothing is re-predicted inside the optimiser, which matters because the index carries error that is correlated with relatedness (<a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 14</span></a>, finding 5). The allele-frequency base <code>ctx$p0</code> is the candidate pool and is set once in <code>build_ctx()</code>. Diversity loss <span class="math inline">\(\alpha\)</span> is always measured against a random subset of <em>the same size</em> <code>n_sel</code> (<a href="06-metric-catalogue.html#sec-baseline" class="quarto-xref"><span>Section 13.9</span></a>), never against the whole pool. Dominance appears nowhere in the objective: it is already inside the predicted hybrid performance, and the between-pool divergence that generates heterosis is a quantity to <em>preserve</em>, not to minimise (<a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 12</span></a>).</p>
 <p>The instance this chapter runs on:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">candidates_N      =</span> ctx<span class="sc">$</span>N,</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">lines_A           =</span> <span class="fu">sum</span>(ctx<span class="sc">$</span>pool <span class="sc">==</span> <span class="st">"A"</span>),</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">lines_B           =</span> <span class="fu">sum</span>(ctx<span class="sc">$</span>pool <span class="sc">==</span> <span class="st">"B"</span>),</span>
@@ -691,12 +694,15 @@ window.Quarto = {
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      6.000000e+01      2.400000e+00      3.258386e-01      7.654486e-04 </span></span>
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; alpha_ceiling_pct </span></span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      4.121618e+00</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>Read it as a breeder would. 60 crosses are kept out of 625, which is 9.6% of the factorial. The 60 crosses consume <span class="math inline">\(2n =\)</span> 120 parent slots spread over 50 lines, so a perfectly even plan would use each line 2.4 times – the scale against which any per-line cap has to be set. <code>gd_ref</code> is the gene diversity of a random subset of exactly this size, with its resampling standard deviation next to it, and the last row is the <strong>attainable ceiling</strong>: pure truncation loses 4.12% of it. Any <span class="math inline">\(\alpha_{\max}\)</span> above that ceiling constrains nothing at all, which is the first thing to check and the subject of <a href="09-optimal-contributions.html" class="quarto-xref"><span>Chapter 17</span></a>.</p>
 <section id="four-baselines-before-any-optimiser" class="level2" data-number="18.1">
 <h2 data-number="18.1" class="anchored" data-anchor-id="four-baselines-before-any-optimiser"><span class="header-section-number">18.1</span> Four baselines before any optimiser</h2>
 <p>Four families – random, truncation, truncation under a per-line cap, and greedy – in six rows, because greedy is shown at three merit weights.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>sels <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">random     =</span> <span class="fu">sel_random</span>(ctx, n_sel),</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">truncation =</span> <span class="fu">sel_truncation</span>(ctx, n_sel),</span>
@@ -711,6 +717,7 @@ window.Quarto = {
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">Ns         =</span> <span class="fu">status_number</span>(s, ctx),</span>
 <span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">Ne_parents =</span> <span class="fu">ne_parents</span>(s, ctx),</span>
 <span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">max_line   =</span> <span class="fu">max_line_use</span>(s, ctx)))), <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -779,10 +786,13 @@ window.Quarto = {
 </div>
 </div>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">w1_is_truncation =</span> <span class="fu">setequal</span>(sels[[<span class="st">"greedy_w1"</span>]], sels[[<span class="st">"truncation"</span>]]),</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">w3_is_truncation =</span> <span class="fu">setequal</span>(sels[[<span class="st">"greedy_w3"</span>]], sels[[<span class="st">"truncation"</span>]]))</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; w1_is_truncation w3_is_truncation </span></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             TRUE             TRUE</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>Three of those six rows are the same plan. <code>greedy_w1</code> and <code>greedy_w3</code> return <em>exactly</em> the truncation set – same index, same <span class="math inline">\(\alpha\)</span>, same <code>max_line</code> – because both weights sit far above the crossover measured in the <code>w-units</code> chunk below, where the merit term swamps the coancestry term and the greedy argmax degenerates to the index ranking. Read them as one row until that measurement has been made; it is the reason a <span class="math inline">\(w\)</span> grid of round numbers is a trap.</p>
 <p>Read the columns in this order, because each answers a different question and three of them are routinely skipped:</p>
@@ -796,6 +806,8 @@ window.Quarto = {
 <p><strong>Truncation</strong> is the ceiling on gain and the floor on diversity. It is what every programme does by default, and the interesting question is not whether it loses diversity but how <em>little</em> index a constrained plan has to give up relative to it. Its <code>max_line</code> here is 23: one line parents that many of the 60 selected crosses, against 2.4 under even use. That is the concentration a cap is meant to remove, and it is visible without any coancestry matrix.</p>
 <p><strong>Truncation with a per-line cap</strong> is the cheap baseline that deserves more attention than it gets. It needs no coancestry matrix at all – only counting:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>sel_truncation_cap</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (ctx, n_sel, cap = ceiling(2 * n_sel/ctx$n_lines) + </span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     1) </span></span>
@@ -816,8 +828,9 @@ window.Quarto = {
 <span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     }</span></span>
 <span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     out</span></span>
 <span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0xacb8922e0&gt;</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x767a40cb30&gt;</span></span>
 <span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>The procedure, stated as a breeder would run it:</p>
 <ol type="1">
@@ -830,6 +843,8 @@ window.Quarto = {
 </ol></li>
 </ol>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">index_truncation =</span> <span class="fu">mean_index</span>(sels<span class="sc">$</span>truncation, ctx),</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">index_capped     =</span> <span class="fu">mean_index</span>(sels<span class="sc">$</span>trunc_cap, ctx),</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">index_retained_pct =</span> <span class="dv">100</span> <span class="sc">*</span> <span class="fu">mean_index</span>(sels<span class="sc">$</span>trunc_cap, ctx) <span class="sc">/</span></span>
@@ -840,8 +855,11 @@ window.Quarto = {
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          1.9919371          0.8203555         41.1838050         13.0198915 </span></span>
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      Ne_par_capped </span></span>
 <span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         31.0344828</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>cap <span class="ot">&lt;-</span> <span class="fu">ceiling</span>(<span class="dv">2</span> <span class="sc">*</span> n_sel <span class="sc">/</span> ctx<span class="sc">$</span>n_lines) <span class="sc">+</span> <span class="dv">1</span>          <span class="co"># the function's default</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>ord <span class="ot">&lt;-</span> <span class="fu">order</span>(ctx<span class="sc">$</span>index, <span class="at">decreasing =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>lines_used <span class="ot">&lt;-</span> <span class="cf">function</span>(s) <span class="fu">sum</span>(<span class="fu">tabulate</span>(<span class="fu">c</span>(ctx<span class="sc">$</span>ped<span class="sc">$</span>a[s], ctx<span class="sc">$</span>ped<span class="sc">$</span>b[s]),</span>
@@ -857,6 +875,7 @@ window.Quarto = {
 <span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                      4                      1                    413 </span></span>
 <span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; shared_with_truncation  lines_used_truncation      lines_used_capped </span></span>
 <span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                     16                     33                     32</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>The default cap is <code>ceiling(2 * n_sel / ctx$n_lines) + 1</code>, one above even use, which is 4 here. Filling 60 slots under it required scanning 413 of the 625 ranked candidates, and only 16 of the resulting crosses are also in the truncation set: the cap does not trim the top of the ranking, it reshuffles most of it. The last two rows count the same reshuffling in lines rather than in crosses, and they are the reason <span class="math inline">\(N_{e,\text{par}}\)</span> is not a line count: the capped plan touches 32 distinct parent lines against truncation’s 33, out of 50 available – to within one line, the same set size – while its effective number of parents is 31 against 13. What the cap changes is how evenly the 120 parent slots are spread over the lines that are used, not how many lines are used at all.</p>
 <p>What that buys and what it costs, separately. The cap cuts the diversity loss from 4.12% to 0.33% and raises the effective number of parents from 13 to 31, at 41% of truncation’s index. Whether that is a good trade is a programme decision, not a statistical one – but note that the capped plan is <em>feasible</em> at a 1% budget while truncation is not, and it was found by counting alone.</p>
@@ -866,6 +885,8 @@ window.Quarto = {
 <h2 data-number="18.2" class="anchored" data-anchor-id="greedy-with-incremental-updates"><span class="header-section-number">18.2</span> Greedy, with incremental updates</h2>
 <p>Adding hybrid <span class="math inline">\(j\)</span> to an existing set changes the submatrix total by <span class="math inline">\(2 s_j + f_{jj}\)</span>, where <span class="math inline">\(s_j\)</span> is the sum of <span class="math inline">\(f_{ij}\)</span> over the already-chosen. That makes each step <span class="math inline">\(O(N)\)</span> instead of <span class="math inline">\(O(n^2)\)</span>, and the whole construction affordable.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>S <span class="ot">&lt;-</span> <span class="fu">sel_greedy</span>(ctx, <span class="at">n_sel =</span> <span class="dv">10</span>, <span class="at">w =</span> <span class="dv">1</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>j <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(<span class="fu">seq_len</span>(ctx<span class="sc">$</span>N), S)[<span class="dv">1</span>]</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> ctx[[<span class="st">"f"</span>]]</span>
@@ -875,8 +896,11 @@ window.Quarto = {
 <span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">recomputed =</span> recomputed, <span class="at">incremental =</span> incremental)</span>
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  recomputed incremental </span></span>
 <span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    87.07925    87.07925</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>sel_greedy</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (ctx, n_sel, w = 0, max_use = NULL) </span></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; {</span></span>
@@ -914,8 +938,9 @@ window.Quarto = {
 <span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     }</span></span>
 <span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     out</span></span>
 <span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
-<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0xacafafcb0&gt;</span></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x767add2698&gt;</span></span>
 <span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>One step <span class="math inline">\(k\)</span>, in the order the code performs it:</p>
 <ol type="1">
@@ -928,6 +953,8 @@ window.Quarto = {
 <p>The score is <span class="math inline">\(w \cdot \text{index} - \theta\)</span>. At <span class="math inline">\(w = 0\)</span> this is pure diversity – the ceiling on diversity and near-zero gain. As <span class="math inline">\(w \to \infty\)</span> it converges to truncation. Sweeping <span class="math inline">\(w\)</span> traces a frontier – but <strong>only if the grid is in the right units</strong>, and that is the trap at this step.</p>
 <p><span class="math inline">\(w\)</span> is an exchange rate: index standard deviations per unit of group coancestry. The two quantities it converts between differ by four orders of magnitude, and that ratio is measurable before any sweep is run:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>S30 <span class="ot">&lt;-</span> <span class="fu">sel_greedy</span>(ctx, <span class="dv">30</span>, <span class="at">w =</span> <span class="dv">0</span>)</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>theta_if_added <span class="ot">&lt;-</span> (<span class="fu">sum</span>(f[S30, S30]) <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">colSums</span>(f[S30, ]) <span class="sc">+</span> <span class="fu">diag</span>(f)) <span class="sc">/</span> <span class="dv">31</span><span class="sc">^</span><span class="dv">2</span></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">index_spread =</span> <span class="fu">diff</span>(<span class="fu">range</span>(ctx<span class="sc">$</span>index)),</span>
@@ -935,33 +962,40 @@ window.Quarto = {
 <span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">w_crossover  =</span> <span class="fu">diff</span>(<span class="fu">range</span>(theta_if_added)) <span class="sc">/</span> <span class="fu">diff</span>(<span class="fu">range</span>(ctx<span class="sc">$</span>index)))</span>
 <span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; index_spread theta_spread  w_crossover </span></span>
 <span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6.055856e+00 3.293444e-04 5.438446e-05</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p><code>w_crossover</code> is the weight at which the two terms of the score have equal range. Below it the sweep returns the diversity solution; a decade or two above it, every point collapses onto truncation. A grid of <span class="math inline">\(w \in \{0.25, 0.5, \dots, 30\}\)</span> – the obvious one, and the one this chapter used before it was measured – sits entirely above the transition and returns the <em>same</em> selection at every point, which makes greedy look an order of magnitude worse than it is. The grid below spans six decades around the crossover and is the one <code>book/scripts/regenerate.R</code> uses for the benchmark of <a href="10b-advanced-selection.html" class="quarto-xref"><span>Chapter 19</span></a>, so the two chapters report the same greedy.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>ws <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">10</span><span class="sc">^</span><span class="fu">seq</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="dv">1</span>, <span class="at">length.out =</span> <span class="dv">19</span>))</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>gf <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(ws, <span class="cf">function</span>(w) {</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  s <span class="ot">&lt;-</span> <span class="fu">sel_greedy</span>(ctx, n_sel, <span class="at">w =</span> w)</span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">w =</span> w, <span class="at">alpha =</span> <span class="fu">alpha_loss</span>(s, ctx, null<span class="sc">$</span>gd_ref),</span>
 <span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>             <span class="at">index =</span> <span class="fu">mean_index</span>(s, ctx))</span>
 <span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>}))</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(gf<span class="sc">$</span>alpha <span class="sc">*</span> <span class="dv">100</span>, gf<span class="sc">$</span>index, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="st">"#2166ac"</span>,</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(gf<span class="sc">$</span>alpha <span class="sc">*</span> <span class="dv">100</span>, gf<span class="sc">$</span>index, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="st">"#1f5f8b"</span>,</span>
 <span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"gene diversity loss, alpha (%)"</span>, <span class="at">ylab =</span> <span class="st">"mean index (s.d.)"</span>)</span>
 <span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(<span class="fu">alpha_loss</span>(sels<span class="sc">$</span>truncation, ctx, null<span class="sc">$</span>gd_ref) <span class="sc">*</span> <span class="dv">100</span>,</span>
 <span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>       <span class="fu">mean_index</span>(sels<span class="sc">$</span>truncation, ctx), <span class="at">pch =</span> <span class="dv">4</span>, <span class="at">cex =</span> <span class="fl">1.5</span>, <span class="at">col =</span> <span class="st">"#b2182b"</span>)</span>
 <span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="fu">alpha_loss</span>(sels<span class="sc">$</span>truncation, ctx, null<span class="sc">$</span>gd_ref) <span class="sc">*</span> <span class="dv">100</span>,</span>
 <span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>     <span class="fu">mean_index</span>(sels<span class="sc">$</span>truncation, ctx), <span class="st">"truncation"</span>, <span class="at">pos =</span> <span class="dv">2</span>, <span class="at">cex =</span> <span class="fl">0.75</span>)</span>
 <span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="dv">0</span>, <span class="at">lty =</span> <span class="dv">3</span>); <span class="fu">grid</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="10-combinatorial-selection_files/figure-html/greedy-frontier-1.png" class="img-fluid figure-img" width="1050"></p>
+<p><img src="10-combinatorial-selection_files/figure-html/greedy-frontier-1.png" class="img-fluid figure-img" alt="The greedy frontier" width="1050"></p>
 <figcaption>The greedy frontier. w = 0 is maximum diversity; large w converges to truncation. The useful range of w spans roughly 1e-5 to 1e-2 on this dataset, the same window the prose and the sweep table below quote: below it the sweep returns the maximum-diversity plan, above it the truncation plan, and every row outside the window is a duplicate of one of those two.</figcaption>
 </figure>
 </div>
 </div>
 </div>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(gf[gf<span class="sc">$</span>w <span class="sc">&lt;=</span> <span class="fl">0.01</span>, ], <span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1032,9 +1066,12 @@ window.Quarto = {
 </table>
 </div>
 </div>
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>step <span class="ot">&lt;-</span> <span class="fu">which.max</span>(gf<span class="sc">$</span>alpha <span class="sc">&gt;</span> <span class="dv">0</span>)          <span class="co"># first grid point that loses diversity</span></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>jump <span class="ot">&lt;-</span> gf[<span class="fu">c</span>(step <span class="sc">-</span> <span class="dv">1</span>L, step), ]</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(jump, <span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1063,12 +1100,15 @@ window.Quarto = {
 </table>
 </div>
 </div>
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The upper edge of the useful window: the smallest w whose plan is already the</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co"># truncation plan, above which every row of the sweep is a duplicate.</span></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>flat_from <span class="ot">&lt;-</span> <span class="fu">min</span>(gf<span class="sc">$</span>w[gf<span class="sc">$</span>index <span class="sc">&gt;=</span> <span class="fu">max</span>(gf<span class="sc">$</span>index) <span class="sc">-</span> <span class="fl">1e-12</span>])</span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">flat_from =</span> flat_from, <span class="at">rows_above =</span> <span class="fu">sum</span>(gf<span class="sc">$</span>w <span class="sc">&gt;</span> flat_from))</span>
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  flat_from rows_above </span></span>
 <span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 0.02154435 8.00000000</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>Two readings, and the second is the argument for everything that follows. First, the whole frontier lives in the three decades between <span class="math inline">\(w = 10^{-5}\)</span> – where the sweep is still moving, 0.13 at <span class="math inline">\(w = 0\)</span> against 0.21 at the first non-zero grid point – and <span class="math inline">\(w \approx 10^{-2}\)</span>, by which the plan is within 0.04% of truncation’s index. From <span class="math inline">\(w =\)</span> 0.0215 upward every one of the remaining 8 rows is the <em>identical</em> selection, and a sweep whose rows are all the same selection is a sweep in the wrong units, not a flat frontier. Second, the sweep is parameterised by <span class="math inline">\(w\)</span> and <em>the breeder’s constraint is not</em>. Between the two adjacent grid points printed above, <span class="math inline">\(\alpha\)</span> jumps from -0.76% to 0.56% and the index from 0.87 to 1.38; a budget falling inside that interval cannot be requested of a greedy sweep at all, only stumbled upon. An optimiser parameterised by <span class="math inline">\(\alpha_{\max}\)</span> can be asked for it directly.</p>
 <p>Greedy solutions are also what warm-start the differential evolution. That is not an optimisation detail – it is the difference between the DE working and not working.</p>
@@ -1077,6 +1117,8 @@ window.Quarto = {
 <h2 data-number="18.3" class="anchored" data-anchor-id="the-encoding-problem"><span class="header-section-number">18.3</span> The encoding problem</h2>
 <p>An <span class="math inline">\(N\)</span>-dimensional 0/1 encoding is infeasible for differential evolution at this scale: at production size that is 5041 binary dimensions. Instead, encode <span class="math inline">\(n_{sel}\)</span> continuous values in <span class="math inline">\([1, N]\)</span> and decode them to unique indices.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>decode</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (par, N, n_sel) </span></span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; {</span></span>
@@ -1088,8 +1130,9 @@ window.Quarto = {
 <span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         k[dup] &lt;- setdiff(seq_len(N), k[!dup])[seq_len(sum(dup))]</span></span>
 <span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     k</span></span>
 <span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0xacf74a938&gt;</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x7677bc2008&gt;</span></span>
 <span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>The decode, step by step:</p>
 <ol type="1">
@@ -1100,13 +1143,18 @@ window.Quarto = {
 </ol>
 <p>A worked case, small enough to check by hand:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">decode</span>(<span class="fu">c</span>(<span class="fl">3.9</span>, <span class="fl">3.2</span>, <span class="fl">1.1</span>, <span class="fl">7.5</span>), <span class="at">N =</span> <span class="dv">10</span>, <span class="at">n_sel =</span> <span class="dv">4</span>)</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">all</span>(d <span class="sc">==</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">7</span>)))</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>d</span>
 <span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 3 2 1 7</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>Truncation gives <span class="math inline">\((3, 3, 1, 7)\)</span>; the second coordinate is the duplicate; the lowest index not in <span class="math inline">\(\{3, 1, 7\}\)</span> is 2; the repair returns <span class="math inline">\((3, 2, 1, 7)\)</span>. The same mechanism is what lets a warm start be injected exactly: a seed is written into the population as <code>index + 0.5</code>, the middle of its own interval, and decodes back to itself.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>s0 <span class="ot">&lt;-</span> <span class="fu">sel_greedy</span>(ctx, n_sel, <span class="at">w =</span> <span class="dv">1</span>)</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">box_lower      =</span> <span class="dv">1</span>,</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">box_upper      =</span> ctx<span class="sc">$</span>N <span class="sc">+</span> <span class="fl">0.999</span>,</span>
@@ -1115,9 +1163,12 @@ window.Quarto = {
 <span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed_roundtrip =</span> <span class="fu">all</span>(<span class="fu">decode</span>(s0 <span class="sc">+</span> <span class="fl">0.5</span>, ctx<span class="sc">$</span>N, n_sel) <span class="sc">==</span> s0))</span>
 <span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      box_lower      box_upper  width_typical     width_last seed_roundtrip </span></span>
 <span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          1.000        625.999          1.000          0.999          1.000</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>Duplicates are repaired <strong>deterministically</strong>. A stochastic repair would make the fitness noisy, and a noisy fitness stops DE converging – the same parameter vector must always score the same.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">3</span>)</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">runif</span>(n_sel, <span class="dv">1</span>, ctx<span class="sc">$</span>N <span class="sc">+</span> <span class="dv">1</span>)</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> <span class="fu">runif</span>(n_sel, <span class="dv">1</span>, ctx<span class="sc">$</span>N <span class="sc">+</span> <span class="dv">1</span>)</span>
@@ -1131,8 +1182,9 @@ window.Quarto = {
 <span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                  60                  60                   1                   2 </span></span>
 <span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       deterministic </span></span>
 <span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                   1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-simple callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -1149,6 +1201,8 @@ window.Quarto = {
 <h3 data-number="18.3.1" class="anchored" data-anchor-id="a-third-encoding-one-weight-per-line"><span class="header-section-number">18.3.1</span> A third encoding: one weight per line</h3>
 <p><a href="07-choosing-metrics.html#sec-collapse" class="quarto-xref"><span>Section 14.1</span></a> showed that <span class="math inline">\(\theta\)</span> depends only on the line-usage vector. That makes a third encoding available, and one that changes what the coordinates <em>mean</em>: one weight per <strong>line</strong>, dimension <span class="math inline">\(L\)</span>. Against the <span class="math inline">\(N\)</span>-dimensional key vector that is a collapse from 3600 coordinates to 120 in the run below. Against the <span class="math inline">\(n_{sel}\)</span> coordinates <code>sel_de()</code> actually searches it is close to a wash, and the numbers below say which of those two comparisons is which.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>decode_lines</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (p, ctx, n_sel, max_use = NULL, w_div = 3) </span></span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; {</span></span>
@@ -1178,8 +1232,9 @@ window.Quarto = {
 <span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     }</span></span>
 <span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     sel</span></span>
 <span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
-<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0xad0374f90&gt;</span></span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x767682a9a8&gt;</span></span>
 <span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>The line weight shifts each hybrid’s score by the weights of its two parents, and hybrids are taken greedily subject to the per-line usage cap – so the cap is satisfied <strong>by construction</strong> rather than by penalty. In detail:</p>
 <ol type="1">
@@ -1284,6 +1339,8 @@ window.Quarto = {
 <li>Check the returned plan before using it: realised <span class="math inline">\(\alpha\)</span> against the budget, <code>max_line</code>, <span class="math inline">\(N_{e,\text{par}}\)</span>, and the gap to the bound. The diversity constraint is a <strong>penalty</strong>, so a returned plan is not guaranteed feasible – the violation is only made expensive.</li>
 </ol>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>sel_de</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (ctx, n_sel, alpha_max, gd_ref, NP = 300, itermax = 2000, </span></span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     seeds = NULL, trace = FALSE, max_use = NULL) </span></span>
@@ -1302,10 +1359,13 @@ window.Quarto = {
 <span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         0.999, n_sel), control = ctrl)</span></span>
 <span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     decode(res$optim$bestmem, ctx$N, n_sel)</span></span>
 <span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
-<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0xac9c6b700&gt;</span></span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x767a1a4318&gt;</span></span>
 <span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>alpha_max <span class="ot">&lt;-</span> <span class="fl">0.01</span></span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">9</span>)</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>de_idx <span class="ot">&lt;-</span> <span class="fu">suppressWarnings</span>(</span>
@@ -1319,12 +1379,15 @@ window.Quarto = {
 <span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>      <span class="at">Ne_parents =</span> <span class="fu">ne_parents</span>(de_idx, ctx)), <span class="dv">3</span>)</span>
 <span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      index  alpha_pct budget_pct         Ns Ne_parents </span></span>
 <span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      1.330      0.978      1.000      0.738     22.857</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>The realised loss sits just inside the budget, which is the sign that the constraint is active and the penalty correctly scaled: with <code>penalty = 1000</code> multiplying the <em>absolute</em> violation, one tenth of a percentage point of excess loss costs a full index standard deviation. A plan that comes back well inside the budget at a low index usually means the opposite – that the penalty dominated and the search never approached the boundary.</p>
 <section id="the-warm-start-is-not-optional" class="level3" data-number="18.4.1">
 <h3 data-number="18.4.1" class="anchored" data-anchor-id="the-warm-start-is-not-optional"><span class="header-section-number">18.4.1</span> The warm start is not optional</h3>
 <p>The strong form of this claim was measured at the package’s own simulation scale – 2500 candidates from 50 + 50 lines, <span class="math inline">\(n = 100\)</span>, <span class="math inline">\(4.5 \times 10^5\)</span> evaluations, recorded as finding 7 of <code>README.md</code> – where a cold-started DE finishes <em>below</em> the greedy solutions it was supposed to improve on. That run is not reproduced here; this chapter runs 625 candidates and <span class="math inline">\(3 \times 10^4\)</span> evaluations, and the conclusion at this scale is weaker. What follows is the same comparison, measured rather than asserted.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>budget <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">NP =</span> <span class="dv">120</span>, <span class="at">itermax =</span> <span class="dv">250</span>)</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">21</span>)</span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>cold <span class="ot">&lt;-</span> <span class="fu">suppressWarnings</span>(</span>
@@ -1341,25 +1404,31 @@ window.Quarto = {
 <span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">`</span><span class="at">cold DE</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">mean_index</span>(cold, ctx),</span>
 <span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">best feasible greedy</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">mean_index</span>(feasible_greedy, ctx),</span>
 <span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">warm DE</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">mean_index</span>(de_idx, ctx))</span>
-<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>bp <span class="ot">&lt;-</span> <span class="fu">barplot</span>(res, <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"grey70"</span>, <span class="st">"#2166ac"</span>, <span class="st">"#b2182b"</span>), <span class="at">ylab =</span> <span class="st">"mean index (s.d.)"</span>,</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>bp <span class="ot">&lt;-</span> <span class="fu">barplot</span>(res, <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"grey70"</span>, <span class="st">"#1f5f8b"</span>, <span class="st">"#b2182b"</span>), <span class="at">ylab =</span> <span class="st">"mean index (s.d.)"</span>,</span>
 <span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>              <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">max</span>(res) <span class="sc">*</span> <span class="fl">1.2</span>))</span>
 <span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(bp, res, <span class="fu">sprintf</span>(<span class="st">"%.3f"</span>, res), <span class="at">pos =</span> <span class="dv">3</span>, <span class="at">cex =</span> <span class="fl">0.8</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="10-combinatorial-selection_files/figure-html/warm-start-1.png" class="img-fluid figure-img" width="1050"></p>
+<p><img src="10-combinatorial-selection_files/figure-html/warm-start-1.png" class="img-fluid figure-img" alt="With and without a greedy warm start, at identical evaluation budget, at book scale" width="1050"></p>
 <figcaption>With and without a greedy warm start, at identical evaluation budget, at book scale. The cold start finishes below the best feasible greedy solution; the warm start finishes above the cold start but does not overtake greedy at this budget.</figcaption>
 </figure>
 </div>
 </div>
 </div>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(res, <span class="dv">4</span>)</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;              cold DE best feasible greedy              warm DE </span></span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;               1.2289               1.3782               1.3299</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>One run of each is not a comparison. Three seeds, with the cold and warm arms branched off the <em>same</em> seed so that the two differ only in the initial population:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>reps <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">c</span>(<span class="dv">9</span>, <span class="dv">21</span>, <span class="dv">33</span>), <span class="cf">function</span>(sd_) {</span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(sd_)</span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  warm <span class="ot">&lt;-</span> <span class="fu">suppressWarnings</span>(</span>
@@ -1372,6 +1441,7 @@ window.Quarto = {
 <span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>             <span class="at">cold =</span> <span class="fu">mean_index</span>(cold, ctx))</span>
 <span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>}))</span>
 <span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(reps, <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1402,14 +1472,19 @@ window.Quarto = {
 </table>
 </div>
 </div>
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">c</span>(<span class="at">warm_mean =</span> <span class="fu">mean</span>(reps<span class="sc">$</span>warm), <span class="at">warm_sd =</span> <span class="fu">sd</span>(reps<span class="sc">$</span>warm),</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>      <span class="at">cold_mean =</span> <span class="fu">mean</span>(reps<span class="sc">$</span>cold), <span class="at">cold_sd =</span> <span class="fu">sd</span>(reps<span class="sc">$</span>cold)), <span class="dv">4</span>)</span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; warm_mean   warm_sd cold_mean   cold_sd </span></span>
 <span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    1.3303    0.0023    1.1965    0.0353</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>Result: over three seeds the warm start averages 1.33 with a standard deviation of 0.0023, the cold start 1.196 with 0.0353. Interpretation: the warm start is worth about 11% of mean index at equal evaluation budget, and rather more importantly it shrinks the run-to-run spread by an order of magnitude. A single cold run is not reportable: three cold runs span 0.07 index units against 0.004 for three warm ones – a spread that is 52% of the very difference being measured.</p>
 <p>What the warm start actually contains at this scale is worth looking at, because it is weaker than the name suggests:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">make_fitness</span>(ctx, n_sel, alpha_max, null<span class="sc">$</span>gd_ref)</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>seed_w <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">8</span>, <span class="dv">16</span>)        <span class="co"># the grid sel_de() hard-codes</span></span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>seeds <span class="ot">&lt;-</span> <span class="fu">lapply</span>(seed_w, <span class="cf">function</span>(w) <span class="fu">sel_greedy</span>(ctx, n_sel, <span class="at">w =</span> w))</span>
@@ -1419,6 +1494,7 @@ window.Quarto = {
 <span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">alpha_pct =</span> <span class="dv">100</span> <span class="sc">*</span> <span class="fu">vapply</span>(seeds, alpha_loss, <span class="fu">numeric</span>(<span class="dv">1</span>), <span class="at">ctx =</span> ctx,</span>
 <span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>                           <span class="at">gd_ref =</span> null<span class="sc">$</span>gd_ref),</span>
 <span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">fitness   =</span> <span class="fu">vapply</span>(seeds, <span class="cf">function</span>(s) <span class="fu">fit</span>(s <span class="sc">+</span> <span class="fl">0.5</span>), <span class="fu">numeric</span>(<span class="dv">1</span>))), <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1493,6 +1569,8 @@ window.Quarto = {
 <h3 data-number="18.4.2" class="anchored" data-anchor-id="checking-convergence-against-the-bound"><span class="header-section-number">18.4.2</span> Checking convergence against the bound</h3>
 <p><a href="09-optimal-contributions.html#sec-relaxation" class="quarto-xref"><span>Section 17.2.1</span></a> gives a relaxation. Turning it into a <em>bound</em> takes one more step, derived in <a href="10b-advanced-selection.html#sec-bound" class="quarto-xref"><span>Section 19.4</span></a>: the relaxation at a given <span class="math inline">\(\lambda\)</span> maximises a penalised objective rather than the index, so the best relaxation point inside the budget is not an upper bound on the best plan inside the budget. The Lagrangian combination is.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>relax <span class="ot">&lt;-</span> <span class="fu">ocs_relaxation</span>(ctx, n_sel, <span class="at">lambdas =</span> <span class="dv">10</span><span class="sc">^</span><span class="fu">seq</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="fl">2.5</span>, <span class="at">length.out =</span> <span class="dv">10</span>))</span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>a_relax <span class="ot">&lt;-</span> (null<span class="sc">$</span>gd_ref <span class="sc">-</span> relax[, <span class="st">"GD"</span>]) <span class="sc">/</span> null<span class="sc">$</span>gd_ref</span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1503,6 +1581,7 @@ window.Quarto = {
 <span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">gap_pct =</span> <span class="dv">100</span> <span class="sc">*</span> (<span class="fu">as.numeric</span>(bound) <span class="sc">-</span> <span class="fu">mean_index</span>(de_idx, ctx)) <span class="sc">/</span> <span class="fu">as.numeric</span>(bound))</span>
 <span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    DE_index upper_bound     gap_pct </span></span>
 <span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    1.329921    1.553244   14.377862</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>The four steps behind that one call, and the check that has to accompany it:</p>
 <ol type="1">
@@ -1512,6 +1591,8 @@ window.Quarto = {
 <li><code>ocs_bound()</code> doubles its iteration count until the value stops moving and records whether it succeeded. <strong>Read that flag before quoting any gap</strong>: an under-converged relaxation reports <span class="math inline">\(V(\lambda)\)</span> too small, which makes the “bound” too small, and then it is not a bound at all (<a href="10b-advanced-selection.html#sec-scaling" class="quarto-xref"><span>Section 19.7</span></a>).</li>
 </ol>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">lambda_star =</span> <span class="fu">attr</span>(bound, <span class="st">"lambda"</span>),</span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">iterations  =</span> <span class="fu">attr</span>(bound, <span class="st">"iters"</span>),</span>
 <span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">theta_max   =</span> <span class="dv">1</span> <span class="sc">-</span> null<span class="sc">$</span>gd_ref <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> alpha_max))</span>
@@ -1519,9 +1600,10 @@ window.Quarto = {
 <span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   68.1292069 8000.0000000    0.6774198</span></span>
 <span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a><span class="fu">attr</span>(bound, <span class="st">"converged"</span>)</span>
 <span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>A large gap means <strong>the optimiser has not converged</strong>, not that the problem is intrinsically hard. A small gap means further optimiser effort is wasted. The gap here is 14.4%, against a bound the function certifies as converged; <a href="10b-advanced-selection.html" class="quarto-xref"><span>Chapter 19</span></a> closes most of it at the same budget with a cheaper move, which settles which of the two readings applies.</p>
-<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout callout-style-simple callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -1541,6 +1623,8 @@ window.Quarto = {
 <h2 data-number="18.5" class="anchored" data-anchor-id="the-full-frontier"><span class="header-section-number">18.5</span> The full frontier</h2>
 <p>One optimisation per budget, which is the epsilon-constraint method: each point is a plan that can be put in front of a committee, described by the budget it respects rather than by an exchange rate nobody can interpret.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>alphas <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.0025</span>, <span class="fl">0.005</span>, <span class="fl">0.01</span>, <span class="fl">0.02</span>)</span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">45</span>)</span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>front <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(alphas, <span class="cf">function</span>(a) {</span>
@@ -1553,25 +1637,29 @@ window.Quarto = {
 <span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"gene diversity loss, alpha (%)"</span>, <span class="at">ylab =</span> <span class="st">"mean index (s.d.)"</span>,</span>
 <span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlim =</span> <span class="fu">range</span>(<span class="fu">c</span>(front<span class="sc">$</span>alpha, gf<span class="sc">$</span>alpha, a_relax) <span class="sc">*</span> <span class="dv">100</span>),</span>
 <span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylim =</span> <span class="fu">range</span>(<span class="fu">c</span>(front<span class="sc">$</span>index, gf<span class="sc">$</span>index, relax[, <span class="st">"index"</span>])))</span>
-<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(gf<span class="sc">$</span>alpha <span class="sc">*</span> <span class="dv">100</span>, gf<span class="sc">$</span>index, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">pch =</span> <span class="dv">17</span>, <span class="at">col =</span> <span class="st">"#2166ac"</span>, <span class="at">cex =</span> <span class="fl">0.7</span>)</span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(gf<span class="sc">$</span>alpha <span class="sc">*</span> <span class="dv">100</span>, gf<span class="sc">$</span>index, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">pch =</span> <span class="dv">17</span>, <span class="at">col =</span> <span class="st">"#1f5f8b"</span>, <span class="at">cex =</span> <span class="fl">0.7</span>)</span>
 <span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="fu">sort</span>(a_relax) <span class="sc">*</span> <span class="dv">100</span>, relax[<span class="fu">order</span>(a_relax), <span class="st">"index"</span>], <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">pch =</span> <span class="dv">1</span>,</span>
 <span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>      <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">"grey55"</span>, <span class="at">cex =</span> <span class="fl">0.7</span>)</span>
 <span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="dv">0</span>, <span class="at">lty =</span> <span class="dv">3</span>)</span>
 <span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"bottomright"</span>, <span class="fu">c</span>(<span class="st">"constrained DE"</span>, <span class="st">"greedy sweep"</span>, <span class="st">"continuous OCS relaxation"</span>),</span>
-<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"#b2182b"</span>, <span class="st">"#2166ac"</span>, <span class="st">"grey55"</span>), <span class="at">pch =</span> <span class="fu">c</span>(<span class="dv">19</span>, <span class="dv">17</span>, <span class="dv">1</span>),</span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"#b2182b"</span>, <span class="st">"#1f5f8b"</span>, <span class="st">"grey55"</span>), <span class="at">pch =</span> <span class="fu">c</span>(<span class="dv">19</span>, <span class="dv">17</span>, <span class="dv">1</span>),</span>
 <span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a>       <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>), <span class="at">lwd =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">1</span>), <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">cex =</span> <span class="fl">0.8</span>)</span>
 <span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a><span class="fu">grid</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="10-combinatorial-selection_files/figure-html/full-frontier-1.png" class="img-fluid figure-img" width="1050"></p>
+<p><img src="10-combinatorial-selection_files/figure-html/full-frontier-1.png" class="img-fluid figure-img" alt="Everything together" width="1050"></p>
 <figcaption>Everything together. The constrained DE, the greedy sweep, and the continuous OCS relaxation – which is a relaxation, not a bound at matched diversity (<a href="10b-advanced-selection.html#sec-bound" class="quarto-xref"><span>Section 19.4</span></a>).</figcaption>
 </figure>
 </div>
 </div>
 </div>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(front, <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1620,6 +1708,8 @@ window.Quarto = {
 </div>
 </div>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>best_greedy <span class="ot">&lt;-</span> <span class="fu">vapply</span>(front<span class="sc">$</span>alpha_max, <span class="cf">function</span>(a) {</span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  ok <span class="ot">&lt;-</span> gf<span class="sc">$</span>alpha <span class="sc">&lt;=</span> a</span>
 <span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">any</span>(ok)) <span class="fu">max</span>(gf<span class="sc">$</span>index[ok]) <span class="cf">else</span> <span class="cn">NA_real_</span></span>
@@ -1627,6 +1717,7 @@ window.Quarto = {
 <span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">data.frame</span>(<span class="at">alpha_max =</span> front<span class="sc">$</span>alpha_max, <span class="at">DE =</span> front<span class="sc">$</span>index,</span>
 <span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">greedy_sweep =</span> best_greedy,</span>
 <span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>               <span class="at">DE_minus_greedy =</span> front<span class="sc">$</span>index <span class="sc">-</span> best_greedy), <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">

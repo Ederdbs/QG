@@ -1034,6 +1034,7 @@ fmt(fit_m, 5)
 ```{r}
 #| label: fig-era-lens-divergence
 #| fig-cap: "The two lenses on one heterotic pool over 12 cycles, averaged over 20 replicates, against a base frozen at cycle 0. Left: a crossing block of 50 plants (100 gametes per cycle). Centre: the same 50 lines re-derived as doubled haploids (50 allele copies per cycle), which drifts at twice the rate. In both, the closed form 1 - (1 - 1/n_gam)^t is the dashed line and the two lenses sit on it. Right: the crossing block with every frequency moved 5% toward 0.5 before each drift step, where the homozygosity lens reports a gain of heterozygosity against the frozen base while the drift lens reports more than twice the neutral rate; the dashed line is the same neutral closed form, here a reference both lenses leave. Nothing is selected in any panel; the divergence in the right-hand panel is produced by the management rule alone."
+#| fig-alt: "The two lenses on one heterotic pool over 12 cycles, averaged over 20 replicates, against a base frozen at cycle 0. Left: a crossing block of 50 plants (100 gametes per cycle)"
 #| fig-width: 9
 #| fig-height: 3.4
 arms <- list(`crossing block` = block, `DH pool` = dh, `pull toward 0.5` = managed)
@@ -1043,12 +1044,12 @@ for (nm in names(arms)) {
   plot(a$cycle, a$F_drift, type = "b", pch = 19, col = "#b2182b",
        ylim = c(-0.42, 0.26), xlab = "cycle", ylab = "F against frozen p0",
        main = nm)
-  lines(a$cycle, a$F_hom, type = "b", pch = 17, col = "#2166ac")
+  lines(a$cycle, a$F_hom, type = "b", pch = 17, col = "#1f5f8b")
   lines(a$cycle, a$expected, lty = 2, col = "grey40")
   abline(h = 0, col = "grey70")
   legend("bottomleft", c("F_drift", "F_hom", "closed form"), bty = "n",
          cex = 0.75, pch = c(19, 17, NA), lty = c(NA, NA, 2),
-         col = c("#b2182b", "#2166ac", "grey40"))
+         col = c("#b2182b", "#1f5f8b", "grey40"))
 }
 par(op)
 ```

@@ -101,6 +101,7 @@ at 40 x 40 so that individual cells can be seen:
 #| fig-width: 9
 #| fig-height: 3.4
 #| fig-cap: "Three samples of the same 40 x 40 factorial, drawn by the package's own generators. Rows are pool-A lines, columns pool-B lines, a filled cell is a cross that goes to the field. Left: two testers per pool (156 crosses). Centre: a circulant sparse factorial with four crosses per line (160 crosses). Right: North Carolina Design II as four disconnected 10 x 10 blocks (400 crosses)."
+#| fig-alt: "Three samples of the same 40 x 40 factorial, drawn by the package's own generators"
 set.seed(3)
 grids <- list("Tester, k = 2"     = design_tester(40, 40, k = 2),
               "Circulant, c = 4"  = design_circulant(40, 40, c = 4),
@@ -109,7 +110,7 @@ op <- par(mfrow = c(1, 3), mar = c(1, 1, 2.2, 1))
 for (nm in names(grids)) {
   M <- matrix(0, 40, 40)
   M[cbind(grids[[nm]]$parent1, grids[[nm]]$parent2)] <- 1
-  image(t(M[40:1, ]), col = c("grey96", "#1b6ca8"), axes = FALSE,
+  image(t(M[40:1, ]), col = c("grey96", "#1f5f8b"), axes = FALSE,
         main = sprintf("%s  (%d crosses)", nm, nrow(grids[[nm]])), cex.main = 0.9)
   box(col = "grey60")
 }
@@ -337,6 +338,7 @@ assumes:
 ```{r}
 #| label: fig-mating-testers
 #| fig-cap: "GCA accuracy of a k-tester design against the number of testers, at one and two plots per testcross. Lines: the closed form of @tbl-mating-quantities. Points: least-squares estimates from `fit_gca()` on the 200 x 200 running example, mean of 12 replicates with the truth redrawn each time; bars are two standard errors."
+#| fig-alt: "GCA accuracy of a k-tester design against the number of testers, at one and two plots per testcross"
 set.seed(42)
 tester_mc <- do.call(rbind, lapply(c(1, 2, 3, 4, 8), function(k) {
   do.call(rbind, lapply(1:2, function(r) {
@@ -354,7 +356,7 @@ tester_mc <- do.call(rbind, lapply(c(1, 2, 3, 4, 8), function(k) {
 kk <- seq(1, 8, by = 0.1)
 plot(NA, xlim = c(1, 8), ylim = c(0.3, 0.9), xlab = "testers per pool, k",
      ylab = "GCA accuracy (all 200 lines)", las = 1)
-cols <- c("#1b6ca8", "#b2182b")
+cols <- c("#1f5f8b", "#b2182b")
 for (r in 1:2) {
   lines(kk, gca_accuracy_theory(kk, r, (vc$A + vc$B) / 2, vc$S, s2e),
         col = cols[r], lwd = 2)
@@ -494,7 +496,7 @@ from 1 to 4 helped most exactly there.
 The cached sweep puts every design at the same three plot budgets and scores GCA
 accuracy over all 200 candidates per pool, analysed by phenotypic BLUP:
 
-![GCA accuracy against the number of distinct hybrids in the field, one line per design family, panelled by plot budget. Cached from the `sparsex` sweep: 30 replicates per cell, phenotypic BLUP, accuracy over all 200 candidates per pool.](figs/mating_acc_vs_hybrids.png){#fig-mating-acc-hybrids width=100%}
+![GCA accuracy against the number of distinct hybrids in the field, one line per design family, panelled by plot budget. Cached from the `sparsex` sweep: 30 replicates per cell, phenotypic BLUP, accuracy over all 200 candidates per pool.](figs/mating_acc_vs_hybrids.png){fig-alt="GCA accuracy against the number of distinct hybrids in the field, one line per design family, panelled by plot budget" #fig-mating-acc-hybrids width=100%}
 
 ```{r}
 #| label: tbl-mating-h2h
@@ -555,7 +557,7 @@ accuracy target, not by a universal threshold.
 
 ### Crosses per line, and structure versus randomness
 
-![GCA accuracy against crosses per line $c$, separating circulant (structured) from random sparse layouts. Cached from the `sparsex` sweep.](figs/mating_acc_vs_c.png){#fig-mating-acc-c width=100%}
+![GCA accuracy against crosses per line $c$, separating circulant (structured) from random sparse layouts. Cached from the `sparsex` sweep.](figs/mating_acc_vs_c.png){fig-alt="GCA accuracy against crosses per line , separating circulant (structured) from random sparse layouts" #fig-mating-acc-c width=100%}
 
 The literature leaves one comparison open: structured against random layouts at
 matched $c$ [@weeks1964 and @fernando1983 supply the tools; no retrieved design
@@ -726,7 +728,7 @@ concrete.
 
 ### The negative result
 
-![Genomic against phenotypic BLUP by design (left) and the genomic accuracy for hybrids whose parents were never crossed (right). Cached from the `sparsex` sweep, 2,000 plots.](figs/mating_genomic_tlevel.png){#fig-mating-genomic width=100%}
+![Genomic against phenotypic BLUP by design (left) and the genomic accuracy for hybrids whose parents were never crossed (right). Cached from the `sparsex` sweep, 2,000 plots.](figs/mating_genomic_tlevel.png){fig-alt="Genomic against phenotypic BLUP by design (left) and the genomic accuracy for hybrids whose parents were never crossed (right)" #fig-mating-genomic width=100%}
 
 ```{r}
 #| label: tbl-mating-gblup
@@ -896,9 +898,9 @@ raising $c$ raises $\rho$ but, at fixed budget, lowers the number of lines teste
 and with it the selection intensity $i$. It scores $\rho$ with the least-squares
 closed form, so it is conservative for sparse designs.
 
-![Left: expected response per unit cost by design. Right: the best feasible configuration at each total budget. Cached from the `sparsex` optimiser; cost levels are placeholders.](figs/mating_gain_per_cost.png){#fig-mating-gain-cost width=100%}
+![Left: expected response per unit cost by design. Right: the best feasible configuration at each total budget. Cached from the `sparsex` optimiser; cost levels are placeholders.](figs/mating_gain_per_cost.png){fig-alt="Left: expected response per unit cost by design" #fig-mating-gain-cost width=100%}
 
-![The optimiser's budget frontier. Cached from the `sparsex` optimiser.](figs/mating_frontier.png){#fig-mating-frontier width=100%}
+![The optimiser's budget frontier. Cached from the `sparsex` optimiser.](figs/mating_frontier.png){fig-alt="The optimiser's budget frontier" #fig-mating-frontier width=100%}
 
 ```{r}
 #| label: tbl-mating-frontier
@@ -939,6 +941,7 @@ The chapter collapses into a procedure a breeder can apply in a planning meeting
 #| fig-width: 9
 #| fig-height: 5.2
 #| fig-cap: "A decision procedure for the crossing plan of a two-pool programme. Each question is answered by a section of this chapter."
+#| fig-alt: "A decision procedure for the crossing plan of a two-pool programme"
 op <- par(mar = c(0, 0, 0, 0)); plot.new(); plot.window(c(0, 100), c(0, 62))
 node <- function(x, y, lab, fill, w = 26, h = 8) {
   rect(x - w / 2, y - h / 2, x + w / 2, y + h / 2, col = fill, border = "grey40")

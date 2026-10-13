@@ -92,20 +92,21 @@ div.csl-indent {
 <meta name="quarto:offset" content="./">
 <link href="./12-case-study.html" rel="next">
 <link href="./11b-diversity-across-cycles.html" rel="prev">
+<link href="./favicon.svg" rel="icon" type="image/svg+xml">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9ef9d4760de657dc918b81d25b42b59f.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-58115a419e540697b7ccd904e8efcd2d.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9ef9d4760de657dc918b81d25b42b59f.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-37a0ccb6f5b9899fcb884e11bb6f7458.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-da8b26c7a017495cabf78e5d2792d1d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-b192ecda6a457e66a32e528cd3cc1fbc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-da8b26c7a017495cabf78e5d2792d1d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -670,6 +671,8 @@ window.Quarto = {
 <p>with a half-life of about <span class="math inline">\(1.4 N_e\)</span> generations. The result is the theoretical ancestor of every optimal-contribution scheme in this book: it is <em>why</em> <span class="math inline">\(N_e\)</span> is the thing to manage, and it says exactly what a unit of <span class="math inline">\(N_e\)</span> is worth in units of cumulative gain.</p>
 <p>Both inputs are already in <a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 21</span></a>’ trajectory. <span class="math inline">\(R_1\)</span> is the first cycle’s response, and <span class="math inline">\(N_e\)</span> comes from the rate of inbreeding, exactly as <a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 21</span></a> computed it:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>rob <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">unique</span>(traj<span class="sc">$</span>budget), <span class="cf">function</span>(b) {</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  d  <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(<span class="fu">cbind</span>(index, F_drift) <span class="sc">~</span> cycle, traj[traj<span class="sc">$</span>budget <span class="sc">==</span> b, ], mean)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  f  <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="fu">log</span>(<span class="dv">1</span> <span class="sc">-</span> F_drift) <span class="sc">~</span> cycle, d[<span class="sc">-</span><span class="dv">1</span>, ])</span>
@@ -681,6 +684,7 @@ window.Quarto = {
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>             <span class="at">predicted_15 =</span> <span class="dv">2</span> <span class="sc">*</span> Ne <span class="sc">*</span> R1 <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="dv">1</span> <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> Ne))<span class="sc">^</span><span class="dv">15</span>))</span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>}))</span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(rob, <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -749,7 +753,7 @@ window.Quarto = {
 <p>For the tightest budget the prediction is 10.03 and the observation is 9.98. Robertson’s theory, published in 1960 and derived for a single locus under idealised drift, predicts fifteen cycles of a genomic hybrid programme to better than one percent.</p>
 <p>For the unconstrained programme it predicts 15.69 against an observed 7.81 – too high by about half.</p>
 <p>The theory did not fail arbitrarily, and <a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 21</span></a> already said why. Robertson assumes a <em>constant</em> rate of inbreeding, and the regression of <span class="math inline">\(\log(1-F)\)</span> on cycle is where that assumption is testable. Its <span class="math inline">\(R^2\)</span> is 0.998 for the tightest budget and 0.853 for the unconstrained run, whose drift decelerates because there is progressively less left to lose. That low <span class="math inline">\(R^2\)</span> is not a nuisance. It is the theory declining to apply, in advance, and in a column you can read before you trust the number.</p>
-<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout callout-style-simple callout-important callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -776,12 +780,15 @@ window.Quarto = {
 <h3 data-number="22.3.1" class="anchored" data-anchor-id="the-experiment"><span class="header-section-number">22.3.1</span> The experiment</h3>
 <p>The gap <span class="math inline">\(\operatorname{Var}(\mathbf{X}\boldsymbol\beta) - V_{\text{genic}}\)</span> is <strong>not</strong> on its own a measure of the Bulmer effect. A finite founder base leaves disequilibrium in the very first cycle, and two divergent pools add more. So the comparison is against a control: an arm identical in every respect – same founders, same seeds, same recycling, same population sizes – in which the hybrids are chosen at random instead of on the index.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>gapc <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(gap <span class="sc">~</span> regime <span class="sc">+</span> cycle, vr, mean)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>w <span class="ot">&lt;-</span> <span class="fu">reshape</span>(gapc, <span class="at">idvar =</span> <span class="st">"cycle"</span>, <span class="at">timevar =</span> <span class="st">"regime"</span>, <span class="at">direction =</span> <span class="st">"wide"</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(w) <span class="ot">&lt;-</span> <span class="fu">sub</span>(<span class="st">"gap."</span>, <span class="st">""</span>, <span class="fu">names</span>(w))</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>w<span class="sc">$</span>selection_effect <span class="ot">&lt;-</span> w<span class="sc">$</span>unconstrained <span class="sc">-</span> w<span class="sc">$</span>random</span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">head</span>(w[, <span class="fu">c</span>(<span class="st">"cycle"</span>, <span class="st">"random"</span>, <span class="st">"unconstrained"</span>, <span class="st">"constrained"</span>,</span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>               <span class="st">"selection_effect"</span>)], <span class="dv">7</span>), <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -860,6 +867,8 @@ window.Quarto = {
 <p>Cycle 0 is identical across all three arms, to the digit. Nothing has been selected yet, so the control is doing its job.</p>
 <p>From cycle 1 the arms separate. Paired within seed and cycle:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>p  <span class="ot">&lt;-</span> <span class="fu">reshape</span>(<span class="fu">aggregate</span>(gap <span class="sc">~</span> regime <span class="sc">+</span> seed <span class="sc">+</span> cycle, vr, mean),</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>              <span class="at">idvar =</span> <span class="fu">c</span>(<span class="st">"seed"</span>, <span class="st">"cycle"</span>), <span class="at">timevar =</span> <span class="st">"regime"</span>, <span class="at">direction =</span> <span class="st">"wide"</span>)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>p  <span class="ot">&lt;-</span> p[p<span class="sc">$</span>cycle <span class="sc">&gt;</span> <span class="dv">0</span>, ]</span>
@@ -868,8 +877,9 @@ window.Quarto = {
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">t =</span> <span class="fu">mean</span>(dd) <span class="sc">/</span> (<span class="fu">sd</span>(dd) <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">length</span>(dd))), <span class="at">n_pairs =</span> <span class="fu">length</span>(dd))</span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; mean_effect          se           t     n_pairs </span></span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; -0.08568088  0.02108980 -4.06266819 96.00000000</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
-<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout callout-style-simple callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -889,6 +899,8 @@ window.Quarto = {
 <h3 data-number="22.3.2" class="anchored" data-anchor-id="with-real-linkage"><span class="header-section-number">22.3.2</span> With real linkage</h3>
 <p>The same question with real meiosis behind it. <a href="04c-alphasimr-pipeline.html" class="quarto-xref"><span>Chapter 7</span></a>’s reciprocal recurrent selection runs on a coalescent founder history with a genetic map, and AlphaSimR reports <code>varA</code> (which carries the disequilibrium) and <code>genicVarA</code> (which does not), so this arm needs no variance code of its own.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>lk<span class="sc">$</span>rel <span class="ot">&lt;-</span> ((lk<span class="sc">$</span>varA_A <span class="sc">-</span> lk<span class="sc">$</span>genicVarA_A) <span class="sc">+</span> (lk<span class="sc">$</span>varA_B <span class="sc">-</span> lk<span class="sc">$</span>genicVarA_B)) <span class="sc">/</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>          (lk<span class="sc">$</span>genicVarA_A <span class="sc">+</span> lk<span class="sc">$</span>genicVarA_B)</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>pl  <span class="ot">&lt;-</span> <span class="fu">reshape</span>(lk[, <span class="fu">c</span>(<span class="st">"regime"</span>, <span class="st">"seed"</span>, <span class="st">"cycle"</span>, <span class="st">"rel"</span>)],</span>
@@ -899,9 +911,10 @@ window.Quarto = {
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">t =</span> <span class="fu">mean</span>(ddl) <span class="sc">/</span> (<span class="fu">sd</span>(ddl) <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">length</span>(ddl))), <span class="at">n_pairs =</span> <span class="fu">length</span>(ddl))</span>
 <span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; mean_effect          se           t     n_pairs </span></span>
 <span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; -0.16493928  0.04672916 -3.52968674 32.00000000</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>Same sign, larger in magnitude, and measured with fewer replicates so the evidence is weaker. Linkage does what linkage should: it slows the decay, so the disequilibrium selection creates persists longer than it does under free recombination.</p>
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-simple callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>

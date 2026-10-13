@@ -73,20 +73,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta name="quarto:offset" content="./">
 <link href="./04c-alphasimr-pipeline.html" rel="next">
 <link href="./04-population-sizing.html" rel="prev">
+<link href="./favicon.svg" rel="icon" type="image/svg+xml">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9ef9d4760de657dc918b81d25b42b59f.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-58115a419e540697b7ccd904e8efcd2d.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9ef9d4760de657dc918b81d25b42b59f.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-37a0ccb6f5b9899fcb884e11bb6f7458.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-da8b26c7a017495cabf78e5d2792d1d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-b192ecda6a457e66a32e528cd3cc1fbc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-da8b26c7a017495cabf78e5d2792d1d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -650,10 +651,10 @@ window.Quarto = {
 <p>Before any sizing question can be asked, the crossing operations have to be unambiguous – which plant is pollinated by which, and what is genotyped at each step.</p>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
-<div id="fig-bc-flow" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<div id="fig-bc-flow" class="quarto-float quarto-figure quarto-figure-center anchored" alt="The MABC operation" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-bc-flow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="04b-backcross-introgression_files/figure-html/fig-bc-flow-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="1500">
+<img src="04b-backcross-introgression_files/figure-html/fig-bc-flow-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="The MABC operation" width="1500">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bc-flow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;6.1: The MABC operation. Left column: the cross made in each generation. Right column: what is genotyped and selected on, and the population size that criterion demands. The recurrent parent E re-enters at every backcross; the fork at the bottom is the fixation step, where doubled haploids and selfing differ by more than an order of magnitude in plants required.
@@ -682,9 +683,12 @@ P_{\text{same}} = \frac{e^{-L}}{\bigl(1 + e^{-2L}\bigr)/2},
 \qquad L = d/100 \text{ Morgans}.
 \]</span></p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(<span class="at">d_cM =</span> <span class="fu">c</span>(<span class="dv">20</span>, <span class="dv">60</span>, <span class="dv">400</span>),</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>           <span class="at">naive =</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="fu">c</span>(<span class="dv">20</span>, <span class="dv">60</span>, <span class="dv">400</span>) <span class="sc">/</span> <span class="dv">100</span>),</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">conditional =</span> <span class="fu">p_same_segment</span>(<span class="fu">c</span>(<span class="dv">20</span>, <span class="dv">60</span>, <span class="dv">400</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -717,7 +721,7 @@ P_{\text{same}} = \frac{e^{-L}}{\bigl(1 + e^{-2L}\bigr)/2},
 </div>
 </div>
 <p>At 20 cM that is 0.98 against a naive 0.82. Published stacking simulations get this wrong often enough that it is worth stating separately.</p>
-<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout callout-style-simple callout-important callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -736,8 +740,11 @@ P_{\text{same}} = \frac{e^{-L}}{\bigl(1 + e^{-2L}\bigr)/2},
 <p>A conversion programme is usually written with three success conditions at BC3: do not lose the genes, recover the recurrent parent, and do not drag a chunk of donor chromosome along with each target. They are not remotely equal in cost.</p>
 <p><strong>Not losing the genes</strong> is exact and cheap. A plant is foreground-positive with probability <span class="math inline">\(q = (1/2)^k\)</span>, so <span class="math inline">\(n\)</span> plants fail with probability <span class="math inline">\((1-q)^n\)</span>:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(<span class="at">genes =</span> mb_sz<span class="sc">$</span>genes, <span class="at">q =</span> mb_sz<span class="sc">$</span>q_foreground,</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>           <span class="at">n_BC_per_gen =</span> <span class="fu">vapply</span>(mb_sz<span class="sc">$</span>q_foreground, n_for_count, <span class="fu">integer</span>(<span class="dv">1</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -828,7 +835,7 @@ P_{\text{same}} = \frac{e^{-L}}{\bigl(1 + e^{-2L}\bigr)/2},
 </div>
 </div>
 <p>That leaves <strong>linkage drag</strong> – the donor chromosome still attached to each target – as the only criterion that a large population can buy. It is the criterion the rest of the chapter is about.</p>
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-simple callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -878,10 +885,10 @@ P_{\text{same}} = \frac{e^{-L}}{\bigl(1 + e^{-2L}\bigr)/2},
 <p><code>rec_bg</code> is the natural-looking two-stage rule: truncate on drag, then pick the cleanest background among the survivors. Stage 2 discards stage 1. The plant with the least drag survives the truncation and then loses to a sibling that happens to carry less donor genome somewhere irrelevant.</p>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
-<div id="fig-bc-index" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<div id="fig-bc-index" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Paired comparison (common random numbers, 300 replicates, s = 0.60) of the two-stage background-priority index against the drag-priority index" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-bc-index-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="04b-backcross-introgression_files/figure-html/fig-bc-index-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="1350">
+<img src="04b-backcross-introgression_files/figure-html/fig-bc-index-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Paired comparison (common random numbers, 300 replicates, s = 0.60) of the two-stage background-priority index against the drag-priority index" width="1350">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bc-index-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;6.2: Paired comparison (common random numbers, 300 replicates, s = 0.60) of the two-stage background-priority index against the drag-priority index. Bars are Clopper-Pearson 95% intervals. The criterion is drag &lt;= 30 cM per gene AND IBD &gt;= 0.90 at BC3.
@@ -997,10 +1004,10 @@ Figure&nbsp;6.2: Paired comparison (common random numbers, 300 replicates, s = 0
 <h2 data-number="6.5" class="anchored" data-anchor-id="how-long-to-keep-selecting-recombinants"><span class="header-section-number">6.5</span> How long to keep selecting recombinants</h2>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
-<div id="fig-bc-policies" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<div id="fig-bc-policies" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Linkage drag at BC3 (left) and probability of meeting the ceiling (right) under the four policies, s = 0.60. Solid = 1 gene, dashed = 3 genes" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-bc-policies-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="figs/mabc_policies.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="405">
+<img src="figs/mabc_policies.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Linkage drag at BC3 (left) and probability of meeting the ceiling (right) under the four policies, s = 0.60. Solid = 1 gene, dashed = 3 genes" width="405">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bc-policies-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;6.3: Linkage drag at BC3 (left) and probability of meeting the ceiling (right) under the four policies, s = 0.60. Solid = 1 gene, dashed = 3 genes. Extending recombinant selection into BC3 costs no extra plants, only the flanking markers on plants that are being genotyped anyway.
@@ -1016,10 +1023,10 @@ Figure&nbsp;6.3: Linkage drag at BC3 (left) and probability of meeting the ceili
 <p>Given a total number of plants to grow, how should they be split between the three backcrosses?</p>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
-<div id="fig-bc-alloc" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<div id="fig-bc-alloc" class="quarto-float quarto-figure quarto-figure-center anchored" alt="P(criterion met) against the share of a fixed budget spent early, for 1 and 3 genes, binned by total plants" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-bc-alloc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="04b-backcross-introgression_files/figure-html/fig-bc-alloc-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="1350">
+<img src="04b-backcross-introgression_files/figure-html/fig-bc-alloc-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="P(criterion met) against the share of a fixed budget spent early, for 1 and 3 genes, binned by total plants" width="1350">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bc-alloc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;6.4: P(criterion met) against the share of a fixed budget spent early, for 1 and 3 genes, binned by total plants. Front-loading BC1 is the worst use of a fixed budget.
@@ -1171,10 +1178,10 @@ Figure&nbsp;6.4: P(criterion met) against the share of a fixed budget spent earl
 </div>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
-<div id="fig-bc-f2" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<div id="fig-bc-f2" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Points: simulation" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-bc-f2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="04b-backcross-introgression_files/figure-html/fig-bc-f2-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="1200">
+<img src="04b-backcross-introgression_files/figure-html/fig-bc-f2-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Points: simulation" width="1200">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bc-f2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;6.5: Points: simulation. Dashed: the cumulative binomial. Log scale. Each extra gene multiplies the BC3F2 requirement by four.
@@ -1185,10 +1192,10 @@ Figure&nbsp;6.5: Points: simulation. Dashed: the cumulative binomial. Log scale.
 </div>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
-<div id="fig-bc-sizing" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<div id="fig-bc-sizing" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Analytical sizing by stage, log scale" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-bc-sizing-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="figs/mabc_sizing.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="387">
+<img src="figs/mabc_sizing.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Analytical sizing by stage, log scale" width="387">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bc-sizing-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;6.6: Analytical sizing by stage, log scale. The two blue bars are backcross generations; red is fixation by selfing; green is fixation by doubled haploids.
@@ -1205,6 +1212,8 @@ Figure&nbsp;6.6: Analytical sizing by stage, log scale. The two blue bars are ba
 <p>Everything above is reproducible from the package. The engine and the decision layer are in <code>R/08_mabc.R</code>; the experiment driver that produced the cached tables is <code>inst/scripts/run_mabc.R</code>.</p>
 <p><strong>One programme, interactively.</strong> Build a map, place the targets, draw the donor-elite sharing, and run the three backcrosses:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>map <span class="ot">&lt;-</span> <span class="fu">build_map</span>(maize_chr_len, <span class="at">spacing_cM =</span> <span class="dv">5</span>)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>w   <span class="ot">&lt;-</span> <span class="fu">marker_weights</span>(map)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>tg  <span class="ot">&lt;-</span> <span class="fu">target_indices</span>(map, <span class="at">k =</span> <span class="dv">3</span>)              <span class="co"># the first three of maize_targets</span></span>
@@ -1214,6 +1223,7 @@ Figure&nbsp;6.6: Analytical sizing by stage, log scale. The two blue bars are ba
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>                     <span class="at">strategy =</span> <span class="st">"rec_drag"</span>, <span class="at">map =</span> map, <span class="at">opt =</span> mabc_opt,</span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>                     <span class="at">tg =</span> tg, <span class="at">w =</span> w, <span class="at">shared =</span> sh)</span>
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(pr<span class="sc">$</span>traj, <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1264,6 +1274,8 @@ Figure&nbsp;6.6: Analytical sizing by stage, log scale. The two blue bars are ba
 <p><code>n_sched</code> is the schedule, one entry per backcross, so <code>c(300, 40, 20)</code> and <code>c(120, 120, 120)</code> are the two allocations compared above. Passing the same <code>shared</code> mask to two calls is what makes a comparison between selection indices paired rather than confounded with the donor-elite pair.</p>
 <p><strong>Comparing indices on common random numbers.</strong> Reset the seed before each strategy so the two programmes see the same meioses:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>drag_of <span class="ot">&lt;-</span> <span class="cf">function</span>(strategy) {</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(<span class="dv">7</span>)</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">run_bc_program</span>(<span class="fu">c</span>(<span class="dv">120</span>, <span class="dv">120</span>, <span class="dv">120</span>), <span class="fl">0.60</span>, strategy, map, mabc_opt, tg, w,</span>
@@ -1272,11 +1284,15 @@ Figure&nbsp;6.6: Analytical sizing by stage, log scale. The two blue bars are ba
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">rec_bg =</span> <span class="fu">drag_of</span>(<span class="st">"rec_bg"</span>), <span class="at">rec_drag =</span> <span class="fu">drag_of</span>(<span class="st">"rec_drag"</span>))</span>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   rec_bg rec_drag </span></span>
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       60       45</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>A single replicate is noise; the tables above are 300 of these per cell, which is the driver’s job.</p>
 <p><strong>The analytical sizing needs no simulation at all.</strong> It is a cumulative binomial, so it is exact and instant:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sizing_table</span>(<span class="at">k_max =</span> <span class="dv">4</span>, <span class="at">flank_cM =</span> <span class="dv">5</span>, <span class="at">P =</span> <span class="fl">0.95</span>, <span class="at">n_keep =</span> <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1361,6 +1377,8 @@ Figure&nbsp;6.6: Analytical sizing by stage, log scale. The two blue bars are ba
 <p>The cached tables this chapter reads are the full run’s <code>results_uniform.csv</code>, <code>results_allocation.csv</code>, <code>results_bcnf2.csv</code> and <code>analytical_sizing.csv</code>, copied into <code>book/data</code> as <code>mabc_*.csv</code>; the header of the driver lists the copy commands.</p>
 <p><strong>Pointing it at your own programme.</strong> Three things change and nothing else:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. your map</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>map <span class="ot">&lt;-</span> <span class="fu">build_map</span>(my_chr_len_cM, <span class="at">spacing_cM =</span> <span class="dv">5</span>)</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1372,6 +1390,7 @@ Figure&nbsp;6.6: Analytical sizing by stage, log scale. The two blue bars are ba
 <span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. your criteria</span></span>
 <span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>opt <span class="ot">&lt;-</span> utils<span class="sc">::</span><span class="fu">modifyList</span>(mabc_opt,</span>
 <span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>                         <span class="fu">list</span>(<span class="at">n_bc =</span> <span class="dv">4</span>, <span class="at">drag_per_gene =</span> <span class="dv">20</span>, <span class="at">target_ibd =</span> <span class="fl">0.95</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p><code>s</code> – how much of the genome your donor and your elite already share – is the parameter worth measuring rather than assuming. It scales the whole cost: at <span class="math inline">\(s = 0.7\)</span> most of the donor genome that survives is free, at <span class="math inline">\(s = 0\)</span> none of it is.</p>
 </section>
@@ -1383,7 +1402,7 @@ Figure&nbsp;6.6: Analytical sizing by stage, log scale. The two blue bars are ba
 <p><strong>Uniform recombination rate, no distortion, no genotyping error.</strong> Maize has 5-10x rate variation and strongly suppressed pericentromeric regions; a target in a cold region carries drag no feasible population will trim. Gametophyte factors shift the foreground frequency away from <span class="math inline">\(1/2\)</span>. Map positions here are illustrative and not pinned to a named consensus map – and IBM-type maps must be rescaled before use, exactly as in <a href="04-population-sizing.html" class="quarto-xref"><span>Chapter 5</span></a>.</p>
 <p><strong>Triploid endosperm genetics is not modelled.</strong> The illustrative targets are endosperm genes. The endosperm is 2 maternal : 1 paternal, so a recessive kernel phenotype does not appear on the ear of a heterozygous plant: phenotypic confirmation lags the genotype by one generation, and xenia means it requires a self-pollination, not open pollination.</p>
 <p><strong>The gene set is illustrative, not a breeding recommendation.</strong> <code>sh2</code> and <code>bt2</code> encode the two subunits of the same enzyme, so stacking both is largely redundant – dropping one turns the hard case (<span class="math inline">\(k = 4\)</span>) into the comfortable one (<span class="math inline">\(k = 3\)</span>). <code>o2</code> alone gives opaque endosperm, not QPM: the hardness modifiers are polygenic, unlinked and unmodelled here, which changes the problem class from “stack <span class="math inline">\(k\)</span> Mendelian genes” to “stack <span class="math inline">\(k\)</span> genes plus a QTL background”.</p>
-<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout callout-style-simple callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -1404,6 +1423,8 @@ Figure&nbsp;6.6: Analytical sizing by stage, log scale. The two blue bars are ba
 <p>The converted lines this chapter produces re-enter the pool the rest of the book optimises over. A conversion programme run for its own sake reduces diversity by construction: it makes an elite line into a near-copy of itself. If several conversions are run in parallel off the same recurrent parent, the resulting lines are close to each other.</p>
 <p>That has been asserted for a chapter and a half. It is cheap to measure, and the size of it is the argument. Eight BC3 conversions off one recurrent parent, against eight unrelated elite lines, put through the kernel of <a href="01-coancestry.html" class="quarto-xref"><span>Chapter 1</span></a>:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">11</span>)</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>m_c  <span class="ot">&lt;-</span> <span class="dv">2000</span></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>elite <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rbinom</span>(<span class="dv">40</span> <span class="sc">*</span> m_c, <span class="dv">1</span>, <span class="fl">0.5</span>), <span class="dv">40</span>, m_c)   <span class="co"># unrelated elite lines</span></span>
@@ -1420,6 +1441,7 @@ Figure&nbsp;6.6: Analytical sizing by stage, log scale. The two blue bars are ba
 <span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>            <span class="fu">mean</span>(<span class="fu">molecular_coancestry</span>(elite[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>, ]))))</span>
 <span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>cost<span class="sc">$</span>GD <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> cost<span class="sc">$</span>theta</span>
 <span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(cost, <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1448,7 +1470,7 @@ Figure&nbsp;6.6: Analytical sizing by stage, log scale. The two blue bars are ba
 </div>
 <p>The converted panel carries about 0.07 times the gene diversity of the unrelated one – not a marginal erosion but a different order of magnitude, and it follows directly from <code>expected_ibd(3, 0.5) =</code> 0.969. Conversion is <em>designed</em> to make lines identical everywhere except the target, and it succeeds.</p>
 <p>Two consequences for the rest of the book. A conversion programme must be counted against the diversity budget of <a href="09-optimal-contributions.html" class="quarto-xref"><span>Chapter 17</span></a> rather than run alongside it, because <span class="math inline">\(\theta\)</span> cannot distinguish eight conversions from one line entered eight times. And <a href="08-pipeline-stages.html" class="quarto-xref"><span>Chapter 15</span></a>’ per-line usage cap is the mechanism that already handles this: capping how often a line is used caps how often its near-copies are, provided the conversions are recognised as near-copies rather than entered as eight independent parents.</p>
-<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout callout-style-simple callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>

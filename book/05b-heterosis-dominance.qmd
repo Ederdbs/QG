@@ -526,16 +526,17 @@ fmt(sw[, c("fst", "shared", "pred_shared", "divergence", "pred_divergence")], 4)
 ```{r}
 #| label: fig-heterosis-sweep
 #| fig-cap: "Expected heterosis and its two components as the pools are driven apart by drift alone. Dashed lines are the Balding-Nichols predictions for each component separately, with no fitted parameter. Each measured component is offset from its prediction -- divergence above, shared below -- by sampling error in the pool frequencies; that offset narrows along the axis, and the text quantifies both it and the measured gap. The divergence term grows several-fold; the shared term pays for all of it, unit for unit; the total is flat. Nothing is selected here -- this is what neutral divergence does."
-plot(sw$fst, sw$total, type = "b", pch = 19, col = "#1b7837", ylim = c(0, 0.40),
+#| fig-alt: "Expected heterosis and its two components as the pools are driven apart by drift alone"
+plot(sw$fst, sw$total, type = "b", pch = 19, col = "#d98e04", ylim = c(0, 0.40),
      xlab = "target fst between pools", ylab = "expected heterosis per locus (d = 1)")
-lines(sw$fst, sw$shared, type = "b", pch = 17, col = "#2166ac")
+lines(sw$fst, sw$shared, type = "b", pch = 17, col = "#1f5f8b")
 lines(sw$fst, sw$divergence, type = "b", pch = 15, col = "#b2182b")
-lines(sw$fst, sw$pred_shared, lty = 2, col = "#2166ac")
+lines(sw$fst, sw$pred_shared, lty = 2, col = "#1f5f8b")
 lines(sw$fst, sw$pred_divergence, lty = 2, col = "#b2182b")
 abline(h = mean(sw$total), lty = 2, col = "grey45")
 legend("right", c("total", "shared", "divergence", "predicted"), bty = "n",
        cex = 0.8, pch = c(19, 17, 15, NA), lty = c(NA, NA, NA, 2),
-       col = c("#1b7837", "#2166ac", "#b2182b", "grey45"))
+       col = c("#d98e04", "#1f5f8b", "#b2182b", "grey45"))
 grid()
 ```
 
@@ -645,10 +646,11 @@ fmt(al, 3)
 ```{r}
 #| label: fig-heterosis-alignment
 #| fig-cap: "The same two pools, the same F_ST, and the same set of dominance deviations in all three bars -- only their placement across loci differs. Expected heterosis moves by half again between the extremes. F_ST cannot see any of this, because d does not enter it."
+#| fig-alt: "The same two pools, the same FST, and the same set of dominance deviations in all three bars -- only their placement across loci differs"
 bp <- barplot(rbind(al$shared, al$divergence), beside = FALSE,
-              names.arg = al$scenario, col = c("#2166ac", "#b2182b"),
+              names.arg = al$scenario, col = c("#1f5f8b", "#b2182b"),
               ylab = "expected heterosis", border = NA)
-legend("topleft", c("shared", "divergence"), fill = c("#2166ac", "#b2182b"),
+legend("topleft", c("shared", "divergence"), fill = c("#1f5f8b", "#b2182b"),
        bty = "n", cex = 0.8, border = NA)
 text(bp, al$total, sprintf("%.2fx", al$relative), pos = 3, cex = 0.8, xpd = NA)
 grid(nx = NA, ny = NULL)
@@ -971,13 +973,14 @@ fmt(rl, 3)
 ```{r}
 #| label: fig-heterosis-relocation
 #| fig-cap: "The same neutral divergence sweep, read through the combining-ability decomposition rather than through the mean. Expected heterosis is flat across this entire range (@fig-heterosis-sweep); its decomposition is not. Specific combining ability falls steeply throughout. General combining ability rises, by much less than SCA loses, and itself turns over inside the range -- both components vanish at F_ST = 1. The two curves do not sum to a constant: most of the SCA variance lost is destroyed rather than relocated, and the exact percentages are in the text."
-plot(rl$fst, rl$var_GCA, type = "b", pch = 19, col = "#1b7837",
+#| fig-alt: "The same neutral divergence sweep, read through the combining-ability decomposition rather than through the mean"
+plot(rl$fst, rl$var_GCA, type = "b", pch = 19, col = "#d98e04",
      ylim = range(0, rl$var_GCA, rl$var_SCA),
      xlab = "target fst between pools",
      ylab = "variance of heterosis over the factorial")
 lines(rl$fst, rl$var_SCA, type = "b", pch = 15, col = "#b2182b")
 legend("right", c("GCA (both pools)", "SCA"), bty = "n", cex = 0.8,
-       pch = c(19, 15), col = c("#1b7837", "#b2182b"))
+       pch = c(19, 15), col = c("#d98e04", "#b2182b"))
 grid()
 ```
 

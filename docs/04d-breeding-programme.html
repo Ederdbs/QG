@@ -92,20 +92,21 @@ div.csl-indent {
 <meta name="quarto:offset" content="./">
 <link href="./04e-mating-design.html" rel="next">
 <link href="./04c-alphasimr-pipeline.html" rel="prev">
+<link href="./favicon.svg" rel="icon" type="image/svg+xml">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9ef9d4760de657dc918b81d25b42b59f.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-58115a419e540697b7ccd904e8efcd2d.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9ef9d4760de657dc918b81d25b42b59f.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-37a0ccb6f5b9899fcb884e11bb6f7458.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-da8b26c7a017495cabf78e5d2792d1d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-b192ecda6a457e66a32e528cd3cc1fbc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-da8b26c7a017495cabf78e5d2792d1d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -669,7 +670,7 @@ window.Quarto = {
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="04d-breeding-programme_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="1425"></p>
+<p><img src="04d-breeding-programme_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" alt="The staged inbred-line programme" width="1425"></p>
 <figcaption>The staged inbred-line programme. Entries fall by roughly an order of magnitude at each stage while replication – the number of locations each entry is scored in – rises. Parents for the next cycle are recycled from the late trials (solid) or, under genomic selection, from the preliminary trial as well (dashed).</figcaption>
 </figure>
 </div>
@@ -678,6 +679,8 @@ window.Quarto = {
 <p>Seven stages, and the logic connecting them is a single idea: <strong>at every step, entries fall and replication rises.</strong> Four hundred doubled-haploid lines are scored once, cheaply, in unreplicated headrows; sixty survive into a preliminary yield trial at one location; twelve into an advanced trial at four; four into an elite trial at eight. Selection accuracy at the last stage is high because the error variance has been divided by eight locations – not because the trait became more heritable.</p>
 <p>That is what <code>reps</code> does in <code>setPheno()</code>, and it is the argument <a href="04c-alphasimr-pipeline.html" class="quarto-xref"><span>Chapter 7</span></a>’s Step 2 flagged as the plant idiom. The configuration:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>sch <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">n_founders =</span> <span class="dv">40</span>, <span class="at">n_chr =</span> <span class="dv">10</span>, <span class="at">n_qtl =</span> <span class="dv">60</span>,   <span class="co"># founder genomes</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">n_crosses  =</span> <span class="dv">20</span>, <span class="at">n_dh =</span> <span class="dv">20</span>, <span class="at">fam_max =</span> <span class="dv">5</span>,   <span class="co"># crossing and DH production</span></span>
@@ -685,6 +688,7 @@ window.Quarto = {
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">rep_hdrw =</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">4</span>, <span class="at">rep_pyt =</span> <span class="dv">1</span>, <span class="at">rep_ayt =</span> <span class="dv">4</span>, <span class="at">rep_eyt =</span> <span class="dv">8</span>,   <span class="co"># locations per stage</span></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">var_e =</span> <span class="fl">0.4</span>, <span class="at">gs_boost =</span> <span class="dv">3</span>, <span class="at">n_burn =</span> <span class="dv">7</span>, <span class="at">n_years =</span> <span class="dv">15</span></span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p><code>rep_hdrw = 1/4</code> is the course’s device for a stage <em>less</em> precise than a single plot: headrows are scored visually on a short row, which carries less information than one replicated plot, so the error variance is multiplied by four. <code>fam_max</code> caps how many DH lines any one cross may contribute to the preliminary trial – <code>selectWithinFam()</code> from <a href="04c-alphasimr-pipeline.html" class="quarto-xref"><span>Chapter 7</span></a>’s Step 6, holding the genetic base open against a truncation that would otherwise take the whole trial from the two best crosses.</p>
 </section>
@@ -706,6 +710,8 @@ window.Quarto = {
 <h2 data-number="8.3" class="anchored" data-anchor-id="one-programme-fifteen-years"><span class="header-section-number">8.3</span> One programme, fifteen years</h2>
 <p>The whole scheme is one function. It is written out rather than packaged because the loop is the thing being taught, and because a reader adapting it to their own programme will edit the loop, not call it.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>gd_of <span class="ot">&lt;-</span> <span class="cf">function</span>(pop, SP)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="dv">1</span> <span class="sc">-</span> <span class="fu">mean</span>(<span class="fu">molecular_coancestry</span>(<span class="fu">pullSegSiteGeno</span>(pop, <span class="at">simParam =</span> SP) <span class="sc">/</span> <span class="dv">2</span>))</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -783,13 +789,17 @@ window.Quarto = {
 <span id="cb3-75"><a href="#cb3-75" aria-hidden="true" tabindex="-1"></a>  }</span>
 <span id="cb3-76"><a href="#cb3-76" aria-hidden="true" tabindex="-1"></a>  out</span>
 <span id="cb3-77"><a href="#cb3-77" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>Two details are worth pausing on.</p>
 <p><strong>The advancing loop runs backwards.</strong> The elite trial is filled <em>before</em> the advanced trial is refilled, which is before the preliminary trial is refilled. Written in the other order, <code>EYT</code> would be selected from an <code>AYT</code> that had already been overwritten with this year’s cohort, and the programme would advance two stages per year without anyone noticing. Ordering is the whole correctness argument of a staged simulation.</p>
 <p><strong>Progress is reported at the PYT.</strong> It is the first stage with a yield phenotype and the last with enough entries for a variance to mean anything – <code>meanG</code> on four elite lines is noise. This is the course’s choice and it is the right one.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>ps <span class="ot">&lt;-</span> <span class="fu">run_programme</span>(sch, <span class="at">seed =</span> <span class="dv">1</span>, <span class="at">genomic =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(ps[<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">15</span>), ])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -847,7 +857,7 @@ window.Quarto = {
 </div>
 </div>
 <p>Genetic mean rises, genetic variance falls, and gene diversity of the preliminary trial falls with it. Nothing here is surprising; what matters is that all three are now being measured on the same run.</p>
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-simple callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -870,8 +880,11 @@ window.Quarto = {
 </ol>
 <p>This chapter mimics the prediction rather than fitting one: <code>ebv</code> is filled with a phenotype simulated at <code>gs_boost</code> times the replication, which is a stand-in for a genomic prediction of the corresponding accuracy. <a href="08b-genomic-prediction.html" class="quarto-xref"><span>Chapter 16</span></a> is where the book actually fits prediction models and measures what accuracy is attainable; the honest statement here is that this chapter <em>assumes</em> an accuracy and studies its consequences, rather than earning it.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>gs <span class="ot">&lt;-</span> <span class="fu">run_programme</span>(sch, <span class="at">seed =</span> <span class="dv">1</span>, <span class="at">genomic =</span> <span class="cn">TRUE</span>, <span class="at">gs_from =</span> <span class="dv">6</span>)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(gs[<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">15</span>), ])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -934,6 +947,8 @@ window.Quarto = {
 <h2 data-number="8.5" class="anchored" data-anchor-id="the-comparison-replicated"><span class="header-section-number">8.5</span> The comparison, replicated</h2>
 <p>One run of one seed is an anecdote. Both arms are cheap enough to replicate.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>seeds <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">24</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>reps <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(seeds, <span class="cf">function</span>(s) {</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  a <span class="ot">&lt;-</span> <span class="fu">run_programme</span>(sch, s, <span class="at">genomic =</span> <span class="cn">FALSE</span>)</span>
@@ -953,6 +968,7 @@ window.Quarto = {
 <span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">rbind</span>(<span class="st">`</span><span class="at">gain per year</span><span class="st">`</span>      <span class="ot">=</span> <span class="fu">paired</span>(reps<span class="sc">$</span>gain_ps, reps<span class="sc">$</span>gain_gs),</span>
 <span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>          <span class="st">`</span><span class="at">gene diversity, yr 15</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">paired</span>(reps<span class="sc">$</span>gd_ps, reps<span class="sc">$</span>gd_gs),</span>
 <span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>          <span class="st">`</span><span class="at">genetic mean, yr 15</span><span class="st">`</span>   <span class="ot">=</span> <span class="fu">paired</span>(reps<span class="sc">$</span>end_ps, reps<span class="sc">$</span>end_gs)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -986,10 +1002,10 @@ window.Quarto = {
 </div>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
-<div id="fig-programme-arms" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<div id="fig-programme-arms" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" alt="Twenty-four paired runs, genomic selection switched on in year 6. Left: genetic mean of the preliminary yield trial">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-programme-arms-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="04d-breeding-programme_files/figure-html/fig-programme-arms-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="1350">
+<img src="04d-breeding-programme_files/figure-html/fig-programme-arms-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Twenty-four paired runs, genomic selection switched on in year 6. Left: genetic mean of the preliminary yield trial" width="1350">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-programme-arms-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;8.1: Twenty-four paired runs, genomic selection switched on in year 6. Left: genetic mean of the preliminary yield trial. Right: gene diversity of the same population. The faster programme is also the one spending diversity faster.
@@ -1005,11 +1021,14 @@ Figure&nbsp;8.1: Twenty-four paired runs, genomic selection switched on in year 
 <h2 data-number="8.6" class="anchored" data-anchor-id="the-diversity-ledger"><span class="header-section-number">8.6</span> The diversity ledger</h2>
 <p>The measurement above used gene diversity of the preliminary trial. The parent set is the population that actually transmits, and it is the one an optimal contribution scheme would act on:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ledger <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">year       =</span> yr,</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">gd_pyt_ps  =</span> <span class="fu">avg</span>(<span class="st">"ps"</span>, <span class="st">"gd_pyt"</span>),  <span class="at">gd_pyt_gs  =</span> <span class="fu">avg</span>(<span class="st">"gs"</span>, <span class="st">"gd_pyt"</span>),</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">gd_par_ps  =</span> <span class="fu">avg</span>(<span class="st">"ps"</span>, <span class="st">"gd_parents"</span>), <span class="at">gd_par_gs =</span> <span class="fu">avg</span>(<span class="st">"gs"</span>, <span class="st">"gd_parents"</span>))</span>
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(ledger[<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">15</span>), ])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1062,14 +1081,17 @@ Figure&nbsp;8.1: Twenty-four paired runs, genomic selection switched on in year 
 </div>
 </div>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>loss <span class="ot">&lt;-</span> <span class="cf">function</span>(v) (ledger[[v]][<span class="dv">1</span>] <span class="sc">-</span> ledger[[v]][<span class="fu">nrow</span>(ledger)]) <span class="sc">/</span> ledger[[v]][<span class="dv">1</span>]</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">c</span>(<span class="st">`</span><span class="at">PYT, phenotypic</span><span class="st">`</span>   <span class="ot">=</span> <span class="fu">loss</span>(<span class="st">"gd_pyt_ps"</span>), <span class="st">`</span><span class="at">PYT, genomic</span><span class="st">`</span>   <span class="ot">=</span> <span class="fu">loss</span>(<span class="st">"gd_pyt_gs"</span>),</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>      <span class="st">`</span><span class="at">parents, phenotypic</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">loss</span>(<span class="st">"gd_par_ps"</span>), <span class="st">`</span><span class="at">parents, genomic</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">loss</span>(<span class="st">"gd_par_gs"</span>)))</span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     PYT, phenotypic        PYT, genomic parents, phenotypic    parents, genomic </span></span>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;              0.2131              0.2729              0.1788              0.2470</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>Those four numbers are exactly the quantity this book calls <code>alpha</code>: the proportional loss of gene diversity, here measured against the programme’s own starting point rather than against a random-selection baseline of the same size (<a href="06-metric-catalogue.html#sec-baseline" class="quarto-xref"><span>Section 13.9</span></a> is where that distinction is made, and it matters – a same-size random baseline would attribute part of this loss to drift rather than to selection).</p>
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-simple callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>

@@ -1,0 +1,54 @@
+// Shared rules for light and dark. Colours come from the Sass variables set in
+// each theme file, so nothing here is mode-specific.
+$pool-a: #1f5f8b;
+$pool-b: #d98e04;
+
+body { font-feature-settings: "kern", "liga", "onum"; text-rendering: optimizeLegibility; }
+main.content, .content { max-width: 46rem; }
+p, li { line-height: 1.62; hyphens: auto; }
+
+h1, h2, h3, h4, .sidebar-title, .quarto-title-block, .callout-title-container,
+figcaption, .figure-caption, .table caption, .toc-title, nav, .quarto-title-meta {
+  font-family: $font-family-sans-serif;
+}
+h1, h2, h3, h4 { letter-spacing: -0.01em; line-height: 1.2; font-weight: 600; }
+h1.title, h1.quarto-section-header { font-weight: 650; }
+
+// Signature: a double rule, pool A over pool B, under every chapter title.
+header#title-block-header h1.title::after,
+h1.title::after {
+  content: ""; display: block; margin-top: 0.7rem; height: 7px; width: 5.5rem;
+  background: linear-gradient($pool-a 0 3px, transparent 3px 4px, $pool-b 4px 7px);
+}
+
+// Body links: pool A, underlined thinly, not the stock blue.
+main a:not(.nav-link):not(.btn) { text-underline-offset: 0.18em; text-decoration-thickness: 1px; }
+
+// Code is secondary to prose in a theory book.
+pre, code, .sourceCode { font-family: $font-family-monospace; }
+div.sourceCode { border: 0; border-left: 3px solid rgba($pool-a, 0.55); border-radius: 0 3px 3px 0; margin: 1rem 0; }
+pre.sourceCode { font-size: 0.82em; line-height: 1.5; }
+details > summary { font-family: $font-family-sans-serif; font-size: 0.85em; cursor: pointer; }
+
+// Callouts: one quiet style, hierarchy by colour of the left bar only.
+.callout { border-radius: 3px; border-width: 0 0 0 4px !important; box-shadow: none; }
+.callout-title-container { font-weight: 600; font-size: 0.92em; }
+.callout-note { border-left-color: $pool-a !important; }
+.callout-tip { border-left-color: #2e7d5b !important; }
+.callout-important, .callout-caution { border-left-color: $pool-b !important; }
+.callout-warning { border-left-color: #b2182b !important; }
+
+// Tables: rules only, numerals aligned.
+table { font-size: 0.9em; font-variant-numeric: tabular-nums lining-nums; }
+table thead th { border-bottom: 1.5px solid currentColor; font-family: $font-family-sans-serif; font-weight: 600; }
+table tbody tr, table tbody td { border-color: rgba(128, 128, 128, 0.25); }
+.table > :not(caption) > * > * { background: transparent; }
+
+// Figures
+figure figcaption, .figure-caption { font-size: 0.86em; line-height: 1.45; text-align: left; }
+.quarto-figure img, img.img-fluid { border-radius: 2px; }
+
+// Sidebar and TOC
+.sidebar-navigation .sidebar-item { font-size: 0.9rem; }
+.sidebar-navigation .part-title, .sidebar-item-text.part { text-transform: none; letter-spacing: 0; font-weight: 600; }
+#TOC .active { border-left-color: $pool-b; }

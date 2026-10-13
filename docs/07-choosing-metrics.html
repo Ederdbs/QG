@@ -73,20 +73,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta name="quarto:offset" content="./">
 <link href="./08-pipeline-stages.html" rel="next">
 <link href="./06-metric-catalogue.html" rel="prev">
+<link href="./favicon.svg" rel="icon" type="image/svg+xml">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9ef9d4760de657dc918b81d25b42b59f.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-58115a419e540697b7ccd904e8efcd2d.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9ef9d4760de657dc918b81d25b42b59f.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-37a0ccb6f5b9899fcb884e11bb6f7458.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-da8b26c7a017495cabf78e5d2792d1d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-b192ecda6a457e66a32e528cd3cc1fbc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-da8b26c7a017495cabf78e5d2792d1d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -807,6 +808,8 @@ window.Quarto = {
 </div>
 <p>The same identity, live, on the book’s own data:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>ctx  <span class="ot">&lt;-</span> <span class="fu">fast_ctx</span>(<span class="fu">simulate_data</span>(book_cfg))</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">51</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>idx  <span class="ot">&lt;-</span> <span class="fu">sample.int</span>(ctx<span class="sc">$</span>N, <span class="dv">60</span>)</span>
@@ -815,9 +818,12 @@ window.Quarto = {
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">difference        =</span> <span class="fu">theta_group</span>(idx, ctx) <span class="sc">-</span> <span class="fu">fast_theta</span>(idx, ctx))</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; via_hybrid_matrix    via_line_route        difference </span></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         0.6745897         0.6745897         0.0000000</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>And the incremental swap, which is what makes a local search affordable:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>st  <span class="ot">&lt;-</span> <span class="fu">theta_state</span>(idx, ctx)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>out <span class="ot">&lt;-</span> idx[<span class="dv">1</span>]; inn <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(<span class="fu">seq_len</span>(ctx<span class="sc">$</span>N), idx)[<span class="dv">1</span>]</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>st2 <span class="ot">&lt;-</span> <span class="fu">theta_swap</span>(st, out, inn, ctx)</span>
@@ -826,8 +832,9 @@ window.Quarto = {
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">difference             =</span> st2<span class="sc">$</span>theta <span class="sc">-</span> <span class="fu">theta_group</span>(<span class="fu">c</span>(idx[<span class="sc">-</span><span class="dv">1</span>], inn), ctx))</span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; after_swap_incremental  after_swap_recomputed             difference </span></span>
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           6.747225e-01           6.747225e-01           2.220446e-16</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
-<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout callout-style-simple callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -849,7 +856,7 @@ window.Quarto = {
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="figs/cost_scaling.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="figs/cost_scaling.png" class="img-fluid figure-img" alt="Cost per fitness evaluation" width="672"></p>
 <figcaption>Cost per fitness evaluation. Panel A: scaling in the number of candidate hybrids. Panel B: hours to complete one million evaluations at production scale.</figcaption>
 </figure>
 </div>
@@ -930,7 +937,10 @@ window.Quarto = {
 </ul>
 <p>The same ordering is visible at the book’s scale, where every route is affordable and so the comparison is about ratios, not feasibility:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">cost_per_eval</span>(ctx, <span class="at">n_sel =</span> <span class="dv">60</span>, <span class="at">reps =</span> <span class="dv">40</span>), <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -947,15 +957,15 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td style="text-align: left;">theta_from_freq</td>
-<td style="text-align: right;">150</td>
+<td style="text-align: right;">175</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">ne_parents</td>
-<td style="text-align: right;">0</td>
+<td style="text-align: right;">25</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">alleles_lost</td>
-<td style="text-align: right;">125</td>
+<td style="text-align: right;">150</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">ENE</td>
@@ -967,11 +977,11 @@ window.Quarto = {
 </tr>
 <tr class="odd">
 <td style="text-align: left;">eff_dim</td>
-<td style="text-align: right;">125</td>
+<td style="text-align: right;">100</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Gst</td>
-<td style="text-align: right;">1300</td>
+<td style="text-align: right;">1375</td>
 </tr>
 </tbody>
 </table>
@@ -986,7 +996,7 @@ window.Quarto = {
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="figs/metric_redundancy.png" class="img-fluid figure-img" width="768"></p>
+<p><img src="figs/metric_redundancy.png" class="img-fluid figure-img" alt="Metric redundancy" width="768"></p>
 <figcaption>Metric redundancy. A: Spearman correlations. B: PCA of rank-transformed metrics. C: the discriminating case, inside a narrow coancestry band.</figcaption>
 </figure>
 </div>
@@ -1002,6 +1012,8 @@ window.Quarto = {
 <section id="reproducing-the-argument-at-book-scale" class="level3" data-number="14.3.1">
 <h3 data-number="14.3.1" class="anchored" data-anchor-id="reproducing-the-argument-at-book-scale"><span class="header-section-number">14.3.1</span> Reproducing the argument at book scale</h3>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">77</span>)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>grid <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">4</span>, <span class="at">length.out =</span> <span class="dv">30</span>), <span class="cf">function</span>(w) {</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  s <span class="ot">&lt;-</span> <span class="fu">sel_greedy</span>(ctx, <span class="dv">60</span>, <span class="at">w =</span> w)</span>
@@ -1020,16 +1032,19 @@ window.Quarto = {
 <span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topright"</span>, <span class="fu">c</span>(<span class="st">"greedy sweep"</span>, <span class="st">"random"</span>), <span class="at">pch =</span> <span class="dv">19</span>,</span>
 <span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"#b2182b"</span>, <span class="st">"grey60"</span>), <span class="at">bty =</span> <span class="st">"n"</span>)</span>
 <span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="fu">grid</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="07-choosing-metrics_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="1050"></p>
+<p><img src="07-choosing-metrics_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" alt="At fixed theta, the effective number of parents still varies by a factor of two" width="1050"></p>
 <figcaption>At fixed theta, the effective number of parents still varies by a factor of two. The constraint cannot see the difference; the second metric can.</figcaption>
 </figure>
 </div>
 </div>
 </div>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>band <span class="ot">&lt;-</span> all[<span class="fu">abs</span>(all<span class="sc">$</span>theta <span class="sc">-</span> <span class="fu">median</span>(all<span class="sc">$</span>theta)) <span class="sc">&lt;</span> <span class="fl">0.0015</span>, ]</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">n_in_band =</span> <span class="fu">nrow</span>(band),</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">theta_span =</span> <span class="fu">diff</span>(<span class="fu">range</span>(band<span class="sc">$</span>theta)),</span>
@@ -1039,8 +1054,9 @@ window.Quarto = {
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      55.000000000       0.002502847      31.578947368      41.860465116 </span></span>
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; alleles_lost_span </span></span>
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      31.000000000</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-simple callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -1062,7 +1078,7 @@ window.Quarto = {
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="figs/de_convergence.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="figs/de_convergence.png" class="img-fluid figure-img" alt="Differential evolution under four simultaneous restrictions at equal evaluation budget" width="672"></p>
 <figcaption>Differential evolution under four simultaneous restrictions at equal evaluation budget.</figcaption>
 </figure>
 </div>
@@ -1124,6 +1140,8 @@ window.Quarto = {
 <p>Findings 1 to 4 are about the diversity side of the objective. This one is about the other side, and it is the larger uncertainty of the two.</p>
 <p>Everywhere in this book <code>ctx$index</code> is built from <em>known</em> marker effects (<a href="03-simulating-crosses.html" class="quarto-xref"><span>Chapter 4</span></a>), so every result so far assumes the breeding values are predicted without error. Real ones are not, and the error is not white noise: predictions for close relatives are wrong in the same direction, because they lean on the same training records and share the same haplotypes. The book already has a matrix of exactly that structure – the molecular coancestry <span class="math inline">\(\mathbf{f}\)</span> – so the error can be simulated without inventing anything. (<a href="08b-genomic-prediction.html" class="quarto-xref"><span>Chapter 16</span></a> fits an actual GBLUP model later and finds the same structure in its real residuals, at a comparable accuracy, without injecting anything.)</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>n_sel <span class="ot">&lt;-</span> <span class="dv">60</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>null  <span class="ot">&lt;-</span> <span class="fu">null_distribution</span>(ctx, n_sel, <span class="at">B =</span> <span class="dv">400</span>, <span class="at">B_full =</span> <span class="dv">60</span>)</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>gd    <span class="ot">&lt;-</span> null<span class="sc">$</span>gd_ref</span>
@@ -1139,9 +1157,12 @@ window.Quarto = {
 <span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  e <span class="ot">&lt;-</span> (e <span class="sc">-</span> <span class="fu">mean</span>(e)) <span class="sc">/</span> stats<span class="sc">::</span><span class="fu">sd</span>(e)</span>
 <span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.numeric</span>(<span class="fu">scale</span>(r <span class="sc">*</span> u <span class="sc">+</span> <span class="fu">sqrt</span>(<span class="dv">1</span> <span class="sc">-</span> r<span class="sc">^</span><span class="dv">2</span>) <span class="sc">*</span> e))</span>
 <span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>Select on the prediction, then score the plan on the truth:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>run <span class="ot">&lt;-</span> <span class="cf">function</span>(r, <span class="at">seed =</span> <span class="dv">1</span>, <span class="at">kind =</span> <span class="st">"correlated"</span>) {</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  ch <span class="ot">&lt;-</span> ctx; ch<span class="sc">$</span>index <span class="ot">&lt;-</span> <span class="fu">predicted</span>(r, seed, kind)</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  sel <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">truncation =</span> <span class="fu">sel_truncation</span>(ch, n_sel),</span>
@@ -1154,6 +1175,7 @@ window.Quarto = {
 <span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>acc <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">0.9</span>, <span class="fl">0.7</span>, <span class="fl">0.5</span>), run))</span>
 <span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(acc, <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1234,6 +1256,8 @@ window.Quarto = {
 <h3 data-number="14.5.1" class="anchored" data-anchor-id="the-correlation-structure-matters-more-than-the-amount"><span class="header-section-number">14.5.1</span> The correlation structure matters more than the amount</h3>
 <p>Hold accuracy fixed at <span class="math inline">\(r = 0.6\)</span> and change only whether the error is correlated with relatedness, over twenty draws:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>cmp <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">c</span>(<span class="st">"correlated"</span>, <span class="st">"independent"</span>), <span class="cf">function</span>(k)</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>, <span class="cf">function</span>(s) {</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    ch <span class="ot">&lt;-</span> ctx; ch<span class="sc">$</span>index <span class="ot">&lt;-</span> <span class="fu">predicted</span>(<span class="fl">0.6</span>, s, k)</span>
@@ -1242,6 +1266,7 @@ window.Quarto = {
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">alpha =</span> <span class="fu">alpha_loss</span>(tr, ctx, gd), <span class="at">max_line =</span> <span class="fu">max_line_use</span>(tr, ctx))</span>
 <span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  }))))</span>
 <span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">aggregate</span>(<span class="fu">cbind</span>(realised, alpha, max_line) <span class="sc">~</span> kind, cmp, mean), <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1273,7 +1298,7 @@ window.Quarto = {
 </div>
 <p>Same accuracy, same method, same number selected. Correlated error costs roughly 3.2 times the diversity of independent error, and leans 1.4 times as hard on its favourite line.</p>
 <p>The mechanism is direct. Independent error scatters the mistakes, which accidentally diversifies the plan. Error correlated with relatedness makes whole families look good together, so the plan takes families – and a family is exactly what the diversity constraint exists to stop it taking.</p>
-<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout callout-style-simple callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -1325,6 +1350,8 @@ window.Quarto = {
 <section id="drop-in-code" class="level2" data-number="14.7">
 <h2 data-number="14.7" class="anchored" data-anchor-id="drop-in-code"><span class="header-section-number">14.7</span> Drop-in code</h2>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>ctx <span class="ot">&lt;-</span> <span class="fu">fast_ctx</span>(ctx, <span class="at">GL =</span> line_genotypes, <span class="at">pack =</span> <span class="cn">TRUE</span>)   <span class="co"># no N x N matrix needed</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>gd_ref <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">replicate</span>(<span class="dv">500</span>, <span class="fu">fast_gene_div</span>(<span class="fu">sample.int</span>(ctx<span class="sc">$</span>N, n_sel), ctx)))</span>
@@ -1343,6 +1370,7 @@ window.Quarto = {
 <span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">Ne_parents =</span> <span class="fu">fast_ne_parents</span>(idx, ctx),</span>
 <span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">alleles    =</span> <span class="fu">alleles_retained_fast</span>(idx, ctx),</span>
 <span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fast_theta_pools</span>(idx, ctx))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 
 

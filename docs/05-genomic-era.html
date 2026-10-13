@@ -92,20 +92,21 @@ div.csl-indent {
 <meta name="quarto:offset" content="./">
 <link href="./05b-heterosis-dominance.html" rel="next">
 <link href="./04f-sparse-testing.html" rel="prev">
+<link href="./favicon.svg" rel="icon" type="image/svg+xml">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9ef9d4760de657dc918b81d25b42b59f.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-58115a419e540697b7ccd904e8efcd2d.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9ef9d4760de657dc918b81d25b42b59f.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-37a0ccb6f5b9899fcb884e11bb6f7458.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-da8b26c7a017495cabf78e5d2792d1d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-b192ecda6a457e66a32e528cd3cc1fbc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-da8b26c7a017495cabf78e5d2792d1d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -696,12 +697,15 @@ window.Quarto = {
 <p><strong>A1. The species is allogamous and the product is an F1 hybrid.</strong> Maize-type: two heterotic pools, A and B, crossed to produce single-cross hybrids. The commercial product carries the heterozygosity; the parents do not. Nothing here is addressed to a self-pollinated crop whose product is a line, and nothing here is addressed to a programme whose commercial unit is a synthetic or a population cross – both change which quantity is the product and therefore which loss matters.</p>
 <p><strong>A2. Parent lines are fully inbred, by DH induction or by selfing to fixation.</strong> This is a property of the <em>programme</em>, not of the mating system: an allogamous crop bred for hybrids still delivers inbred parents. In this simulation the lines are homozygous at every locus, which the coancestry kernel reports exactly:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">het_fraction_lines   =</span> <span class="fu">mean</span>(L <span class="sc">/</span> <span class="dv">2</span> <span class="sc">==</span> <span class="fl">0.5</span>),</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">self_coancestry_min  =</span> <span class="fu">min</span>(<span class="fu">diag</span>(<span class="fu">molecular_coancestry</span>(L <span class="sc">/</span> <span class="dv">2</span>))),</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">het_fraction_F1      =</span> <span class="fu">mean</span>(ctx<span class="sc">$</span>X <span class="sc">==</span> <span class="fl">0.5</span>),</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">twice_GD_WI_hyb      =</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">gd_partition</span>(<span class="fu">seq_len</span>(ctx<span class="sc">$</span>N), ctx)[[<span class="st">"GD_WI_hyb"</span>]])</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  het_fraction_lines self_coancestry_min     het_fraction_F1     twice_GD_WI_hyb </span></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           0.0000000           1.0000000           0.3616896           0.3616896</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>Line heterozygosity is zero and every line’s self-coancestry is 1, so individual-level inbreeding coefficients are 1 by construction and carry no management information. The F1s carry 0.362 of their loci heterozygous, and that fraction is exactly twice <code>GD_WI_hyb</code> – the identity <a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 12</span></a> derives. <strong>The manageable quantity is therefore an allele frequency in a pool, never a homozygosity within an individual.</strong> Everything below is computed on frequencies.</p>
 <p><strong>A3. Germplasm is recycled within pool; only information crosses the pool boundary.</strong> Lines are chosen on hybrid performance against the opposite pool (<span class="citation" data-cites="comstock1949">Comstock et al. (<a href="99-references.html#ref-comstock1949" role="doc-biblioref">1949</a>)</span>) and recycled inside their own pool. A DH taken from an <span class="math inline">\(A \times B\)</span> F1 would be a blend of both pools and would destroy the heterotic pattern, so it never happens. <code>run_cycles()</code> in <a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 21</span></a> implements exactly this loop.</p>
@@ -760,7 +764,7 @@ window.Quarto = {
 </table>
 </div>
 </div>
-<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout callout-style-simple callout-important callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -798,6 +802,8 @@ window.Quarto = {
 \theta_B)/4 = \overline{\bar p^2 + (1 - \bar p)^2}\)</span> under A2.</p>
 <p><strong>That is gene diversity of the notional merged pool, and it is not the heterozygosity of the product.</strong> The realised F1 heterozygosity is <span class="math inline">\(2\,GD_{WI\text{-}hyb}\)</span> – exactly, by the self-coancestry identity of assumption A2 – and on the full factorial it equals <span class="math inline">\(GD_T + GD_{BS}\)</span>, the between-pool component counted twice (<a href="05b-heterosis-dominance.html#sec-heterosis-identity" class="quarto-xref"><span>Section 12.3</span></a>). The difference between the two quantities is therefore <span class="math inline">\(GD_{BS}\)</span>, which the <span class="math inline">\(F_{hom}\)</span> lens does not carry, and which moves with the selection:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">31</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>sels <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">random     =</span> <span class="fu">sample.int</span>(ctx<span class="sc">$</span>N, <span class="dv">60</span>),</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">max_div    =</span> <span class="fu">sel_greedy</span>(ctx, <span class="dv">60</span>, <span class="at">w =</span> <span class="dv">0</span>),</span>
@@ -814,6 +820,7 @@ window.Quarto = {
 <span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">isTRUE</span>(<span class="fu">all.equal</span>(two_levels[, <span class="st">"He_merged"</span>], two_levels[, <span class="st">"GD_T"</span>])),</span>
 <span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>          <span class="fu">isTRUE</span>(<span class="fu">all.equal</span>(two_levels[, <span class="st">"F1_het"</span>], two_levels[, <span class="st">"two_GD_WI_hyb"</span>])))</span>
 <span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">as.data.frame</span>(two_levels), <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -916,14 +923,19 @@ window.Quarto = {
 <h3 data-number="11.4.1" class="anchored" data-anchor-id="verifying-the-identity"><span class="header-section-number">11.4.1</span> Verifying the identity</h3>
 <p><code>freq_metrics()</code> returns all three quantities in one marker sweep. The identity is asserted in <code>tests/testthat/test-lenses.R</code>; here it is on live data:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">31</span>)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>idx <span class="ot">&lt;-</span> <span class="fu">sample.int</span>(ctx<span class="sc">$</span>N, <span class="dv">60</span>)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>fm <span class="ot">&lt;-</span> <span class="fu">freq_metrics</span>(idx, ctx)</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(fm[<span class="fu">c</span>(<span class="st">"F_hom"</span>, <span class="st">"F_drift"</span>, <span class="st">"cov_diag"</span>)], <span class="dv">6</span>)</span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    F_hom  F_drift cov_diag </span></span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 0.011458 0.005192 0.006267</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">isTRUE</span>(<span class="fu">all.equal</span>(fm[[<span class="st">"cov_diag"</span>]], fm[[<span class="st">"F_hom"</span>]] <span class="sc">-</span> fm[[<span class="st">"F_drift"</span>]])))</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"># The two standardised marker vectors of Eq. 3, on the markers polymorphic in</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co"># the base, so `2 * mean(x * y)` can be put next to `2 * cov(x, y)`.</span></span>
@@ -942,12 +954,16 @@ window.Quarto = {
 <span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        6.266505e-03        6.266505e-03        8.673617e-18       -7.725594e-04 </span></span>
 <span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;              mean_y     two_times_R_cov </span></span>
 <span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       -1.005046e-02        6.254209e-03</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>Exact to machine precision, and the two <code>stopifnot()</code>s mean this page cannot render if it stops being. The last three entries are the point of the previous paragraph: neither marker-wise mean is zero, so <code>2 * cov(x, y)</code> returns 0.006254 where the quantity Eq. 3 defines is 0.006267. And when the selection <em>is</em> the base, both lenses must read zero:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">freq_metrics</span>(<span class="fu">seq_len</span>(ctx<span class="sc">$</span>N), ctx)[<span class="fu">c</span>(<span class="st">"F_hom"</span>, <span class="st">"F_drift"</span>, <span class="st">"cov_diag"</span>)], <span class="dv">12</span>)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    F_hom  F_drift cov_diag </span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        0        0        0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 </section>
 <section id="why-each-matrix-generates-a-sign" class="level3" data-number="11.4.2">
@@ -993,7 +1009,7 @@ window.Quarto = {
 </table>
 </div>
 </div>
-<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout callout-style-simple callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -1006,6 +1022,8 @@ window.Quarto = {
 <p><span class="citation" data-cites="meuwissen2020">Meuwissen et al. (<a href="99-references.html#ref-meuwissen2020" role="doc-biblioref">2020</a>)</span> state this as an expectation rather than as a measured comparison: “the covariance generated is expected to be larger for WGS data where allele frequencies are extreme with typical MAF close to 0, than for SNP (chip) panels where allele frequencies are generally closer to 1/2” (their second Conclusion bullet), having observed that the strength of the covariance “depends on the distribution of <span class="math inline">\((p_0 - \tfrac12)\)</span>” (their Discussion). Their own simulation used four panels, all random samples of the same whole-genome sequence data (an SNP-BLUP panel, a neutral panel, a QTL panel and a second management panel) – none a SNP chip – so the comparison across a WGS panel and a chip panel is an inference from the algebra of Eq. 3 and not a result of their experiment either.</p>
 <p>The algebra can be made a number, which is worth doing because it decides whether <code>G_VR2</code> is usable. Apply one deterministic management rule – move every frequency 5% of the way toward 0.5, the caricature of a heterozygosity-maximising constraint used again in <a href="#sec-era-step4" class="quarto-xref"><span>Section 11.7.4</span></a> – to a sequence-like panel whose folded site-frequency spectrum has density proportional to <span class="math inline">\(1/[p(1-p)]\)</span>, and then to MAF-filtered subsets of the <em>same</em> draw:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">21</span>)</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Folded site-frequency spectrum with density proportional to 1/[p(1-p)] on</span></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># [1e-3, 1 - 1e-3]: the logit of p is uniform. One draw, filtered four ways.</span></span>
@@ -1027,6 +1045,7 @@ window.Quarto = {
 <span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>keep0  <span class="ot">&lt;-</span> ctx<span class="sc">$</span>p0 <span class="sc">&gt;</span> <span class="fl">1e-6</span> <span class="sc">&amp;</span> ctx<span class="sc">$</span>p0 <span class="sc">&lt;</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fl">1e-6</span>        <span class="co"># as freq_metrics() drops them</span></span>
 <span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>W_book <span class="ot">&lt;-</span> <span class="fu">mean</span>((ctx<span class="sc">$</span>p0[keep0] <span class="sc">-</span> <span class="fl">0.5</span>)<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> (ctx<span class="sc">$</span>p0[keep0] <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> ctx<span class="sc">$</span>p0[keep0])))</span>
 <span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(mafw, <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1277,6 +1296,8 @@ window.Quarto = {
 <p>Both lenses are ratios to a base, so the base is the first thing a cycle report has to pin down. In this book it is <code>ctx$p0</code>, the candidate-pool allele frequencies, set once in <code>build_ctx()</code> and carried forward unchanged by <code>run_cycles()</code>.</p>
 <p>At the hybrid level the base is not a free choice: on the full factorial it is the average of the two pool bases, exactly.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">isTRUE</span>(<span class="fu">all.equal</span>(ctx<span class="sc">$</span>p0, <span class="fu">as.vector</span>((P0[<span class="st">"A"</span>, ] <span class="sc">+</span> P0[<span class="st">"B"</span>, ]) <span class="sc">/</span> <span class="dv">2</span>))))</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Unequal pool sizes, still a complete factorial: each pool-A line appears in</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co"># n_pool_B hybrids and each pool-B line in n_pool_A, so the internal weight</span></span>
@@ -1304,10 +1325,13 @@ window.Quarto = {
 <span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           1.110223e-16           1.110223e-16           1.110223e-16 </span></span>
 <span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      truncation_subset </span></span>
 <span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           3.133333e-01</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>Each pool-A line appears in 25 hybrids and each pool-B line in 25, so a column mean over the factorial is <span class="math inline">\((p_A + p_B)/2\)</span> with no weighting left over. Two consequences a breeder should read off this identity. First, freezing <span class="math inline">\(p_0\)</span> at the hybrid level freezes both pool bases <em>jointly</em>, so the hybrid-level lenses cannot attribute erosion to one pool – that is <a href="#sec-era-step6" class="quarto-xref"><span>Section 11.7.6</span></a>’s job. Second – and this is the part that is easy to state wrongly – what the identity requires is <strong>uniform line usage within each pool</strong>, not completeness of the factorial as such. With 10 lines in one pool against 40 in the other, still complete, the identity holds to 1.1e-16. It holds just as exactly (1.1e-16) on a <strong>balanced but incomplete</strong> factorial – 75 of the 625 possible hybrids, each line used exactly 3 times, the shape of a real NCII design – because each pool’s lines are still used equally often <em>within</em> that pool. What re-weights the two pools inside the base is unequal <strong>line usage</strong>, which a balanced partial factorial does not have and a selected subset typically does: the column means of the 60-hybrid truncation set depart from <span class="math inline">\((p_A + p_B)/2\)</span> by up to 0.313 on a single marker, because truncation concentrates hybrids on a few high-value lines in each pool. A base computed on a set with unequal line usage is therefore a different base – which is the failure mode below, and not a property of the design being a factorial or not.</p>
 <p>Now the failure mode. <code>build_ctx()</code> recomputes <code>p0 &lt;- colMeans(X)</code> on every call, so rebuilding the context from the <em>selected</em> hybrids each cycle – which is what re-running a <code>G</code>-construction function per cycle amounts to – re-anchors the base on the population you were about to measure:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>i_md   <span class="ot">&lt;-</span> <span class="fu">sel_greedy</span>(ctx, <span class="dv">60</span>, <span class="at">w =</span> <span class="dv">0</span>)</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>Xs     <span class="ot">&lt;-</span> ctx<span class="sc">$</span>X[i_md, , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>rebase <span class="ot">&lt;-</span> <span class="fu">build_ctx</span>(<span class="at">X =</span> Xs, <span class="at">f =</span> <span class="fu">molecular_coancestry</span>(Xs), <span class="at">G =</span> <span class="cn">NULL</span>,</span>
@@ -1316,6 +1340,7 @@ window.Quarto = {
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>                    <span class="at">pool =</span> ctx<span class="sc">$</span>pool, <span class="at">fL =</span> ctx<span class="sc">$</span>fL, <span class="at">cfg =</span> <span class="cn">NULL</span>)</span>
 <span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">rbind</span>(<span class="at">frozen_base   =</span> <span class="fu">freq_metrics</span>(i_md, ctx)[<span class="fu">c</span>(<span class="st">"F_hom"</span>, <span class="st">"F_drift"</span>, <span class="st">"cov_diag"</span>)],</span>
 <span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>          <span class="at">rebased       =</span> <span class="fu">freq_metrics</span>(<span class="fu">seq_along</span>(i_md), rebase)[<span class="fu">c</span>(<span class="st">"F_hom"</span>, <span class="st">"F_drift"</span>, <span class="st">"cov_diag"</span>)]), <span class="dv">6</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1348,6 +1373,8 @@ window.Quarto = {
 <p>Not attenuated – <strong>identically zero, both lenses</strong>. A rebased report is not a conservative report or a noisy one; it is a report that cannot detect erosion at all, and it will look clean for as many cycles as you run it.</p>
 <p>The check has to be on the base itself, and it has to be the right check. If the base is stored per cycle, comparing each cycle’s vector with cycle 0’s catches the failure; collapsing the whole history into a <code>range()</code> does not, because <code>range()</code> discards the cycle dimension and returns the marker-wise spread of <span class="math inline">\(p_0\)</span>, the same number whether the base moved or not – here 1, the whole unit interval, because 66 of the 2000 markers are fixed in the candidate pool:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>chk <span class="ot">&lt;-</span> <span class="cf">function</span>(h) {</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">all_identical_to_cycle0 =</span> <span class="fu">all</span>(<span class="fu">vapply</span>(h, identical, <span class="fu">logical</span>(<span class="dv">1</span>), h[[<span class="dv">1</span>]])),</span>
@@ -1356,6 +1383,7 @@ window.Quarto = {
 <span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">rbind</span>(<span class="at">frozen  =</span> <span class="fu">chk</span>(<span class="fu">list</span>(ctx<span class="sc">$</span>p0, ctx<span class="sc">$</span>p0, ctx<span class="sc">$</span>p0)),</span>
 <span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>          <span class="at">rebased =</span> <span class="fu">chk</span>(<span class="fu">list</span>(ctx<span class="sc">$</span>p0, ctx<span class="sc">$</span>p0, rebase<span class="sc">$</span>p0))), <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1393,6 +1421,8 @@ window.Quarto = {
 <p><code>freq_metrics()</code> is the single sweep: it computes <span class="math inline">\(He\)</span>, <code>alleles_lost</code>, <span class="math inline">\(F_{hom}\)</span>, <span class="math inline">\(F_{drift}\)</span>, <code>cov_diag</code>, <code>cor_dp_p0</code> and <code>rare_retained</code> from one <code>colMeans(X[idx, ])</code>. Anything else needing the selected frequencies belongs inside it, not in a second function with its own sweep.</p>
 <p>The pure max-diversity greedy is the <code>G_0.5</code> scheme in miniature: it constrains molecular coancestry and nothing else. Its signature has to be read against a <strong>resampled</strong> baseline rather than against one random draw, for the reason the numbers below make explicit. The baseline is the package’s own <code>null_distribution()</code>, 1000 resampled subsets of the same size, and the z-scores come from <code>discriminatory_power()</code>, so the comparison is the same machinery every scenario in <a href="12-case-study.html" class="quarto-xref"><span>Chapter 23</span></a> is reported through:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># `sels` is the set of four selections built in @sec-era-fhom.</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>cols   <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"He"</span>, <span class="st">"F_hom"</span>, <span class="st">"F_drift"</span>, <span class="st">"cov_diag"</span>, <span class="st">"rare_retained"</span>)</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>null60 <span class="ot">&lt;-</span> <span class="fu">null_distribution</span>(ctx, <span class="dv">60</span>, <span class="at">B =</span> <span class="dv">2000</span>, <span class="at">B_full =</span> <span class="dv">1000</span>, <span class="at">seed =</span> <span class="dv">7</span>)</span>
@@ -1400,6 +1430,7 @@ window.Quarto = {
 <span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">rbind</span>(<span class="at">null_mean =</span> <span class="fu">colMeans</span>(null60<span class="sc">$</span>full[, cols]),</span>
 <span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>          <span class="at">null_sd   =</span> <span class="fu">apply</span>(null60<span class="sc">$</span>full[, cols], <span class="dv">2</span>, stats<span class="sc">::</span>sd),</span>
 <span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>          panel), <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1468,8 +1499,11 @@ window.Quarto = {
 </div>
 </div>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">discriminatory_power</span>(<span class="fu">evaluate</span>(sels, ctx, null60<span class="sc">$</span>gd_ref), null60)[, cols]</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">as.data.frame</span>(z), <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1526,8 +1560,11 @@ window.Quarto = {
 <p>Interpretation, and what it does not license. At this scale, on a single selection from a fixed candidate set, <strong>minimising</strong> molecular coancestry (the <code>max_div</code> plan, <code>w = 0</code>, which maximises gene diversity <code>GD = 1 - theta</code>) buys a measurable divergence between the two lenses – the negative covariance that the <code>G_0.5</code> row of the matrix-sign table predicts – and <strong>no</strong> measurable drift excess over random sampling. The drift excess <span class="citation" data-cites="meuwissen2020">Meuwissen et al. (<a href="99-references.html#ref-meuwissen2020" role="doc-biblioref">2020</a>)</span> report for <code>G_0.5</code> (<span class="math inline">\(\Delta F_{drift} = 0.0176\)</span> against a 0.005 target) is a 20-generation <em>cumulative</em> result under recurrent optimal contributions, where each cycle’s frequency change compounds on the last; one subset drawn once from one candidate pool is not that experiment, and the honest way to run it here is the multi-cycle arm of <a href="#sec-era-step4" class="quarto-xref"><span>Section 11.7.4</span></a>, where the same pull toward 0.5 does produce drift at more than twice the neutral rate. What survives at one cycle is the covariance, and a report carrying only <span class="math inline">\(F_{hom}\)</span> would not show it.</p>
 <p>One thing the table quietly says about the <em>weight</em> rather than the metric:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(<span class="fu">sort</span>(<span class="fu">sel_greedy</span>(ctx, <span class="dv">60</span>, <span class="at">w =</span> <span class="dv">1</span>)), <span class="fu">sort</span>(<span class="fu">sel_truncation</span>(ctx, <span class="dv">60</span>)))</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>At this scale <code>w = 1</code> is not a compromise between index and coancestry – it returns the truncation set exactly, because the index is standardised to unit variance (<code>sd(ctx$index)</code> = 1) while the spread of <span class="math inline">\(\theta\)</span> across candidate subsets of the same size is 7.58e-04, the standard deviation of the <code>theta</code> column over the 2000 cheap-metric resamples of the same null. That is a ratio of 1319: three orders of magnitude, not two. A linear weight has to be calibrated to that ratio, which is why <code>sel_greedy_budget()</code> sweeps a <em>logarithmic</em> grid of <code>w</code> instead of trusting any single value.</p>
 <p><strong>Call.</strong> <code>freq_metrics(idx, ctx)</code> per cycle; <code>metrics_cheap()</code> if you also need the coancestry block, <code>metrics_full()</code> post-hoc for the expensive ones. <strong>Check.</strong> Both lenses present in the report, side by side, with the sign of <span class="math inline">\(F_{hom}\)</span> preserved (never take an absolute value or clamp at zero). <strong>Warning sign.</strong> A single “inbreeding” column in the cycle report. If you cannot tell which lens it is, it is the one your constraint used, and the other one is unmeasured. <strong>Threshold.</strong> Not the <span class="math inline">\(\Delta F\)</span> target. Both columns here are <em>stocks</em> accumulated against the frozen base, and a stock cannot be compared with a rate – <a href="#sec-era-step4" class="quarto-xref"><span>Section 11.7.4</span></a> opens on exactly that point. Within one cycle the reference is the resampled null in the same table, i.e.&nbsp;the z columns above, read on <strong>both</strong> lenses separately and never on their average. The comparison with the programme’s <span class="math inline">\(\Delta F\)</span> budget requires a trajectory and happens only through the regression of <a href="#sec-era-step4" class="quarto-xref"><span>Section 11.7.4</span></a>.</p>
@@ -1546,6 +1583,8 @@ window.Quarto = {
 <li>a pool <strong>re-derived as <span class="math inline">\(n\)</span> doubled-haploid lines</strong> passes only <span class="math inline">\(n\)</span> distinct allele copies, because each DH is homozygous and contributes one allele identity per locus, so <span class="math inline">\(\Delta F = 1/n\)</span> and <span class="math inline">\(N_e = n/2\)</span>. This is literally what <code>next_pool()</code> does in <a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 21</span></a>: one Bernoulli draw per locus per new line.</li>
 </ul>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># One heterotic pool, n_gam allele copies sampled per cycle, n_cyc cycles,</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co"># `reps` independent replicates. `pull` first moves every frequency a fixed</span></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co"># fraction toward 0.5: a caricature of a heterozygosity-maximising constraint,</span></span>
@@ -1594,6 +1633,7 @@ window.Quarto = {
 <span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a>block  <span class="ot">&lt;-</span> <span class="fu">per_cycle</span>(<span class="fu">pool_traj</span>(<span class="dv">2</span> <span class="sc">*</span> n_line, book_cfg<span class="sc">$</span>m, n_cyc), <span class="dv">2</span> <span class="sc">*</span> n_line)</span>
 <span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a>dh     <span class="ot">&lt;-</span> <span class="fu">per_cycle</span>(<span class="fu">pool_traj</span>(n_line, book_cfg<span class="sc">$</span>m, n_cyc), n_line)</span>
 <span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(block, <span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1733,6 +1773,8 @@ window.Quarto = {
 </div>
 <p>The <code>expected</code> column is the closed form, not a fit. Both lenses agree with it and with each other, in both regimes:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>dev <span class="ot">&lt;-</span> <span class="cf">function</span>(a) <span class="fu">max</span>(<span class="fu">abs</span>(<span class="fu">c</span>(a<span class="sc">$</span>F_hom, a<span class="sc">$</span>F_drift) <span class="sc">-</span> <span class="fu">rep</span>(a<span class="sc">$</span>expected, <span class="dv">2</span>)))</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>fit_n <span class="ot">&lt;-</span> <span class="fu">rbind</span>(<span class="at">block_F_hom   =</span> <span class="fu">dF_fit</span>(block, <span class="st">"F_hom"</span>),</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">block_F_drift =</span> <span class="fu">dF_fit</span>(block, <span class="st">"F_drift"</span>),</span>
@@ -1744,6 +1786,7 @@ window.Quarto = {
 <span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>                             <span class="at">sd_drift_final =</span> block<span class="sc">$</span>sd_drift[<span class="fu">nrow</span>(block)]),</span>
 <span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>          <span class="at">dh_pool        =</span> <span class="fu">c</span>(<span class="dv">1</span> <span class="sc">/</span> n_line, n_line <span class="sc">/</span> <span class="dv">2</span>, <span class="fu">dev</span>(dh),</span>
 <span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>                             dh<span class="sc">$</span>sd_hom[<span class="fu">nrow</span>(dh)], dh<span class="sc">$</span>sd_drift[<span class="fu">nrow</span>(dh)])), <span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1786,7 +1829,10 @@ window.Quarto = {
 </table>
 </div>
 </div>
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(fit_n, <span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1833,9 +1879,12 @@ window.Quarto = {
 <p>A third thing, which is what the <span class="math inline">\(F_{drift}\)</span> section above needed and could not compute at that point in the chapter. At cycle 12 the unmanaged crossing block stands at <span class="math inline">\(F_{drift} =\)</span> 0.1141 and the DH pool at 0.2142, with <strong>no selection applied in any cycle of either arm</strong>: <code>pool_traj(pull = 0)</code> is a binomial resampling of the previous cycle’s frequencies and nothing else. A statistic that reaches those values under pure drift is not an accumulated selection intensity, and reading it as one would attribute an intensity to a process that has none.</p>
 <p>Now the crossing block again with the caricature constraint switched on: every frequency moved 5% of the way toward 0.5 before each drift step, which is what a heterozygosity-maximising objective does to the frequencies without needing an optimiser to do it.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>managed <span class="ot">&lt;-</span> <span class="fu">per_cycle</span>(<span class="fu">pool_traj</span>(<span class="dv">2</span> <span class="sc">*</span> n_line, book_cfg<span class="sc">$</span>m, n_cyc, <span class="at">pull =</span> <span class="fl">0.05</span>),</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>                     <span class="dv">2</span> <span class="sc">*</span> n_line)</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(managed[, <span class="fu">c</span>(<span class="st">"cycle"</span>, <span class="st">"F_hom"</span>, <span class="st">"F_drift"</span>, <span class="st">"cov_diag"</span>, <span class="st">"sd_drift"</span>)], <span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1946,9 +1995,12 @@ window.Quarto = {
 </div>
 </div>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">isTRUE</span>(<span class="fu">all.equal</span>(managed<span class="sc">$</span>cov_diag, managed<span class="sc">$</span>F_hom <span class="sc">-</span> managed<span class="sc">$</span>F_drift)))</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>fit_m <span class="ot">&lt;-</span> <span class="fu">rbind</span>(<span class="at">F_hom =</span> <span class="fu">dF_fit</span>(managed, <span class="st">"F_hom"</span>), <span class="at">F_drift =</span> <span class="fu">dF_fit</span>(managed, <span class="st">"F_drift"</span>))</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(fit_m, <span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1979,6 +2031,8 @@ window.Quarto = {
 </div>
 </div>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>arms <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="st">`</span><span class="at">crossing block</span><span class="st">`</span> <span class="ot">=</span> block, <span class="st">`</span><span class="at">DH pool</span><span class="st">`</span> <span class="ot">=</span> dh, <span class="st">`</span><span class="at">pull toward 0.5</span><span class="st">`</span> <span class="ot">=</span> managed)</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="fl">2.5</span>, <span class="dv">1</span>))</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (nm <span class="cf">in</span> <span class="fu">names</span>(arms)) {</span>
@@ -1986,19 +2040,20 @@ window.Quarto = {
 <span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(a<span class="sc">$</span>cycle, a<span class="sc">$</span>F_drift, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="st">"#b2182b"</span>,</span>
 <span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.42</span>, <span class="fl">0.26</span>), <span class="at">xlab =</span> <span class="st">"cycle"</span>, <span class="at">ylab =</span> <span class="st">"F against frozen p0"</span>,</span>
 <span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">main =</span> nm)</span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lines</span>(a<span class="sc">$</span>cycle, a<span class="sc">$</span>F_hom, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">pch =</span> <span class="dv">17</span>, <span class="at">col =</span> <span class="st">"#2166ac"</span>)</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lines</span>(a<span class="sc">$</span>cycle, a<span class="sc">$</span>F_hom, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">pch =</span> <span class="dv">17</span>, <span class="at">col =</span> <span class="st">"#1f5f8b"</span>)</span>
 <span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lines</span>(a<span class="sc">$</span>cycle, a<span class="sc">$</span>expected, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">"grey40"</span>)</span>
 <span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">0</span>, <span class="at">col =</span> <span class="st">"grey70"</span>)</span>
 <span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">legend</span>(<span class="st">"bottomleft"</span>, <span class="fu">c</span>(<span class="st">"F_drift"</span>, <span class="st">"F_hom"</span>, <span class="st">"closed form"</span>), <span class="at">bty =</span> <span class="st">"n"</span>,</span>
 <span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>         <span class="at">cex =</span> <span class="fl">0.75</span>, <span class="at">pch =</span> <span class="fu">c</span>(<span class="dv">19</span>, <span class="dv">17</span>, <span class="cn">NA</span>), <span class="at">lty =</span> <span class="fu">c</span>(<span class="cn">NA</span>, <span class="cn">NA</span>, <span class="dv">2</span>),</span>
-<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>         <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"#b2182b"</span>, <span class="st">"#2166ac"</span>, <span class="st">"grey40"</span>))</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>         <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"#b2182b"</span>, <span class="st">"#1f5f8b"</span>, <span class="st">"grey40"</span>))</span>
 <span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
-<div id="fig-era-lens-divergence" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<div id="fig-era-lens-divergence" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" alt="The two lenses on one heterotic pool over 12 cycles, averaged over 20 replicates, against a base frozen at cycle 0. Left: a crossing block of 50 plants (100 gametes per cycle)">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-era-lens-divergence-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="05-genomic-era_files/figure-html/fig-era-lens-divergence-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="1350">
+<img src="05-genomic-era_files/figure-html/fig-era-lens-divergence-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="The two lenses on one heterotic pool over 12 cycles, averaged over 20 replicates, against a base frozen at cycle 0. Left: a crossing block of 50 plants (100 gametes per cycle)" width="1350">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-era-lens-divergence-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;11.1: The two lenses on one heterotic pool over 12 cycles, averaged over 20 replicates, against a base frozen at cycle 0. Left: a crossing block of 50 plants (100 gametes per cycle). Centre: the same 50 lines re-derived as doubled haploids (50 allele copies per cycle), which drifts at twice the rate. In both, the closed form 1 - (1 - 1/n_gam)^t is the dashed line and the two lenses sit on it. Right: the crossing block with every frequency moved 5% toward 0.5 before each drift step, where the homozygosity lens reports a gain of heterozygosity against the frozen base while the drift lens reports more than twice the neutral rate; the dashed line is the same neutral closed form, here a reference both lenses leave. Nothing is selected in any panel; the divergence in the right-hand panel is produced by the management rule alone.
@@ -2015,6 +2070,8 @@ Figure&nbsp;11.1: The two lenses on one heterotic pool over 12 cycles, averaged 
 <h3 data-number="11.7.5" class="anchored" data-anchor-id="sec-era-step5"><span class="header-section-number">11.7.5</span> Step 5 – Audit on loci that did not enter the management</h3>
 <p>The constraint is met on the panel it is computed on. Whether it is met anywhere else is a separate measurement, and it needs loci the optimiser never saw. Split the marker panel in two, manage on one half, and read the report on the other:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>mgmt  <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">1</span>, ctx<span class="sc">$</span>m, <span class="at">by =</span> <span class="dv">2</span>)</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>audit <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">2</span>, ctx<span class="sc">$</span>m, <span class="at">by =</span> <span class="dv">2</span>)</span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>sub_ctx <span class="ot">&lt;-</span> <span class="cf">function</span>(k) {</span>
@@ -2037,6 +2094,7 @@ Figure&nbsp;11.1: The two lenses on one heterotic pool over 12 cycles, averaged 
 <span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>             <span class="at">index_managed   =</span> <span class="fu">freq_metrics</span>(i_bal, c_mgmt)[cols],</span>
 <span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>             <span class="at">index_audit     =</span> <span class="fu">freq_metrics</span>(i_bal, c_audit)[cols])</span>
 <span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">as.data.frame</span>(aud), <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -2084,9 +2142,12 @@ Figure&nbsp;11.1: The two lenses on one heterotic pool over 12 cycles, averaged 
 </div>
 </div>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>gaps <span class="ot">&lt;-</span> <span class="fu">rbind</span>(<span class="at">max_div =</span> aud[<span class="st">"max_div_audit"</span>, ] <span class="sc">-</span> aud[<span class="st">"max_div_managed"</span>, ],</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>              <span class="at">index   =</span> aud[<span class="st">"index_audit"</span>, ]   <span class="sc">-</span> aud[<span class="st">"index_managed"</span>, ])</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">as.data.frame</span>(gaps[, <span class="fu">c</span>(<span class="st">"F_hom"</span>, <span class="st">"F_drift"</span>)]), <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -2121,6 +2182,8 @@ Figure&nbsp;11.1: The two lenses on one heterotic pool over 12 cycles, averaged 
 <h3 data-number="11.7.6" class="anchored" data-anchor-id="sec-era-step6"><span class="header-section-number">11.7.6</span> Step 6 – Read the two pools separately, and never <span class="math inline">\(F_{ST}\)</span> alone</h3>
 <p>Everything so far is a single-population reading. A hybrid programme has two, and they must be constrained in opposite directions: within pool, limit <span class="math inline">\(\Delta F\)</span>; between pools, <em>preserve</em> divergence, because that is the heterosis engine (<a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 12</span></a> proves the identity, <a href="08-pipeline-stages.html" class="quarto-xref"><span>Chapter 15</span></a> Trap 3 states the prescription). A single global <span class="math inline">\(\tfrac{1}{2}\mathbf{c}'\mathbf{G}\mathbf{c}\)</span> cannot express that.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>pool_row <span class="ot">&lt;-</span> <span class="cf">function</span>(i) {</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="at">GD =</span> <span class="fu">gene_diversity</span>(i, ctx), <span class="at">index =</span> <span class="fu">mean</span>(ctx<span class="sc">$</span>index[i]),</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theta_pools</span>(i, ctx)[<span class="fu">c</span>(<span class="st">"theta_A"</span>, <span class="st">"theta_B"</span>)],</span>
@@ -2135,6 +2198,7 @@ Figure&nbsp;11.1: The two lenses on one heterotic pool over 12 cycles, averaged 
 <span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>            <span class="at">capped     =</span> <span class="fu">pool_row</span>(<span class="fu">sel_greedy</span>(ctx, <span class="dv">60</span>, <span class="at">w =</span> <span class="dv">1</span>, <span class="at">max_use =</span> <span class="dv">4</span>)))</span>
 <span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">isTRUE</span>(<span class="fu">all.equal</span>(<span class="fu">unname</span>(pr[, <span class="st">"GD"</span>]), <span class="fu">unname</span>(pr[, <span class="st">"GD_T"</span>]))))</span>
 <span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">as.data.frame</span>(pr), <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -2235,8 +2299,11 @@ Figure&nbsp;11.1: The two lenses on one heterotic pool over 12 cycles, averaged 
 <p>The dangerous column is <span class="math inline">\(F_{ST}\)</span>. It <em>rises</em> from 0.1095 to 0.1678 under truncation, and so does <span class="math inline">\(GD_{BS}\)</span>. Read as divergence, that looks like a gain in heterosis potential. It is not: by the Caballero &amp; Toro definitions <code>gd_partition()</code> implements <span class="citation" data-cites="caballero2002">(<a href="99-references.html#ref-caballero2002" role="doc-biblioref">Caballero and Toro 2002</a>, Eq. 7)</span>, <span class="math inline">\(GD_{BS} = \tilde f - \bar f\)</span> with <span class="math inline">\(\tilde f = (\theta_A + \theta_B)/2\)</span> and <span class="math inline">\(\bar f = (\theta_A + 2\theta_{AB} + \theta_B)/4\)</span>, so concentrating usage inside <em>one</em> pool raises <span class="math inline">\(\tilde f\)</span> twice as fast as it raises <span class="math inline">\(\bar f\)</span> and therefore raises the between-pool component – even though the two pools’ lines are unchanged and their coancestry matrix <span class="math inline">\(\mathbf{f}^L\)</span> is fixed. All that moved is the weight the selection puts on each line. <span class="math inline">\(F_{ST}\)</span> then divides by a <span class="math inline">\(GD_T\)</span> that fell at the same time – the <code>GD_T</code> column of the table above, from 0.3302 to 0.3124 – which amplifies the artefact: the numerator rises by 45% while the denominator falls by 5%. A within-pool collapse and a genuine divergence are indistinguishable in <span class="math inline">\(F_{ST}\)</span>, and only the separate <span class="math inline">\(\theta_A\)</span>, <span class="math inline">\(\theta_B\)</span> columns tell them apart.</p>
 <p>The limitation to state here rather than hide: <code>freq_metrics()</code> computes its two lenses on <code>ctx$X</code> against <code>ctx$p0</code>, and <a href="#sec-era-step1" class="quarto-xref"><span>Section 11.7.1</span></a> showed that hybrid base to be <span class="math inline">\((p_A + p_B)/2\)</span>. So <span class="math inline">\(F_{hom}\)</span> and <span class="math inline">\(F_{drift}\)</span> as this package computes them are <strong>pooled over the two pools</strong> and cannot, on their own, tell you which pool eroded. The pool-level attribution comes from three other places: <span class="math inline">\(\theta_A\)</span> and <span class="math inline">\(\theta_B\)</span> (<code>theta_pools()</code>), the effective number of lines used per pool (<code>ne_lines_pool()</code>), and the pool-level panel <code>s1_monitor()</code> returns from the line matrix:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>s1 <span class="ot">&lt;-</span> <span class="fu">s1_monitor</span>(L <span class="sc">/</span> <span class="dv">2</span>, pool, <span class="at">cycle =</span> <span class="dv">0</span>)</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(s1, <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -2289,6 +2356,8 @@ Figure&nbsp;11.1: The two lenses on one heterotic pool over 12 cycles, averaged 
 </div>
 <p>The two panels are the same quantities computed from the two ends of the contract, and on the full factorial – where line usage is uniform – they agree exactly:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>gp_full <span class="ot">&lt;-</span> <span class="fu">gd_partition</span>(<span class="fu">seq_len</span>(ctx<span class="sc">$</span>N), ctx)</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">isTRUE</span>(<span class="fu">all.equal</span>(gp_full[[<span class="st">"GD_T"</span>]], s1<span class="sc">$</span>GD_total)),</span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>          <span class="fu">isTRUE</span>(<span class="fu">all.equal</span>(gp_full[[<span class="st">"F_ST"</span>]], s1<span class="sc">$</span>Gst_Nei)))</span>
@@ -2299,6 +2368,7 @@ Figure&nbsp;11.1: The two lenses on one heterotic pool over 12 cycles, averaged 
 <span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         0.3280928         0.3280928         0.1024003         0.1024003 </span></span>
 <span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     s1_Fst_Wright </span></span>
 <span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         0.1857770</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>Note which two agree. <code>gd_partition()</code>’s <code>F_ST</code> is <span class="math inline">\(GD_{BS}/GD_T\)</span>, which is the Nei <span class="math inline">\(G_{ST}\)</span> form, and it equals <code>s1_monitor()</code>’s <code>Gst_Nei</code> to machine precision; <code>Fst_Wright</code> is the other definition and is 1.81 times larger on the same germplasm. That is <a href="08-pipeline-stages.html" class="quarto-xref"><span>Chapter 15</span></a> Trap 2, and it is the reason to name the definition in the report rather than the symbol.</p>
 <p><strong>Call.</strong> <code>theta_pools()</code>, <code>gd_partition()</code>, <code>ne_lines_pool()</code>, <code>max_line_use()</code>, <code>ne_parents()</code> on the selection; <code>s1_monitor()</code> on the line matrix of each cycle. <strong>Check.</strong> <span class="math inline">\(\theta_A\)</span> and <span class="math inline">\(\theta_B\)</span> separately; <span class="math inline">\(GD_{BS}\)</span> held in a band, not maximised; the number of distinct lines used per pool. <strong>Warning sign.</strong> <span class="math inline">\(F_{ST}\)</span> rising while <span class="math inline">\(GD_T\)</span> falls – almost always a one-pool collapse, not divergence. An <code>Ne_lines</code> asymmetry between pools of the size in the <code>truncation</code> row above (4.5 against 11.8). <strong>Threshold.</strong> A per-line usage cap is the direct instrument: the <code>capped</code> row is <code>sel_greedy(ctx, 60, w = 1, max_use = 4)</code>, which holds <span class="math inline">\(|\theta_A - \theta_B|\)</span> at 0.0056 and both pools above 15.5 effective lines, against an index of 0.82 where truncation reached 1.99. That index difference is the price, and <a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 21</span></a> is where it is paid back or not. <code>max_use</code> defaults to <code>NULL</code> everywhere in this package, so the cap is opt-in.</p>
@@ -2308,7 +2378,7 @@ Figure&nbsp;11.1: The two lenses on one heterotic pool over 12 cycles, averaged 
 </section>
 <section id="sec-era-step7" class="level3" data-number="11.7.7">
 <h3 data-number="11.7.7" class="anchored" data-anchor-id="sec-era-step7"><span class="header-section-number">11.7.7</span> Step 7 – Check the matrix you are about to invert</h3>
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-simple callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -2321,6 +2391,8 @@ Figure&nbsp;11.1: The two lenses on one heterotic pool over 12 cycles, averaged 
 <p><code>G_VR1</code>, <code>G_VR2</code>, <code>G_0.5</code> and <code>G_i(p)</code> are all only <strong>semi</strong>-definite positive, so every one of them needs <span class="math inline">\(\alpha\)</span> added to the diagonal (<span class="math inline">\(\alpha = 0.01\)</span> in <span class="citation" data-cites="meuwissen2020">Meuwissen et al. (<a href="99-references.html#ref-meuwissen2020" role="doc-biblioref">2020</a>)</span>, their Methods) before it can be inverted and before the optimal-contribution algorithm will run. <span class="math inline">\(\mathbf{A}\)</span> and <code>G_LA</code> are positive definite by construction.</p>
 <p><strong>The mechanism is not the same for all four, and the difference matters here.</strong> For the centred VanRaden forms it is the centring: <span class="math inline">\(\mathbf{Z}\)</span> is centred on the <em>population’s own</em> allele frequencies, so its columns sum to zero over individuals, the constant vector lies in the null space and one degree of freedom is gone by construction. For <code>G_0.5</code>, which is the molecular coancestry this book calls <span class="math inline">\(\mathbf{f}\)</span>, it is <strong>not</strong> the centring – <span class="math inline">\(\mathbf{f}\)</span> is not centred on anything and stays in <span class="math inline">\([0, 1]\)</span> by design (<a href="01-coancestry.html" class="quarto-xref"><span>Chapter 1</span></a>). Its deficiency has a different cause, derived below. Both statements are checkable:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>Zh  <span class="ot">&lt;-</span> ctx<span class="sc">$</span>X <span class="sc">-</span> <span class="fl">0.5</span></span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>rkf <span class="ot">&lt;-</span> <span class="fu">qr</span>(ctx[[<span class="st">"f"</span>]])<span class="sc">$</span>rank</span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>rkG <span class="ot">&lt;-</span> <span class="fu">qr</span>(ctx[[<span class="st">"G"</span>]])<span class="sc">$</span>rank</span>
@@ -2337,12 +2409,15 @@ Figure&nbsp;11.1: The two lenses on one heterotic pool over 12 cycles, averaged 
 <span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           -4.178879e-11            1.163340e-13            4.900000e+01 </span></span>
 <span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                  rank_G                 n_lines                       N </span></span>
 <span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;            4.800000e+01            5.000000e+01            6.250000e+02</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p><span class="math inline">\(\mathbf{f} = 0.5 + \tfrac{2}{m}\mathbf{Z}_h\mathbf{Z}_h'\)</span> with <span class="math inline">\(\mathbf{Z}_h = \mathbf{X} - 0.5\)</span>, to machine precision – a Gram matrix plus the positive rank-one term <span class="math inline">\(0.5\,\mathbf{1}\mathbf{1}'\)</span>, hence positive semi-definite, and with row sums nowhere near zero (<code>f_rowsum_min</code> above), so neither <span class="math inline">\(\mathbf{1}\)</span> nor any other constant vector is in its null space. VanRaden’s <span class="math inline">\(\mathbf{G}\)</span> on the same hybrids has <code>sum(G)</code> and every row sum at numerical zero, which <em>is</em> the centring, and its rank comes out exactly one below <span class="math inline">\(\mathrm{rank}(\mathbf{f})\)</span> on this data set: one dimension is what centring costs, and it is the only part of either deficiency that centring explains. The other 576 missing dimensions have a different cause entirely, and the rest of this step is that cause.</p>
 </div>
 </div>
 <p>In a hybrid programme the deficiency is far worse than one zero eigenvalue, and it is structural rather than numerical. A hybrid’s marker row is the average of its two parents’ rows, so <span class="math inline">\(\mathbf{X} = \tfrac12 \mathbf{B}\mathbf{M}_L\)</span> with <span class="math inline">\(\mathbf{B}\)</span> the <span class="math inline">\(N \times L\)</span> parent-usage incidence matrix (a 1 in the two columns of its parents) and <span class="math inline">\(\mathbf{M}_L\)</span> the <span class="math inline">\(L \times m\)</span> line matrix (the <code>L / 2</code> object of <code>simulate_lines()</code>; the subscript keeps it apart from the <span class="math inline">\(\mathbf{G}_\bullet\)</span> relationship matrices of this chapter). The hybrid coancestry matrix is a Gram matrix of that, <span class="math inline">\(\mathbf{f} = [\mathbf{X}, 1 - \mathbf{X}][\mathbf{X}, 1 - \mathbf{X}]'/m\)</span>. Its column space lies in the span of the columns of <span class="math inline">\(\mathbf{X}\)</span> plus the constant vector, so its rank is bounded by <span class="math inline">\(\min(\mathrm{rank}(\mathbf{B}),\, m) + 1\)</span> however many hybrids you have. Measured:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>incidence <span class="ot">&lt;-</span> <span class="cf">function</span>(idx, ctx) {</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  B <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="fu">length</span>(idx), ctx<span class="sc">$</span>n_lines)</span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  B[<span class="fu">cbind</span>(<span class="fu">seq_along</span>(idx), ctx<span class="sc">$</span>ped<span class="sc">$</span>a[idx])] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
@@ -2366,6 +2441,7 @@ Figure&nbsp;11.1: The two lenses on one heterotic pool over 12 cycles, averaged 
 <span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a>}))</span>
 <span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a>rk<span class="sc">$</span>deficiency <span class="ot">&lt;-</span> rk<span class="sc">$</span>n_sel <span class="sc">-</span> rk<span class="sc">$</span>rank_f</span>
 <span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(rk)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -2426,6 +2502,8 @@ Figure&nbsp;11.1: The two lenses on one heterotic pool over 12 cycles, averaged 
 </div>
 </div>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">all</span>(rk<span class="sc">$</span>rank_f <span class="sc">==</span> rk<span class="sc">$</span>rank_incidence))</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>ev_min <span class="ot">&lt;-</span> <span class="fu">min</span>(<span class="fu">eigen</span>(ctx[[<span class="st">"f"</span>]], <span class="at">symmetric =</span> <span class="cn">TRUE</span>, <span class="at">only.values =</span> <span class="cn">TRUE</span>)<span class="sc">$</span>values)</span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">rank_full_factorial =</span> rk<span class="sc">$</span>rank_f[<span class="dv">1</span>], <span class="at">n_lines =</span> ctx<span class="sc">$</span>n_lines)</span>
@@ -2434,6 +2512,7 @@ Figure&nbsp;11.1: The two lenses on one heterotic pool over 12 cycles, averaged 
 <span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">min_eigenvalue_f =</span> <span class="fu">signif</span>(ev_min, <span class="dv">3</span>))</span>
 <span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; min_eigenvalue_f </span></span>
 <span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        -4.28e-13</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>Result. In all five selections the rank of <span class="math inline">\(\mathbf{f}\)</span> equals the rank of the parent-usage incidence matrix exactly. On the full factorial that is 49 <span class="math inline">\(= L - 1\)</span> for 50 lines, against 625 hybrids: a deficiency of 576, with a smallest eigenvalue at -4.3^{-13}. A subset of 20 hybrids drawn from 50 lines is full rank.</p>
 <p>Interpretation. The deficiency is not a rounding artefact and does not shrink with more markers; it is the factorial structure. <span class="math inline">\(N\)</span> hybrids built from <span class="math inline">\(L\)</span> lines live in an at most <span class="math inline">\(L\)</span>-dimensional space, so any hybrid-level optimiser that needs <span class="math inline">\(\mathbf{f}^{-1}\)</span> must regularise, and the amount of regularisation required is predictable <em>before</em> any eigendecomposition: compute <span class="math inline">\(\mathrm{rank}(\mathbf{B})\)</span>, which costs one <code>qr()</code> on an <span class="math inline">\(N \times L\)</span> 0/1 matrix. The equality <code>rank_f == rank_incidence</code> is a measurement over five selections at one scale, not a theorem – the algebra above bounds <span class="math inline">\(\mathrm{rank}(\mathbf{f})\)</span> by <span class="math inline">\(\mathrm{rank}(\mathbf{B}) + 1\)</span>, and the extra dimension the bound allows is not attained in any of the five. It is also the reason this book’s selection machinery never inverts <span class="math inline">\(\mathbf{f}\)</span>: <code>metrics_cheap()</code> and the DE fitness only ever evaluate the quadratic form <span class="math inline">\(\mathbf{c}'\mathbf{f}\mathbf{c}\)</span>, which needs no inverse. The quadratic-programming routes do need a definite matrix, and both <code>optimal_contributions()</code> and <code>ocs_quadprog()</code> add <code>diag(1e-8, n)</code> for exactly this reason – four orders of magnitude above the numerical zero reported above, and small enough not to move the optimum. See <a href="09-optimal-contributions.html" class="quarto-xref"><span>Chapter 17</span></a> and <a href="08b-genomic-prediction.html#sec-g-singular" class="quarto-xref"><span>Section 16.3.2</span></a>.</p>

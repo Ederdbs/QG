@@ -92,20 +92,21 @@ div.csl-indent {
 <meta name="quarto:offset" content="./">
 <link href="./04d-breeding-programme.html" rel="next">
 <link href="./04b-backcross-introgression.html" rel="prev">
+<link href="./favicon.svg" rel="icon" type="image/svg+xml">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9ef9d4760de657dc918b81d25b42b59f.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-58115a419e540697b7ccd904e8efcd2d.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9ef9d4760de657dc918b81d25b42b59f.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-37a0ccb6f5b9899fcb884e11bb6f7458.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-da8b26c7a017495cabf78e5d2792d1d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-b192ecda6a457e66a32e528cd3cc1fbc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-da8b26c7a017495cabf78e5d2792d1d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -685,6 +686,8 @@ window.Quarto = {
 <h2 data-number="7.1" class="anchored" data-anchor-id="step-1-founder-genomes-what-a-founder-is-and-which-engine-to-use"><span class="header-section-number">7.1</span> Step 1 – Founder genomes: what a founder is, and which engine to use</h2>
 <p>Every AlphaSimR simulation starts with founder haplotypes. Before choosing an engine, it is worth seeing what one produces, at a size small enough to read. <code>inbred = TRUE</code> makes every founder fully homozygous, which is what a panel of inbred lines is.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>tiny <span class="ot">&lt;-</span> <span class="fu">quickHaplo</span>(<span class="at">nInd =</span> <span class="dv">3</span>, <span class="at">nChr =</span> <span class="dv">2</span>, <span class="at">segSites =</span> <span class="dv">4</span>, <span class="at">inbred =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>SPt  <span class="ot">&lt;-</span> SimParam<span class="sc">$</span><span class="fu">new</span>(tiny)</span>
@@ -697,9 +700,12 @@ window.Quarto = {
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2_2   0   1   1   0   1   0   1   1</span></span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3_1   1   0   0   0   0   1   0   1</span></span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3_2   1   0   0   0   0   1   0   1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>One row per haplotype, two per diploid individual (<code>1_1</code> and <code>1_2</code> are the two chromosome copies of individual 1), one column per segregating site across both chromosomes (<code>1_3</code> is chromosome 1, site 3). Alleles are coded 0 and 1 – ancestral and derived under a coalescent engine, arbitrary labels under <code>quickHaplo()</code>. Because the founders are inbred, the two rows of each individual are identical. <code>pullSegSiteGeno()</code> sums the two rows into an allele dosage in <code>{0, 1, 2}</code>:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>tiny_geno <span class="ot">&lt;-</span> <span class="fu">pullSegSiteGeno</span>(tiny_pop, <span class="at">simParam =</span> SPt)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>tiny_geno</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   1_1 1_2 1_3 1_4 2_1 2_2 2_3 2_4</span></span>
@@ -709,10 +715,13 @@ window.Quarto = {
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">all</span>(tiny_geno <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">2</span>)))</span>
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">isTRUE</span>(<span class="fu">all.equal</span>(<span class="fu">diag</span>(<span class="fu">molecular_coancestry</span>(tiny_geno <span class="sc">/</span> <span class="dv">2</span>)),</span>
 <span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>                           <span class="fu">rep</span>(<span class="dv">1</span>, <span class="dv">3</span>))))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>The two assertions fix the coding for the rest of the book. AlphaSimR’s dosage is 0/1/2; the contract of <a href="03-simulating-crosses.html" class="quarto-xref"><span>Chapter 4</span></a> codes the same information as 0/0.5/1, the within-individual frequency of the reference allele (AlphaSimR’s derived allele plays that role), and every bridge function divides by two on the way across (<code>stage1_build()</code> also detects and rescales 0/1/2 on its own). On an inbred individual the molecular self-coancestry of <a href="01-coancestry.html" class="quarto-xref"><span>Chapter 1</span></a> is exactly 1, which is the second assertion.</p>
 <p>There are two engines, and the choice is not cosmetic. <code>runMacs()</code> runs a backward-in-time coalescent (<span class="citation" data-cites="chen2009">Chen et al. (<a href="99-references.html#ref-chen2009" role="doc-biblioref">2009</a>)</span>) under a species-specific demography – <code>species = "MAIZE"</code>, <code>"WHEAT"</code>, <code>"CATTLE"</code> – so the founders carry a realistic allele-frequency spectrum and realistic linkage disequilibrium. <code>quickHaplo()</code> samples 0s and 1s directly: instant, and with no history behind it.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>tm <span class="ot">&lt;-</span> <span class="cf">function</span>(expr) <span class="fu">as.numeric</span>(<span class="fu">system.time</span>(expr)[<span class="st">"elapsed"</span>])</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># reproducibility: two calls from the same seed, and R's own stream after each</span></span>
@@ -742,6 +751,7 @@ window.Quarto = {
 <span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>                                       <span class="fu">identical</span>(ma<span class="sc">@</span>geno, mb<span class="sc">@</span>geno)),</span>
 <span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>               <span class="at">R_stream_same_after =</span> <span class="fu">c</span>(<span class="fu">identical</span>(rs_qa, rs_qb),</span>
 <span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>                                       <span class="fu">identical</span>(rs_ma, rs_mb))), <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -756,13 +766,13 @@ window.Quarto = {
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">quickHaplo</td>
-<td style="text-align: right;">0.0003</td>
+<td style="text-align: right;">0.0002</td>
 <td style="text-align: left;">TRUE</td>
 <td style="text-align: left;">TRUE</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">runMacs</td>
-<td style="text-align: right;">2.7160</td>
+<td style="text-align: right;">2.6750</td>
 <td style="text-align: left;">FALSE</td>
 <td style="text-align: left;">TRUE</td>
 </tr>
@@ -773,7 +783,7 @@ window.Quarto = {
 </div>
 <p>Read the last two columns together. <strong><code>runMacs()</code> is not reproducible from <code>set.seed()</code>, and R’s own random stream is untouched by that.</strong> <code>runMacs()</code> draws a seed for MaCS from R’s stream (one <code>sample.int()</code> per chromosome) and hands it to the binary. The fourth column, asserted in the chunk, says that after two calls from the same seed R’s <code>.Random.seed</code> is identical: the amount of R’s stream the call consumes is fixed, and every draw R makes afterwards is the same in both runs. Yet the third column says the haplotypes differ. What was measured, then, is that MaCS’s output is not a deterministic function of the seed it is handed. The only thing that moves between two runs is the founder haplotypes themselves – and everything computed <em>from</em> those founders. <code>quickHaplo()</code> is pure R sampling and is exactly reproducible.</p>
 <p>(The <code>seconds_per_call</code> column is wall clock and will differ on your machine and between renders. <code>runMacs()</code> takes seconds; <code>quickHaplo()</code>, timed over 100 calls because one call is below the clock’s resolution, takes about 0.25 ms per call.)</p>
-<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout callout-style-simple callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -794,6 +804,8 @@ window.Quarto = {
 </div>
 <p>So what does <code>quickHaplo()</code> give up? Linkage disequilibrium among the founders. The honest way to measure that is against the sampling floor: with <code>n</code> individuals, two completely independent loci still show <code>r^2</code> of about <code>1 / (n - 1)</code> by chance alone.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>ldstat <span class="ot">&lt;-</span> <span class="cf">function</span>(fg) {</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  SPx <span class="ot">&lt;-</span> SimParam<span class="sc">$</span><span class="fu">new</span>(fg)</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  g <span class="ot">&lt;-</span> <span class="fu">pullSegSiteGeno</span>(<span class="fu">newPop</span>(fg, <span class="at">simParam =</span> SPx), <span class="at">simParam =</span> SPx)</span>
@@ -811,6 +823,7 @@ window.Quarto = {
 <span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">3</span>); lm_ <span class="ot">&lt;-</span> <span class="fu">ldstat</span>(<span class="fu">runMacs</span>(<span class="at">nInd =</span> <span class="dv">100</span>, <span class="at">nChr =</span> <span class="dv">5</span>, <span class="at">segSites =</span> <span class="dv">200</span>,</span>
 <span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">inbred =</span> <span class="cn">TRUE</span>, <span class="at">species =</span> <span class="st">"MAIZE"</span>))</span>
 <span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">rbind</span>(<span class="at">quickHaplo =</span> lq, <span class="at">runMacs =</span> lm_))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -831,8 +844,8 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td style="text-align: left;">runMacs</td>
-<td style="text-align: right;">0.1255</td>
-<td style="text-align: right;">0.0120</td>
+<td style="text-align: right;">0.1204</td>
+<td style="text-align: right;">0.0119</td>
 <td style="text-align: right;">0.0101</td>
 </tr>
 </tbody>
@@ -855,6 +868,8 @@ window.Quarto = {
 <p><code>SimParam</code> holds everything global: the genetic map, which sites are QTL, the trait effects, the error variances. It is an R6 object, so its methods are called with <code>$</code>, and a variable named <code>SP</code> is picked up automatically by every AlphaSimR function that needs it.</p>
 <p>A hybrid programme exists because of dominance: without it a line’s cross performance is its own breeding value and there is nothing a testcross can see that the line per se could not (<a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 12</span></a>). So the trait defined here, and used through Step 6, carries a dominance term from the start. This is exactly the reason an autogamous programme has no equivalent of this step: there, dominance is invisible by construction (a released, self-pollinated variety is homozygous, so no heterozygote is ever evaluated or sold) and <code>SP$addTraitA()</code> – additive effects only – is the whole model, the case <a href="04d-breeding-programme.html" class="quarto-xref"><span>Chapter 8</span></a> runs throughout.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Seeded here, not once at the top of the chapter: Step 1 draws from R's random</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># stream (each runMacs() call consumes a fixed amount of it), so everything</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># downstream would move with any edit or re-execution of Step 1 unless the seed</span></span>
@@ -865,6 +880,7 @@ window.Quarto = {
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>SP<span class="sc">$</span><span class="fu">addTraitAD</span>(<span class="at">nQtlPerChr =</span> <span class="dv">100</span>, <span class="at">mean =</span> <span class="dv">10</span>, <span class="at">var =</span> <span class="dv">1</span>,</span>
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>              <span class="at">meanDD =</span> rrs_cfg[[<span class="st">"mean_dd"</span>]], <span class="at">varDD =</span> rrs_cfg[[<span class="st">"var_dd"</span>]])</span>
 <span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>SP<span class="sc">$</span><span class="fu">setVarE</span>(<span class="at">h2 =</span> <span class="fl">0.4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>There are four trait constructors, and choosing between them is choosing a model of gene action:</p>
 <table class="caption-top table">
@@ -910,6 +926,8 @@ window.Quarto = {
 <p>with <span class="math inline">\(\mu_0\)</span> an intercept, <span class="math inline">\(a_k \in \mathbb{R}\)</span> the additive effect (half the difference between the two homozygotes, on the classical scale of <span class="citation" data-cites="falconer1996">Falconer and Mackay (<a href="99-references.html#ref-falconer1996" role="doc-biblioref">1996</a>)</span>, Ch. 7, which puts the origin at the midpoint of the two homozygotes and assigns them <span class="math inline">\(+a\)</span> and <span class="math inline">\(-a\)</span> and the heterozygote <span class="math inline">\(d\)</span>; no equation number is attributed here, the scale is stated in full) and <span class="math inline">\(d_k \in
 \mathbb{R}\)</span> the dominance deviation, the departure of the heterozygote from that midpoint. It is the model of <a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 12</span></a> with AlphaSimR’s coding, and the chunk checks it rather than trusts it:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>tr <span class="ot">&lt;-</span> SP<span class="sc">$</span>traits[[<span class="dv">1</span>]]</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>a  <span class="ot">&lt;-</span> tr<span class="sc">@</span>addEff</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>d  <span class="ot">&lt;-</span> tr<span class="sc">@</span>domEff</span>
@@ -917,10 +935,13 @@ window.Quarto = {
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>x0   <span class="ot">&lt;-</span> <span class="fu">pullQtlGeno</span>(pop0, <span class="at">simParam =</span> SP)</span>
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>gv_by_hand <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(tr<span class="sc">@</span>intercept <span class="sc">+</span> (x0 <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">%*%</span> a <span class="sc">+</span> (x0 <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">%*%</span> d)</span>
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">isTRUE</span>(<span class="fu">all.equal</span>(gv_by_hand, <span class="fu">as.numeric</span>(<span class="fu">gv</span>(pop0)))))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p><code>meanDD</code> and <code>varDD</code> parameterise the <strong>dominance degree</strong> <span class="math inline">\(\delta_k = d_k / |a_k|\)</span>: AlphaSimR draws <span class="math inline">\(\delta_k \sim N(\texttt{meanDD},
 \texttt{varDD})\)</span> and sets <span class="math inline">\(d_k = \delta_k\,|a_k|\)</span>, so <span class="math inline">\(\delta_k = 0\)</span> is additivity, <span class="math inline">\(\delta_k = 1\)</span> complete dominance, <span class="math inline">\(\delta_k &gt; 1\)</span> overdominance, and a <em>positive mean</em> is directional dominance: on average the heterozygote sits above the homozygote midpoint, whichever allele is favourable. Directional dominance is what makes heterosis positive and inbreeding depression a loss on the trait scale, and it is the standing hypothesis for yield in maize.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">n_qtl =</span> <span class="fu">length</span>(a), <span class="at">meanDD_requested =</span> rrs_cfg[[<span class="st">"mean_dd"</span>]],</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">meanDD_realised =</span> <span class="fu">mean</span>(d <span class="sc">/</span> <span class="fu">abs</span>(a)), <span class="at">varDD_requested =</span> rrs_cfg[[<span class="st">"var_dd"</span>]],</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">varDD_realised =</span> stats<span class="sc">::</span><span class="fu">var</span>(d <span class="sc">/</span> <span class="fu">abs</span>(a))) <span class="sc">|&gt;</span> <span class="fu">fmt</span>(<span class="dv">3</span>)</span>
@@ -928,6 +949,7 @@ window.Quarto = {
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         1000.000            0.400            0.378            0.100 </span></span>
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   varDD_realised </span></span>
 <span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;            0.104</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p><code>nQtlPerChr</code> sets how polygenic the trait is. Setting it equal to <code>segSites</code> makes <em>every</em> segregating site a QTL, which is what this chapter does throughout – convenient, because then the marker matrix and the causal loci are the same set and there is no marker-versus-QTL gap to reason about. Real programmes have that gap; <a href="05-genomic-era.html" class="quarto-xref"><span>Chapter 11</span></a> is where the book takes it seriously.</p>
 <p><code>mean</code> fixes the mean genetic value of the <em>founders</em>. <code>var</code> fixes their <strong>additive</strong> variance (<code>useVarA = TRUE</code>, the default), not their total genetic variance – with inbred founders the two coincide, for a reason Step 3 shows. <code>corA</code> (Step 7) sets the genetic correlation between traits.</p>
@@ -942,16 +964,21 @@ window.Quarto = {
 <h2 data-number="7.3" class="anchored" data-anchor-id="step-3-the-base-population-and-where-the-variance-components-live"><span class="header-section-number">7.3</span> Step 3 – The base population, and where the variance components live</h2>
 <p><code>newPop()</code> turns founder haplotypes into individuals and, because a trait is now defined, computes their genetic values immediately.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>pop <span class="ot">&lt;-</span> <span class="fu">setPheno</span>(<span class="fu">newPop</span>(founders, <span class="at">simParam =</span> SP), <span class="at">simParam =</span> SP)</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">n =</span> pop<span class="sc">@</span>nInd, <span class="at">meanG =</span> <span class="fu">as.numeric</span>(<span class="fu">meanG</span>(pop)), <span class="at">varG =</span> <span class="fu">as.numeric</span>(<span class="fu">varG</span>(pop)),</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">varP =</span> <span class="fu">as.numeric</span>(<span class="fu">varP</span>(pop)),</span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">h2_realised =</span> <span class="fu">as.numeric</span>(<span class="fu">varG</span>(pop) <span class="sc">/</span> <span class="fu">varP</span>(pop))) <span class="sc">|&gt;</span> <span class="fu">fmt</span>(<span class="dv">3</span>)</span>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           n       meanG        varG        varP h2_realised </span></span>
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      60.000      10.000       1.000       2.614       0.383</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>The realised heritability is near but not equal to the requested 0.4: <code>setVarE()</code> fixes a variance, and the ratio it produces in any finite sample is itself a random variable. This is a general and useful habit – <strong>check what the simulation realised, do not assume what you requested.</strong></p>
 <p><code>genParam()</code> returns the full decomposition. Four of its fields are the ones a hybrid programme cares about, and they read differently on a panel of inbred lines and on a random-mating population made from them:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>mixed <span class="ot">&lt;-</span> pop</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>) mixed <span class="ot">&lt;-</span> <span class="fu">randCross</span>(mixed, <span class="at">nCrosses =</span> <span class="dv">1000</span>, <span class="at">simParam =</span> SP)</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -968,6 +995,7 @@ window.Quarto = {
 <span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>vtab <span class="ot">&lt;-</span> <span class="fu">rbind</span>(<span class="fu">vrow</span>(pop,   <span class="st">"founders (fully inbred)"</span>),</span>
 <span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>              <span class="fu">vrow</span>(mixed, <span class="st">"after 3 random matings"</span>))</span>
 <span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(vtab)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1014,6 +1042,8 @@ window.Quarto = {
 </table>
 </div>
 </div>
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(vtab[[<span class="st">"varD"</span>]][<span class="dv">1</span>] <span class="sc">&lt;</span> <span class="fl">1e-10</span>)</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Among fully homozygous lines the locus value is a (x - 1), so at linkage</span></span>
@@ -1033,6 +1063,7 @@ window.Quarto = {
 <span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">varA_LD =</span> varA_LD, <span class="at">ratio_LD =</span> ratio_LD) <span class="sc">|&gt;</span> <span class="fu">fmt</span>(<span class="dv">4</span>)</span>
 <span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     varA  varA_LE ratio_LE  varA_LD ratio_LD </span></span>
 <span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   1.0000   0.8495   1.9875   0.1505   0.3522</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p><code>varA</code> is the realised additive variance; <code>genicVarA</code> is what it would be if the loci were independent and in Hardy-Weinberg proportions. Their ratio is the whole subject of <a href="11c-limits.html" class="quarto-xref"><span>Chapter 22</span></a>, and the package’s <code>genic_var()</code> computes the same quantity from a marker matrix directly.</p>
 <p>The founders’ ratio of 2.34 has two parts, and the chunk separates them. Among fully homozygous lines the value at QTL <span class="math inline">\(k\)</span> is <span class="math inline">\(a_k (x_{ik} - 1)\)</span> with <span class="math inline">\(x_{ik} \in \{0, 2\}\)</span>, and AlphaSimR’s <code>bv()</code> on these founders is exactly <span class="math inline">\(\sum_k a_k (x_{ik} - 2 p_k)\)</span> (asserted in the chunk). At linkage equilibrium its variance is <code>varA_LE</code> <span class="math inline">\(= \sum_k 4 p_k q_k a_k^2 =\)</span> 0.8495, against a genic value of 0.4274: a ratio of 1.99, exact given the effects and the frequencies. That part is <strong>inbreeding</strong> – a homozygous population has per-locus variance <code>4pq</code> where a Hardy-Weinberg one has <code>2pq</code>. It is close to 2 and not exactly 2 because <code>genicVarA</code> is written with the Hardy-Weinberg average effect <span class="math inline">\(\alpha_k = a_k + d_k (q_k - p_k)\)</span> defined below, whereas the homozygous lines carry <span class="math inline">\(a_k\)</span>; twice the genic value equals <code>varA_LE</code> only where <span class="math inline">\(d_k (q_k - p_k) = 0\)</span> at every locus. The remainder, <code>varA_LD = varA - varA_LE</code> <span class="math inline">\(=\)</span> 0.1505, or 0.35 in ratio units, is sampling (gametic-phase) disequilibrium among only 60 founders’ worth of gametes. Three rounds of random mating restore Hardy-Weinberg and pull the ratio to 1.06; what remains is that same disequilibrium. A ratio away from 1 in an <em>outbred</em> population is the gametic-phase disequilibrium <a href="02b-response.html" class="quarto-xref"><span>Chapter 3</span></a> defines and <a href="11c-limits.html" class="quarto-xref"><span>Chapter 22</span></a> measures; a ratio away from 1 in an inbred one is mostly the homozygosity.</p>
@@ -1040,6 +1071,8 @@ window.Quarto = {
 <p><span class="math display">\[M_{HW} \;=\; \mu_0 + \sum_k \big[a_k\,(p_k - q_k) + 2\,p_k q_k\,d_k\big]\]</span></p>
 <p>while the inbred panel at the same frequencies has only the first term. The difference, <span class="math inline">\(2\sum_k d_k p_k q_k\)</span>, is the inbreeding depression of <a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 12</span></a> at <span class="math inline">\(F = 1\)</span>, which the package computes as <code>inbreeding_depression(p, d, F_coef = 1)</code>. And the genic additive variance is <span class="math inline">\(\sum_k 2 p_k q_k \alpha_k^2\)</span> with <span class="math inline">\(\alpha_k = a_k + d_k\,(q_k - p_k)\)</span> the average effect of a gene substitution. <span class="citation" data-cites="falconer1996">Falconer and Mackay (<a href="99-references.html#ref-falconer1996" role="doc-biblioref">1996</a>)</span> define <span class="math inline">\(\alpha\)</span> in Ch. 7 and the single-locus additive variance <span class="math inline">\(2pq\alpha^2\)</span> in Ch. 8; the equation numbers are not attributed here, so both identities are stated in this chapter’s notation: <span class="math inline">\(\alpha_k = a_k + d_k\,(q_k - p_k)\)</span> and, summed over independent loci, <span class="math inline">\(\sum_k 2 p_k q_k \alpha_k^2\)</span>, which is the genic variance:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>gp  <span class="ot">&lt;-</span> <span class="fu">genParam</span>(pop, <span class="at">simParam =</span> SP)</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>alpha_f <span class="ot">&lt;-</span> a <span class="sc">+</span> d <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> p_f)</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">isTRUE</span>(<span class="fu">all.equal</span>(<span class="fu">as.numeric</span>(gp[[<span class="st">"mu_HW"</span>]] <span class="sc">-</span> gp[[<span class="st">"mu"</span>]]),</span>
@@ -1050,6 +1083,7 @@ window.Quarto = {
 <span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">inbreeding_depression =</span> <span class="fu">inbreeding_depression</span>(p_f, d, <span class="at">F_coef =</span> <span class="dv">1</span>)) <span class="sc">|&gt;</span> <span class="fu">fmt</span>(<span class="dv">3</span>)</span>
 <span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           mean_inbred               mean_HW inbreeding_depression </span></span>
 <span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                10.000                14.355                 4.355</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>Both hold to machine precision against AlphaSimR’s own <code>genParam()</code>. The gap between the two means is the amount a random-mating population built from these lines would sit <em>above</em> the lines themselves – and, read in the other direction, the amount an open-pollinated population loses on being driven to homozygosity. It is the same <span class="math inline">\(d\)</span> that Step 4 turns into heterosis.</p>
 </section>
@@ -1057,6 +1091,8 @@ window.Quarto = {
 <h2 data-number="7.4" class="anchored" data-anchor-id="step-4-the-dna-lottery-heterosis-and-why-an-f1-is-not-a-family"><span class="header-section-number">7.4</span> Step 4 – The DNA lottery, heterosis, and why an F1 is not a family</h2>
 <p>The course <span class="citation" data-cites="gorjanc2022">(<a href="99-references.html#ref-gorjanc2022" role="doc-biblioref">Gorjanc et al. 2022</a>)</span> demonstrates Mendelian sampling by crossing outbred founders and showing that full sibs vary. With <strong>inbred</strong> parents the result is different, and it is the fact hybrid breeding is organised around.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>crosses <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>), <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>))</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>lottery <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(crosses, <span class="cf">function</span>(ij) {</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  plan <span class="ot">&lt;-</span> <span class="fu">matrix</span>(ij, <span class="at">ncol =</span> <span class="dv">2</span>)</span>
@@ -1076,6 +1112,7 @@ window.Quarto = {
 <span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>             <span class="at">gap_in_dh_sd  =</span> (better <span class="sc">-</span> <span class="fu">mean</span>(<span class="fu">gv</span>(pop)[ij])) <span class="sc">/</span> <span class="fu">as.numeric</span>(<span class="fu">sqrt</span>(<span class="fu">varG</span>(dh))))</span>
 <span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>}))</span>
 <span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(lottery, <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1141,14 +1178,19 @@ window.Quarto = {
 </table>
 </div>
 </div>
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">all</span>(lottery[[<span class="st">"f1_sd"</span>]] <span class="sc">&lt;</span> <span class="fl">1e-8</span>))</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">which.max</span>(lottery[[<span class="st">"transgressive"</span>]]) <span class="sc">==</span> <span class="fu">which.min</span>(lottery[[<span class="st">"gap_in_dh_sd"</span>]]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p><code>f1_sd</code> is <strong>zero</strong>, asserted to machine precision. Two fully inbred parents are homozygous everywhere, so every gamete each one makes is identical, and every F1 is the same heterozygote. Two hundred F1 plants from a cross of two inbred lines are two hundred copies of one genotype. There is no lottery yet – and this uniformity is the first reason a single-cross hybrid is a saleable variety.</p>
 <p><code>f1_mean</code> sits well above <code>better_parent</code>. That is heterosis, and under the model of Step 2 it has an exact value: for inbred parents <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> with allele indicators <span class="math inline">\(u_{ik}, u_{jk} \in \{0, 1\}\)</span> (their dosage halved), the F1 is heterozygous exactly where they differ, so</p>
 <p><span class="math display">\[H_{ij} \;=\; G_{ij} - \tfrac{1}{2}(G_i + G_j) \;=\; \sum_k d_k\,\mathbb{1}[u_{ik} \neq u_{jk}]\]</span></p>
 <p>The additive terms cancel from the mid-parent difference because an inbred parent’s additive contribution is exactly half the F1’s. <code>heterosis_value(X, d)</code> is this sum, with <code>X</code> the F1’s 0/0.5/1 genotype:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>H <span class="ot">&lt;-</span> <span class="fu">vapply</span>(<span class="fu">seq_along</span>(crosses), <span class="cf">function</span>(s) {</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  ij <span class="ot">&lt;-</span> crosses[[s]]</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  f1 <span class="ot">&lt;-</span> <span class="fu">makeCross</span>(pop, <span class="fu">matrix</span>(ij, <span class="at">ncol =</span> <span class="dv">2</span>), <span class="at">nProgeny =</span> <span class="dv">1</span>, <span class="at">simParam =</span> SP)</span>
@@ -1160,10 +1202,13 @@ window.Quarto = {
 <span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(H, <span class="dv">3</span>)</span>
 <span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 x 2 1 x 3 2 x 3 </span></span>
 <span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4.342 4.438 4.655</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>Over a <em>set</em> of crosses the same identity has a closed form in the allele frequencies. Take the 60 founders as two arbitrary halves, “pool A” (lines 1–30) and “pool B” (lines 31–60) – arbitrary because <code>quickHaplo()</code> gave them a common history and no divergence, which Step 8 will add – and cross every A line to every B line. <code>hybridCross(crossPlan = "testcross")</code> is the full factorial. With <span class="math inline">\(p_{Ak}\)</span> and <span class="math inline">\(p_{Bk}\)</span> the derived-allele frequencies of the two pools at QTL <span class="math inline">\(k\)</span>, the mean of <span class="math inline">\(H_{ij}\)</span> over the factorial is <code>heterosis_expected(pA, pB, d)</code>, the identity of <a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 12</span></a>:</p>
 <p><span class="math display">\[\bar H \;=\; \sum_k d_k\,\big(p_{Ak} + p_{Bk} - 2\,p_{Ak}\,p_{Bk}\big)\]</span></p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>A <span class="ot">&lt;-</span> pop[<span class="dv">1</span><span class="sc">:</span><span class="dv">30</span>]</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>B <span class="ot">&lt;-</span> pop[<span class="dv">31</span><span class="sc">:</span><span class="dv">60</span>]</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>fact <span class="ot">&lt;-</span> <span class="fu">hybridCross</span>(A, B, <span class="at">crossPlan =</span> <span class="st">"testcross"</span>, <span class="at">simParam =</span> SP)</span>
@@ -1183,6 +1228,7 @@ window.Quarto = {
 <span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;            900.000             10.216              9.784             14.427 </span></span>
 <span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; heterosis_observed heterosis_expected   pct_of_midparent </span></span>
 <span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;              4.427              4.427             44.275</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>Exact, on the full factorial, because every A x B pairing is present once. The size – 44.3 percent of the mid-parent – follows from <code>meanDD</code> and from <code>quickHaplo()</code>’s frequencies near one half, where <span class="math inline">\(p_A + p_B - 2 p_A p_B\)</span> is near its maximum; it is not calibrated to a crop. <span class="citation" data-cites="falconer1996">Falconer and Mackay (<a href="99-references.html#ref-falconer1996" role="doc-biblioref">1996</a>)</span>, Ch. 14, derive the heterosis of the F1 between two <em>random-mating</em> populations as <span class="math inline">\(H_{F1} = \sum_k d_k y_k^2\)</span> with <span class="math inline">\(y_k = p_{Ak} - p_{Bk}\)</span> (stated here in this chapter’s notation rather than by their equation number; it is twice the <code>divergence</code> term of <code>heterosis_partition()</code>). The two do not conflict; they use different mid-parents. Theirs carries each population’s own random-mating heterozygosity; an inbred line carries none, so the whole F1 heterozygosity is heterosis and the expression above keeps the <code>shared</code> term as well – <a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 12</span></a> works the reconciliation through.</p>
 <p>The lottery starts one meiosis later. <code>dh_sd</code> is the standard deviation among doubled haploids drawn from that F1, and it is substantial – this is the segregation that F2, DH and RIL populations exist to sample. It is also why <a href="04-population-sizing.html" class="quarto-xref"><span>Chapter 5</span></a> is a chapter: the number of DH lines you pull from a cross is the number of tickets you buy, and no downstream selection stage can recover a combination that was never sampled.</p>
@@ -1196,6 +1242,8 @@ window.Quarto = {
 <p><span class="math display">\[\mathbb{E}[M_{F_t}] \;=\; \tfrac{1}{2}(G_i + G_j) + H_{ij}\,(1/2)^{t-1}\]</span></p>
 <p>with <span class="math inline">\(H_{ij}\)</span> the F1 heterosis of Step 4. At <span class="math inline">\(t = 2\)</span> this is the classical result that the F2 retains half the F1 heterosis, <span class="math inline">\(H_{F2} = \tfrac{1}{2} H_{F1}\)</span>, which <span class="citation" data-cites="falconer1996">Falconer and Mackay (<a href="99-references.html#ref-falconer1996" role="doc-biblioref">1996</a>)</span> derive in Ch. 14 for the F2 of a cross between two populations (stated here in this chapter’s notation rather than by their equation number); the form above extends it to later selfed generations by the same argument, since the expected heterozygosity at every locus is halved each generation.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>homozygosity <span class="ot">&lt;-</span> <span class="cf">function</span>(p)</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(<span class="fu">pullSegSiteGeno</span>(p, <span class="at">simParam =</span> SP) <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">2</span>))</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1227,6 +1275,7 @@ window.Quarto = {
 <span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>traj[[<span class="st">"z"</span>]] <span class="ot">&lt;-</span> (traj[[<span class="st">"meanG"</span>]] <span class="sc">-</span> traj[[<span class="st">"expected"</span>]]) <span class="sc">/</span> (traj[[<span class="st">"sdG"</span>]] <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="dv">400</span>))</span>
 <span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>traj[[<span class="st">"z"</span>]][<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="dv">0</span>   <span class="co"># F1: no variance, and the identity of Step 4 is exact</span></span>
 <span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(traj, <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1309,7 +1358,10 @@ window.Quarto = {
 </table>
 </div>
 </div>
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">all</span>(<span class="fu">abs</span>(traj[[<span class="st">"z"</span>]]) <span class="sc">&lt;</span> <span class="dv">4</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>Three columns, three lessons.</p>
 <p><code>homozygosity</code>: <code>self()</code> halves the remaining heterozygosity every generation – the familiar <code>1 - (1/2)^(t-1)</code> approach to fixation, which never quite arrives. <code>makeDH()</code> gets there in one step, at 1.0 exactly, by doubling a haploid gamete.</p>
@@ -1324,6 +1376,8 @@ window.Quarto = {
 <section id="per-se-selection-and-the-breeders-equation" class="level3" data-number="7.6.1">
 <h3 data-number="7.6.1" class="anchored" data-anchor-id="per-se-selection-and-the-breeders-equation"><span class="header-section-number">7.6.1</span> Per se selection and the breeder’s equation</h3>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>be_draw <span class="ot">&lt;-</span> <span class="cf">function</span>(q, r) {</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(<span class="dv">500</span> <span class="sc">+</span> r)</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  mx    <span class="ot">&lt;-</span> <span class="fu">setPheno</span>(mixed, <span class="at">simParam =</span> SP)</span>
@@ -1348,6 +1402,7 @@ window.Quarto = {
 <span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>             <span class="at">gap_mean =</span> <span class="fu">mean</span>(gap), <span class="at">gap_sd =</span> stats<span class="sc">::</span><span class="fu">sd</span>(gap))</span>
 <span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>}))</span>
 <span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(sweep_q, <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1418,11 +1473,14 @@ window.Quarto = {
 <p><code>gap_mean</code> is the paired difference between the observed response and <code>R_S_h2</code>, with <code>gap_sd</code> its standard deviation over the draws. The mean gap is -0.5 percent of the prediction at <code>q = 0.05</code> and 2.5 percent at <code>q = 0.20</code>; its standard error over the 20 draws is <code>gap_sd / sqrt(20)</code>, and the largest gap in units of that standard error is 1.1. A single draw is another matter: <code>R_observed_sd</code> says that one realisation of the response scatters by around 11 percent of the prediction at <code>q = 0.05</code>, which is why the course’s one-off comparison <span class="citation" data-cites="gorjanc2022">(<a href="99-references.html#ref-gorjanc2022" role="doc-biblioref">Gorjanc et al. 2022</a>)</span> “did not match perfectly” and why this one is replicated. The equation predicts the additive response to first order in the allele-frequency change; what it leaves out is second order in that change and the dominance contribution of the progeny’s departure from Hardy-Weinberg proportions, both small with 1000 progeny from 50 or more parents. The empirical intensity agrees with the normal-theory value to within 0.2 percent: with 1000 candidates and a criterion that is a sum over 1000 loci plus normal error, the two assumptions of <code>sel_intensity()</code> – an infinite population and a normal criterion – are nearly met.</p>
 <p>The book exports its own selection intensity, and AlphaSimR exports one too. They are independent implementations of <code>phi(z) / q</code>:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>q <span class="ot">&lt;-</span> <span class="fl">0.05</span></span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">hybdiv =</span> <span class="fu">sel_intensity</span>(q), <span class="at">AlphaSimR =</span> <span class="fu">selInt</span>(q),</span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">difference =</span> <span class="fu">abs</span>(<span class="fu">sel_intensity</span>(q) <span class="sc">-</span> <span class="fu">selInt</span>(q))) <span class="sc">|&gt;</span> <span class="fu">fmt</span>(<span class="dv">10</span>)</span>
 <span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     hybdiv  AlphaSimR difference </span></span>
 <span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   2.062713   2.062713   0.000000</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p><code>selectInd()</code> takes <code>use = "pheno"</code>, <code>"gv"</code> or <code>"ebv"</code>. Selecting on <code>"gv"</code> is selecting with perfect accuracy – impossible in a real programme, and the correct way to compute the ceiling a scheme is being measured against. <code>use = "ebv"</code> selects on whatever has been written into the population’s <code>ebv</code> slot, which is how genomic selection enters a simulation (<a href="04d-breeding-programme.html" class="quarto-xref"><span>Chapter 8</span></a>). <code>selectTop = FALSE</code> selects downwards, for traits where less is better.</p>
 <p><code>selectWithinFam()</code> is the plant-specific one. A programme that truncates globally on a set of families will take every entry from the two best crosses and nothing from the rest; capping the number retained per family holds the programme’s genetic base open at some cost in immediate gain. It is the same trade-off as the <code>max_use</code> parental cap of <a href="10-combinatorial-selection.html" class="quarto-xref"><span>Chapter 18</span></a>, applied one stage earlier.</p>
@@ -1435,6 +1493,8 @@ window.Quarto = {
 \qquad \alpha^{(B)}_k = a_k + d_k\,(1 - 2\,p_{Bk})\]</span></p>
 <p><span class="math inline">\(\alpha^{(B)}_k\)</span> is the average effect of substituting the line’s allele into a <em>pool-B</em> background – the same <span class="math inline">\(\alpha = a + d(q - p)\)</span> of Step 3, with the frequency of the tester pool, not the line’s own pool. That is the algebraic content of the sentence “combining ability is a property of a line against a tester”: change the tester pool and the weights change. Its dominance part, <span class="math inline">\(\sum_k d_k (1 - 2 p_{Bk})(u_{ik} - p_{Ak})\)</span>, is the <code>gca_A</code> of <code>heterosis_gca_sca()</code> (<a href="05b-heterosis-dominance.html#sec-heterosis-gca-sca" class="quarto-xref"><span>Section 12.10</span></a>), and the interaction residual of the factorial is that function’s <code>sca</code>:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>gca_true <span class="ot">&lt;-</span> <span class="fu">tapply</span>(<span class="fu">gv</span>(fact)[, <span class="dv">1</span>], fact<span class="sc">@</span>mother, mean)[A<span class="sc">@</span>id] <span class="sc">-</span> <span class="fu">as.numeric</span>(<span class="fu">meanG</span>(fact))</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>gca_formula <span class="ot">&lt;-</span> <span class="fu">drop</span>(<span class="fu">sweep</span>(U, <span class="dv">2</span>, pA) <span class="sc">%*%</span> (a <span class="sc">+</span> d <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> pB)))</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">isTRUE</span>(<span class="fu">all.equal</span>(<span class="fu">as.numeric</span>(gca_true), <span class="fu">as.numeric</span>(gca_formula))))</span>
@@ -1453,6 +1513,7 @@ window.Quarto = {
 <span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">cor_perse_gv_vs_GCA =</span> stats<span class="sc">::</span><span class="fu">cor</span>(<span class="fu">gv</span>(A)[, <span class="dv">1</span>], gca_true)) <span class="sc">|&gt;</span> <span class="fu">fmt</span>(<span class="dv">4</span>)</span>
 <span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           var_GCA_A             var_SCA cor_perse_gv_vs_GCA </span></span>
 <span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;              0.2678              0.0486              0.9973</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>The last number is the one to hold on to. With pools that have no divergence, <span class="math inline">\(p_{Bk}\)</span> sits near one half at most loci, <span class="math inline">\((1 - 2 p_{Bk})\)</span> is near zero, and the dominance contribution to GCA nearly vanishes: a line’s own genetic value ranks it for combining ability almost perfectly. Step 8 measures the same correlation on pools with a real split, and it is lower there. Divergence is what makes the testcross informative beyond the line itself, and it is the reason heterotic pools are kept apart.</p>
 </section>
@@ -1466,6 +1527,8 @@ v_s = \frac{\sigma^2_{SCA}}{t}\cdot\frac{n_A}{n_A - 1}\cdot\frac{n_B - t}{n_B - 
 v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <p>where <span class="math inline">\(v_g\)</span> is the sample variance (<span class="math inline">\(n_A - 1\)</span> divisor) of the candidates’ true GCA, because the correlation is taken over exactly those <span class="math inline">\(n_A\)</span> points; <span class="math inline">\(\sigma^2_{SCA} = \frac{1}{n_A n_B}\sum_{ij} \mathrm{SCA}_{ij}^2\)</span> is the SCA variance on the factorial (computed above), <span class="math inline">\((n_B - t)/(n_B - 1)\)</span> is the finite-population correction for <span class="math inline">\(t\)</span> testers drawn without replacement from <span class="math inline">\(n_B\)</span>, <span class="math inline">\(n_A/(n_A - 1)\)</span> turns the mean of the per-candidate variances of <span class="math inline">\(\bar s_i\)</span> into the expected sample variance, and <span class="math inline">\(\sigma^2_e\)</span> is <code>SP$varE</code>, the plot error of Step 2. The textbook form of this prediction replaces <span class="math inline">\(v_g\)</span> by the population variance of GCA and <span class="math inline">\(v_s\)</span> by <span class="math inline">\(\sigma^2_{SCA}/t\)</span>: it assumes an infinite tester pool and population variances. It is kept in the table as <code>predicted_infinite</code>, so the two can be compared. Neither corrects the second-order term of a sample correlation (the Jensen term); it is measured directly, not assumed away, in the Monte Carlo chunk below the accuracy grid, and left uncorrected because it is small at this <span class="math inline">\(n_A\)</span>. The simulation measures the thing itself: repeated draws of the tester set and of the field error, at every combination.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>grid  <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">testers =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">8</span>), <span class="at">reps =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">4</span>))</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>n_acc <span class="ot">&lt;-</span> <span class="dv">20</span></span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>acc   <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="fu">seq_len</span>(n_acc), <span class="cf">function</span>(rep) {</span>
@@ -1510,6 +1573,7 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <span id="cb21-42"><a href="#cb21-42" aria-hidden="true" tabindex="-1"></a>grid[[<span class="st">"z"</span>]] <span class="ot">&lt;-</span> (grid[[<span class="st">"observed_mean"</span>]] <span class="sc">-</span> grid[[<span class="st">"predicted"</span>]]) <span class="sc">/</span></span>
 <span id="cb21-43"><a href="#cb21-43" aria-hidden="true" tabindex="-1"></a>  (grid[[<span class="st">"observed_sd"</span>]] <span class="sc">/</span> <span class="fu">sqrt</span>(n_acc))</span>
 <span id="cb21-44"><a href="#cb21-44" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(grid, <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1610,6 +1674,8 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 </table>
 </div>
 </div>
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>acc_max_z <span class="ot">&lt;-</span> <span class="fu">max</span>(<span class="fu">abs</span>(grid[[<span class="st">"z"</span>]]))</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>acc_max_z_infinite <span class="ot">&lt;-</span> <span class="fu">max</span>(<span class="fu">abs</span>(grid[[<span class="st">"observed_mean"</span>]] <span class="sc">-</span> grid[[<span class="st">"predicted_infinite"</span>]]) <span class="sc">/</span></span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>                            (grid[[<span class="st">"observed_sd"</span>]] <span class="sc">/</span> <span class="fu">sqrt</span>(n_acc)))</span>
@@ -1620,8 +1686,11 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                       1.625                       1.913 </span></span>
 <span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; max_gap_between_predictions </span></span>
 <span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                       0.007</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The second-order term the first-order prediction leaves out: the bias of a</span></span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="co"># sample correlation over n_A points, by Gaussian Monte Carlo per cell,</span></span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="co"># y = x + N(0, v_s + v_e), E[cor(x, y)] minus the first-order value. In the</span></span>
@@ -1648,6 +1717,7 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a>jensen_max <span class="ot">&lt;-</span> <span class="fu">max</span>(<span class="fu">abs</span>(jensen))</span>
 <span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">rbind</span>(<span class="at">fixed_candidates =</span> <span class="fu">c</span>(jensen, <span class="at">max_abs =</span> jensen_max),</span>
 <span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a>          <span class="at">random_x =</span> <span class="fu">c</span>(jensen_random_x, <span class="at">max_abs =</span> <span class="fu">max</span>(<span class="fu">abs</span>(jensen_random_x)))), <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1716,6 +1786,8 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <h2 data-number="7.7" class="anchored" data-anchor-id="step-7-two-traits-and-what-equal-weighting-assumes"><span class="header-section-number">7.7</span> Step 7 – Two traits, and what equal weighting assumes</h2>
 <p><code>corA</code> makes the traits genetically correlated, which is where selection stops being one-dimensional. This step uses an additive trait pair on its own founder draw: index theory is written on breeding values, and the point being made does not need dominance.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">202</span>)</span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>f2 <span class="ot">&lt;-</span> <span class="fu">quickHaplo</span>(<span class="at">nInd =</span> <span class="dv">80</span>, <span class="at">nChr =</span> <span class="dv">10</span>, <span class="at">segSites =</span> <span class="dv">100</span>, <span class="at">inbred =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>SP2 <span class="ot">&lt;-</span> SimParam<span class="sc">$</span><span class="fu">new</span>(f2)</span>
@@ -1734,10 +1806,13 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">h2_trait2   =</span> <span class="fu">as.numeric</span>(<span class="fu">diag</span>(G)[<span class="dv">2</span>] <span class="sc">/</span> <span class="fu">diag</span>(P)[<span class="dv">2</span>])) <span class="sc">|&gt;</span> <span class="fu">fmt</span>(<span class="dv">3</span>)</span>
 <span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; cor_genetic   cor_pheno   h2_trait1   h2_trait2 </span></span>
 <span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      -0.416      -0.084       0.470       0.072</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>The genetic correlation lands near the requested <code>-0.4</code>; the phenotypic one is much weaker, because the environmental components were left uncorrelated (<code>SP$setCorE()</code> is where that would change). The two traits differ in variance and, sharply, in heritability – the ordinary situation.</p>
 <p>The book’s pipeline defaults to <code>weights = NULL</code>, meaning equal weight on every trait. Step 7 is where that default gets examined, using the index functions <a href="02b-response.html" class="quarto-xref"><span>Chapter 3</span></a> introduced:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>cor_with_H <span class="ot">&lt;-</span> <span class="cf">function</span>(w)</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">drop</span>(<span class="fu">crossprod</span>(w, G <span class="sc">%*%</span> a2)) <span class="sc">/</span></span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sqrt</span>(<span class="fu">drop</span>(<span class="fu">crossprod</span>(w, P <span class="sc">%*%</span> w)) <span class="sc">*</span> <span class="fu">drop</span>(<span class="fu">crossprod</span>(a2, G <span class="sc">%*%</span> a2)))</span>
@@ -1753,6 +1828,7 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>idx_tab <span class="ot">&lt;-</span> <span class="fu">cbind</span>(Bw, dG, <span class="at">aggregate =</span> <span class="fu">rowSums</span>(dG),</span>
 <span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>                 <span class="at">cor_with_H =</span> <span class="fu">apply</span>(Bw, <span class="dv">1</span>, cor_with_H))</span>
 <span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(idx_tab)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1808,9 +1884,12 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 </table>
 </div>
 </div>
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">isTRUE</span>(<span class="fu">all.equal</span>(idx_tab[, <span class="st">"aggregate"</span>],</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>                           idx_tab[, <span class="st">"cor_with_H"</span>] <span class="sc">*</span> <span class="fu">sqrt</span>(<span class="fu">drop</span>(<span class="fu">crossprod</span>(a2, G <span class="sc">%*%</span> a2))),</span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>                           <span class="at">check.attributes =</span> <span class="cn">FALSE</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p><code>gain_trait1</code> and <code>gain_trait2</code> are the expected genetic change in each trait per unit of selection intensity on the index, <code>G b / sqrt(b' P b)</code>, and <code>aggregate</code> is their <code>a</code>-weighted sum – which equals <code>cor_with_H</code> times the standard deviation of the aggregate genotype, asserted. Three readings, in the order they matter:</p>
 <ol type="1">
@@ -1823,11 +1902,14 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 </ol>
 <p>Smith-Hazel is defined as the weight vector maximising that correlation, so the claim is checkable against a numerical optimum rather than taken on faith:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>opt <span class="ot">&lt;-</span> stats<span class="sc">::</span><span class="fu">optim</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>), <span class="cf">function</span>(w) <span class="sc">-</span><span class="fu">cor_with_H</span>(w), <span class="at">method =</span> <span class="st">"BFGS"</span>)</span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">numerical =</span> <span class="sc">-</span>opt<span class="sc">$</span>value, <span class="at">smith_hazel =</span> <span class="fu">cor_with_H</span>(Bw[<span class="st">"smith_hazel"</span>, ]),</span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">difference =</span> <span class="fu">abs</span>(<span class="sc">-</span>opt<span class="sc">$</span>value <span class="sc">-</span> <span class="fu">cor_with_H</span>(Bw[<span class="st">"smith_hazel"</span>, ]))) <span class="sc">|&gt;</span> <span class="fu">fmt</span>(<span class="dv">10</span>)</span>
 <span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   numerical smith_hazel  difference </span></span>
 <span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   0.2438417   0.2438417   0.0000000</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>Multi-trait genomic selection in wheat, balancing yield against protein content and quality, is the standing plant example – <span class="citation" data-cites="michel2019">Michel et al. (<a href="99-references.html#ref-michel2019" role="doc-biblioref">2019</a>)</span>. In the hybrid scheme below only trait 1 enters the ranking; the second trait rides along in the contract so that <code>stage2_select()</code> has an index to build.</p>
 </section>
@@ -1838,6 +1920,8 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <h3 data-number="7.8.1" class="anchored" data-anchor-id="founding-two-pools-with-a-real-coalescent-history"><span class="header-section-number">7.8.1</span> Founding two pools with a real coalescent history</h3>
 <p>This is the one place the chapter pays for <code>runMacs2()</code> rather than <code>quickHaplo()</code>. <code>AlphaSimR::runMacs2(..., split = )</code> draws founder haplotypes from a population-split coalescent history: one ancestral population, then two demes of equal size that stopped exchanging migrants <code>split</code> generations ago, with the first half of the sampled individuals from one deme and the second half from the other. That is the realistic analogue of <code>simulate_lines()</code>’s Balding-Nichols draw in <a href="03-simulating-crosses.html" class="quarto-xref"><span>Chapter 4</span></a>, and between-pool divergence is the entire subject of <a href="02-subdivided.html" class="quarto-xref"><span>Chapter 2</span></a>, so a stylised substitute would not do.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>n_split_draws <span class="ot">&lt;-</span> <span class="dv">20</span>   <span class="co"># founder draws per split time, below</span></span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>n_dh_gca      <span class="ot">&lt;-</span> <span class="dv">10</span>   <span class="co"># DH lines per founder for the GCA measurement, below</span></span>
 <span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>fp <span class="ot">&lt;-</span> <span class="fu">alphasimr_founder_pools</span>(rrs_cfg)</span>
@@ -1850,12 +1934,15 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                pool_A                pool_B               markers </span></span>
 <span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                12.000                12.000               750.000 </span></span>
 <span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; heterozygous_fraction                  gd_A                  gd_B </span></span>
-<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                 0.236                 0.215                 0.223</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                 0.236                 0.228                 0.234</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>Reading <code>alphasimr_founder_pools()</code> against Steps 1 and 2, it is <code>runMacs2(nInd = , nChr = , segSites = , split = )</code> followed by <code>SP$addTraitAD(nQtlPerChr = seg_sites, meanDD = 0.4, varDD = 0.1)</code> – the same dominance model as Step 2 – and <code>SP$setVarE(h2 = 0.4)</code>. Two things about it must be said before any number is read. <strong>The founders are outbred</strong>: <code>runMacs2()</code> is called without <code>inbred = TRUE</code>, so each pool is a sample of a random-mating population, heterozygous at the fraction of sites printed above, as an open-pollinated maize population would be; the inbred lines of the scheme are made from them by <code>makeDH()</code> inside each cycle. And there is no separate marker panel: every one of the 150 segregating sites per chromosome is a QTL, so the sites that carry the trait are the ones <code>pullSegSiteGeno()</code> reads for <code>X</code>, <code>f</code> and <code>fL</code> throughout. <code>alphasimr_gd()</code> is <code>1 - mean(f)</code>, the exact definition <code>gene_diversity()</code> uses, computed from that pull, so the two pools are already on the same scale as every diversity number in the rest of the book.</p>
 <p>Because these founders come from MaCS, no number in the rest of this section is reproducible from its seed – see Step 1: the founders move between runs, and everything below is computed from them. The chapter’s response is to replicate every Step 8 measurement over independent founder draws and report the spread.</p>
 <p><strong>What <code>split</code> does.</strong> The bridge’s default is <code>split_gen = 100</code>. The sweep below draws 20 independent founder sets at each of four split times and measures three things on each: the Caballero &amp; Toro partition of <a href="02-subdivided.html" class="quarto-xref"><span>Chapter 2</span></a> over the two pools (<code>ct_partition()</code>, the general form of <code>gd_partition()</code>: the <span class="math inline">\(F\)</span>-statistics of their Eq. 6 and the partition <span class="math inline">\(GD_T = GD_{WI} + GD_{BI} + GD_{BS}\)</span> of their Eq. 7, from which <span class="math inline">\(F_{ST} = GD_{BS} / GD_T\)</span> follows as an identity derived in <a href="02-subdivided.html" class="quarto-xref"><span>Chapter 2</span></a>, not stated in the paper), the share of expected heterosis that the divergence term carries (<code>heterosis_partition()</code>, <a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 12</span></a>), and – the Step 6 question with divergence – how much of a DH line’s exact GCA against the other pool’s DH lines its own genetic value can see. For that last one, 10 DH lines are drawn from every founder, the full factorial between the two DH sets is made, and the GCA of each pool-A line is split into its additive and dominance parts with <code>heterosis_gca_sca()</code>; the identity behind that split was asserted in Step 6. The chunk also records, per draw, an ascertainment bookkeeping that the reading of <code>GD_T</code> will need: the fraction of sites monomorphic within each pool, the fraction fixed for opposite alleles in the two pools, and the part of <code>GD_T</code> those sites carry.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>split_draw <span class="ot">&lt;-</span> <span class="cf">function</span>(split, seed) {</span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  cfg <span class="ot">&lt;-</span> utils<span class="sc">::</span><span class="fu">modifyList</span>(rrs_cfg, <span class="fu">list</span>(<span class="at">split_gen =</span> split, <span class="at">seed =</span> seed))</span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  fp_s <span class="ot">&lt;-</span> <span class="fu">alphasimr_founder_pools</span>(cfg)</span>
@@ -1921,6 +2008,7 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <span id="cb29-63"><a href="#cb29-63" aria-hidden="true" tabindex="-1"></a>cols_gca <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"split"</span>, <span class="st">"GCA_var"</span>, <span class="st">"GCA_var_add"</span>, <span class="st">"GCA_var_dom"</span>, <span class="st">"GCA_cov2"</span>,</span>
 <span id="cb29-64"><a href="#cb29-64" aria-hidden="true" tabindex="-1"></a>              <span class="st">"GCA_dominance_share"</span>, <span class="st">"cor_perse_GCA"</span>)</span>
 <span id="cb29-65"><a href="#cb29-65" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(sw_mean[, cols_div], <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1940,38 +2028,41 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0.021</td>
 <td style="text-align: right;">0.312</td>
-<td style="text-align: right;">0.007</td>
-<td style="text-align: right;">0.021</td>
+<td style="text-align: right;">0.006</td>
+<td style="text-align: right;">0.020</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">split_10</td>
 <td style="text-align: right;">10</td>
-<td style="text-align: right;">0.047</td>
-<td style="text-align: right;">0.301</td>
-<td style="text-align: right;">0.014</td>
 <td style="text-align: right;">0.045</td>
+<td style="text-align: right;">0.305</td>
+<td style="text-align: right;">0.014</td>
+<td style="text-align: right;">0.042</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">split_100</td>
 <td style="text-align: right;">100</td>
-<td style="text-align: right;">0.254</td>
-<td style="text-align: right;">0.297</td>
-<td style="text-align: right;">0.076</td>
-<td style="text-align: right;">0.202</td>
+<td style="text-align: right;">0.261</td>
+<td style="text-align: right;">0.296</td>
+<td style="text-align: right;">0.077</td>
+<td style="text-align: right;">0.207</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">split_1000</td>
 <td style="text-align: right;">1000</td>
-<td style="text-align: right;">0.566</td>
+<td style="text-align: right;">0.564</td>
 <td style="text-align: right;">0.331</td>
-<td style="text-align: right;">0.188</td>
-<td style="text-align: right;">0.361</td>
+<td style="text-align: right;">0.187</td>
+<td style="text-align: right;">0.363</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(sw_sd[, cols_div], <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1989,40 +2080,43 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <tr class="odd">
 <td style="text-align: left;">split_0</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">0.002</td>
-<td style="text-align: right;">0.007</td>
+<td style="text-align: right;">0.003</td>
+<td style="text-align: right;">0.006</td>
 <td style="text-align: right;">0.001</td>
-<td style="text-align: right;">0.002</td>
+<td style="text-align: right;">0.003</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">split_10</td>
 <td style="text-align: right;">10</td>
-<td style="text-align: right;">0.004</td>
-<td style="text-align: right;">0.007</td>
-<td style="text-align: right;">0.001</td>
 <td style="text-align: right;">0.005</td>
+<td style="text-align: right;">0.009</td>
+<td style="text-align: right;">0.002</td>
+<td style="text-align: right;">0.007</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">split_100</td>
 <td style="text-align: right;">100</td>
-<td style="text-align: right;">0.012</td>
+<td style="text-align: right;">0.016</td>
+<td style="text-align: right;">0.007</td>
 <td style="text-align: right;">0.006</td>
-<td style="text-align: right;">0.004</td>
-<td style="text-align: right;">0.010</td>
+<td style="text-align: right;">0.013</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">split_1000</td>
 <td style="text-align: right;">1000</td>
-<td style="text-align: right;">0.019</td>
+<td style="text-align: right;">0.015</td>
+<td style="text-align: right;">0.005</td>
 <td style="text-align: right;">0.007</td>
-<td style="text-align: right;">0.009</td>
-<td style="text-align: right;">0.012</td>
+<td style="text-align: right;">0.008</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(sw_mean[, cols_asc], <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -2055,8 +2149,8 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <td style="text-align: left;">split_0</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0.312</td>
-<td style="text-align: right;">0.066</td>
-<td style="text-align: right;">0.067</td>
+<td style="text-align: right;">0.070</td>
+<td style="text-align: right;">0.068</td>
 <td style="text-align: right;">0.000</td>
 <td style="text-align: right;">0.000</td>
 <td style="text-align: right;">0.312</td>
@@ -2065,41 +2159,44 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <tr class="even">
 <td style="text-align: left;">split_10</td>
 <td style="text-align: right;">10</td>
-<td style="text-align: right;">0.301</td>
-<td style="text-align: right;">0.116</td>
-<td style="text-align: right;">0.108</td>
+<td style="text-align: right;">0.305</td>
+<td style="text-align: right;">0.110</td>
+<td style="text-align: right;">0.107</td>
 <td style="text-align: right;">0.000</td>
 <td style="text-align: right;">0.000</td>
-<td style="text-align: right;">0.301</td>
-<td style="text-align: right;">0.222</td>
+<td style="text-align: right;">0.305</td>
+<td style="text-align: right;">0.226</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">split_100</td>
 <td style="text-align: right;">100</td>
-<td style="text-align: right;">0.297</td>
-<td style="text-align: right;">0.319</td>
-<td style="text-align: right;">0.325</td>
-<td style="text-align: right;">0.009</td>
-<td style="text-align: right;">0.004</td>
-<td style="text-align: right;">0.293</td>
-<td style="text-align: right;">0.219</td>
+<td style="text-align: right;">0.296</td>
+<td style="text-align: right;">0.327</td>
+<td style="text-align: right;">0.326</td>
+<td style="text-align: right;">0.012</td>
+<td style="text-align: right;">0.006</td>
+<td style="text-align: right;">0.291</td>
+<td style="text-align: right;">0.218</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">split_1000</td>
 <td style="text-align: right;">1000</td>
 <td style="text-align: right;">0.331</td>
-<td style="text-align: right;">0.561</td>
-<td style="text-align: right;">0.563</td>
-<td style="text-align: right;">0.187</td>
-<td style="text-align: right;">0.093</td>
-<td style="text-align: right;">0.238</td>
+<td style="text-align: right;">0.551</td>
+<td style="text-align: right;">0.570</td>
+<td style="text-align: right;">0.184</td>
+<td style="text-align: right;">0.092</td>
+<td style="text-align: right;">0.239</td>
 <td style="text-align: right;">0.265</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(sw_mean[, cols_gca], <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -2129,48 +2226,51 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <tr class="odd">
 <td style="text-align: left;">split_0</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">0.560</td>
-<td style="text-align: right;">0.499</td>
-<td style="text-align: right;">0.051</td>
-<td style="text-align: right;">0.010</td>
-<td style="text-align: right;">0.095</td>
-<td style="text-align: right;">0.955</td>
+<td style="text-align: right;">0.549</td>
+<td style="text-align: right;">0.495</td>
+<td style="text-align: right;">0.052</td>
+<td style="text-align: right;">0.003</td>
+<td style="text-align: right;">0.096</td>
+<td style="text-align: right;">0.952</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">split_10</td>
 <td style="text-align: right;">10</td>
-<td style="text-align: right;">0.519</td>
-<td style="text-align: right;">0.483</td>
-<td style="text-align: right;">0.050</td>
-<td style="text-align: right;">-0.014</td>
-<td style="text-align: right;">0.099</td>
-<td style="text-align: right;">0.951</td>
+<td style="text-align: right;">0.520</td>
+<td style="text-align: right;">0.467</td>
+<td style="text-align: right;">0.061</td>
+<td style="text-align: right;">-0.008</td>
+<td style="text-align: right;">0.118</td>
+<td style="text-align: right;">0.941</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">split_100</td>
 <td style="text-align: right;">100</td>
-<td style="text-align: right;">0.503</td>
-<td style="text-align: right;">0.433</td>
-<td style="text-align: right;">0.087</td>
-<td style="text-align: right;">-0.016</td>
-<td style="text-align: right;">0.165</td>
-<td style="text-align: right;">0.916</td>
+<td style="text-align: right;">0.468</td>
+<td style="text-align: right;">0.422</td>
+<td style="text-align: right;">0.070</td>
+<td style="text-align: right;">-0.025</td>
+<td style="text-align: right;">0.159</td>
+<td style="text-align: right;">0.922</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">split_1000</td>
 <td style="text-align: right;">1000</td>
-<td style="text-align: right;">0.293</td>
-<td style="text-align: right;">0.233</td>
-<td style="text-align: right;">0.057</td>
-<td style="text-align: right;">0.003</td>
-<td style="text-align: right;">0.204</td>
-<td style="text-align: right;">0.896</td>
+<td style="text-align: right;">0.286</td>
+<td style="text-align: right;">0.230</td>
+<td style="text-align: right;">0.054</td>
+<td style="text-align: right;">0.002</td>
+<td style="text-align: right;">0.188</td>
+<td style="text-align: right;">0.905</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(sw_sd[, cols_gca], <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -2200,42 +2300,42 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <tr class="odd">
 <td style="text-align: left;">split_0</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">0.200</td>
-<td style="text-align: right;">0.158</td>
+<td style="text-align: right;">0.167</td>
+<td style="text-align: right;">0.139</td>
+<td style="text-align: right;">0.022</td>
+<td style="text-align: right;">0.050</td>
+<td style="text-align: right;">0.036</td>
 <td style="text-align: right;">0.019</td>
-<td style="text-align: right;">0.078</td>
-<td style="text-align: right;">0.033</td>
-<td style="text-align: right;">0.016</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">split_10</td>
 <td style="text-align: right;">10</td>
-<td style="text-align: right;">0.145</td>
-<td style="text-align: right;">0.133</td>
-<td style="text-align: right;">0.019</td>
-<td style="text-align: right;">0.044</td>
-<td style="text-align: right;">0.029</td>
-<td style="text-align: right;">0.015</td>
+<td style="text-align: right;">0.190</td>
+<td style="text-align: right;">0.120</td>
+<td style="text-align: right;">0.038</td>
+<td style="text-align: right;">0.069</td>
+<td style="text-align: right;">0.048</td>
+<td style="text-align: right;">0.024</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">split_100</td>
 <td style="text-align: right;">100</td>
-<td style="text-align: right;">0.284</td>
-<td style="text-align: right;">0.229</td>
-<td style="text-align: right;">0.084</td>
-<td style="text-align: right;">0.078</td>
-<td style="text-align: right;">0.084</td>
-<td style="text-align: right;">0.044</td>
+<td style="text-align: right;">0.198</td>
+<td style="text-align: right;">0.160</td>
+<td style="text-align: right;">0.032</td>
+<td style="text-align: right;">0.059</td>
+<td style="text-align: right;">0.062</td>
+<td style="text-align: right;">0.023</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">split_1000</td>
 <td style="text-align: right;">1000</td>
-<td style="text-align: right;">0.216</td>
-<td style="text-align: right;">0.175</td>
+<td style="text-align: right;">0.179</td>
+<td style="text-align: right;">0.151</td>
 <td style="text-align: right;">0.040</td>
+<td style="text-align: right;">0.054</td>
+<td style="text-align: right;">0.080</td>
 <td style="text-align: right;">0.043</td>
-<td style="text-align: right;">0.049</td>
-<td style="text-align: right;">0.027</td>
 </tr>
 </tbody>
 </table>
@@ -2243,6 +2343,8 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 </div>
 </div>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># the contrast between the two extreme split times, for the two GCA columns</span></span>
 <span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>contrast <span class="ot">&lt;-</span> <span class="cf">function</span>(m) {</span>
 <span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">&lt;-</span> sw[[m]][sw[[<span class="st">"split"</span>]] <span class="sc">==</span> <span class="fu">max</span>(splits)]</span>
@@ -2254,6 +2356,7 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>ctr <span class="ot">&lt;-</span> <span class="fu">rbind</span>(<span class="at">GCA_dominance_share =</span> <span class="fu">contrast</span>(<span class="st">"GCA_dominance_share"</span>),</span>
 <span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>             <span class="at">cor_perse_GCA       =</span> <span class="fu">contrast</span>(<span class="st">"cor_perse_GCA"</span>))</span>
 <span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(ctr, <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -2262,7 +2365,7 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <col style="width: 19%">
 <col style="width: 16%">
 <col style="width: 16%">
-<col style="width: 8%">
+<col style="width: 7%">
 <col style="width: 10%">
 </colgroup>
 <thead>
@@ -2278,36 +2381,39 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">GCA_dominance_share</td>
-<td style="text-align: right;">0.204</td>
-<td style="text-align: right;">0.095</td>
-<td style="text-align: right;">0.109</td>
-<td style="text-align: right;">0.013</td>
-<td style="text-align: right;">8.251</td>
+<td style="text-align: right;">0.188</td>
+<td style="text-align: right;">0.096</td>
+<td style="text-align: right;">0.092</td>
+<td style="text-align: right;">0.02</td>
+<td style="text-align: right;">4.673</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">cor_perse_GCA</td>
-<td style="text-align: right;">0.896</td>
-<td style="text-align: right;">0.955</td>
-<td style="text-align: right;">-0.058</td>
-<td style="text-align: right;">0.007</td>
-<td style="text-align: right;">-8.258</td>
+<td style="text-align: right;">0.905</td>
+<td style="text-align: right;">0.952</td>
+<td style="text-align: right;">-0.046</td>
+<td style="text-align: right;">0.01</td>
+<td style="text-align: right;">-4.445</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
 </div>
-<p>Read the first two tables together: the first is the mean over the 20 draws, the second their standard deviation. What was measured: <code>F_ST</code> rises from 0.021 at <code>split = 0</code> to 0.566 at <code>split = 1000</code>, and <code>GD_BS</code> from 0.007 to 0.188, each step many standard deviations wide; the divergence share of expected heterosis rises from 0.021 to 0.361. <code>GD_T</code> does not stay flat: it is 0.312 at <code>split = 0</code>, 0.297 at <code>split = 100</code> and 0.331 at <code>split = 1000</code>, and the rise from <code>split = 100</code> to <code>split = 1000</code>, 0.034, is 17 standard errors at this replication. The third table is the bookkeeping behind that rise. Across the same range the fraction of sites monomorphic within pool A goes from 0.066 to 0.561 (pool B: 0.067 to 0.563), the fraction of sites fixed for opposite alleles in the two pools from 0 to 0.187, the part of <code>GD_T</code> those sites carry (<code>GD_T_fixed</code>) from 0 to 0.093, and the part carried by every other site (<code>GD_T_other</code>) falls from 0.312 to 0.238.</p>
+<p>Read the first two tables together: the first is the mean over the 20 draws, the second their standard deviation. What was measured: <code>F_ST</code> rises from 0.021 at <code>split = 0</code> to 0.564 at <code>split = 1000</code>, and <code>GD_BS</code> from 0.006 to 0.187, each step many standard deviations wide; the divergence share of expected heterosis rises from 0.02 to 0.363. <code>GD_T</code> does not stay flat: it is 0.312 at <code>split = 0</code>, 0.296 at <code>split = 100</code> and 0.331 at <code>split = 1000</code>, and the rise from <code>split = 100</code> to <code>split = 1000</code>, 0.035, is 17 standard errors at this replication. The third table is the bookkeeping behind that rise. Across the same range the fraction of sites monomorphic within pool A goes from 0.07 to 0.551 (pool B: 0.068 to 0.57), the fraction of sites fixed for opposite alleles in the two pools from 0 to 0.184, the part of <code>GD_T</code> those sites carry (<code>GD_T_fixed</code>) from 0 to 0.092, and the part carried by every other site (<code>GD_T_other</code>) falls from 0.312 to 0.239.</p>
 <p>What is inferred from those three tables: <code>runMacs2()</code> returns the sites that segregate in the <em>pooled</em> sample of the two demes, so a site fixed for opposite alleles in the two pools is kept and, with equal pool sizes, sits at pooled frequency one half – the maximum of <span class="math inline">\(2\bar p \bar q\)</span>, which is exactly what <code>GD_T</code> averages over sites (asserted in the chunk). The rise in <code>GD_T</code> therefore comes entirely from sites fixed for opposite alleles, an ascertainment effect of how the founder sites are sampled, while diversity at every other site falls with divergence. At those other sites the reading is the one <a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 12</span></a> gives for expected heterosis: drift moves diversity from within pools to between them and does not create it. How much of <code>GD_T</code> a marker panel shows under divergence therefore depends on how its sites were ascertained, which is a property of the panel and not of the pools.</p>
-<p>The fourth and fifth tables are the combining-ability side, mean and standard deviation, and the sixth is the contrast between the two extreme split times, unpaired because the draws are independent. GCA is the sum of its additive and dominance parts (asserted in the chunk), so its variance is <span class="math inline">\(\mathrm{var}(\mathrm{add}) + \mathrm{var}(\mathrm{dom}) + 2\,\mathrm{cov}(\mathrm{add}, \mathrm{dom})\)</span>, three terms. What was measured, from <code>split = 0</code> to <code>split = 1000</code>: <code>GCA_var</code> goes from 0.56 to 0.293, <code>GCA_var_add</code> from 0.499 to 0.233, <code>GCA_var_dom</code> from 0.051 to 0.057, and <code>GCA_cov2</code> (<span class="math inline">\(2\,\mathrm{cov}\)</span>) from 0.01 to 0.003, the last with between-draw standard deviations of 0.078 and 0.043, so at every split it is within 1.4 standard errors of zero. The ratio <code>GCA_dominance_share</code> <span class="math inline">\(= \mathrm{var}(\mathrm{dom}) / \mathrm{var}(\mathrm{GCA})\)</span> rises from 0.095 to 0.204 (<code>t = 8.3</code>). Which part drives it: holding the dominance part at its <code>split = 0</code> value and moving only the additive part to its <code>split = 1000</code> value gives a ratio of 0.174; holding the additive part and moving only the dominance part gives 0.1. And the per se-versus-GCA correlation falls from 0.955 to 0.896 (<code>t = -8.3</code>). Both correlations are below the 0.997 of Step 6’s undifferentiated halves, but that comparison crosses a change of founders, trait draw and line number, so the within-sweep contrast is the one that isolates <code>split</code>.</p>
-<p>What is inferred: in this render the fall of the <em>additive</em> part of the GCA variance accounts for more of the rise in the ratio than the growth of the dominance part; the additive part falls with divergence because the sites that fix within a pool stop contributing to it, so the ratio can rise without the dominance part growing at all. The ratio is a partition of <span class="math inline">\(\mathrm{var}(\mathrm{GCA})\)</span> only insofar as the covariance term is negligible; here that term is within 1.4 standard errors of zero at every split, which is the only sense in which “share” is used. As the pools separate, the dominance weights <span class="math inline">\((1 - 2 p_{Bk})\)</span> of Step 6 move away from zero and a growing part of a line’s combining ability is invisible to its own genetic value; the evidence for that at this scale is the <code>t</code> of the contrast, and nothing here separates how much of the between-draw spread is the trait drawn with each founder set and how much is the DH sampling. The limit of the inference is the scale: 12 individuals per pool, 750 sites, 20 draws per split, and a <code>split</code> in coalescent generations that is not calibrated to any named heterotic-pool pair. The direction transfers; the numbers do not.</p>
+<p>The fourth and fifth tables are the combining-ability side, mean and standard deviation, and the sixth is the contrast between the two extreme split times, unpaired because the draws are independent. GCA is the sum of its additive and dominance parts (asserted in the chunk), so its variance is <span class="math inline">\(\mathrm{var}(\mathrm{add}) + \mathrm{var}(\mathrm{dom}) + 2\,\mathrm{cov}(\mathrm{add}, \mathrm{dom})\)</span>, three terms. What was measured, from <code>split = 0</code> to <code>split = 1000</code>: <code>GCA_var</code> goes from 0.549 to 0.286, <code>GCA_var_add</code> from 0.495 to 0.23, <code>GCA_var_dom</code> from 0.052 to 0.054, and <code>GCA_cov2</code> (<span class="math inline">\(2\,\mathrm{cov}\)</span>) from 0.003 to 0.002, the last with between-draw standard deviations of 0.05 and 0.054, so at every split it is within 1.9 standard errors of zero. The ratio <code>GCA_dominance_share</code> <span class="math inline">\(= \mathrm{var}(\mathrm{dom}) / \mathrm{var}(\mathrm{GCA})\)</span> rises from 0.096 to 0.188 (<code>t = 4.7</code>). Which part drives it: holding the dominance part at its <code>split = 0</code> value and moving only the additive part to its <code>split = 1000</code> value gives a ratio of 0.182; holding the additive part and moving only the dominance part gives 0.098. And the per se-versus-GCA correlation falls from 0.952 to 0.905 (<code>t = -4.4</code>). Both correlations are below the 0.997 of Step 6’s undifferentiated halves, but that comparison crosses a change of founders, trait draw and line number, so the within-sweep contrast is the one that isolates <code>split</code>.</p>
+<p>What is inferred: in this render the fall of the <em>additive</em> part of the GCA variance accounts for more of the rise in the ratio than the growth of the dominance part; the additive part falls with divergence because the sites that fix within a pool stop contributing to it, so the ratio can rise without the dominance part growing at all. The ratio is a partition of <span class="math inline">\(\mathrm{var}(\mathrm{GCA})\)</span> only insofar as the covariance term is negligible; here that term is within 1.9 standard errors of zero at every split, which is the only sense in which “share” is used. As the pools separate, the dominance weights <span class="math inline">\((1 - 2 p_{Bk})\)</span> of Step 6 move away from zero and a growing part of a line’s combining ability is invisible to its own genetic value; the evidence for that at this scale is the <code>t</code> of the contrast, and nothing here separates how much of the between-draw spread is the trait drawn with each founder set and how much is the DH sampling. The limit of the inference is the scale: 12 individuals per pool, 750 sites, 20 draws per split, and a <code>split</code> in coalescent generations that is not calibrated to any named heterotic-pool pair. The direction transfers; the numbers do not.</p>
 </section>
 <section id="one-cycle" class="level3" data-number="7.8.2">
 <h3 data-number="7.8.2" class="anchored" data-anchor-id="one-cycle"><span class="header-section-number">7.8.2</span> One cycle</h3>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">11</span>)</span>
 <span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>cy1 <span class="ot">&lt;-</span> <span class="fu">alphasimr_rrs_cycle</span>(fp[[<span class="st">"pop_A"</span>]], fp[[<span class="st">"pop_B"</span>]], fp[[<span class="st">"SP"</span>]], rrs_cfg)</span>
 <span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(cy1[[<span class="st">"summary"</span>]], <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -2321,10 +2427,10 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: right;">1.4863</td>
-<td style="text-align: right;">1.1969</td>
-<td style="text-align: right;">0.1785</td>
-<td style="text-align: right;">0.1831</td>
+<td style="text-align: right;">1.6669</td>
+<td style="text-align: right;">1.5134</td>
+<td style="text-align: right;">0.2037</td>
+<td style="text-align: right;">0.199</td>
 </tr>
 </tbody>
 </table>
@@ -2347,6 +2453,8 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <p><code>alphasimr_pipeline()</code> runs <code>alphasimr_rrs_cycle()</code> in a loop for 4 cycles, carrying <code>pop_A</code>/<code>pop_B</code> forward from one cycle’s output to the next’s input. Only the <em>last</em> cycle’s <code>elite_A</code>/<code>elite_B</code> go on to found the commercial hybrid pool; every earlier cycle’s elites are spent entirely on <code>randCross()</code>ing the next cycle’s pool.</p>
 <p>One run of that loop is an anecdote, and it would be an anecdote about one founder draw. The loop is written out here instead, so that three things can be added to it: a <strong>paired no-selection control</strong> (<code>random_elite = TRUE</code>, which draws the elites at random and leaves every other operation – the DH lines, the testcrosses, the recombination – identical, so the difference between the two arms is selection and nothing else), the between-pool partition of the <em>recombined</em> pools each cycle, and the genetic value of the actual product, the elite factorial.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>run_rrs <span class="ot">&lt;-</span> <span class="cf">function</span>(fp, cfg, <span class="at">random_elite =</span> <span class="cn">FALSE</span>, <span class="at">seed =</span> <span class="dv">1</span>) {</span>
 <span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(seed)</span>
 <span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  SP_r  <span class="ot">&lt;-</span> fp[[<span class="st">"SP"</span>]]</span>
@@ -2383,10 +2491,14 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <span id="cb36-34"><a href="#cb36-34" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">all</span>(<span class="fu">vapply</span>(arms, <span class="cf">function</span>(a)</span>
 <span id="cb36-35"><a href="#cb36-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">isTRUE</span>(<span class="fu">all.equal</span>(a[[<span class="st">"sel"</span>]][<span class="fu">c</span>(<span class="st">"mean_tc_A"</span>, <span class="st">"mean_tc_B"</span>)][<span class="dv">2</span>, ],</span>
 <span id="cb36-36"><a href="#cb36-36" aria-hidden="true" tabindex="-1"></a>                   a[[<span class="st">"ctl"</span>]][<span class="fu">c</span>(<span class="st">"mean_tc_A"</span>, <span class="st">"mean_tc_B"</span>)][<span class="dv">2</span>, ])), <span class="fu">logical</span>(<span class="dv">1</span>))))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>48 founder draws; each drawn once and both arms branched off it, with the same seed set before each arm so that cycle 1’s DH lines and testcross phenotypes are identical between arms (asserted) and the two only diverge at the selection step. The first replicate’s selected arm, cycle by cycle:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(arms[[<span class="dv">1</span>]][[<span class="st">"sel"</span>]], <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -2424,58 +2536,58 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
-<td style="text-align: right;">0.218</td>
-<td style="text-align: right;">0.220</td>
-<td style="text-align: right;">0.069</td>
-<td style="text-align: right;">0.240</td>
+<td style="text-align: right;">0.234</td>
+<td style="text-align: right;">0.214</td>
+<td style="text-align: right;">0.081</td>
+<td style="text-align: right;">0.264</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">2.288</td>
-<td style="text-align: right;">2.983</td>
-<td style="text-align: right;">0.174</td>
-<td style="text-align: right;">0.185</td>
-<td style="text-align: right;">4.626</td>
-<td style="text-align: right;">0.174</td>
-<td style="text-align: right;">0.181</td>
-<td style="text-align: right;">0.090</td>
-<td style="text-align: right;">0.338</td>
+<td style="text-align: right;">1.535</td>
+<td style="text-align: right;">1.641</td>
+<td style="text-align: right;">0.200</td>
+<td style="text-align: right;">0.191</td>
+<td style="text-align: right;">2.096</td>
+<td style="text-align: right;">0.199</td>
+<td style="text-align: right;">0.191</td>
+<td style="text-align: right;">0.101</td>
+<td style="text-align: right;">0.341</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">2</td>
-<td style="text-align: right;">5.023</td>
-<td style="text-align: right;">4.322</td>
-<td style="text-align: right;">0.124</td>
-<td style="text-align: right;">0.152</td>
-<td style="text-align: right;">6.210</td>
-<td style="text-align: right;">0.121</td>
-<td style="text-align: right;">0.151</td>
-<td style="text-align: right;">0.116</td>
-<td style="text-align: right;">0.460</td>
+<td style="text-align: right;">1.865</td>
+<td style="text-align: right;">1.871</td>
+<td style="text-align: right;">0.188</td>
+<td style="text-align: right;">0.178</td>
+<td style="text-align: right;">2.230</td>
+<td style="text-align: right;">0.185</td>
+<td style="text-align: right;">0.180</td>
+<td style="text-align: right;">0.108</td>
+<td style="text-align: right;">0.373</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">3</td>
-<td style="text-align: right;">6.292</td>
-<td style="text-align: right;">6.537</td>
-<td style="text-align: right;">0.094</td>
+<td style="text-align: right;">2.464</td>
+<td style="text-align: right;">2.176</td>
+<td style="text-align: right;">0.145</td>
+<td style="text-align: right;">0.143</td>
+<td style="text-align: right;">2.473</td>
+<td style="text-align: right;">0.142</td>
+<td style="text-align: right;">0.146</td>
 <td style="text-align: right;">0.122</td>
-<td style="text-align: right;">7.412</td>
-<td style="text-align: right;">0.093</td>
-<td style="text-align: right;">0.119</td>
-<td style="text-align: right;">0.130</td>
-<td style="text-align: right;">0.551</td>
+<td style="text-align: right;">0.459</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">4</td>
-<td style="text-align: right;">7.250</td>
-<td style="text-align: right;">7.228</td>
-<td style="text-align: right;">0.085</td>
-<td style="text-align: right;">0.102</td>
-<td style="text-align: right;">8.030</td>
-<td style="text-align: right;">0.086</td>
-<td style="text-align: right;">0.100</td>
-<td style="text-align: right;">0.137</td>
-<td style="text-align: right;">0.596</td>
+<td style="text-align: right;">2.681</td>
+<td style="text-align: right;">2.347</td>
+<td style="text-align: right;">0.091</td>
+<td style="text-align: right;">0.120</td>
+<td style="text-align: right;">2.827</td>
+<td style="text-align: right;">0.092</td>
+<td style="text-align: right;">0.118</td>
+<td style="text-align: right;">0.141</td>
+<td style="text-align: right;">0.574</td>
 </tr>
 </tbody>
 </table>
@@ -2484,6 +2596,8 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 </div>
 <p><code>gd_pool_A</code>/<code>gd_pool_B</code> are the gene diversity of the recombined pools that enter the next cycle, on the same <code>1 - mean(f)</code> scale as the elites’ <code>gd_A</code>/ <code>gd_B</code>; <code>GD_BS</code> and <code>F_ST</code> are the between-pool components of those two pools; <code>hybrid_meanG</code> is the mean genetic value of the 6 x 6 elite factorial, the product the cycle would sell. All of them, over all replicates, at the last cycle, selected minus control:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>last <span class="ot">&lt;-</span> rrs_cfg[[<span class="st">"n_cycles"</span>]] <span class="sc">+</span> <span class="dv">1</span></span>
 <span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="co"># The two pools are exchangeable by design, so their mean is a legitimate</span></span>
 <span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a><span class="co"># pooled statistic; how much noise it removes is measured below (pool_tab).</span></span>
@@ -2508,6 +2622,7 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <span id="cb38-22"><a href="#cb38-22" aria-hidden="true" tabindex="-1"></a>t_crit   <span class="ot">&lt;-</span> stats<span class="sc">::</span><span class="fu">qt</span>(<span class="fl">0.975</span>, <span class="at">df =</span> n_rep <span class="sc">-</span> <span class="dv">1</span>)</span>
 <span id="cb38-23"><a href="#cb38-23" aria-hidden="true" tabindex="-1"></a>sig_paired <span class="ot">&lt;-</span> <span class="fu">abs</span>(t_paired) <span class="sc">&gt;</span> t_crit             <span class="co"># named logical, same names</span></span>
 <span id="cb38-24"><a href="#cb38-24" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(rep_tab, <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -2524,96 +2639,98 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">mean_tc_A</td>
-<td style="text-align: right;">4.932</td>
-<td style="text-align: right;">2.315</td>
-<td style="text-align: right;">2.617</td>
-<td style="text-align: right;">1.189</td>
-<td style="text-align: right;">15.243</td>
+<td style="text-align: right;">4.492</td>
+<td style="text-align: right;">2.086</td>
+<td style="text-align: right;">2.406</td>
+<td style="text-align: right;">1.289</td>
+<td style="text-align: right;">12.929</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">mean_tc_B</td>
-<td style="text-align: right;">4.925</td>
-<td style="text-align: right;">2.400</td>
-<td style="text-align: right;">2.525</td>
-<td style="text-align: right;">1.142</td>
-<td style="text-align: right;">15.324</td>
+<td style="text-align: right;">4.502</td>
+<td style="text-align: right;">2.080</td>
+<td style="text-align: right;">2.422</td>
+<td style="text-align: right;">1.368</td>
+<td style="text-align: right;">12.262</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">hybrid_meanG</td>
-<td style="text-align: right;">5.570</td>
-<td style="text-align: right;">2.355</td>
-<td style="text-align: right;">3.216</td>
-<td style="text-align: right;">1.428</td>
-<td style="text-align: right;">15.601</td>
+<td style="text-align: right;">5.025</td>
+<td style="text-align: right;">2.107</td>
+<td style="text-align: right;">2.918</td>
+<td style="text-align: right;">1.505</td>
+<td style="text-align: right;">13.431</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">gd_A</td>
-<td style="text-align: right;">0.100</td>
-<td style="text-align: right;">0.110</td>
-<td style="text-align: right;">-0.010</td>
-<td style="text-align: right;">0.023</td>
-<td style="text-align: right;">-3.078</td>
+<td style="text-align: right;">0.097</td>
+<td style="text-align: right;">0.112</td>
+<td style="text-align: right;">-0.015</td>
+<td style="text-align: right;">0.024</td>
+<td style="text-align: right;">-4.378</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">gd_B</td>
-<td style="text-align: right;">0.097</td>
-<td style="text-align: right;">0.106</td>
-<td style="text-align: right;">-0.009</td>
-<td style="text-align: right;">0.026</td>
-<td style="text-align: right;">-2.319</td>
+<td style="text-align: right;">0.101</td>
+<td style="text-align: right;">0.102</td>
+<td style="text-align: right;">-0.001</td>
+<td style="text-align: right;">0.030</td>
+<td style="text-align: right;">-0.248</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">gd_elite_mean</td>
-<td style="text-align: right;">0.098</td>
-<td style="text-align: right;">0.108</td>
-<td style="text-align: right;">-0.010</td>
-<td style="text-align: right;">0.019</td>
-<td style="text-align: right;">-3.445</td>
+<td style="text-align: right;">0.099</td>
+<td style="text-align: right;">0.107</td>
+<td style="text-align: right;">-0.008</td>
+<td style="text-align: right;">0.017</td>
+<td style="text-align: right;">-3.317</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">gd_pool_A</td>
-<td style="text-align: right;">0.099</td>
-<td style="text-align: right;">0.109</td>
-<td style="text-align: right;">-0.010</td>
+<td style="text-align: right;">0.096</td>
+<td style="text-align: right;">0.111</td>
+<td style="text-align: right;">-0.015</td>
 <td style="text-align: right;">0.024</td>
-<td style="text-align: right;">-2.944</td>
+<td style="text-align: right;">-4.396</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">gd_pool_B</td>
-<td style="text-align: right;">0.097</td>
-<td style="text-align: right;">0.105</td>
-<td style="text-align: right;">-0.008</td>
-<td style="text-align: right;">0.026</td>
-<td style="text-align: right;">-2.247</td>
+<td style="text-align: right;">0.101</td>
+<td style="text-align: right;">0.101</td>
+<td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.030</td>
+<td style="text-align: right;">-0.085</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">gd_pool_mean</td>
 <td style="text-align: right;">0.098</td>
-<td style="text-align: right;">0.107</td>
-<td style="text-align: right;">-0.009</td>
-<td style="text-align: right;">0.019</td>
-<td style="text-align: right;">-3.296</td>
+<td style="text-align: right;">0.106</td>
+<td style="text-align: right;">-0.008</td>
+<td style="text-align: right;">0.017</td>
+<td style="text-align: right;">-3.141</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">GD_BS</td>
-<td style="text-align: right;">0.145</td>
-<td style="text-align: right;">0.133</td>
+<td style="text-align: right;">0.144</td>
+<td style="text-align: right;">0.135</td>
+<td style="text-align: right;">0.009</td>
 <td style="text-align: right;">0.012</td>
-<td style="text-align: right;">0.015</td>
-<td style="text-align: right;">5.516</td>
+<td style="text-align: right;">4.936</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">F_ST</td>
-<td style="text-align: right;">0.597</td>
-<td style="text-align: right;">0.554</td>
-<td style="text-align: right;">0.043</td>
-<td style="text-align: right;">0.068</td>
-<td style="text-align: right;">4.392</td>
+<td style="text-align: right;">0.596</td>
+<td style="text-align: right;">0.561</td>
+<td style="text-align: right;">0.034</td>
+<td style="text-align: right;">0.059</td>
+<td style="text-align: right;">3.983</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Pooling the two pools halves the variance only if their paired differences</span></span>
 <span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="co"># are uncorrelated across founder draws: measured, not assumed.</span></span>
 <span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>pool_pair <span class="ot">&lt;-</span> <span class="cf">function</span>(mA, mB) {</span>
@@ -2626,6 +2743,7 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>                  <span class="at">gd_pool  =</span> <span class="fu">pool_pair</span>(<span class="st">"gd_pool_A"</span>, <span class="st">"gd_pool_B"</span>),</span>
 <span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>                  <span class="at">mean_tc  =</span> <span class="fu">pool_pair</span>(<span class="st">"mean_tc_A"</span>, <span class="st">"mean_tc_B"</span>))</span>
 <span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(pool_tab, <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -2642,36 +2760,41 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">gd_elite</td>
-<td style="text-align: right;">0.203</td>
-<td style="text-align: right;">0.023</td>
-<td style="text-align: right;">0.026</td>
+<td style="text-align: right;">-0.235</td>
+<td style="text-align: right;">0.024</td>
+<td style="text-align: right;">0.030</td>
+<td style="text-align: right;">0.017</td>
 <td style="text-align: right;">0.019</td>
-<td style="text-align: right;">0.018</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">gd_pool</td>
-<td style="text-align: right;">0.221</td>
+<td style="text-align: right;">-0.181</td>
 <td style="text-align: right;">0.024</td>
-<td style="text-align: right;">0.026</td>
+<td style="text-align: right;">0.030</td>
+<td style="text-align: right;">0.017</td>
 <td style="text-align: right;">0.019</td>
-<td style="text-align: right;">0.018</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">mean_tc</td>
-<td style="text-align: right;">0.903</td>
-<td style="text-align: right;">1.189</td>
-<td style="text-align: right;">1.142</td>
-<td style="text-align: right;">1.137</td>
-<td style="text-align: right;">0.824</td>
+<td style="text-align: right;">0.876</td>
+<td style="text-align: right;">1.289</td>
+<td style="text-align: right;">1.368</td>
+<td style="text-align: right;">1.287</td>
+<td style="text-align: right;">0.940</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">isTRUE</span>(<span class="fu">all.equal</span>(pool_tab[<span class="st">"gd_elite"</span>, <span class="st">"sd_pooled"</span>],</span>
 <span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>                           rep_tab[<span class="st">"gd_elite_mean"</span>, <span class="st">"diff_sd"</span>])))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>loss <span class="ot">&lt;-</span> <span class="cf">function</span>(arm, m) <span class="fu">vapply</span>(arms, <span class="cf">function</span>(a)</span>
 <span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  (a[[arm]][[m]][<span class="dv">1</span>] <span class="sc">-</span> a[[arm]][[m]][last]) <span class="sc">/</span> a[[arm]][[m]][<span class="dv">1</span>], <span class="fu">numeric</span>(<span class="dv">1</span>))</span>
 <span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>loss_tab <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
@@ -2680,6 +2803,7 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">pool B, selected</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="at">mean =</span> <span class="fu">mean</span>(<span class="fu">loss</span>(<span class="st">"sel"</span>, <span class="st">"gd_pool_B"</span>)), <span class="at">sd =</span> stats<span class="sc">::</span><span class="fu">sd</span>(<span class="fu">loss</span>(<span class="st">"sel"</span>, <span class="st">"gd_pool_B"</span>))),</span>
 <span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">pool B, control</span><span class="st">`</span>  <span class="ot">=</span> <span class="fu">c</span>(<span class="at">mean =</span> <span class="fu">mean</span>(<span class="fu">loss</span>(<span class="st">"ctl"</span>, <span class="st">"gd_pool_B"</span>)), <span class="at">sd =</span> stats<span class="sc">::</span><span class="fu">sd</span>(<span class="fu">loss</span>(<span class="st">"ctl"</span>, <span class="st">"gd_pool_B"</span>))))</span>
 <span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(loss_tab, <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -2693,34 +2817,37 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">pool A, selected</td>
-<td style="text-align: right;">0.552</td>
-<td style="text-align: right;">0.088</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">pool A, control</td>
-<td style="text-align: right;">0.509</td>
-<td style="text-align: right;">0.059</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">pool B, selected</td>
-<td style="text-align: right;">0.560</td>
+<td style="text-align: right;">0.566</td>
 <td style="text-align: right;">0.099</td>
 </tr>
 <tr class="even">
+<td style="text-align: left;">pool A, control</td>
+<td style="text-align: right;">0.497</td>
+<td style="text-align: right;">0.066</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">pool B, selected</td>
+<td style="text-align: right;">0.544</td>
+<td style="text-align: right;">0.084</td>
+</tr>
+<tr class="even">
 <td style="text-align: left;">pool B, control</td>
-<td style="text-align: right;">0.522</td>
-<td style="text-align: right;">0.077</td>
+<td style="text-align: right;">0.543</td>
+<td style="text-align: right;">0.084</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>fig_cap <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"Reciprocal recurrent selection over "</span>, rrs_cfg[[<span class="st">"n_cycles"</span>]],</span>
 <span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">" cycles at book scale, "</span>, n_rep, <span class="st">" founder draws, selection (solid) against "</span>,</span>
 <span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"the paired no-selection control (dashed); points are means over draws and "</span>,</span>
 <span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"bars one standard deviation. Left: mean testcross phenotype per pool, "</span>,</span>
 <span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"measured on all DH lines tested that cycle. Right: gene diversity of the "</span>,</span>
 <span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">"elite lines retained each cycle."</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
@@ -2736,16 +2863,19 @@ Figure&nbsp;7.1: Reciprocal recurrent selection over 4 cycles at book scale, 48 
 </div>
 </div>
 </div>
-<p>What was measured (<a href="#fig-alphasimr-cycles" class="quarto-xref">Figure&nbsp;<span>7.1</span></a> and the tables): over 48 paired replicates, the selected arm’s mean testcross phenotype at cycle 4 differs from the control’s by +2.62 (pool A) and +2.52 (pool B) trait units, with paired standard deviations of 1.19 and 1.14; the elite factorial’s genetic value – the product – differs by +3.22 (<code>t = 15.6</code>). Gene diversity of the elite lines, averaged over the two pools, differs by -0.010 (paired s.d. 0.019, <code>t = -3.4</code>), and that of the recombined pools by -0.009 (<code>t = -3.3</code>). Between the pools, <code>GD_BS</code> differs by +0.012 (<code>t = 5.5</code>) and <code>F_ST</code> by +0.043 (<code>t = 4.4</code>). The two-sided 5% point of <code>t</code> with 47 degrees of freedom is 2.01. Against it, in this render, the response – both pools and the product – is beyond it; the pooled elite-line gene-diversity difference is beyond it; the pooled recombined-pool difference is beyond it; the <code>GD_BS</code> difference is beyond it; the <code>F_ST</code> difference is beyond it.</p>
-<p>Pooling the two pools’ differences is not free noise reduction, and <code>pool_tab</code> measures what it buys. Averaging halves the variance only if the two pools’ paired differences are independent across founder draws. For the elite-line gene diversity they are correlated at 0.2, and the pooled standard deviation, 0.019, is close to the 0.018 it would be if they were independent: pooling does what it should there. For the testcross mean they are correlated at 0.9, and the pooled standard deviation is 1.14 against 0.82 if independent: pooling does not reduce that noise, because the founder draw moves both pools’ response together. The per-pool rows are there to show the asymmetry between two exchangeable pools that any one set of 48 draws produces. The loss table says how much of the pools’ loss is selection: the control loses gene diversity too – 6 elites recombined into 12 individuals is a bottleneck whether or not the elites were chosen – and the selected arm’s mean loss exceeds the control’s, with the pooled <code>t</code> just stated as the evidence.</p>
+<p>What was measured (<a href="#fig-alphasimr-cycles" class="quarto-xref">Figure&nbsp;<span>7.1</span></a> and the tables): over 48 paired replicates, the selected arm’s mean testcross phenotype at cycle 4 differs from the control’s by +2.41 (pool A) and +2.42 (pool B) trait units, with paired standard deviations of 1.29 and 1.37; the elite factorial’s genetic value – the product – differs by +2.92 (<code>t = 13.4</code>). Gene diversity of the elite lines, averaged over the two pools, differs by -0.008 (paired s.d. 0.017, <code>t = -3.3</code>), and that of the recombined pools by -0.008 (<code>t = -3.1</code>). Between the pools, <code>GD_BS</code> differs by +0.009 (<code>t = 4.9</code>) and <code>F_ST</code> by +0.034 (<code>t = 4</code>). The two-sided 5% point of <code>t</code> with 47 degrees of freedom is 2.01. Against it, in this render, the response – both pools and the product – is beyond it; the pooled elite-line gene-diversity difference is beyond it; the pooled recombined-pool difference is beyond it; the <code>GD_BS</code> difference is beyond it; the <code>F_ST</code> difference is beyond it.</p>
+<p>Pooling the two pools’ differences is not free noise reduction, and <code>pool_tab</code> measures what it buys. Averaging halves the variance only if the two pools’ paired differences are independent across founder draws. For the elite-line gene diversity they are correlated at -0.23, and the pooled standard deviation, 0.017, is close to the 0.019 it would be if they were independent: pooling does what it should there. For the testcross mean they are correlated at 0.88, and the pooled standard deviation is 1.29 against 0.94 if independent: pooling does not reduce that noise, because the founder draw moves both pools’ response together. The per-pool rows are there to show the asymmetry between two exchangeable pools that any one set of 48 draws produces. The loss table says how much of the pools’ loss is selection: the control loses gene diversity too – 6 elites recombined into 12 individuals is a bottleneck whether or not the elites were chosen – and the selected arm’s mean loss exceeds the control’s, with the pooled <code>t</code> just stated as the evidence.</p>
 <p>What is inferred: with real meiosis and a dominance trait behind it, reciprocal recurrent selection responds in both pools, and at this replication the response is beyond <code>t_crit</code>. Whether it spends within-pool diversity faster than the same bottleneck under drift alone is what the pooled gene-diversity <code>t</code> decides, and in this render it does for the elite lines and does for the recombined pools: the selection component of the loss is of the same order as its paired standard deviation at this scale, so the conclusion, not only the number, is what the <code>t</code> decides. Where the sign holds, the control isolates that component from the drift part, which is the distinction <a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 21</span></a> draws with the package’s own faster simulator over a longer trajectory and a grid of selection intensities, and <a href="04d-breeding-programme.html" class="quarto-xref"><span>Chapter 8</span></a> draws a third time in an inbred-line programme. The between-pool rows: the <code>GD_BS</code> difference is beyond <code>t_crit</code>; where it is, and positive, RRS is moving the pools apart faster than drift does, which is what a scheme selecting on the cross is expected to do. <code>F_ST</code> rises partly because <code>GD_T</code> falls, so <code>GD_BS</code> is the row to read. What limits the inference is the scale – 12 founders per pool, 4 cycles, 2 testers at one location, 48 draws – and the fact that the founders come from MaCS, so both the numbers in this paragraph and any verdict that rests on a <code>t</code> near <code>t_crit</code> may differ between renders.</p>
 </section>
 <section id="the-final-hybrid-pool-through-stage2_select-unchanged" class="level3" data-number="7.8.4">
 <h3 data-number="7.8.4" class="anchored" data-anchor-id="the-final-hybrid-pool-through-stage2_select-unchanged"><span class="header-section-number">7.8.4</span> The final hybrid pool through <code>stage2_select()</code>, unchanged</h3>
 <p><code>alphasimr_pipeline()</code> is the loop above without the instrumentation: founders, 4 cycles, then <code>alphasimr_make_hybrids()</code> testcrosses the final cycle’s elites directly against each other – a full factorial between the 6 pool-A elites and 6 pool-B elites, so 36 commercial hybrids – and phenotypes them the same way every testcross in this chapter was phenotyped. <code>alphasimr_to_stage1()</code> then does the bookkeeping that makes this look like any other stage-1 output: it remaps AlphaSimR’s internal line ids into the <code>1..n_A</code>, <code>n_A+1..n_A+n_B</code> convention <code>hybrids$line_A</code>/<code>line_B</code> and <code>fL</code> use elsewhere in the book, and builds <code>fL</code> by stacking the elite lines from <em>both</em> pools’ genotypes into one matrix and computing a single joint coancestry matrix over all of them – not two separate per-pool matrices – which is what lets <code>theta_pools()</code> and the rest of the pipeline index into pool A and pool B lines with one consistent numbering.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">alphasimr_pipeline</span>(rrs_cfg)</span>
 <span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(res[[<span class="st">"cycles"</span>]], <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -2761,42 +2891,45 @@ Figure&nbsp;7.1: Reciprocal recurrent selection over 4 cycles at book scale, 48 
 <tbody>
 <tr class="odd">
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">2.0171</td>
-<td style="text-align: right;">3.0163</td>
-<td style="text-align: right;">0.2126</td>
-<td style="text-align: right;">0.1687</td>
+<td style="text-align: right;">1.5532</td>
+<td style="text-align: right;">1.6652</td>
+<td style="text-align: right;">0.1908</td>
+<td style="text-align: right;">0.1942</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">2</td>
-<td style="text-align: right;">3.5341</td>
-<td style="text-align: right;">3.8909</td>
-<td style="text-align: right;">0.1716</td>
-<td style="text-align: right;">0.1378</td>
+<td style="text-align: right;">2.1464</td>
+<td style="text-align: right;">2.1264</td>
+<td style="text-align: right;">0.1445</td>
+<td style="text-align: right;">0.1517</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">3</td>
-<td style="text-align: right;">4.4066</td>
-<td style="text-align: right;">3.7606</td>
-<td style="text-align: right;">0.1536</td>
-<td style="text-align: right;">0.1232</td>
+<td style="text-align: right;">2.8739</td>
+<td style="text-align: right;">3.0791</td>
+<td style="text-align: right;">0.1317</td>
+<td style="text-align: right;">0.1161</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">4</td>
-<td style="text-align: right;">4.7725</td>
-<td style="text-align: right;">4.5303</td>
-<td style="text-align: right;">0.1316</td>
-<td style="text-align: right;">0.0986</td>
+<td style="text-align: right;">3.3182</td>
+<td style="text-align: right;">3.1526</td>
+<td style="text-align: right;">0.0766</td>
+<td style="text-align: right;">0.0984</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>st1 <span class="ot">&lt;-</span> res[[<span class="st">"stage1"</span>]]</span>
 <span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(st1[[<span class="st">"X"</span>]])</span>
 <span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1]  36 750</span></span>
 <span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>sel <span class="ot">&lt;-</span> <span class="fu">stage2_select</span>(st1[[<span class="st">"X"</span>]], st1[[<span class="st">"f"</span>]], st1[[<span class="st">"hybrids"</span>]], <span class="at">n_sel =</span> <span class="dv">8</span>, <span class="at">fL =</span> st1[[<span class="st">"fL"</span>]],</span>
 <span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>                     <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(sel[[<span class="st">"metrics"</span>]][, <span class="fu">c</span>(<span class="st">"scenario"</span>, <span class="st">"alpha"</span>, <span class="st">"GD"</span>, <span class="st">"GD_BS"</span>, <span class="st">"F_ST"</span>, <span class="st">"index"</span>)], <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -2813,75 +2946,75 @@ Figure&nbsp;7.1: Reciprocal recurrent selection over 4 cycles at book scale, 48 
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">DE_alpha_0.00</td>
-<td style="text-align: right;">-0.0015</td>
-<td style="text-align: right;">0.2489</td>
-<td style="text-align: right;">0.1474</td>
-<td style="text-align: right;">0.5924</td>
-<td style="text-align: right;">1.2473</td>
+<td style="text-align: right;">-0.0181</td>
+<td style="text-align: right;">0.2417</td>
+<td style="text-align: right;">0.1543</td>
+<td style="text-align: right;">0.6385</td>
+<td style="text-align: right;">1.2521</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">DE_alpha_-0.04</td>
-<td style="text-align: right;">-0.0015</td>
-<td style="text-align: right;">0.2489</td>
-<td style="text-align: right;">0.1474</td>
-<td style="text-align: right;">0.5924</td>
-<td style="text-align: right;">1.2473</td>
+<td style="text-align: left;">DE_alpha_-0.45</td>
+<td style="text-align: right;">-0.0181</td>
+<td style="text-align: right;">0.2417</td>
+<td style="text-align: right;">0.1543</td>
+<td style="text-align: right;">0.6385</td>
+<td style="text-align: right;">1.2521</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">DE_alpha_-0.07</td>
-<td style="text-align: right;">-0.0015</td>
-<td style="text-align: right;">0.2489</td>
-<td style="text-align: right;">0.1474</td>
-<td style="text-align: right;">0.5924</td>
-<td style="text-align: right;">1.2473</td>
+<td style="text-align: left;">DE_alpha_-0.91</td>
+<td style="text-align: right;">-0.0181</td>
+<td style="text-align: right;">0.2417</td>
+<td style="text-align: right;">0.1543</td>
+<td style="text-align: right;">0.6385</td>
+<td style="text-align: right;">1.2521</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">DE_alpha_-0.11</td>
-<td style="text-align: right;">-0.0015</td>
-<td style="text-align: right;">0.2489</td>
-<td style="text-align: right;">0.1474</td>
-<td style="text-align: right;">0.5924</td>
-<td style="text-align: right;">1.2473</td>
+<td style="text-align: left;">DE_alpha_-1.36</td>
+<td style="text-align: right;">-0.0181</td>
+<td style="text-align: right;">0.2417</td>
+<td style="text-align: right;">0.1543</td>
+<td style="text-align: right;">0.6385</td>
+<td style="text-align: right;">1.2521</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">DE_alpha_-0.15</td>
-<td style="text-align: right;">-0.0015</td>
-<td style="text-align: right;">0.2489</td>
-<td style="text-align: right;">0.1474</td>
-<td style="text-align: right;">0.5924</td>
-<td style="text-align: right;">1.2473</td>
+<td style="text-align: left;">DE_alpha_-1.81</td>
+<td style="text-align: right;">-0.0181</td>
+<td style="text-align: right;">0.2417</td>
+<td style="text-align: right;">0.1543</td>
+<td style="text-align: right;">0.6385</td>
+<td style="text-align: right;">1.2521</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">ref_truncation</td>
-<td style="text-align: right;">-0.0015</td>
-<td style="text-align: right;">0.2489</td>
-<td style="text-align: right;">0.1474</td>
-<td style="text-align: right;">0.5924</td>
-<td style="text-align: right;">1.2473</td>
+<td style="text-align: right;">-0.0181</td>
+<td style="text-align: right;">0.2417</td>
+<td style="text-align: right;">0.1543</td>
+<td style="text-align: right;">0.6385</td>
+<td style="text-align: right;">1.2521</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">ref_trunc_cap</td>
-<td style="text-align: right;">-0.0015</td>
-<td style="text-align: right;">0.2489</td>
-<td style="text-align: right;">0.1474</td>
-<td style="text-align: right;">0.5924</td>
-<td style="text-align: right;">1.2473</td>
+<td style="text-align: right;">-0.0181</td>
+<td style="text-align: right;">0.2417</td>
+<td style="text-align: right;">0.1543</td>
+<td style="text-align: right;">0.6385</td>
+<td style="text-align: right;">1.2521</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">ref_max_div</td>
-<td style="text-align: right;">-0.0444</td>
-<td style="text-align: right;">0.2595</td>
-<td style="text-align: right;">0.1375</td>
-<td style="text-align: right;">0.5297</td>
-<td style="text-align: right;">-0.1180</td>
+<td style="text-align: right;">-0.0268</td>
+<td style="text-align: right;">0.2438</td>
+<td style="text-align: right;">0.1548</td>
+<td style="text-align: right;">0.6352</td>
+<td style="text-align: right;">0.5727</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">ref_random</td>
-<td style="text-align: right;">-0.0084</td>
-<td style="text-align: right;">0.2506</td>
-<td style="text-align: right;">0.1430</td>
-<td style="text-align: right;">0.5706</td>
-<td style="text-align: right;">-0.2783</td>
+<td style="text-align: right;">-0.0109</td>
+<td style="text-align: right;">0.2400</td>
+<td style="text-align: right;">0.1560</td>
+<td style="text-align: right;">0.6501</td>
+<td style="text-align: right;">-0.3397</td>
 </tr>
 </tbody>
 </table>

@@ -1,0 +1,16 @@
+// Page furniture and type for the Typst PDF. Fonts are the ones Typst bundles
+// (Libertinus) plus system sans with fallbacks, so the build needs no install.
+#let sans = ("Avenir Next", "Helvetica Neue", "Libertinus Sans", "DejaVu Sans")
+#let pool-a = rgb("#1f5f8b")
+#let pool-b = rgb("#d98e04")
+#set par(justify: true, leading: 0.68em, spacing: 0.95em)
+#set text(lang: "en", hyphenate: true)
+#show heading: set text(font: sans, weight: "semibold")
+#show heading.where(level: 2): set block(above: 1.6em, below: 0.8em)
+#show raw: set text(font: ("Menlo", "DejaVu Sans Mono"), size: 8.2pt)
+#show raw.where(block: true): it => block(width: 100%, inset: (left: 8pt, y: 6pt), stroke: (left: 2pt + pool-a.lighten(35%)), fill: luma(247), it)
+#show figure.caption: set text(font: sans, size: 8.5pt)
+#show figure.where(kind: table): set figure.caption(position: top)
+#set table(stroke: (x, y) => if y == 0 { (bottom: 0.8pt) } else { (bottom: 0.3pt + luma(200)) }, inset: (x: 6pt, y: 4pt))
+#show table: set text(size: 8.8pt)
+#set page(numbering: "1", footer: context { set text(font: sans, size: 8pt, fill: luma(120)); align(center)[#counter(page).display()] })

@@ -73,20 +73,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta name="quarto:offset" content="./">
 <link href="./04b-backcross-introgression.html" rel="next">
 <link href="./03-simulating-crosses.html" rel="prev">
+<link href="./favicon.svg" rel="icon" type="image/svg+xml">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9ef9d4760de657dc918b81d25b42b59f.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-58115a419e540697b7ccd904e8efcd2d.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9ef9d4760de657dc918b81d25b42b59f.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-37a0ccb6f5b9899fcb884e11bb6f7458.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-da8b26c7a017495cabf78e5d2792d1d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-b192ecda6a457e66a32e528cd3cc1fbc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-da8b26c7a017495cabf78e5d2792d1d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -659,17 +660,23 @@ window.Quarto = {
 <p><strong>P2. Parents fully homozygous and fixed for alternative alleles.</strong> Consequently every F1 plant is genetically identical and the genetic <span class="math inline">\(N_e\)</span> of the F1 is 1. Sizing the F1 is a <strong>logistical</strong> decision, not a genetic one – unless the parents carry residual heterozygosity, which is handled separately below.</p>
 <p><strong>P3. The genetic map.</strong> Ten chromosomes, lengths from a classical composite maize map, about 1670 cM (~17 Morgans). Do <strong>not</strong> use IBM-type map lengths from intermated RILs: they are inflated 5-10x by construction and will make every answer wrong.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>map <span class="ot">&lt;-</span> <span class="fu">build_map</span>(maize_chr_len, <span class="at">spacing_cM =</span> <span class="dv">2</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">chromosomes =</span> <span class="fu">length</span>(map<span class="sc">$</span>chr_len), <span class="at">markers =</span> map<span class="sc">$</span>m,</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">total_cM =</span> map<span class="sc">$</span>total_cM, <span class="at">morgans =</span> map<span class="sc">$</span>total_cM <span class="sc">/</span> <span class="dv">100</span>)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; chromosomes     markers    total_cM     morgans </span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        10.0       846.0      1670.0        16.7</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p><strong>P4. Haldane recombination, no interference,</strong> identical in male and female. The probability of a haplotype switch between adjacent markers <span class="math inline">\(d\)</span> cM apart is <span class="math inline">\(r = 0.5(1 - e^{-2d/100})\)</span>; the first marker of each chromosome gets <span class="math inline">\(r = 0.5\)</span>, which produces independent segregation between chromosomes automatically.</p>
 <p><em>Limitation:</em> without interference the variance in crossover number is inflated (Poisson). Maize has strong positive interference, so the simulated block-length distribution has a slightly longer tail than reality. Mean block lengths and allele frequencies are unaffected.</p>
 <p><strong>P5. Segregation distortion by rejection sampling,</strong> therefore exact rather than approximate. Two mechanisms: <em>gametophytic</em> (ga1/Ga1-s type, pollen incompatibility) acting only on the male gamete, and <em>zygotic</em> (hybrid lethality or subvitality) as genotype fitnesses. Because rejection acts on the <strong>whole gamete</strong>, the region linked to the distorter is dragged along – which is exactly the phenomenon of interest.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>f2_distorters</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -721,7 +728,7 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout callout-style-simple callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -790,6 +797,8 @@ window.Quarto = {
 <h2 data-number="5.3" class="anchored" data-anchor-id="verifying-the-identities-live"><span class="header-section-number">5.3</span> Verifying the identities live</h2>
 <p>The theory above is not decoration – it is checkable, and the simulator is only trustworthy if it reproduces it.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>map10 <span class="ot">&lt;-</span> <span class="fu">build_map</span>(maize_chr_len, <span class="at">spacing_cM =</span> <span class="dv">10</span>)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>neutral <span class="ot">&lt;-</span> <span class="fu">make_distortion</span>(map10, <span class="cn">NULL</span>, <span class="at">active =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -804,6 +813,7 @@ window.Quarto = {
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">H_observed =</span> <span class="fu">round</span>(<span class="fu">c</span>(<span class="fu">panel_het</span>(F1), <span class="fu">panel_het</span>(F2), <span class="fu">panel_het</span>(F3), <span class="fu">panel_het</span>(F4)), <span class="dv">4</span>),</span>
 <span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">H_expected =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">0.5</span>, <span class="fl">0.25</span>, <span class="fl">0.125</span>)</span>
 <span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -842,6 +852,8 @@ window.Quarto = {
 </div>
 <p>Heterozygosity halves at every selfing, as it must. And the diversity identity:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">5</span>)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>check <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">c</span>(<span class="dv">20</span>, <span class="dv">50</span>, <span class="dv">100</span>, <span class="dv">200</span>), <span class="cf">function</span>(N) {</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  pop <span class="ot">&lt;-</span> <span class="fu">run_scheme</span>(<span class="st">"ssd"</span>, N, map10, neutral, f2_opt)</span>
@@ -851,6 +863,7 @@ window.Quarto = {
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>             <span class="at">D_expected =</span> <span class="dv">1</span> <span class="sc">-</span> (<span class="dv">1</span> <span class="sc">-</span> H) <span class="sc">/</span> N)</span>
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>}))</span>
 <span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(check, <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -889,6 +902,8 @@ window.Quarto = {
 </div>
 <p>Map expansion is an algebraic prediction, and the payoff is a result many programmes get wrong:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>Lm <span class="ot">&lt;-</span> map<span class="sc">$</span>total_cM <span class="sc">/</span> <span class="dv">100</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(<span class="at">SSD  =</span> <span class="fu">expected_junctions</span>(<span class="st">"ssd"</span>,  map),</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>      <span class="at">Syn1 =</span> <span class="fu">expected_junctions</span>(<span class="st">"syn1"</span>, map),</span>
@@ -897,6 +912,7 @@ window.Quarto = {
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; SSD     29.225      42.57489</span></span>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Syn1    37.575      35.10247</span></span>
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Syn2    45.925      29.86142</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>Each Syn cycle adds only <span class="math inline">\(0.5L\)</span> junctions, not <span class="math inline">\(1.0L\)</span>. The extra meiosis creates a junction only where the parent is heterozygous, and <span class="math inline">\(H = 0.5\)</span> at the F2/Syn stage. Budgeting an intercrossing cycle as “one more map length of recombination” overstates what it buys by a factor of two.</p>
 </section>
@@ -1005,8 +1021,10 @@ window.Quarto = {
 <section id="the-diversity-curve-saturates-at-0.988-not-at-1" class="level3" data-number="5.4.1">
 <h3 data-number="5.4.1" class="anchored" data-anchor-id="the-diversity-curve-saturates-at-0.988-not-at-1"><span class="header-section-number">5.4.1</span> The diversity curve saturates at 0.988, not at 1</h3>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>schemes <span class="ot">&lt;-</span> <span class="fu">unique</span>(f2<span class="sc">$</span>scheme)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>cols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">ssd =</span> <span class="st">"#1b6ca8"</span>, <span class="at">ssd_attr =</span> <span class="st">"#7fb3d5"</span>, <span class="at">bulk =</span> <span class="st">"#c0392b"</span>,</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>cols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">ssd =</span> <span class="st">"#1f5f8b"</span>, <span class="at">ssd_attr =</span> <span class="st">"#7fb3d5"</span>, <span class="at">bulk =</span> <span class="st">"#c0392b"</span>,</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">syn1 =</span> <span class="st">"#27ae60"</span>, <span class="at">syn2 =</span> <span class="st">"#16a085"</span>)</span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="cn">NA</span>, <span class="at">xlim =</span> <span class="fu">range</span>(f2<span class="sc">$</span>N), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="fl">0.88</span>, <span class="fl">1.0</span>),</span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="fu">expression</span>(N[F2]<span class="sc">~</span><span class="st">"plants"</span>), <span class="at">ylab =</span> <span class="st">"diversity retained, D"</span>)</span>
@@ -1020,10 +1038,11 @@ window.Quarto = {
 <span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="fu">c</span>(cols[schemes], <span class="st">"grey30"</span>), <span class="at">lwd =</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="fl">1.8</span>, <span class="fu">length</span>(schemes)), <span class="fl">1.5</span>),</span>
 <span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>       <span class="at">lty =</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">1</span>, <span class="fu">length</span>(schemes)), <span class="dv">2</span>), <span class="at">pch =</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">19</span>, <span class="fu">length</span>(schemes)), <span class="cn">NA</span>),</span>
 <span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>       <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">cex =</span> <span class="fl">0.8</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="04-population-sizing_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="1050"></p>
+<p><img src="04-population-sizing_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" alt="Diversity retained against population size, five schemes" width="1050"></p>
 <figcaption>Diversity retained against population size, five schemes. The theoretical curve is 1 - (1 - H)/N under no distortion.</figcaption>
 </figure>
 </div>
@@ -1065,6 +1084,8 @@ window.Quarto = {
 <section id="block-size-does-not-depend-on-n" class="level3" data-number="5.4.3">
 <h3 data-number="5.4.3" class="anchored" data-anchor-id="block-size-does-not-depend-on-n"><span class="header-section-number">5.4.3</span> Block size does not depend on N</h3>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>map4 <span class="ot">&lt;-</span> <span class="fu">build_map</span>(maize_chr_len, <span class="at">spacing_cM =</span> <span class="dv">4</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>dist <span class="ot">&lt;-</span> <span class="fu">make_distortion</span>(map4, f2_distorters)</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">6</span>)</span>
@@ -1073,7 +1094,7 @@ window.Quarto = {
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(small, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">col =</span> <span class="st">"#e08214"</span>, <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>),</span>
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"genome (chromosomes 1-10)"</span>, <span class="at">ylab =</span> <span class="st">"P1 ancestry frequency"</span>, <span class="at">xaxt =</span> <span class="st">"n"</span>)</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(large, <span class="at">col =</span> <span class="st">"#1b6ca8"</span>, <span class="at">lwd =</span> <span class="fl">1.6</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(large, <span class="at">col =</span> <span class="st">"#1f5f8b"</span>, <span class="at">lwd =</span> <span class="fl">1.6</span>)</span>
 <span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="fl">0.5</span>, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">"grey50"</span>)</span>
 <span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co"># chromosome boundaries and distorter positions</span></span>
 <span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>bnd <span class="ot">&lt;-</span> <span class="fu">which</span>(map4<span class="sc">$</span>first)</span>
@@ -1082,12 +1103,13 @@ window.Quarto = {
 <span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_len</span>(<span class="fu">nrow</span>(f2_distorters)))</span>
 <span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">abline</span>(<span class="at">v =</span> <span class="fu">marker_index</span>(map4, f2_distorters<span class="sc">$</span>chr[i], f2_distorters<span class="sc">$</span>pos_cM[i]),</span>
 <span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>         <span class="at">col =</span> <span class="st">"#b2182b"</span>, <span class="at">lty =</span> <span class="dv">3</span>)</span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topleft"</span>, <span class="fu">c</span>(<span class="st">"N = 20"</span>, <span class="st">"N = 300"</span>, <span class="st">"distorter"</span>), <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"#e08214"</span>, <span class="st">"#1b6ca8"</span>, <span class="st">"#b2182b"</span>),</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topleft"</span>, <span class="fu">c</span>(<span class="st">"N = 20"</span>, <span class="st">"N = 300"</span>, <span class="st">"distorter"</span>), <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"#e08214"</span>, <span class="st">"#1f5f8b"</span>, <span class="st">"#b2182b"</span>),</span>
 <span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>       <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">3</span>), <span class="at">lwd =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">1.6</span>, <span class="dv">1</span>), <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">cex =</span> <span class="fl">0.8</span>, <span class="at">horiz =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="04-population-sizing_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="1050"></p>
+<p><img src="04-population-sizing_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" alt="Ancestry frequency along the ten chromosomes, at N = 20 and N = 300. At N = 20 the whole curve is noisy: that is drift, and more plants remove it" width="1050"></p>
 <figcaption>Ancestry frequency along the ten chromosomes, at N = 20 and N = 300. At N = 20 the whole curve is noisy: that is drift, and more plants remove it. At N = 300 the noise is gone and three peaks remain, exactly at the distorters. Those are the deterministic bias, and no number of plants removes them.</figcaption>
 </figure>
 </div>
@@ -1138,6 +1160,8 @@ window.Quarto = {
 </div>
 </div>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>kk <span class="ot">&lt;-</span> <span class="fu">sort</span>(<span class="fu">unique</span>(ml<span class="sc">$</span>k))</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="cn">NA</span>, <span class="at">xlim =</span> <span class="fu">range</span>(ml<span class="sc">$</span>N), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">xlab =</span> <span class="fu">expression</span>(N[F2]),</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">"P(at least one line)"</span>)</span>
@@ -1148,10 +1172,11 @@ window.Quarto = {
 <span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topright"</span>, <span class="fu">paste</span>(<span class="st">"k ="</span>, kk), <span class="at">col =</span> <span class="fu">seq_along</span>(kk) <span class="sc">+</span> <span class="dv">1</span>, <span class="at">lwd =</span> <span class="fl">1.8</span>,</span>
 <span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">bty =</span> <span class="st">"n"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="04-population-sizing_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="1050"></p>
+<p><img src="04-population-sizing_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" alt="Multilocus recovery: P(at least one line homozygous for P2 at k loci)" width="1050"></p>
 <figcaption>Multilocus recovery: P(at least one line homozygous for P2 at k loci). This is the objective that keeps paying for larger N.</figcaption>
 </figure>
 </div>
@@ -1205,8 +1230,11 @@ window.Quarto = {
 <h2 data-number="5.5" class="anchored" data-anchor-id="sizing-the-f1"><span class="header-section-number">5.5</span> Sizing the F1</h2>
 <p>With fully homozygous parents the F1 is genetically uniform and the decision is logistical. With residual heterozygosity – <span class="math inline">\(F \approx 0.95\)</span> is common in programme lines – each parent still segregates at a fraction of loci, and each F1 plant receives one random gamete from each parent. At a segregating locus the chance of losing one of the two parental alleles with <span class="math inline">\(n\)</span> F1 plants is <span class="math inline">\(2(1/2)^n\)</span>.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>s <span class="ot">&lt;-</span> <span class="fu">f1_sizing</span>(<span class="at">n_F1 =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>, <span class="at">h_res =</span> <span class="fl">0.05</span>, <span class="at">n_loci_eff =</span> <span class="dv">5000</span>)</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>s[s<span class="sc">$</span>n_F1 <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">8</span>, <span class="dv">10</span>, <span class="dv">12</span>, <span class="dv">15</span>, <span class="dv">20</span>), ]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1310,7 +1338,7 @@ window.Quarto = {
 </table>
 </div>
 </div>
-<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout callout-style-simple callout-caution callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -1328,6 +1356,8 @@ window.Quarto = {
 <h2 data-number="5.7" class="anchored" data-anchor-id="where-this-connects"><span class="header-section-number">5.7</span> Where this connects</h2>
 <p>The panel this chapter sizes is the raw material for everything else, and the claim that its diversity is a <em>ceiling</em> should be measured rather than asserted. The rest of the book works on one kernel – molecular coancestry <span class="math inline">\(f\)</span> and <span class="math inline">\(GD = 1 - \theta\)</span> (<a href="01-coancestry.html" class="quarto-xref"><span>Chapter 1</span></a>). The F4 panel can be pushed straight into it:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">3</span>)</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>map4  <span class="ot">&lt;-</span> <span class="fu">build_map</span>(<span class="at">spacing_cM =</span> <span class="dv">10</span>)</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>dist4 <span class="ot">&lt;-</span> <span class="fu">make_distortion</span>(map4, <span class="at">active =</span> <span class="cn">TRUE</span>)</span>
@@ -1340,6 +1370,7 @@ window.Quarto = {
 <span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>             <span class="at">theta =</span> th, <span class="at">GD =</span> <span class="dv">1</span> <span class="sc">-</span> th)</span>
 <span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>}))</span>
 <span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(bridge, <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1376,7 +1407,7 @@ window.Quarto = {
 </div>
 </div>
 <p><span class="math inline">\(D\)</span>, the chapter’s own diversity-retained statistic, and <span class="math inline">\(GD\)</span>, the quantity every later chapter constrains, move together: they are the same loss in two coordinate systems. The sizing decision made here therefore sets the <span class="math inline">\(GD\)</span> that <a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 14</span></a>, <a href="09-optimal-contributions.html" class="quarto-xref"><span>Chapter 17</span></a> and <a href="10-combinatorial-selection.html" class="quarto-xref"><span>Chapter 18</span></a> spend the rest of the book budgeting, and it sets it <em>once</em>. An optimiser cannot select back up to variation the panel never sampled; the best it can do is spend what is left more slowly.</p>
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-simple callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>

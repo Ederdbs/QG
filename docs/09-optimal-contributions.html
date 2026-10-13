@@ -92,20 +92,21 @@ div.csl-indent {
 <meta name="quarto:offset" content="./">
 <link href="./10-combinatorial-selection.html" rel="next">
 <link href="./08b-genomic-prediction.html" rel="prev">
+<link href="./favicon.svg" rel="icon" type="image/svg+xml">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9ef9d4760de657dc918b81d25b42b59f.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-58115a419e540697b7ccd904e8efcd2d.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9ef9d4760de657dc918b81d25b42b59f.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-37a0ccb6f5b9899fcb884e11bb6f7458.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-da8b26c7a017495cabf78e5d2792d1d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-b192ecda6a457e66a32e528cd3cc1fbc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-da8b26c7a017495cabf78e5d2792d1d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -676,6 +677,8 @@ window.Quarto = {
 <p>The common alternative, <span class="math inline">\(\max\; \bar u - \lambda\,\theta_S\)</span>, requires calibrating <span class="math inline">\(\lambda\)</span>, which has no direct interpretation. The constraint form preserves an operational meaning: <em>“I accept losing at most <span class="math inline">\(\alpha_{\max}\)</span> of diversity.”</em> That is a sentence a breeding committee can approve or reject. “Diversity is worth <span class="math inline">\(\lambda = 3.7\)</span> index units” is not.</p>
 <p>The two are not equivalent in practice either. A weighted sum lets the optimiser buy index by spending diversity anywhere on the curve; a constraint fixes the budget and makes the optimiser find the best plan <em>inside</em> it. Since the acceptable loss is a policy decision and the exchange rate is not, the constraint form puts the decision in the right hands.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>make_fitness</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (ctx, n_sel, alpha_max, gd_ref, penalty = 1000, max_use = NULL) </span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; {</span></span>
@@ -696,14 +699,17 @@ window.Quarto = {
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         -(mean(ix[idx]) - penalty * viol)</span></span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     }</span></span>
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x9def9a900&gt;</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x760b41e158&gt;</span></span>
 <span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>The violation enters as a <em>proportional</em> penalty, so a plan that overshoots by 10% of the budget is penalised in units the budget defines, whatever the absolute value of <span class="math inline">\(\alpha_{\max}\)</span>.</p>
 <section id="this-argument-is-older-than-it-looks" class="level3" data-number="17.1.1">
 <h3 data-number="17.1.1" class="anchored" data-anchor-id="this-argument-is-older-than-it-looks"><span class="header-section-number">17.1.1</span> This argument is older than it looks</h3>
 <p>The paragraphs above read as a claim about human decision-making: budgets are approvable, exchange rates are not. That is true, and it undersells the case. Kempthorne &amp; Nordskog <span class="citation" data-cites="kempthorne1959">(<a href="99-references.html#ref-kempthorne1959" role="doc-biblioref">1959</a>)</span> posed the identical problem for selection indices – maximise aggregate gain subject to <strong>zero expected change</strong> in a specified direction – and solved it in closed form. <a href="02b-response.html" class="quarto-xref"><span>Chapter 3</span></a> derives their solution; <code>index_restricted()</code> implements it. The distinguishing property is not softness:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>P <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fl">4.0</span>, <span class="fl">1.2</span>, <span class="fl">1.2</span>, <span class="fl">1.0</span>), <span class="dv">2</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>G <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fl">2.0</span>, <span class="fl">0.9</span>, <span class="fl">0.9</span>, <span class="fl">0.3</span>), <span class="dv">2</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>); R <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>))</span>
@@ -711,9 +717,10 @@ window.Quarto = {
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">restricted   =</span> <span class="fu">drop</span>(<span class="fu">crossprod</span>(R, G <span class="sc">%*%</span> <span class="fu">index_restricted</span>(P, G, a, R))))</span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; unrestricted   restricted </span></span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6.679688e-01 2.096025e-17</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>Exactly zero, not approximately. A penalty trades the restricted direction away at some price; a restriction refuses to trade it at any price. That is the distinction this section is drawing, and it has stood since 1959.</p>
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-simple callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -738,7 +745,7 @@ window.Quarto = {
 <p>with <span class="math inline">\(\mathbf{s}\)</span> and <span class="math inline">\(\mathbf{d}\)</span> indicating sex and <span class="math inline">\(\mathbf{G}\)</span> the coancestry matrix chosen for managing diversity – here, <span class="math inline">\(\mathbf{f}\)</span>.</p>
 <p>The formulation of this book is that problem <strong>restricted to <span class="math inline">\(c_i \in \{0, 1/n\}\)</span></strong>: a fixed number <span class="math inline">\(n\)</span> of candidates contribute equally, none partially. The minimisation of <span class="math inline">\(\mathbf{c}'\mathbf{f}\mathbf{c}\)</span> is turned into a constraint and <span class="math inline">\(\bar u\)</span> is promoted to the objective.</p>
 <p>That restriction to equal, all-or-nothing contributions is exactly what makes the problem combinatorial, and what pushes the solution method from convex quadratic programming to a metaheuristic. It is also not arbitrary: a commercial hybrid programme plants a whole plot of a hybrid or does not plant it.</p>
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-simple callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -755,6 +762,8 @@ window.Quarto = {
 <h3 data-number="17.2.1" class="anchored" data-anchor-id="sec-relaxation"><span class="header-section-number">17.2.1</span> The continuous relaxation as an upper bound</h3>
 <p>Dropping <span class="math inline">\(c_i \in \{0, 1/n\}\)</span> back to <span class="math inline">\(0 \le c_i \le 1/n\)</span> gives the continuous relaxation of <em>this</em> restricted problem. Every discrete solution is feasible under the relaxation, so the relaxation’s optimum is a valid <strong>upper bound</strong>.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>project_capped_simplex</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (v, cap) </span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; {</span></span>
@@ -768,15 +777,19 @@ window.Quarto = {
 <span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     }</span></span>
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     pmin(pmax(v - (lo + hi)/2, 0), cap)</span></span>
 <span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x9e1236c48&gt;</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x76094032d8&gt;</span></span>
 <span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>The cap is what makes the bound valid. Without <span class="math inline">\(c_i \le 1/n\)</span> the relaxation would put all weight on the single best candidate and the bound would be useless.</p>
 <p>Turning the relaxation into a bound on the <em>constrained</em> problem needs one more step, and turning it into an actual selection needs a rounding: both are in <a href="10b-advanced-selection.html" class="quarto-xref"><span>Chapter 19</span></a>.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>lambdas <span class="ot">&lt;-</span> <span class="dv">10</span><span class="sc">^</span><span class="fu">seq</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="fl">2.5</span>, <span class="at">length.out =</span> <span class="dv">12</span>)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>relax <span class="ot">&lt;-</span> <span class="fu">ocs_relaxation</span>(ctx, n_sel, lambdas)</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">as.data.frame</span>(relax), <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -868,6 +881,8 @@ window.Quarto = {
 </div>
 <p>Sweeping <span class="math inline">\(\lambda\)</span> traces the merit-versus-diversity frontier. Each row is the best <em>continuous</em> plan at that exchange rate, and therefore an upper bound on what any discrete plan of the same diversity can achieve.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>null <span class="ot">&lt;-</span> <span class="fu">null_distribution</span>(ctx, n_sel, <span class="at">B =</span> <span class="dv">400</span>, <span class="at">B_full =</span> <span class="dv">60</span>)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>a_relax <span class="ot">&lt;-</span> (null<span class="sc">$</span>gd_ref <span class="sc">-</span> relax[, <span class="st">"GD"</span>]) <span class="sc">/</span> null<span class="sc">$</span>gd_ref</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -889,16 +904,17 @@ window.Quarto = {
 <span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"bottomright"</span>, <span class="fu">c</span>(<span class="st">"continuous OCS relaxation (upper bound)"</span>, <span class="st">"discrete strategies"</span>),</span>
 <span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"grey45"</span>, <span class="st">"#b2182b"</span>), <span class="at">pch =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">19</span>), <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="cn">NA</span>), <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">cex =</span> <span class="fl">0.8</span>)</span>
 <span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="fu">grid</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="09-optimal-contributions_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="1050"></p>
+<p><img src="09-optimal-contributions_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" alt="The continuous relaxation traces an upper bound" width="1050"></p>
 <figcaption>The continuous relaxation traces an upper bound. Discrete strategies must sit below and to the left of it; how far below is the convergence diagnostic.</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout callout-style-simple callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -912,12 +928,15 @@ window.Quarto = {
 </div>
 </div>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>short <span class="ot">&lt;-</span> <span class="fu">ocs_relaxation</span>(ctx, n_sel, <span class="at">lambdas =</span> <span class="dv">10</span>, <span class="at">iters =</span> <span class="dv">50</span>)</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>long  <span class="ot">&lt;-</span> <span class="fu">ocs_relaxation</span>(ctx, n_sel, <span class="at">lambdas =</span> <span class="dv">10</span>, <span class="at">iters =</span> <span class="dv">4000</span>)</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">index_50_iters =</span> short[, <span class="st">"index"</span>], <span class="at">index_4000_iters =</span> long[, <span class="st">"index"</span>],</span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">greedy_w3 =</span> <span class="fu">mean_index</span>(sels<span class="sc">$</span>greedy_w3, ctx))</span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   index_50_iters.index index_4000_iters.index              greedy_w3 </span></span>
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;               1.605937               1.987272               1.991937</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 </section>
 </section>
@@ -925,6 +944,8 @@ window.Quarto = {
 <h2 data-number="17.3" class="anchored" data-anchor-id="setting-alpha_max"><span class="header-section-number">17.3</span> Setting <span class="math inline">\(\alpha_{\max}\)</span></h2>
 <p>The limit <strong>should not be chosen a priori</strong>. Pure truncation – the greediest possible selection – defines the maximum attainable <span class="math inline">\(\alpha\)</span>. If that ceiling sits below your intended limit, the constraint restricts nothing.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>attainable <span class="ot">&lt;-</span> <span class="fu">alpha_loss</span>(<span class="fu">sel_truncation</span>(ctx, n_sel), ctx, null<span class="sc">$</span>gd_ref)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">attainable_ceiling =</span> attainable,</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">a_5pct_limit_would_be_active =</span> attainable <span class="sc">&gt;</span> <span class="fl">0.05</span>,</span>
@@ -933,33 +954,40 @@ window.Quarto = {
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                   0.04121618                   0.00000000 </span></span>
 <span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; a_1pct_limit_would_be_active </span></span>
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                   1.00000000</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p><code>stage2_select()</code> computes this ceiling automatically and warns about any requested <span class="math inline">\(\alpha\)</span> above it, rather than silently returning an unconstrained solution that looks constrained.</p>
 <p>The correct procedure is to trace the frontier and choose its knee:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>ws <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">0.75</span>, <span class="dv">1</span>, <span class="fl">1.5</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">8</span>, <span class="dv">12</span>)</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>front <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(ws, <span class="cf">function</span>(w) {</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  s <span class="ot">&lt;-</span> <span class="fu">sel_greedy</span>(ctx, n_sel, <span class="at">w =</span> w)</span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">w =</span> w, <span class="at">alpha =</span> <span class="fu">alpha_loss</span>(s, ctx, null<span class="sc">$</span>gd_ref),</span>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>             <span class="at">index =</span> <span class="fu">mean_index</span>(s, ctx), <span class="at">Ne_par =</span> <span class="fu">ne_parents</span>(s, ctx))</span>
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>}))</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(front<span class="sc">$</span>alpha <span class="sc">*</span> <span class="dv">100</span>, front<span class="sc">$</span>index, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="st">"#2166ac"</span>,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(front<span class="sc">$</span>alpha <span class="sc">*</span> <span class="dv">100</span>, front<span class="sc">$</span>index, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="st">"#1f5f8b"</span>,</span>
 <span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"gene diversity loss, alpha (%)"</span>, <span class="at">ylab =</span> <span class="st">"mean index (s.d.)"</span>)</span>
 <span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> attainable <span class="sc">*</span> <span class="dv">100</span>, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">"#b2182b"</span>)</span>
 <span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(attainable <span class="sc">*</span> <span class="dv">100</span>, <span class="fu">min</span>(front<span class="sc">$</span>index), <span class="st">"truncation ceiling"</span>, <span class="at">pos =</span> <span class="dv">2</span>, <span class="at">cex =</span> <span class="fl">0.7</span>,</span>
 <span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>     <span class="at">col =</span> <span class="st">"#b2182b"</span>)</span>
 <span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="fu">grid</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="09-optimal-contributions_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="1050"></p>
+<p><img src="09-optimal-contributions_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" alt="The greedy frontier, swept over the merit weight w" width="1050"></p>
 <figcaption>The greedy frontier, swept over the merit weight w. The knee is where further diversity costs index steeply.</figcaption>
 </figure>
 </div>
 </div>
 </div>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(front, <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1048,6 +1076,8 @@ window.Quarto = {
 <p>The ceiling above is quoted to four decimals, which invites more confidence than the marker panel supports. <a href="05-genomic-era.html" class="quarto-xref"><span>Chapter 11</span></a> showed that the MAF spectrum decides how badly the two inbreeding lenses disagree; the same spectrum feeds <span class="math inline">\(\mathbf{f}\)</span>, and therefore <span class="math inline">\(\bar H_{\text{ref}}\)</span> and the ceiling. It is worth knowing which choices move the budget and which only look as though they should.</p>
 <p>Rebuild everything downstream of the marker panel – <span class="math inline">\(\mathbf{f}\)</span>, the null, the ceiling – under a filter, a density and an ascertainment scenario:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>ceiling_for <span class="ot">&lt;-</span> <span class="cf">function</span>(keep, label, <span class="at">B =</span> <span class="dv">250</span>) {</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  Xs <span class="ot">&lt;-</span> ctx<span class="sc">$</span>X[, keep, drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  ck <span class="ot">&lt;-</span> <span class="fu">build_ctx</span>(<span class="at">X =</span> Xs, <span class="at">f =</span> <span class="fu">molecular_coancestry</span>(Xs), <span class="at">G =</span> <span class="cn">NULL</span>,</span>
@@ -1064,6 +1094,7 @@ window.Quarto = {
 <span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">function</span>(t) <span class="fu">ceiling_for</span>(maf <span class="sc">&gt;=</span> t, <span class="fu">sprintf</span>(<span class="st">"MAF &gt;= %.2f"</span>, t)))),</span>
 <span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ceiling_for</span>(polyA <span class="sc">&gt;</span> <span class="dv">0</span> <span class="sc">&amp;</span> polyA <span class="sc">&lt;</span> <span class="dv">1</span>, <span class="st">"ascertained in pool A"</span>))</span>
 <span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(sens, <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1114,6 +1145,8 @@ window.Quarto = {
 <p><span class="math inline">\(\bar H_{\text{ref}}\)</span> moves by 19% across these panels. <span class="math inline">\(\alpha_{\max}\)</span> moves by 4.7%. That is not a coincidence: <span class="math inline">\(\alpha\)</span> is a <em>ratio</em> of diversities measured on the same panel, so a filter that shifts the absolute level shifts numerator and denominator together and largely cancels out. <strong>Filtering choices move the diversity level; they do not move the budget.</strong></p>
 <p>Density does not move it either, but it does something worse: it makes the estimate noisy without making it wrong. Thinning the panel and averaging over six independent draws of which markers survive:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Every subset is drawn BEFORE the loop. `null_distribution()` calls set.seed()</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co"># internally, so a `sample.int()` written inside the loop would hand every</span></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co"># replicate after the first the very same markers -- see the warning below.</span></span>
@@ -1125,6 +1158,7 @@ window.Quarto = {
 <span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">markers =</span> <span class="fu">length</span>(sl[[<span class="dv">1</span>]]), <span class="at">alpha_max =</span> <span class="fu">mean</span>(v), <span class="at">sd =</span> stats<span class="sc">::</span><span class="fu">sd</span>(v))</span>
 <span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>}))</span>
 <span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">rbind</span>(dens, <span class="fu">data.frame</span>(<span class="at">markers =</span> ctx<span class="sc">$</span>m, <span class="at">alpha_max =</span> attainable, <span class="at">sd =</span> <span class="cn">NA</span>)), <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1163,7 +1197,7 @@ window.Quarto = {
 </div>
 <p>The means sit within one standard deviation of the full-panel ceiling all the way down to 250 markers. The standard deviation does not: at 250 it is about 20% of the estimate itself. A budget set from a thin panel is not biased, it is a coin flip – and a single thin-panel study has no way to tell which side it landed on.</p>
 <p>So all three axes leave <span class="math inline">\(\alpha_{\max}\)</span> where it was. That is the useful finding, and it is worth stating positively: <strong>the budget is a more portable quantity than the diversity level it is computed from.</strong> <span class="math inline">\(\bar H_{\text{ref}}\)</span> is not comparable across panels; <span class="math inline">\(\alpha\)</span> largely is, provided the panel is dense enough for the estimate to be stable.</p>
-<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout callout-style-simple callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -1177,7 +1211,7 @@ window.Quarto = {
 <p>This is not hypothetical: the table above returned two different wrong answers – once suggesting thin panels understate the ceiling, once that they overstate it – before the subsets were hoisted out of the loop. Draw randomisation up front, or pass an explicit varying <code>seed</code>.</p>
 </div>
 </div>
-<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout callout-style-simple callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -1202,6 +1236,8 @@ window.Quarto = {
 <h2 data-number="17.5" class="anchored" data-anchor-id="quadratic-programming-when-contributions-are-continuous"><span class="header-section-number">17.5</span> Quadratic programming, when contributions are continuous</h2>
 <p>Where the problem genuinely is continuous – composing a synthetic, assembling a core collection, setting seed proportions – solve it as a quadratic programme rather than with a metaheuristic. That is <a href="02-subdivided.html" class="quarto-xref"><span>Chapter 2</span></a>’s <code>optimal_contributions()</code>, with <code>ocs_quadprog()</code> adding the merit term:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>sub <span class="ot">&lt;-</span> <span class="fu">sample.int</span>(ctx<span class="sc">$</span>n_lines, <span class="dv">20</span>)</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>fLs <span class="ot">&lt;-</span> ctx<span class="sc">$</span>fL[sub, sub]</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>merit <span class="ot">&lt;-</span> <span class="fu">as.vector</span>(<span class="fu">scale</span>(<span class="fu">rnorm</span>(<span class="dv">20</span>)))</span>
@@ -1212,6 +1248,7 @@ window.Quarto = {
 <span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>             <span class="at">n_used =</span> <span class="fu">sum</span>(o<span class="sc">$</span>c_i <span class="sc">&gt;</span> <span class="fl">1e-6</span>))</span>
 <span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>}))</span>
 <span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(front_qp, <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1284,7 +1321,10 @@ window.Quarto = {
 <h2 data-number="17.6" class="anchored" data-anchor-id="what-belongs-in-the-inner-loop"><span class="header-section-number">17.6</span> What belongs in the inner loop</h2>
 <p>The optimiser performs on the order of <span class="math inline">\(10^5\)</span> to <span class="math inline">\(10^6\)</span> evaluations, so the cost per call decides what goes into the objective and what waits for post-hoc validation.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">cost_per_eval</span>(ctx, n_sel, <span class="at">reps =</span> <span class="dv">20</span>), <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1297,11 +1337,11 @@ window.Quarto = {
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">theta_group</td>
-<td style="text-align: right;">50</td>
+<td style="text-align: right;">0</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">theta_from_freq</td>
-<td style="text-align: right;">100</td>
+<td style="text-align: right;">150</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">ne_parents</td>
@@ -1317,7 +1357,7 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td style="text-align: left;">ANE</td>
-<td style="text-align: right;">350</td>
+<td style="text-align: right;">400</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">eff_dim</td>
@@ -1325,7 +1365,7 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td style="text-align: left;">Gst</td>
-<td style="text-align: right;">1300</td>
+<td style="text-align: right;">1350</td>
 </tr>
 </tbody>
 </table>

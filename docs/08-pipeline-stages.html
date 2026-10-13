@@ -73,20 +73,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta name="quarto:offset" content="./">
 <link href="./08b-genomic-prediction.html" rel="next">
 <link href="./07-choosing-metrics.html" rel="prev">
+<link href="./favicon.svg" rel="icon" type="image/svg+xml">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9ef9d4760de657dc918b81d25b42b59f.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-58115a419e540697b7ccd904e8efcd2d.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9ef9d4760de657dc918b81d25b42b59f.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-37a0ccb6f5b9899fcb884e11bb6f7458.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-da8b26c7a017495cabf78e5d2792d1d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-b192ecda6a457e66a32e528cd3cc1fbc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-da8b26c7a017495cabf78e5d2792d1d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -690,12 +691,15 @@ window.Quarto = {
 <p>Two rules govern everything below. Every formula was verified numerically before it was written; where a result is an exact algebraic identity, the maximum deviation from simulation is reported next to it. And the metric set is the one established in <a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 14</span></a>: molecular coancestry as the kernel, <span class="math inline">\(GD = 1 -
 \theta\)</span> as the scale, <span class="math inline">\(N_s\)</span> as the interpretable size, allelic richness as the one non-redundant addition, and proportional loss measured against a same-size resampling baseline.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="fu">simulate_pools</span>(<span class="at">n_A =</span> <span class="dv">30</span>, <span class="at">n_B =</span> <span class="dv">30</span>, <span class="at">m =</span> <span class="dv">3000</span>, <span class="at">fst =</span> <span class="fl">0.15</span>, <span class="at">seed =</span> <span class="dv">12</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>ctx <span class="ot">&lt;-</span> <span class="fu">ctx_from_pools</span>(sim)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>GL  <span class="ot">&lt;-</span> sim<span class="sc">$</span>GL; pool <span class="ot">&lt;-</span> sim<span class="sc">$</span>pool; fL <span class="ot">&lt;-</span> sim<span class="sc">$</span>fL</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">lines =</span> sim<span class="sc">$</span>L, <span class="at">markers =</span> sim<span class="sc">$</span>m, <span class="at">hybrids =</span> sim<span class="sc">$</span>N)</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   lines markers hybrids </span></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      60    3000     900</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <section id="the-kernel-one-matrix-all-four-stages" class="level2" data-number="15.1">
 <h2 data-number="15.1" class="anchored" data-anchor-id="the-kernel-one-matrix-all-four-stages"><span class="header-section-number">15.1</span> The kernel: one matrix, all four stages</h2>
@@ -707,10 +711,13 @@ window.Quarto = {
 <h3 data-number="15.1.1" class="anchored" data-anchor-id="trap-1-modified-rogers-distance-is-the-same-statistic"><span class="header-section-number">15.1.1</span> Trap 1: modified Rogers distance is the same statistic</h3>
 <p>Reporting both MRD and coancestry as separate evidence is reporting one number twice. The relation is exact:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>D <span class="ot">&lt;-</span> <span class="fu">mrd_matrix</span>(GL)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">max_deviation =</span> <span class="fu">max</span>(<span class="fu">abs</span>(<span class="fu">coancestry_from_mrd</span>(D) <span class="sc">-</span> fL)))</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; max_deviation </span></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1.110223e-16</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p><span class="math inline">\(f_{ij} = 1 - \text{MRD}_{ij}^2\)</span>. If a diversity report shows a distance tree and a coancestry table as mutual corroboration, they are the same analysis in two coordinate systems.</p>
 </section>
@@ -721,12 +728,15 @@ window.Quarto = {
 <p>The partition is exact for any grouping:</p>
 <p><span class="math display">\[\theta_T = \sum_p w_p^2\,\theta_{pp} \;+\; \sum \text{over } p \ne q \text{ of } w_p w_q\,\theta_{pq}\]</span></p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">theta_decompose</span>(GL, pool)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">theta_T_from_partition =</span> d<span class="sc">$</span>theta_T,</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">theta_T_direct         =</span> <span class="fu">mean</span>(fL),</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">deviation              =</span> d<span class="sc">$</span>theta_T <span class="sc">-</span> <span class="fu">mean</span>(fL))</span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; theta_T_from_partition         theta_T_direct              deviation </span></span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;              0.6614378              0.6614378              0.0000000</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <section id="trap-2-two-f_st-definitions-differ-by-up-to-2x" class="level3" data-number="15.2.1">
 <h3 data-number="15.2.1" class="anchored" data-anchor-id="trap-2-two-f_st-definitions-differ-by-up-to-2x"><span class="header-section-number">15.2.1</span> Trap 2: two <span class="math inline">\(F_{ST}\)</span> definitions differ by up to 2x</h3>
@@ -736,12 +746,15 @@ window.Quarto = {
   G_{ST} = \frac{\theta_w - \theta_T}{1 - \theta_T}\]</span></p>
 <p>The first references <em>between-pool</em> coancestry; the second references <em>total</em> pooled-frequency coancestry and equals Nei’s <span class="math inline">\(G_{ST} = (H_T - H_S)/H_T\)</span>:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">Fst_Wright =</span> d<span class="sc">$</span>Fst_Wright,</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">Gst_Nei    =</span> d<span class="sc">$</span>Gst_Nei,</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">Gst_classical =</span> <span class="fu">unname</span>(<span class="fu">gst_nei</span>(GL, pool)[[<span class="st">"Gst"</span>]]),</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">ratio      =</span> d<span class="sc">$</span>Fst_Wright <span class="sc">/</span> d<span class="sc">$</span>Gst_Nei)</span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Fst_Wright       Gst_Nei Gst_classical         ratio </span></span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     0.1824006     0.1003525     0.1003525     1.8175994</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>Because <span class="math inline">\(\theta_T &gt; \theta_B\)</span> whenever the pools differ at all, <span class="math inline">\(G_{ST} &lt;
 F_{ST}\)</span> <strong>always</strong>. Across simulated divergence they never converge:</p>
@@ -861,6 +874,8 @@ F_{ST}\)</span> <strong>always</strong>. Across simulated divergence they never 
 <h3 data-number="15.2.2" class="anchored" data-anchor-id="trap-3-f_st-is-the-wrong-target-to-maximise"><span class="header-section-number">15.2.2</span> Trap 3: <span class="math inline">\(F_{ST}\)</span> is the wrong target to maximise</h3>
 <p><span class="math inline">\(F_{ST}\)</span> keeps rising as pools drift apart at loci that are <em>already</em> divergent, which buys no additional heterosis. <a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 12</span></a> makes the reason exact: under neutral divergence expected heterosis does not depend on <span class="math inline">\(F_{ST}\)</span> at all, because every unit gained in the divergence term is paid for out of the shared term. What does move it is divergence landing on the dominance loci. The frequency-side statistics decouple from <span class="math inline">\(F_{ST}\)</span> accordingly:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>sweep_fst <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">c</span>(<span class="fl">0.05</span>, <span class="fl">0.15</span>, <span class="fl">0.25</span>, <span class="fl">0.40</span>), <span class="cf">function</span>(fst) {</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  s <span class="ot">&lt;-</span> <span class="fu">simulate_pools</span>(<span class="at">n_A =</span> <span class="dv">25</span>, <span class="at">n_B =</span> <span class="dv">25</span>, <span class="at">m =</span> <span class="dv">2000</span>, <span class="at">fst =</span> fst, <span class="at">seed =</span> <span class="dv">3</span>)</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  dd <span class="ot">&lt;-</span> <span class="fu">theta_decompose</span>(s<span class="sc">$</span>GL, s<span class="sc">$</span>pool)</span>
@@ -871,6 +886,7 @@ F_{ST}\)</span> <strong>always</strong>. Across simulated divergence they never 
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>             <span class="at">mean_sq_delta_p =</span> cm[[<span class="st">"mean_sq_delta_p"</span>]])</span>
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>}))</span>
 <span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(sweep_fst, <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -936,7 +952,10 @@ F_{ST}\)</span> <strong>always</strong>. Across simulated divergence they never 
 <section id="the-s1-monitoring-panel" class="level3" data-number="15.2.3">
 <h3 data-number="15.2.3" class="anchored" data-anchor-id="the-s1-monitoring-panel"><span class="header-section-number">15.2.3</span> The S1 monitoring panel</h3>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">s1_monitor</span>(GL, pool, <span class="at">cycle =</span> <span class="dv">12</span>), <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1004,6 +1023,8 @@ F_{ST}\)</span> <strong>always</strong>. Across simulated divergence they never 
   \;+\; \frac{1}{D}\left(1 - \overline{\left(\tfrac{1 + f_c}{2}\right)}\right)\]</span></p>
 <p>with <span class="math inline">\(\mathbf{w}\)</span> the <strong>parent-usage weight vector</strong>. The second term is the self-coancestry correction; it is <span class="math inline">\(O(1/D)\)</span> and worth keeping.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">88</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>A <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">30</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>crosses <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="fu">sample</span>(A, <span class="dv">20</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>), <span class="fu">sample</span>(A, <span class="dv">20</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>))</span>
@@ -1014,8 +1035,9 @@ F_{ST}\)</span> <strong>always</strong>. Across simulated divergence they never 
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">sib_coancestry_ex =</span> <span class="fu">dh_sib_coancestry</span>(fL[crosses[<span class="dv">1</span>, <span class="dv">1</span>], crosses[<span class="dv">1</span>, <span class="dv">2</span>]]))</span>
 <span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    with_self_term without_self_term sib_coancestry_ex </span></span>
 <span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         0.7010910         0.7008837         0.8493333</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
-<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout callout-style-simple callout-important callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -1034,6 +1056,8 @@ F_{ST}\)</span> <strong>always</strong>. Across simulated divergence they never 
 <p>Under an additive model only loci segregating in the cross contribute:</p>
 <p><span class="math display">\[\sigma^2_{DH(i,j)} = \frac{1}{4}\sum_{k \,:\, x_{ik} \ne x_{jk}} \beta_k^2\]</span></p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>sig <span class="ot">&lt;-</span> <span class="fu">sigma_dh_crosses</span>(crosses, GL, sim<span class="sc">$</span>beta)</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>mu  <span class="ot">&lt;-</span> <span class="fu">rowMeans</span>(<span class="fu">cbind</span>(GL[crosses[, <span class="dv">1</span>], ] <span class="sc">%*%</span> sim<span class="sc">$</span>beta,</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>                      GL[crosses[, <span class="dv">2</span>], ] <span class="sc">%*%</span> sim<span class="sc">$</span>beta))</span>
@@ -1043,6 +1067,7 @@ F_{ST}\)</span> <strong>always</strong>. Across simulated divergence they never 
 <span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           2.062713           2.063000</span></span>
 <span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">head</span>(<span class="fu">data.frame</span>(<span class="at">p1 =</span> crosses[, <span class="dv">1</span>], <span class="at">p2 =</span> crosses[, <span class="dv">2</span>],</span>
 <span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>                    <span class="at">mu =</span> mu, <span class="at">sigma_dh =</span> sig, <span class="at">UC =</span> uc), <span class="dv">6</span>), <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1143,7 +1168,7 @@ F_{ST}\)</span> <strong>always</strong>. Across simulated divergence they never 
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="figs/metric_pitfalls.png" class="img-fluid figure-img" width="645"></p>
+<p><img src="figs/metric_pitfalls.png" class="img-fluid figure-img" alt="Traps 4 and 2, on the full simulation" width="645"></p>
 <figcaption>Traps 4 and 2, on the full simulation. Panel A: progeny standard deviation against modified Rogers distance – the strong pooled correlation only re-separates inter- from within-pool crosses and carries almost no information within either stratum. Panel B: the two F_ST definitions on identical data, differing only in the reference in the denominator.</figcaption>
 </figure>
 </div>
@@ -1159,17 +1184,22 @@ F_{ST}\)</span> <strong>always</strong>. Across simulated divergence they never 
 <p><strong>Apply the constraint within each pool separately.</strong> A pooled constraint can be satisfied by keeping the pools apart while both erode internally – exactly the failure mode S1 exists to prevent.</p>
 <p><strong>Measure loss against a same-size resampling baseline.</strong></p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>merit <span class="ot">&lt;-</span> <span class="fu">as.vector</span>(GL <span class="sc">%*%</span> sim<span class="sc">$</span>beta)</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>merit <span class="ot">&lt;-</span> (merit <span class="sc">-</span> <span class="fu">mean</span>(merit)) <span class="sc">/</span> <span class="fu">sd</span>(merit)</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>top   <span class="ot">&lt;-</span> <span class="fu">order</span>(merit, <span class="at">decreasing =</span> <span class="cn">TRUE</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>]</span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">loss_vs_resampling</span>(top, fL, <span class="at">B =</span> <span class="dv">300</span>), <span class="dv">4</span>)</span>
 <span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    GD_selected GD_random_mean       loss_pct     percentile </span></span>
 <span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         0.3245         0.3271         0.8029         0.0700</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <section id="trap-5-the-incremental-greedy-constraint-silently-returns-nothing" class="level3" data-number="15.4.1">
 <h3 data-number="15.4.1" class="anchored" data-anchor-id="trap-5-the-incremental-greedy-constraint-silently-returns-nothing"><span class="header-section-number">15.4.1</span> Trap 5: the incremental greedy constraint silently returns nothing</h3>
 <p>The natural implementation – “add the next-best line while <span class="math inline">\(\theta\)</span> stays below the ceiling” – <strong>cannot work</strong>, and fails silently by returning an empty set. Group coancestry includes the diagonal, so a single line has <span class="math inline">\(\theta = 1\)</span> and any pair has <span class="math inline">\(\theta = (1 + f_{ij})/2\)</span>. A ceiling calibrated on a large pool is unreachable at small set sizes; the greedy never gets past the first candidate.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>ceiling20 <span class="ot">&lt;-</span> <span class="fu">theta_ceiling</span>(fL, <span class="at">n_sel =</span> <span class="dv">20</span>, <span class="at">alpha =</span> <span class="fl">0.005</span>)</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">ceiling             =</span> ceiling20,</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">theta_single_line   =</span> fL[<span class="dv">1</span>, <span class="dv">1</span>],</span>
@@ -1177,9 +1207,12 @@ F_{ST}\)</span> <strong>always</strong>. Across simulated divergence they never 
 <span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">any_pair_admissible =</span> <span class="fu">any</span>((<span class="dv">1</span> <span class="sc">+</span> fL[<span class="fu">upper.tri</span>(fL)]) <span class="sc">/</span> <span class="dv">2</span> <span class="sc">&lt;=</span> ceiling20))</span>
 <span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             ceiling   theta_single_line     theta_best_pair any_pair_admissible </span></span>
 <span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           0.6746394           1.0000000           0.8008333           0.0000000</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>No single line and no pair can satisfy the ceiling. <span class="math inline">\(\theta\)</span> falls monotonically as the set grows, so <strong>the constraint is only meaningful at the target size</strong>:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>sizes <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">8</span>, <span class="dv">12</span>, <span class="dv">20</span>, <span class="dv">30</span>, <span class="dv">45</span>, <span class="dv">60</span>)</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>th <span class="ot">&lt;-</span> <span class="fu">vapply</span>(sizes, <span class="cf">function</span>(n) <span class="fu">mean</span>(<span class="fu">replicate</span>(<span class="dv">50</span>, {</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  s <span class="ot">&lt;-</span> <span class="fu">sample.int</span>(<span class="fu">nrow</span>(fL), n); <span class="fu">mean</span>(fL[s, s])})), <span class="fu">numeric</span>(<span class="dv">1</span>))</span>
@@ -1188,10 +1221,11 @@ F_{ST}\)</span> <strong>always</strong>. Across simulated divergence they never 
 <span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topright"</span>, <span class="fu">c</span>(<span class="st">"mean theta of a random set"</span>, <span class="st">"ceiling for n = 20"</span>),</span>
 <span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"black"</span>, <span class="st">"#b2182b"</span>), <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">pch =</span> <span class="fu">c</span>(<span class="dv">19</span>, <span class="cn">NA</span>), <span class="at">bty =</span> <span class="st">"n"</span>)</span>
 <span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="fu">grid</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="08-pipeline-stages_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="1050"></p>
+<p><img src="08-pipeline-stages_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" alt="Group coancestry falls monotonically with set size" width="1050"></p>
 <figcaption>Group coancestry falls monotonically with set size. A ceiling calibrated at the target size is unreachable at every smaller size, which is why an incremental greedy stops at the first candidate.</figcaption>
 </figure>
 </div>
@@ -1199,6 +1233,8 @@ F_{ST}\)</span> <strong>always</strong>. Across simulated divergence they never 
 </div>
 <p>The working route is <strong>truncate-then-repair</strong>: take the top <code>n_sel</code> by merit, then swap the most-related member for the least-related non-member until the ceiling is met, breaking ties on merit.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>sel <span class="ot">&lt;-</span> <span class="fu">select_lines_constrained</span>(merit, fL, <span class="at">n_sel =</span> <span class="dv">20</span>, <span class="at">theta_max =</span> ceiling20)</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">n_selected   =</span> <span class="fu">length</span>(sel),</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">theta        =</span> <span class="fu">s3_theta</span>(sel, fL),</span>
@@ -1208,6 +1244,7 @@ F_{ST}\)</span> <strong>always</strong>. Across simulated divergence they never 
 <span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">merit_of_top =</span> <span class="fu">mean</span>(merit[top]))</span>
 <span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   n_selected        theta      ceiling          met   mean_merit merit_of_top </span></span>
 <span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   20.0000000    0.6755400    0.6746394    0.0000000    1.0724564    1.0724564</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p><code>theta_ceiling()</code> expresses the ceiling as a permitted <strong>proportional loss</strong> against the same-size baseline, so the constraint means the same thing at every set size.</p>
 </section>
@@ -1217,6 +1254,8 @@ F_{ST}\)</span> <strong>always</strong>. Across simulated divergence they never 
 <p>With <span class="math inline">\(\mathbf{u}\)</span> the line-usage count vector over the <span class="math inline">\(n\)</span> selected hybrids,</p>
 <p><span class="math display">\[\theta_{hyb} = \frac{\mathbf{u}^{\top}\mathbf{f}^L\,\mathbf{u}}{(2n)^2}\]</span></p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">91</span>)</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>hyb <span class="ot">&lt;-</span> <span class="fu">sample.int</span>(ctx<span class="sc">$</span>N, <span class="dv">100</span>)</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>u   <span class="ot">&lt;-</span> <span class="fu">line_usage</span>(hyb, ctx<span class="sc">$</span>parents, ctx<span class="sc">$</span>n_lines)</span>
@@ -1225,16 +1264,20 @@ F_{ST}\)</span> <strong>always</strong>. Across simulated divergence they never 
 <span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">deviation =</span> <span class="fu">hybrid_theta_from_usage</span>(u, fL) <span class="sc">-</span> <span class="fu">ref_theta</span>(hyb, ctx))</span>
 <span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  theta_from_usage theta_from_matrix         deviation </span></span>
 <span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         0.6620848         0.6620848         0.0000000</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>Deviation exactly zero. This is the collapse of <a href="07-choosing-metrics.html#sec-collapse" class="quarto-xref"><span>Section 14.1</span></a>: cost drops from <span class="math inline">\(O(n^2)\)</span> over an <span class="math inline">\(N \times N\)</span> hybrid matrix to <span class="math inline">\(O(L^2)\)</span> with no hybrid matrix formed at all.</p>
 <p>Expected heterozygosity of the hybrid set needs no separate computation: for hybrids of fixed lines it is exactly <span class="math inline">\(1 - \theta_{hyb}\)</span>.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">theta =</span> <span class="fu">hybrid_theta_from_usage</span>(u, fL),</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">He    =</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">hybrid_theta_from_usage</span>(u, fL),</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">Ne    =</span> <span class="fu">ne_parents_from_counts</span>(u),</span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">pool_balance =</span> <span class="fu">pool_balance</span>(hyb, ctx<span class="sc">$</span>parents, pool))</span>
 <span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         theta            He            Ne pool_balance1 pool_balance2 </span></span>
 <span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     0.6620848     0.3379152    49.6277916     0.5000000     0.5000000</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 </section>
 <section id="where-the-diversity-actually-goes" class="level2" data-number="15.6">
@@ -1291,7 +1334,7 @@ F_{ST}\)</span> <strong>always</strong>. Across simulated divergence they never 
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="figs/pipeline_loss.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="figs/pipeline_loss.png" class="img-fluid figure-img" alt="Where the diversity goes" width="672"></p>
 <figcaption>Where the diversity goes. DH induction dominates, and a diversity term applied there redistributes loss rather than removing it.</figcaption>
 </figure>
 </div>

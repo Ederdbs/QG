@@ -73,20 +73,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta name="quarto:offset" content="./">
 <link href="./90-notation.html" rel="next">
 <link href="./11c-limits.html" rel="prev">
+<link href="./favicon.svg" rel="icon" type="image/svg+xml">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9ef9d4760de657dc918b81d25b42b59f.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-58115a419e540697b7ccd904e8efcd2d.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9ef9d4760de657dc918b81d25b42b59f.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-37a0ccb6f5b9899fcb884e11bb6f7458.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-da8b26c7a017495cabf78e5d2792d1d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-b192ecda6a457e66a32e528cd3cc1fbc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-da8b26c7a017495cabf78e5d2792d1d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -656,13 +657,18 @@ window.Quarto = {
 <section id="the-whole-pipeline-in-one-script" class="level2" data-number="23.1">
 <h2 data-number="23.1" class="anchored" data-anchor-id="the-whole-pipeline-in-one-script"><span class="header-section-number">23.1</span> The whole pipeline in one script</h2>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>st1 <span class="ot">&lt;-</span> <span class="fu">stage1_simulate</span>(book_cfg)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">hybrids =</span> <span class="fu">nrow</span>(st1<span class="sc">$</span>X), <span class="at">markers =</span> <span class="fu">ncol</span>(st1<span class="sc">$</span>X),</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">f_min =</span> <span class="fu">min</span>(st1<span class="sc">$</span>f), <span class="at">f_max =</span> <span class="fu">max</span>(st1<span class="sc">$</span>f))</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    hybrids    markers      f_min      f_max </span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  625.00000 2000.00000    0.64475    0.83175</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>n_sel <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fl">0.10</span> <span class="sc">*</span> <span class="fu">nrow</span>(st1<span class="sc">$</span>X))</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">suppressWarnings</span>(<span class="fu">stage2_select</span>(</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">X =</span> st1<span class="sc">$</span>X, <span class="at">f =</span> st1<span class="sc">$</span>f, <span class="at">hybrids =</span> st1<span class="sc">$</span>hybrids,</span>
@@ -671,8 +677,9 @@ window.Quarto = {
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">weights =</span> <span class="cn">NULL</span>,     <span class="co"># NULL = equal weight across traits</span></span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">fL      =</span> st1<span class="sc">$</span>fL,   <span class="co"># optional: enables theta_A / theta_B / theta_AB</span></span>
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">B_null =</span> <span class="dv">500</span>, <span class="at">B_full =</span> <span class="dv">80</span>, <span class="at">NP =</span> <span class="dv">100</span>, <span class="at">itermax =</span> <span class="dv">200</span>, <span class="at">verbose =</span> <span class="cn">FALSE</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-simple callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -689,23 +696,32 @@ window.Quarto = {
 </div>
 <p>With real data only the first line changes:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>st1 <span class="ot">&lt;-</span> <span class="fu">stage1_build</span>(<span class="at">X =</span> my_hybrid_matrix, <span class="at">ped =</span> my_pedigree,</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>                    <span class="at">traits =</span> my_predicted_traits, <span class="at">fL =</span> my_line_coancestry)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <section id="the-reference-values" class="level3" data-number="23.1.1">
 <h3 data-number="23.1.1" class="anchored" data-anchor-id="the-reference-values"><span class="header-section-number">23.1.1</span> The reference values</h3>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">unlist</span>(res<span class="sc">$</span>ref)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          gd_ref           gd_se       alpha_max           n_sel population_bias </span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    3.259845e-01    3.556567e-05    3.938109e-02    6.200000e+01    6.467346e-03</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p><code>alpha_max</code> is the attainable ceiling from <a href="06-metric-catalogue.html#sec-baseline" class="quarto-xref"><span>Section 13.9</span></a>: the loss pure truncation would incur. Any requested budget above it constrains nothing, and <code>stage2_select()</code> says so rather than returning a solution that merely looks constrained.</p>
 </section>
 <section id="metrics-per-scenario" class="level3" data-number="23.1.2">
 <h3 data-number="23.1.2" class="anchored" data-anchor-id="metrics-per-scenario"><span class="header-section-number">23.1.2</span> Metrics per scenario</h3>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(res<span class="sc">$</span>metrics[, <span class="fu">c</span>(<span class="st">"scenario"</span>, <span class="st">"alpha"</span>, <span class="st">"index"</span>, <span class="st">"Ns"</span>, <span class="st">"Ne_parents"</span>,</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"Ne_lines_A"</span>, <span class="st">"Ne_lines_B"</span>, <span class="st">"max_line"</span>, <span class="st">"alleles_lost"</span>)], <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -841,12 +857,15 @@ window.Quarto = {
 <p>Read the <code>index</code> column against <code>alpha</code>. That is the price list: what each percentage point of diversity costs in index units, on this dataset, at this selection intensity.</p>
 <p>Now read <code>Ne_parents</code> against <code>Ns</code> in the same rows. This is the diagnostic <a href="05-genomic-era.html" class="quarto-xref"><span>Chapter 11</span></a> called for, and the reason <code>Ne_parents</code> is a second constraint rather than a report line:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> res<span class="sc">$</span>metrics</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">data.frame</span>(<span class="at">scenario =</span> d<span class="sc">$</span>scenario,</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">Ns =</span> d<span class="sc">$</span>Ns,</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>               <span class="at">Ne_parents =</span> d<span class="sc">$</span>Ne_parents,</span>
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>               <span class="at">Ns_relative =</span> d<span class="sc">$</span>Ns <span class="sc">/</span> <span class="fu">max</span>(d<span class="sc">$</span>Ns),</span>
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">Ne_par_relative =</span> d<span class="sc">$</span>Ne_parents <span class="sc">/</span> <span class="fu">max</span>(d<span class="sc">$</span>Ne_parents)), <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -933,8 +952,11 @@ window.Quarto = {
 <section id="both-lenses-and-the-pool-partition" class="level3" data-number="23.1.3">
 <h3 data-number="23.1.3" class="anchored" data-anchor-id="both-lenses-and-the-pool-partition"><span class="header-section-number">23.1.3</span> Both lenses, and the pool partition</h3>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(res<span class="sc">$</span>metrics[, <span class="fu">c</span>(<span class="st">"scenario"</span>, <span class="st">"alpha"</span>, <span class="st">"F_hom"</span>, <span class="st">"F_drift"</span>, <span class="st">"cov_diag"</span>,</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"rare_retained"</span>, <span class="st">"GD_WI_hyb"</span>, <span class="st">"GD_BS"</span>, <span class="st">"F_ST"</span>)], <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1069,18 +1091,24 @@ window.Quarto = {
 </div>
 <p><code>alpha</code> constrains the first lens only. <code>F_drift</code> is the unmonitored bill, and <code>cov_diag</code> is exactly the gap between them – verify it:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">max_deviation_from_Eq3 =</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">max</span>(<span class="fu">abs</span>(d<span class="sc">$</span>cov_diag <span class="sc">-</span> (d<span class="sc">$</span>F_hom <span class="sc">-</span> d<span class="sc">$</span>F_drift)), <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; max_deviation_from_Eq3 </span></span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           6.678685e-17</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p><code>GD_BS</code> rising across scenarios is selection concentrating on the most complementary line pairs, which pushes the pools further apart. That is not automatically bad – it is heterosis – but <a href="08-pipeline-stages.html" class="quarto-xref"><span>Chapter 15</span></a> is the reason to watch it rather than celebrate it.</p>
 </section>
 <section id="distance-from-the-random-null" class="level3" data-number="23.1.4">
 <h3 data-number="23.1.4" class="anchored" data-anchor-id="distance-from-the-random-null"><span class="header-section-number">23.1.4</span> Distance from the random null</h3>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(res<span class="sc">$</span>z_scores[, <span class="fu">c</span>(<span class="st">"scenario"</span>, <span class="st">"z_GD"</span>, <span class="st">"z_Ne_parents"</span>, <span class="st">"z_F_drift"</span>,</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"z_rare_retained"</span>, <span class="st">"z_GD_BS"</span>, <span class="st">"z_ANE"</span>)], <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1196,9 +1224,12 @@ window.Quarto = {
 <section id="the-selection-table" class="level3" data-number="23.1.5">
 <h3 data-number="23.1.5" class="anchored" data-anchor-id="the-selection-table"><span class="header-section-number">23.1.5</span> The selection table</h3>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>scn <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(<span class="fu">names</span>(res<span class="sc">$</span>selection), <span class="fu">c</span>(<span class="fu">names</span>(st1<span class="sc">$</span>hybrids), <span class="st">"n_scenarios"</span>))</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(res<span class="sc">$</span>selection[<span class="fu">order</span>(<span class="sc">-</span>res<span class="sc">$</span>selection<span class="sc">$</span>n_scenarios),</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>                   <span class="fu">c</span>(<span class="st">"hybrid"</span>, <span class="st">"line_A"</span>, <span class="st">"line_B"</span>, scn, <span class="st">"n_scenarios"</span>)], <span class="dv">8</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1371,6 +1402,8 @@ window.Quarto = {
 </div>
 </div>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>de_cols <span class="ot">&lt;-</span> <span class="fu">grep</span>(<span class="st">"^DE_"</span>, scn, <span class="at">value =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">scenarios          =</span> <span class="fu">length</span>(scn),</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">chosen_in_all_DE   =</span> <span class="fu">sum</span>(<span class="fu">rowSums</span>(res<span class="sc">$</span>selection[, de_cols, <span class="at">drop =</span> <span class="cn">FALSE</span>]) <span class="sc">==</span></span>
@@ -1379,6 +1412,7 @@ window.Quarto = {
 <span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">total_candidates   =</span> <span class="fu">nrow</span>(res<span class="sc">$</span>selection))</span>
 <span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        scenarios chosen_in_all_DE     never_chosen total_candidates </span></span>
 <span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                9               18              386              625</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p><code>n_scenarios</code> is the most directly useful column in the whole output. Hybrids chosen under <strong>every</strong> diversity budget are robust to the choice of <span class="math inline">\(\alpha\)</span> – they are the plan’s backbone, and the argument for them does not depend on a policy number nobody wants to defend. Hybrids that appear only at the loosest budget are the ones being bought with diversity.</p>
 </section>
@@ -1386,15 +1420,18 @@ window.Quarto = {
 <section id="reading-the-frontier" class="level2" data-number="23.2">
 <h2 data-number="23.2" class="anchored" data-anchor-id="reading-the-frontier"><span class="header-section-number">23.2</span> Reading the frontier</h2>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(d<span class="sc">$</span>alpha <span class="sc">*</span> <span class="dv">100</span>, d<span class="sc">$</span>index, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="st">"#b2182b"</span>, <span class="at">lwd =</span> <span class="dv">2</span>,</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"gene diversity loss, alpha (%)"</span>, <span class="at">ylab =</span> <span class="st">"mean index (s.d.)"</span>)</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(d<span class="sc">$</span>alpha <span class="sc">*</span> <span class="dv">100</span>, d<span class="sc">$</span>index, d<span class="sc">$</span>scenario, <span class="at">pos =</span> <span class="dv">4</span>, <span class="at">cex =</span> <span class="fl">0.65</span>, <span class="at">col =</span> <span class="st">"grey30"</span>)</span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="dv">0</span>, <span class="at">lty =</span> <span class="dv">3</span>)</span>
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="fu">grid</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="12-case-study_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="1050"></p>
+<p><img src="12-case-study_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" alt="The price list" width="1050"></p>
 <figcaption>The price list. Each point is one diversity budget; the curve is what index it buys.</figcaption>
 </figure>
 </div>

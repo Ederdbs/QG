@@ -73,20 +73,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta name="quarto:offset" content="./">
 <link href="./03-simulating-crosses.html" rel="next">
 <link href="./02-subdivided.html" rel="prev">
+<link href="./favicon.svg" rel="icon" type="image/svg+xml">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9ef9d4760de657dc918b81d25b42b59f.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-58115a419e540697b7ccd904e8efcd2d.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9ef9d4760de657dc918b81d25b42b59f.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-37a0ccb6f5b9899fcb884e11bb6f7458.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-da8b26c7a017495cabf78e5d2792d1d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-b192ecda6a457e66a32e528cd3cc1fbc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-da8b26c7a017495cabf78e5d2792d1d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -643,6 +644,8 @@ window.Quarto = {
 <p>That asymmetry is not cosmetic. <a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 21</span></a> will show a constrained programme overtaking an unconstrained one after eight cycles, and the book can report that number because it simulated it – not because anything in the preceding chapters predicts it. A reader who wants to know whether the crossover arrives at cycle 8 in <em>their</em> programme has no way to find out except to re-run the simulation with their own parameters.</p>
 <p>The quantitative genetics that answers such questions is older than any of the genomic machinery here, and this chapter installs it: the variance selection acts on, the equation that turns that variance into gain, and the classical index theory that turns out to be the direct ancestor of this book’s <span class="math inline">\(\alpha\)</span> constraint.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="fu">simulate_pools</span>(<span class="at">n_A =</span> book_cfg<span class="sc">$</span>n_pool_A, <span class="at">n_B =</span> book_cfg<span class="sc">$</span>n_pool_B,</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>                      <span class="at">m =</span> book_cfg<span class="sc">$</span>m, <span class="at">fst =</span> <span class="fl">0.15</span>, <span class="at">n_qtl =</span> <span class="dv">300</span>, <span class="at">h2 =</span> <span class="fl">0.5</span>, <span class="at">seed =</span> <span class="dv">1</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>X  <span class="ot">&lt;-</span> sim<span class="sc">$</span>X                       <span class="co"># N x m hybrids, 0/0.5/1</span></span>
@@ -651,6 +654,7 @@ window.Quarto = {
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">hybrids =</span> <span class="fu">nrow</span>(X), <span class="at">markers =</span> <span class="fu">ncol</span>(X), <span class="at">qtl =</span> <span class="fu">sum</span>(sim<span class="sc">$</span>beta <span class="sc">!=</span> <span class="dv">0</span>))</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; hybrids markers     qtl </span></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     625    2000     300</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <section id="the-breeders-equation-and-how-well-it-does-here" class="level2" data-number="3.1">
 <h2 data-number="3.1" class="anchored" data-anchor-id="the-breeders-equation-and-how-well-it-does-here"><span class="header-section-number">3.1</span> The breeder’s equation, and how well it does here</h2>
@@ -658,6 +662,8 @@ window.Quarto = {
 <p><span class="math display">\[R \;=\; i \, r \, \sigma_A\]</span></p>
 <p>with <span class="math inline">\(i\)</span> the selection intensity (a property of the selected fraction alone), <span class="math inline">\(r\)</span> the accuracy of the criterion as a predictor of genetic value, and <span class="math inline">\(\sigma_A\)</span> the additive standard deviation. <code>sel_intensity()</code> has been in this package since <a href="08-pipeline-stages.html" class="quarto-xref"><span>Chapter 15</span></a>; it has never once been used to compute a response.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>n_sel <span class="ot">&lt;-</span> <span class="dv">60</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>N     <span class="ot">&lt;-</span> <span class="fu">nrow</span>(X)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>i_norm <span class="ot">&lt;-</span> <span class="fu">sel_intensity</span>(n_sel <span class="sc">/</span> N)</span>
@@ -667,6 +673,7 @@ window.Quarto = {
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">data.frame</span>(<span class="at">i =</span> i_norm, <span class="at">r =</span> r, <span class="at">sigma_A =</span> <span class="fu">sd</span>(gv),</span>
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>               <span class="at">predicted =</span> i_norm <span class="sc">*</span> r <span class="sc">*</span> <span class="fu">sd</span>(gv),</span>
 <span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>               <span class="at">realised  =</span> <span class="fu">mean</span>(gv[sel]) <span class="sc">-</span> <span class="fu">mean</span>(gv)), <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -694,6 +701,8 @@ window.Quarto = {
 </div>
 <p>The equation overpredicts, by about 13 percent. That is worth taking apart rather than rounding away, because both halves of the discrepancy are instructive.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>i_real <span class="ot">&lt;-</span> (<span class="fu">mean</span>(I[sel]) <span class="sc">-</span> <span class="fu">mean</span>(I)) <span class="sc">/</span> <span class="fu">sd</span>(I)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>b      <span class="ot">&lt;-</span> <span class="fu">cov</span>(gv, I) <span class="sc">/</span> <span class="fu">var</span>(I)                 <span class="co"># regression of value on criterion</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">data.frame</span>(</span>
@@ -703,6 +712,7 @@ window.Quarto = {
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">R_from_regression =</span> b <span class="sc">*</span> (<span class="fu">mean</span>(I[sel]) <span class="sc">-</span> <span class="fu">mean</span>(I)),</span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">R_actual          =</span> <span class="fu">mean</span>(gv[sel]) <span class="sc">-</span> <span class="fu">mean</span>(gv),</span>
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">index_skew        =</span> <span class="fu">mean</span>(<span class="fu">scale</span>(I)<span class="sc">^</span><span class="dv">3</span>)), <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -741,7 +751,7 @@ window.Quarto = {
 <p>Two separate failures, and they are different in kind.</p>
 <p><strong>The realised intensity is below normal theory.</strong> <span class="math inline">\(i = \varphi(z)/q\)</span> is exact for a normal criterion. This index is slightly left-skewed, so its upper tail is thinner than a normal’s and the top 60 individuals sit closer to the mean than the formula assumes. This is a property of <em>this</em> population, not an error.</p>
 <p><strong>The regression is exact, and still wrong.</strong> <code>R_from_regression</code> and <code>R_with_realised_i</code> agree to machine precision – they are the same quantity written twice, since <span class="math inline">\(b\,S_I = i\,r\,\sigma_A\)</span> identically. Both still exceed the realised response. What fails is not the algebra but the assumption underneath it: <span class="math inline">\(R = b\,S_I\)</span> requires <span class="math inline">\(E[g \mid I]\)</span> to be linear in <span class="math inline">\(I\)</span> <em>in the selected tail</em>, which is a bivariate-normality claim, and bivariate normality is exactly what a two-pool hybrid population does not have.</p>
-<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout callout-style-simple callout-important callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -765,17 +775,20 @@ window.Quarto = {
 <p><span class="math display">\[\operatorname{Var}(\mathbf{X}\boldsymbol\beta) - V_{\text{genic}}
 \;=\; 2\sum_{k&lt;l}\beta_k\beta_l \operatorname{Cov}(x_k, x_l)\]</span></p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">realised =</span> <span class="fu">var</span>(gv),</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">genic    =</span> <span class="fu">genic_var</span>(X, sim<span class="sc">$</span>beta),</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">gap      =</span> <span class="fu">var</span>(gv) <span class="sc">-</span> <span class="fu">genic_var</span>(X, sim<span class="sc">$</span>beta),</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">oracle_deviation =</span> <span class="fu">abs</span>(<span class="fu">genic_var</span>(X, sim<span class="sc">$</span>beta) <span class="sc">-</span> <span class="fu">ref_genic_var</span>(X, sim<span class="sc">$</span>beta)))</span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         realised            genic              gap oracle_deviation </span></span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     2.248375e+01     2.520510e+01    -2.721357e+00     1.065814e-14</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>Now the sentence that ties this chapter to every one that follows.</p>
 <p><span class="math inline">\(V_{\text{genic}}\)</span> is <span class="math inline">\(\sum_k \beta_k^2\,p_k q_k\)</span> up to a coding constant, and gene diversity is <span class="math inline">\(\frac{1}{m}\sum_k 2 p_k q_k\)</span>. <strong>They are the same sum over the same loci, weighted differently</strong> – one by squared effect, one by nothing at all. That is the precise sense in which managing gene diversity manages the raw material of response, and it is why a diversity constraint is a defensible proxy for a variance constraint in the first place.</p>
 <p>It is also the precise sense in which the proxy is incomplete. Gene diversity weights every locus equally, so it cannot distinguish a marker carrying half the genetic variance from one carrying none. And – more seriously –</p>
-<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout callout-style-simple callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -793,6 +806,8 @@ window.Quarto = {
 <h2 data-number="3.3" class="anchored" data-anchor-id="the-decomposition-this-book-already-had"><span class="header-section-number">3.3</span> The decomposition this book already had</h2>
 <p>Additive variance is the variance of <em>breeding values</em>, not of genotypic values, and in a two-pool hybrid population the average effect of an allele substitution depends on which pool it is substituted into. That sounds like it needs new machinery. It does not: <a href="05b-heterosis-dominance.html#sec-heterosis-gca-sca" class="quarto-xref"><span>Section 12.10</span></a> already built the exact orthogonal split, and general combining ability <em>is</em> the additive part.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">7</span>)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>d  <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="fu">ncol</span>(X), <span class="fl">0.3</span>, <span class="fl">0.1</span>)                  <span class="co"># dominance deviations</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>U  <span class="ot">&lt;-</span> sim<span class="sc">$</span>GL[sim<span class="sc">$</span>pool <span class="sc">==</span> <span class="st">"A"</span>, ]</span>
@@ -811,12 +826,16 @@ window.Quarto = {
 <span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">identity_dev       =</span> <span class="fu">abs</span>(<span class="fu">var</span>(H) <span class="sc">-</span> (<span class="fu">var</span>(gA) <span class="sc">+</span> <span class="fu">var</span>(gB) <span class="sc">+</span> <span class="fu">var</span>(sc))))</span>
 <span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; reconstruction_dev              var_H  sum_of_components       identity_dev </span></span>
 <span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       5.115908e-13       3.811311e+01       3.811311e+01       9.237056e-14</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>The three components are orthogonal, so their variances add exactly. Read the shares:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">gca_A =</span> <span class="fu">var</span>(gA), <span class="at">gca_B =</span> <span class="fu">var</span>(gB), <span class="at">sca =</span> <span class="fu">var</span>(sc))</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">data.frame</span>(<span class="at">component =</span> <span class="fu">names</span>(p), <span class="at">variance =</span> p,</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">share =</span> p <span class="sc">/</span> <span class="fu">sum</span>(p)), <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -859,6 +878,8 @@ window.Quarto = {
 <p><code>stage2_select()</code> defaults to equal weight on every trait, and every chapter of this book including <a href="12-case-study.html" class="quarto-xref"><span>Chapter 23</span></a> takes that default. It is a choice, not a neutral one.</p>
 <p>The classical answer is the Smith-Hazel index (Smith 1936; Hazel 1943): the weights maximising the correlation between the index and the aggregate genotype <span class="math inline">\(H = \mathbf{a}'\mathbf{g}\)</span> are <span class="math inline">\(\mathbf{b} = \mathbf{P}^{-1}\mathbf{G}\mathbf{a}\)</span>.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>P <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fl">4.0</span>, <span class="fl">1.2</span>, <span class="fl">1.2</span>, <span class="fl">1.0</span>), <span class="dv">2</span>)      <span class="co"># phenotypic covariance</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>G <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fl">2.0</span>, <span class="fl">0.9</span>, <span class="fl">0.9</span>, <span class="fl">0.3</span>), <span class="dv">2</span>)      <span class="co"># genetic covariance</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>)                               <span class="co"># equal economic weight</span></span>
@@ -866,6 +887,7 @@ window.Quarto = {
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">data.frame</span>(<span class="at">trait =</span> <span class="fu">c</span>(<span class="st">"yield"</span>, <span class="st">"moisture"</span>),</span>
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">economic_weight =</span> a,</span>
 <span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>               <span class="at">smith_hazel     =</span> <span class="fu">index_smith_hazel</span>(P, G, a)), <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -902,6 +924,8 @@ window.Quarto = {
 (\mathbf{C}'\mathbf{P}^{-1}\mathbf{C})^{-1}\mathbf{C}'\mathbf{P}^{-1}
 \mathbf{G}\mathbf{a}\right], \qquad \mathbf{C} = \mathbf{G}\mathbf{R}\]</span></p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>R  <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>))                       <span class="co"># hold moisture at zero gain</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>b_r <span class="ot">&lt;-</span> <span class="fu">index_restricted</span>(P, G, a, R)</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>b_u <span class="ot">&lt;-</span> <span class="fu">index_smith_hazel</span>(P, G, a)</span>
@@ -912,6 +936,7 @@ window.Quarto = {
 <span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">w_moisture =</span> <span class="fu">c</span>(b_u[<span class="dv">2</span>], b_r[<span class="dv">2</span>]),</span>
 <span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">gain_in_restricted_trait =</span> <span class="fu">c</span>(<span class="fu">drop</span>(<span class="fu">crossprod</span>(R, G <span class="sc">%*%</span> b_u)),</span>
 <span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>                               <span class="fu">drop</span>(<span class="fu">crossprod</span>(R, G <span class="sc">%*%</span> b_r)))), <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -942,7 +967,7 @@ window.Quarto = {
 </div>
 </div>
 <p>The restricted index moves the restricted trait by exactly zero – not approximately, not on average. That is the property distinguishing a restriction from a penalty, and it is the property <span class="math inline">\(\alpha\)</span> inherits.</p>
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-simple callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>

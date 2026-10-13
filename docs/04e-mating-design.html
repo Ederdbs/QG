@@ -92,20 +92,21 @@ div.csl-indent {
 <meta name="quarto:offset" content="./">
 <link href="./04f-sparse-testing.html" rel="next">
 <link href="./04d-breeding-programme.html" rel="prev">
+<link href="./favicon.svg" rel="icon" type="image/svg+xml">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9ef9d4760de657dc918b81d25b42b59f.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-58115a419e540697b7ccd904e8efcd2d.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-9ef9d4760de657dc918b81d25b42b59f.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-37a0ccb6f5b9899fcb884e11bb6f7458.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-d3f7f8e73c8d287b30bcf59c2b563615.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-da8b26c7a017495cabf78e5d2792d1d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-b192ecda6a457e66a32e528cd3cc1fbc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-da8b26c7a017495cabf78e5d2792d1d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -701,7 +702,7 @@ window.Quarto = {
 <li><strong>Genomic information buys inference about lines that were never crossed, not better estimates for lines that were.</strong> Where every candidate is in the field, genomic kernels did not raise GCA accuracy; where only a quarter of them were, they did.</li>
 </ol>
 <p>The running example throughout is one simulated maize programme: two heterotic pools, 200 doubled-haploid candidates per pool, a field of 1,000 to 3,000 hybrid plots, and a winter nursery that must physically produce the seed of every cross that enters the field.</p>
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-simple callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -726,6 +727,8 @@ window.Quarto = {
 <p>The organising question of the chapter follows: <em>for a fixed budget, which sample of the factorial maximises the accuracy of combining-ability estimates and the selection response they support?</em> And one constraint is stated now, because it is the one most often forgotten: <strong>a crossing plan is not a matrix, it is a nursery.</strong> Each filled cell is a pollination that must yield enough seed for its plots.</p>
 <p>The three canonical samples drawn over the same grid make the difference visible before any statistics. The plans below are produced by the package’s generators, at 40 x 40 so that individual cells can be seen:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">3</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>grids <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="st">"Tester, k = 2"</span>     <span class="ot">=</span> <span class="fu">design_tester</span>(<span class="dv">40</span>, <span class="dv">40</span>, <span class="at">k =</span> <span class="dv">2</span>),</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>              <span class="st">"Circulant, c = 4"</span>  <span class="ot">=</span> <span class="fu">design_circulant</span>(<span class="dv">40</span>, <span class="dv">40</span>, <span class="at">c =</span> <span class="dv">4</span>),</span>
@@ -734,16 +737,17 @@ window.Quarto = {
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (nm <span class="cf">in</span> <span class="fu">names</span>(grids)) {</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  M <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="dv">40</span>, <span class="dv">40</span>)</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  M[<span class="fu">cbind</span>(grids[[nm]]<span class="sc">$</span>parent1, grids[[nm]]<span class="sc">$</span>parent2)] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">image</span>(<span class="fu">t</span>(M[<span class="dv">40</span><span class="sc">:</span><span class="dv">1</span>, ]), <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"grey96"</span>, <span class="st">"#1b6ca8"</span>), <span class="at">axes =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">image</span>(<span class="fu">t</span>(M[<span class="dv">40</span><span class="sc">:</span><span class="dv">1</span>, ]), <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"grey96"</span>, <span class="st">"#1f5f8b"</span>), <span class="at">axes =</span> <span class="cn">FALSE</span>,</span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        <span class="at">main =</span> <span class="fu">sprintf</span>(<span class="st">"%s  (%d crosses)"</span>, nm, <span class="fu">nrow</span>(grids[[nm]])), <span class="at">cex.main =</span> <span class="fl">0.9</span>)</span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">box</span>(<span class="at">col =</span> <span class="st">"grey60"</span>)</span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
-<div id="fig-mating-grids" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<div id="fig-mating-grids" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" alt="Three samples of the same 40 x 40 factorial, drawn by the package's own generators">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-mating-grids-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="04e-mating-design_files/figure-html/fig-mating-grids-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="1350">
+<img src="04e-mating-design_files/figure-html/fig-mating-grids-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Three samples of the same 40 x 40 factorial, drawn by the package's own generators" width="1350">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mating-grids-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;9.1: Three samples of the same 40 x 40 factorial, drawn by the package’s own generators. Rows are pool-A lines, columns pool-B lines, a filled cell is a cross that goes to the field. Left: two testers per pool (156 crosses). Centre: a circulant sparse factorial with four crosses per line (160 crosses). Right: North Carolina Design II as four disconnected 10 x 10 blocks (400 crosses).
@@ -766,6 +770,8 @@ Figure&nbsp;9.1: Three samples of the same 40 x 40 factorial, drawn by the packa
 <p><span class="math display">\[g^A_i = \sum_k \bigl[a_k + d_k (1 - 2p_{Bk})\bigr]\,\delta u_{ik},\]</span></p>
 <p>the classical structure of <span class="citation" data-cites="stuber1966">Stuber and Cockerham (<a href="99-references.html#ref-stuber1966" role="doc-biblioref">1966</a>)</span> for a cross between two populations. The additive part adds a term and changes nothing else, which is quick to confirm: the row effects of a complete factorial of genotypic values equal <code>cU %*% a</code> plus the <code>gca_A</code> of <code>heterosis_gca_sca()</code>, with no second implementation.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">7</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>m  <span class="ot">&lt;-</span> <span class="dv">300</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>pA <span class="ot">&lt;-</span> <span class="fu">runif</span>(m, <span class="fl">0.1</span>, <span class="fl">0.9</span>); pB <span class="ot">&lt;-</span> <span class="fu">runif</span>(m, <span class="fl">0.1</span>, <span class="fl">0.9</span>)</span>
@@ -780,6 +786,7 @@ Figure&nbsp;9.1: Three samples of the same 40 x 40 factorial, drawn by the packa
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">max_abs_diff =</span> <span class="fu">max</span>(<span class="fu">abs</span>((<span class="fu">rowMeans</span>(G) <span class="sc">-</span> <span class="fu">mean</span>(G)) <span class="sc">-</span> gcaA_formula)))</span>
 <span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; max_abs_diff </span></span>
 <span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  2.04281e-14</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>Result. The row effects of the complete factorial and the closed form agree to machine precision. Interpretation. “True GCA” in this chapter is always this quantity – the row and column effects a breeder would estimate by growing every hybrid without error – and every accuracy reported is a correlation with it, over <strong>all</strong> candidates of a pool, crossed or not.</p>
 </section>
@@ -833,10 +840,13 @@ Table&nbsp;9.1: The four quantities of a two-pool mating design, their closed fo
 <p>The third row is the quantitative form of the argument of <span class="citation" data-cites="sprague1942">Sprague and Tatum (<a href="99-references.html#ref-sprague1942" role="doc-biblioref">1942</a>)</span> for using more than one tester, and the fourth is its square root as an accuracy: the square root of the heritability of a testcross mean <span class="citation" data-cites="hallauer2010">(<a href="99-references.html#ref-hallauer2010" role="doc-biblioref">Hallauer et al. 2010</a>)</span>. Both describe <strong>least squares</strong>. A shrinkage estimator on a connected design borrows information across lines and exceeds them, which is why <a href="#sec-mating-analysis" class="quarto-xref"><span>Section 9.5</span></a> exists.</p>
 <p>The cached run validated the third and fourth rows against simulation in the complete 200 x 200 factorial, for <span class="math inline">\(k = 1, 2, 4, 8\)</span> testers and <span class="math inline">\(r = 1, 2\)</span> plots:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>v4 <span class="ot">&lt;-</span> <span class="fu">subset</span>(val, <span class="fu">grepl</span>(<span class="st">"^V4"</span>, check))</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">data.frame</span>(<span class="at">design =</span> <span class="fu">sub</span>(<span class="st">"cor</span><span class="sc">\\</span><span class="st">(ghat_LS, GCA</span><span class="sc">\\</span><span class="st">), "</span>, <span class="st">""</span>, v4<span class="sc">$</span>quantity),</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">simulated =</span> v4<span class="sc">$</span>observed, <span class="at">closed_form =</span> v4<span class="sc">$</span>expected,</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>               <span class="at">rel_error_pct =</span> <span class="dv">100</span> <span class="sc">*</span> v4<span class="sc">$</span>rel_error), <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div id="tbl-mating-v4" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-mating-v4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -927,7 +937,7 @@ Table&nbsp;9.2: Least-squares GCA accuracy in a k-tester design: simulated (30-r
 </section>
 <section id="sec-mating-connectivity" class="level3" data-number="9.2.3">
 <h3 data-number="9.2.3" class="anchored" data-anchor-id="sec-mating-connectivity"><span class="header-section-number">9.2.3</span> Connectivity, in one paragraph</h3>
-<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout callout-style-simple callout-important callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -942,6 +952,8 @@ Table&nbsp;9.2: Least-squares GCA accuracy in a k-tester design: simulated (30-r
 </div>
 <p><code>design_diagnostics()</code> computes both sides of the rule independently – the numerical rank by QR, the components by union-find over the graph – so a disagreement would be a bug, not a modelling choice:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>plans <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="st">"tester k=1"</span>        <span class="ot">=</span> <span class="fu">design_tester</span>(n, n, <span class="dv">1</span>),</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>              <span class="st">"tester k=2"</span>        <span class="ot">=</span> <span class="fu">design_tester</span>(n, n, <span class="dv">2</span>),</span>
@@ -958,6 +970,7 @@ Table&nbsp;9.2: Least-squares GCA accuracy in a k-tester design: simulated (30-r
 <span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>}))</span>
 <span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">all</span>(diag_tab<span class="sc">$</span>rank_gca <span class="sc">==</span> diag_tab<span class="sc">$</span>rank_expected))</span>
 <span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>diag_tab</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div id="tbl-mating-connectivity" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-mating-connectivity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1053,6 +1066,8 @@ Table&nbsp;9.3: Connectivity and estimability of five designs on the 200 x 200 r
 <p>Result. The rank equals the graph prediction in every row. The NC II layout – twenty disconnected 10 x 10 blocks – has rank 380, not 399: twenty components, twenty lost constraints. The random sparse design at two crosses per line leaves 53 candidates with no cross at all and splits the rest into 11 components; the circulant design with the same number of crosses is a single component with every line crossed exactly twice. One tester per pool is connected and has <strong>zero</strong> residual df: <span class="math inline">\(n_A + n_B - 1\)</span> crosses for <span class="math inline">\(n_A + n_B - 1\)</span> GCA parameters. The GCA model is saturated and SCA is not merely imprecise, it is not identifiable.</p>
 <p>What “not estimable” means is checked directly. A contrast between two lines of the same NC II block lies in the row space of the design matrix; a contrast between lines of different blocks does not:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>nc <span class="ot">&lt;-</span> plans[[<span class="st">"NC II 10x10 sets"</span>]]</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>l_within  <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>, <span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">2</span> <span class="sc">*</span> n <span class="sc">-</span> <span class="dv">2</span>))           <span class="co"># A1 - A2, same block</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>l_between <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">9</span>), <span class="sc">-</span><span class="dv">1</span>, <span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">2</span> <span class="sc">*</span> n <span class="sc">-</span> <span class="dv">11</span>)) <span class="co"># A1 - A11, next block</span></span>
@@ -1061,6 +1076,7 @@ Table&nbsp;9.3: Connectivity and estimability of five designs on the 200 x 200 r
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         estimable rel_residual</span></span>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; within          1 3.831056e-16</span></span>
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; between         0 2.236068e-01</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 <p>The within-block residual is rounding error; the between-block residual is 0.224, a contrast nowhere near the row space. Any least-squares ranking that crosses block boundaries in this design is a statement about the analyst’s centring convention, not about the lines.</p>
 <p>BLUP does rank across blocks, and in the simulations below NC II scores well on all-lines accuracy. It can, because a random-effects model supplies the missing constraint from its prior: every block’s lines are assumed drawn from the same pool distribution, so every block mean is shrunk to the same value. That assumption is exactly true in a simulation that assigns lines to blocks at random, and exactly what fails when blocks are families, years or breeders’ sub-programmes with real mean differences. Disconnection is not repaired by the estimator; it is replaced by an assumption, and the assumption should be stated.</p>
@@ -1078,6 +1094,8 @@ Table&nbsp;9.3: Connectivity and estimability of five designs on the 200 x 200 r
 <p>A tester is a <strong>deliberate variance trade</strong>. It buys cheap seed production and perfect connectivity – every line tied to every other through the common testers – at the price of confounding a line’s GCA with its SCA <em>to the testers used</em>, and of a training set that covers the relationship space of the opposite pool very thinly. The testcross mean of line <span class="math inline">\(i\)</span> estimates <span class="math inline">\(g^A_i\)</span> plus the mean of <span class="math inline">\(k\)</span> SCA deviations, so its error variance carries <span class="math inline">\(\sigma^2_s/k\)</span> and <span class="math inline">\(\sigma^2_e/(k r)\)</span>. Adding testers buys down both terms; adding replicates buys down only one. That is why the allocation literature treats tester number as a decision variable jointly with lines, locations and stages <span class="citation" data-cites="longin2006c">(<a href="99-references.html#ref-longin2006c" role="doc-biblioref">C. Longin et al. 2006</a>)</span>, and why it is not interchangeable with replication.</p>
 <p>The closed form and its least-squares simulation on the running example, with the truth redrawn in every replicate so that tester SCA is resampled as the theory assumes:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>tester_mc <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">8</span>), <span class="cf">function</span>(k) {</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, <span class="cf">function</span>(r) {</span>
@@ -1095,7 +1113,7 @@ Table&nbsp;9.3: Connectivity and estimability of five designs on the 200 x 200 r
 <span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>kk <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">1</span>, <span class="dv">8</span>, <span class="at">by =</span> <span class="fl">0.1</span>)</span>
 <span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="cn">NA</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">8</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="fl">0.3</span>, <span class="fl">0.9</span>), <span class="at">xlab =</span> <span class="st">"testers per pool, k"</span>,</span>
 <span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">"GCA accuracy (all 200 lines)"</span>, <span class="at">las =</span> <span class="dv">1</span>)</span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>cols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"#1b6ca8"</span>, <span class="st">"#b2182b"</span>)</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>cols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"#1f5f8b"</span>, <span class="st">"#b2182b"</span>)</span>
 <span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (r <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>) {</span>
 <span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lines</span>(kk, <span class="fu">gca_accuracy_theory</span>(kk, r, (vc<span class="sc">$</span>A <span class="sc">+</span> vc<span class="sc">$</span>B) <span class="sc">/</span> <span class="dv">2</span>, vc<span class="sc">$</span>S, s2e),</span>
 <span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>        <span class="at">col =</span> cols[r], <span class="at">lwd =</span> <span class="dv">2</span>)</span>
@@ -1106,11 +1124,12 @@ Table&nbsp;9.3: Connectivity and estimability of five designs on the 200 x 200 r
 <span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"bottomright"</span>, <span class="fu">c</span>(<span class="st">"1 plot per testcross"</span>, <span class="st">"2 plots per testcross"</span>),</span>
 <span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> cols, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">bty =</span> <span class="st">"n"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output-display">
-<div id="fig-mating-testers" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<div id="fig-mating-testers" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" alt="GCA accuracy of a k-tester design against the number of testers, at one and two plots per testcross">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-mating-testers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="04e-mating-design_files/figure-html/fig-mating-testers-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="1050">
+<img src="04e-mating-design_files/figure-html/fig-mating-testers-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="GCA accuracy of a k-tester design against the number of testers, at one and two plots per testcross" width="1050">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mating-testers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;9.2: GCA accuracy of a k-tester design against the number of testers, at one and two plots per testcross. Lines: the closed form of <a href="#tbl-mating-quantities" class="quarto-xref">Table&nbsp;<span>9.1</span></a>. Points: least-squares estimates from <code>fit_gca()</code> on the 200 x 200 running example, mean of 12 replicates with the truth redrawn each time; bars are two standard errors.
@@ -1158,10 +1177,10 @@ Figure&nbsp;9.2: GCA accuracy of a k-tester design against the number of testers
 <section id="sparse-versus-tester-at-equal-plot-budget" class="level3" data-number="9.4.3">
 <h3 data-number="9.4.3" class="anchored" data-anchor-id="sparse-versus-tester-at-equal-plot-budget"><span class="header-section-number">9.4.3</span> Sparse versus tester, at equal plot budget</h3>
 <p>The cached sweep puts every design at the same three plot budgets and scores GCA accuracy over all 200 candidates per pool, analysed by phenotypic BLUP:</p>
-<div id="fig-mating-acc-hybrids" class="quarto-float quarto-figure quarto-figure-center anchored">
+<div id="fig-mating-acc-hybrids" class="quarto-float quarto-figure quarto-figure-center anchored" alt="GCA accuracy against the number of distinct hybrids in the field, one line per design family, panelled by plot budget">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-mating-acc-hybrids-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="figs/mating_acc_vs_hybrids.png" class="img-fluid figure-img" style="width:100.0%">
+<img src="figs/mating_acc_vs_hybrids.png" class="img-fluid figure-img" style="width:100.0%" alt="GCA accuracy against the number of distinct hybrids in the field, one line per design family, panelled by plot budget">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mating-acc-hybrids-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;9.3: GCA accuracy against the number of distinct hybrids in the field, one line per design family, panelled by plot budget. Cached from the <code>sparsex</code> sweep: 30 replicates per cell, phenotypic BLUP, accuracy over all 200 candidates per pool.
@@ -1169,6 +1188,8 @@ Figure&nbsp;9.3: GCA accuracy against the number of distinct hybrids in the fiel
 </figure>
 </div>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>sparse_fam <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"sparse_circulant"</span>, <span class="st">"sparse_random"</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>h2h <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">split</span>(bl, bl<span class="sc">$</span>budget_plots), <span class="cf">function</span>(d) {</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  t <span class="ot">&lt;-</span> <span class="fu">subset</span>(d, family <span class="sc">==</span> <span class="st">"tester"</span>);       t <span class="ot">&lt;-</span> t[<span class="fu">which.max</span>(t<span class="sc">$</span>acc_gca_all), ]</span>
@@ -1183,6 +1204,7 @@ Figure&nbsp;9.3: GCA accuracy against the number of distinct hybrids in the fiel
 <span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>                 <span class="fu">sqrt</span>(s<span class="sc">$</span>se_acc_gca_all<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> t<span class="sc">$</span>se_acc_gca_all<span class="sc">^</span><span class="dv">2</span>))</span>
 <span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>}))</span>
 <span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(h2h, <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div id="tbl-mating-h2h" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-mating-h2h-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1266,6 +1288,8 @@ Table&nbsp;9.4: Best tester against best sparse factorial (circulant or random) 
 <p>Result. The sparse factorial wins at every budget, by 0.125, 0.107 and 0.082, each more than 16 standard errors. At 1,000 plots the relationship-guided design with five crosses per line is marginally ahead of the circulant one (0.662, a difference well inside the noise); it is excluded from the table only so that the comparison is between designs that need no markers. Interpretation. Two features of the table are mechanical and worth naming. The best tester never uses more than 1,584 crosses because <span class="math inline">\(k = 4\)</span> is the largest tester set swept, and at 3,000 plots it can only add replication, which buys down <span class="math inline">\(\sigma^2_e\)</span> but not <span class="math inline">\(\sigma^2_s\)</span>. And the sparse winner at 3,000 plots is random rather than circulant because at <span class="math inline">\(c = 10\)</span> connectivity is no longer in question and the layouts converge.</p>
 <p>The smallest fields that reach a given accuracy:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>fewest <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">c</span>(<span class="fl">0.60</span>, <span class="fl">0.65</span>, <span class="fl">0.70</span>, <span class="fl">0.75</span>, <span class="fl">0.80</span>), <span class="cf">function</span>(tg) {</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  d <span class="ot">&lt;-</span> <span class="fu">subset</span>(bl, acc_gca_all <span class="sc">&gt;=</span> tg)</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  d <span class="ot">&lt;-</span> d[<span class="fu">order</span>(d<span class="sc">$</span>n_crosses, d<span class="sc">$</span>budget_plots), ][<span class="dv">1</span>, ]   <span class="co"># ties: the smaller field</span></span>
@@ -1275,6 +1299,7 @@ Table&nbsp;9.4: Best tester against best sparse factorial (circulant or random) 
 <span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>             <span class="at">cost =</span> <span class="fu">round</span>(d<span class="sc">$</span>cost_total))</span>
 <span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>}))</span>
 <span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(fewest, <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div id="tbl-mating-fewest" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-mating-fewest-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1369,10 +1394,10 @@ Table&nbsp;9.5: Fewest distinct field hybrids, over all designs and budgets, who
 </section>
 <section id="crosses-per-line-and-structure-versus-randomness" class="level3" data-number="9.4.4">
 <h3 data-number="9.4.4" class="anchored" data-anchor-id="crosses-per-line-and-structure-versus-randomness"><span class="header-section-number">9.4.4</span> Crosses per line, and structure versus randomness</h3>
-<div id="fig-mating-acc-c" class="quarto-float quarto-figure quarto-figure-center anchored">
+<div id="fig-mating-acc-c" class="quarto-float quarto-figure quarto-figure-center anchored" alt="GCA accuracy against crosses per line , separating circulant (structured) from random sparse layouts">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-mating-acc-c-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="figs/mating_acc_vs_c.png" class="img-fluid figure-img" style="width:100.0%">
+<img src="figs/mating_acc_vs_c.png" class="img-fluid figure-img" style="width:100.0%" alt="GCA accuracy against crosses per line , separating circulant (structured) from random sparse layouts">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mating-acc-c-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;9.4: GCA accuracy against crosses per line <span class="math inline">\(c\)</span>, separating circulant (structured) from random sparse layouts. Cached from the <code>sparsex</code> sweep.
@@ -1381,6 +1406,8 @@ Figure&nbsp;9.4: GCA accuracy against crosses per line <span class="math inline"
 </div>
 <p>The literature leaves one comparison open: structured against random layouts at matched <span class="math inline">\(c\)</span> [<span class="citation" data-cites="weeks1964">Weeks and Williams (<a href="99-references.html#ref-weeks1964" role="doc-biblioref">1964</a>)</span> and <span class="citation" data-cites="fernando1983">Fernando et al. (<a href="99-references.html#ref-fernando1983" role="doc-biblioref">1983</a>)</span> supply the tools; no retrieved design paper reports the connectivity of the layout it used]. The sweep closes it at 2,000 plots:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>mc <span class="ot">&lt;-</span> <span class="fu">subset</span>(bl, budget_plots <span class="sc">==</span> <span class="dv">2000</span> <span class="sc">&amp;</span> family <span class="sc">%in%</span> sparse_fam)</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>mc <span class="ot">&lt;-</span> <span class="fu">merge</span>(<span class="fu">subset</span>(mc, family <span class="sc">==</span> <span class="st">"sparse_circulant"</span>)[, <span class="fu">c</span>(<span class="st">"x_axis"</span>, <span class="st">"acc_gca_all"</span>, <span class="st">"se_acc_gca_all"</span>)],</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>            <span class="fu">subset</span>(mc, family <span class="sc">==</span> <span class="st">"sparse_random"</span>)[, <span class="fu">c</span>(<span class="st">"x_axis"</span>, <span class="st">"acc_gca_all"</span>, <span class="st">"se_acc_gca_all"</span>)],</span>
@@ -1391,6 +1418,7 @@ Figure&nbsp;9.4: GCA accuracy against crosses per line <span class="math inline"
 <span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>                 <span class="at">z =</span> (mc<span class="sc">$</span>acc_gca_all_circ <span class="sc">-</span> mc<span class="sc">$</span>acc_gca_all_rand) <span class="sc">/</span></span>
 <span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">sqrt</span>(mc<span class="sc">$</span>se_acc_gca_all_circ<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> mc<span class="sc">$</span>se_acc_gca_all_rand<span class="sc">^</span><span class="dv">2</span>))</span>
 <span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(mc, <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div id="tbl-mating-matched-c" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-mating-matched-c-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1459,6 +1487,8 @@ Table&nbsp;9.6: Circulant against random sparse at matched crosses per line, 2,0
 <p>A sparse factorial is only a good design if it is analysed with a shrinkage estimator. This section exists because the single largest effect in the study is not a design effect at all.</p>
 <p>The demonstration is live: one replicate of the running example at 2,000 plots, the same data analysed both ways.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">99</span>)</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>ls_blup <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">c</span>(<span class="st">"tester k=2"</span>, <span class="st">"circulant c=2"</span>, <span class="st">"circulant c=5"</span>),</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(nm) {</span>
@@ -1473,6 +1503,7 @@ Table&nbsp;9.6: Circulant against random sparse at matched crosses per line, 2,0
 <span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>               <span class="at">blup_advantage =</span> acc[[<span class="st">"blup"</span>]] <span class="sc">-</span> acc[[<span class="st">"ls"</span>]])</span>
 <span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>  }))</span>
 <span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(ls_blup, <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div id="tbl-mating-ls-blup" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-mating-ls-blup-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1535,6 +1566,8 @@ Table&nbsp;9.7: One replicate of the 200 x 200 running example at 2,000 plots: t
 </div>
 <p>Result. On the tester design the two estimators agree to within 0.008. On the circulant design with two crosses per line, least squares collapses to 0.19 while BLUP reaches 0.63 on the same data. The cached sweep, averaged over 30 replicates, reproduces the pattern across all 24 designs:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>lsb <span class="ot">&lt;-</span> <span class="fu">merge</span>(<span class="fu">subset</span>(sm, model <span class="sc">==</span> <span class="st">"LS"</span>   <span class="sc">&amp;</span> budget_plots <span class="sc">==</span> <span class="dv">2000</span>)[, <span class="fu">c</span>(<span class="st">"scenario"</span>, <span class="st">"n_crosses"</span>, <span class="st">"acc_gca_all"</span>)],</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>             <span class="fu">subset</span>(sm, model <span class="sc">==</span> <span class="st">"BLUP"</span> <span class="sc">&amp;</span> budget_plots <span class="sc">==</span> <span class="dv">2000</span>)[, <span class="fu">c</span>(<span class="st">"scenario"</span>, <span class="st">"acc_gca_all"</span>)],</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">by =</span> <span class="st">"scenario"</span>, <span class="at">suffixes =</span> <span class="fu">c</span>(<span class="st">"_ls"</span>, <span class="st">"_blup"</span>))</span>
@@ -1544,6 +1577,7 @@ Table&nbsp;9.7: One replicate of the 200 x 200 running example at 2,000 plots: t
 <span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>lsb<span class="sc">$</span>hybrids <span class="ot">&lt;-</span> <span class="fu">round</span>(lsb<span class="sc">$</span>hybrids)</span>
 <span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(lsb) <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
 <span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(lsb, <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div id="tbl-mating-ls-sweep" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-mating-ls-sweep-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1765,10 +1799,10 @@ Table&nbsp;9.8: BLUP advantage over least squares by design, 2,000 plots, ordere
 </section>
 <section id="the-negative-result" class="level3" data-number="9.6.3">
 <h3 data-number="9.6.3" class="anchored" data-anchor-id="the-negative-result"><span class="header-section-number">9.6.3</span> The negative result</h3>
-<div id="fig-mating-genomic" class="quarto-float quarto-figure quarto-figure-center anchored">
+<div id="fig-mating-genomic" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Genomic against phenotypic BLUP by design (left) and the genomic accuracy for hybrids whose parents were never crossed (right)">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-mating-genomic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="figs/mating_genomic_tlevel.png" class="img-fluid figure-img" style="width:100.0%">
+<img src="figs/mating_genomic_tlevel.png" class="img-fluid figure-img" style="width:100.0%" alt="Genomic against phenotypic BLUP by design (left) and the genomic accuracy for hybrids whose parents were never crossed (right)">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mating-genomic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;9.5: Genomic against phenotypic BLUP by design (left) and the genomic accuracy for hybrids whose parents were never crossed (right). Cached from the <code>sparsex</code> sweep, 2,000 plots.
@@ -1776,6 +1810,8 @@ Figure&nbsp;9.5: Genomic against phenotypic BLUP by design (left) and the genomi
 </figure>
 </div>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>gb <span class="ot">&lt;-</span> <span class="fu">merge</span>(<span class="fu">subset</span>(sm, model <span class="sc">==</span> <span class="st">"GBLUP"</span> <span class="sc">&amp;</span> budget_plots <span class="sc">==</span> <span class="dv">2000</span>)[, <span class="fu">c</span>(<span class="st">"scenario"</span>, <span class="st">"n_linesA_tested"</span>, <span class="st">"acc_gca_all"</span>, <span class="st">"se_acc_gca_all"</span>, <span class="st">"acc_T0"</span>)],</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>            <span class="fu">subset</span>(sm, model <span class="sc">==</span> <span class="st">"BLUP"</span>  <span class="sc">&amp;</span> budget_plots <span class="sc">==</span> <span class="dv">2000</span>)[, <span class="fu">c</span>(<span class="st">"scenario"</span>, <span class="st">"acc_gca_all"</span>, <span class="st">"se_acc_gca_all"</span>)],</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">by =</span> <span class="st">"scenario"</span>, <span class="at">suffixes =</span> <span class="fu">c</span>(<span class="st">"_g"</span>, <span class="st">"_p"</span>))</span>
@@ -1788,6 +1824,7 @@ Figure&nbsp;9.5: Genomic against phenotypic BLUP by design (left) and the genomi
 <span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>gb <span class="ot">&lt;-</span> gb[<span class="fu">order</span>(<span class="sc">-</span>gb<span class="sc">$</span>difference), ]</span>
 <span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(gb) <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
 <span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">head</span>(gb, <span class="dv">6</span>), <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div id="tbl-mating-gblup" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-mating-gblup-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1966,6 +2003,8 @@ Table&nbsp;9.10: Where the simulated programme confirms, refines or contradicts 
 <p>A mating design has three cost centres that scale differently. <strong>Making</strong> the crosses – pollinations, ears, nursery rows, isolation blocks – scales with the number of distinct crosses. <strong>Testing</strong> them scales with crosses x locations x replicates. <strong>Genotyping</strong> scales with the number of lines, not crosses, which is the structural reason genomics favours designs with many lines and few crosses each. A tester design makes few crosses with much seed each; a sparse factorial makes many crosses with little seed each. The two can occupy the same plots and need completely different nurseries.</p>
 <p><code>cross_cost()</code> writes the accounting chain from plots back to the nursery: seed needed per cross is plots x seed per plot; ears are that over seed per ear, never fewer than an insurance minimum; pollinations are ears over pollination success; female rows follow from the pollinations each pool-A parent carries, male rows from the pollinations each pool-B parent serves, several per plant. Four designs at the same 2,000 plots:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">8</span>)</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>cost_plans <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="st">"tester k=4"</span>       <span class="ot">=</span> <span class="fu">design_tester</span>(n, n, <span class="dv">4</span>),</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>                   <span class="st">"circulant c=5"</span>    <span class="ot">=</span> <span class="fu">design_circulant</span>(n, n, <span class="dv">5</span>),</span>
@@ -1977,6 +2016,7 @@ Table&nbsp;9.10: Where the simulated programme confirms, refines or contradicts 
 <span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>                                 <span class="st">"nursery_rows"</span>, <span class="st">"genotyped"</span>, <span class="st">"total"</span>)]))</span>
 <span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>}))</span>
 <span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>cost_tab</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div id="tbl-mating-cost" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-mating-cost-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -2053,7 +2093,7 @@ Table&nbsp;9.11: The cost vector of four designs at an equal budget of 2,000 plo
 </div>
 <p>Result. Under this accounting the four plans cost within 10 % of each other. The cheapest is the circulant design with five crosses per line, because it makes the fewest distinct crosses (1000) and spends the rest of the plots on replicates, which need more seed per cross but no more pollinations: the two-ear insurance minimum already produces enough seed for two plots. The ten-cross designs make twice as many crosses and need 6000 pollinations against 3000.</p>
 <p>Interpretation. The tester is <strong>not</strong> cheaper here, and that is a property of the model, not of testers. <code>cross_cost()</code> charges every cross as hand pollinations, so it cannot credit the bulk production – an isolation block, a male-sterile female – that makes a tester cross cheap in practice, and the tester’s 1,584 crosses each pay the insurance minimum. That missing term is gap 1 of <a href="#sec-mating-open" class="quarto-xref"><span>Section 9.9</span></a>, and it is the term a real programme must add before comparing designs on cost. The column that matters for a sparse factorial is the other one: seed per cross caps replication, so a plan at one ear per cross has no seed for a second plot. Operational sparse designs such as <span class="citation" data-cites="thomsen2026">Thomsen et al. (<a href="99-references.html#ref-thomsen2026" role="doc-biblioref">2026</a>)</span> are unreplicated for exactly this reason.</p>
-<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout callout-style-simple callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -2070,20 +2110,20 @@ Table&nbsp;9.11: The cost vector of four designs at an equal budget of 2,000 plo
 <section id="budget-constrained-optimisation" class="level3" data-number="9.7.2">
 <h3 data-number="9.7.2" class="anchored" data-anchor-id="budget-constrained-optimisation"><span class="header-section-number">9.7.2</span> Budget-constrained optimisation</h3>
 <p>The cached optimiser searched over lines tested per pool, design family, <span class="math inline">\(k\)</span> or <span class="math inline">\(c\)</span>, plots per cross and whether to genotype every candidate, subject to field, nursery and money constraints, and maximised expected response <span class="math inline">\(R = i\,\rho\,\sigma_{GCA}\)</span> – not accuracy. That distinction is the trade-off: raising <span class="math inline">\(c\)</span> raises <span class="math inline">\(\rho\)</span> but, at fixed budget, lowers the number of lines tested and with it the selection intensity <span class="math inline">\(i\)</span>. It scores <span class="math inline">\(\rho\)</span> with the least-squares closed form, so it is conservative for sparse designs.</p>
-<div id="fig-mating-gain-cost" class="quarto-float quarto-figure quarto-figure-center anchored">
+<div id="fig-mating-gain-cost" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Left: expected response per unit cost by design">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-mating-gain-cost-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="figs/mating_gain_per_cost.png" class="img-fluid figure-img" style="width:100.0%">
+<img src="figs/mating_gain_per_cost.png" class="img-fluid figure-img" style="width:100.0%" alt="Left: expected response per unit cost by design">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mating-gain-cost-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;9.6: Left: expected response per unit cost by design. Right: the best feasible configuration at each total budget. Cached from the <code>sparsex</code> optimiser; cost levels are placeholders.
 </figcaption>
 </figure>
 </div>
-<div id="fig-mating-frontier" class="quarto-float quarto-figure quarto-figure-center anchored">
+<div id="fig-mating-frontier" class="quarto-float quarto-figure quarto-figure-center anchored" alt="The optimiser's budget frontier">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-mating-frontier-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="figs/mating_frontier.png" class="img-fluid figure-img" style="width:100.0%">
+<img src="figs/mating_frontier.png" class="img-fluid figure-img" style="width:100.0%" alt="The optimiser's budget frontier">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mating-frontier-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;9.7: The optimiser’s budget frontier. Cached from the <code>sparsex</code> optimiser.
@@ -2091,12 +2131,15 @@ Figure&nbsp;9.7: The optimiser’s budget frontier. Cached from the <code>sparse
 </figure>
 </div>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>ff <span class="ot">&lt;-</span> <span class="fu">subset</span>(front, feasible)</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>best <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">split</span>(ff, ff<span class="sc">$</span>budget), <span class="cf">function</span>(d) d[<span class="fu">which.max</span>(d<span class="sc">$</span>resp), ]))</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>best <span class="ot">&lt;-</span> best[, <span class="fu">c</span>(<span class="st">"budget"</span>, <span class="st">"design"</span>, <span class="st">"n_test"</span>, <span class="st">"c_or_k"</span>, <span class="st">"reps"</span>, <span class="st">"n_crosses"</span>,</span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>                 <span class="st">"n_plots"</span>, <span class="st">"cost_total"</span>, <span class="st">"resp"</span>, <span class="st">"resp_per_1000"</span>)]</span>
 <span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(best) <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
 <span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(best, <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div id="tbl-mating-frontier" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-mating-frontier-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -2222,10 +2265,10 @@ Table&nbsp;9.12: The best feasible configuration at each total budget. Response 
 <p>The chapter collapses into a procedure a breeder can apply in a planning meeting.</p>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
-<div id="fig-mating-decision" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<div id="fig-mating-decision" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" alt="A decision procedure for the crossing plan of a two-pool programme">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-mating-decision-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="04e-mating-design_files/figure-html/fig-mating-decision-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="1350">
+<img src="04e-mating-design_files/figure-html/fig-mating-decision-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="A decision procedure for the crossing plan of a two-pool programme" width="1350">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mating-decision-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;9.8: A decision procedure for the crossing plan of a two-pool programme. Each question is answered by a section of this chapter.
@@ -2259,6 +2302,8 @@ Figure&nbsp;9.8: A decision procedure for the crossing plan of a two-pool progra
 <p><strong>What runs live.</strong> Every table and figure above built from <code>design_*()</code>, <code>design_diagnostics()</code>, <code>fit_gca()</code>, <code>cross_cost()</code> or <code>gca_accuracy_theory()</code> is computed at render, from base R, at the full 200 x 200 scale. The package’s tests (<code>tests/testthat/test-mating.R</code>) assert the rank rule for every design family, the NC II estimability result, the <span class="math inline">\(k = 1\)</span> saturation, the Sprague-Tatum error variance by Monte Carlo, and that BLUP converges to least squares as the GCA variance grows.</p>
 <p><strong>What is cached.</strong> The 24-design x 3-budget sweep, the REML variance components, the genomic results and the optimiser frontier come from the external <code>sparsex</code> study, whose validation suite of 37 checks (closed form against AlphaSimR’s own genotypic values to <span class="math inline">\(6 \times 10^{-14}\)</span>; the sampling-variance and accuracy expressions to 1.5 %; in-house REML against <code>sommer</code> to <span class="math inline">\(10^{-5}\)</span>; the rank rule for every family) all passed. The phenotypic core of that sweep is re-run in-repo by <code>Rscript book/scripts/regenerate.R mating</code>, with the package’s i.i.d. model and the variance components held at their true values:</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>cr <span class="ot">&lt;-</span> <span class="fu">subset</span>(core, budget_plots <span class="sc">==</span> <span class="dv">2000</span>)</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>cr <span class="ot">&lt;-</span> <span class="fu">reshape</span>(cr[, <span class="fu">c</span>(<span class="st">"scenario"</span>, <span class="st">"method"</span>, <span class="st">"acc_mean"</span>)], <span class="at">idvar =</span> <span class="st">"scenario"</span>,</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>              <span class="at">timevar =</span> <span class="st">"method"</span>, <span class="at">direction =</span> <span class="st">"wide"</span>)</span>
@@ -2270,6 +2315,7 @@ Figure&nbsp;9.8: A decision procedure for the crossing plan of a two-pool progra
 <span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>                      <span class="at">ls_inrepo =</span> rep_tab<span class="sc">$</span>acc_mean.ls, <span class="at">ls_cached =</span> rep_tab<span class="sc">$</span>acc_gca_all_ls,</span>
 <span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>                      <span class="at">blup_inrepo =</span> rep_tab<span class="sc">$</span>acc_mean.blup, <span class="at">blup_cached =</span> rep_tab<span class="sc">$</span>acc_gca_all_blup)</span>
 <span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(rep_tab[<span class="fu">order</span>(rep_tab<span class="sc">$</span>blup_inrepo), ], <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div id="tbl-mating-reproduce" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-mating-reproduce-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
