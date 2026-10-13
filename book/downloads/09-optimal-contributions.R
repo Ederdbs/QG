@@ -1,0 +1,429 @@
+#' # Optimal contributions and the $\alpha$ constraint {#sec-ocs}
+#' 
+# 09-optimal-contributions -- standalone script of the chapter 09-optimal-contributions.qmd
+# Book: https://ederdbs.github.io/QG/09-optimal-contributions.html
+#
+# Reproduces every analysis of the chapter, in order; the chapter text is kept
+# as comments (#') so the script reads as the chapter does.
+#
+# Requirements: R >= 4.1 and the 'hybdiv' package (this repository's root):
+#   install.packages('remotes'); remotes::install_github('Ederdbs/QG')
+# Run it top to bottom in an empty working directory.
+
+library(hybdiv)
+set.seed(2026)
+
+# The teaching scale. Every live example in the book runs at this size: small
+# enough that a full render takes minutes, large enough that none of the
+# identities hold by accident. The production scale is n_pool_A = n_pool_B = 71
+# and m = 25000; see the note in each chapter where the difference matters.
+book_cfg <- utils::modifyList(
+  hybdiv::sim_config,
+  list(n_pool_A = 25, n_pool_B = 25, m = 2000, seed = 1)
+)
+
+# Paths to the cached artefacts, so chapters never guess.
+
+# Rounded table helper, used wherever a metric panel is printed.
+fmt <- function(x, digits = 4) {
+  # A matrix must become a data frame first: `x[num] <- lapply(...)` on a
+  # matrix recycles the logical over the flattened array and assigns a list
+  # back, silently turning the matrix into a list.
+  if (is.matrix(x)) x <- as.data.frame(x)
+  if (is.data.frame(x)) {
+    num <- vapply(x, is.numeric, logical(1))
+    x[num] <- lapply(x[num], round, digits)
+    x
+  } else round(x, digits)
+}
+
+# Cached artefacts (expensive sweeps) are fetched from the repository on first use.
+.book_get <- function(dir, ...) {
+  f <- file.path(dir, ...)
+  if (!file.exists(f)) {
+    dir.create(dirname(f), showWarnings = FALSE, recursive = TRUE)
+    utils::download.file(paste0('https://raw.githubusercontent.com/Ederdbs/QG/main/book/', f), f, quiet = TRUE, mode = 'wb')
+  }
+  f
+}
+book_data <- function(...) .book_get('data', ...)
+book_fig  <- function(...) .book_get('figs', ...)
+ctx <- simulate_data(book_cfg)
+n_sel <- 60
+
+#' 
+#' Everything so far has been measurement. This chapter turns the measurement into
+#' a constraint an optimiser can respect, and connects it to the
+#' optimal-contribution literature it specialises. `ctx$index` below is still the
+#' known-marker-effects version built in @sec-simulating-crosses; @sec-genomic-prediction
+#' shows how a real programme gets a `traits` matrix to hand `stage1_build()` in
+#' the first place, and what accuracy it can expect once it does.
+#' 
+#' ## Constraint, not a weighted sum
+#' 
+#' With $\mathbf{u}$ the multi-trait index and $S$ the selected set of size $n$:
+#' 
+#' $$\max_{S,\; |S| = n} \; \frac{1}{n}\sum_{i \in S} u_i
+#'   \qquad \text{subject to} \qquad \alpha(S) \le \alpha_{\max}.$$
+#' 
+#' The common alternative, $\max\; \bar u - \lambda\,\theta_S$, requires
+#' calibrating $\lambda$, which has no direct interpretation. The constraint form
+#' preserves an operational meaning: *"I accept losing at most $\alpha_{\max}$ of
+#' diversity."* That is a sentence a breeding committee can approve or reject.
+#' "Diversity is worth $\lambda = 3.7$ index units" is not.
+#' 
+#' The two are not equivalent in practice either. A weighted sum lets the optimiser
+#' buy index by spending diversity anywhere on the curve; a constraint fixes the
+#' budget and makes the optimiser find the best plan *inside* it. Since the
+#' acceptable loss is a policy decision and the exchange rate is not, the
+#' constraint form puts the decision in the right hands.
+#' 
+## -----------------------------------------------------------------------------
+make_fitness
+
+#' 
+#' The violation enters as a *proportional* penalty, so a plan that overshoots by
+#' 10% of the budget is penalised in units the budget defines, whatever the
+#' absolute value of $\alpha_{\max}$.
+#' 
+#' ### This argument is older than it looks
+#' 
+#' The paragraphs above read as a claim about human decision-making: budgets are
+#' approvable, exchange rates are not. That is true, and it undersells the case.
+#' Kempthorne & Nordskog [-@kempthorne1959] posed the identical problem for
+#' selection indices -- maximise aggregate gain subject to **zero expected change**
+#' in a specified direction -- and solved it in closed form. @sec-response derives
+#' their solution; `index_restricted()` implements it. The distinguishing property
+#' is not softness:
+#' 
+## -----------------------------------------------------------------------------
+P <- matrix(c(4.0, 1.2, 1.2, 1.0), 2)
+G <- matrix(c(2.0, 0.9, 0.9, 0.3), 2)
+a <- c(1, 1); R <- cbind(c(0, 1))
+c(unrestricted = drop(crossprod(R, G %*% index_smith_hazel(P, G, a))),
+  restricted   = drop(crossprod(R, G %*% index_restricted(P, G, a, R))))
+
+#' 
+#' Exactly zero, not approximately. A penalty trades the restricted direction away
+#' at some price; a restriction refuses to trade it at any price. That is the
+#' distinction this section is drawing, and it has stood since 1959.
+#' 
+#' ::: {.callout-note}
+#' ## What is actually new here
+#' 
+#' Not restriction over pricing. What is new is *what* is being restricted.
+#' Kempthorne and Nordskog restricted a trait -- something with a genetic variance,
+#' an economic weight and a row in $\mathbf{G}$. The $\alpha$ constraint restricts
+#' the loss of molecular gene diversity, which has none of those: it is a property
+#' of a matrix, not of a phenotype, and it is bounded relative to a resampling
+#' baseline rather than held at zero.
+#' 
+#' The algebra of restriction carries over. The object being restricted does not,
+#' which is why the rest of this chapter cannot simply cite 1959 and stop.
+#' :::
+#' 
+#' ## Relation to the standard OCS formulation
+#' 
+#' @gomezromano2016 write the general optimal-contribution problem, for a vector of
+#' continuous contributions $\mathbf{c}$, as
+#' 
+#' $$\text{minimise} \quad \mathbf{c}'\mathbf{G}\mathbf{c}
+#'   \qquad \text{subject to} \qquad
+#'   \mathbf{c}'\mathbf{s} = 0.5,\;\; \mathbf{c}'\mathbf{d} = 0.5,\;\; c_i \ge 0,$$
+#' 
+#' with $\mathbf{s}$ and $\mathbf{d}$ indicating sex and $\mathbf{G}$ the coancestry
+#' matrix chosen for managing diversity -- here, $\mathbf{f}$.
+#' 
+#' The formulation of this book is that problem **restricted to
+#' $c_i \in \{0, 1/n\}$**: a fixed number $n$ of candidates contribute equally, none
+#' partially. The minimisation of $\mathbf{c}'\mathbf{f}\mathbf{c}$ is turned into
+#' a constraint and $\bar u$ is promoted to the objective.
+#' 
+#' That restriction to equal, all-or-nothing contributions is exactly what makes
+#' the problem combinatorial, and what pushes the solution method from convex
+#' quadratic programming to a metaheuristic. It is also not arbitrary: a commercial
+#' hybrid programme plants a whole plot of a hybrid or does not plant it.
+#' 
+#' ::: {.callout-note}
+#' ## The sex constraint, in plants
+#' 
+#' The per-sex sum constraint disappears in hermaphrodite and monoecious species
+#' (a single sum to 1) and reappears in dioecious crops and in schemes using
+#' cytoplasmic male sterility. In hybrid maize the natural problem is not OCS but
+#' **optimal cross selection**: $\mathbf{c}$ stops being an individual contribution
+#' and becomes a weight per cross, with the between-pool covariance entering
+#' explicitly. And there is an extra restriction the animal literature does not
+#' have -- the **maximum number of crosses executable in a field**, which makes the
+#' problem mixed-integer.
+#' :::
+#' 
+#' ### The continuous relaxation as an upper bound {#sec-relaxation}
+#' 
+#' Dropping $c_i \in \{0, 1/n\}$ back to $0 \le c_i \le 1/n$ gives the continuous
+#' relaxation of *this* restricted problem. Every discrete solution is feasible
+#' under the relaxation, so the relaxation's optimum is a valid **upper bound**.
+#' 
+## -----------------------------------------------------------------------------
+project_capped_simplex
+
+#' 
+#' The cap is what makes the bound valid. Without $c_i \le 1/n$ the relaxation
+#' would put all weight on the single best candidate and the bound would be
+#' useless.
+#' 
+#' Turning the relaxation into a bound on the *constrained* problem needs one more
+#' step, and turning it into an actual selection needs a rounding: both are in
+#' @sec-advanced.
+#' 
+## -----------------------------------------------------------------------------
+lambdas <- 10^seq(-1, 2.5, length.out = 12)
+relax <- ocs_relaxation(ctx, n_sel, lambdas)
+fmt(as.data.frame(relax), 4)
+
+#' 
+#' Sweeping $\lambda$ traces the merit-versus-diversity frontier. Each row is the
+#' best *continuous* plan at that exchange rate, and therefore an upper bound on
+#' what any discrete plan of the same diversity can achieve.
+#' 
+## -----------------------------------------------------------------------------
+#| fig-cap: "The continuous relaxation traces an upper bound. Discrete strategies must sit below and to the left of it; how far below is the convergence diagnostic."
+null <- null_distribution(ctx, n_sel, B = 400, B_full = 60)
+a_relax <- (null$gd_ref - relax[, "GD"]) / null$gd_ref
+
+sels <- list(random     = sel_random(ctx, n_sel),
+             trunc_cap  = sel_truncation_cap(ctx, n_sel),
+             greedy_w1  = sel_greedy(ctx, n_sel, w = 1),
+             greedy_w3  = sel_greedy(ctx, n_sel, w = 3),
+             truncation = sel_truncation(ctx, n_sel))
+pts <- t(sapply(sels, function(s)
+  c(alpha = alpha_loss(s, ctx, null$gd_ref), index = mean_index(s, ctx))))
+
+plot(a_relax * 100, relax[, "index"], type = "b", pch = 1, lty = 2, col = "grey45",
+     xlab = "gene diversity loss, alpha (%)", ylab = "mean index (s.d.)",
+     xlim = range(c(a_relax, pts[, "alpha"]) * 100),
+     ylim = range(c(relax[, "index"], pts[, "index"])))
+points(pts[, "alpha"] * 100, pts[, "index"], pch = 19, col = "#b2182b")
+text(pts[, "alpha"] * 100, pts[, "index"], rownames(pts), pos = 2, cex = 0.7)
+abline(v = 0, lty = 3)
+legend("bottomright", c("continuous OCS relaxation (upper bound)", "discrete strategies"),
+       col = c("grey45", "#b2182b"), pch = c(1, 19), lty = c(2, NA), bty = "n", cex = 0.8)
+grid()
+
+#' 
+#' ::: {.callout-warning}
+#' ## Too few iterations gives an "upper bound" below the discrete optimum
+#' 
+#' The relaxation is solved by projected gradient. Under-converged, it returns a
+#' value *smaller* than the discrete optimum -- which is useless, and worse,
+#' silently so. The default of 4000 iterations is the minimum that converged in
+#' testing; re-check it whenever the dataset changes.
+#' :::
+#' 
+## -----------------------------------------------------------------------------
+short <- ocs_relaxation(ctx, n_sel, lambdas = 10, iters = 50)
+long  <- ocs_relaxation(ctx, n_sel, lambdas = 10, iters = 4000)
+c(index_50_iters = short[, "index"], index_4000_iters = long[, "index"],
+  greedy_w3 = mean_index(sels$greedy_w3, ctx))
+
+#' 
+#' ## Setting $\alpha_{\max}$
+#' 
+#' The limit **should not be chosen a priori**. Pure truncation -- the greediest
+#' possible selection -- defines the maximum attainable $\alpha$. If that ceiling
+#' sits below your intended limit, the constraint restricts nothing.
+#' 
+## -----------------------------------------------------------------------------
+attainable <- alpha_loss(sel_truncation(ctx, n_sel), ctx, null$gd_ref)
+c(attainable_ceiling = attainable,
+  a_5pct_limit_would_be_active = attainable > 0.05,
+  a_1pct_limit_would_be_active = attainable > 0.01)
+
+#' 
+#' `stage2_select()` computes this ceiling automatically and warns about any
+#' requested $\alpha$ above it, rather than silently returning an unconstrained
+#' solution that looks constrained.
+#' 
+#' The correct procedure is to trace the frontier and choose its knee:
+#' 
+## -----------------------------------------------------------------------------
+#| fig-cap: "The greedy frontier, swept over the merit weight w. The knee is where further diversity costs index steeply."
+ws <- c(0, 0.25, 0.5, 0.75, 1, 1.5, 2, 3, 5, 8, 12)
+front <- do.call(rbind, lapply(ws, function(w) {
+  s <- sel_greedy(ctx, n_sel, w = w)
+  data.frame(w = w, alpha = alpha_loss(s, ctx, null$gd_ref),
+             index = mean_index(s, ctx), Ne_par = ne_parents(s, ctx))
+}))
+plot(front$alpha * 100, front$index, type = "b", pch = 19, col = "#2166ac",
+     xlab = "gene diversity loss, alpha (%)", ylab = "mean index (s.d.)")
+abline(v = attainable * 100, lty = 2, col = "#b2182b")
+text(attainable * 100, min(front$index), "truncation ceiling", pos = 2, cex = 0.7,
+     col = "#b2182b")
+grid()
+
+#' 
+## -----------------------------------------------------------------------------
+fmt(front, 4)
+
+#' 
+#' ### How far $\alpha_{\max}$ moves when $\mathbf{f}$ moves
+#' 
+#' The ceiling above is quoted to four decimals, which invites more confidence than
+#' the marker panel supports. @sec-genomic-era showed that the MAF spectrum decides
+#' how badly the two inbreeding lenses disagree; the same spectrum feeds
+#' $\mathbf{f}$, and therefore $\bar H_{\text{ref}}$ and the ceiling. It is worth
+#' knowing which choices move the budget and which only look as though they should.
+#' 
+#' Rebuild everything downstream of the marker panel -- $\mathbf{f}$, the null, the
+#' ceiling -- under a filter, a density and an ascertainment scenario:
+#' 
+## -----------------------------------------------------------------------------
+ceiling_for <- function(keep, label, B = 250) {
+  Xs <- ctx$X[, keep, drop = FALSE]
+  ck <- build_ctx(X = Xs, f = molecular_coancestry(Xs), G = NULL,
+                  traits = ctx$traits, ped = ctx$ped, n_lines = ctx$n_lines,
+                  pool = ctx$pool, fL = NULL, cfg = ctx$cfg)
+  nl <- null_distribution(ck, n_sel, B = B, B_full = 20)
+  data.frame(panel = label, markers = ncol(Xs), gd_ref = nl$gd_ref,
+             alpha_max = alpha_loss(sel_truncation(ck, n_sel), ck, nl$gd_ref))
+}
+maf <- pmin(ctx$p0, 1 - ctx$p0)
+polyA <- colMeans(simulate_lines(book_cfg)[seq_len(book_cfg$n_pool_A), ] / 2)
+sens <- rbind(
+  do.call(rbind, lapply(c(0, 0.01, 0.05, 0.10),
+    function(t) ceiling_for(maf >= t, sprintf("MAF >= %.2f", t)))),
+  ceiling_for(polyA > 0 & polyA < 1, "ascertained in pool A"))
+fmt(sens, 4)
+
+#' 
+#' $\bar H_{\text{ref}}$ moves by
+#' `r fmt(100 * (max(sens$gd_ref) / min(sens$gd_ref) - 1), 0)`% across these panels.
+#' $\alpha_{\max}$ moves by
+#' `r fmt(100 * (max(sens$alpha_max) / min(sens$alpha_max) - 1), 1)`%. That is not a
+#' coincidence: $\alpha$ is a *ratio* of diversities measured on the same panel, so a
+#' filter that shifts the absolute level shifts numerator and denominator together
+#' and largely cancels out. **Filtering choices move the diversity level; they do not
+#' move the budget.**
+#' 
+#' Density does not move it either, but it does something worse: it makes the
+#' estimate noisy without making it wrong. Thinning the panel and averaging over six
+#' independent draws of which markers survive:
+#' 
+## -----------------------------------------------------------------------------
+# Every subset is drawn BEFORE the loop. `null_distribution()` calls set.seed()
+# internally, so a `sample.int()` written inside the loop would hand every
+# replicate after the first the very same markers -- see the warning below.
+set.seed(4)
+subs <- lapply(c(250, 500, 1000),
+               function(mm) lapply(1:6, function(i) sort(sample.int(ctx$m, mm))))
+dens <- do.call(rbind, lapply(subs, function(sl) {
+  v <- vapply(sl, function(k) ceiling_for(k, "", B = 200)$alpha_max, numeric(1))
+  data.frame(markers = length(sl[[1]]), alpha_max = mean(v), sd = stats::sd(v))
+}))
+fmt(rbind(dens, data.frame(markers = ctx$m, alpha_max = attainable, sd = NA)), 4)
+
+#' 
+#' The means sit within one standard deviation of the full-panel ceiling all the way
+#' down to 250 markers. The standard deviation does not: at 250 it is about
+#' `r fmt(100 * dens$sd[1] / dens$alpha_max[1], 0)`% of the estimate itself. A budget
+#' set from a thin panel is not biased, it is a coin flip -- and a single thin-panel
+#' study has no way to tell which side it landed on.
+#' 
+#' So all three axes leave $\alpha_{\max}$ where it was. That is the useful finding,
+#' and it is worth stating positively: **the budget is a more portable quantity than
+#' the diversity level it is computed from.** $\bar H_{\text{ref}}$ is not
+#' comparable across panels; $\alpha$ largely is, provided the panel is dense enough
+#' for the estimate to be stable.
+#' 
+#' :::: {.callout-warning}
+#' ## `null_distribution()` reseeds, and will freeze a resampling loop
+#' 
+#' It calls `set.seed(seed)` on entry, with `seed = 7` by default, so the random
+#' stream is reset every time it is invoked. Any `sample()` written *after* it inside
+#' a loop therefore draws the same values on every pass but the first, and a
+#' replication study silently becomes one replicate reported with a fabricated
+#' standard deviation.
+#' 
+#' This is not hypothetical: the table above returned two different wrong answers --
+#' once suggesting thin panels understate the ceiling, once that they overstate it --
+#' before the subsets were hoisted out of the loop. Draw randomisation up front, or
+#' pass an explicit varying `seed`.
+#' ::::
+#' 
+#' :::: {.callout-tip}
+#' ## Quote $\alpha_{\max}$ with the panel that produced it
+#' 
+#' A budget is not a property of the germplasm. It is a property of the germplasm
+#' *and* the marker panel, and only the second of those changes when the genotyping
+#' platform does. Re-derive the ceiling whenever the panel changes, and do not
+#' compare an $\alpha$ across two studies genotyped differently -- @sec-choosing
+#' Finding 3's caveat on transfer applies here with more force, because this one is a
+#' constraint rather than a diagnostic.
+#' ::::
+#' 
+#' ## A caveat carried over from the OCS literature
+#' 
+#' @gomezromano2016 show that the *predicted* rate of coancestry in the next
+#' generation,
+#' $E(\Delta f_{t+1}) = (\mathbf{c}'\mathbf{G}_t\mathbf{c} - f_t)/(1 - f_t)$, is
+#' systematically **biased downward** relative to the coancestry actually realised
+#' after offspring are generated -- by roughly a factor of two in their simulations
+#' with small candidate pools, shrinking as the pool grows. The bias arises because
+#' $\mathbf{c}'\mathbf{G}\mathbf{c}$ is an expectation over Mendelian segregation,
+#' and the realised draw carries its own sampling variance on top of that
+#' expectation.
+#' 
+#' This does **not** affect the $\theta_S$ computed in this book. $\mathbf{f}$ is
+#' measured on real marker genotypes of an already-realised hybrid population;
+#' there is no forward-prediction step to bias.
+#' 
+#' It becomes relevant the moment the pipeline is extended to *plan a further
+#' generation* from the selected hybrids -- to predict *their* offspring's
+#' coancestry from a contribution vector. At that point the naive
+#' $\mathbf{c}'\mathbf{f}\mathbf{c}$ prediction should be expected to underestimate
+#' realised coancestry, and the margin built into $\alpha_{\max}$ must account for
+#' it.
+#' 
+#' ## Quadratic programming, when contributions are continuous
+#' 
+#' Where the problem genuinely is continuous -- composing a synthetic, assembling a
+#' core collection, setting seed proportions -- solve it as a quadratic programme
+#' rather than with a metaheuristic. That is @sec-subdivided's
+#' `optimal_contributions()`, with `ocs_quadprog()` adding the merit term:
+#' 
+## -----------------------------------------------------------------------------
+sub <- sample.int(ctx$n_lines, 20)
+fLs <- ctx$fL[sub, sub]
+merit <- as.vector(scale(rnorm(20)))
+
+front_qp <- do.call(rbind, lapply(10^seq(-1, 2, length.out = 8), function(lam) {
+  o <- ocs_quadprog(fLs, merit, lambda = lam, upper = 0.20)
+  data.frame(lambda = lam, merit = o$merit, coancestry = o$coancestry,
+             n_used = sum(o$c_i > 1e-6))
+}))
+fmt(front_qp, 4)
+
+#' 
+#' Note the `upper = 0.20` cap: an operational ceiling on how much any single line
+#' may contribute. Caps of this kind are usually easier to defend than the
+#' $\lambda$ that produced them, and they are the continuous analogue of the
+#' per-line usage cap that @sec-combinatorial enforces in the decoder.
+#' 
+#' As $\lambda$ falls the solution concentrates on fewer sources -- the same
+#' mechanism, in continuous form, that makes $N_{e,\text{par}}$ a necessary second
+#' constraint in the discrete problem.
+#' 
+#' ## What belongs in the inner loop
+#' 
+#' The optimiser performs on the order of $10^5$ to $10^6$ evaluations, so the cost
+#' per call decides what goes into the objective and what waits for post-hoc
+#' validation.
+#' 
+## -----------------------------------------------------------------------------
+fmt(cost_per_eval(ctx, n_sel, reps = 20), 1)
+
+#' 
+#' $\theta$ by the matrix route (or, better, the line route of @sec-collapse) and
+#' $N_{e,\text{par}}$ go into the objective. Allelic richness, A-NE and $G_{st}$
+#' are computed **once**, on the final solution. This is the same conclusion
+#' @sec-choosing reached from the production-scale benchmark, reproduced here at
+#' book scale so it can be re-run on your own data.

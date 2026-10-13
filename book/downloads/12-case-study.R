@@ -1,0 +1,316 @@
+#' # End to end, and the operational checklist {#sec-case-study}
+#' 
+# 12-case-study -- standalone script of the chapter 12-case-study.qmd
+# Book: https://ederdbs.github.io/QG/12-case-study.html
+#
+# Reproduces every analysis of the chapter, in order; the chapter text is kept
+# as comments (#') so the script reads as the chapter does.
+#
+# Requirements: R >= 4.1 and the 'hybdiv' package (this repository's root):
+#   install.packages('remotes'); remotes::install_github('Ederdbs/QG')
+# Run it top to bottom in an empty working directory.
+
+library(hybdiv)
+set.seed(2026)
+
+# The teaching scale. Every live example in the book runs at this size: small
+# enough that a full render takes minutes, large enough that none of the
+# identities hold by accident. The production scale is n_pool_A = n_pool_B = 71
+# and m = 25000; see the note in each chapter where the difference matters.
+book_cfg <- utils::modifyList(
+  hybdiv::sim_config,
+  list(n_pool_A = 25, n_pool_B = 25, m = 2000, seed = 1)
+)
+
+# Paths to the cached artefacts, so chapters never guess.
+
+# Rounded table helper, used wherever a metric panel is printed.
+fmt <- function(x, digits = 4) {
+  # A matrix must become a data frame first: `x[num] <- lapply(...)` on a
+  # matrix recycles the logical over the flattened array and assigns a list
+  # back, silently turning the matrix into a list.
+  if (is.matrix(x)) x <- as.data.frame(x)
+  if (is.data.frame(x)) {
+    num <- vapply(x, is.numeric, logical(1))
+    x[num] <- lapply(x[num], round, digits)
+    x
+  } else round(x, digits)
+}
+
+# Cached artefacts (expensive sweeps) are fetched from the repository on first use.
+.book_get <- function(dir, ...) {
+  f <- file.path(dir, ...)
+  if (!file.exists(f)) {
+    dir.create(dirname(f), showWarnings = FALSE, recursive = TRUE)
+    utils::download.file(paste0('https://raw.githubusercontent.com/Ederdbs/QG/main/book/', f), f, quiet = TRUE, mode = 'wb')
+  }
+  f
+}
+book_data <- function(...) .book_get('data', ...)
+book_fig  <- function(...) .book_get('figs', ...)
+
+#' 
+#' Everything the book has built, run once, on one dataset, in the order a
+#' programme would run it. Then the checklist.
+#' 
+#' ## The whole pipeline in one script
+#' 
+## -----------------------------------------------------------------------------
+st1 <- stage1_simulate(book_cfg)
+c(hybrids = nrow(st1$X), markers = ncol(st1$X),
+  f_min = min(st1$f), f_max = max(st1$f))
+
+#' 
+## -----------------------------------------------------------------------------
+#| results: hide
+n_sel <- round(0.10 * nrow(st1$X))
+res <- suppressWarnings(stage2_select(
+  X = st1$X, f = st1$f, hybrids = st1$hybrids,
+  n_sel   = n_sel,
+  alphas  = NULL,     # NULL = automatic grid, 0 to the attainable ceiling
+  weights = NULL,     # NULL = equal weight across traits
+  fL      = st1$fL,   # optional: enables theta_A / theta_B / theta_AB
+  B_null = 500, B_full = 80, NP = 100, itermax = 200, verbose = FALSE))
+
+#' 
+#' ::: {.callout-note}
+#' ## The same pipeline as a script
+#' 
+#' This chapter runs at the book's reduced scale so it renders in seconds. The
+#' identical pipeline at the **production** scale of `sim_config`, writing its
+#' tables to `report/`, is `inst/scripts/run_all.R`:
+#' 
+#' ```sh
+#' Rscript inst/scripts/run_all.R          # ~4 min
+#' Rscript inst/scripts/run_benchmark.R    # ~6 min; the numbers quoted in README.md
+#' ```
+#' :::
+#' 
+#' With real data only the first line changes:
+#' 
+## -----------------------------------------------------------------------------
+#| eval: false
+# st1 <- stage1_build(X = my_hybrid_matrix, ped = my_pedigree,
+#                     traits = my_predicted_traits, fL = my_line_coancestry)
+
+#' 
+#' ### The reference values
+#' 
+## -----------------------------------------------------------------------------
+unlist(res$ref)
+
+#' 
+#' `alpha_max` is the attainable ceiling from @sec-baseline: the loss pure
+#' truncation would incur. Any requested budget above it constrains nothing, and
+#' `stage2_select()` says so rather than returning a solution that merely looks
+#' constrained.
+#' 
+#' ### Metrics per scenario
+#' 
+## -----------------------------------------------------------------------------
+fmt(res$metrics[, c("scenario", "alpha", "index", "Ns", "Ne_parents",
+                    "Ne_lines_A", "Ne_lines_B", "max_line", "alleles_lost")], 4)
+
+#' 
+#' Read the `index` column against `alpha`. That is the price list: what each
+#' percentage point of diversity costs in index units, on this dataset, at this
+#' selection intensity.
+#' 
+#' Now read `Ne_parents` against `Ns` in the same rows. This is the diagnostic
+#' @sec-genomic-era called for, and the reason `Ne_parents` is a second constraint
+#' rather than a report line:
+#' 
+## -----------------------------------------------------------------------------
+d <- res$metrics
+fmt(data.frame(scenario = d$scenario,
+               Ns = d$Ns,
+               Ne_parents = d$Ne_parents,
+               Ns_relative = d$Ns / max(d$Ns),
+               Ne_par_relative = d$Ne_parents / max(d$Ne_parents)), 3)
+
+#' 
+#' The status number barely moves across scenarios while the effective number of
+#' parents collapses. A programme reporting only $N_s$ would see a healthy pool and
+#' a shrinking parent base it never measured.
+#' 
+#' ### Both lenses, and the pool partition
+#' 
+## -----------------------------------------------------------------------------
+fmt(res$metrics[, c("scenario", "alpha", "F_hom", "F_drift", "cov_diag",
+                    "rare_retained", "GD_WI_hyb", "GD_BS", "F_ST")], 4)
+
+#' 
+#' `alpha` constrains the first lens only. `F_drift` is the unmonitored bill, and
+#' `cov_diag` is exactly the gap between them -- verify it:
+#' 
+## -----------------------------------------------------------------------------
+c(max_deviation_from_Eq3 =
+    max(abs(d$cov_diag - (d$F_hom - d$F_drift)), na.rm = TRUE))
+
+#' 
+#' `GD_BS` rising across scenarios is selection concentrating on the most
+#' complementary line pairs, which pushes the pools further apart. That is not
+#' automatically bad -- it is heterosis -- but @sec-stages is the reason to watch it
+#' rather than celebrate it.
+#' 
+#' ### Distance from the random null
+#' 
+## -----------------------------------------------------------------------------
+fmt(res$z_scores[, c("scenario", "z_GD", "z_Ne_parents", "z_F_drift",
+                     "z_rare_retained", "z_GD_BS", "z_ANE")], 2)
+
+#' 
+#' Every metric in standard deviations from a random selection of the same size. A
+#' metric near zero is not distinguishing this plan from chance, and cannot be
+#' serving as a constraint.
+#' 
+#' ### The selection table
+#' 
+## -----------------------------------------------------------------------------
+scn <- setdiff(names(res$selection), c(names(st1$hybrids), "n_scenarios"))
+head(res$selection[order(-res$selection$n_scenarios),
+                   c("hybrid", "line_A", "line_B", scn, "n_scenarios")], 8)
+
+#' 
+## -----------------------------------------------------------------------------
+de_cols <- grep("^DE_", scn, value = TRUE)
+c(scenarios          = length(scn),
+  chosen_in_all_DE   = sum(rowSums(res$selection[, de_cols, drop = FALSE]) ==
+                             length(de_cols)),
+  never_chosen       = sum(res$selection$n_scenarios == 0),
+  total_candidates   = nrow(res$selection))
+
+#' 
+#' `n_scenarios` is the most directly useful column in the whole output. Hybrids
+#' chosen under **every** diversity budget are robust to the choice of $\alpha$ --
+#' they are the plan's backbone, and the argument for them does not depend on a
+#' policy number nobody wants to defend. Hybrids that appear only at the loosest
+#' budget are the ones being bought with diversity.
+#' 
+#' ## Reading the frontier
+#' 
+## -----------------------------------------------------------------------------
+#| fig-cap: "The price list. Each point is one diversity budget; the curve is what index it buys."
+plot(d$alpha * 100, d$index, type = "b", pch = 19, col = "#b2182b", lwd = 2,
+     xlab = "gene diversity loss, alpha (%)", ylab = "mean index (s.d.)")
+text(d$alpha * 100, d$index, d$scenario, pos = 4, cex = 0.65, col = "grey30")
+abline(v = 0, lty = 3)
+grid()
+
+#' 
+#' Choose the knee, not the endpoint. Past the knee, each additional unit of index
+#' costs disproportionately more diversity, and the diversity is not recoverable
+#' next cycle while the index gain is realised once.
+#' 
+#' ## What this simulation cannot tell you
+#' 
+#' Stated plainly, because the numbers above are precise and precision invites more
+#' confidence than the model supports.
+#' 
+#' **The GEBVs carry no prediction error.** The traits are built from *known* marker
+#' effects (@sec-simulating-crosses). @sec-choosing Finding 5 measures what happens
+#' when they do not: the reported index is biased upward, and error *correlated with
+#' relatedness* costs several times the diversity that independent error of the same
+#' size does. The plans below should be read as an optimistic ceiling.
+#' 
+#' **The model is additive.** An additive $\mathbf{G}$ misses heterosis and specific
+#' combining ability, which is precisely what a hybrid programme sells. The
+#' diversity constraint does not need a dominance model; the *mean-performance
+#' ranking* does (@sec-heterosis). Do not conflate them, and do not use these `index`
+#' values as performance predictions.
+#' 
+#' **The pools are symmetric by construction.** Both are simulated from the same
+#' ancestral frequencies at the same $F_{ST}$. Real heterotic pools differ in size,
+#' history and internal structure, and a real programme will find one pool eroding
+#' faster than the other -- which is why `ne_lines_pool()` is reported per pool.
+#' 
+#' **$N_s$ is not a drift projection.** It is a static descriptor
+#' (@sec-ns). Do not extrapolate it forward.
+#' 
+#' **One cycle, not a trajectory.** Every result here is a single round of hybrid
+#' selection. @sec-stages showed that a constraint applied at one stage buys
+#' stage-level diversity, not end-of-pipeline richness -- and the same logic applies
+#' across cycles. A one-cycle constraint is not a multi-cycle policy: @sec-cycles
+#' runs fifteen of them and finds the unconstrained programme ahead for eight cycles
+#' and behind for the rest.
+#' 
+#' **$p_0$ must be frozen.** In this book it is set once in `build_ctx()`. In a real
+#' multi-cycle programme it must be the founder cycle's frequencies, propagated
+#' forward -- the single most common error in applying `F_hom` and `F_drift`
+#' (@sec-genomic-era). @sec-cycles shows the failure directly: re-anchored, five
+#' generations of real drift are reported as exactly none.
+#' 
+#' ## The operational checklist
+#' 
+#' ### Setting up
+#' 
+#' - The base $p_0$ is frozen at the founding cycle and documented.
+#' - Diversity is computed on molecular coancestry `f`, never on a centered `G`.
+#'   Check `sum(G) == 0` once, to see why.
+#' - The marker panel's MAF spectrum is known -- it decides how severely the two
+#'   lenses diverge.
+#' - Heterotic-group assignment is recorded, with the method that produced it, and
+#'   treated as uncertain.
+#' 
+#' ### Choosing the budget
+#' 
+#' - The attainable $\alpha$ ceiling is computed *before* choosing $\alpha_{\max}$.
+#'   A budget above the ceiling constrains nothing.
+#' - Loss is measured against a **same-size resampling baseline**, never against the
+#'   full pool.
+#' - The constraint is applied at the target set size, not incrementally.
+#' - The frontier is traced and the knee chosen, rather than a round number.
+#' 
+#' ### Running the optimiser
+#' 
+#' - The search is encoded on **line weights**, not hybrid keys.
+#' - The differential evolution is **warm-started** from greedy solutions.
+#' - $N_{e,\text{par}}$ is a second constraint, not a report line.
+#' - The per-line usage cap is enforced in the decoder, not by penalty.
+#' - The result is checked against the continuous relaxation. A large gap means the
+#'   optimiser has not converged; a slack constraint means the search never reached
+#'   the boundary.
+#' 
+#' ### Validating the plan
+#' 
+#' - `F_hom` and `F_drift` are computed **separately** and reported together, with
+#'   `cov_diag` as the diagnostic.
+#' - Allelic richness is computed on the returned plan -- it is the one metric
+#'   carrying information $\theta$ does not.
+#' - The within/between pool decomposition confirms diversity was not preserved by
+#'   degrading pool separation.
+#' - The number of selected parent lines is biologically plausible.
+#' - $N_s$ is reported; a rate-based $N_e$ is **not**, under active management.
+#' - Every metric is reported against the random null, in standard deviations.
+#' 
+#' ### Across cycles
+#' 
+#' - The per-stage loss ledger is kept. DH induction, not hybrid mining, is usually
+#'   where the diversity goes.
+#' - The regression of $\log(1 - F)$ on cycle is checked for linearity. Curvature
+#'   means a non-constant rate.
+#' - Periodic germplasm injection is planned. A closed elite pool depletes however
+#'   well the constraint is managed.
+#' - The diversity cost per cycle is reported when cycle time is shortened.
+#' 
+#' ## Where to go next
+#' 
+#' Three extensions the material here supports but does not cover, each needing new
+#' work rather than new derivation:
+#' 
+#' **Real data ingestion.** `load_data()` is the single swap point and is currently
+#' a stub. A worked path from a VCF to the `X`/`f`/`hybrids` contract is what most
+#' readers will need first, and it is the one extension here that is pure
+#' engineering rather than new derivation.
+#' 
+#' **Estimating the dominance deviations.** @sec-heterosis shows that expected
+#' heterosis depends on the alignment between divergence and $d$, and that no
+#' frequency-based statistic can see $d$. Everything downstream of that -- ranking
+#' crosses on more than the mean, putting a number on the $\lambda$ of
+#' @sec-catalogue -- waits on an estimate of $d$ the book does not attempt.
+#' 
+#' **Prediction error compounded across cycles.** @sec-choosing Finding 5 measures it
+#' within one cycle and @sec-cycles assumes it away (C7). The two have not been run
+#' together, and the interaction is not obviously benign: correlated error
+#' concentrates the selection, and @sec-cycles shows concentration is what erodes the
+#' programme's future.
