@@ -246,6 +246,19 @@ freeze directory and then re-rendering `--to html` only restores half of it, lea
 `typ.json` deleted in `git status`. Finish with a full `quarto render book` (or
 `inst/scripts/render_book.R`) before committing.
 
+## Chapter scripts: every chapter ends with a downloadable R script
+
+Standing convention: each chapter and appendix (except `index` and references) closes with a
+"Reproduce this chapter" section linking `book/downloads/<chapter>.R`, a standalone script
+holding all the code in order with the chapter prose kept as `#'` comments. **Never write
+these by hand**: `Rscript book/scripts/make_downloads.R` (from the repo root) regenerates every
+script with `knitr::purl` and appends the footer (guarded by `<!-- reproduce-chapter -->`)
+when it is missing. Re-run it after editing any chapter and before rendering; a new chapter
+needs only to be listed in `_quarto.yml`. The scripts fetch cached `book/data`/`book/figs`
+files from GitHub raw on first use, so they only work for artefacts already pushed.
+`downloads` is under `resources:` so it is copied into `docs/`. The footer uses an absolute
+Pages URL so it also works in the Typst PDF.
+
 ## Don't relitigate these either
 
 - **`R/09_reference.R` earns its keep.** The `ref_*` functions are deliberately slow and

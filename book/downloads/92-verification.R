@@ -1,0 +1,435 @@
+#' # Verification {#sec-verification}
+#' 
+# 92-verification -- standalone script of the chapter 92-verification.qmd
+# Book: https://ederdbs.github.io/QG/92-verification.html
+#
+# Reproduces every analysis of the chapter, in order; the chapter text is kept
+# as comments (#') so the script reads as the chapter does.
+#
+# Requirements: R >= 4.1 and the 'hybdiv' package (this repository's root):
+#   install.packages('remotes'); remotes::install_github('Ederdbs/QG')
+# Run it top to bottom in an empty working directory.
+
+library(hybdiv)
+set.seed(2026)
+
+# The teaching scale. Every live example in the book runs at this size: small
+# enough that a full render takes minutes, large enough that none of the
+# identities hold by accident. The production scale is n_pool_A = n_pool_B = 71
+# and m = 25000; see the note in each chapter where the difference matters.
+book_cfg <- utils::modifyList(
+  hybdiv::sim_config,
+  list(n_pool_A = 25, n_pool_B = 25, m = 2000, seed = 1)
+)
+
+# Paths to the cached artefacts, so chapters never guess.
+
+# Rounded table helper, used wherever a metric panel is printed.
+fmt <- function(x, digits = 4) {
+  # A matrix must become a data frame first: `x[num] <- lapply(...)` on a
+  # matrix recycles the logical over the flattened array and assigns a list
+  # back, silently turning the matrix into a list.
+  if (is.matrix(x)) x <- as.data.frame(x)
+  if (is.data.frame(x)) {
+    num <- vapply(x, is.numeric, logical(1))
+    x[num] <- lapply(x[num], round, digits)
+    x
+  } else round(x, digits)
+}
+
+# Cached artefacts (expensive sweeps) are fetched from the repository on first use.
+.book_get <- function(dir, ...) {
+  f <- file.path(dir, ...)
+  if (!file.exists(f)) {
+    dir.create(dirname(f), showWarnings = FALSE, recursive = TRUE)
+    utils::download.file(paste0('https://raw.githubusercontent.com/Ederdbs/QG/main/book/', f), f, quiet = TRUE, mode = 'wb')
+  }
+  f
+}
+book_data <- function(...) .book_get('data', ...)
+book_fig  <- function(...) .book_get('figs', ...)
+ic <- read.csv(book_data("theta_identity_check.csv"))
+
+#' 
+#' A derivation the reader cannot re-run against a naive implementation is a claim,
+#' not a verification. This appendix says how each result in the book was checked,
+#' and how to re-run the checks.
+#' 
+#' ## The method: slow oracles
+#' 
+#' Every fast route in the package has a **deliberately slow, literal**
+#' counterpart in `R/09_reference.R` that transcribes the definition with no
+#' algebraic shortcut. The fast route must match it to machine precision.
+#' 
+## -----------------------------------------------------------------------------
+ref_theta
+theta_group
+fast_theta
+
+#' 
+#' Three implementations of one quantity: a literal mean over the submatrix, the
+#' packaged version, and the line-route collapse that never forms the submatrix at
+#' all. They must agree.
+#' 
+## -----------------------------------------------------------------------------
+sim  <- simulate_pools(n_A = 20, n_B = 20, m = 1500, seed = 7)
+ctxp <- ctx_from_pools(sim)
+set.seed(3); sel <- sample.int(ctxp$N, 50)
+
+c(oracle     = ref_theta(sel, ctxp),
+  packaged   = theta_group(sel, ctxp),
+  line_route = fast_theta(sel, ctxp),
+  max_dev    = max(abs(c(theta_group(sel, ctxp), fast_theta(sel, ctxp)) -
+                       ref_theta(sel, ctxp))))
+
+#' 
+#' The oracles exist so that this comparison is possible for a reader who does not
+#' trust the derivation -- which is the correct posture.
+#' 
+## -----------------------------------------------------------------------------
+fmt(rbind(
+  he_nei       = c(oracle = ref_he_nei(sel, ctxp), packaged = he_nei(sel, ctxp)),
+  theta_freq   = c(ref_theta_freq(sel, ctxp), theta_from_freq(sel, ctxp)),
+  status_num   = c(ref_status_num(sel, ctxp), status_number(sel, ctxp)),
+  ne_parents   = c(ref_ne_parents(sel, ctxp), ne_parents(sel, ctxp)),
+  alleles_lost = c(ref_alleles_lost(sel, ctxp), alleles_lost(sel, ctxp)),
+  ENE          = c(ref_ene(sel, ctxp), ene(sel, ctxp)),
+  ANE          = c(ref_ane(sel, ctxp), ane(sel, ctxp))), 10)
+
+#' 
+#' ## The identity sweep
+#' 
+#' The line-level collapse was checked across $F_{ST} \in \{0.05, 0.15, 0.35\}$,
+#' two seeds and two selection sizes, thirty replicate selections each.
+#' 
+## -----------------------------------------------------------------------------
+#| echo: false
+cols <- c(max_pairwise_f = "pairwise f: hybrid vs line formula",
+          max_theta_sub_vs_line = "theta: line route vs f submatrix",
+          max_theta_sub_vs_freq = "theta: line route vs allele-frequency route",
+          max_pbar = "selection allele frequencies",
+          max_He = "Nei He",
+          max_Neparents = "effective number of parents",
+          max_alleles_lost = "allele loss at MAF threshold",
+          max_theta_pools = "pool decomposition",
+          max_swap_update = "incremental swap vs full recompute",
+          bitset_vs_literal = "bitset allelic richness vs literal count")
+worst <- vapply(names(cols), function(k) max(abs(ic[[k]])), numeric(1))
+knitr::kable(data.frame(
+  Identity = unname(cols),
+  `Worst deviation over the sweep` =
+    ifelse(worst == 0, "0 (exact)", sprintf("%.1e", worst)),
+  check.names = FALSE),
+  caption = "Machine precision throughout. Anything above 1e-12 would mean an error, not a rounding artefact.")
+
+#' 
+#' ## The test suite
+#' 
+#' The suite is `tests/testthat/`, run with `devtools::test()`. It takes about a
+#' minute. What it asserts, and why each check earns its place:
+#' 
+## -----------------------------------------------------------------------------
+#| echo: false
+knitr::kable(data.frame(
+  Check = c("theta via submatrix == theta via allele frequencies",
+            "1 - theta == Nei's He",
+            "f is bounded to [0, 1]",
+            "sum(VanRaden G) == 0",
+            "theta and Ns analytical edge cases",
+            "greedy < random < truncation on theta",
+            "decode() is unique, in range, deterministic",
+            "fast line route == hybrid-matrix route",
+            "incremental swap == full recomputation",
+            "popcount32 == naive bit count",
+            "F_hom and F_drift are 0 when the selection is the base",
+            "cov_diag == F_hom - F_drift",
+            "max-diversity drives F_hom negative, F_drift positive",
+            "freq_metrics reproduces he_nei and alleles_lost",
+            "the Caballero & Toro partition closes",
+            "GD_WI == 0 for inbred lines, GD_WI_hyb large for their F1s",
+            "eff_dim in (0, n - 1]",
+            "the two-stage output contract",
+            "stage 2 runs without fL",
+            "stage1_build accepts both marker codings",
+            "genic_var == its literal oracle",
+            "realised minus genic variance == the disequilibrium term",
+            "inbreeding depression == the shared term of the heterosis partition",
+            "inbreeding depression == simulated genotypes (Monte Carlo)",
+            "the restricted index moves the restricted trait exactly zero",
+            "no restriction reduces the restricted index to Smith-Hazel",
+            "MRD and coancestry are one statistic",
+            "Gst < Fst always, and Gst matches the classical route",
+            "the DH identities",
+            "hybrid theta from usage == the hybrid matrix",
+            "constrained line selection meets its ceiling",
+            "the oracles agree with the packaged metrics",
+            "map length and Haldane spacing",
+            "heterozygosity halves per selfing",
+            "D == 1 - (1 - H)/N under neutrality",
+            "n_equivalent inverts diversity_retained",
+            "a Syn cycle adds half a map length of junctions",
+            "distortion shifts ancestry away from 0.5",
+            "f1_sizing halves the loss probability per plant",
+            "heterosis_value matches the literal oracle",
+            "additive effects cancel from the mid-parent difference",
+            "shared and divergence == GD_T and GD_BS",
+            "2 * GD_WI_hyb == GD_T + GD_BS",
+            "neutral divergence leaves expected heterosis unchanged",
+            "alignment between d and divergence is what moves heterosis",
+            "GCA + SCA reconstruct heterosis exactly and are mean-zero",
+            "SCA is the interaction residual of the two-way additive fit",
+            "the closed-form GCA and SCA variance components match",
+            "uniform-d heterosis is the coancestry kernel, exactly",
+            "GD_T + GD_BS == 1 - theta_AB",
+            "pool_freqs reproduces what its callers computed inline",
+            "the DH draw is an unbiased gamete; selfing an inbred returns it",
+            "p0 is frozen, not re-anchored, across cycles",
+            "a closed programme loses diversity and gains index",
+            "the budget is respected; alpha_max = Inf is truncation",
+            "injection raises diversity relative to a closed run",
+            "GCA rank == n' - components for every design family",
+            "NC II: between-set GCA contrast not estimable",
+            "k = 1 tester leaves zero df for SCA",
+            "LS GCA error == s2s/k + s2e/(k r)",
+            "sparse_blup == literal GLS oracle (BLUP and PEV)",
+            "each hybrid in exactly k locations; parentage covers both pools everywhere",
+            "known-component BLUP has dispersion slope ~ 1"),
+  `If it fails` = c(
+    "**f is wrong**: centered, rescaled, or the wrong marker coding",
+    "the identity underpinning every 'loss of X%' statement is broken",
+    "a centered matrix is being used as coancestry",
+    "the demonstration in @sec-why-not-g no longer holds on this data",
+    "the diagonal is being dropped somewhere",
+    "there is no trade-off to optimise; the whole benchmark is pointless",
+    "the DE fitness is noisy and cannot converge",
+    "**the collapse is broken**; production scale becomes infeasible",
+    "any local search built on the state vector is wrong",
+    "allelic richness counts are wrong",
+    "the base p0 is not frozen, or is being recomputed",
+    "one of the three lens formulas is wrong",
+    "the two-lens argument of @sec-genomic-era does not reproduce",
+    "the consolidated marker sweep changed an existing number",
+    "the Eq. 8 algebra is broken",
+    "lines are not actually inbred, or the hybrid diagonal is wrong",
+    "the double-centering was dropped and eff_dim re-measures theta",
+    "downstream code reading `$selection` or `$metrics` will break",
+    "the optional-fL path is broken",
+    "real data in the other coding would give different answers",
+    "the genic-variance route diverged from its definition",
+    "the disequilibrium decomposition of @sec-response is wrong",
+    "Falconer's symmetry is broken, or `d` is being applied inconsistently",
+    "the closed form does not describe genotypes anyone could actually draw",
+    "**the restriction is a penalty**, and the @sec-ocs analogy is wrong",
+    "the degenerate case silently returns something other than Smith-Hazel",
+    "Trap 1 of @sec-stages no longer holds",
+    "Trap 2 is wrong, or the two definitions were conflated",
+    "the S2 algebra is wrong and crossing plans cannot be pre-evaluated",
+    "Trap 5's repair route is broken",
+    "the constrained selection silently returns an infeasible plan",
+    "a fast route diverged from its definition",
+    "the sizing chapter's map is not the map it claims",
+    "the simulator is not doing what selfing does",
+    "the identity every sizing number rests on is broken",
+    "N_eq is not the inverse it is described as",
+    "the intercrossing budget in @sec-sizing is wrong by 2x",
+    "the distortion mechanism is inactive",
+    "the F1 sizing argument is wrong",
+    "the fast heterosis route diverged from its definition",
+    "the derivation of @sec-heterosis is wrong, or the parents are not inbred",
+    "**the central identity of @sec-heterosis is broken**",
+    "the hybrid-level and line-level partitions have come apart",
+    "@sec-heterosis's correction is wrong and F_ST would predict heterosis",
+    "the alignment result, and the argument for @sec-cycles with it, is wrong",
+    "**the combining-ability decomposition of @sec-heterosis is not a decomposition**",
+    "SCA is a proxy for the interaction, not the interaction -- the section overclaims",
+    "the variance-component result of @sec-heterosis-relocation rests on a wrong closed form",
+    "genetic distance no longer predicts heterosis under flat dominance",
+    "the between-pool coancestry reading of the identity is wrong",
+    "a pool frequency route diverged after the refactor",
+    "recycling fabricates or destroys diversity; every trajectory is wrong",
+    "**both inbreeding lenses report no loss forever** -- the trap of @sec-cycles",
+    "the cycle loop is not selecting, or not recycling what it selected",
+    "the budget is not binding across cycles",
+    "injection is not actually introducing founder material",
+    "**the connectivity argument of @sec-mating is wrong**, or a generator is",
+    "the estimability check accepts what it should reject",
+    "the tester saturation claim of @sec-mating-tester is wrong",
+    "the Sprague-Tatum closed form no longer describes `fit_gca()`",
+    "**every live number of @sec-sparse is wrong**: the MME are assembled incorrectly",
+    "the allocation comparison of @sec-sparse-results compares different budgets",
+    "the BLUP is mis-scaled; the dispersion claims of @sec-sparse-components fail"),
+  check.names = FALSE))
+
+#' 
+## -----------------------------------------------------------------------------
+#| eval: false
+# Rscript -e 'devtools::test()'
+
+#' 
+#' ## Provenance of every figure and table
+#' 
+#' The book runs light examples live and reads heavy results from cache. This is
+#' the complete accounting.
+#' 
+#' ### Computed live at render
+#' 
+## -----------------------------------------------------------------------------
+#| echo: false
+knitr::kable(data.frame(
+  Chapter = c("@sec-coancestry", "@sec-subdivided", "@sec-response", "@sec-simulating-crosses",
+              "@sec-sizing", "@sec-alphasimr", "@sec-programme",
+              "@sec-mating", "@sec-sparse", "@sec-genomic-era", "@sec-heterosis", "@sec-catalogue",
+              "@sec-choosing", "@sec-stages", "@sec-ocs", "@sec-combinatorial",
+              "@sec-advanced", "@sec-cycles", "@sec-limits", "@sec-case-study",
+              "@sec-verification"),
+  `Runs live` = c(
+    "both matrices, the sum(G) demonstration, the f diagonal",
+    "the whole worked example, reproduced against the published tables",
+    "the breeder's equation against the realised response and its decomposition, the genic-variance oracle check, the GCA/SCA variance identity, both selection indices",
+    "the simulation, the fst sweep, the contract, the sampling-bias histogram",
+    "the theoretical identities, heterozygosity halving, map expansion, f1_sizing",
+    "the founder-engine reproducibility and LD comparison, the varA-against-genicVarA trajectory, the zero F1 variance of inbred parents, the selfing-versus-DH homozygosity trajectory, the breeder's equation over a selected-fraction sweep, sel_intensity against AlphaSimR selInt, Smith-Hazel against a numerical optimum, the RRS trajectory and the stage-2 metrics",
+    "the staged programme in both arms, the paired phenotypic-versus-genomic comparison over 24 seeds, the gene-diversity ledger",
+    "the design grids, the GCA-from-frequencies identity, the connectivity table and estimability check, the tester accuracy curve against its closed form, one LS-versus-BLUP replicate, the cost table, the decision tree",
+    "the allocation taxonomy panel, the pre-planting connectivity and reliability recipe",
+    "the Eq. 3 identity, the four-strategy lens panel",
+    "the heterosis oracle check, the additive cancellation, the shared/divergence identity, the coancestry-kernel identity, the fst sweep and its Balding-Nichols prediction, the alignment scenarios and their stratified control, the GCA/SCA decomposition and its variance components, the SCA/GCA relocation sweep",
+    "every metric, the sampling-bias formula, the null distribution",
+    "the collapse, the swap update, cost at book scale, the fixed-theta band, the prediction-error sweep",
+    "all five traps, the S1 panel, the DH identities, the S4 collapse",
+    "the OCS relaxation, the convergence check, the greedy frontier, the marker-panel sensitivity",
+    "all baselines, the encodings, the DE, the warm-start comparison",
+    "the Gram identity and PSD check, the submatrix-sum identity, the three local-search modes, the invalid-versus-Lagrangian bound comparison, ocs_round",
+    "the frozen-p0 demonstration, the delta-F regression",
+    "Robertson's limit against the observed trajectory, the paired selected-versus-random variance test in both the unlinked and the linked arm",
+    "the full two-stage pipeline",
+    "the oracle comparisons"),
+  check.names = FALSE))
+
+#' 
+#' ### Read from cache
+#' 
+## -----------------------------------------------------------------------------
+#| echo: false
+knitr::kable(data.frame(
+  File = c("`data/theta_identity_check.csv`", "`data/cost_per_eval.csv`",
+           "`data/metric_redundancy.csv`", "`data/de_constraints.csv`",
+           "`data/fst_definitions.csv`", "`data/dist_vs_variance.csv`",
+           "`data/pipeline_loss_ledger.csv`", "`data/plant_metric_usage.csv`",
+           "`data/bibliography_*.csv`", "`data/f2_results.csv`",
+           "`data/f2_multilocus.csv`", "`data/mabc_*.csv`",
+           "`figs/mabc_sizing.png`", "`figs/mabc_policies.png`",
+           "`figs/cost_scaling.png`", "`figs/de_convergence.png`",
+           "`figs/metric_redundancy.png`", "`figs/pipeline_loss.png`",
+           "`figs/metric_pitfalls.png`", "`data/search_benchmark.csv`",
+           "`data/search_scaling.csv`", "`data/search_exact_gap.csv`",
+           "`figs/search_anytime.png`", "`figs/search_scaling.png`",
+           "`data/cycles_trajectory.csv`", "`data/cycles_crossover.csv`",
+           "`data/cycles_maxuse.csv`", "`data/cycles_injection.csv`",
+           "`data/cycles_selector.csv`", "`figs/cycles_gain.png`",
+           "`figs/cycles_diversity.png`", "`data/mating_core_sweep.csv`",
+           "`data/mating_scenarios_summary.csv`, `data/mating_optimizer_frontier.csv`, `data/mating_validation.csv`, `figs/mating_*.png`",
+           "`data/sparse_core_sweep.csv`",
+           "`data/sparse_scenarios.csv`, `data/sparse_min_allocation.csv`, `data/sparse_contrasts.csv`, `data/sparse_two_stage.csv`, `data/sparse_genomic_layer.csv`, `data/sparse_validation.csv`",
+           "`data/sparse_primary_studies.csv`, `data/sparse_literature_parameters.csv`"),
+  Why = c("the full identity sweep, 12 configurations",
+          "production scale: L = 300, N = 22500, m = 10000",
+          "621 selections x 17 metrics",
+          "9 DE runs at 60,000 evaluations each",
+          "the divergence sweep",
+          "600 candidate crosses with simulated DH",
+          "8 founder pools, four stages, two strategies",
+          "687 screened plant records",
+          "the screened corpora themselves",
+          "5 schemes x 20 sizes, adaptive replication",
+          "multilocus recovery across the grid",
+          "the MABC grid: 4 policies x 4 gene numbers x 11 sizes x 3 s, 300 reps",
+          "analytical sizing by stage",
+          "the four recombinant-selection policies",
+          "cost scaling at production scale",
+          "DE convergence under four restrictions",
+          "the redundancy panels",
+          "the loss ledger",
+          "Traps 4 and 2 on the full simulation",
+          "8 methods x 2 scales x 3 seeds, production scale N = 10000",
+          "per-evaluation cost from N = 400 to N = 22500",
+          "the outer-approximation oracle, proven small and time-limited large (target `search_exact`)",
+          "anytime curves at equal wall-clock",
+          "the encoding scaling wall",
+          "3 budgets x 16 cycles x 5 seeds (target `cycles`)",
+          "the crossover cycle, per budget per seed",
+          "3 caps x 16 cycles x 5 seeds",
+          "closed against one injection at cycle 8, 5 seeds",
+          "greedy against DE, 2 budgets x 13 cycles, seed 1",
+          "cumulative gain by budget",
+          "gene diversity and F_drift by budget",
+          "11 designs x 3 budgets x 30 reps, LS and BLUP (target `mating`)",
+          "**not regenerable here**: the external `sparsex` study (AlphaSimR founders, AI-REML, GBLUP, CDmean), 24 designs x 3 budgets x 30 reps x 3 models; its phenotypic core is the row above",
+          "spreading, k = 1 strategies, and overlap x family size; 30 reps, known components (target `sparse`)",
+          "**not regenerable here**: an external study (REML by `sommer`, 2,630 fits; two-stage layer; AlphaSimR genomic layer); its phenotypic core is the row above",
+          "hand-extracted from the six primary papers of @sec-sparse"),
+  check.names = FALSE))
+
+#' 
+#' Nothing is read from `report/` or `data/` at the repository root: both are
+#' gitignored, so a clean clone would fail to render. Everything cached lives in
+#' `book/data` and `book/figs`, which are tracked.
+#' 
+#' ## Regenerating the cached results
+#' 
+## -----------------------------------------------------------------------------
+#| eval: false
+# Rscript book/scripts/regenerate.R          # everything; hours
+# Rscript book/scripts/regenerate.R f2size   # one target
+# Rscript book/scripts/regenerate.R search   # the advanced-selection benchmark
+# Rscript book/scripts/regenerate.R search_exact  # just the exact oracle
+# Rscript book/scripts/regenerate.R cycles   # the recurrent-selection trajectories
+# Rscript book/scripts/regenerate.R mating   # the mating-design core sweep (~6 min)
+# Rscript book/scripts/regenerate.R sparse   # the sparse-testing core sweep (~5 min)
+
+#' 
+#' The script is the single place where the expensive computations live. It is
+#' never invoked by `quarto render`.
+#' 
+#' ## Reproducing the book
+#' 
+## Rscript -e 'devtools::document(); devtools::load_all()'
+## Rscript -e 'devtools::test()'
+## Rscript -e 'devtools::check()'
+## quarto render book
+#' 
+#' Quarto's `freeze: auto` means a chapter re-runs only when its source changes.
+#' To force a full recomputation, delete `book/_freeze/`.
+#' 
+#' ## Known limitations of the verification
+#' 
+#' Stated so they are not mistaken for oversights.
+#' 
+#' **The oracles share the author's understanding.** They check that the fast route
+#' computes what the slow route computes. They cannot check that the slow route
+#' implements the right definition. That is what the reproduction of the published
+#' Caballero & Toro tables in @sec-subdivided is for -- an external check against
+#' numbers this project did not produce.
+#' 
+#' **Monte Carlo checks have Monte Carlo error.** Where a test asserts agreement
+#' with a simulated expectation rather than an algebraic identity, the tolerance is
+#' loose by necessity, and a genuinely small bias would pass.
+#' 
+#' **Everything is verified on simulated data.** The identities are algebraic and
+#' will hold on real genotypes. The *empirical* results -- which metrics are
+#' redundant, how much index a constraint costs -- were derived at $F_{ST} = 0.15$
+#' with simulated markers, and @sec-choosing says explicitly that they should be
+#' re-derived on real genotypes before being treated as settled.
+#' 
+#' **One chapter's headline results come from outside this repository.** The
+#' mating-design sweep of @sec-mating (`mating_scenarios_summary.csv` and its
+#' siblings) was produced by an external study whose code needs AlphaSimR and
+#' `sommer`; it shipped with its own 37-check validation report, summarised in that
+#' chapter, but it is not re-run by anything here. What is re-run is its phenotypic
+#' core (`regenerate.R mating`), and @sec-mating-reproduce compares the two.
+#' 
+#' The sparse-testing chapter (@sec-sparse) has the same structure. Its REML grid,
+#' two-stage scenario and genomic layer are cached from an external study, which
+#' validated its own estimator on the complete design (@tbl-sparse-validation). The
+#' in-repo `regenerate.R sparse` re-runs the known-component core, and
+#' @sec-sparse-reproduce compares the two.

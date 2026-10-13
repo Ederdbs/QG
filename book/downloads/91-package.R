@@ -1,0 +1,376 @@
+#' # The `hybdiv` package {#sec-package}
+#' 
+# 91-package -- standalone script of the chapter 91-package.qmd
+# Book: https://ederdbs.github.io/QG/91-package.html
+#
+# Reproduces every analysis of the chapter, in order; the chapter text is kept
+# as comments (#') so the script reads as the chapter does.
+#
+# Requirements: R >= 4.1 and the 'hybdiv' package (this repository's root):
+#   install.packages('remotes'); remotes::install_github('Ederdbs/QG')
+# Run it top to bottom in an empty working directory.
+
+library(hybdiv)
+set.seed(2026)
+
+# The teaching scale. Every live example in the book runs at this size: small
+# enough that a full render takes minutes, large enough that none of the
+# identities hold by accident. The production scale is n_pool_A = n_pool_B = 71
+# and m = 25000; see the note in each chapter where the difference matters.
+book_cfg <- utils::modifyList(
+  hybdiv::sim_config,
+  list(n_pool_A = 25, n_pool_B = 25, m = 2000, seed = 1)
+)
+
+# Paths to the cached artefacts, so chapters never guess.
+
+# Rounded table helper, used wherever a metric panel is printed.
+fmt <- function(x, digits = 4) {
+  # A matrix must become a data frame first: `x[num] <- lapply(...)` on a
+  # matrix recycles the logical over the flattened array and assigns a list
+  # back, silently turning the matrix into a list.
+  if (is.matrix(x)) x <- as.data.frame(x)
+  if (is.data.frame(x)) {
+    num <- vapply(x, is.numeric, logical(1))
+    x[num] <- lapply(x[num], round, digits)
+    x
+  } else round(x, digits)
+}
+
+# Cached artefacts (expensive sweeps) are fetched from the repository on first use.
+.book_get <- function(dir, ...) {
+  f <- file.path(dir, ...)
+  if (!file.exists(f)) {
+    dir.create(dirname(f), showWarnings = FALSE, recursive = TRUE)
+    utils::download.file(paste0('https://raw.githubusercontent.com/Ederdbs/QG/main/book/', f), f, quiet = TRUE, mode = 'wb')
+  }
+  f
+}
+book_data <- function(...) .book_get('data', ...)
+book_fig  <- function(...) .book_get('figs', ...)
+
+#' 
+#' Every function used in this book lives in one package, whose source is the `R/`
+#' directory of this repository. This appendix is the index.
+#' 
+## -----------------------------------------------------------------------------
+#| echo: false
+ns <- asNamespace("hybdiv")
+exported <- sort(getNamespaceExports(ns))
+c(exported_objects = length(exported))
+
+#' 
+#' ## Installation
+#' 
+## -----------------------------------------------------------------------------
+#| eval: false
+# install.packages(c("DEoptim", "quadprog"))
+# devtools::install(".")        # from the repository root
+# library(hybdiv)
+
+#' 
+#' Only `DEoptim` is a hard dependency, used solely by `sel_de()`. `quadprog` is
+#' suggested and needed only for `optimal_contributions()` and `ocs_quadprog()`.
+#' Everything else, including every plot, is base R.
+#' 
+#' ## File map
+#' 
+## -----------------------------------------------------------------------------
+#| echo: false
+knitr::kable(data.frame(
+  File = c("`R/00_data.R`", "`R/01_metrics.R`", "`R/02_benchmark.R`",
+           "`R/03_de_select.R`", "`R/04_fast_metrics.R`", "`R/05_pipeline_metrics.R`",
+           "`R/06_f2size.R`", "`R/07_caballero_toro.R`", "`R/08_mabc.R`",
+           "`R/09_reference.R`",
+           "`R/10_stage1.R`", "`R/11_stage2.R`", "`R/12_search.R`",
+           "`R/13_dominance.R`", "`R/14_cycles.R`", "`R/15_response.R`",
+           "`R/16_mating_design.R`", "`R/17_sparse_testing.R`"),
+  Role = c("simulation, the two matrices, the `ctx` builder",
+           "the diversity metrics, all `f(idx, ctx) -> scalar`",
+           "null distribution, discriminatory power, cost, plots",
+           "selection strategies: truncation, greedy, DE, OCS relaxation",
+           "the line-level fast route -- no N x N matrix",
+           "stage-specific metrics for S1 to S4",
+           "F1 to F4 population sizing simulator",
+           "Caballero & Toro subdivided-population analysis",
+           "marker-assisted backcrossing: drag, the selection index, sizing",
+           "slow literal oracles, for verification",
+           "stage 1: lines to the X / f / hybrids contract",
+           "stage 2: constrained selection across an alpha grid",
+           "structure-aware search: local search, the bound, the exact oracle",
+           "heterosis under a dominance model, and its link to the partition",
+           "recurrent selection across cycles",
+           "genic variance, and the Smith-Hazel and restricted indices",
+           "mating designs: generators, connectivity, LS/BLUP GCA, seed cost",
+           "sparse testing: allocation, connectivity, MME BLUP/PEV"),
+  Chapter = c("@sec-simulating-crosses", "@sec-catalogue", "@sec-catalogue",
+              "@sec-combinatorial", "@sec-choosing", "@sec-stages",
+              "@sec-sizing", "@sec-subdivided", "@sec-backcross",
+              "@sec-verification",
+              "@sec-simulating-crosses", "@sec-case-study", "@sec-advanced",
+              "@sec-heterosis", "@sec-cycles", "@sec-response",
+              "@sec-mating", "@sec-sparse"),
+  check.names = FALSE))
+
+#' 
+#' Files are numbered because the package has no `Collate` field and sourcing order
+#' is alphabetical.
+#' 
+#' ## The two-stage contract
+#' 
+#' Everything downstream of stage 1 talks only through three objects. This is the
+#' seam for swapping in real data.
+#' 
+## -----------------------------------------------------------------------------
+#| eval: false
+# st1 <- stage1_simulate()                 # or stage1_build(X, ped, traits, fL)
+# #   $X        N x m hybrid markers, 0/0.5/1
+# #   $f        N x N molecular coancestry
+# #   $hybrids  N x (3 + n_traits): id, line_A, line_B, traits
+# #   $fL       L x L line coancestry (optional)
+# 
+# res <- stage2_select(st1$X, st1$f, st1$hybrids, n_sel = 100, fL = st1$fL)
+# #   $selection  0/1 column per scenario, plus n_scenarios
+# #   $metrics    one row per scenario
+# #   $z_scores   each metric in s.d. from the random null
+# #   $ref        gd_ref, its Monte Carlo s.e., alpha_max, n_sel
+
+#' 
+#' ## Function index
+#' 
+#' ### Simulation and context
+#' 
+## -----------------------------------------------------------------------------
+#| echo: false
+idx <- function(...) {
+  rows <- list(...)
+  knitr::kable(do.call(rbind, lapply(rows, function(r)
+    data.frame(Function = r[1], Does = r[2]))), row.names = FALSE)
+}
+idx(
+  c("`sim_config`", "simulation scale: lines per pool, markers, traits, divergence"),
+  c("`simulate_lines()`", "Balding-Nichols line genotypes in two divergent pools"),
+  c("`simulate_data()`", "lines, all A x B crosses, both matrices, predicted traits"),
+  c("`simulate_pools()`", "lighter simulator returning raw pieces, with `GL` in 0/1"),
+  c("`build_ctx()`", "assemble the context; freezes `p0` and the index"),
+  c("`build_ctx_from_stage1()`", "same, from the stage-1 contract"),
+  c("`ctx_from_pools()`", "context from `simulate_pools()`, carrying `parents` and `GL`"),
+  c("`load_data()`", "the single swap point for real data"),
+  c("`stage1_simulate()` / `stage1_build()`", "produce the stage-1 contract"),
+  c("`stage2_select()`", "the whole constrained selection pipeline")
+)
+
+#' 
+#' ### The two matrices
+#' 
+## -----------------------------------------------------------------------------
+#| echo: false
+idx(
+  c("`molecular_coancestry()`", "**the diversity kernel**; one `tcrossprod`, stays in [0, 1]"),
+  c("`vanraden_G()`", "**prediction only**; `sum(G) == 0` by construction"),
+  c("`mrd_matrix()` / `coancestry_from_mrd()`", "modified Rogers distance, the same statistic")
+)
+
+#' 
+#' ### Diversity metrics -- all `f(idx, ctx) -> scalar`
+#' 
+## -----------------------------------------------------------------------------
+#| echo: false
+idx(
+  c("`theta_group()`", "group coancestry, diagonal included"),
+  c("`gene_diversity()` / `he_nei()`", "`1 - theta`; the same quantity, two routes"),
+  c("`theta_from_freq()`", "theta via allele frequencies -- validation only, ~100x slower"),
+  c("`status_number()`", "`Ns = 1/(2 theta)`; a static descriptor"),
+  c("`ne_parents()`", "effective number of parent lines; independent of `f`"),
+  c("`ne_lines_pool()`", "the same, per pool; needs only the pedigree"),
+  c("`alleles_lost()`", "markers polymorphic in the pool, rare in the selection"),
+  c("`freq_metrics()`", "**one marker sweep**: He, F_hom, F_drift, cov_diag, rare_retained"),
+  c("`line_weights()` / `theta_pools()`", "per-pool usage weights and coancestries"),
+  c("`gd_partition()`", "Caballero & Toro Eq. 8 over the heterotic pools"),
+  c("`ene()` / `ane()`", "Core Hunter entry- and accession-to-nearest-entry"),
+  c("`eff_dim()`", "effective dimensionality, on the **double-centered** submatrix"),
+  c("`gst()`", "Nei's Gst, selected against non-selected"),
+  c("`mean_offdiag()`", "the common production metric, kept for comparison"),
+  c("`metrics_cheap()` / `metrics_full()`", "the inner-loop panel and the post-hoc panel")
+)
+
+#' 
+#' ### The fast line route
+#' 
+## -----------------------------------------------------------------------------
+#| echo: false
+idx(
+  c("`fast_ctx()`", "add `parents`, `GL` and the packed bitset to a context"),
+  c("`line_counts()` / `line_usage_freq()`", "the sufficient statistic"),
+  c("`fast_theta()` / `fast_gene_div()` / `fast_status_num()`", "`theta = w' fL w`; no N x N matrix"),
+  c("`make_theta_fun()`", "precompiled closure for ~1e6 evaluations"),
+  c("`theta_state()` / `theta_swap()`", "O(L) incremental update per swap"),
+  c("`fast_ne_parents()` / `ne_parents_from_counts()`", "free once the counts exist"),
+  c("`fast_pbar()` / `fast_he_nei()` / `fast_alleles_lost()`", "frequencies from the line matrix"),
+  c("`pack_lines()` / `popcount32()` / `alleles_retained_fast()`", "bitset allelic richness"),
+  c("`fast_theta_pools()`", "pool decomposition from the same counts"),
+  c("`decode_rank()` / `decode_lines()`", "the two encodings; **use `decode_lines()`**"),
+  c("`make_fitness_fast()`", "DE fitness with several simultaneous restrictions")
+)
+
+#' 
+#' ### Selection strategies
+#' 
+## -----------------------------------------------------------------------------
+#| echo: false
+idx(
+  c("`sel_random()`", "the null strategy"),
+  c("`sel_truncation()`", "ceiling on gain, floor on diversity"),
+  c("`sel_truncation_cap()`", "per-line cap; no matrix needed, usually most of the benefit"),
+  c("`sel_greedy()`", "incremental greedy; `w = 0` is max diversity"),
+  c("`decode()` / `make_fitness()` / `sel_de()`", "differential evolution, warm-started by default"),
+  c("`project_capped_simplex()` / `ocs_relaxation()`", "the continuous upper bound"),
+  c("`optimal_contributions()` / `ocs_quadprog()`", "quadratic-programming OCS")
+)
+
+#' 
+#' ### Benchmarking
+#' 
+## -----------------------------------------------------------------------------
+#| echo: false
+idx(
+  c("`null_distribution()`", "**the correct baseline**: random subsets of the same size"),
+  c("`alpha_loss()`", "proportional diversity loss against that baseline"),
+  c("`evaluate()` / `discriminatory_power()`", "metric panel and its z-scores"),
+  c("`cost_per_eval()`", "microseconds per metric; decides what goes inside the loop"),
+  c("`plot_null()` / `plot_correlation()` / `plot_frontier()`",
+    "base-R diagnostics; run by `inst/scripts/run_benchmark.R`, not by the book")
+)
+
+#' 
+#' ## Runnable scripts
+#' 
+#' The book runs everything at a reduced scale so it renders quickly. Three scripts
+#' ship with the package and run the same work at the production scale of
+#' `sim_config`, writing their tables and plots to `report/`:
+#' 
+#' ```sh
+#' Rscript inst/scripts/run_all.R          # the two-stage pipeline, ~4 min
+#' Rscript inst/scripts/run_benchmark.R    # the metrics benchmark, ~6 min
+#' Rscript inst/scripts/run_mabc.R         # the MABC scans, ~3 min
+#' ```
+#' 
+#' `run_benchmark.R` is the source of the numeric results quoted in `README.md`,
+#' and the only place the three `plot_*` helpers above are exercised. From an
+#' installed copy of the package:
+#' 
+## -----------------------------------------------------------------------------
+#| eval: false
+# source(system.file("scripts", "run_all.R", package = "hybdiv"))
+
+#' 
+#' ### Pipeline stages S1-S4
+#' 
+## -----------------------------------------------------------------------------
+#| echo: false
+idx(
+  c("`theta_decompose()` / `gst_nei()`", "**both** F_ST definitions, and Nei's Gst"),
+  c("`pool_freqs()`", "allele frequencies per pool, one row each"),
+  c("`pool_complementarity()` / `s1_monitor()`", "the S1 cycle panel; `mean_sq_delta_p` is the exact one"),
+  c("`dh_sib_coancestry()` / `dh_cross_coancestry()` / `dh_pool_theta()`", "the three DH identities"),
+  c("`sigma2_dh()` / `sigma_dh_crosses()`", "progeny variance from marker effects"),
+  c("`usefulness_criterion()` / `sel_intensity()`", "UC -- applies at S2, not S4"),
+  c("`s3_theta()` / `alleles_retained()`", "line-level metrics"),
+  c("`loss_vs_resampling()` / `theta_ceiling()`", "calibrate against a same-size baseline"),
+  c("`select_lines_constrained()`", "truncate-then-repair; the incremental greedy fails"),
+  c("`hybrid_theta_from_usage()` / `line_usage()` / `pool_balance()`", "S4 on the line route"),
+  c("`loss_ledger()`", "loss per stage, on one scale")
+)
+
+#' 
+#' ### Heterosis and cycles
+#' 
+## -----------------------------------------------------------------------------
+#| echo: false
+idx(
+  c("`heterosis_value()`", "mid-parent heterosis of each hybrid, from `d` alone"),
+  c("`heterosis_expected()`", "the same, expected over a pool pair"),
+  c("`heterosis_partition()`", "shared and divergence terms -- `GD_T` and `GD_BS`"),
+  c("`run_cycles()`", "recurrent selection, one row per cycle"),
+  c("`next_pool()`", "one generation of a pool: weighted intermating, DH derivation"),
+  c("`sel_greedy_budget()`", "greedy sweep returning the best plan inside a budget")
+)
+
+#' 
+#' ### Mating design
+#' 
+## -----------------------------------------------------------------------------
+#| echo: false
+idx(
+  c("`design_tester()` / `design_random_sparse()` / `design_circulant()` / `design_nc2()`", "crossing plans over the two-pool factorial"),
+  c("`design_reps()`", "spread a plot budget over the crosses"),
+  c("`design_diagnostics()` / `design_estimable()`", "connectivity, rank = n' - components, df for SCA"),
+  c("`gca_accuracy_theory()`", "least-squares GCA accuracy in closed form"),
+  c("`simulate_factorial()` / `simulate_cross_means()`", "true GCA/SCA and the cross means a plan produces"),
+  c("`fit_gca()`", "least squares or BLUP with known components"),
+  c("`cross_cost_par()` / `cross_cost()`", "seed production and cost; **placeholder** levels")
+)
+
+#' 
+#' ### Sparse testing
+#' 
+## -----------------------------------------------------------------------------
+#| echo: false
+idx(
+  c("`sparse_alloc()`", "hybrid x location allocation: complete, random, parentage"),
+  c("`sparse_connectivity()`", "parent coverage per location, concurrence, disconnected pairs"),
+  c("`sparse_vc()` / `relmat_halfsib()`", "calibrated variance components; half-sib relationships"),
+  c("`sparse_simulate()`", "true values and plot phenotypes for an allocation"),
+  c("`sparse_blup()`", "mixed-model BLUP and PEV with known components"),
+  c("`ref_sparse_blup()`", "the literal GLS oracle of `sparse_blup()`")
+)
+
+#' 
+#' ### Caballero & Toro
+#' 
+## -----------------------------------------------------------------------------
+#| echo: false
+idx(
+  c("`ct_partition()`", "subpopulation coancestries, F statistics, the Eq. 7 partition"),
+  c("`ct_loss_gain()`", "loss **or gain** from removing each subpopulation")
+)
+
+#' 
+#' ### Population sizing
+#' 
+## -----------------------------------------------------------------------------
+#| echo: false
+idx(
+  c("`maize_chr_len` / `f2_distorters` / `f2_opt`", "defaults; **replace the distorters** with your data"),
+  c("`build_map()` / `marker_index()`", "Haldane map on a regular grid"),
+  c("`meiosis()` / `meiosis_sel()` / `cross_indices()` / `make_F1()`", "the vectorised engine"),
+  c("`make_distortion()` / `zyg_fitness()`", "gametophytic and zygotic distortion, by exact rejection"),
+  c("`run_scheme()` / `reps_for_N()` / `bulk_weights()`", "SSD, bulk, Syn schemes"),
+  c("`panel_freq()` / `panel_het()` / `diversity_retained()`", "panel metrics"),
+  c("`min_minor_freq()` / `fixed_fraction()` / `skew_fraction()`", "worst-region metrics"),
+  c("`n_equivalent()`", "equivalent N -- a communication device, **not** a Wright Ne"),
+  c("`block_lengths()` / `junctions_per_hap()` / `expected_junctions()`", "map expansion"),
+  c("`multilocus_recovery()` / `f1_sizing()`", "the objectives that keep paying for larger N"),
+  c("`f2_run_experiment()`", "the full grid; minutes")
+)
+
+#' 
+#' ### Reference oracles
+#' 
+## -----------------------------------------------------------------------------
+#| echo: false
+idx(
+  c("`ref_theta()`, `ref_gene_div()`, `ref_theta_freq()`, `ref_he_nei()`", "literal transcriptions"),
+  c("`ref_status_num()`, `ref_ne_parents()`, `ref_alleles_lost()`, `ref_alleles_fixed()`", "-"),
+  c("`ref_ene()`, `ref_ane()`, `ref_eff_dim()`, `ref_theta_pools()`", "-")
+)
+
+#' 
+#' ## Full export list
+#' 
+## -----------------------------------------------------------------------------
+#| echo: false
+knitr::kable(matrix(c(exported, rep("", (4 - length(exported) %% 4) %% 4)),
+                    ncol = 4, byrow = FALSE),
+             col.names = NULL)
+
