@@ -645,6 +645,7 @@ window.Quarto = {
   <li><a href="#how-to-set-the-alpha-limit" id="toc-how-to-set-the-alpha-limit" class="nav-link" data-scroll-target="#how-to-set-the-alpha-limit"><span class="header-section-number">13.9.3</span> How to set the <span class="math inline">\(\alpha\)</span> limit</a></li>
   </ul></li>
   <li><a href="#every-metric-against-the-null" id="toc-every-metric-against-the-null" class="nav-link" data-scroll-target="#every-metric-against-the-null"><span class="header-section-number">13.10</span> Every metric against the null</a></li>
+  <li><a href="#reproduce-this-chapter" id="toc-reproduce-this-chapter" class="nav-link" data-scroll-target="#reproduce-this-chapter">Reproduce this chapter</a></li>
   </ul>
 </nav>
     </div>
@@ -784,7 +785,7 @@ window.Quarto = {
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">us_matrix =</span> <span class="fl">1e6</span> <span class="sc">*</span> t_mat <span class="sc">/</span> reps, <span class="at">us_frequency =</span> <span class="fl">1e6</span> <span class="sc">*</span> t_frq <span class="sc">/</span> reps,</span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">ratio =</span> t_frq <span class="sc">/</span> t_mat)</span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    us_matrix us_frequency        ratio </span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           25          150            6</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           25          175            7</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <p>The matrix route is the one that belongs in an optimiser’s inner loop. <a href="07-choosing-metrics.html#sec-collapse" class="quarto-xref"><span>Section 14.1</span></a> makes it cheaper still.</p>
@@ -1270,6 +1271,11 @@ window.Quarto = {
 </div>
 </div>
 <p>Read the rows against each other. Truncation is many standard deviations from random on <code>F_drift</code> and on <code>Ne_parents</code> while being far less extreme on <code>GD</code> – the constraint that would catch it is not the one most programmes apply. That observation is what <a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 14</span></a> turns into a recommendation.</p>
+<!-- reproduce-chapter -->
+</section>
+<section id="reproduce-this-chapter" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="reproduce-this-chapter">Reproduce this chapter</h2>
+<p>All the code of this chapter, in order and with the explanation kept as comments, is one script: <a href="https://ederdbs.github.io/QG/downloads/06-metric-catalogue.R" download="06-metric-catalogue.R"><strong>06-metric-catalogue.R</strong></a>. Download it, install <code>hybdiv</code>, and run it top to bottom in an empty directory; cached results are fetched on first use.</p>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">

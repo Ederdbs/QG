@@ -619,6 +619,7 @@ window.Quarto = {
   <li><a href="#regenerating-the-cached-results" id="toc-regenerating-the-cached-results" class="nav-link" data-scroll-target="#regenerating-the-cached-results"><span class="header-section-number">C.5</span> Regenerating the cached results</a></li>
   <li><a href="#reproducing-the-book" id="toc-reproducing-the-book" class="nav-link" data-scroll-target="#reproducing-the-book"><span class="header-section-number">C.6</span> Reproducing the book</a></li>
   <li><a href="#known-limitations-of-the-verification" id="toc-known-limitations-of-the-verification" class="nav-link" data-scroll-target="#known-limitations-of-the-verification"><span class="header-section-number">C.7</span> Known limitations of the verification</a></li>
+  <li><a href="#reproduce-this-chapter" id="toc-reproduce-this-chapter" class="nav-link" data-scroll-target="#reproduce-this-chapter">Reproduce this chapter</a></li>
   </ul>
 </nav>
     </div>
@@ -655,12 +656,12 @@ window.Quarto = {
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>ref_theta</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (idx, ctx) </span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; mean(ctx[["f"]][idx, idx])</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x78934eb9a0&gt;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x78133f3690&gt;</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>theta_group</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (idx, ctx) </span></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; mean(ctx$f[idx, idx])</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x7893526e78&gt;</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x7813434b68&gt;</span></span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>fast_theta</span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (idx, ctx) </span></span>
@@ -672,7 +673,7 @@ window.Quarto = {
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     as.numeric(crossprod(cu, ctx$fL[u, u, drop = FALSE] %*% cu))/(s * </span></span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         s)</span></span>
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x789355a900&gt;</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x78134665f0&gt;</span></span>
 <span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
@@ -1425,6 +1426,11 @@ window.Quarto = {
 <p><strong>Everything is verified on simulated data.</strong> The identities are algebraic and will hold on real genotypes. The <em>empirical</em> results – which metrics are redundant, how much index a constraint costs – were derived at <span class="math inline">\(F_{ST} = 0.15\)</span> with simulated markers, and <a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 14</span></a> says explicitly that they should be re-derived on real genotypes before being treated as settled.</p>
 <p><strong>One chapter’s headline results come from outside this repository.</strong> The mating-design sweep of <a href="04e-mating-design.html" class="quarto-xref"><span>Chapter 9</span></a> (<code>mating_scenarios_summary.csv</code> and its siblings) was produced by an external study whose code needs AlphaSimR and <code>sommer</code>; it shipped with its own 37-check validation report, summarised in that chapter, but it is not re-run by anything here. What is re-run is its phenotypic core (<code>regenerate.R mating</code>), and <a href="04e-mating-design.html#sec-mating-reproduce" class="quarto-xref"><span>Section 9.10</span></a> compares the two.</p>
 <p>The sparse-testing chapter (<a href="04f-sparse-testing.html" class="quarto-xref"><span>Chapter 10</span></a>) has the same structure. Its REML grid, two-stage scenario and genomic layer are cached from an external study, which validated its own estimator on the complete design (<a href="04f-sparse-testing.html#tbl-sparse-validation" class="quarto-xref">Table&nbsp;<span>10.5</span></a>). The in-repo <code>regenerate.R sparse</code> re-runs the known-component core, and <a href="04f-sparse-testing.html#sec-sparse-reproduce" class="quarto-xref"><span>Section 10.14</span></a> compares the two.</p>
+<!-- reproduce-chapter -->
+</section>
+<section id="reproduce-this-chapter" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="reproduce-this-chapter">Reproduce this chapter</h2>
+<p>All the code of this chapter, in order and with the explanation kept as comments, is one script: <a href="https://ederdbs.github.io/QG/downloads/92-verification.R" download="92-verification.R"><strong>92-verification.R</strong></a>. Download it, install <code>hybdiv</code>, and run it top to bottom in an empty directory; cached results are fetched on first use.</p>
 
 
 </section>
