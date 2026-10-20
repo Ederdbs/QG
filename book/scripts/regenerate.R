@@ -19,6 +19,7 @@
 #   limits       genic vs realised variance, with a no-selection control (Ch 11c)
 #   mating       the phenotypic core of the mating-design sweep (Ch 4e)
 #   sparse       the phenotypic core of the sparse-testing study (Ch 4f)
+#   joint        crosses x locations at a fixed plot budget (Ch 4g)
 #
 # Not regenerated here, because they are not this project's output:
 #   bibliography_animal.csv, bibliography_plant.csv  (literature screens)
@@ -54,7 +55,7 @@ dir.create(fig_dir,  showWarnings = FALSE, recursive = TRUE)
 dir.create(out_dir,  showWarnings = FALSE, recursive = TRUE)
 
 targets <- commandArgs(trailingOnly = TRUE)
-if (!length(targets)) targets <- c("f2size", "benchmark", "identity", "genpred", "search", "cycles", "limits", "mating", "sparse")
+if (!length(targets)) targets <- c("f2size", "benchmark", "identity", "genpred", "search", "cycles", "limits", "mating", "sparse", "joint")
 want <- function(x) x %in% targets
 
 # --- f2size: the population-sizing grid ---------------------------------------
@@ -783,3 +784,104 @@ if (want("sparse")) {
 }
 
 message("regenerate: complete")
+
+# --- joint: which crosses, at which locations (Ch 4g) --------------------------
+if (want("joint")) {
+  message("joint: crossing plan x location allocation at 160 plots (paired)")
+  # 20 x 20 pools in half-sib families of 4, 8 locations, components KNOWN.
+  # Every configuration spends 160 plots (the tester design 152), so the rows
+  # trade distinct crosses against locations per cross.
+  #
+  # Paired design. In each replicate one plan is drawn, "random" and
+  # "coverage" allocate THAT plan, and all designs are simulated from the same
+  # seed, so they share the true values -- sparse_simulate() draws every effect
+  # before it looks at M. "optimised" is too slow to redo per replicate: per
+  # cell one plan gets a coverage allocation ("start") and an exchange search
+  # from it, 300 + 300 proposals with the PEV recorded at both points; those two
+  # fixed designs are then simulated in every replicate with the same seed, so
+  # optimised - start is paired as well.
+  nF <- 20; nM <- 20; nLoc <- 8
+  Af <- relmat_halfsib(nF, 5); Am <- relmat_halfsib(nM, 5)
+  cfg <- data.frame(
+    plan = c("circulant", "circulant", "circulant", "random", "random", "tester"),
+    c = c(8, 4, 2, 8, 4, 2), k = c(1, 2, 4, 1, 2, 2), stringsAsFactors = FALSE)
+  make_plan <- function(i) switch(cfg$plan[i],
+    circulant = design_circulant(nF, nM, cfg$c[i]),
+    random = design_random_sparse(nF, nM, cfg$c[i]),
+    tester = design_tester(nF, nM, cfg$c[i]))
+  vcs <- expand.grid(h2 = c(0.2, 0.4), sca = c("low", "high"), stringsAsFactors = FALSE)
+  score <- function(M, vc, seed) {
+    made <- rowSums(M) > 0
+    set.seed(seed)
+    sim <- sparse_simulate(M, nF, nM, vc, Af, Am)
+    fit <- sparse_blup(sim$pheno, nF, nM, nLoc, vc, Af, Am)
+    cn <- joint_connectivity(M, nF, nM)
+    data.frame(n_crosses = sum(made), n_plots = sum(M),
+               acc_all = cor(fit$blup, sim$g_target),
+               acc_made = cor(fit$blup[made], sim$g_target[made]),
+               acc_unmade = cor(fit$blup[!made], sim$g_target[!made]),
+               pev_gca = joint_pev(M, nF, nM, vc, Af, Am),
+               fem_cover = cn$fem_cover, male_cover = cn$male_cover,
+               n_comp_cross = cn$n_comp_cross, n_comp_loc = cn$n_comp_loc)
+  }
+  set.seed(5050)
+  opt_log <- list()
+  res <- do.call(rbind, lapply(seq_len(nrow(vcs)), function(v) {
+    vc <- sparse_vc(vcs$h2[v], vcs$sca[v])
+    do.call(rbind, lapply(seq_len(nrow(cfg)), function(i) {
+      p0 <- make_plan(i)
+      M_start <- joint_alloc(p0, nF, nM, nLoc, cfg$k[i], "coverage")
+      t0 <- Sys.time()
+      M_300 <- joint_alloc(p0, nF, nM, nLoc, cfg$k[i], "optimised", vc, Af, Am,
+                           n_iter = 300L, start = M_start)
+      M_opt <- joint_alloc(p0, nF, nM, nLoc, cfg$k[i], "optimised", vc, Af, Am,
+                           n_iter = 300L, start = M_300)
+      sec <- as.numeric(difftime(Sys.time(), t0, units = "secs"))
+      opt_log[[length(opt_log) + 1]] <<- data.frame(cfg[i, ], h2_plot = vcs$h2[v],
+        sca = vcs$sca[v], pev_start = joint_pev(M_start, nF, nM, vc, Af, Am),
+        pev_300 = joint_pev(M_300, nF, nM, vc, Af, Am),
+        pev_600 = joint_pev(M_opt, nF, nM, vc, Af, Am), sec_600 = sec)
+      seeds <- sample.int(1e9, 30)
+      do.call(rbind, lapply(seq_len(30), function(rep) {
+        set.seed(seeds[rep])
+        p <- make_plan(i)
+        des <- list(random = joint_alloc(p, nF, nM, nLoc, cfg$k[i], "random"),
+                    coverage = joint_alloc(p, nF, nM, nLoc, cfg$k[i], "coverage"),
+                    start = M_start, optimised = M_opt)
+        s2 <- sample.int(1e9, 1)
+        do.call(rbind, lapply(names(des), function(s)
+          data.frame(cfg[i, ], h2_plot = vcs$h2[v], sca = vcs$sca[v],
+                     strategy = s, rep = rep, score(des[[s]], vc, s2))))
+      }))
+    }))
+  }))
+  saveRDS(list(res = res, opt = do.call(rbind, opt_log)),
+          file.path(out_dir, "joint_raw.rds"))
+  by <- c("plan", "c", "k", "h2_plot", "sca", "strategy")
+  vars <- c("n_crosses", "n_plots", "acc_all", "acc_made", "acc_unmade",
+            "pev_gca", "fem_cover", "male_cover", "n_comp_cross", "n_comp_loc")
+  out <- aggregate(res[vars], res[by], mean)
+  se <- aggregate(res[c("acc_all", "acc_made", "acc_unmade")], res[by],
+                  function(x) sd(x) / sqrt(length(x)))
+  names(se)[-seq_along(by)] <- paste0(names(se)[-seq_along(by)], "_se")
+  write.csv(merge(out, se), file.path(data_dir, "joint_core_sweep.csv"),
+            row.names = FALSE)
+  # Paired contrasts: same plan, same true values, per replicate.
+  key <- c("plan", "c", "k", "h2_plot", "sca", "rep")
+  ctr <- do.call(rbind, lapply(list(c("coverage", "random"), c("optimised", "start")),
+    function(ab) {
+      a <- res[res$strategy == ab[1], ]; b <- res[res$strategy == ab[2], ]
+      b <- b[match(do.call(paste, a[key]), do.call(paste, b[key])), ]
+      do.call(rbind, lapply(c("acc_all", "acc_made", "acc_unmade"), function(m) {
+        d <- cbind(a[key], diff = a[[m]] - b[[m]])
+        g <- aggregate(diff ~ plan + c + k + h2_plot + sca, d,
+                       function(x) c(mean = mean(x), se = sd(x) / sqrt(length(x))))
+        data.frame(g[1:5], contrast = paste(ab, collapse = " - "), metric = m,
+                   diff = g$diff[, "mean"], se = g$diff[, "se"])
+      }))
+    }))
+  write.csv(ctr, file.path(data_dir, "joint_contrasts.csv"), row.names = FALSE)
+  write.csv(do.call(rbind, opt_log), file.path(data_dir, "joint_optimiser.csv"),
+            row.names = FALSE)
+  message("joint: done")
+}

@@ -37,6 +37,12 @@ fmt <- function(x, digits = 4) {
   } else round(x, digits)
 }
 
+# One palette for every live figure: the two heterotic pools get fixed colours
+# (A blue, B amber, a colour-blind-safe pair); red marks the constraint or the
+# loss; greys carry everything else. Chapters pass these instead of hex codes.
+book_pal <- c(A = "#1f5f8b", B = "#d98e04", loss = "#b2182b",
+              ink = "#14202b", mid = "grey45", light = "grey85")
+
 # Cached artefacts (expensive sweeps) are fetched from the repository on first use.
 .book_get <- function(dir, ...) {
   f <- file.path(dir, ...)
@@ -117,6 +123,7 @@ table(as.vector(L[1:5, 1:200]))
 #' 
 ## -----------------------------------------------------------------------------
 #| fig-cap: "Driving the pools apart leaves the expected heterozygous fraction of the F1 flat. What moves is the within-pool coancestry, which climbs throughout. @sec-heterosis-flat derives why the two terms must trade one for one."
+#| fig-alt: "Driving the pools apart leaves the expected heterozygous fraction of the F1 flat"
 fst_grid <- c(0.02, 0.05, 0.10, 0.15, 0.25, 0.40)
 div <- vapply(fst_grid, function(fst) {
   cfg <- modifyList(book_cfg, list(fst = fst, m = 1500))
@@ -272,6 +279,7 @@ identical(stage1_build(st1$X, pd, tr)$f,
 #' 
 ## -----------------------------------------------------------------------------
 #| fig-cap: "The candidate pool. Left: the index the selection maximises. Right: gene diversity of random subsets of 60, the baseline every later chapter measures against."
+#| fig-alt: "The candidate pool"
 op <- par(mfrow = c(1, 2), mar = c(4.2, 4.2, 2.5, 1))
 hist(ctx$index, breaks = 40, col = "grey85", border = "white",
      main = "multi-trait index", xlab = "index (s.d. units)")

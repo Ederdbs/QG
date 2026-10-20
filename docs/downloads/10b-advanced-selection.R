@@ -37,6 +37,12 @@ fmt <- function(x, digits = 4) {
   } else round(x, digits)
 }
 
+# One palette for every live figure: the two heterotic pools get fixed colours
+# (A blue, B amber, a colour-blind-safe pair); red marks the constraint or the
+# loss; greys carry everything else. Chapters pass these instead of hex codes.
+book_pal <- c(A = "#1f5f8b", B = "#d98e04", loss = "#b2182b",
+              ink = "#14202b", mid = "grey45", light = "grey85")
+
 # Cached artefacts (expensive sweeps) are fetched from the repository on first use.
 .book_get <- function(dir, ...) {
   f <- file.path(dir, ...)
@@ -461,6 +467,7 @@ fmt(rbind(here_20000 = setNames(ls_res[["index"]], modes),
 ## -----------------------------------------------------------------------------
 #| echo: false
 #| fig-cap: "Best index reached against wall-clock seconds, at book scale under a 1% diversity budget. The dashed line is the Lagrangian bound of @sec-bound. Local search is at 1.52 within a tenth of a second; the differential evolution reaches only 1.45 after two seconds."
+#| fig-alt: "Best index reached against wall-clock seconds, at book scale under a 1% diversity budget"
 knitr::include_graphics(book_fig("search_anytime.png"))
 
 #' 
@@ -1038,6 +1045,7 @@ fmt(c(N_from = sc$N[1], N_to = sc$N[nrow(sc)],
 ## -----------------------------------------------------------------------------
 #| echo: false
 #| fig-cap: "Cost per objective evaluation against the number of candidate hybrids. Only the incremental swap is flat. Both encodings grow: the line route by 9.4x, dominated by decode_lines()'s O(N log N) sort over all candidates, and the hybrid route by 20x -- but that arm is confounded, because the sweep sets n_sel to 2 percent of N (20 crosses at N = 400, 200 at N = 10,000) and mean(f[idx, idx]) is quadratic in the selection, not in N."
+#| fig-alt: "Cost per objective evaluation against the number of candidate hybrids"
 knitr::include_graphics(book_fig("search_scaling.png"))
 
 #' 

@@ -37,6 +37,12 @@ fmt <- function(x, digits = 4) {
   } else round(x, digits)
 }
 
+# One palette for every live figure: the two heterotic pools get fixed colours
+# (A blue, B amber, a colour-blind-safe pair); red marks the constraint or the
+# loss; greys carry everything else. Chapters pass these instead of hex codes.
+book_pal <- c(A = "#1f5f8b", B = "#d98e04", loss = "#b2182b",
+              ink = "#14202b", mid = "grey45", light = "grey85")
+
 # Cached artefacts (expensive sweeps) are fetched from the repository on first use.
 .book_get <- function(dir, ...) {
   f <- file.path(dir, ...)
@@ -187,6 +193,7 @@ fmt(as.data.frame(relax), 4)
 #' 
 ## -----------------------------------------------------------------------------
 #| fig-cap: "The continuous relaxation traces an upper bound. Discrete strategies must sit below and to the left of it; how far below is the convergence diagnostic."
+#| fig-alt: "The continuous relaxation traces an upper bound"
 null <- null_distribution(ctx, n_sel, B = 400, B_full = 60)
 a_relax <- (null$gd_ref - relax[, "GD"]) / null$gd_ref
 
@@ -247,13 +254,14 @@ c(attainable_ceiling = attainable,
 #' 
 ## -----------------------------------------------------------------------------
 #| fig-cap: "The greedy frontier, swept over the merit weight w. The knee is where further diversity costs index steeply."
+#| fig-alt: "The greedy frontier, swept over the merit weight w"
 ws <- c(0, 0.25, 0.5, 0.75, 1, 1.5, 2, 3, 5, 8, 12)
 front <- do.call(rbind, lapply(ws, function(w) {
   s <- sel_greedy(ctx, n_sel, w = w)
   data.frame(w = w, alpha = alpha_loss(s, ctx, null$gd_ref),
              index = mean_index(s, ctx), Ne_par = ne_parents(s, ctx))
 }))
-plot(front$alpha * 100, front$index, type = "b", pch = 19, col = "#2166ac",
+plot(front$alpha * 100, front$index, type = "b", pch = 19, col = "#1f5f8b",
      xlab = "gene diversity loss, alpha (%)", ylab = "mean index (s.d.)")
 abline(v = attainable * 100, lty = 2, col = "#b2182b")
 text(attainable * 100, min(front$index), "truncation ceiling", pos = 2, cex = 0.7,

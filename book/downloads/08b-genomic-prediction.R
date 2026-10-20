@@ -37,6 +37,12 @@ fmt <- function(x, digits = 4) {
   } else round(x, digits)
 }
 
+# One palette for every live figure: the two heterotic pools get fixed colours
+# (A blue, B amber, a colour-blind-safe pair); red marks the constraint or the
+# loss; greys carry everything else. Chapters pass these instead of hex codes.
+book_pal <- c(A = "#1f5f8b", B = "#d98e04", loss = "#b2182b",
+              ink = "#14202b", mid = "grey45", light = "grey85")
+
 # Cached artefacts (expensive sweeps) are fetched from the repository on first use.
 .book_get <- function(dir, ...) {
   f <- file.path(dir, ...)
@@ -566,6 +572,7 @@ c(BayesB_d_at_QTL   = oB$d[big],  BayesB_d_median  = median(oB$d),
 ## -----------------------------------------------------------------------------
 #| label: fig-genpred-selection
 #| fig-cap: "The two priors on the same oligogenic trait, with the marker carrying 96% of the genetic variance circled. Both find it. Only BayesB can then remove the other 1999 from the model."
+#| fig-alt: "The two priors on the same oligogenic trait, with the marker carrying 96% of the genetic variance circled"
 par(mfrow = c(1, 2), mar = c(4, 4, 2, 1))
 for (v in list(list(oB$d, "BayesB: posterior inclusion"),
                list(oA$vb, "BayesA: marker variance"))) {
@@ -675,6 +682,7 @@ knitr::kable(fmt(aggregate(cbind(GBLUP, BayesA, BayesB) ~ arch + h2, acc, mean),
 ## -----------------------------------------------------------------------------
 #| label: fig-genpred-accuracy
 #| fig-cap: "Prediction accuracy by architecture and heritability, 15 replicate splits each."
+#| fig-alt: "Prediction accuracy by architecture and heritability, 15 replicate splits each"
 sub <- reshape(acc, direction = "long", varying = c("GBLUP", "BayesA", "BayesB"),
                v.names = "accuracy", timevar = "method",
                times = c("GBLUP", "BayesA", "BayesB"))

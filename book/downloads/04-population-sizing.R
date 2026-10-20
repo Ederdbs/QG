@@ -37,6 +37,12 @@ fmt <- function(x, digits = 4) {
   } else round(x, digits)
 }
 
+# One palette for every live figure: the two heterotic pools get fixed colours
+# (A blue, B amber, a colour-blind-safe pair); red marks the constraint or the
+# loss; greys carry everything else. Chapters pass these instead of hex codes.
+book_pal <- c(A = "#1f5f8b", B = "#d98e04", loss = "#b2182b",
+              ink = "#14202b", mid = "grey45", light = "grey85")
+
 # Cached artefacts (expensive sweeps) are fetched from the repository on first use.
 .book_get <- function(dir, ...) {
   f <- file.path(dir, ...)
@@ -240,8 +246,9 @@ knitr::kable(data.frame(
 #' 
 ## -----------------------------------------------------------------------------
 #| fig-cap: "Diversity retained against population size, five schemes. The theoretical curve is 1 - (1 - H)/N under no distortion."
+#| fig-alt: "Diversity retained against population size, five schemes"
 schemes <- unique(f2$scheme)
-cols <- c(ssd = "#1b6ca8", ssd_attr = "#7fb3d5", bulk = "#c0392b",
+cols <- c(ssd = "#1f5f8b", ssd_attr = "#7fb3d5", bulk = "#c0392b",
           syn1 = "#27ae60", syn2 = "#16a085")
 plot(NA, xlim = range(f2$N), ylim = c(0.88, 1.0),
      xlab = expression(N[F2]~"plants"), ylab = "diversity retained, D")
@@ -282,6 +289,7 @@ data.frame(comparison = c("bulk, largest N", "SSD, N = 30"),
 #' 
 ## -----------------------------------------------------------------------------
 #| fig-cap: "Ancestry frequency along the ten chromosomes, at N = 20 and N = 300. At N = 20 the whole curve is noisy: that is drift, and more plants remove it. At N = 300 the noise is gone and three peaks remain, exactly at the distorters. Those are the deterministic bias, and no number of plants removes them."
+#| fig-alt: "Ancestry frequency along the ten chromosomes, at N = 20 and N = 300. At N = 20 the whole curve is noisy: that is drift, and more plants remove it"
 map4 <- build_map(maize_chr_len, spacing_cM = 4)
 dist <- make_distortion(map4, f2_distorters)
 set.seed(6)
@@ -290,7 +298,7 @@ large <- panel_freq(run_scheme("ssd", 300, map4, dist, f2_opt))
 
 plot(small, type = "l", col = "#e08214", ylim = c(0, 1),
      xlab = "genome (chromosomes 1-10)", ylab = "P1 ancestry frequency", xaxt = "n")
-lines(large, col = "#1b6ca8", lwd = 1.6)
+lines(large, col = "#1f5f8b", lwd = 1.6)
 abline(h = 0.5, lty = 2, col = "grey50")
 # chromosome boundaries and distorter positions
 bnd <- which(map4$first)
@@ -299,7 +307,7 @@ abline(v = bnd[-1] - 0.5, col = "grey85")
 for (i in seq_len(nrow(f2_distorters)))
   abline(v = marker_index(map4, f2_distorters$chr[i], f2_distorters$pos_cM[i]),
          col = "#b2182b", lty = 3)
-legend("topleft", c("N = 20", "N = 300", "distorter"), col = c("#e08214", "#1b6ca8", "#b2182b"),
+legend("topleft", c("N = 20", "N = 300", "distorter"), col = c("#e08214", "#1f5f8b", "#b2182b"),
        lty = c(1, 1, 3), lwd = c(1, 1.6, 1), bty = "n", cex = 0.8, horiz = TRUE)
 
 #' 
@@ -330,6 +338,7 @@ knitr::kable(data.frame(
 #' 
 ## -----------------------------------------------------------------------------
 #| fig-cap: "Multilocus recovery: P(at least one line homozygous for P2 at k loci). This is the objective that keeps paying for larger N."
+#| fig-alt: "Multilocus recovery: P(at least one line homozygous for P2 at k loci)"
 kk <- sort(unique(ml$k))
 plot(NA, xlim = range(ml$N), ylim = c(0, 1), xlab = expression(N[F2]),
      ylab = "P(at least one line)")

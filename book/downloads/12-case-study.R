@@ -37,6 +37,12 @@ fmt <- function(x, digits = 4) {
   } else round(x, digits)
 }
 
+# One palette for every live figure: the two heterotic pools get fixed colours
+# (A blue, B amber, a colour-blind-safe pair); red marks the constraint or the
+# loss; greys carry everything else. Chapters pass these instead of hex codes.
+book_pal <- c(A = "#1f5f8b", B = "#d98e04", loss = "#b2182b",
+              ink = "#14202b", mid = "grey45", light = "grey85")
+
 # Cached artefacts (expensive sweeps) are fetched from the repository on first use.
 .book_get <- function(dir, ...) {
   f <- file.path(dir, ...)
@@ -191,6 +197,7 @@ c(scenarios          = length(scn),
 #' 
 ## -----------------------------------------------------------------------------
 #| fig-cap: "The price list. Each point is one diversity budget; the curve is what index it buys."
+#| fig-alt: "The price list"
 plot(d$alpha * 100, d$index, type = "b", pch = 19, col = "#b2182b", lwd = 2,
      xlab = "gene diversity loss, alpha (%)", ylab = "mean index (s.d.)")
 text(d$alpha * 100, d$index, d$scenario, pos = 4, cex = 0.65, col = "grey30")

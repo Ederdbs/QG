@@ -37,6 +37,12 @@ fmt <- function(x, digits = 4) {
   } else round(x, digits)
 }
 
+# One palette for every live figure: the two heterotic pools get fixed colours
+# (A blue, B amber, a colour-blind-safe pair); red marks the constraint or the
+# loss; greys carry everything else. Chapters pass these instead of hex codes.
+book_pal <- c(A = "#1f5f8b", B = "#d98e04", loss = "#b2182b",
+              ink = "#14202b", mid = "grey45", light = "grey85")
+
 # Cached artefacts (expensive sweeps) are fetched from the repository on first use.
 .book_get <- function(dir, ...) {
   f <- file.path(dir, ...)
@@ -291,6 +297,7 @@ knitr::kable(rbind(strat, pooled), row.names = FALSE,
 ## -----------------------------------------------------------------------------
 #| echo: false
 #| fig-cap: "Traps 4 and 2, on the full simulation. Panel A: progeny standard deviation against modified Rogers distance -- the strong pooled correlation only re-separates inter- from within-pool crosses and carries almost no information within either stratum. Panel B: the two F_ST definitions on identical data, differing only in the reference in the denominator."
+#| fig-alt: "Traps 4 and 2, on the full simulation"
 knitr::include_graphics(book_fig("metric_pitfalls.png"))
 
 #' 
@@ -338,6 +345,7 @@ c(ceiling             = ceiling20,
 #' 
 ## -----------------------------------------------------------------------------
 #| fig-cap: "Group coancestry falls monotonically with set size. A ceiling calibrated at the target size is unreachable at every smaller size, which is why an incremental greedy stops at the first candidate."
+#| fig-alt: "Group coancestry falls monotonically with set size"
 sizes <- c(2, 3, 5, 8, 12, 20, 30, 45, 60)
 th <- vapply(sizes, function(n) mean(replicate(50, {
   s <- sample.int(nrow(fL), n); mean(fL[s, s])})), numeric(1))
@@ -416,6 +424,7 @@ knitr::kable(fmt(wide, 2),
 ## -----------------------------------------------------------------------------
 #| echo: false
 #| fig-cap: "Where the diversity goes. DH induction dominates, and a diversity term applied there redistributes loss rather than removing it."
+#| fig-alt: "Where the diversity goes"
 knitr::include_graphics(book_fig("pipeline_loss.png"))
 
 #' 

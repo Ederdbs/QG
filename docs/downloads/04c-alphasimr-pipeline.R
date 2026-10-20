@@ -37,6 +37,12 @@ fmt <- function(x, digits = 4) {
   } else round(x, digits)
 }
 
+# One palette for every live figure: the two heterotic pools get fixed colours
+# (A blue, B amber, a colour-blind-safe pair); red marks the constraint or the
+# loss; greys carry everything else. Chapters pass these instead of hex codes.
+book_pal <- c(A = "#1f5f8b", B = "#d98e04", loss = "#b2182b",
+              ink = "#14202b", mid = "grey45", light = "grey85")
+
 # Cached artefacts (expensive sweeps) are fetched from the repository on first use.
 .book_get <- function(dir, ...) {
   f <- file.path(dir, ...)
@@ -1653,7 +1659,7 @@ fig_cap <- paste0("Reciprocal recurrent selection over ", rrs_cfg[["n_cycles"]],
 arm_stat <- function(arm, m, f) sapply(seq_len(rrs_cfg[["n_cycles"]]), function(i)
   f(vapply(arms, function(a) a[[arm]][[m]][i + 1], numeric(1))))
 cyc  <- seq_len(rrs_cfg[["n_cycles"]])
-cols <- c(A = "#1b6ca8", B = "#c0392b")
+cols <- c(A = "#1f5f8b", B = "#c0392b")
 panel <- function(mA, mB, ylab, main, legend_pos) {
   st <- lapply(c(sel = "sel", ctl = "ctl"), function(arm)
     list(A = arm_stat(arm, mA, mean), B = arm_stat(arm, mB, mean),

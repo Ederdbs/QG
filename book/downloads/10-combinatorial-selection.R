@@ -37,6 +37,12 @@ fmt <- function(x, digits = 4) {
   } else round(x, digits)
 }
 
+# One palette for every live figure: the two heterotic pools get fixed colours
+# (A blue, B amber, a colour-blind-safe pair); red marks the constraint or the
+# loss; greys carry everything else. Chapters pass these instead of hex codes.
+book_pal <- c(A = "#1f5f8b", B = "#d98e04", loss = "#b2182b",
+              ink = "#14202b", mid = "grey45", light = "grey85")
+
 # Cached artefacts (expensive sweeps) are fetched from the repository on first use.
 .book_get <- function(dir, ...) {
   f <- file.path(dir, ...)
@@ -336,13 +342,14 @@ c(index_spread = diff(range(ctx$index)),
 ## -----------------------------------------------------------------------------
 #| label: greedy-frontier
 #| fig-cap: "The greedy frontier. w = 0 is maximum diversity; large w converges to truncation. The useful range of w spans roughly 1e-5 to 1e-2 on this dataset, the same window the prose and the sweep table below quote: below it the sweep returns the maximum-diversity plan, above it the truncation plan, and every row outside the window is a duplicate of one of those two."
+#| fig-alt: "The greedy frontier"
 ws <- c(0, 10^seq(-5, 1, length.out = 19))
 gf <- do.call(rbind, lapply(ws, function(w) {
   s <- sel_greedy(ctx, n_sel, w = w)
   data.frame(w = w, alpha = alpha_loss(s, ctx, null$gd_ref),
              index = mean_index(s, ctx))
 }))
-plot(gf$alpha * 100, gf$index, type = "b", pch = 19, col = "#2166ac",
+plot(gf$alpha * 100, gf$index, type = "b", pch = 19, col = "#1f5f8b",
      xlab = "gene diversity loss, alpha (%)", ylab = "mean index (s.d.)")
 points(alpha_loss(sels$truncation, ctx, null$gd_ref) * 100,
        mean_index(sels$truncation, ctx), pch = 4, cex = 1.5, col = "#b2182b")
@@ -619,6 +626,7 @@ fmt(c(index      = mean_index(de_idx, ctx),
 ## -----------------------------------------------------------------------------
 #| label: warm-start
 #| fig-cap: "With and without a greedy warm start, at identical evaluation budget, at book scale. The cold start finishes below the best feasible greedy solution; the warm start finishes above the cold start but does not overtake greedy at this budget."
+#| fig-alt: "With and without a greedy warm start, at identical evaluation budget, at book scale"
 budget <- list(NP = 120, itermax = 250)
 set.seed(21)
 cold <- suppressWarnings(
@@ -635,7 +643,7 @@ feasible_greedy <- {
 res <- c(`cold DE` = mean_index(cold, ctx),
          `best feasible greedy` = mean_index(feasible_greedy, ctx),
          `warm DE` = mean_index(de_idx, ctx))
-bp <- barplot(res, col = c("grey70", "#2166ac", "#b2182b"), ylab = "mean index (s.d.)",
+bp <- barplot(res, col = c("grey70", "#1f5f8b", "#b2182b"), ylab = "mean index (s.d.)",
               ylim = c(0, max(res) * 1.2))
 text(bp, res, sprintf("%.3f", res), pos = 3, cex = 0.8)
 
@@ -805,6 +813,7 @@ attr(bound, "converged")
 ## -----------------------------------------------------------------------------
 #| label: full-frontier
 #| fig-cap: "Everything together. The constrained DE, the greedy sweep, and the continuous OCS relaxation -- which is a relaxation, not a bound at matched diversity (@sec-bound)."
+#| fig-alt: "Everything together"
 alphas <- c(0, 0.0025, 0.005, 0.01, 0.02)
 set.seed(45)
 front <- do.call(rbind, lapply(alphas, function(a) {
@@ -817,12 +826,12 @@ plot(front$alpha * 100, front$index, type = "b", pch = 19, lwd = 2, col = "#b218
      xlab = "gene diversity loss, alpha (%)", ylab = "mean index (s.d.)",
      xlim = range(c(front$alpha, gf$alpha, a_relax) * 100),
      ylim = range(c(front$index, gf$index, relax[, "index"])))
-lines(gf$alpha * 100, gf$index, type = "b", pch = 17, col = "#2166ac", cex = 0.7)
+lines(gf$alpha * 100, gf$index, type = "b", pch = 17, col = "#1f5f8b", cex = 0.7)
 lines(sort(a_relax) * 100, relax[order(a_relax), "index"], type = "b", pch = 1,
       lty = 2, col = "grey55", cex = 0.7)
 abline(v = 0, lty = 3)
 legend("bottomright", c("constrained DE", "greedy sweep", "continuous OCS relaxation"),
-       col = c("#b2182b", "#2166ac", "grey55"), pch = c(19, 17, 1),
+       col = c("#b2182b", "#1f5f8b", "grey55"), pch = c(19, 17, 1),
        lty = c(1, 1, 2), lwd = c(2, 1, 1), bty = "n", cex = 0.8)
 grid()
 

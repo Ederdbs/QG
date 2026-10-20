@@ -37,6 +37,12 @@ fmt <- function(x, digits = 4) {
   } else round(x, digits)
 }
 
+# One palette for every live figure: the two heterotic pools get fixed colours
+# (A blue, B amber, a colour-blind-safe pair); red marks the constraint or the
+# loss; greys carry everything else. Chapters pass these instead of hex codes.
+book_pal <- c(A = "#1f5f8b", B = "#d98e04", loss = "#b2182b",
+              ink = "#14202b", mid = "grey45", light = "grey85")
+
 # Cached artefacts (expensive sweeps) are fetched from the repository on first use.
 .book_get <- function(dir, ...) {
   f <- file.path(dir, ...)
@@ -77,6 +83,7 @@ library(AlphaSimR)
 #| fig-width: 9.5
 #| fig-height: 3.6
 #| fig-cap: "The staged inbred-line programme. Entries fall by roughly an order of magnitude at each stage while replication -- the number of locations each entry is scored in -- rises. Parents for the next cycle are recycled from the late trials (solid) or, under genomic selection, from the preliminary trial as well (dashed)."
+#| fig-alt: "The staged inbred-line programme"
 op <- par(mar = c(0, 0, 0, 0)); plot.new(); plot.window(c(0, 100), c(0, 40))
 box_ <- function(x, y, w, h, lab, fill, cex = 0.66) {
   rect(x, y, x + w, y + h, col = fill, border = "grey40")
@@ -95,12 +102,12 @@ for (x in c(13, 26.5, 40, 53.5, 67, 80.5, 92.5)) arr(x, 21.5, x + 1.4, 21.5)
 
 arr(88, 16, 88, 6, lty = 1, col = "#b2182b"); arr(88, 6, 8, 6, lty = 1, col = "#b2182b")
 arr(7, 6, 7, 16, lty = 1, col = "#b2182b")
-arr(61, 16, 61, 10.5, lty = 2, col = "#1b6ca8")
-arr(61, 10.5, 9, 10.5, lty = 2, col = "#1b6ca8")
+arr(61, 16, 61, 10.5, lty = 2, col = "#1f5f8b")
+arr(61, 10.5, 9, 10.5, lty = 2, col = "#1f5f8b")
 text(46, 4, "recycle parents from EYT + AYT (phenotypic selection)",
      cex = 0.6, col = "#b2182b")
 text(36, 12.4, "genomic selection also recycles from PYT -- one year sooner",
-     cex = 0.6, col = "#1b6ca8")
+     cex = 0.6, col = "#1f5f8b")
 text(50, 31, "entries fall, replication rises", cex = 0.72, col = "grey25")
 arr(30, 29, 78, 29, col = "grey55")
 par(op)
@@ -348,6 +355,7 @@ fmt(rbind(`gain per year`      = paired(reps$gain_ps, reps$gain_gs),
 #| fig-width: 9
 #| fig-height: 4.2
 #| fig-cap: "Twenty-four paired runs, genomic selection switched on in year 6. Left: genetic mean of the preliminary yield trial. Right: gene diversity of the same population. The faster programme is also the one spending diversity faster."
+#| fig-alt: "Twenty-four paired runs, genomic selection switched on in year 6. Left: genetic mean of the preliminary yield trial"
 traj <- lapply(seeds, function(s)
   list(ps = run_programme(sch, s, FALSE), gs = run_programme(sch, s, TRUE, gs_from = 6)))
 avg <- function(arm, col) rowMeans(sapply(traj, function(t) t[[arm]][[col]]))

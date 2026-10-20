@@ -278,6 +278,20 @@ sparse_target_map <- function(nF, nM, nLoc, pix) {
   K
 }
 
+# Henderson's coefficient matrix for the stacked design W = [X, Z_f, ..., Z_ml]:
+# W'W plus G^-1 * (s2res / s2) on each random block. Shared by sparse_blup()
+# and joint_pev(), which needs it before any phenotype exists.
+sparse_coef <- function(W, d, vc) {
+  C <- crossprod(W)
+  off <- ncol(d$X)
+  for (t in d$terms) {
+    ix <- off + seq_len(ncol(t$Z))
+    C[ix, ix] <- C[ix, ix] + solve(t$G) * (vc$s2res / t$s2)
+    off <- off + ncol(t$Z)
+  }
+  C
+}
+
 #' BLUP of hybrid values from a sparse trial, with known components
 #'
 #' Solves Henderson's mixed-model equations for
@@ -302,14 +316,8 @@ sparse_target_map <- function(nF, nM, nLoc, pix) {
 sparse_blup <- function(pheno, nF, nM, nLoc, vc, Af = diag(nF), Am = diag(nM)) {
   d <- sparse_terms(pheno, nF, nM, nLoc, vc, Af, Am)
   W <- cbind(d$X, do.call(cbind, lapply(d$terms, `[[`, "Z")))
-  C <- crossprod(W)
-  nb <- ncol(d$X); off <- nb
-  for (t in d$terms) {
-    ix <- off + seq_len(ncol(t$Z))
-    C[ix, ix] <- C[ix, ix] + solve(t$G) * (vc$s2res / t$s2)
-    off <- off + ncol(t$Z)
-  }
-  R <- chol(C)
+  nb <- ncol(d$X)
+  R <- chol(sparse_coef(W, d, vc))
   sol <- backsolve(R, backsolve(R, crossprod(W, pheno$y), transpose = TRUE))
   u <- sol[-seq_len(nb)]
   K <- sparse_target_map(nF, nM, nLoc, d$pix)

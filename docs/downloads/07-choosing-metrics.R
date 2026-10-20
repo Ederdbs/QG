@@ -37,6 +37,12 @@ fmt <- function(x, digits = 4) {
   } else round(x, digits)
 }
 
+# One palette for every live figure: the two heterotic pools get fixed colours
+# (A blue, B amber, a colour-blind-safe pair); red marks the constraint or the
+# loss; greys carry everything else. Chapters pass these instead of hex codes.
+book_pal <- c(A = "#1f5f8b", B = "#d98e04", loss = "#b2182b",
+              ink = "#14202b", mid = "grey45", light = "grey85")
+
 # Cached artefacts (expensive sweeps) are fetched from the repository on first use.
 .book_get <- function(dir, ...) {
   f <- file.path(dir, ...)
@@ -192,6 +198,7 @@ c(after_swap_incremental = st2$theta,
 ## -----------------------------------------------------------------------------
 #| echo: false
 #| fig-cap: "Cost per fitness evaluation. Panel A: scaling in the number of candidate hybrids. Panel B: hours to complete one million evaluations at production scale."
+#| fig-alt: "Cost per fitness evaluation"
 knitr::include_graphics(book_fig("cost_scaling.png"))
 
 #' 
@@ -236,6 +243,7 @@ fmt(cost_per_eval(ctx, n_sel = 60, reps = 40), 1)
 ## -----------------------------------------------------------------------------
 #| echo: false
 #| fig-cap: "Metric redundancy. A: Spearman correlations. B: PCA of rank-transformed metrics. C: the discriminating case, inside a narrow coancestry band."
+#| fig-alt: "Metric redundancy"
 knitr::include_graphics(book_fig("metric_redundancy.png"))
 
 #' 
@@ -265,6 +273,7 @@ knitr::include_graphics(book_fig("metric_redundancy.png"))
 #' 
 ## -----------------------------------------------------------------------------
 #| fig-cap: "At fixed theta, the effective number of parents still varies by a factor of two. The constraint cannot see the difference; the second metric can."
+#| fig-alt: "At fixed theta, the effective number of parents still varies by a factor of two"
 set.seed(77)
 grid <- do.call(rbind, lapply(seq(0, 4, length.out = 30), function(w) {
   s <- sel_greedy(ctx, 60, w = w)
@@ -314,6 +323,7 @@ c(n_in_band = nrow(band),
 ## -----------------------------------------------------------------------------
 #| echo: false
 #| fig-cap: "Differential evolution under four simultaneous restrictions at equal evaluation budget."
+#| fig-alt: "Differential evolution under four simultaneous restrictions at equal evaluation budget"
 knitr::include_graphics(book_fig("de_convergence.png"))
 
 #' 

@@ -37,6 +37,12 @@ fmt <- function(x, digits = 4) {
   } else round(x, digits)
 }
 
+# One palette for every live figure: the two heterotic pools get fixed colours
+# (A blue, B amber, a colour-blind-safe pair); red marks the constraint or the
+# loss; greys carry everything else. Chapters pass these instead of hex codes.
+book_pal <- c(A = "#1f5f8b", B = "#d98e04", loss = "#b2182b",
+              ink = "#14202b", mid = "grey45", light = "grey85")
+
 # Cached artefacts (expensive sweeps) are fetched from the repository on first use.
 .book_get <- function(dir, ...) {
   f <- file.path(dir, ...)
@@ -86,6 +92,7 @@ at    <- function(b, k) ag$index[ag$budget == b & ag$cycle == k]
 #| fig-width: 9
 #| fig-height: 4.2
 #| fig-cap: "One cycle. Hybrids are evaluated across the pool boundary; lines are recycled inside it. The usage weights are the only channel between the two, and they are what `line_weights()` returns."
+#| fig-alt: "One cycle"
 op <- par(mar = c(0, 0, 0, 0)); plot.new(); plot.window(c(0, 100), c(0, 46))
 box_ <- function(x, y, w, h, lab, fill, cex = 0.72) {
   rect(x, y, x + w, y + h, col = fill, border = "grey40")
@@ -197,6 +204,7 @@ c(frozen_p0   = drift(X5, p0),
 ## -----------------------------------------------------------------------------
 #| echo: false
 #| fig-cap: "Mean index of the selected hybrids, in founding-cycle standard deviations, averaged over five seeds. The unconstrained programme leads for eight cycles and then stops climbing. Neither constrained programme has stopped by cycle 15."
+#| fig-alt: "Mean index of the selected hybrids, in founding-cycle standard deviations, averaged over five seeds"
 knitr::include_graphics(book_fig("cycles_gain.png"))
 
 #' 
@@ -224,6 +232,7 @@ knitr::kable(
 ## -----------------------------------------------------------------------------
 #| echo: false
 #| fig-cap: "Left: gene diversity of the selection. Right: F_drift against the frozen founding base. The unconstrained programme spends nearly its whole diversity endowment by cycle 8 and has little left to convert afterwards."
+#| fig-alt: "Left: gene diversity of the selection"
 knitr::include_graphics(book_fig("cycles_diversity.png"))
 
 #' 
