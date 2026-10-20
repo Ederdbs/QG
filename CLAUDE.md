@@ -25,7 +25,7 @@ Rscript book/scripts/regenerate.R search       # advanced-selection benchmark (~
 Rscript book/scripts/regenerate.R search_exact # just the exact oracle (slowest piece)
 Rscript book/scripts/regenerate.R mating       # mating-design core sweep (~6 min)
 Rscript book/scripts/regenerate.R sparse       # sparse-testing core sweep (~5 min)
-Rscript book/scripts/regenerate.R joint        # crosses x locations sweep (~15 min)
+Rscript book/scripts/regenerate.R joint        # crosses x locations paired sweep (~30 min CPU)
 Rscript inst/scripts/render_book.R  # the book, HTML + Typst PDF -> docs/ (preferred)
 quarto render book --to html        # HTML only, while iterating
 ```
@@ -143,7 +143,7 @@ need to change — everything else operates on `ctx`/`X`/`f`/`hybrids` and is ag
 | `R/15_response.R` | the objective side: `genic_var()`, `index_smith_hazel()`, `index_restricted()` |
 | `R/16_mating_design.R` | mating designs: `design_*()` generators, `design_diagnostics()` (rank = n' - components), `fit_gca()` LS/BLUP with known components, `cross_cost()` (placeholder levels) |
 | `R/17_sparse_testing.R` | sparse testing: `sparse_alloc()` (complete/random/parentage), `sparse_connectivity()`, `sparse_simulate()`, `sparse_blup()` (dense MME, known components; oracle `ref_sparse_blup()`) |
-| `R/18_joint_allocation.R` | joint allocation: `joint_alloc()` (a crossing plan times locations, random/coverage/PEV-optimised), `joint_pev()` (mean GCA PEV before planting), `joint_connectivity()` (female x male x location components). Builds the R/17 matrix with zero rows for unmade crosses |
+| `R/18_joint_allocation.R` | joint allocation: `joint_alloc()` (a crossing plan times locations, random/coverage/PEV-optimised), `joint_pev()` (mean GCA PEV before planting), `joint_connectivity()` (`n_comp_cross`, female x male components of the planted crosses, and `n_comp_loc`, locations linked by shared parents -- a single female x male x location graph is wrong, a shared location links only sums of GCA). Builds the R/17 matrix with zero rows for unmade crosses |
 | `inst/scripts/` | `run_all.R`, `run_benchmark.R`, `run_mabc.R`, `run_alphasimr.R`, `render_book.R` — the CLI entry points at production scale |
 | `book/` | the Quarto book (see below) |
 | `reference/` | the source documents the book was built from; provenance only, see `reference/README.md` |
@@ -160,8 +160,10 @@ is the only source of truth for the order. A suffixed number (`02b`, `04b`, `04c
 renumbering the whole book would break every `docs/` URL, which GitHub Pages serves directly.
 The Simulation part is the largest at five chapters (`03`, `04`, `04b`, `04c`, `04d`).
 The Mating and testing design part holds `04e` (which crosses), `04f` (which locations;
-`R/17_sparse_testing.R`) and `04g` (both at once; `R/18_joint_allocation.R`, whose only
-data, `book/data/joint_core_sweep.csv`, IS regenerated in-repo by `regenerate.R joint`). The `04e` headline sweep is cached from an external
+`R/17_sparse_testing.R`) and `04g` (both at once; `R/18_joint_allocation.R`). Unlike its two
+neighbours `04g` has no cached external study: all three of its data files,
+`book/data/joint_core_sweep.csv`, `joint_contrasts.csv` and `joint_optimiser.csv`, ARE
+regenerated in-repo by `regenerate.R joint`. The `04e` headline sweep is cached from an external
 study (`sparsex`, AlphaSimR + sommer) that is not in the repo -- `book/data/mating_*.csv` and
 `book/figs/mating_*.png` cannot be regenerated here. `regenerate.R mating` re-runs only its
 phenotypic core (`mating_core_sweep.csv`) with `R/16_mating_design.R`. Do not present the
