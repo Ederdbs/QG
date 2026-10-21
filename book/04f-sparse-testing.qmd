@@ -26,9 +26,11 @@ strat_col <- c(complete = "grey35", random = "#d95f02",
 A hybrid programme's first field stage concentrates most of its selection
 pressure where it has the least information. It typically has thousands of
 testcrosses, seed for one or two plots of each, a handful of locations, and
-almost no replication. The previous chapter (@sec-mating) asked **which crosses**
-to make from two pools. This one asks the next question: given the crosses,
-**which locations should each one be planted in?**
+almost no replication. @sec-mating settled **which crosses** to make from two
+pools -- a connected sparse factorial, analysed by BLUP -- but held the field
+fixed and folded genotype x location into plot error. This chapter takes the
+crosses as given and asks the next question: **which locations should each one
+be planted in?**
 
 *Sparse testing* is the answer the literature has converged on. Not every hybrid
 is grown at every location. Different subsets go to different environments, and
@@ -44,20 +46,30 @@ across crops, including its main controversy. It then measures the question
 with a simulation that the primary literature had not run. The results it
 defends:
 
-1. **At a fixed number of plots, spreading them over more locations beats
+1. **The cutting margin is wide, and wider at higher heritability.** A sparse
+   allocation reaches within 5 % of the accuracy of the complete design at a
+   fraction of its plots; at $h^2 = 0.2$ it needs more of them.
+2. **At a fixed number of plots, spreading them over more locations beats
    concentrating them.** Spreading two plots per hybrid over ten locations
    instead of two raises accuracy by 0.06 to 0.09, with no extra plots.
-2. **The choice among sparse layouts matters little, except at extreme
+3. **The choice among sparse layouts matters little, except at extreme
    sparsity.** At that point, a layout that puts *both pools in every location*
    helps the hybrids that were never tested.
-3. **What connects a sparse trial is parent coverage, not shared hybrids.** With
+4. **What connects a sparse trial is parent coverage, not shared hybrids.** With
    a relationship matrix in the model, the best layouts share *no* hybrid
    between some location pairs. This suggests one way to reconcile the
    contradictory published advice on overlap between environments.
-4. **Prediction survives sparsity better than estimation.** The BLUP stays
-   undispersed down to one location per hybrid. Variance components stop being
-   reportable earlier, and the SCA variance is biased upward even in the
-   complete design.
+5. **Prediction survives sparsity better than estimation.** Where REML
+   converged, the BLUP showed no systematic dispersion bias, and with known
+   components it stayed undispersed down to one location per hybrid. Variance
+   components stop being reportable earlier: at one location per hybrid REML
+   rarely converges, and the SCA variance is biased upward even in the complete
+   design.
+6. **In two stages, test every candidate sparsely rather than a subset
+   densely.** At a fixed budget, covering all candidates in stage 1 gave the
+   larger realised gain.
+
+The numbering is that of @sec-sparse-results, which the rest of the book cites.
 
 ::: {.callout-note}
 ## Where the numbers come from
@@ -136,13 +148,15 @@ par(op)
 The gain per unit time,
 
 $$
-\Delta G_t = \frac{i \, r \, \sigma_A}{t},
+\Delta G_t = \frac{i \, \rho \, \sigma_A}{t},
 $$
 
-has four terms. A trial design moves at least three of them together:
+has four terms. $\rho$ is the accuracy of the selection criterion -- the $r$ of
+@sec-response; this Part keeps $r$ for plots,
+as @sec-mating does. A trial design moves at least three of them together:
 
 - **intensity $i$**, through the number of candidates;
-- **accuracy $r$**, through plots, locations, and how well the locations sample
+- **accuracy $\rho$**, through plots, locations, and how well the locations sample
   the target population of environments (TPE);
 - **cycle length $t$**, when parents can be recycled from stage 1.
 
@@ -158,8 +172,8 @@ to whichever term limits that programme [@werner2025trends;
 | Term | Design decision that moves it |
 |---|---|
 | $i$ (intensity) | number of candidates tested at a fixed plot budget |
-| $r$ (accuracy) | plots per candidate, locations per candidate, use of a relationship matrix |
-| $r$ (relevance) | how well the chosen locations sample the TPE |
+| $\rho$ (accuracy) | plots per candidate, locations per candidate, use of a relationship matrix |
+| $\rho$ (relevance) | how well the chosen locations sample the TPE |
 | $\sigma_A$ | indirectly: which parents are recycled, and how related they are (@sec-ocs) |
 | $t$ | whether stage-1 GCA predictions are good enough to recycle parents immediately |
 :::
@@ -168,7 +182,8 @@ to whichever term limits that programme [@werner2025trends;
 
 ### The hybrid model: GCA, SCA, and what sparsity threatens
 
-The value of the single cross between female $i$ and male $j$ splits as
+The value of the single cross between female $i$ and male $j$ -- a pool-A and
+a pool-B line in the notation of @sec-mating -- splits as
 
 $$
 g_{ij} = \mathrm{GCA}^f_i + \mathrm{GCA}^m_j + \mathrm{SCA}_{ij}
@@ -213,7 +228,11 @@ $$
 \mathrm{SCA}   \sim N(\mathbf 0, (\mathbf A_f\otimes\mathbf A_m)\sigma^2_{s})
 $$
 
-[@bernardo1994; @bernardo1996; @technow2012]. The practical point is that
+[@bernardo1994; @bernardo1996; @technow2012]. Here $\sigma^2_f$ and
+$\sigma^2_m$ are the GCA variances of the female (pool-A) and male (pool-B)
+lines, which @sec-mating writes as a single $\sigma^2_g$ within the pool being
+ranked; $\sigma^2_s$ is the SCA variance, with the same symbol as in
+@sec-mating, and is also written $\sigma^2_{SCA}$ in this chapter. The practical point is that
 **the hybrid itself never needs genotyping**: its covariance is a Kronecker
 product of the parental matrices. Replacing pedigree $\mathbf A$ by marker $\mathbf G$
 [@vanraden2008] gives the genomic version (@sec-genomic-prediction). There are
@@ -267,7 +286,10 @@ Cullis'.
 ### Definition and genealogy
 
 **Definition.** A trial is sparse when not every genotype is evaluated in every
-environment *and* the missing cells are predicted rather than discarded. The idea
+environment *and* the missing cells are predicted rather than discarded. The
+literature's *environment* is a location in a year; the simulations of this
+Part have one season, so their environments are *locations*, and the two
+words are used in those two senses. The idea
 developed in four steps:
 
 1. **Incomplete blocks and lattices.** These already accepted partial
@@ -387,6 +409,12 @@ classical validation schemes of @sec-sparse-validation. Their "CV1" is the
 full-overlap *design*. It is not the "new genotype" *validation* of
 @burgueno2012. Reading the two literatures together without noticing this
 produces wrong comparisons.
+
+A second collision is inside this book. @sec-hybrid-cv uses CV2 / CV1 / CV0 for
+hybrids with both / one / neither parent seen in training -- the T2 / T1 / T0 of
+@sec-mating-genomic. Here, as in @burgueno2012, the labels classify genotype x
+environment cells. A CV1 hybrid of this chapter, never planted but with both
+parents planted in other crosses, is a T2 hybrid in @sec-mating's terms.
 :::
 
 ## Validation schemes: what each one answers {#sec-sparse-validation}
@@ -544,7 +572,7 @@ ov <- subset(core, part == "overlap")
 fs <- sort(unique(ov$family_size))
 cols <- c("grey40", "#1b9e77", "#d95f02")[seq_along(fs)]
 op <- par(mar = c(4.2, 4.2, 3.2, 1))
-plot(NA, xlim = c(0, 1), ylim = range(ov$acc_all + c(-2, 2) * ov$acc_all_se),
+plot(NA, xlim = c(0, 1), ylim = range(ov$acc_all - 2 * ov$acc_all_se, ov$acc_all + 2 * ov$acc_all_se),
      xlab = "Overlap: fraction of each location's plots in the common core",
      ylab = "Accuracy, all hybrids")
 for (i in seq_along(fs)) {
@@ -569,18 +597,33 @@ z_ov <- sapply(ovs, function(d) {
   a <- d[d$overlap == 0, ]; b <- d[d$overlap == 1, ]
   (a$acc_all - b$acc_all) / sqrt(a$acc_all_se^2 + b$acc_all_se^2)
 })
+# Every pair of family sizes at the same overlap, in SE of the difference.
+zs_fs <- unlist(lapply(split(ov, ov$overlap), function(d) {
+  ij <- combn(nrow(d), 2)
+  abs(d$acc_all[ij[1, ]] - d$acc_all[ij[2, ]]) /
+    sqrt(d$acc_all_se[ij[1, ]]^2 + d$acc_all_se[ij[2, ]]^2)
+}))
+z_fs <- max(zs_fs)
 ```
 
 With the training size held fixed, accuracy falls as overlap rises: it is
 `r r4(min(drop_ov))` to `r r4(max(drop_ov))` lower under full overlap than under
 none, `r sprintf("%.1f", min(z_ov))` to `r sprintf("%.1f", max(z_ov))` standard
-errors of the difference depending on family size. The cause is the confound, not overlap
-as such. Every hybrid moved into the common core is one fewer distinct hybrid
+errors of the difference depending on family size. The drop is resolved for
+unrelated lines and for families of 10, and not for families of
+`r names(z_ov)[which.min(z_ov)]`
+(`r sprintf("%.1f", min(z_ov))` standard errors), whose curve has the same
+direction. The cause is the confound, not overlap as such.
+Every hybrid moved into the common core is one fewer distinct hybrid
 observed (top axis). This is the @lubanga2025 pattern, reproduced with the
 mechanism exposed.
 
 The second half of the hypothesis is **not** supported at this scale. The
-family-size curves cross, and they differ by no more than two standard errors.
+family-size curves cross, and they differ by at most
+`r sprintf("%.1f", z_fs)` standard errors at any one overlap: of the
+`r length(zs_fs)` pairs compared (every pair of family sizes at every overlap,
+with no correction for multiple comparisons), `r sum(zs_fs > 2)` exceeded two
+standard errors and `r sum(zs_fs > 3)` exceeded three.
 In hindsight the reason is structural. In a female x male factorial every line
 is already the parent of 20 hybrids, so the factorial carries much of the
 connectivity before any relationship *among lines* is added. Half-sib families
@@ -593,8 +636,11 @@ and the two effects pull in opposite directions.
 
 **What to do with this.** The right question is not "how many common
 genotypes?". It is "how much *effective* connectivity does the design have,
-counting both physical overlap and relationships?". Physical overlap and genomic
-relationships are partial substitutes [@windhausen2012]. In a hybrid factorial,
+counting both physical overlap and relationships?". The experiment above
+suggests that physical overlap and relationships between the lines of different
+environments are partial substitutes, and @atanda2022 found both the genetic
+correlation between environments and the genomic relationship of lines across
+them among the drivers of sparse-testing accuracy. In a hybrid factorial,
 shared parents already supply much of the relationship side.
 
 ## Connectivity and checks {#sec-sparse-connectivity}
@@ -604,7 +650,7 @@ common genotypes can be connected very differently, depending on *how* those
 genotypes are distributed. Hybrids add a dimension. There is female x male
 connectivity, the subject of @sec-mating-connectivity. There is genotype x
 location connectivity. And there is **female x male x location**, for which no
-metric is agreed. That is an open gap (@sec-sparse-limits). The available tools
+metric is agreed (@sec-sparse-limits); @sec-joint-criteria proposes one. The available tools
 are:
 
 - the rank of the incidence matrix;
@@ -877,7 +923,8 @@ y = \mu + \text{loc} + \mathrm{GCA}^f + \mathrm{GCA}^m + \mathrm{SCA}
 $$
 
 The target is the value in the TPE, $\mathrm{GCA}^f + \mathrm{GCA}^m +
-\mathrm{SCA}$. In every replicate, **20 % of the hybrids get no plot at all.**
+\mathrm{SCA}$. In every replicate,
+**`r pc(mean(sc$n_cv1_mean / sc$nHyb), 0)` of the hybrids get no plot at all.**
 These are the CV1 hybrids, predicted only through relationships.
 
 **The calibration** is `sparse_vc()`:
@@ -886,13 +933,19 @@ These are the CV1 hybrids, predicted only through relationships.
 - every interaction with location is half its main effect;
 - plot $h^2$ of 0.20 or 0.40.
 
+In `sparse_vc()` the components are `s2f`, `s2m`, `s2s` ($\sigma^2_{SCA}$),
+`s2fl`, `s2ml` (the two GCA x location variances), `s2sl`
+($\sigma^2_{SCA\times L}$, written $\sigma^2_{s\ell}$ in @sec-joint-model) and
+`s2e`.
+
 These choices imply a genetic correlation between locations of
 $V_G/(V_G+V_{GE}) = `r r4(2/3)`$. That sits inside the 0.36 to 0.67 measured in
 maize [@li2026] and close to the 0.60 of @werner2025. The SCA:GCA ratio of 0.25
 lies among the values in @gonzalezdieguez2026, and the two heritabilities
 bracket @werner2025's 0.10 and the 0.30 of @gonzalezdieguez2026.
 
-**The four strategies**, all at the same cost of $k$ locations per hybrid:
+**The four strategies**, all at the same cost of $k$ locations per hybrid out
+of $L$ in the trial ($k$ is not the testers per pool of @sec-mating):
 
 - *complete*;
 - *random*: each hybrid goes to $k$ locations drawn at random;
@@ -910,7 +963,7 @@ on the complete design, where REML must recover the true components
 
 ```{r}
 #| label: tbl-sparse-validation
-#| tbl-cap: "Component recovery by REML in the COMPLETE design (20 x 20 hybrids, 6 locations, 30 replicates per heritability; cached). The residual target is $\\sigma^2_{SCA\\times L} + \\sigma^2_e$, because with one plot per cell the two are confounded."
+#| tbl-cap: "Component recovery by REML in the COMPLETE design (20 x 20 hybrids, 6 locations, 30 replicates per heritability; cached). The residual target is $\\sigma^2_{SCA\\times L} + \\sigma^2_e$, because with one plot per cell the analysis model absorbs SCA x location into the residual."
 v <- val; v$component <- sub("s2", "s2_", v$component)
 knitr::kable(fmt(v[, c("h2_plot", "component", "true", "mean_est", "relbias_pct", "se_relbias_pct", "t")], 3),
              col.names = c("Plot h2", "Component", "True", "Mean estimate", "Rel. bias %", "SE %", "t"))
@@ -931,7 +984,7 @@ The grid has 2,630 fits:
 - 2, 4, 6 and 10 locations;
 - nominal sparsity from 20 % to 100 %;
 - two heritabilities;
-- 15 replicates per cell.
+- 15 replicates per cell at 400 hybrids, 9 to 15 at 100.
 
 #### 1. The cutting margin is wide, and wider at higher heritability
 
@@ -953,7 +1006,7 @@ for (i in seq_along(Ls)) {
 legend("bottomright", bty = "n", col = lc, lwd = 2, legend = paste(Ls, "locations"), cex = 0.8)
 sp <- subset(s4, k == 2 & strategy %in% c("complete", "random"))
 plot(NA, xlim = c(2, 10), ylim = range(sp$acc_all_mean), xlab = "Locations sharing the 2 plots per hybrid",
-     ylab = "Accuracy, all hybrids", main = "Same 800 plots, spread wider", cex.main = 0.9)
+     ylab = "Accuracy, all hybrids", main = sprintf("Same %.0f plots, spread wider", mean(sp$n_plots_mean)), cex.main = 0.9)
 for (h in c(0.2, 0.4)) {
   e <- sp[sp$h2_plot == h, ]; e <- e[order(e$nLoc), ]
   lines(e$nLoc, e$acc_all_mean, type = "b", pch = 19, lty = ifelse(h == 0.2, 2, 1))
@@ -975,7 +1028,7 @@ within 5 % of that** is the `r m5$strategy` design with `r m5$k` locations per
 hybrid. It uses `r round(m5$n_plots_mean)` plots, `r pc(m5$cost_rel, 0)` of the
 budget, and reaches `r r4(m5$acc_all_mean)`, which is `r pc(m5$acc_rel)` of the
 reference. Coincidence with the true top 5 % falls only from `r pc(coinc_ref, 1)`
-to `r pc(coinc_m5, 1)`. At $h^2 = 0.2$ the requirement roughly doubles to half
+to `r pc(coinc_m5, 1)`. At $h^2 = 0.2$ the requirement rises to half
 the cells. @tbl-sparse-minimal lists every scenario.
 
 ```{r}
@@ -996,18 +1049,30 @@ knitr::kable(fmt(m[, c("nHyb", "h2_plot", "sca_level", "nLoc", "within", "strate
 #| include: false
 spr <- function(h, L) subset(s4, k == 2 & nLoc == L & h2_plot == h &
                                  strategy %in% c("complete", "random"))$acc_all_mean
+# The panel's claim: one plot count and one planted fraction in every cell.
+stopifnot(length(unique(sp$n_plots_mean)) == 1L, all(sp$n_plots_se == 0),
+          length(unique(sp$conn_n_obs_hyb_mean / sp$nHyb)) == 1L,
+          isTRUE(all.equal(sp$n_plots_mean, 2 * sp$conn_n_obs_hyb_mean)),
+          length(unique(sc$n_cv1_mean / sc$nHyb)) == 1L)
 ```
 
-This is the most actionable result (@fig-sparse-frontier, right). Each hybrid
-keeps **two plots**, the cost of a complete two-location trial. At
+This is the most actionable result (@fig-sparse-frontier, right). Each planted
+hybrid keeps **two plots** (the `r pc(mean(sp$conn_n_obs_hyb_mean / sp$nHyb), 0)`
+of the factorial that is planted, so
+`r sprintf("%.0f", mean(sp$n_plots_mean))` plots in every design of the panel),
+the cost of a two-location trial of those hybrids. At
 $h^2 = 0.4$, accuracy rises from `r r4(spr(0.4, 2))` with both plots in the same
 two locations to `r r4(spr(0.4, 4))`, `r r4(spr(0.4, 6))` and
 `r r4(spr(0.4, 10))` as those plots are spread across 4, 6 and 10 locations. At
 $h^2 = 0.2$ it rises from `r r4(spr(0.2, 2))` to `r r4(spr(0.2, 10))`. Not one
-extra plot is spent. The gain saturates between six and ten locations, so the
-practical advice is to add locations up to about six before adding plots per
-hybrid. This is the replication-against-breadth trade-off of @lorenz2013,
-@atlin2022 and @werner2025, now measured for hybrids with GCA and SCA.
+extra plot is spent, and no planted hybrid gains a location: each is still in two.
+What grows is the number of environments the trial samples, and with it the
+number of locations over which each parent's crosses, and so its GCA, are
+spread. The gain saturates between six and ten locations. This slice never
+varied the locations per hybrid and never traded a location against a
+replicate, so it measures only the value of sampling more trial sites at a
+fixed number of plots -- the "broader sampling of trial sites" of
+@werner2025 -- not a trade against replication.
 
 #### 3. Among sparse designs the choice matters little, except at extreme sparsity
 
@@ -1094,7 +1159,7 @@ account of the @atanda2022 versus @lubanga2025 disagreement. Shared hybrids are
 one way to connect environments. Shared parents are another, cheaper one, and
 in a hybrid factorial the shared parents come for free.
 
-#### 5. The BLUP is not dispersed; the SCA variance is not recoverable
+#### 5. Dispersion is small where REML converges; the SCA variance is not recoverable
 
 ```{r}
 #| label: fig-sparse-estimates
@@ -1127,12 +1192,21 @@ fc <- function(k) pc(conv$frac[conv$k == k])
 s2s_k <- function(k) median(sc$relbias_s2s_mean[sc$k == k])
 ```
 
-**Prediction holds up.** Where every REML fit converged, the dispersion slope
-stays within `r paste(r4(b1r(subset(sc, frac_conv == 1))), collapse = " to ")`
-across the grid. With $k \ge 4$ it stays within
-`r paste(r4(b1r(subset(sc, k >= 4))), collapse = " to ")`. Sparsity costs
-accuracy but adds **no dispersion bias**, as long as the components are
-estimable. The GCA variance, the GCA x location variance and plot $h^2$ have
+**Prediction holds up where the components are estimable.** In the scenarios
+where every REML fit converged -- all with $k \ge 2$ -- the dispersion slope
+lies between `r paste(r4(b1r(subset(sc, frac_conv == 1))), collapse = " and ")`,
+on both sides of 1 (median
+`r r4(median(subset(sc, frac_conv == 1)$bias_all_mean))`). With $k \ge 4$ it
+lies between `r paste(r4(b1r(subset(sc, k >= 4))), collapse = " and ")`. At
+$k = 1$ no scenario had every fit converge; the median slope there is
+`r r4(median(sc$bias_all_mean[sc$k == 1]))`, with outliers far from 1
+(@fig-sparse-estimates, right). Sparsity therefore costs accuracy without a
+*systematic* dispersion bias at $k \ge 2$, with individual scenarios off by up
+to `r sprintf("%.0f", 100 * max(abs(b1r(subset(sc, frac_conv == 1)) - 1)))` %;
+at $k = 1$ the REML evidence does not settle the question, and
+the known-component sweep of @sec-sparse-reproduce, whose slopes sit near 1 at
+$k = 1$, shows only that the estimator is undispersed when the components are
+right. The GCA variance, the GCA x location variance and plot $h^2$ have
 median biases near zero at every $k$.
 
 **$\sigma^2_{SCA}$ is the exception.** Its median relative bias is
@@ -1218,9 +1292,14 @@ the top 10 to 20 %.
 
 The simulation has six limitations.
 
-1. **One plot per cell.** $\sigma^2_{SCA\times L}$ is confounded with plot error,
-   and the residual estimates their sum. Within-location replication was not
-   simulated.
+1. **One plot per cell.** SCA x location then has the same incidence as plot
+   error, and the analysis model absorbs it into an i.i.d. residual that
+   estimates $\sigma^2_{SCA\times L} + \sigma^2_e$. Equal incidence alone does
+   not make the two inseparable: drawn with the kernel
+   $\mathbf A_f \otimes \mathbf A_m$, as `sparse_simulate()` draws it, SCA x
+   location is correlated between related crosses in one location and could be
+   carried as a structured term; @sec-joint-model measures what that buys in
+   one configuration. Within-location replication was not simulated.
 2. **G x E is full-rank and symmetric in the fast layer, and rank one in the
    genomic layer.** Neither layer has the factor-analytic structure of real
    trials or a crossover/non-crossover split [@burgueno2012; @werner2025].
@@ -1231,7 +1310,7 @@ The simulation has six limitations.
    adding plots to an existing one. The advice to spread plots assumes the
    marginal location is moderately priced (@sec-mating-cost has the cost
    structure).
-5. **The grid is reduced.** It has 15 replicates, no 200-hybrid level, and the
+5. **The grid is reduced.** It has at most 15 replicates per cell, no 200-hybrid level, and the
    high-SCA block run separately. The two-stage layer has 4 replicates and the
    genomic layer 8.
 6. **Components are checked by mean bias only.** No per-replicate confidence
@@ -1241,8 +1320,8 @@ The simulation has six limitations.
 
 **Stage 1 (first agronomic testcross trial).**
 
-- Give priority to the number of candidates and the number of locations over
-  replication. Keep the plots per hybrid fixed and widen the locations, up to
+- Give priority to the number of candidates and the number of locations in the
+  trial. At fixed plots per hybrid, spread them over more locations, up to
   about six (result 2).
 - Use 3 to 5 testers in sparse testcrossing, with full-sibs spread across
   testers.
@@ -1321,7 +1400,8 @@ As a research agenda, the open gaps are these.
   chapter's simulation shows the variance component is not recoverable at stage
   1. The accuracy of specific unseen crosses is still unmeasured.
 - **A three-dimensional connectivity metric**, female x male x location. It
-  would join @sec-mating-connectivity to Box 4. @sec-joint defines one.
+  would join @sec-mating-connectivity to Box 4. @sec-joint-criteria defines a
+  pair of counts for it.
 - **The long-run effect on pool divergence and within-pool variance**, in
   interaction with optimum contribution selection (@sec-cycles; @sec-ocs;
   @santantonio2020hoc).
@@ -1377,8 +1457,11 @@ knitr::kable(fmt(cr[, c("h2_plot", "nLoc", "k", "strategy", "acc_all", "cached",
 dk <- tapply(cr$acc_all - cr$cached, cr$k, mean, na.rm = TRUE)
 ```
 
-At $k = 2$ the two sources agree within sampling error. The mean difference is
-`r sprintf("%+.3f", dk[["2"]])`, and the gain from spreading the same plots over
+At $k = 2$ the mean difference is `r sprintf("%+.3f", dk[["2"]])`, and
+`r sum(abs(cr$z[cr$k == 2]) > 2, na.rm = TRUE)` of the
+`r sum(!is.na(cr$z[cr$k == 2]))` cells
+`r if (sum(abs(cr$z[cr$k == 2]) > 2, na.rm = TRUE) == 1) "differs" else "differ"` by more than two standard errors
+(the largest, `r sprintf("%.1f", max(abs(cr$z[cr$k == 2]), na.rm = TRUE))`); the gain from spreading the same plots over
 more locations reproduces. At $k = 1$ the known-component values are higher by
 `r sprintf("%+.3f", dk[["1"]])` on average. That is the cost of estimating the
 components where REML mostly fails to converge (result 5). The in-repo dispersion
@@ -1402,8 +1485,13 @@ configuration, not as constants.
 ## Where this connects {#sec-sparse-connects}
 
 - @sec-mating chose *which crosses* to make. This chapter chose *where to plant
-  them*. The joint problem, sparse in crosses and in environments at once, is
-  @sec-mating-open's second gap, and @sec-joint treats it.
+  them*, mostly with the whole factorial taken as given. Result 6 traded
+  locations per candidate against a smaller stage-1 factorial at equal plots;
+  what it leaves is the version in which every line stays in the data and the
+  unmade crosses are predicted, so that an extra location per hybrid costs a
+  cross rather than a parent. Result 2 never varied the locations per hybrid;
+  it held two plots per hybrid and widened the trial. The joint problem,
+  @sec-mating-open's second gap, is @sec-joint.
 - The GCA/SCA decomposition and the tester-frequency argument behind Box 5 are
   derived in @sec-heterosis-gca-sca.
 - The relationship matrices that make sparse designs analysable are those of

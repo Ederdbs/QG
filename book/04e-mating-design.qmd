@@ -8,6 +8,23 @@ front <- read.csv(book_data("mating_optimizer_frontier.csv"))
 val   <- read.csv(book_data("mating_validation.csv"))
 core  <- read.csv(book_data("mating_core_sweep.csv"))
 bl    <- subset(sm, model == "BLUP")
+# Rank of a design on all-lines GCA accuracy at 2,000 plots under one model.
+rk <- function(model, s) {
+  d <- sm[sm$model == model & sm$budget_plots == 2000, ]
+  rank(-d$acc_gca_all)[d$scenario == s]
+}
+# Result 2's wording: c = 3 in the top third, c = 2 in the middle third.
+local({
+  n <- sum(sm$model == "BLUP" & sm$budget_plots == 2000)
+  stopifnot(rk("BLUP", "circulant c=3") <= n / 3,
+            rk("BLUP", "circulant c=2") > n / 3, rk("BLUP", "circulant c=2") <= 2 * n / 3)
+})
+# Designs in which GBLUP beat phenotypic BLUP on all-lines GCA accuracy, per budget.
+g_wins <- sapply(split(sm, sm$budget_plots), function(d) {
+  x <- merge(d[d$model == "GBLUP", c("scenario", "acc_gca_all")],
+             d[d$model == "BLUP", c("scenario", "acc_gca_all")], by = "scenario")
+  c(wins = sum(x[[2]] > x[[3]]), designs = nrow(x))
+})
 # True variance components of the cached run's complete 200 x 200 factorial,
 # and the plot error implied by a single-plot heritability of 0.3.
 vc  <- list(A = 8.185, B = 7.158, S = 2.899)
@@ -35,12 +52,16 @@ results:
    budget studied, by 0.08 to 0.13 correlation points.
 2. **The analysis matters more than the design.** Analysed by least squares, the
    sparsest factorials are the worst designs in the study; analysed by BLUP, they
-   are among the best. The penalty for the wrong estimator is the largest single
+   climb out of the bottom, $c = 3$ into the top third and $c = 2$ to mid-table
+   (at 2,000 plots, circulant $c = 3$ moves from rank
+   `r rk("LS", "circulant c=3")` to rank `r rk("BLUP", "circulant c=3")` of
+   `r sum(sm$model == "BLUP" & sm$budget_plots == 2000)` designs, $c = 2$ from
+   `r rk("LS", "circulant c=2")` to `r rk("BLUP", "circulant c=2")`). The penalty for the wrong estimator is the largest single
    effect measured.
 3. **Genomic information buys inference about lines that were never crossed, not
    better estimates for lines that were.** Where every candidate is in the field,
    genomic kernels did not raise GCA accuracy; where only a quarter of them were,
-   they did.
+   chosen by CDmean, they did.
 
 The running example throughout is one simulated maize programme: two heterotic
 pools, 200 doubled-haploid candidates per pool, a field of 1,000 to 3,000 hybrid
@@ -143,8 +164,12 @@ At the level of a cross mean, the two-pool model is
 $$\bar y_{ij} = \mu + g^A_i + g^B_j + s_{ij} + \bar e_{ij},
   \qquad \mathrm{Var}(\bar e_{ij}) = \sigma^2_e / r_{ij},$$
 
-with $g^A$, $g^B$ the GCA of the pool-A and pool-B parent, $s_{ij}$ the SCA of
-the pair, and $r_{ij}$ the plots the cross received. @sec-heterosis-gca-sca derived
+with $g^A$, $g^B$ the GCA of the pool-A and pool-B parent (variance
+$\sigma^2_g$ within the pool whose lines are being ranked), $s_{ij}$ the SCA of
+the pair (variance $\sigma^2_s$), $\sigma^2_e$ the plot error, and $r_{ij}$ the
+plots the cross received; $n_A$ and $n_B$ are the candidate lines per pool, and
+$n_A'$, $n_B'$ those that receive at least one cross. In @sec-sparse and
+@sec-joint the pool-A line is the female and the pool-B line the male. @sec-heterosis-gca-sca derived
 exactly this decomposition from allele frequencies, for the heterosis part of the
 hybrid value, and showed that a pool-A line's GCA is an average effect
 *evaluated at pool B's frequencies*. With an additive effect $a_k$ added to the
@@ -152,7 +177,8 @@ dominance deviation $d_k$, the general combining ability of pool-A line $i$ is
 
 $$g^A_i = \sum_k \bigl[a_k + d_k (1 - 2p_{Bk})\bigr]\,\delta u_{ik},$$
 
-the classical structure of @stuber1966 for a cross between two populations. The
+with $\delta u_{ik} = u_{ik} - p_{Ak}$ the centred genotype (0/1) of the inbred
+line at locus $k$ and $p_{Ak}$, $p_{Bk}$ the pool frequencies: the classical structure of @stuber1966 for a cross between two populations. The
 additive part adds a term and changes nothing else, which is quick to confirm: the
 row effects of a complete factorial of genotypic values equal
 `cU %*% a` plus the `gca_A` of `heterosis_gca_sca()`, with no second
@@ -236,7 +262,7 @@ disagreement would be a bug, not a modelling choice:
 
 ```{r}
 #| label: tbl-mating-connectivity
-#| tbl-cap: "Connectivity and estimability of five designs on the 200 x 200 running example. `rank_gca` is the numerical rank of the GCA design matrix; `rank_expected` is the graph prediction; `df_sca` is what is left at cross-mean level to separate SCA from error."
+#| tbl-cap: "Connectivity and estimability of six designs on the 200 x 200 running example. `rank_gca` is the numerical rank of the GCA design matrix; `rank_expected` is the graph prediction; `df_sca` is what is left at cross-mean level to separate SCA from error."
 set.seed(2026)
 plans <- list("tester k=1"        = design_tester(n, n, 1),
               "tester k=2"        = design_tester(n, n, 2),
@@ -302,7 +328,7 @@ $\sigma^2_s + \sigma^2_e / r$ is identified. The cached study separated them by
 fixing $\sigma^2_e$ from the within-cross plot variance of stage 1 and estimating
 $\sigma^2_s$; an independent REML implementation (`sommer`) estimated a residual
 scale instead and put $\sigma^2_s$ at zero, and the two agreed on the **sum** to
-`r format(abs(val$rel_error[29]), digits = 1)` relative error. A reported
+`r format(abs(val$rel_error[grepl("^V6", val$check) & grepl("residual", val$quantity)]), digits = 1)` relative error. A reported
 $\sigma^2_{SCA}$ from cross means is only as good as the external plot-error
 estimate it was separated with. `fit_gca()` in this package sidesteps the question
 by taking the components as known, and weights each cross mean by
@@ -410,8 +436,9 @@ Three limitations recur, and the simulation adds numbers to two of them.
 **No SCA in the reference population.** With $k = 1$ the GCA model is saturated
 and $\sigma^2_{SCA}$ is not identifiable at all (`df_sca` = 0 in
 @tbl-mating-connectivity). With $k \ge 2$ it is identified, but the cached REML
-estimates of the SCA:GCA ratio were inflated by +14.8 % at $k = 2$ and +12.8 % at
-$k = 4$, against +0.3 % for a circulant factorial with three crosses per line. A
+estimates of the SCA:GCA ratio at 2,000 plots were inflated by +14.8 % at $k = 2$
+and +12.8 % at $k = 4$, against +0.3 % for a circulant factorial with three
+crosses per line. A
 tester design estimates SCA *with the testers*, not in the population of crosses
 the programme will sell.
 
@@ -579,10 +606,12 @@ mc <- data.frame(c = mc$x_axis, circulant = mc$acc_gca_all_circ,
 fmt(mc, 3)
 ```
 
-Result. The circulant layout is ahead at every $c$, and the gap shrinks as $c$
-grows, from `r fmt(mc$difference[1], 3)` at $c = 2$ to
-`r fmt(mc$difference[4], 3)` at $c = 10$; all four gaps exceed three standard errors
-of the difference. Interpretation. This is what @tbl-mating-connectivity predicts:
+Result. The circulant layout is ahead at every $c$; the gap is
+`r fmt(mc$difference[1], 3)` at $c = 2$, largest at $c = 3$
+(`r fmt(mc$difference[2], 3)`) and shrinks to `r fmt(mc$difference[4], 3)` at
+$c = 10$; all four gaps exceed three standard errors of the difference.
+
+Interpretation. This is what @tbl-mating-connectivity predicts:
 at $c = 2$ the random layout leaves lines uncrossed and splits the rest into many
 components, so its advantage is pure connectivity, and connectivity stops being
 binding once every line has enough partners. **A sparse factorial should be
@@ -594,7 +623,8 @@ SCA is weakly estimated at low $c$. The circulant design with $c = 2$ has exactl
 `r diag_tab$df_sca[4]` residual degree of freedom at cross-mean level
 (@tbl-mating-connectivity) -- enough to fit a model and not enough to estimate a
 variance component -- and the cached REML recovered the SCA:GCA ratio there with
-a +34.4 % error, the largest in the sweep. The recommendation therefore splits by
+a +34.4 % error, the largest at 2,000 plots among designs in which SCA is
+identifiable. The recommendation therefore splits by
 objective: $c = 2$ to rank lines, $c \ge 3$ before any statement about SCA
 variance.
 
@@ -606,7 +636,8 @@ managements is as low as 0.37 [@atanda2021], a line observed only in one is weak
 informative about the other. A design observing 2 % of the hybrid factorial and
 30 % of the environment cells within that observes well under 1 % of the
 information space, and the two sparsities have not been studied together for
-hybrids (@sec-mating-open).
+hybrids (@sec-mating-open). @sec-sparse takes the environment axis on its own and
+@sec-joint the two together.
 
 ## The analysis is part of the design {#sec-mating-analysis}
 
@@ -658,7 +689,7 @@ fmt(lsb, 3)
 ```
 
 Result. The penalty for least squares is
-`r fmt(lsb$advantage[1], 3)` accuracy points at circulant $c = 2$ and
+`r fmt(lsb$advantage[1], 3)` correlation points at circulant $c = 2$ and
 `r fmt(lsb$advantage[2], 3)` at $c = 3$; for the four tester designs it is
 `r fmt(min(lsb$advantage[grepl("tester", lsb$design)]), 3)` to
 `r fmt(max(lsb$advantage[grepl("tester", lsb$design)]), 3)`. Testers are robust to
@@ -721,7 +752,7 @@ lines, because the tester is always a tested parent and the candidate never is.
 These figures share a property that must be stated: they come from material with
 strong family structure, where an untested line has close relatives in the
 training set. @technow2019 found the advantage of a better training-set composition
-shrank from 0.15 accuracy points for well-connected hybrids to 0.06 for T0 under a
+shrank from 0.15 correlation points for well-connected hybrids to 0.06 for T0 under a
 divergent heterotic structure. **Published T0 accuracies are not
 programme-independent**, and the simulated counter-example below makes the point
 concrete.
@@ -744,16 +775,28 @@ gb <- data.frame(design = gb$scenario, lines_tested = gb$n_linesA_tested,
                  T0 = gb$acc_T0)
 gb <- gb[order(-gb$difference), ]
 rownames(gb) <- NULL
+gb_oth <- gb[gb$difference < 0, ]      # the designs where genomics did not gain
 fmt(head(gb, 6), 3)
 ```
 
-Result. Genomic kernels raised all-lines GCA accuracy in
+Result. At 2,000 plots genomic kernels raised all-lines GCA accuracy in
 `r sum(gb$difference > 0)` of `r nrow(gb)` designs, both of them reduced line sets of
 50 per pool chosen by CDmean (+`r fmt(gb$difference[1], 3)` and
-+`r fmt(gb$difference[2], 3)`, each beyond 3 standard errors). In every design that
-fielded all 200 candidates, the genomic model was level with or slightly below the
-phenotypic one. Genomic T0 accuracy where it is defined on more than a handful of
-lines was `r fmt(min(gb$T0[gb$lines_tested <= 100], na.rm = TRUE), 2)` to
++`r fmt(gb$difference[2], 3)`, each beyond 3 standard errors); the same two
+designs, and no others, gained at 1,000 and 3,000 plots
+(`r g_wins["wins", "1000"]` of `r g_wins["designs", "1000"]` and
+`r g_wins["wins", "3000"]` of `r g_wins["designs", "3000"]`). In every other design
+-- all 200 candidates fielded, 50 per pool drawn at random, or 100 per pool by either rule --
+the genomic model was level with or below the phenotypic one, by
+`r fmt(-max(gb_oth$difference), 3)` to `r fmt(-min(gb_oth$difference), 3)`:
+below by more than three standard errors in `r sum(gb_oth$z < -3)` of
+`r nrow(gb_oth)`, between two and three in `r sum(gb_oth$z >= -3 & gb_oth$z <= -2)`
+(`r paste(gb_oth$design[gb_oth$z >= -3 & gb_oth$z <= -2], collapse = ", ")`), which
+this chapter's three-standard-error rule does not count as resolved, and within
+two in `r sum(gb_oth$z > -2)`
+(`r paste(gb_oth$design[gb_oth$z > -2], collapse = ", ")`), unresolved at 30
+replicates. Genomic T0 accuracy, where it is defined on more
+than a handful of lines, was `r fmt(min(gb$T0[gb$lines_tested <= 100], na.rm = TRUE), 2)` to
 `r fmt(max(gb$T0[gb$lines_tested <= 100], na.rm = TRUE), 2)`; the negative value in
 the random sparse rows is computed over the few lines the random draw happened to
 leave uncrossed and means nothing.
@@ -809,9 +852,9 @@ Table: Where the simulated programme confirms, refines or contradicts the publis
 |---|---|---|
 | Sparse factorials beat testers as training sets [@seye2020; @lorenzi2022; @fritscheneto2018] | Sparse beats tester on GCA accuracy over all candidates at every budget, by 0.08 to 0.13 (@tbl-mating-h2h) | Confirms, and extends beyond the training-set role |
 | Spend on parents, $c$ = 2 to 4 [@melchinger2023] | Supported for ranking; $c = 2$ leaves 1 residual df and inflates SCA:GCA by +34 %; the optimiser picks $c$ = 3 to 5 | Refines: $c = 2$ to rank, $c \ge 3$ to estimate variances |
-| Sampling fractions of 1 to 5 % suffice [@thomsen2026; @guo2019] | 1 % gives 0.61, 1.5 % gives 0.72, 2.5 % gives 0.82 (@tbl-mating-fewest) | Confirms the order of magnitude; the fraction follows the accuracy target |
+| Small sampling fractions suffice: 1.67 % of combinations operationally [@thomsen2026]; training sets of 2 to 13 % across maize, wheat and rice [@guo2019] | 1 % gives 0.61, 1.5 % gives 0.72, 2.5 % gives 0.82 (@tbl-mating-fewest) | Confirms the order of magnitude; the fraction follows the accuracy target |
 | T0 penalty ~0.1 to 0.15 below T2 [@technow2014; @gonzalezdieguez2021] | Genomic T0 accuracy 0.10 to 0.15 *in absolute terms* | Tension: published values rest on family structure |
-| Genomic kernels improve hybrid evaluation | Gain only in 2 of 24 designs, both reduced CDmean line sets (@tbl-mating-gblup) | Refines: the gain is extrapolation and line choice |
+| Genomic kernels improve hybrid evaluation | Gain only in `r sum(gb$difference > 0)` of `r nrow(gb)` designs at 2,000 plots, both reduced CDmean line sets, and in the same two at 1,000 and 3,000 (@tbl-mating-gblup) | Refines: the gain is extrapolation and line choice |
 | Structured vs random layouts at matched $c$ not compared | Circulant ahead at every $c$, all four gaps resolved (@tbl-mating-matched-c) | Closes the gap |
 | Testers lose SCA information [@hallauer2010; @burdo2021] | $k = 1$: SCA not identifiable; $k$ = 2, 4 inflate SCA:GCA by +15 %, +13 % | Confirms and quantifies |
 | *Not in the retrieved literature* | Least squares instead of BLUP costs 0.50 at $c = 2$, under 0.01 for testers (@tbl-mating-ls-sweep) | New, and the largest effect in the study |
@@ -959,7 +1002,7 @@ node(30, 43, "2. Can the field hold c >= 2\ncrosses for every candidate?", q)
 arr(30, 52, 30, 47, "yes")
 node(78, 43, "4. Choose WHICH lines go in:\nCDmean on markers, GBLUP for the rest", a)
 arr(43, 43, 65, 43, "no")
-node(30, 30, "3. Choose c from the objective:\nc = 2 rank; c >= 3 estimate SCA; ~5 at budget", a)
+node(30, 30, "3. Choose c from the objective:\nc = 2 rank; c >= 3 estimate SCA; 3-5 at budget", a)
 arr(30, 39, 30, 34, "yes")
 node(30, 17, "Build it connected: circulant,\nnot random. Check rank = n' - components", a)
 arr(30, 26, 30, 21)
@@ -971,15 +1014,15 @@ arr(78, 13, 78, 7.8)
 par(op)
 ```
 
-1. **Can you fit a mixed model, and do you have markers?** If neither, use testers:
-   they are the only design robust to least squares (@tbl-mating-ls-sweep). Choose
-   $k$ from the curve of @fig-mating-testers.
+1. **Can you fit a mixed model?** If not, use testers: they are the only design
+   robust to least squares (@tbl-mating-ls-sweep). Choose $k$ from the curve of
+   @fig-mating-testers. Markers are not needed at this step; they enter at step 4.
 2. **How many candidates must be ranked, and can the field hold a cross for each?**
    If it can hold $c \ge 2$ crosses per candidate, prefer a connected sparse
    factorial (@tbl-mating-h2h).
 3. **Choose $c$ from the objective.** $c = 2$ ranks lines; $c \ge 3$ is required
-   before any statement about SCA variance; $c \approx 5$ is where the optimiser sits
-   at realistic budgets (@tbl-mating-frontier). Build the layout, do not sample it,
+   before any statement about SCA variance; $c$ = 3 to 5 is where the optimiser
+   sits across the budgets of @tbl-mating-frontier. Build the layout, do not sample it,
    and confirm with `design_diagnostics()` that it is one component.
 4. **Choose the line set, not just the crosses.** When the field cannot hold every
    candidate, CDmean-type selection of which lines to field is where genomic
@@ -1061,14 +1104,18 @@ gives the estimator the true components.
 **Assumptions, stated in the chapter rather than a footnote.**
 
 - **Thirty replicates per cell.** The median standard error of a cell mean was
-  about 0.004, so differences below about 0.018 accuracy points are inside the noise;
+  about 0.004, so differences below about 0.018 correlation points are inside the noise;
   every comparison quoted above clears three standard errors of the difference
   unless it says otherwise.
 - **One trait, one marker density** (1,000 markers), no epistasis, no selection
   during line development, no spatial trend, no missing plots.
 - **Genotype x location is folded into plot error.** An extra location and an extra
   replicate are treated as equivalent, which is exact under that assumption and
-  optimistic when G x L variance is large.
+  optimistic when G x L variance is large. @sec-sparse did not compare a location
+  with a replicate. With G x L in the model, its result 2 (@sec-sparse-results)
+  held two plots per hybrid fixed and found that spreading them over more trial
+  locations, 2 to 10, raised accuracy: once G x L exists, the number of
+  environments a trial samples matters, which this assumption cannot represent.
 - **Unrelated candidate panel.** The DH lines come from two pools diverged for 100
   generations, with no family structure, which is why genomic T0 accuracy is low.
 - **Placeholder costs.** Every level in `cross_cost_par()`.
@@ -1078,10 +1125,16 @@ gives the estimator the true components.
 
 ## Where this connects {#sec-mating-connects}
 
+This chapter settled which crosses to make with the field held fixed: a
+connected sparse factorial, analysed by BLUP, with $c$ chosen by the objective.
+It left the field itself -- how many locations each cross is planted in, and
+which -- to @sec-sparse, and the trade between crosses and locations under one
+budget to @sec-joint.
+
 The crossing plan decides **which lines are seen**, and that makes it a diversity
 decision before it is a statistical one. A design that fields 50 lines per pool
 selected by CDmean ranks those 50 and predicts the other 150 at a T0 accuracy of
-0.1 -- so the next cycle's parents will in practice come from the 50, and the
+about `r fmt(mean(gb$T0[grepl("^50 lines.*cdmean", gb$design)]), 2)` -- so the next cycle's parents will in practice come from the 50, and the
 loss of gene diversity that @sec-stages tracks across the pipeline starts in the
 nursery plan, not at selection. A sparse factorial that crosses every candidate is
 the design that keeps the whole candidate set in contention.

@@ -693,15 +693,18 @@ window.Quarto = {
 </header>
 
 
-<p>A hybrid programme’s first field stage concentrates most of its selection pressure where it has the least information. It typically has thousands of testcrosses, seed for one or two plots of each, a handful of locations, and almost no replication. The previous chapter (<a href="04e-mating-design.html" class="quarto-xref"><span>Chapter 9</span></a>) asked <strong>which crosses</strong> to make from two pools. This one asks the next question: given the crosses, <strong>which locations should each one be planted in?</strong></p>
+<p>A hybrid programme’s first field stage concentrates most of its selection pressure where it has the least information. It typically has thousands of testcrosses, seed for one or two plots of each, a handful of locations, and almost no replication. <a href="04e-mating-design.html" class="quarto-xref"><span>Chapter 9</span></a> settled <strong>which crosses</strong> to make from two pools – a connected sparse factorial, analysed by BLUP – but held the field fixed and folded genotype x location into plot error. This chapter takes the crosses as given and asks the next question: <strong>which locations should each one be planted in?</strong></p>
 <p><em>Sparse testing</em> is the answer the literature has converged on. Not every hybrid is grown at every location. Different subsets go to different environments, and the missing hybrid x environment cells are <em>predicted</em>, not discarded, with a relationship matrix connecting what the field left unconnected. In <a href="04e-mating-design.html" class="quarto-xref"><span>Chapter 9</span></a> the sparsity was in the female x male grid. Here it is in the hybrid x environment grid. Real programmes face both at once, the joint problem <a href="04e-mating-design.html#sec-mating-open" class="quarto-xref"><span>Section 9.9</span></a> lists as its second gap.</p>
 <p>The chapter covers the quantitative basis, the history and a taxonomy of the designs, the validation schemes used to judge them, and the empirical record across crops, including its main controversy. It then measures the question with a simulation that the primary literature had not run. The results it defends:</p>
 <ol type="1">
+<li><strong>The cutting margin is wide, and wider at higher heritability.</strong> A sparse allocation reaches within 5 % of the accuracy of the complete design at a fraction of its plots; at <span class="math inline">\(h^2 = 0.2\)</span> it needs more of them.</li>
 <li><strong>At a fixed number of plots, spreading them over more locations beats concentrating them.</strong> Spreading two plots per hybrid over ten locations instead of two raises accuracy by 0.06 to 0.09, with no extra plots.</li>
 <li><strong>The choice among sparse layouts matters little, except at extreme sparsity.</strong> At that point, a layout that puts <em>both pools in every location</em> helps the hybrids that were never tested.</li>
 <li><strong>What connects a sparse trial is parent coverage, not shared hybrids.</strong> With a relationship matrix in the model, the best layouts share <em>no</em> hybrid between some location pairs. This suggests one way to reconcile the contradictory published advice on overlap between environments.</li>
-<li><strong>Prediction survives sparsity better than estimation.</strong> The BLUP stays undispersed down to one location per hybrid. Variance components stop being reportable earlier, and the SCA variance is biased upward even in the complete design.</li>
+<li><strong>Prediction survives sparsity better than estimation.</strong> Where REML converged, the BLUP showed no systematic dispersion bias, and with known components it stayed undispersed down to one location per hybrid. Variance components stop being reportable earlier: at one location per hybrid REML rarely converges, and the SCA variance is biased upward even in the complete design.</li>
+<li><strong>In two stages, test every candidate sparsely rather than a subset densely.</strong> At a fixed budget, covering all candidates in stage 1 gave the larger realised gain.</li>
 </ol>
+<p>The numbering is that of <a href="#sec-sparse-results" class="quarto-xref"><span>Section 10.11.3</span></a>, which the rest of the book cites.</p>
 <div class="callout callout-style-simple callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -741,7 +744,7 @@ window.Quarto = {
 <p>What is left is the classical trade-off. More genotypes at fewer locations buys selection intensity and costs accuracy. Fewer genotypes at more locations does the opposite. At stage 1 the scarce resource is the plot, so the question is not <em>how much to test</em> but <em>how to spread what can already be tested</em> <span class="citation" data-cites="li2026">(<a href="99-references.html#ref-li2026" role="doc-biblioref">Li et al. 2026</a>)</span>.</p>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
-<div id="fig-sparse-pipeline" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" alt="A two-pool hybrid pipeline">
+<div id="fig-sparse-pipeline" class="quarto-float quarto-figure quarto-figure-center anchored" alt="A two-pool hybrid pipeline" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-sparse-pipeline-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="04f-sparse-testing_files/figure-html/fig-sparse-pipeline-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="A two-pool hybrid pipeline" width="1425">
@@ -758,12 +761,12 @@ Figure&nbsp;10.1: A two-pool hybrid pipeline. Population improvement (left) feed
 <h3 data-number="10.1.2" class="anchored" data-anchor-id="the-breeders-equation-as-the-decision-criterion"><span class="header-section-number">10.1.2</span> The breeder’s equation as the decision criterion</h3>
 <p>The gain per unit time,</p>
 <p><span class="math display">\[
-\Delta G_t = \frac{i \, r \, \sigma_A}{t},
+\Delta G_t = \frac{i \, \rho \, \sigma_A}{t},
 \]</span></p>
-<p>has four terms. A trial design moves at least three of them together:</p>
+<p>has four terms. <span class="math inline">\(\rho\)</span> is the accuracy of the selection criterion – the <span class="math inline">\(r\)</span> of <a href="02b-response.html" class="quarto-xref"><span>Chapter 3</span></a>; this Part keeps <span class="math inline">\(r\)</span> for plots, as <a href="04e-mating-design.html" class="quarto-xref"><span>Chapter 9</span></a> does. A trial design moves at least three of them together:</p>
 <ul>
 <li><strong>intensity <span class="math inline">\(i\)</span></strong>, through the number of candidates;</li>
-<li><strong>accuracy <span class="math inline">\(r\)</span></strong>, through plots, locations, and how well the locations sample the target population of environments (TPE);</li>
+<li><strong>accuracy <span class="math inline">\(\rho\)</span></strong>, through plots, locations, and how well the locations sample the target population of environments (TPE);</li>
 <li><strong>cycle length <span class="math inline">\(t\)</span></strong>, when parents can be recycled from stage 1.</li>
 </ul>
 <p>What a gain measured on a research station is worth depends on the genetic correlation between the selection environment and the TPE <span class="citation" data-cites="atlin2000 atlin2001">(<a href="99-references.html#ref-atlin2000" role="doc-biblioref">Atlin et al. 2000</a>, <a href="99-references.html#ref-atlin2001" role="doc-biblioref">2001</a>)</span>. No design is better in the abstract. A design is better according to whichever term limits that programme <span class="citation" data-cites="werner2025trends riedelsheimer2013">(<a href="99-references.html#ref-werner2025trends" role="doc-biblioref">Werner, Zaman-Allah, et al. 2025</a>; <a href="99-references.html#ref-riedelsheimer2013" role="doc-biblioref">Riedelsheimer and Melchinger 2013</a>)</span>.</p>
@@ -794,11 +797,11 @@ Figure&nbsp;10.1: A two-pool hybrid pipeline. Population improvement (left) feed
 <td>number of candidates tested at a fixed plot budget</td>
 </tr>
 <tr class="even">
-<td><span class="math inline">\(r\)</span> (accuracy)</td>
+<td><span class="math inline">\(\rho\)</span> (accuracy)</td>
 <td>plots per candidate, locations per candidate, use of a relationship matrix</td>
 </tr>
 <tr class="odd">
-<td><span class="math inline">\(r\)</span> (relevance)</td>
+<td><span class="math inline">\(\rho\)</span> (relevance)</td>
 <td>how well the chosen locations sample the TPE</td>
 </tr>
 <tr class="even">
@@ -819,7 +822,7 @@ Figure&nbsp;10.1: A two-pool hybrid pipeline. Population improvement (left) feed
 <h2 data-number="10.2" class="anchored" data-anchor-id="sec-sparse-foundations"><span class="header-section-number">10.2</span> Foundations</h2>
 <section id="the-hybrid-model-gca-sca-and-what-sparsity-threatens" class="level3" data-number="10.2.1">
 <h3 data-number="10.2.1" class="anchored" data-anchor-id="the-hybrid-model-gca-sca-and-what-sparsity-threatens"><span class="header-section-number">10.2.1</span> The hybrid model: GCA, SCA, and what sparsity threatens</h3>
-<p>The value of the single cross between female <span class="math inline">\(i\)</span> and male <span class="math inline">\(j\)</span> splits as</p>
+<p>The value of the single cross between female <span class="math inline">\(i\)</span> and male <span class="math inline">\(j\)</span> – a pool-A and a pool-B line in the notation of <a href="04e-mating-design.html" class="quarto-xref"><span>Chapter 9</span></a> – splits as</p>
 <p><span class="math display">\[
 g_{ij} = \mathrm{GCA}^f_i + \mathrm{GCA}^m_j + \mathrm{SCA}_{ij}
 \]</span></p>
@@ -854,7 +857,7 @@ g_{ij} = \mathrm{GCA}^f_i + \mathrm{GCA}^m_j + \mathrm{SCA}_{ij}
 \mathrm{GCA}^m \sim N(\mathbf 0, \mathbf A_m\sigma^2_{m}), \quad
 \mathrm{SCA}   \sim N(\mathbf 0, (\mathbf A_f\otimes\mathbf A_m)\sigma^2_{s})
 \]</span></p>
-<p><span class="citation" data-cites="bernardo1994 bernardo1996 technow2012">(<a href="99-references.html#ref-bernardo1994" role="doc-biblioref">Bernardo 1994</a>, <a href="99-references.html#ref-bernardo1996" role="doc-biblioref">1996</a>; <a href="99-references.html#ref-technow2012" role="doc-biblioref">Technow et al. 2012</a>)</span>. The practical point is that <strong>the hybrid itself never needs genotyping</strong>: its covariance is a Kronecker product of the parental matrices. Replacing pedigree <span class="math inline">\(\mathbf A\)</span> by marker <span class="math inline">\(\mathbf G\)</span> <span class="citation" data-cites="vanraden2008">(<a href="99-references.html#ref-vanraden2008" role="doc-biblioref">VanRaden 2008</a>)</span> gives the genomic version (2). There are two ways to write the additive and dominance effects: the “biological” form and the “statistical” form, which is orthogonal at the population’s frequencies. Pool-specific marker effects are a third option <span class="citation" data-cites="vitezica2013 gonzalezdieguez2021">(<a href="99-references.html#ref-vitezica2013" role="doc-biblioref">Vitezica et al. 2013</a>; <a href="99-references.html#ref-gonzalezdieguez2021" role="doc-biblioref">González-Diéguez et al. 2021</a>)</span>. All of them lead to the same covariance structure.</p>
+<p><span class="citation" data-cites="bernardo1994 bernardo1996 technow2012">(<a href="99-references.html#ref-bernardo1994" role="doc-biblioref">Bernardo 1994</a>, <a href="99-references.html#ref-bernardo1996" role="doc-biblioref">1996</a>; <a href="99-references.html#ref-technow2012" role="doc-biblioref">Technow et al. 2012</a>)</span>. Here <span class="math inline">\(\sigma^2_f\)</span> and <span class="math inline">\(\sigma^2_m\)</span> are the GCA variances of the female (pool-A) and male (pool-B) lines, which <a href="04e-mating-design.html" class="quarto-xref"><span>Chapter 9</span></a> writes as a single <span class="math inline">\(\sigma^2_g\)</span> within the pool being ranked; <span class="math inline">\(\sigma^2_s\)</span> is the SCA variance, with the same symbol as in <a href="04e-mating-design.html" class="quarto-xref"><span>Chapter 9</span></a>, and is also written <span class="math inline">\(\sigma^2_{SCA}\)</span> in this chapter. The practical point is that <strong>the hybrid itself never needs genotyping</strong>: its covariance is a Kronecker product of the parental matrices. Replacing pedigree <span class="math inline">\(\mathbf A\)</span> by marker <span class="math inline">\(\mathbf G\)</span> <span class="citation" data-cites="vanraden2008">(<a href="99-references.html#ref-vanraden2008" role="doc-biblioref">VanRaden 2008</a>)</span> gives the genomic version (2). There are two ways to write the additive and dominance effects: the “biological” form and the “statistical” form, which is orthogonal at the population’s frequencies. Pool-specific marker effects are a third option <span class="citation" data-cites="vitezica2013 gonzalezdieguez2021">(<a href="99-references.html#ref-vitezica2013" role="doc-biblioref">Vitezica et al. 2013</a>; <a href="99-references.html#ref-gonzalezdieguez2021" role="doc-biblioref">González-Diéguez et al. 2021</a>)</span>. All of them lead to the same covariance structure.</p>
 <p><strong>The relationship matrix is what makes a sparse design analysable.</strong> It is the only link between cells that the field did not link. A hybrid with no plot gets a BLUP only because its parents are related to parents that do have plots. Without it, a sparse design yields comparisons that are not fair.</p>
 </section>
 <section id="multi-environment-trials-and-mixed-models" class="level3" data-number="10.2.3">
@@ -923,7 +926,7 @@ g_{ij} = \mathrm{GCA}^f_i + \mathrm{GCA}^m_j + \mathrm{SCA}_{ij}
 <h2 data-number="10.3" class="anchored" data-anchor-id="sec-sparse-what"><span class="header-section-number">10.3</span> What sparse testing is, and where it came from</h2>
 <section id="definition-and-genealogy" class="level3" data-number="10.3.1">
 <h3 data-number="10.3.1" class="anchored" data-anchor-id="definition-and-genealogy"><span class="header-section-number">10.3.1</span> Definition and genealogy</h3>
-<p><strong>Definition.</strong> A trial is sparse when not every genotype is evaluated in every environment <em>and</em> the missing cells are predicted rather than discarded. The idea developed in four steps:</p>
+<p><strong>Definition.</strong> A trial is sparse when not every genotype is evaluated in every environment <em>and</em> the missing cells are predicted rather than discarded. The literature’s <em>environment</em> is a location in a year; the simulations of this Part have one season, so their environments are <em>locations</em>, and the two words are used in those two senses. The idea developed in four steps:</p>
 <ol type="1">
 <li><strong>Incomplete blocks and lattices.</strong> These already accepted partial evaluation <em>within</em> a location.</li>
 <li><strong>Partially replicated designs (p-rep) and augmented p-rep.</strong> These replaced replication of each entry with replicated checks and partial replication <span class="citation" data-cites="cullis2006 williams2011">(<a href="99-references.html#ref-cullis2006" role="doc-biblioref">Cullis et al. 2006</a>; <a href="99-references.html#ref-williams2011" role="doc-biblioref">Williams et al. 2011</a>)</span>.</li>
@@ -934,7 +937,7 @@ g_{ij} = \mathrm{GCA}^f_i + \mathrm{GCA}^m_j + \mathrm{SCA}_{ij}
 <p>Sparse testing is not a new method. It is incomplete-block design applied at the scale of many environments, made workable by genomic relationships acting as the connecting mechanism. The classical theory of incomplete blocks therefore carries over.</p>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
-<div id="fig-sparse-genealogy" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" alt="The genealogy of sparse testing, drawn as genotype (rows) x environment (columns) matrices; dark = observed">
+<div id="fig-sparse-genealogy" class="quarto-float quarto-figure quarto-figure-center anchored" alt="The genealogy of sparse testing, drawn as genotype (rows) x environment (columns) matrices; dark = observed" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-sparse-genealogy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="04f-sparse-testing_files/figure-html/fig-sparse-genealogy-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="The genealogy of sparse testing, drawn as genotype (rows) x environment (columns) matrices; dark = observed" width="1425">
@@ -991,7 +994,7 @@ Figure&nbsp;10.2: The genealogy of sparse testing, drawn as genotype (rows) x en
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
-<div id="fig-sparse-taxonomy" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" alt="Six allocations of the same 8 x 4 factorial (32 hybrids, rows; male index fastest) to six locations (columns), each with the same number of plots except 'complete'. The last three are generated by the">
+<div id="fig-sparse-taxonomy" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Six allocations of the same 8 x 4 factorial (32 hybrids, rows; male index fastest) to six locations (columns), each with the same number of plots except 'complete'. The last three are generated by the" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-sparse-taxonomy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="04f-sparse-testing_files/figure-html/fig-sparse-taxonomy-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Six allocations of the same 8 x 4 factorial (32 hybrids, rows; male index fastest) to six locations (columns), each with the same number of plots except 'complete'. The last three are generated by the" width="1425">
@@ -1092,6 +1095,7 @@ Table&nbsp;10.1: The taxonomy mapped onto the designs in the literature. Differe
 </div>
 <div class="callout-body-container callout-body">
 <p><span class="citation" data-cites="li2026">Li et al. (<a href="99-references.html#ref-li2026" role="doc-biblioref">2026</a>)</span> use <strong>“CV1” to “CV5” as names of allocation strategies</strong>, not of the classical validation schemes of <a href="#sec-sparse-validation" class="quarto-xref"><span>Section 10.4</span></a>. Their “CV1” is the full-overlap <em>design</em>. It is not the “new genotype” <em>validation</em> of <span class="citation" data-cites="burgueno2012">Burgueño et al. (<a href="99-references.html#ref-burgueno2012" role="doc-biblioref">2012</a>)</span>. Reading the two literatures together without noticing this produces wrong comparisons.</p>
+<p>A second collision is inside this book. <a href="08b-genomic-prediction.html#sec-hybrid-cv" class="quarto-xref"><span>Section 17.4</span></a> uses CV2 / CV1 / CV0 for hybrids with both / one / neither parent seen in training – the T2 / T1 / T0 of <a href="04e-mating-design.html#sec-mating-genomic" class="quarto-xref"><span>Section 9.6</span></a>. Here, as in <span class="citation" data-cites="burgueno2012">Burgueño et al. (<a href="99-references.html#ref-burgueno2012" role="doc-biblioref">2012</a>)</span>, the labels classify genotype x environment cells. A CV1 hybrid of this chapter, never planted but with both parents planted in other crosses, is a T2 hybrid in <a href="04e-mating-design.html" class="quarto-xref"><span>Chapter 9</span></a>’s terms.</p>
 </div>
 </div>
 </section>
@@ -1115,7 +1119,7 @@ Table&nbsp;10.1: The taxonomy mapped onto the designs in the literature. Differe
 <p>At stage 1 the operationally relevant number is the <strong>rate of wrongly discarded superior candidates</strong>. The correlation is only a proxy for it.</p>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
-<div id="fig-sparse-cv" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" alt="The four validation schemes as a 2 x 2 by whether the genotype (rows) and the environment (columns) were observed">
+<div id="fig-sparse-cv" class="quarto-float quarto-figure quarto-figure-center anchored" alt="The four validation schemes as a 2 x 2 by whether the genotype (rows) and the environment (columns) were observed" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-sparse-cv-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="04f-sparse-testing_files/figure-html/fig-sparse-cv-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="The four validation schemes as a 2 x 2 by whether the genotype (rows) and the environment (columns) were observed" width="1125">
@@ -1310,7 +1314,7 @@ Table&nbsp;10.2: The six primary studies. ‘Observed’ is the share of genotyp
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>fs <span class="ot">&lt;-</span> <span class="fu">sort</span>(<span class="fu">unique</span>(ov<span class="sc">$</span>family_size))</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>cols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"grey40"</span>, <span class="st">"#1b9e77"</span>, <span class="st">"#d95f02"</span>)[<span class="fu">seq_along</span>(fs)]</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="fl">4.2</span>, <span class="fl">4.2</span>, <span class="fl">3.2</span>, <span class="dv">1</span>))</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="cn">NA</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">ylim =</span> <span class="fu">range</span>(ov<span class="sc">$</span>acc_all <span class="sc">+</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>) <span class="sc">*</span> ov<span class="sc">$</span>acc_all_se),</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="cn">NA</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">ylim =</span> <span class="fu">range</span>(ov<span class="sc">$</span>acc_all <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> ov<span class="sc">$</span>acc_all_se, ov<span class="sc">$</span>acc_all <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> ov<span class="sc">$</span>acc_all_se),</span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"Overlap: fraction of each location's plots in the common core"</span>,</span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">"Accuracy, all hybrids"</span>)</span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_along</span>(fs)) {</span>
@@ -1327,7 +1331,7 @@ Table&nbsp;10.2: The six primary studies. ‘Observed’ is the share of genotyp
 <span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
-<div id="fig-sparse-overlap" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" alt="Accuracy over all 400 hybrids against the fraction of each location's 80 plots taken by a core common to all four locations, by half-sib family size">
+<div id="fig-sparse-overlap" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Accuracy over all 400 hybrids against the fraction of each location's 80 plots taken by a core common to all four locations, by half-sib family size" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-sparse-overlap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="04f-sparse-testing_files/figure-html/fig-sparse-overlap-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Accuracy over all 400 hybrids against the fraction of each location's 80 plots taken by a core common to all four locations, by half-sib family size" width="1125">
@@ -1339,13 +1343,13 @@ Figure&nbsp;10.5: Accuracy over all 400 hybrids against the fraction of each loc
 </div>
 </div>
 </div>
-<p>With the training size held fixed, accuracy falls as overlap rises: it is 0.023 to 0.059 lower under full overlap than under none, 1.6 to 4.7 standard errors of the difference depending on family size. The cause is the confound, not overlap as such. Every hybrid moved into the common core is one fewer distinct hybrid observed (top axis). This is the <span class="citation" data-cites="lubanga2025">Lubanga et al. (<a href="99-references.html#ref-lubanga2025" role="doc-biblioref">2025</a>)</span> pattern, reproduced with the mechanism exposed.</p>
-<p>The second half of the hypothesis is <strong>not</strong> supported at this scale. The family-size curves cross, and they differ by no more than two standard errors. In hindsight the reason is structural. In a female x male factorial every line is already the parent of 20 hybrids, so the factorial carries much of the connectivity before any relationship <em>among lines</em> is added. Half-sib families add relatively little on top of that. In a line-breeding programme like <span class="citation" data-cites="atanda2022">Atanda et al. (<a href="99-references.html#ref-atanda2022" role="doc-biblioref">2022</a>)</span>, each entry is its own genotype and no parent links them, so family structure should matter far more. This experiment cannot test that case. The experiment also holds the training size fixed, so it does not reproduce <span class="citation" data-cites="atanda2022">Atanda et al. (<a href="99-references.html#ref-atanda2022" role="doc-biblioref">2022</a>)</span>’s design, in which more overlap also meant a larger calibration set and the two effects pull in opposite directions.</p>
-<p><strong>What to do with this.</strong> The right question is not “how many common genotypes?”. It is “how much <em>effective</em> connectivity does the design have, counting both physical overlap and relationships?”. Physical overlap and genomic relationships are partial substitutes <span class="citation" data-cites="windhausen2012">(<a href="99-references.html#ref-windhausen2012" role="doc-biblioref">Windhausen et al. 2012</a>)</span>. In a hybrid factorial, shared parents already supply much of the relationship side.</p>
+<p>With the training size held fixed, accuracy falls as overlap rises: it is 0.023 to 0.059 lower under full overlap than under none, 1.6 to 4.7 standard errors of the difference depending on family size. The drop is resolved for unrelated lines and for families of 10, and not for families of 4 (1.6 standard errors), whose curve has the same direction. The cause is the confound, not overlap as such. Every hybrid moved into the common core is one fewer distinct hybrid observed (top axis). This is the <span class="citation" data-cites="lubanga2025">Lubanga et al. (<a href="99-references.html#ref-lubanga2025" role="doc-biblioref">2025</a>)</span> pattern, reproduced with the mechanism exposed.</p>
+<p>The second half of the hypothesis is <strong>not</strong> supported at this scale. The family-size curves cross, and they differ by at most 2.2 standard errors at any one overlap: of the 15 pairs compared (every pair of family sizes at every overlap, with no correction for multiple comparisons), 1 exceeded two standard errors and 0 exceeded three. In hindsight the reason is structural. In a female x male factorial every line is already the parent of 20 hybrids, so the factorial carries much of the connectivity before any relationship <em>among lines</em> is added. Half-sib families add relatively little on top of that. In a line-breeding programme like <span class="citation" data-cites="atanda2022">Atanda et al. (<a href="99-references.html#ref-atanda2022" role="doc-biblioref">2022</a>)</span>, each entry is its own genotype and no parent links them, so family structure should matter far more. This experiment cannot test that case. The experiment also holds the training size fixed, so it does not reproduce <span class="citation" data-cites="atanda2022">Atanda et al. (<a href="99-references.html#ref-atanda2022" role="doc-biblioref">2022</a>)</span>’s design, in which more overlap also meant a larger calibration set and the two effects pull in opposite directions.</p>
+<p><strong>What to do with this.</strong> The right question is not “how many common genotypes?”. It is “how much <em>effective</em> connectivity does the design have, counting both physical overlap and relationships?”. The experiment above suggests that physical overlap and relationships between the lines of different environments are partial substitutes, and <span class="citation" data-cites="atanda2022">Atanda et al. (<a href="99-references.html#ref-atanda2022" role="doc-biblioref">2022</a>)</span> found both the genetic correlation between environments and the genomic relationship of lines across them among the drivers of sparse-testing accuracy. In a hybrid factorial, shared parents already supply much of the relationship side.</p>
 </section>
 <section id="sec-sparse-connectivity" class="level2" data-number="10.7">
 <h2 data-number="10.7" class="anchored" data-anchor-id="sec-sparse-connectivity"><span class="header-section-number">10.7</span> Connectivity and checks</h2>
-<p>Connectivity is not the same as overlap. Two designs with the same number of common genotypes can be connected very differently, depending on <em>how</em> those genotypes are distributed. Hybrids add a dimension. There is female x male connectivity, the subject of <a href="04e-mating-design.html#sec-mating-connectivity" class="quarto-xref"><span>Section 9.2.3</span></a>. There is genotype x location connectivity. And there is <strong>female x male x location</strong>, for which no metric is agreed. That is an open gap (<a href="#sec-sparse-limits" class="quarto-xref"><span>Section 10.13</span></a>). The available tools are:</p>
+<p>Connectivity is not the same as overlap. Two designs with the same number of common genotypes can be connected very differently, depending on <em>how</em> those genotypes are distributed. Hybrids add a dimension. There is female x male connectivity, the subject of <a href="04e-mating-design.html#sec-mating-connectivity" class="quarto-xref"><span>Section 9.2.3</span></a>. There is genotype x location connectivity. And there is <strong>female x male x location</strong>, for which no metric is agreed (<a href="#sec-sparse-limits" class="quarto-xref"><span>Section 10.13</span></a>); <a href="04g-joint-allocation.html#sec-joint-criteria" class="quarto-xref"><span>Section 11.4</span></a> proposes one. The available tools are:</p>
 <ul>
 <li>the rank of the incidence matrix;</li>
 <li>the PEV of pairwise contrasts, and the reliability derived from it;</li>
@@ -1444,7 +1448,7 @@ Figure&nbsp;10.5: Accuracy over all 400 hybrids against the fraction of each loc
 <p>The central idea of <span class="citation" data-cites="gonzalezdieguez2026">González-Diéguez et al. (<a href="99-references.html#ref-gonzalezdieguez2026" role="doc-biblioref">2026</a>)</span> is to treat the tester as an “environment”. Each line is crossed to <strong>one</strong> tester, but full-sibs go to <em>different</em> testers. What gets evaluated against several testers is therefore the haplotype, not the genotype. This removes a real logistical constraint. The more accurate alternative, an incomplete factorial among candidates (<a href="04e-mating-design.html#sec-mating-sparse" class="quarto-xref"><span>Section 9.4</span></a>), needs hand pollination at scale and synchronised flowering between pools.</p>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
-<div id="fig-sparse-testcross" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" alt="Sparse testcrossing">
+<div id="fig-sparse-testcross" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Sparse testcrossing" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-sparse-testcross-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="04f-sparse-testing_files/figure-html/fig-sparse-testcross-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Sparse testcrossing" width="1275">
@@ -1544,7 +1548,7 @@ Table&nbsp;10.3: Sparse testcrossing in <span class="citation" data-cites="gonza
 <p>The image kernel matched or beat the genomic kernel from about 30 to 33 % completeness, reaching <span class="math inline">\(r^2 = 0.997\)</span> on pairs of environments. Below about 20 % the genomic kernel was preferable again. <strong>The authors warn of possible information leakage</strong>, because the kernel came from the same trial that supplied training and validation. The result should be reported with that caveat.</p>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
-<div id="fig-sparse-phenomics" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" alt="Building an environment kernel from images, after Hild Aono and Chawade (2026)">
+<div id="fig-sparse-phenomics" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Building an environment kernel from images, after Hild Aono and Chawade (2026)" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-sparse-phenomics-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="04f-sparse-testing_files/figure-html/fig-sparse-phenomics-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Building an environment kernel from images, after Hild Aono and Chawade (2026)" width="1350">
@@ -1739,8 +1743,9 @@ y = \mu + \text{loc} + \mathrm{GCA}^f + \mathrm{GCA}^m + \mathrm{SCA}
 <li>every interaction with location is half its main effect;</li>
 <li>plot <span class="math inline">\(h^2\)</span> of 0.20 or 0.40.</li>
 </ul>
+<p>In <code>sparse_vc()</code> the components are <code>s2f</code>, <code>s2m</code>, <code>s2s</code> (<span class="math inline">\(\sigma^2_{SCA}\)</span>), <code>s2fl</code>, <code>s2ml</code> (the two GCA x location variances), <code>s2sl</code> (<span class="math inline">\(\sigma^2_{SCA\times L}\)</span>, written <span class="math inline">\(\sigma^2_{s\ell}\)</span> in <a href="04g-joint-allocation.html#sec-joint-model" class="quarto-xref"><span>Section 11.2</span></a>) and <code>s2e</code>.</p>
 <p>These choices imply a genetic correlation between locations of <span class="math inline">\(V_G/(V_G+V_{GE}) = 0.667\)</span>. That sits inside the 0.36 to 0.67 measured in maize <span class="citation" data-cites="li2026">(<a href="99-references.html#ref-li2026" role="doc-biblioref">Li et al. 2026</a>)</span> and close to the 0.60 of <span class="citation" data-cites="werner2025">Werner, Covarrubias-Pazaran, et al. (<a href="99-references.html#ref-werner2025" role="doc-biblioref">2025</a>)</span>. The SCA:GCA ratio of 0.25 lies among the values in <span class="citation" data-cites="gonzalezdieguez2026">González-Diéguez et al. (<a href="99-references.html#ref-gonzalezdieguez2026" role="doc-biblioref">2026</a>)</span>, and the two heritabilities bracket <span class="citation" data-cites="werner2025">Werner, Covarrubias-Pazaran, et al. (<a href="99-references.html#ref-werner2025" role="doc-biblioref">2025</a>)</span>’s 0.10 and the 0.30 of <span class="citation" data-cites="gonzalezdieguez2026">González-Diéguez et al. (<a href="99-references.html#ref-gonzalezdieguez2026" role="doc-biblioref">2026</a>)</span>.</p>
-<p><strong>The four strategies</strong>, all at the same cost of <span class="math inline">\(k\)</span> locations per hybrid:</p>
+<p><strong>The four strategies</strong>, all at the same cost of <span class="math inline">\(k\)</span> locations per hybrid out of <span class="math inline">\(L\)</span> in the trial (<span class="math inline">\(k\)</span> is not the testers per pool of <a href="04e-mating-design.html" class="quarto-xref"><span>Chapter 9</span></a>):</p>
 <ul>
 <li><em>complete</em>;</li>
 <li><em>random</em>: each hybrid goes to <span class="math inline">\(k\)</span> locations drawn at random;</li>
@@ -1759,7 +1764,7 @@ y = \mu + \text{loc} + \mathrm{GCA}^f + \mathrm{GCA}^m + \mathrm{SCA}
 <div id="tbl-sparse-validation" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sparse-validation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;10.5: Component recovery by REML in the COMPLETE design (20 x 20 hybrids, 6 locations, 30 replicates per heritability; cached). The residual target is <span class="math inline">\(\sigma^2_{SCA\times L} + \sigma^2_e\)</span>, because with one plot per cell the two are confounded.
+Table&nbsp;10.5: Component recovery by REML in the COMPLETE design (20 x 20 hybrids, 6 locations, 30 replicates per heritability; cached). The residual target is <span class="math inline">\(\sigma^2_{SCA\times L} + \sigma^2_e\)</span>, because with one plot per cell the analysis model absorbs SCA x location into the residual.
 </figcaption>
 <div aria-describedby="tbl-sparse-validation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
@@ -1898,7 +1903,7 @@ Table&nbsp;10.5: Component recovery by REML in the COMPLETE design (20 x 20 hybr
 <li>2, 4, 6 and 10 locations;</li>
 <li>nominal sparsity from 20 % to 100 %;</li>
 <li>two heritabilities;</li>
-<li>15 replicates per cell.</li>
+<li>15 replicates per cell at 400 hybrids, 9 to 15 at 100.</li>
 </ul>
 <section id="the-cutting-margin-is-wide-and-wider-at-higher-heritability" class="level4" data-number="10.11.3.1">
 <h4 data-number="10.11.3.1" class="anchored" data-anchor-id="the-cutting-margin-is-wide-and-wider-at-higher-heritability"><span class="header-section-number">10.11.3.1</span> 1. The cutting margin is wide, and wider at higher heritability</h4>
@@ -1917,7 +1922,7 @@ Table&nbsp;10.5: Component recovery by REML in the COMPLETE design (20 x 20 hybr
 <span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"bottomright"</span>, <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">col =</span> lc, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">legend =</span> <span class="fu">paste</span>(Ls, <span class="st">"locations"</span>), <span class="at">cex =</span> <span class="fl">0.8</span>)</span>
 <span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>sp <span class="ot">&lt;-</span> <span class="fu">subset</span>(s4, k <span class="sc">==</span> <span class="dv">2</span> <span class="sc">&amp;</span> strategy <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"complete"</span>, <span class="st">"random"</span>))</span>
 <span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="cn">NA</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">10</span>), <span class="at">ylim =</span> <span class="fu">range</span>(sp<span class="sc">$</span>acc_all_mean), <span class="at">xlab =</span> <span class="st">"Locations sharing the 2 plots per hybrid"</span>,</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">"Accuracy, all hybrids"</span>, <span class="at">main =</span> <span class="st">"Same 800 plots, spread wider"</span>, <span class="at">cex.main =</span> <span class="fl">0.9</span>)</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">"Accuracy, all hybrids"</span>, <span class="at">main =</span> <span class="fu">sprintf</span>(<span class="st">"Same %.0f plots, spread wider"</span>, <span class="fu">mean</span>(sp<span class="sc">$</span>n_plots_mean)), <span class="at">cex.main =</span> <span class="fl">0.9</span>)</span>
 <span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (h <span class="cf">in</span> <span class="fu">c</span>(<span class="fl">0.2</span>, <span class="fl">0.4</span>)) {</span>
 <span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  e <span class="ot">&lt;-</span> sp[sp<span class="sc">$</span>h2_plot <span class="sc">==</span> h, ]; e <span class="ot">&lt;-</span> e[<span class="fu">order</span>(e<span class="sc">$</span>nLoc), ]</span>
 <span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lines</span>(e<span class="sc">$</span>nLoc, e<span class="sc">$</span>acc_all_mean, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">lty =</span> <span class="fu">ifelse</span>(h <span class="sc">==</span> <span class="fl">0.2</span>, <span class="dv">2</span>, <span class="dv">1</span>))</span>
@@ -1926,7 +1931,7 @@ Table&nbsp;10.5: Component recovery by REML in the COMPLETE design (20 x 20 hybr
 <span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
-<div id="fig-sparse-frontier" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" alt="Left: accuracy against plots for 400 hybrids at plot h2 = 0.4, one curve per number of locations (parentage and complete designs; complete marked with an open circle)">
+<div id="fig-sparse-frontier" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Left: accuracy against plots for 400 hybrids at plot h2 = 0.4, one curve per number of locations (parentage and complete designs; complete marked with an open circle)" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-sparse-frontier-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="04f-sparse-testing_files/figure-html/fig-sparse-frontier-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Left: accuracy against plots for 400 hybrids at plot h2 = 0.4, one curve per number of locations (parentage and complete designs; complete marked with an open circle)" width="1350">
@@ -1938,7 +1943,7 @@ Figure&nbsp;10.8: Left: accuracy against plots for 400 hybrids at plot h2 = 0.4,
 </div>
 </div>
 </div>
-<p>Take 400 hybrids at <span class="math inline">\(h^2 = 0.4\)</span>. The complete design over ten locations (3,200 plots) reaches an accuracy of 0.941. The <strong>cheapest allocation within 5 % of that</strong> is the parentage design with 2 locations per hybrid. It uses 640 plots, 20 % of the budget, and reaches 0.897, which is 95.3 % of the reference. Coincidence with the true top 5 % falls only from 70.0 % to 65.7 %. At <span class="math inline">\(h^2 = 0.2\)</span> the requirement roughly doubles to half the cells. <a href="#tbl-sparse-minimal" class="quarto-xref">Table&nbsp;<span>10.6</span></a> lists every scenario.</p>
+<p>Take 400 hybrids at <span class="math inline">\(h^2 = 0.4\)</span>. The complete design over ten locations (3,200 plots) reaches an accuracy of 0.941. The <strong>cheapest allocation within 5 % of that</strong> is the parentage design with 2 locations per hybrid. It uses 640 plots, 20 % of the budget, and reaches 0.897, which is 95.3 % of the reference. Coincidence with the true top 5 % falls only from 70.0 % to 65.7 %. At <span class="math inline">\(h^2 = 0.2\)</span> the requirement rises to half the cells. <a href="#tbl-sparse-minimal" class="quarto-xref">Table&nbsp;<span>10.6</span></a> lists every scenario.</p>
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Show code</summary>
@@ -2127,7 +2132,7 @@ Table&nbsp;10.6: Cheapest allocation within 5 % and within 10 % of the accuracy 
 </section>
 <section id="at-fixed-cost-spreading-plots-over-locations-beats-concentrating-them" class="level4" data-number="10.11.3.2">
 <h4 data-number="10.11.3.2" class="anchored" data-anchor-id="at-fixed-cost-spreading-plots-over-locations-beats-concentrating-them"><span class="header-section-number">10.11.3.2</span> 2. At fixed cost, spreading plots over locations beats concentrating them</h4>
-<p>This is the most actionable result (<a href="#fig-sparse-frontier" class="quarto-xref">Figure&nbsp;<span>10.8</span></a>, right). Each hybrid keeps <strong>two plots</strong>, the cost of a complete two-location trial. At <span class="math inline">\(h^2 = 0.4\)</span>, accuracy rises from 0.831 with both plots in the same two locations to 0.860, 0.883 and 0.892 as those plots are spread across 4, 6 and 10 locations. At <span class="math inline">\(h^2 = 0.2\)</span> it rises from 0.733 to 0.819. Not one extra plot is spent. The gain saturates between six and ten locations, so the practical advice is to add locations up to about six before adding plots per hybrid. This is the replication-against-breadth trade-off of <span class="citation" data-cites="lorenz2013">Lorenz (<a href="99-references.html#ref-lorenz2013" role="doc-biblioref">2013</a>)</span>, <span class="citation" data-cites="atlin2022">Atlin and Econopouly (<a href="99-references.html#ref-atlin2022" role="doc-biblioref">2022</a>)</span> and <span class="citation" data-cites="werner2025">Werner, Covarrubias-Pazaran, et al. (<a href="99-references.html#ref-werner2025" role="doc-biblioref">2025</a>)</span>, now measured for hybrids with GCA and SCA.</p>
+<p>This is the most actionable result (<a href="#fig-sparse-frontier" class="quarto-xref">Figure&nbsp;<span>10.8</span></a>, right). Each planted hybrid keeps <strong>two plots</strong> (the 80 % of the factorial that is planted, so 640 plots in every design of the panel), the cost of a two-location trial of those hybrids. At <span class="math inline">\(h^2 = 0.4\)</span>, accuracy rises from 0.831 with both plots in the same two locations to 0.860, 0.883 and 0.892 as those plots are spread across 4, 6 and 10 locations. At <span class="math inline">\(h^2 = 0.2\)</span> it rises from 0.733 to 0.819. Not one extra plot is spent, and no planted hybrid gains a location: each is still in two. What grows is the number of environments the trial samples, and with it the number of locations over which each parent’s crosses, and so its GCA, are spread. The gain saturates between six and ten locations. This slice never varied the locations per hybrid and never traded a location against a replicate, so it measures only the value of sampling more trial sites at a fixed number of plots – the “broader sampling of trial sites” of <span class="citation" data-cites="werner2025">Werner, Covarrubias-Pazaran, et al. (<a href="99-references.html#ref-werner2025" role="doc-biblioref">2025</a>)</span> – not a trade against replication.</p>
 </section>
 <section id="among-sparse-designs-the-choice-matters-little-except-at-extreme-sparsity" class="level4" data-number="10.11.3.3">
 <h4 data-number="10.11.3.3" class="anchored" data-anchor-id="among-sparse-designs-the-choice-matters-little-except-at-extreme-sparsity"><span class="header-section-number">10.11.3.3</span> 3. Among sparse designs the choice matters little, except at extreme sparsity</h4>
@@ -2317,7 +2322,7 @@ Table&nbsp;10.7: Contrasts against random allocation. Paired by replicate in the
 <span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
-<div id="fig-sparse-genomic" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" alt="Genomic layer (AlphaSimR genomes, marker relationships, 8 replicates): accuracy against the share of cells observed, by strategy and number of locations">
+<div id="fig-sparse-genomic" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Genomic layer (AlphaSimR genomes, marker relationships, 8 replicates): accuracy against the share of cells observed, by strategy and number of locations" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-sparse-genomic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="04f-sparse-testing_files/figure-html/fig-sparse-genomic-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Genomic layer (AlphaSimR genomes, marker relationships, 8 replicates): accuracy against the share of cells observed, by strategy and number of locations" width="1125">
@@ -2335,8 +2340,8 @@ Figure&nbsp;10.9: Genomic layer (AlphaSimR genomes, marker relationships, 8 repl
 <p>Consider ten locations with two per hybrid at <span class="math inline">\(h^2 = 0.4\)</span>. The best design there is the parentage design, with accuracy 0.897. Its harmonic-mean concurrence, the number of hybrids a pair of locations shares, is <strong>0.000</strong>: some pairs of locations share no hybrid at all. This is structural. Twenty groups at two locations each touch at most 20 of the 45 location pairs. Random allocation shares hybrids between almost every pair (harmonic mean 5.466) and is less accurate. What the parentage design keeps is <strong>parent coverage</strong>. The mean fraction of females present per location is 0.999, against 0.965 for random allocation.</p>
 <p>Once a relationship matrix is in the model, what carries connectivity is representing both pools in every location, not repeating the same hybrids across locations. Put this together with <a href="#sec-sparse-overlap" class="quarto-xref"><span>Section 10.6</span></a> and it reads as one account of the <span class="citation" data-cites="atanda2022">Atanda et al. (<a href="99-references.html#ref-atanda2022" role="doc-biblioref">2022</a>)</span> versus <span class="citation" data-cites="lubanga2025">Lubanga et al. (<a href="99-references.html#ref-lubanga2025" role="doc-biblioref">2025</a>)</span> disagreement. Shared hybrids are one way to connect environments. Shared parents are another, cheaper one, and in a hybrid factorial the shared parents come for free.</p>
 </section>
-<section id="the-blup-is-not-dispersed-the-sca-variance-is-not-recoverable" class="level4" data-number="10.11.3.5">
-<h4 data-number="10.11.3.5" class="anchored" data-anchor-id="the-blup-is-not-dispersed-the-sca-variance-is-not-recoverable"><span class="header-section-number">10.11.3.5</span> 5. The BLUP is not dispersed; the SCA variance is not recoverable</h4>
+<section id="dispersion-is-small-where-reml-converges-the-sca-variance-is-not-recoverable" class="level4" data-number="10.11.3.5">
+<h4 data-number="10.11.3.5" class="anchored" data-anchor-id="dispersion-is-small-where-reml-converges-the-sca-variance-is-not-recoverable"><span class="header-section-number">10.11.3.5</span> 5. Dispersion is small where REML converges; the SCA variance is not recoverable</h4>
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Show code</summary>
@@ -2357,7 +2362,7 @@ Figure&nbsp;10.9: Genomic layer (AlphaSimR genomes, marker relationships, 8 repl
 <span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
-<div id="fig-sparse-estimates" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" alt="Left: median relative bias of REML components and of plot h2 by locations per hybrid k, over all cached scenarios">
+<div id="fig-sparse-estimates" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Left: median relative bias of REML components and of plot h2 by locations per hybrid k, over all cached scenarios" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-sparse-estimates-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="04f-sparse-testing_files/figure-html/fig-sparse-estimates-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Left: median relative bias of REML components and of plot h2 by locations per hybrid k, over all cached scenarios" width="1350">
@@ -2369,7 +2374,7 @@ Figure&nbsp;10.10: Left: median relative bias of REML components and of plot h2 
 </div>
 </div>
 </div>
-<p><strong>Prediction holds up.</strong> Where every REML fit converged, the dispersion slope stays within 0.845 to 1.076 across the grid. With <span class="math inline">\(k \ge 4\)</span> it stays within 0.942 to 1.057. Sparsity costs accuracy but adds <strong>no dispersion bias</strong>, as long as the components are estimable. The GCA variance, the GCA x location variance and plot <span class="math inline">\(h^2\)</span> have median biases near zero at every <span class="math inline">\(k\)</span>.</p>
+<p><strong>Prediction holds up where the components are estimable.</strong> In the scenarios where every REML fit converged – all with <span class="math inline">\(k \ge 2\)</span> – the dispersion slope lies between 0.845 and 1.076, on both sides of 1 (median 1.005). With <span class="math inline">\(k \ge 4\)</span> it lies between 0.942 and 1.057. At <span class="math inline">\(k = 1\)</span> no scenario had every fit converge; the median slope there is 0.968, with outliers far from 1 (<a href="#fig-sparse-estimates" class="quarto-xref">Figure&nbsp;<span>10.10</span></a>, right). Sparsity therefore costs accuracy without a <em>systematic</em> dispersion bias at <span class="math inline">\(k \ge 2\)</span>, with individual scenarios off by up to 15 %; at <span class="math inline">\(k = 1\)</span> the REML evidence does not settle the question, and the known-component sweep of 1, whose slopes sit near 1 at <span class="math inline">\(k = 1\)</span>, shows only that the estimator is undispersed when the components are right. The GCA variance, the GCA x location variance and plot <span class="math inline">\(h^2\)</span> have median biases near zero at every <span class="math inline">\(k\)</span>.</p>
 <p><strong><span class="math inline">\(\sigma^2_{SCA}\)</span> is the exception.</strong> Its median relative bias is +12 % at <span class="math inline">\(k = 4\)</span>, +30 % at <span class="math inline">\(k = 2\)</span>, and +220 % at <span class="math inline">\(k = 1\)</span>. Much of this is present in the complete design too (<a href="#tbl-sparse-validation" class="quarto-xref">Table&nbsp;<span>10.5</span></a>), so it is mainly a problem of identifying a small component, and sparsity makes it worse. A programme that needs a reliable SCA is in product development, not population improvement. It cannot fix the problem by adding coverage to a stage-1 trial.</p>
 <p><strong>The hidden cost is convergence.</strong> REML converged in 100.0 % of fits with four locations per hybrid, 97.0 % with three, 88.5 % with two, and only <strong>42.6 % with one</strong>. That is 411 non-convergences in 2630 fits.</p>
 <div class="callout callout-style-simple callout-important callout-titled">
@@ -2415,7 +2420,7 @@ Figure&nbsp;10.10: Left: median relative bias of REML components and of plot h2 
 <span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
-<div id="fig-sparse-twostage" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" alt="Realised gain (true value of the 10 hybrids finally selected, genetic SD units) against total plots, by the number of candidates tested in stage 1; mean over replicates and stage-2 settings at each bu">
+<div id="fig-sparse-twostage" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Realised gain (true value of the 10 hybrids finally selected, genetic SD units) against total plots, by the number of candidates tested in stage 1; mean over replicates and stage-2 settings at each bu" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-sparse-twostage-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="04f-sparse-testing_files/figure-html/fig-sparse-twostage-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Realised gain (true value of the 10 hybrids finally selected, genetic SD units) against total plots, by the number of candidates tested in stage 1; mean over replicates and stage-2 settings at each bu" width="1125">
@@ -2433,11 +2438,11 @@ Figure&nbsp;10.11: Realised gain (true value of the 10 hybrids finally selected,
 <h4 data-number="10.11.3.7" class="anchored" data-anchor-id="limitations-of-the-simulation"><span class="header-section-number">10.11.3.7</span> Limitations of the simulation</h4>
 <p>The simulation has six limitations.</p>
 <ol type="1">
-<li><strong>One plot per cell.</strong> <span class="math inline">\(\sigma^2_{SCA\times L}\)</span> is confounded with plot error, and the residual estimates their sum. Within-location replication was not simulated.</li>
+<li><strong>One plot per cell.</strong> SCA x location then has the same incidence as plot error, and the analysis model absorbs it into an i.i.d. residual that estimates <span class="math inline">\(\sigma^2_{SCA\times L} + \sigma^2_e\)</span>. Equal incidence alone does not make the two inseparable: drawn with the kernel <span class="math inline">\(\mathbf A_f \otimes \mathbf A_m\)</span>, as <code>sparse_simulate()</code> draws it, SCA x location is correlated between related crosses in one location and could be carried as a structured term; <a href="04g-joint-allocation.html#sec-joint-model" class="quarto-xref"><span>Section 11.2</span></a> measures what that buys in one configuration. Within-location replication was not simulated.</li>
 <li><strong>G x E is full-rank and symmetric in the fast layer, and rank one in the genomic layer.</strong> Neither layer has the factor-analytic structure of real trials or a crossover/non-crossover split <span class="citation" data-cites="burgueno2012 werner2025">(<a href="99-references.html#ref-burgueno2012" role="doc-biblioref">Burgueño et al. 2012</a>; <a href="99-references.html#ref-werner2025" role="doc-biblioref">Werner, Covarrubias-Pazaran, et al. 2025</a>)</span>.</li>
 <li><strong>The pools are symmetric and unselected.</strong> There are no cycles of reciprocal recurrent selection, so the simulation says nothing about long-run pool trajectories (<a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 22</span></a>) or about unbalanced pools.</li>
 <li><strong>Cost is counted in plots, not money.</strong> Opening a location costs more than adding plots to an existing one. The advice to spread plots assumes the marginal location is moderately priced (<a href="04e-mating-design.html#sec-mating-cost" class="quarto-xref"><span>Section 9.7</span></a> has the cost structure).</li>
-<li><strong>The grid is reduced.</strong> It has 15 replicates, no 200-hybrid level, and the high-SCA block run separately. The two-stage layer has 4 replicates and the genomic layer 8.</li>
+<li><strong>The grid is reduced.</strong> It has at most 15 replicates per cell, no 200-hybrid level, and the high-SCA block run separately. The two-stage layer has 4 replicates and the genomic layer 8.</li>
 <li><strong>Components are checked by mean bias only.</strong> No per-replicate confidence intervals were computed.</li>
 </ol>
 </section>
@@ -2447,7 +2452,7 @@ Figure&nbsp;10.11: Realised gain (true value of the 10 hybrids finally selected,
 <h2 data-number="10.12" class="anchored" data-anchor-id="sec-sparse-recommendations"><span class="header-section-number">10.12</span> Practical recommendations by stage</h2>
 <p><strong>Stage 1 (first agronomic testcross trial).</strong></p>
 <ul>
-<li>Give priority to the number of candidates and the number of locations over replication. Keep the plots per hybrid fixed and widen the locations, up to about six (result 2).</li>
+<li>Give priority to the number of candidates and the number of locations in the trial. At fixed plots per hybrid, spread them over more locations, up to about six (result 2).</li>
 <li>Use 3 to 5 testers in sparse testcrossing, with full-sibs spread across testers.</li>
 <li>Use low partial replication (p-rep of 0.1 to 0.2), with checks replicated in every block.</li>
 <li>When plots per hybrid fall to one or two, use a layout that puts both pools in every location (results 3 and 4).</li>
@@ -2518,7 +2523,7 @@ Figure&nbsp;10.11: Realised gain (true value of the 10 hybrids finally selected,
 <ol type="1">
 <li>The accuracy of specific unseen crosses is still unmeasured.</li>
 </ol></li>
-<li><strong>A three-dimensional connectivity metric</strong>, female x male x location. It would join <a href="04e-mating-design.html#sec-mating-connectivity" class="quarto-xref"><span>Section 9.2.3</span></a> to Box 4. <a href="04g-joint-allocation.html" class="quarto-xref"><span>Chapter 11</span></a> defines one.</li>
+<li><strong>A three-dimensional connectivity metric</strong>, female x male x location. It would join <a href="04e-mating-design.html#sec-mating-connectivity" class="quarto-xref"><span>Section 9.2.3</span></a> to Box 4. <a href="04g-joint-allocation.html#sec-joint-criteria" class="quarto-xref"><span>Section 11.4</span></a> defines a pair of counts for it.</li>
 <li><strong>The long-run effect on pool divergence and within-pool variance</strong>, in interaction with optimum contribution selection (<a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 22</span></a>; <a href="09-optimal-contributions.html" class="quarto-xref"><span>Chapter 18</span></a>; <span class="citation" data-cites="santantonio2020hoc">Santantonio and Robbins (<a href="99-references.html#ref-santantonio2020hoc" role="doc-biblioref">2020</a>)</span>).</li>
 <li><strong>Phenomics-assisted sparse testing in maize hybrids.</strong></li>
 <li><strong>Pools unequal in size and breeding level</strong>, which is the usual commercial case.</li>
@@ -2853,7 +2858,7 @@ Table&nbsp;10.8: In-repo sweep (known components, 30 replicates) against the cac
 </figure>
 </div>
 </div>
-<p>At <span class="math inline">\(k = 2\)</span> the two sources agree within sampling error. The mean difference is +0.006, and the gain from spreading the same plots over more locations reproduces. At <span class="math inline">\(k = 1\)</span> the known-component values are higher by +0.017 on average. That is the cost of estimating the components where REML mostly fails to converge (result 5). The in-repo dispersion slopes all sit near 1. The in-repo sweep does <strong>not</strong> resolve the parentage-versus-random difference at <span class="math inline">\(k = 1\)</span>: its 30 unpaired replicates per cell have standard errors near 0.01, the same size as the effect. The paired contrast of <a href="#tbl-sparse-contrasts" class="quarto-xref">Table&nbsp;<span>10.7</span></a>, on 385 pairs, is the evidence for result 3.</p>
+<p>At <span class="math inline">\(k = 2\)</span> the mean difference is +0.006, and 1 of the 14 cells differs by more than two standard errors (the largest, 4.1); the gain from spreading the same plots over more locations reproduces. At <span class="math inline">\(k = 1\)</span> the known-component values are higher by +0.017 on average. That is the cost of estimating the components where REML mostly fails to converge (result 5). The in-repo dispersion slopes all sit near 1. The in-repo sweep does <strong>not</strong> resolve the parentage-versus-random difference at <span class="math inline">\(k = 1\)</span>: its 30 unpaired replicates per cell have standard errors near 0.01, the same size as the effect. The paired contrast of <a href="#tbl-sparse-contrasts" class="quarto-xref">Table&nbsp;<span>10.7</span></a>, on 385 pairs, is the evidence for result 3.</p>
 <p>The live functions are verified in <code>tests/testthat/test-sparse.R</code>:</p>
 <ul>
 <li><code>sparse_blup()</code> equals the literal GLS form of <code>ref_sparse_blup()</code> to <span class="math inline">\(10^{-8}\)</span>, including untested hybrids, and so do its PEVs.</li>
@@ -2866,7 +2871,7 @@ Table&nbsp;10.8: In-repo sweep (known components, 30 replicates) against the cac
 <section id="sec-sparse-connects" class="level2" data-number="10.15">
 <h2 data-number="10.15" class="anchored" data-anchor-id="sec-sparse-connects"><span class="header-section-number">10.15</span> Where this connects</h2>
 <ul>
-<li><a href="04e-mating-design.html" class="quarto-xref"><span>Chapter 9</span></a> chose <em>which crosses</em> to make. This chapter chose <em>where to plant them</em>. The joint problem, sparse in crosses and in environments at once, is <a href="04e-mating-design.html#sec-mating-open" class="quarto-xref"><span>Section 9.9</span></a>’s second gap, and <a href="04g-joint-allocation.html" class="quarto-xref"><span>Chapter 11</span></a> treats it.</li>
+<li><a href="04e-mating-design.html" class="quarto-xref"><span>Chapter 9</span></a> chose <em>which crosses</em> to make. This chapter chose <em>where to plant them</em>, mostly with the whole factorial taken as given. Result 6 traded locations per candidate against a smaller stage-1 factorial at equal plots; what it leaves is the version in which every line stays in the data and the unmade crosses are predicted, so that an extra location per hybrid costs a cross rather than a parent. Result 2 never varied the locations per hybrid; it held two plots per hybrid and widened the trial. The joint problem, <a href="04e-mating-design.html#sec-mating-open" class="quarto-xref"><span>Section 9.9</span></a>’s second gap, is <a href="04g-joint-allocation.html" class="quarto-xref"><span>Chapter 11</span></a>.</li>
 <li>The GCA/SCA decomposition and the tester-frequency argument behind Box 5 are derived in <a href="05b-heterosis-dominance.html#sec-heterosis-gca-sca" class="quarto-xref"><span>Section 13.10</span></a>.</li>
 <li>The relationship matrices that make sparse designs analysable are those of
 <ol start="2" class="example" type="1">
@@ -3007,7 +3012,7 @@ Melchinger, AE, and M Frisch. 2023. <span>“<span class="nocase">Genomic predic
 Mi, Xuefei, H. Friedrich Utz, Frank Technow, and Albrecht E Melchinger. 2014. <span>“<span class="nocase">Optimizing Resource Allocation for Multistage Selection in Plant Breeding with R Package Selectiongain</span>.”</span> <em>Crop Science</em>, ahead of print. <a href="https://doi.org/10.2135/cropsci2013.10.0699">https://doi.org/10.2135/cropsci2013.10.0699</a>.
 </div>
 <div id="ref-montesinoslopez2023" class="csl-entry" role="listitem">
-Montesinos-López, Osval A., Brandon A. Mosqueda-González, Josafat Salinas-Ruiz, Abelardo Montesinos-López, and José Crossa. 2023. <span>“<span class="nocase">Sparse multi-trait genomic prediction under balanced incomplete block design</span>.”</span> <em>The Plant Genome</em>, ahead of print. <a href="https://doi.org/10.1002/tpg2.20305">https://doi.org/10.1002/tpg2.20305</a>.
+Montesinos-López, Osval A., Brandon A. Mosqueda-González, Josafat Salinas-Ruiz, Abelardo Montesinos-López, and José Crossa. 2023. <span>“<span class="nocase">Sparse multi-trait genomic prediction under balanced incomplete block design</span>.”</span> <em>The Plant Genome</em> 16 (2): e20305. <a href="https://doi.org/10.1002/tpg2.20305">https://doi.org/10.1002/tpg2.20305</a>.
 </div>
 <div id="ref-nguyen2023" class="csl-entry" role="listitem">
 Nguyen, V. H., R. I. Z. Morantte, V. Lopena, et al. 2023. <span>“<span class="nocase">Multi-environment genomic selection in rice elite breeding lines</span>.”</span> <em>Rice</em> 16: 7. <a href="https://doi.org/10.1186/s12284-023-00623-6">https://doi.org/10.1186/s12284-023-00623-6</a>.
@@ -3083,9 +3088,6 @@ Werner, C. R., M. Zaman-Allah, T. Assefa, J. E. Cairns, and G. N. Atlin. 2025. <
 </div>
 <div id="ref-williams2011" class="csl-entry" role="listitem">
 Williams, E., H. P. Piepho, and D. Whitaker. 2011. <span>“<span class="nocase">Augmented p-rep designs</span>.”</span> <em>Biometrical Journal</em> 53: 19–27. <a href="https://doi.org/10.1002/bimj.201000102">https://doi.org/10.1002/bimj.201000102</a>.
-</div>
-<div id="ref-windhausen2012" class="csl-entry" role="listitem">
-Windhausen, V. S., G. N. Atlin, J. M. Hickey, et al. 2012. <span>“<span class="nocase">Effectiveness of genomic prediction of maize hybrid performance in different breeding populations and environments</span>.”</span> <em>G3 Genes|Genomes|Genetics</em> 2: 1427–36. <a href="https://doi.org/10.1534/g3.112.003699">https://doi.org/10.1534/g3.112.003699</a>.
 </div>
 </div>
 </section>
