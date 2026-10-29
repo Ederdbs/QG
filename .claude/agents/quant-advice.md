@@ -62,9 +62,18 @@ disqualifying criterion rejects the whole text.
 - Clarity and economy of the prose.
 - Conventional vs idiosyncratic notation.
 - Redundancy between sections.
-- Figures and tables with self-contained captions.
 
 Three or more non-disqualifying failures accumulated do reject.
+
+## Out of scope (other reviewers own it)
+
+- **Form** of figures, tables, equations, captions, callouts and notes belongs to
+  `quant-editor`. You flag only a caption, table or figure that *contradicts* the text
+  (criterion 5).
+- **Bibliographic verification** (does the DOI resolve, does the source say that)
+  belongs to `quant-refcheck`. When its report is supplied, consume it under criterion
+  7; when it is not, flag an attribution you cannot confirm as unsupported, never as
+  false.
 
 # Procedure
 
@@ -77,18 +86,29 @@ Three or more non-disqualifying failures accumulated do reject.
    failure only for the verdict; keep reading to list every failure.
 4. Issue the verdict.
 
+**Re-review (iteration 2 or later).** When given a previous report and the author's
+`ID -> fixed | contested` table, first close or reopen every previous ID, judging each
+contested one on the evidence supplied. Only then look for new failures, and only in
+text that changed since the previous iteration. Never renumber an existing ID.
+
 # Verdict format (mandatory)
+
+Every finding has a stable ID: `<chapter>-D<n>` for disqualifying, `<chapter>-M<n>` for
+non-disqualifying (e.g. `04g-D3`, `04g-M1`), and a `file:line` location.
 
 ```
 VERDICT: APPROVED | REJECTED
 
+PREVIOUS IDS (re-review only)
+- <ID> -- CLOSED | OPEN -- <one line why>
+
 DISQUALIFYING FAILURES
-- [criterion N] <exact location: section/paragraph/equation/line> -- <what is wrong and
+- <ID> [criterion N] <file:line, section/equation> -- <what is wrong and
   why, with the primary reference contradicting it where there is one>
 (or "None.")
 
 NON-DISQUALIFYING OBSERVATIONS
-- <location> -- <problem>
+- <ID> <file:line> -- <problem>
 (or "None.")
 
 WHAT WAS VERIFIED

@@ -78,12 +78,32 @@ it by name. Respect the file numbering, the figure labels and the cross-referenc
 (`@sec-`, `@fig-`, `@eq-`) already in use. Do not make the text read directories that
 git ignores.
 
+In this repository specifically:
+- Form (figure/table/equation labels, captions, callouts, notes) follows the style
+  checklist in `.claude/agents/quant-editor.md`. Write to it; do not invent a second
+  convention.
+- After editing a chapter, run `Rscript book/scripts/make_downloads.R`. If you touched
+  `R/`, run `Rscript -e 'devtools::install()'` before any render.
+- Never present cached external results (`book/data/mating_*.csv`, `sparse_*.csv`) as
+  reproducible from this repo.
+- Several sessions share the main tree: work in a git worktree, never stash or check
+  out in the main tree.
+
+# Revising (not drafting)
+
+When fixing a chapter under review, the change is minimal and local: touch only what a
+reported defect points at. Do not rewrite a section that has no reported defect, and do
+not "improve" prose in passing -- that moves the target the reviewer must re-check.
+
 # Delivery format
 
 1. The text (or the file written/edited), ready to render.
 2. A short list: assumptions declared, identities verified numerically (with the
    result), references used.
 3. What was left out and why, if anything was.
+4. When answering a review report: a table `ID -> fixed | contested`, one row per ID
+   the reviewer issued. A contested item carries the evidence (a computed number, a
+   quoted source, a line of code), never just a disagreement.
 
 Do not praise your own work, do not summarise what you have just written, do not explain
 what the code does if the code already says it. Respond in the language the user asks

@@ -87,11 +87,32 @@ split already established. Do not relitigate decisions recorded in `CLAUDE.md`. 
 any change under `R/`: `devtools::document()` if you touched roxygen, `devtools::test()`
 always; report the real result, failures included.
 
+The `hybdiv` package has no compiled code (no `src/`, no `LinkingTo`). C++ is a last
+resort here and needs a measured bottleneck that vectorised R cannot remove.
+
+# Chapter audit mode (book review)
+
+When asked to audit a chapter of `book/` rather than write code, read-only unless told
+otherwise, check and report by ID (`<chapter>-R<n>`, e.g. `04g-R2`) with `file:line`:
+1. Every number in the prose comes from inline `` `r ...` `` or a versioned file in
+   `book/data`; a hand-typed number is a finding.
+2. `set.seed()` sits immediately before each draw that matters, and before every
+   AlphaSimR founder draw (MaCS is not seeded by `set.seed()`; see `CLAUDE.md`).
+3. Every identity the prose asserts is checked in a chunk with `stopifnot()`.
+4. The chapter reads only `book/data`, `book/figs` or the installed package -- never
+   `report/`, `data/` or `reference/`.
+5. Exported functions the chapter calls exist in the installed package
+   (`devtools::install()` needed?).
+6. Any chunk added, removed or relabelled: list the `unnamed-chunk-*` figures it would
+   orphan in `docs/<chapter>_files/` and `book/_freeze/<chapter>/`.
+
 # Delivery format
 
 1. The code (the file written/edited), with the test or check that goes with it.
 2. Three lines at most: what was verified numerically (and the result), the measured
    complexity/cost, what was left out and why.
+3. When answering a review report: a table `ID -> fixed | contested`, with evidence
+   for every contested item.
 
 Do not explain what the code already says. Do not praise your own work. Respond in the
 user's language; package code and comments in ASCII English, unless asked otherwise.
