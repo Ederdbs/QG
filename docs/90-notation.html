@@ -591,7 +591,8 @@ window.Quarto = {
   <li><a href="#population-sizing" id="toc-population-sizing" class="nav-link" data-scroll-target="#population-sizing"><span class="header-section-number">A.1.8</span> Population sizing</a></li>
   <li><a href="#mating-design" id="toc-mating-design" class="nav-link" data-scroll-target="#mating-design"><span class="header-section-number">A.1.9</span> Mating design</a></li>
   <li><a href="#sparse-testing" id="toc-sparse-testing" class="nav-link" data-scroll-target="#sparse-testing"><span class="header-section-number">A.1.10</span> Sparse testing</a></li>
-  <li><a href="#response-to-selection" id="toc-response-to-selection" class="nav-link" data-scroll-target="#response-to-selection"><span class="header-section-number">A.1.11</span> Response to selection</a></li>
+  <li><a href="#joint-allocation" id="toc-joint-allocation" class="nav-link" data-scroll-target="#joint-allocation"><span class="header-section-number">A.1.11</span> Joint allocation</a></li>
+  <li><a href="#response-to-selection" id="toc-response-to-selection" class="nav-link" data-scroll-target="#response-to-selection"><span class="header-section-number">A.1.12</span> Response to selection</a></li>
   </ul></li>
   <li><a href="#conventions" id="toc-conventions" class="nav-link" data-scroll-target="#conventions"><span class="header-section-number">A.2</span> Conventions</a></li>
   <li><a href="#terms" id="toc-terms" class="nav-link" data-scroll-target="#terms"><span class="header-section-number">A.3</span> Terms</a></li>
@@ -1309,8 +1310,96 @@ window.Quarto = {
 </div>
 <p>Here <span class="math inline">\(k\)</span> counts locations per hybrid; in <a href="04e-mating-design.html" class="quarto-xref"><span>Chapter 9</span></a> it counts testers per pool.</p>
 </section>
-<section id="response-to-selection" class="level3" data-number="A.1.11">
-<h3 data-number="A.1.11" class="anchored" data-anchor-id="response-to-selection"><span class="header-section-number">A.1.11</span> Response to selection</h3>
+<section id="joint-allocation" class="level3" data-number="A.1.11">
+<h3 data-number="A.1.11" class="anchored" data-anchor-id="joint-allocation"><span class="header-section-number">A.1.11</span> Joint allocation</h3>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 46%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Symbol</th>
+<th style="text-align: left;">Meaning</th>
+<th style="text-align: left;">In the code</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(g^f_i\)</span>, <span class="math inline">\(g^m_j\)</span></td>
+<td style="text-align: left;">GCA of a female (pool-A) / male (pool-B) line: the <span class="math inline">\(g^A_i\)</span>, <span class="math inline">\(g^B_j\)</span> above</td>
+<td style="text-align: left;">-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(n_F\)</span>, <span class="math inline">\(n_M\)</span></td>
+<td style="text-align: left;">female / male lines (the <span class="math inline">\(n_A\)</span>, <span class="math inline">\(n_B\)</span> of <a href="04e-mating-design.html" class="quarto-xref"><span>Chapter 9</span></a>)</td>
+<td style="text-align: left;"><code>nF</code>, <code>nM</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(n_c\)</span></td>
+<td style="text-align: left;">distinct crosses made</td>
+<td style="text-align: left;"><code>nrow(plan)</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(B\)</span></td>
+<td style="text-align: left;">field budget in plots, <span class="math inline">\(n_c k r\)</span></td>
+<td style="text-align: left;">-</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(N_P\)</span></td>
+<td style="text-align: left;">planted plots, <span class="math inline">\(n_c k r\)</span> (rows of <span class="math inline">\(\mathbf{X}_P\)</span>)</td>
+<td style="text-align: left;"><code>sum(M)</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(N_{SNP}\)</span></td>
+<td style="text-align: left;">markers; replaces <span class="math inline">\(m\)</span>, which marks the male pool</td>
+<td style="text-align: left;"><code>n_snp</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(n_l\)</span></td>
+<td style="text-align: left;">plots at location <span class="math inline">\(l\)</span></td>
+<td style="text-align: left;"><code>colSums(M)</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\mathbf{X}_P\)</span></td>
+<td style="text-align: left;">hybrid marker matrix of the planted plots, one row per plot, 0/0.5/1</td>
+<td style="text-align: left;">-</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(SS_B\)</span></td>
+<td style="text-align: left;">between-location sum of squares of <span class="math inline">\(\mathbf{X}_P\)</span>, summed over markers</td>
+<td style="text-align: left;">-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(GD_l\)</span>, <span class="math inline">\(GD_P\)</span></td>
+<td style="text-align: left;">gene diversity <span class="math inline">\(1 - \theta\)</span> of location <span class="math inline">\(l\)</span>’s plots / of all planted plots</td>
+<td style="text-align: left;">-</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\mathbf{Z}\)</span>, <span class="math inline">\(w\)</span></td>
+<td style="text-align: left;">0/1 subgroup indicators per plot / weight equating their total SS to the markers’</td>
+<td style="text-align: left;"><code>wZ * Zh</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\mathbf{A}_f\)</span>, <span class="math inline">\(\mathbf{A}_m\)</span></td>
+<td style="text-align: left;">relationship matrices of the female / male lines</td>
+<td style="text-align: left;"><code>A</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\sigma^2_{f\ell}\)</span>, <span class="math inline">\(\sigma^2_{m\ell}\)</span>, <span class="math inline">\(\sigma^2_{s\ell}\)</span></td>
+<td style="text-align: left;">variances of GCA x location (female, male) and SCA x location</td>
+<td style="text-align: left;"><code>sparse_vc()$s2fl</code>, <code>$s2ml</code>, <code>$s2sl</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="response-to-selection" class="level3" data-number="A.1.12">
+<h3 data-number="A.1.12" class="anchored" data-anchor-id="response-to-selection"><span class="header-section-number">A.1.12</span> Response to selection</h3>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">

@@ -701,7 +701,8 @@ z_fs <- max(zs_fs)
 #' genotypes are distributed. Hybrids add a dimension. There is female x male
 #' connectivity, the subject of @sec-mating-connectivity. There is genotype x
 #' location connectivity. And there is **female x male x location**, for which no
-#' metric is agreed (@sec-sparse-limits); @sec-joint-criteria proposes one. The available tools
+#' metric is agreed (@sec-sparse-limits); @sec-joint-criteria gives a necessary screen and a
+#' counter-example to sufficiency, and leaves the metric open. The available tools
 #' are:
 #' 
 #' - the rank of the incidence matrix;

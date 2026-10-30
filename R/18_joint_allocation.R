@@ -25,9 +25,10 @@
 #' * `"optimised"` -- an exchange search from `start` (default: a fresh
 #'   `"coverage"` allocation) that
 #'   accepts a move of one cross from one location to another (paired with a
-#'   reverse move when loads would drift) only if it lowers [joint_pev]. The
-#'   A-optimality criterion of model-based design (Butler, Smith and Cullis
-#'   2014), with the variance components known. First-improvement acceptance,
+#'   reverse move when loads would drift) only if it lowers [joint_pev], an
+#'   A-type criterion on the GCA effects with the variance components known
+#'   (not the mean PEV of pairwise differences of Butler, Smith and Cullis
+#'   2014; the two need not rank designs identically). First-improvement acceptance,
 #'   `n_iter` proposals, no convergence test.
 #'
 #' @param plan Crossing plan: integer columns `parent1` (female, `1..nF`) and
@@ -98,8 +99,11 @@ joint_alloc <- function(plan, nF, nM, nLoc, k = 1L,
 #' Builds the mixed-model coefficient matrix of [sparse_blup] for the cells of
 #' `M` (no phenotype is needed: the equations' left-hand side depends on the
 #' design alone) and returns the mean PEV of the `nF + nM` GCA effects. Lower is
-#' better; it is the A-optimality criterion restricted to the effects a
-#' programme selects parents on.
+#' better. With `C = W'W + blockdiag(G_t^-1 * s2res / s2_t)` the residual-scaled
+#' coefficient matrix and `C^GCA` the GCA block of `C^-1`, it is
+#' s2res * trace(C^GCA) / (nF + nM), an A-type criterion on the effects
+#' a programme selects parents on; it is not the mean PEV of pairwise GCA
+#' differences, which adds the covariance terms and may rank designs differently.
 #'
 #' @param M Allocation matrix (`nF*nM x nLoc`), zero rows allowed.
 #' @inheritParams joint_alloc
@@ -126,18 +130,22 @@ joint_pev <- function(M, nF, nM, vc, Af = diag(nF), Am = diag(nM)) {
 #' planting.
 #'
 #' * `n_comp_cross` -- components of the female x male graph of the crosses that
-#'   receive at least one plot, pooled over locations. Because GCA is a main
-#'   effect shared by every location, this is what links GCA contrasts by data;
-#'   at one location it is exactly the bipartite count of
+#'   receive at least one plot, pooled over locations; at one location it is
+#'   exactly the bipartite count of
 #'   [design_diagnostics]. Two NC II blocks stay two components however they
 #'   are spread over locations.
 #' * `n_comp_loc` -- components of the location graph in which two locations
 #'   are joined when they share a parent. Location contrasts are linked by data
 #'   only when it is 1.
 #'
-#' Both equal to 1 is necessary, not sufficient: a relationship matrix can
-#' link what the data do not, and shared parents link locations only through
-#' the GCA of those parents.
+#' A screen, not a test: both equal to 1 is necessary for every GCA and
+#' location contrast to be estimable from data, not sufficient. When every
+#' location receives a plot, `n_comp_cross == 1` already implies
+#' `n_comp_loc == 1`. Counter-example to sufficiency: 2 x 2 pools, female 1's
+#' crosses at location 1 and female 2's at location 2 give both counts 1, yet
+#' the female GCA contrast is aliased with the location contrast
+#' (`model.matrix(~ loc + female + male)` has rank 3 of 4; Chapter 4g). A
+#' relationship matrix can also link what the data do not.
 #'
 #' @inheritParams joint_pev
 #' @return The list of [sparse_connectivity] with `n_comp_cross` and

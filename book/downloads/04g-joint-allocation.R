@@ -59,6 +59,15 @@ jc <- read.csv(book_data("joint_contrasts.csv"))
 jo <- read.csv(book_data("joint_optimiser.csv"))
 r3 <- function(x) sprintf("%.3f", x)
 strat_col <- c(random = "#d95f02", coverage = "#1b9e77", optimised = "#7570b3")
+# sparse_vc() as the prose states it: SCA a quarter of (low) or equal to (high)
+# a GCA variance; each GxL variance half its main effect, so the genetic
+# correlation between locations is Vg / (Vg + VgxE) = 2/3 for every term.
+for (sc in c("low", "high")) for (h in c(0.2, 0.3, 0.4)) local({
+  v <- sparse_vc(h, sc)
+  stopifnot(isTRUE(all.equal(v$s2s / v$s2f, if (sc == "low") 0.25 else 1)),
+            isTRUE(all.equal(c(v$s2f / (v$s2f + v$s2fl), v$s2s / (v$s2s + v$s2sl),
+                               v$Vg / (v$Vg + v$VgxE)), rep(2 / 3, 3))))
+})
 # Pooled paired contrast: mean of the cell differences, SE of that mean.
 pooled <- function(ct, m = "acc_all", by = NULL) {
   x <- jc[jc$contrast == ct & jc$metric == m, ]
@@ -109,20 +118,27 @@ zm <- mapply(zc, 2, 8, c(0.2, 0.4, 0.2, 0.4), c("low", "low", "high", "high"),
 #' 1. **At a fixed budget, distinct crosses beat locations per cross for
 #'    predicting all hybrids.** Spending 160 plots as 160 crosses at one location
 #'    each beat 80 at two, which beat 40 at four, in direction in every scenario
-#'    simulated, by a margin that grows with SCA; not every step is resolved
-#'    (@sec-joint-results). For the crosses that were made the order reverses,
-#'    less firmly, so the split of the budget is a statement about what will be
-#'    selected.
+#'    simulated, by a margin that grows with the specific combining ability (SCA)
+#'    variance; not every step is resolved
+#'    (@sec-joint-results). For the crosses that were made the order of the
+#'    extremes reverses (40 crosses at four locations against 160 at one), but
+#'    not in every step: at $h^2 = 0.2$ and high SCA, 80 crosses at two locations
+#'    do not beat 160 at one. The split of the budget is a statement about what
+#'    will be selected.
 #' 2. **Allocation strategy is a second-order decision.** With the plan and the
 #'    locations per cross fixed, a placement that keeps as much of both pools as
 #'    possible in each location raises parent coverage substantially; its accuracy
 #'    gain over random placement of the same plan,
 #'    `r sprintf("%+.3f", pooled("coverage - random")$diff)` correlation points on the
 #'    point estimate, is not detected.
-#' 3. **The PEV criterion ranks plans, not placements.** The mean PEV of GCA,
-#'    computable before planting, orders the budget splits much as accuracy does.
+#' 3. **The PEV criterion ranks plans, not placements.** The mean prediction
+#'    error variance (PEV) of general combining ability (GCA), computable before
+#'    planting, orders the budget splits much as accuracy does (@fig-joint-pev).
 #'    An exchange search on it, stopped at 600 proposals before convergence,
-#'    lowered PEV by a fraction of a percent and bought no detected accuracy.
+#'    lowered PEV by a fraction of a percent and bought no detected accuracy
+#'    pooled over all plans; within the tester family alone its gain passed two
+#'    standard errors but not three, on four cells with one optimised design
+#'    each.
 #' 
 #' ::: {.callout-note}
 #' ## Where the numbers come from
@@ -135,7 +151,7 @@ zm <- mapply(zc, 2, 8, c(0.2, 0.4, 0.2, 0.4), c("low", "low", "high", "high"),
 #'   connectivity diagnostics take it unchanged.
 #' - **In-repo** results come from `Rscript book/scripts/regenerate.R joint`
 #'   (`joint_core_sweep.csv`, `joint_contrasts.csv`, `joint_optimiser.csv`;
-#'   about 30 minutes of CPU): 20 x 20 pools in half-sib families of four, eight
+#'   about 30 minutes of CPU in one unrecorded timing): 20 x 20 pools in half-sib families of four, eight
 #'   locations, **known** variance components, 30 replicates per cell. Strategy
 #'   comparisons are **paired**: within a replicate the designs share the plan
 #'   and the true values.
@@ -150,12 +166,12 @@ zm <- mapply(zc, 2, 8, c(0.2, 0.4, 0.2, 0.4), c("low", "low", "high", "high"),
 #' candidates, $n_A$ and $n_B$, of @sec-mating -- $n_c$ for the number of distinct
 #' crosses made, $L$ for the locations, $k$ for the number of locations each cross
 #' is planted in (as in @sec-sparse; not the testers per pool of @sec-mating, which
-#' appear below only in the label `tester k=2`), and $r$ for plots per cross per
+#' appear in this chapter only in the label `tester k=2` of @fig-joint-budget), and $r$ for plots per cross per
 #' location. The field budget is
 #' 
 #' $$
 #' B = n_c \, k \, r .
-#' $$
+#' $$ {#eq-joint-budget}
 #' 
 #' @sec-mating varied $n_c$ (through the crosses per line $c$, $n_c = c\,n_F$ for
 #' a circulant plan) at fixed $k$; @sec-sparse varied $k$ and the layout at fixed
@@ -167,13 +183,14 @@ zm <- mapply(zc, 2, 8, c(0.2, 0.4, 0.2, 0.4), c("low", "low", "high", "high"),
 #' candidates are a smaller factorial, so their parents leave the data, and a
 #' second stage with selection follows. Here every line stays in the data, the
 #' unmade crosses are predicted from it, and the comparison is of stage-1
-#' accuracy alone. Result 1 below points the same way as result 6.
+#' accuracy alone. Result 1 (@sec-joint-split) points the same way as result 6.
 #' 
-#' The two terms buy different things. More crosses put more lines into data and
-#' sample more of the factorial, which is what predicts the crosses never made
+#' The two terms buy different things. More crosses sample more of the factorial
+#' (in the circulant plans every line is in the data at every split; in the random
+#' sparse plans of @sec-joint-results it is not, @sec-joint-criteria), which is what predicts the crosses never made
 #' (@sec-mating-genomic; @melchinger2023). More locations per cross average that
 #' cross's genotype x location deviations, $(g^f\ell)$, $(g^m\ell)$ and $(s\ell)$
-#' in the model below, over more environments, which is what sharpens the
+#' in @eq-joint-model, over more environments, which is what sharpens the
 #' estimate of a cross that was made. That is the expectation under the model of
 #' @sec-joint-model, not a result of @sec-sparse: its result 2 held the
 #' locations per hybrid fixed while widening the trial (the difference from
@@ -192,10 +209,11 @@ zm <- mapply(zc, 2, 8, c(0.2, 0.4, 0.2, 0.4), c("low", "low", "high", "high"),
 #' $$
 #' y_{ijl} = \mu + \ell_l + g^f_i + g^m_j + s_{ij}
 #'         + (g^f\ell)_{il} + (g^m\ell)_{jl} + (s\ell)_{ijl} + e_{ijl},
-#' $$
+#' $$ {#eq-joint-model}
 #' 
 #' where $g^f_i$, $g^m_j$ and $s_{ij}$ are the $\mathrm{GCA}^f_i$, $\mathrm{GCA}^m_j$
-#' and $\mathrm{SCA}_{ij}$ of @sec-sparse-foundations, $\ell_l$ is the fixed effect of
+#' and $\mathrm{SCA}_{ij}$ of @sec-sparse-foundations (the $g^A_i$, $g^B_j$ and
+#' $s_{ij}$ of @sec-mating, with the female pool as A; @sec-notation), $\ell_l$ is the fixed effect of
 #' location $l$, $g^f \sim N(\mathbf 0, \mathbf A_f\sigma^2_f)$,
 #' $g^m \sim N(\mathbf 0, \mathbf A_m\sigma^2_m)$,
 #' $s \sim N(\mathbf 0, (\mathbf A_f \otimes \mathbf A_m)\sigma^2_s)$, and the
@@ -210,16 +228,17 @@ zm <- mapply(zc, 2, 8, c(0.2, 0.4, 0.2, 0.4), c("low", "low", "high", "high"),
 #' 
 #' One simplification is inherited from @sec-sparse. With one plot per cross per
 #' location, $(s\ell)_{ijl}$ and $e_{ijl}$ have the same incidence, but the
-#' simulator draws $(s\ell)$ with the kernel above, correlated between related
+#' simulator draws $(s\ell)$ with the kernel of @eq-joint-model, correlated between related
 #' crosses in one location, so a model could carry it as a structured term. The
 #' analysis model does not: it absorbs it into an i.i.d. residual of variance
-#' $\sigma^2_{s\ell} + \sigma^2_e$ (`vc$s2res`). The BLUP and every PEV below are
+#' $\sigma^2_{s\ell} + \sigma^2_e$ (`vc$s2res`). The best linear unbiased prediction (BLUP) and every PEV below are
 #' therefore exact for the *analysis* model, not for the generating one. With
-#' known components the cost is measured directly, by a literal GLS that carries
-#' the structured kernel, in the configuration of @tbl-joint-freq.
+#' known components the cost is measured directly, by a literal generalised least squares (GLS) solve that carries
+#' the structured kernel, in the configuration of @tbl-joint-freq (@tbl-joint-misspec).
 #' 
 ## -----------------------------------------------------------------------------
-#| label: joint-misspec
+#| label: tbl-joint-misspec
+#| tbl-cap: 'Accuracy over all 400 hybrids of the literal GLS BLUP with the simulated kernel $\mathbf A_f \otimes \mathbf A_m$ on $(s\ell)$ minus the same BLUP with the analysed kernel $\mathbf I$: mean paired difference in correlation between predicted and true genetic value, and its standard error, over 30 replicates. Circulant plan, 4 crosses per line, 20 x 20 pools in half-sib families of four, 8 locations, 2 locations per cross, coverage allocation, plot $h^2 = 0.4$, known components. Live.'
 # Literal GLS BLUP of the target g^f + g^m + s, with (s l) given the kernel
 # Ksl over the hybrids within a location: A_f x A_m as simulated, or I as
 # analysed. Circulant c = 4, 20 x 20 half-sib pools, 8 locations, k = 2,
@@ -255,7 +274,8 @@ ms <- local({
     c(diff = mean(d), se = sd(d) / sqrt(length(d)))
   }, c(diff = 0, se = 0))
 })
-signif(ms, 2)   # accuracy, correct minus analysed kernel, over all hybrids
+knitr::kable(data.frame(SCA = colnames(ms), fmt(t(ms), 6), row.names = NULL),
+             col.names = c("SCA level", "Mean difference", "SE"))
 
 #' 
 #' Carrying the structured kernel changes accuracy over all hybrids by
@@ -280,7 +300,9 @@ signif(ms, 2)   # accuracy, correct minus analysed kernel, over all hybrids
 ## -----------------------------------------------------------------------------
 #| label: joint-incidence
 p <- design_circulant(6, 6, c = 2)            # 12 of 36 possible crosses
+set.seed(21)
 M <- joint_alloc(p, 6, 6, nLoc = 3, k = 1, strategy = "coverage")
+stopifnot(sum(M) == nrow(p) * 1, all(rowSums(M) %in% c(0, 1)))  # N_P = n_c k
 c(crosses_made = sum(rowSums(M) > 0), plots = sum(M), per_location = colSums(M))
 
 #' 
@@ -340,7 +362,8 @@ lit <- data.frame(
            "@isidro2015; @bustoskorts2016; @berro2019; @ou2019; @akdemir2019; @debeukelaer2018",
            "@atanda2021; @papenberg2021"),
   check.names = FALSE)
-knitr::kable(lit, row.names = FALSE)
+knitr::kable(lit, row.names = FALSE,
+             col.names = c("Approach", "Optimises", "Held fixed", "Borrowed", "References"))
 
 #' 
 #' **Optimising the field for a given entry list** (rows 1, 2, 5, 6) supplies the
@@ -348,7 +371,8 @@ knitr::kable(lit, row.names = FALSE)
 #' predicted genetic effects under the mixed model that will analyse the trial,
 #' relationship matrix included, and beat designs built for unrelated entries in
 #' silico; @lisle2021 diagnose whether a multi-environment design can estimate its
-#' variance parameters at all; @rio2022 extend CDmean [@rincent2012] to G x E
+#' variance parameters at all; @rio2022 extend CDmean, the mean coefficient of
+#' determination [@rincent2012], to genotype x environment (G x E)
 #' models, so reliability can be forecast before planting. The criterion of this
 #' chapter is that framework restricted to GCA. Incomplete-block allocation of
 #' lines to locations beat random allocation by 1.4 to 26.5 % in mean squared
@@ -356,24 +380,27 @@ knitr::kable(lit, row.names = FALSE)
 #' [@montesinoslopez2023]; two of four allocation methods were slightly better,
 #' with accuracy barely lower at a 15:85 training-testing split
 #' [@montesinoslopez2023genes]; and at equal environments per line
-#' incomplete blocks were *less variable* than random [@montesinoslopez2024] -- a
-#' worst-case property a mean accuracy does not show. @lell2021 (1,604 wheat
-#' hybrids) found equal subgroups in overlapping subsets of environments best;
+#' incomplete blocks performed better than random and were *less variable*
+#' [@montesinoslopez2024] -- the second a worst-case property a mean accuracy
+#' does not show. @lell2021 (1,604 wheat
+#' hybrids) found equal subgroups in overlapping subsets of environments one
+#' promising design, with high accuracy and low variability;
 #' @mothukuri2025 guided the split by relatedness to fully tested maize lines,
 #' with a weak correlation (0.20 to 0.31) between relatedness and accuracy. The
 #' overlap question is @sec-sparse-overlap's [@jarquin2020; @crespoherrera2021;
 #' @lubanga2025; @atanda2022]. Which environments to sample is a further choice:
 #' sets chosen with a crop-growth-model criterion estimated wheat phenology
 #' parameters better than random sets twice as large [@rincent2017],
-#' mega-environmental allocation reported a 40 % gain in response for the same
-#' resources [@gonzalezbarrios2019], and @hoefler2026 optimise its replication and
+#' a moderate mega-environmental allocation could potentially raise selection
+#' response by up to 43 % for the same resources [@gonzalezbarrios2019], and @hoefler2026 optimise its replication and
 #' sparsity by simulation. The locations here are exchangeable, which a real
 #' target population of environments is not.
 #' 
 #' **Choosing entries and crosses for given environments** (rows 3, 4, 7)
-#' supplies the search and the coverage logic. @kadam2021 show that optimising
-#' PEV or CDmean over *all possible* single crosses, not only those made, gives a
-#' better training set; @heslot2020, the closest methodological precedent, choose
+#' supplies the search and the coverage logic. @kadam2021 report that optimising
+#' PEV or CDmean over *all possible* single crosses, not only those made, raised
+#' the *expected* prediction accuracy of the training set (a model forecast, not a
+#' realised accuracy) and conclude that it may be worthwhile; @heslot2020, the closest methodological precedent, choose
 #' which maize hybrids to create and phenotype by mixed binary-integer
 #' differential evolution, extended to designing a connected population before
 #' crossing; @guo2019 chose maize, wheat and rice hybrid training sets from the
@@ -382,7 +409,7 @@ knitr::kable(lit, row.names = FALSE)
 #' biparental barley and maize families, choosing no cross: an unbalanced design
 #' over several locations predicted better than every entry in one, and up to 250
 #' yield-plot equivalents per family the optimum did not genotype more progeny
-#' than were phenotyped (its relation to result 1 is in @sec-joint-results).
+#' than were phenotyped (its relation to result 1 is in @sec-joint-split).
 #' Sparse factorials train hybrid prediction at least as well
 #' as tester designs, and fewer crosses per line favours the lines never crossed
 #' [@seye2020; @lorenzi2022; @melchinger2023]. @gonzalezdieguez2026 instead
@@ -438,9 +465,10 @@ knitr::kable(lit, row.names = FALSE)
 #' model of @sec-joint-model, with fixed location effects and a connected design,
 #' concentrating one subgroup's crosses in a few locations does not bias the BLUP
 #' of its mean; it inflates the PEV of contrasts between subgroups, which pass
-#' through the effects of locations they do not share. Bias needs a subgroup x
-#' location interaction the analysis model does not carry (the zero-mean GCA x
-#' location terms do not represent one). Against the presumption,
+#' through the effects of locations they do not share. Bias needs a systematic subgroup x
+#' location interaction the analysis model does not carry: the GCA x location
+#' terms, correlated within a family through $A_f$, carry a *random* family x
+#' location interaction with mean zero, not a systematic one. Against the presumption,
 #' @fernandezgonzalez2023 found in a benchmark of training-set optimisers that a
 #' diverse training set made prediction robust to structure and clustering
 #' information was less effective. None of these papers allocates a crossing
@@ -459,35 +487,106 @@ knitr::kable(lit, row.names = FALSE)
 #' **The mean PEV of GCA.** The left-hand side of the mixed-model equations
 #' depends on the design alone, so the prediction error variance of every GCA
 #' effect is known before any phenotype exists. `joint_pev()` returns its mean
-#' over the $n_F + n_M$ GCA effects: the A-optimality criterion of @butler2014
-#' restricted to the effects parents are selected on, exact for the analysis
-#' model of @sec-joint-model with known components. @tbl-joint-live shows it
+#' over the $n_F + n_M$ GCA effects, the trace of the GCA block of the inverted
+#' coefficient matrix divided by its order, exact for the analysis model of
+#' @sec-joint-model with known components. It is an A-type criterion on the
+#' effects themselves, not the mean PEV of pairwise differences between effects
+#' used as the A-value in model-based design [@butler2014]; the two differ by the
+#' covariance terms and need not rank designs identically. @tbl-joint-live shows it
 #' ranking allocations of one plan. It is blind to SCA and to the difference
 #' between predicting made and unmade crosses.
 #' 
 #' **Two component counts.** A single graph with females, males and locations as
 #' nodes is the obvious female x male x location metric, and it is wrong: a
 #' location node joins every parent planted there, so at one location it reports
-#' one component for any plan, two disconnected NC II blocks included. A shared
+#' one component for any plan, two disconnected North Carolina design II (NC II) blocks included. A shared
 #' location links only *sums* of GCA. `joint_connectivity()` therefore returns two
 #' counts alongside the R/17 diagnostics:
 #' 
 #' - `n_comp_cross`, the components of the female x male graph of the crosses
-#'   that receive a plot, pooled over locations. GCA is a main effect shared by
-#'   every location, so this is what links GCA contrasts by data, and at one
-#'   location it is exactly the bipartite count of @sec-mating-connectivity.
+#'   that receive a plot, pooled over locations. At one location it is exactly
+#'   the bipartite count of @sec-mating-connectivity.
 #' - `n_comp_loc`, the components of the location graph in which two locations
-#'   are joined when they share a parent. Location contrasts are linked by data
-#'   only when it is 1.
+#'   are joined when they share a parent.
 #' 
-#' Both equal to 1 is *necessary*, not sufficient: a relationship matrix can link
-#' families the data do not, and shared parents link locations only through those
-#' parents' GCA. This pair is the female x male x location metric
-#' @sec-sparse-limits asked for.
+#' Both equal to 1 is *necessary* for GCA and location contrasts to be linked by
+#' data, and the pair is not two independent conditions: if every location
+#' receives a plot, `n_comp_cross = 1` implies `n_comp_loc = 1`. Locations split
+#' into two sets sharing no parent would put each planted cross wholly in one
+#' set, disconnecting the cross graph. So `n_comp_loc` adds information only when
+#' `n_comp_cross > 1` or a location is empty. Neither count is sufficient, and
+#' the pair does not detect confounding of GCA with location. With 2 x 2 pools,
+#' two locations and $k = 1$, the crosses (1,1) and (1,2) at location 1 and
+#' (2,1) and (2,2) at location 2 give `n_comp_cross = 1` and `n_comp_loc = 1`,
+#' yet the female contrast is the location contrast: the fixed-effects matrix of
+#' location, female and male is rank-deficient by one (@tbl-joint-alias). A check
+#' that would detect this is the rank of that matrix over the planted plots;
+#' `joint_connectivity()` does not compute it. The two counts are therefore a
+#' screen, not the female x male x location metric @sec-sparse-limits asked for,
+#' which remains open.
+#' 
+## -----------------------------------------------------------------------------
+#| label: tbl-joint-alias
+#| tbl-cap: "Connected by both counts, yet the female GCA contrast is aliased with the location contrast. 2 x 2 pools, two locations, one location per cross. Live."
+pix <- list(f = rep(1:2, each = 2), m = rep(1:2, 2))  # male fastest, as in R/17
+Ma <- cbind(loc1 = as.integer(pix$f == 1), loc2 = as.integer(pix$f == 2))
+cn <- joint_connectivity(Ma, 2, 2)
+cells <- which(Ma == 1L, arr.ind = TRUE)
+Xa <- model.matrix(~ loc + f + m,
+                   data.frame(loc = factor(cells[, 2]), f = factor(pix$f[cells[, 1]]),
+                              m = factor(pix$m[cells[, 1]])))
+rk <- qr(Xa)$rank
+stopifnot(cn[["n_comp_cross"]] == 1, cn[["n_comp_loc"]] == 1, rk == ncol(Xa) - 1)
+knitr::kable(data.frame(female = pix$f, male = pix$m, Ma), row.names = FALSE,
+             col.names = c("Female", "Male", "Location 1", "Location 2"))
+
+#' 
+#' The chunk asserts both counts equal to 1 and a rank of `r rk` for
+#' `r ncol(Xa)` columns.
+#' 
+## -----------------------------------------------------------------------------
+#| label: joint-uncrossed
+# Share of random sparse plans (20 x 20) with at least one uncrossed line.
+uncrossed <- function(p, n) {
+  any(tabulate(p[["parent1"]], n) == 0 | tabulate(p[["parent2"]], n) == 0)
+}
+n_unc <- 20000
+unc <- c(c4 = NA, c8 = NA)
+set.seed(21)
+unc[["c4"]] <- mean(replicate(n_unc, uncrossed(design_random_sparse(20, 20, c = 4), 20)))
+set.seed(22)
+unc[["c8"]] <- mean(replicate(n_unc, uncrossed(design_random_sparse(20, 20, c = 8), 20)))
+# A c = 4 plan with an uncrossed line passes both counts.
+set.seed(23)
+repeat {
+  pu <- design_random_sparse(20, 20, c = 4)
+  du <- design_diagnostics(pu, 20, 20)
+  if (uncrossed(pu, 20) && du[["components"]] == 1) break
+}
+cn_u <- joint_connectivity(joint_alloc(pu, 20, 20, nLoc = 8, k = 2, strategy = "coverage"),
+                           20, 20)
+stopifnot(cn_u[["n_comp_cross"]] == 1, cn_u[["n_comp_loc"]] == 1, !du[["connected"]])
+
+#' 
+#' Neither count sees a line that receives no cross. `design_random_sparse()`
+#' draws $\mathrm{round}(c\,n_F)$ cells of the factorial without a per-line
+#' guarantee, so a line can go uncrossed; `design_components()` labels it unused
+#' and both counts are taken over the lines in use. In `r n_unc` random sparse plans on
+#' the 20 x 20 pools of @sec-joint-results, the share with at least one uncrossed
+#' line was `r sprintf("%.3f", unc[["c4"]])` at 4 crosses per line and
+#' `r sprintf("%.3f", unc[["c8"]])` at 8. One c = 4 plan with an uncrossed line,
+#' allocated by coverage to eight locations at two per cross, returns
+#' `n_comp_cross` = `r cn_u[["n_comp_cross"]]` and `n_comp_loc` =
+#' `r cn_u[["n_comp_loc"]]`. `design_diagnostics()` flags it (`connected` is
+#' `FALSE` because `lines_A` or `lines_B` falls short of the pool). Within the
+#' random family, therefore, moving from 8 to 4 crosses per line changes the
+#' number of lines in the data as well as the split, and the two random
+#' configurations of @sec-joint-results do not isolate the split; the circulant
+#' plans, which cross every line $c$ times, do.
 #' 
 ## -----------------------------------------------------------------------------
 #| label: tbl-joint-live
-#| tbl-cap: "One crossing plan (circulant, 3 crosses per line, 10 x 10), three allocations over 4 locations at 2 locations per cross. Mean PEV of GCA (lower is better), share of each pool present per location, and the two component counts. Live."
+#| tbl-cap: "One crossing plan (circulant, 3 crosses per line, 10 x 10 pools in half-sib families of five), three allocations over 4 locations at 2 locations per cross; plot $h^2 = 0.3$, low SCA, known components, one allocation per strategy. Mean PEV of GCA (lower is better), share of each pool present per location, and the two component counts. Live."
 set.seed(11)
 vc <- sparse_vc(0.3); A <- relmat_halfsib(10, 2)
 p <- design_circulant(10, 10, c = 3)
@@ -499,12 +598,14 @@ live <- do.call(rbind, lapply(names(strat_col), function(s) {
              fem_cover = cn$fem_cover, male_cover = cn$male_cover,
              n_comp_cross = cn$n_comp_cross, n_comp_loc = cn$n_comp_loc)
 }))
-knitr::kable(fmt(live, 4), row.names = FALSE)
+knitr::kable(fmt(live, 4), row.names = FALSE,
+             col.names = c("Strategy", "Plots", "Mean PEV of GCA", "Female coverage",
+                           "Male coverage", "`n_comp_cross`", "`n_comp_loc`"))
 
 #' 
 #' ### Allele frequencies per location {#sec-joint-freq}
 #' 
-#' Neither criterion above reads a genotype. A plan can be connected and low in
+#' Neither criterion of @sec-joint-criteria reads a genotype. A plan can be connected and low in
 #' PEV and still send most crosses of one subgroup to a few locations, which
 #' costs precision in subgroup contrasts, or bias under a subgroup x location
 #' interaction the model omits (@sec-joint-literature gives the argument and the
@@ -526,7 +627,7 @@ knitr::kable(fmt(live, 4), row.names = FALSE)
 #' + SS_B,
 #' \qquad
 #' SS_B = \sum_l n_l \lVert \bar{\mathbf p}_l - \bar{\mathbf p} \rVert^2 ,
-#' $$
+#' $$ {#eq-joint-ssb}
 #' 
 #' with $SS_B$ the between-location sum of squares, summed over markers.
 #' 
@@ -554,16 +655,16 @@ knitr::kable(fmt(live, 4), row.names = FALSE)
 #' 
 #' $$
 #' \sum_l \frac{n_l}{N_P}\, GD_l \;=\; GD_P - \frac{2\,SS_B}{N_P\, N_{SNP}},
-#' $$
+#' $$ {#eq-joint-gd}
 #' 
 #' with $GD_P$ the gene diversity of all planted plots. Take the locations as the
-#' subpopulations of @sec-subdivided and weight them, as @caballero2002 weight
-#' theirs, by their share $N_i/N_T = n_l/N_P$ of the plots. Then $GD_P$ is
+#' subpopulations of @sec-subdivided and weight them, as that chapter weights
+#' the subpopulations of @caballero2002, by their share $N_i/N_T = n_l/N_P$ of the plots. Then $GD_P$ is
 #' $GD_T = 1 - \bar f$, the left-hand side is $GD_{WS} = 1 - \tilde f$, and
 #' 
 #' $$
 #' \frac{2\,SS_B}{N_P\, N_{SNP}} = GD_{BS} = \tilde f - \bar f
-#' $$
+#' $$ {#eq-joint-gdbs}
 #' 
 #' exactly, for any loads; it is also the $\bar D$ in @sec-subdivided's $F_{ST}$,
 #' and Nei's $D_{ST} = H_T - H_S$ [@nei1973] with $H_S$ the plot-weighted mean of
@@ -580,7 +681,7 @@ knitr::kable(fmt(live, 4), row.names = FALSE)
 #' $$
 #' \sum_l n_l \lVert \bar{\mathbf p}_l - \mathbf p_0 \rVert^2
 #' = SS_B + N_P \lVert \bar{\mathbf p} - \mathbf p_0 \rVert^2 ,
-#' $$
+#' $$ {#eq-joint-base}
 #' 
 #' and the second term is fixed by the crossing plan, so with the plan fixed the
 #' two bases rank allocations identically. That term is the plan's departure from
@@ -595,25 +696,26 @@ knitr::kable(fmt(live, 4), row.names = FALSE)
 #' (@sec-mating-connects).
 #' 
 #' @tbl-joint-freq computes all of this for one plan at the scale of the sweep
-#' below, under four allocations: random; coverage; an exchange search that swaps
+#' of @sec-joint-results, under four allocations: random; coverage; an exchange search that swaps
 #' two plots between locations when $SS_B$ falls (loads and $k$ unchanged); and
 #' the same search on $[\mathbf X_P,\; w\mathbf Z]$, the markers with the
 #' female-family x male-family indicators appended and $w$ set so that both
-#' blocks carry the same total sum of squares over the planted plots. Columns:
+#' blocks carry the same total sum of squares over the planted plots. Rows:
 #' `between_pct`, $100\,SS_B$ over the marker sum of squares; `rms_dp`,
 #' $\sqrt{SS_B/(N_P N_{SNP})}$; `gd_short_pct`, the shortfall of the
 #' plot-weighted mean $GD_l$ from $GD_P$, in % of $GD_P$; `groups_between_pct`,
 #' `between_pct` on $\mathbf Z$; `families` and `family_pairs`, the share of each
 #' pool's parent families, and of the plan's family classes, present per
 #' location; `fem_cover` and `pev_gca` as in @tbl-joint-live. The chunk asserts
-#' the decomposition, the $GD$ identity on $\mathbf f$ and $GD_{BS} = 2\,SS_B/(N_P
-#' N_{SNP})$ for every allocation, and the change of base, which has power only on
+#' the decomposition (@eq-joint-ssb), the $GD$ identity (@eq-joint-gd) on
+#' $\mathbf f$ and $GD_{BS} = 2\,SS_B/(N_P N_{SNP})$ (@eq-joint-gdbs) for every
+#' allocation, and the change of base (@eq-joint-base), which has power only on
 #' the random sparse plan checked after the table (a circulant plan uses every
 #' line equally often, so its drift term is zero). No accuracy is computed.
 #' 
 ## -----------------------------------------------------------------------------
 #| label: tbl-joint-freq
-#| tbl-cap: "Allele-frequency balance across locations for one crossing plan (circulant, 4 crosses per line, 20 x 20 pools in half-sib families of four, 8 locations, 2 locations per cross, 160 plots, 500 markers) under four allocations. Columns are defined in the text above. Mean of five allocations. Live."
+#| tbl-cap: "Allele-frequency balance across locations for one crossing plan (circulant, 4 crosses per line, 20 x 20 pools in half-sib families of four, 8 locations, 2 locations per cross, 160 plots, 500 markers) under four allocations (columns). Rows are defined in @sec-joint-freq. Mean of five allocations, one simulated marker set. Live."
 nF <- 20; nM <- 20; nLoc <- 8; nfam <- 5; n_snp <- 500
 fam <- rep(seq_len(nfam), each = nF / nfam)
 # A DH line carries its family's common parent at each marker with probability
@@ -692,13 +794,14 @@ wZ <- sqrt(ss(Xh[rP, ]) / ss(Zh[rP, ]))
 set.seed(32)
 fr_a <- replicate(5, {
   Mc <- joint_alloc(pl, nF, nM, nLoc, k = 2, strategy = "coverage")
+  stopifnot(sum(Mc) == 2 * nrow(pl))                 # N_P = n_c k, used as NP below
   sapply(list(random = joint_alloc(pl, nF, nM, nLoc, k = 2, strategy = "random"),
               coverage = Mc, freq_balanced = freq_balance(Mc, Xh),
               freq_family_balanced = freq_balance(Mc, cbind(Xh, wZ * Zh))),
          freq_terms)
 })
 fr <- data.frame(strategy = dimnames(fr_a)[[2]], t(apply(fr_a, 1:2, mean)), row.names = NULL)
-knitr::kable(fmt(fr, 4), row.names = FALSE)
+knitr::kable(fmt(apply(fr_a, 1:2, mean), 4))   # = t(fr): metrics as rows
 
 #' 
 ## -----------------------------------------------------------------------------
@@ -812,7 +915,7 @@ stopifnot(isTRUE(all.equal(SSB, between(XP, g))))
 #' and two SCA levels (`sparse_vc()`: SCA a quarter of, or equal to, a GCA
 #' variance; genotype x location half of each main effect, so a genetic
 #' correlation of 2/3 between locations). Pools are 20 x 20 in half-sib families
-#' of four; eight locations; 30 replicates per cell.
+#' of four; eight locations; 30 replicates per cell (@fig-joint-budget).
 #' 
 #' Comparisons between strategies are paired; those between configurations are
 #' not. Within one configuration and scenario each replicate draws one plan,
@@ -829,13 +932,13 @@ stopifnot(isTRUE(all.equal(SSB, between(XP, g))))
 #' the difference. @sec-mating calls a difference resolved only past three; a
 #' quantity between two and three is flagged where it appears.
 #' 
-#' ### 1. The budget split: crosses against locations
+#' ### 1. The budget split: crosses against locations {#sec-joint-split}
 #' 
 ## -----------------------------------------------------------------------------
 #| label: fig-joint-budget
-#| fig-width: 9
-#| fig-height: 5.2
-#| fig-cap: "Accuracy over all 400 possible hybrids at 160 plots (tester 152), by configuration (crosses per line, locations per cross) and allocation strategy, in the four variance scenarios. Bars are two standard errors of the cell mean. `optimised` is one fixed design per cell. In-repo sweep, known components, 30 replicates."
+#| fig-width: 6.5
+#| fig-height: 6.5
+#| fig-cap: "Accuracy (correlation between predicted and true genetic value) over all 400 possible hybrids at a budget of 160 plots (tester design 152), by configuration (plan, crosses per line $c$, locations per cross) and allocation strategy; one panel per plot heritability $h^2$ and SCA level. Points are cell means over 30 replicates, error bars span plus or minus two standard errors. `optimised` is one fixed design per cell. 20 x 20 pools in half-sib families of four, eight locations, known variance components; in-repo sweep (`regenerate.R joint`)."
 #| fig-alt: "Accuracy over all hybrids at a fixed plot budget, by crossing plan, locations per cross and allocation strategy"
 lev <- c("circulant c=8, 1 loc", "circulant c=4, 2 loc", "circulant c=2, 4 loc",
          "random c=8, 1 loc", "random c=4, 2 loc", "tester k=2, 2 loc")
@@ -845,8 +948,10 @@ for (sc in c("low", "high")) for (h in c(0.2, 0.4)) {
   plot(NA, xlim = c(0.5, length(lev) + 0.5),
        ylim = range(js$acc_all - 2 * js$acc_all_se, js$acc_all + 2 * js$acc_all_se),
        xaxt = "n", xlab = "", ylab = "Accuracy, all hybrids",
-       main = sprintf("h2 = %.1f, SCA %s", h, sc), cex.main = 0.95, font.main = 1)
+       main = bquote(italic(h)^2 == .(h) * ", " * .(sc) ~ "SCA"), cex.main = 0.95,
+       font.main = 1)
   axis(1, at = seq_along(lev), labels = lev, las = 2, cex.axis = 0.75)
+  title(xlab = "Configuration", line = 6.3)
   for (j in seq_along(strat_col)) {
     e <- d[d$strategy == names(strat_col)[j], ]
     x <- match(e$label, lev) + (j - 2) * 0.2
@@ -866,27 +971,36 @@ par(op)
 z84 <- mapply(zc, 8, 4, c(0.2, 0.4, 0.2, 0.4), c("low", "low", "high", "high"))
 z42 <- mapply(zc, 4, 2, c(0.2, 0.4, 0.2, 0.4), c("low", "low", "high", "high"))
 tst <- js[js$plan == "tester" & js$strategy == "coverage", ]
+zs <- c(z84, z42)
+scen <- sprintf("$h^2 = %.1f$, %s SCA", c(0.2, 0.4, 0.2, 0.4), c("low", "low", "high", "high"))
+step_lab <- c(paste("160 versus 80 at", scen), paste("80 versus 40 at", scen))
+# tester (k = 2) against circulant c = 4 (k = 2), same scenario and strategy
+c4 <- js[js$plan == "circulant" & js$c == 4, ]
+tt <- merge(js[js$plan == "tester", ], c4, by = c("h2_plot", "sca", "strategy"))
+tst_below <- all(tt$acc_all.x < tt$acc_all.y)
 
 #' 
-#' @fig-joint-budget reads left to right along the budget identity. Within the
+#' @fig-joint-budget reads left to right along the budget identity (@eq-joint-budget). Within the
 #' circulant family, with the coverage allocation, 160 crosses at one location
 #' each reach `r r3(cv(8, 0.4, "low"))` at $h^2 = 0.4$ and low SCA, 80 crosses
 #' at two locations `r r3(cv(4, 0.4, "low"))`, and 40 at four
 #' `r r3(cv(2, 0.4, "low"))`. With high SCA the steps are larger --
 #' `r r3(cv(8, 0.4, "high"))`, `r r3(cv(4, 0.4, "high"))`,
-#' `r r3(cv(2, 0.4, "high"))` -- because a cross that is not made has an SCA no
-#' replication of other crosses can reveal. The order holds in all four
+#' `r r3(cv(2, 0.4, "high"))`. The order holds in all four
 #' scenarios, unevenly: the step from 80 to 160 crosses is
 #' `r sprintf("%.1f", min(z84))` to `r sprintf("%.1f", max(z84))` standard errors
 #' of the difference, the step from 40 to 80
 #' `r sprintf("%.1f", min(z42))` to `r sprintf("%.1f", max(z42))`.
-#' Of the eight steps, `r sum(c(z84, z42) < 2)` -- 160 versus 80 at low SCA, 80
-#' versus 40 at $h^2 = 0.2$ -- are under two standard errors, and 160 versus 80
-#' at $h^2 = 0.4$ and high SCA, at `r sprintf("%.2f", z84[4])`, is under
-#' @sec-mating's three; only their direction agrees with the rest. The two-tester
-#' design, with 76 crosses at two locations, sits below the circulant plan with
-#' 80 crosses at two locations in every scenario, at nearly the same budget (152
-#' against 160 plots).
+#' Of the `r length(zs)` steps, `r sum(zs < 2)` --
+#' `r paste(step_lab[zs < 2], collapse = "; ")` -- are under two standard errors,
+#' and `r paste(sprintf("%s, at %.2f,", step_lab[zs >= 2 & zs < 3], zs[zs >= 2 & zs < 3]), collapse = " and ")`
+#' `r if (sum(zs >= 2 & zs < 3) == 1) "is" else "are"` under @sec-mating's three;
+#' only their direction agrees with the rest. The two-tester design, with
+#' `r tst$n_crosses[1]` crosses at two locations, sits below the circulant plan
+#' with `r unique(c4$n_crosses)` crosses at two locations in
+#' `r if (tst_below) "every scenario and strategy" else "not every scenario"`, at
+#' nearly the same budget (`r tst$n_plots[1]` against `r unique(c4$n_plots)`
+#' plots).
 #' 
 #' For the crosses that were made the comparison reverses (@tbl-joint-made).
 #' Forty crosses at four locations estimate *those* crosses at
@@ -910,13 +1024,13 @@ tst <- js[js$plan == "tester" & js$strategy == "coverage", ]
 #' 
 ## -----------------------------------------------------------------------------
 #| label: tbl-joint-made
-#| tbl-cap: "The circulant trade-off at 160 plots, coverage allocation: accuracy over all hybrids, over the crosses made, and over those not made, with standard errors of the cell means."
+#| tbl-cap: "The circulant trade-off at 160 plots, coverage allocation: accuracy over all hybrids, over the crosses made, and over those not made, with standard errors of the cell means. Accuracy is the correlation between predicted and true genetic value; 20 x 20 pools, eight locations, known components, 30 replicates per cell; in-repo sweep."
 tb <- cc[order(cc$sca, cc$h2_plot, -cc$c), ]
 tb$crosses <- tb$c * 20
 knitr::kable(fmt(tb[, c("sca", "h2_plot", "crosses", "k", "acc_all", "acc_all_se",
                         "acc_made", "acc_made_se", "acc_unmade")], 3),
              row.names = FALSE,
-             col.names = c("SCA", "Plot h2", "Crosses", "Loc./cross", "All", "SE",
+             col.names = c("SCA", "Plot $h^2$", "Crosses", "Loc./cross", "All", "SE",
                            "Made", "SE", "Not made"))
 
 #' 
@@ -934,7 +1048,7 @@ knitr::kable(fmt(tb[, c("sca", "h2_plot", "crosses", "k", "acc_all", "acc_all_se
 #' would be expected to move the optimum toward more locations per cross, which
 #' this sweep did not test.
 #' 
-#' ### 2. Allocation strategy, with the plan fixed
+#' ### 2. Allocation strategy, with the plan fixed {#sec-joint-strategy}
 #' 
 ## -----------------------------------------------------------------------------
 #| include: false
@@ -945,6 +1059,8 @@ cov_r <- mean(js$fem_cover[js$strategy == "random" & js$plan != "tester"])
 cov_c <- mean(js$fem_cover[js$strategy == "coverage" & js$plan != "tester"])
 cov_t <- c(mean(js$fem_cover[js$strategy == "random" & js$plan == "tester"]),
            mean(js$fem_cover[js$strategy == "coverage" & js$plan == "tester"]))
+# Female coverage under the tester design cannot pass (18 * 4/8 + 2) / 20.
+stopifnot(all(js$fem_cover[js$plan == "tester"] <= (18 * 4 / 8 + 2) / 20 + 1e-12))
 cell_z <- with(jc[jc$contrast == "coverage - random" & jc$metric == "acc_all", ], diff / se)
 
 #' 
@@ -953,58 +1069,61 @@ cell_z <- with(jc[jc$contrast == "coverage - random" & jc$metric == "acc_all", ]
 #' Coverage does what it is built to do: in the factorial plans the share of
 #' females present per location rises from `r r3(cov_r)` under random placement
 #' to `r r3(cov_c)`. Paired against random placement of the same plan, the
-#' accuracy difference over all hybrids, averaged over the 24 cells, is
+#' accuracy difference over all hybrids, averaged over the `r pc_all$cells` cells, is
 #' `r sprintf("%+.4f", pc_all$diff)` $\pm$ `r sprintf("%.4f", pc_all$se)`
-#' (z = `r sprintf("%.1f", pc_all$diff / pc_all$se)`; `r pc_all$positive` of 24
-#' cells positive). That is below the two-standard-error bar, so the gain is
+#' (z = `r sprintf("%.1f", pc_all$diff / pc_all$se)`; `r pc_all$positive` of
+#' `r pc_all$cells` cells positive). That is below the two-standard-error bar, so the gain is
 #' **not detected** overall. Within the random sparse plans alone it
 #' is `r sprintf("%+.4f", pc_plan$diff[pc_plan$group == "random"])` $\pm$
 #' `r sprintf("%.4f", pc_plan$se[pc_plan$group == "random"])`
 #' (z = `r sprintf("%.2f", with(pc_plan[pc_plan$group == "random", ], diff / se))`,
 #' past two standard errors but not @sec-mating's three), one of three families
-#' tested, with no correction for that. Only `r sum(abs(cell_z) > 2)` of the 24
+#' tested, with no correction for that. Only `r sum(abs(cell_z) > 2)` of the `r length(cell_z)`
 #' cells differ by more than two standard errors on their own (z =
 #' `r paste(sprintf("%.2f", sort(cell_z[abs(cell_z) > 2])), collapse = " and ")`,
 #' all under three), about what chance gives.
 #' The tester design is the exception in the other direction:
 #' there coverage moves the share of females present per location only from
-#' `r r3(cov_t[1])` to `r r3(cov_t[2])`, which is the ceiling: a non-tester female
+#' `r r3(cov_t[1])` to `r r3(cov_t[2])`, within
+#' `r sprintf("%.3f", (18 * 4 / 8 + 2) / 20 - cov_t[2])` of the ceiling: a non-tester female
 #' has two crosses, so at two locations per cross it reaches at most four of the
 #' eight locations, and with the two female testers present everywhere the mean is
 #' at most $(18 \times 4/8 + 2)/20 =$ `r sprintf("%.2f", (18 * 4 / 8 + 2) / 20)`.
-#' Over the four tester cells the paired difference is
+#' Over the `r pc_plan$cells[pc_plan$group == "tester"]` tester cells the paired difference is
 #' `r sprintf("%+.3f", pc_plan$diff[pc_plan$group == "tester"])` $\pm$
-#' `r sprintf("%.3f", pc_plan$se[pc_plan$group == "tester"])`, not detected; an
-#' earlier, unpaired sweep had suggested the opposite.
+#' `r sprintf("%.3f", pc_plan$se[pc_plan$group == "tester"])`, not detected.
 #' 
 ## -----------------------------------------------------------------------------
 #| label: tbl-joint-strategy
-#| tbl-cap: "Paired contrasts in accuracy over all hybrids, pooled over the four variance scenarios within each plan family (and over everything in the last row of each block). `diff` is the mean paired difference, `SE` its standard error, `positive` the number of cells with a positive difference. The tester rows rest on four cells, one plan configuration in four scenarios."
+#| tbl-cap: "Paired contrasts in accuracy over all hybrids, pooled over the four variance scenarios within each plan family (and over everything in the last row of each block). Mean difference is the mean paired difference in correlation, SE its standard error, Positive cells the number of cells with a positive difference; 30 paired replicates per cell, in-repo sweep. The tester rows rest on four cells, one plan configuration in four scenarios."
 st <- rbind(cbind(contrast = "coverage - random",
                   rbind(pc_plan, pc_all)),
             cbind(contrast = "optimised - start",
                   rbind(pooled("optimised - start", by = "plan"), po_all)))
 knitr::kable(fmt(st, 4), row.names = FALSE,
-             col.names = c("Contrast", "Plan family", "Cells", "diff", "SE", "Positive"))
+             col.names = c("Contrast", "Plan family", "Cells", "Mean difference", "SE",
+                           "Positive cells"))
 
 #' 
-#' This replicates, with the plan now variable, the finding of @sec-sparse that
-#' structured layouts matter little except at extreme sparsity, and sits with the
-#' mixed record of incomplete-block allocation (@montesinoslopez2022ibd better
-#' than random, @montesinoslopez2023 close). When every
+#' The pooled contrast is not detected and one family of three passes two
+#' standard errors. We read this as consistent with the finding of @sec-sparse
+#' that structured layouts matter little except at extreme sparsity, not as a
+#' replication of it, and as sitting with the
+#' mixed record of incomplete-block allocation (@montesinoslopez2022ibd and
+#' @montesinoslopez2024 better than random, @montesinoslopez2023 close). When every
 #' line appears in several crosses spread over eight locations, random placement
 #' already puts most parents in most locations; whatever coverage adds -- about
 #' `r sprintf("%+.3f", pc_all$diff)` correlation points overall on the point estimate,
 #' at most `r sprintf("%+.3f", max(pc_plan$diff))` within a plan family -- is
 #' small next to the budget split.
 #' 
-#' ### 3. What the criterion can and cannot see
+#' ### 3. What the criterion can and cannot see {#sec-joint-criterion}
 #' 
 ## -----------------------------------------------------------------------------
 #| label: fig-joint-pev
 #| fig-width: 6.5
 #| fig-height: 4.3
-#| fig-cap: "Mean PEV of GCA, computed before planting, against realised accuracy over all hybrids. One point per configuration x strategy x scenario; colour is the strategy. In-repo sweep."
+#| fig-cap: "Mean PEV of GCA, computed from the design before planting, against realised accuracy (correlation between predicted and true genetic value) over all 400 hybrids. One point per configuration x allocation strategy x variance scenario, each the mean of 30 replicates; colour is the strategy. 20 x 20 pools, eight locations, 160 plots (tester design 152), known variance components; in-repo sweep (`regenerate.R joint`)."
 #| fig-alt: "Mean prediction error variance of GCA against realised accuracy, one point per design cell"
 jp <- js[js$strategy %in% names(strat_col), ]
 op <- par(mar = c(4.2, 4.2, 1, 1))
@@ -1066,33 +1185,44 @@ pot <- pot[pot$group == "tester", ]
 #' design changed accuracy by `r sprintf("%+.4f", po_all$diff)` $\pm$
 #' `r sprintf("%.4f", po_all$se)` overall. The one family that stands out is the
 #' tester design, `r sprintf("%+.3f", pot$diff)` $\pm$ `r sprintf("%.3f", pot$se)`
-#' (z = `r sprintf("%.2f", pot$diff / pot$se)`, under @sec-mating's three) with all
-#' four cells positive, where the search also found the largest PEV
+#' (z = `r sprintf("%.2f", pot$diff / pot$se)`, under @sec-mating's three) with
+#' `r pot$positive` of `r pot$cells` cells positive, where the search also found the largest PEV
 #' reductions. It is tentative: each cell is one optimised design from one plan,
 #' in one of three plan families, with no correction for that. The search, first
 #' improvement with no convergence test, had not converged: the second 300
 #' proposals added a median `r sprintf("%.0f", 100 * median(second))` % of what
-#' the first 300 achieved, and in `r sum(second > 0.65)` of 24 cells 65 % or more.
+#' the first 300 achieved, and in `r sum(second > 0.65)` of `r nrow(jo)` cells 65 % or more.
 #' These results say what 600 proposals buy, not what a converged placement
 #' optimiser would buy. The optimised-block design of the external study behind
 #' @sec-sparse showed the same absence of gain on untested hybrids.
 #' 
 ## -----------------------------------------------------------------------------
 #| label: tbl-joint-optimiser
-#| tbl-cap: "The exchange search on mean PEV of GCA, one design per cell: PEV of the coverage start and after 300 and 600 proposals. Seconds are CPU-bound wall time (three cells ran across a machine sleep; their times are omitted)."
+#| tbl-cap: "The exchange search on mean PEV of GCA, one design per cell (20 x 20 pools, eight locations, 160 plots, tester design 152): PEV of the coverage start and after 300 and 600 proposals. Seconds are wall time; cells that logged more than 600 s, far outside the rest, are omitted, and the cause of those times was not recorded."
 ot <- jo[order(jo$sca, jo$h2_plot, jo$plan, -jo$c), ]
 ot$sec_600 <- ifelse(ot$sec_600 > 600, NA, round(ot$sec_600))
 knitr::kable(fmt(ot[, c("plan", "c", "k", "h2_plot", "sca", "pev_start", "pev_300",
                         "pev_600", "sec_600")], 4), row.names = FALSE,
-             col.names = c("Plan", "c", "Loc./cross", "Plot h2", "SCA", "PEV start",
+             col.names = c("Plan", "$c$", "Loc./cross", "Plot $h^2$", "SCA", "PEV start",
                            "PEV 300", "PEV 600", "Seconds"))
 
 #' 
+## -----------------------------------------------------------------------------
+#| include: false
+# n_comp_cross is a mean over 30 replicates; its excess over 1, times 30, is
+# the number of extra components. Strategies sharing a plan share the count.
+rc <- js[js$n_comp_cross > 1 & js$strategy == "coverage", ]
+stopifnot(all(js$n_comp_loc == 1),
+          all(js$n_comp_cross[js$plan != "random" | js$c != 4] == 1))
+n_disc <- round(sum((rc$n_comp_cross - 1) * 30))
+n_plans <- 30 * sum(js$plan == "random" & js$c == 4 & js$strategy == "coverage")
+
+#' 
 #' The component counts were 1 in almost every replicate. The exception is
-#' informative: in two of the 120 random sparse plans with 4 crosses per line
-#' (one replicate in each of two scenarios, appearing under both strategies that
-#' share the plan), the draw split the factorial into two components (`n_comp_cross = 2`) --
-#' a defect of the plan
+#' informative: the draw split the factorial into two components in `r n_disc`
+#' of the `r n_plans` random sparse plans with 4 crosses per line (in
+#' `r nrow(rc)` scenarios, appearing under both strategies that share the plan)
+#' -- a defect of the plan
 #' that no allocation can repair, visible before a seed is sown. Location
 #' connectivity (`n_comp_loc`) was 1 throughout: with several crosses per line
 #' over eight locations, locations always shared parents.
@@ -1100,7 +1230,7 @@ knitr::kable(fmt(ot[, c("plan", "c", "k", "h2_plot", "sca", "pev_start", "pev_30
 #' ### Limitations of the simulation
 #' 
 #' - **Known variance components.** The criterion and the BLUP use the true
-#'   values; REML on a sparse trial is the weak point of @sec-sparse-results
+#'   values; restricted maximum likelihood (REML) on a sparse trial is the weak point of @sec-sparse-results
 #'   (result 5).
 #' - **A misspecified analysis model**: $(s\ell)$ is absorbed into an i.i.d.
 #'   residual, checked for one plan only (@sec-joint-model).
@@ -1122,7 +1252,7 @@ knitr::kable(fmt(ot[, c("plan", "c", "k", "h2_plot", "sca", "pev_start", "pev_30
 #' 
 #' 1. **Fix the budget in plots, $B = n_c k r$**, and the locations available.
 #' 2. **Decide what will be selected.** Parents on GCA, or any single cross by
-#'    prediction: favour distinct crosses (result 1). Only crosses already made:
+#'    prediction: favour distinct crosses (result 1, @sec-joint-split). Only crosses already made:
 #'    more locations per cross estimate them better, at a cost in selection
 #'    intensity.
 #' 3. **Screen candidate splits with the mean PEV of GCA** (`joint_pev()`), using
@@ -1134,15 +1264,19 @@ knitr::kable(fmt(ot[, c("plan", "c", "k", "h2_plot", "sca", "pev_start", "pev_30
 #'    floor.
 #' 5. **Place crosses with the coverage rule** (`joint_alloc(strategy =
 #'    "coverage")`): it costs nothing and raises parent coverage, though its
-#'    accuracy gain was not detected (result 2). With known subgroups, read the
+#'    accuracy gain was not detected (result 2, @sec-joint-strategy). With known subgroups, read the
 #'    between-location shares of markers and subgroup indicators before planting,
 #'    and balance on the indicators if subgroup shares must be equal; neither
 #'    marker nor indicator balancing has been shown to raise accuracy
 #'    (@sec-joint-freq, including its limits).
 #' 6. **Check `n_comp_cross == 1` and `n_comp_loc == 1`** before planting. A
-#'    disconnected plan needs a new plan, not a new allocation.
+#'    disconnected plan needs a new plan, not a new allocation. Passing is
+#'    necessary, not sufficient: it does not exclude GCA aliased with location
+#'    (@sec-joint-criteria).
 #' 7. **Reserve exchange optimisation of the placement for tester designs**, as
-#'    provisional (result 3), and run it well beyond 600 proposals.
+#'    provisional (result 3, @sec-joint-criterion), and run it well beyond 600 proposals. The evidence
+#'    is four cells with one optimised design each, past two standard errors but
+#'    not three, and its standard error carries no design-to-design variance.
 #' :::
 #' 
 #' ## Open problems {#sec-joint-open}
@@ -1177,7 +1311,9 @@ knitr::kable(fmt(ot[, c("plan", "c", "k", "h2_plot", "sca", "pev_start", "pev_30
 #' `Rscript book/scripts/regenerate.R joint` writes `joint_core_sweep.csv` (cell
 #' means and standard errors), `joint_contrasts.csv` (paired contrasts) and
 #' `joint_optimiser.csv` (the exchange-search trace) to `book/data` in about 30
-#' minutes of CPU, two thirds of it in the exchange searches, and keeps the
+#' minutes of CPU (one timing, not recorded in any file; the exchange searches of
+#' the cells whose times are kept in @tbl-joint-optimiser sum to
+#' `r sprintf("%.1f", sum(jo$sec_600[jo$sec_600 <= 600]) / 60)` minutes), and keeps the
 #' per-replicate results in `report/joint_raw.rds` (gitignored). @tbl-joint-live,
 #' @tbl-joint-freq and the misspecification check of @sec-joint-model run at
 #' render time and assert their identities. `tests/testthat/test-joint.R` checks
@@ -1206,9 +1342,11 @@ knitr::kable(fmt(ot[, c("plan", "c", "k", "h2_plot", "sca", "pev_start", "pev_30
 #'   lever.
 #' - The coverage rule is result 4 of @sec-sparse-results -- parent coverage, not
 #'   shared hybrids, carries connectivity -- turned into an allocation rule.
-#' - Distinct crosses keep more lines in the data, the diversity argument of
-#'   @sec-mating-connects: a line never crossed is one the next cycle will in
-#'   practice not use (@sec-stages; @sec-cycles).
+#' - In plans where a line could go uncrossed, distinct crosses would also keep
+#'   more lines in the data, the diversity argument of @sec-mating-connects: a
+#'   line never crossed is one the next cycle will in practice not use
+#'   (@sec-stages; @sec-cycles). The circulant comparison of result 1 holds every
+#'   line in the data at every split, so it does not measure this effect.
 #' - The PEV screen is the mixed-model machinery of @sec-genomic-prediction, read
 #'   before planting instead of after harvest.
 #' - The frequency term of @sec-joint-freq is the partition of @sec-subdivided

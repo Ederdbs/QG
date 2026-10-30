@@ -263,6 +263,34 @@ knitr::kable(data.frame(
 
 Here $k$ counts locations per hybrid; in @sec-mating it counts testers per pool.
 
+### Joint allocation
+
+```{r}
+#| echo: false
+knitr::kable(data.frame(
+  Symbol = c("$g^f_i$, $g^m_j$", "$n_F$, $n_M$", "$n_c$", "$B$", "$N_P$", "$N_{SNP}$",
+             "$n_l$", "$\\mathbf{X}_P$", "$SS_B$", "$GD_l$, $GD_P$", "$\\mathbf{Z}$, $w$",
+             "$\\mathbf{A}_f$, $\\mathbf{A}_m$",
+             "$\\sigma^2_{f\\ell}$, $\\sigma^2_{m\\ell}$, $\\sigma^2_{s\\ell}$"),
+  Meaning = c("GCA of a female (pool-A) / male (pool-B) line: the $g^A_i$, $g^B_j$ above",
+              "female / male lines (the $n_A$, $n_B$ of @sec-mating)",
+              "distinct crosses made",
+              "field budget in plots, $n_c k r$",
+              "planted plots, $n_c k r$ (rows of $\\mathbf{X}_P$)",
+              "markers; replaces $m$, which marks the male pool",
+              "plots at location $l$",
+              "hybrid marker matrix of the planted plots, one row per plot, 0/0.5/1",
+              "between-location sum of squares of $\\mathbf{X}_P$, summed over markers",
+              "gene diversity $1 - \\theta$ of location $l$'s plots / of all planted plots",
+              "0/1 subgroup indicators per plot / weight equating their total SS to the markers'",
+              "relationship matrices of the female / male lines",
+              "variances of GCA x location (female, male) and SCA x location"),
+  `In the code` = c("-", "`nF`, `nM`", "`nrow(plan)`", "-", "`sum(M)`", "`n_snp`",
+                    "`colSums(M)`", "-", "-", "-", "`wZ * Zh`", "`A`",
+                    "`sparse_vc()$s2fl`, `$s2ml`, `$s2sl`"),
+  check.names = FALSE))
+```
+
 ### Response to selection
 
 ```{r}

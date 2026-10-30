@@ -21,8 +21,11 @@ A scalar.
 Builds the mixed-model coefficient matrix of [sparse_blup] for the cells of
 `M` (no phenotype is needed: the equations' left-hand side depends on the
 design alone) and returns the mean PEV of the `nF + nM` GCA effects. Lower is
-better; it is the A-optimality criterion restricted to the effects a
-programme selects parents on.
+better. With `C = W'W + blockdiag(G_t^-1 * s2res / s2_t)` the residual-scaled
+coefficient matrix and `C^GCA` the GCA block of `C^-1`, it is
+s2res * trace(C^GCA) / (nF + nM), an A-type criterion on the effects
+a programme selects parents on; it is not the mean PEV of pairwise GCA
+differences, which adds the covariance terms and may rank designs differently.
 }
 \examples{
 M <- joint_alloc(design_circulant(6, 6, 2), 6, 6, 3, 1, "coverage")

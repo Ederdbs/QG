@@ -57,9 +57,10 @@ zero rows where no seed exists.
 * `"optimised"` -- an exchange search from `start` (default: a fresh
   `"coverage"` allocation) that
   accepts a move of one cross from one location to another (paired with a
-  reverse move when loads would drift) only if it lowers [joint_pev]. The
-  A-optimality criterion of model-based design (Butler, Smith and Cullis
-  2014), with the variance components known. First-improvement acceptance,
+  reverse move when loads would drift) only if it lowers [joint_pev], an
+  A-type criterion on the GCA effects with the variance components known
+  (not the mean PEV of pairwise differences of Butler, Smith and Cullis
+  2014; the two need not rank designs identically). First-improvement acceptance,
   `n_iter` proposals, no convergence test.
 }
 \examples{
