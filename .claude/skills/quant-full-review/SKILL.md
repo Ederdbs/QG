@@ -41,8 +41,11 @@ start cold; pass paths, not pasted reports.
 
 0. **Setup.** Work in a git worktree (several sessions share the main tree): reuse
    `../SB_quanti_gen-review` on branch `review` if it exists, else create it from
-   `main`. Resolve the chapter; read its row in STATUS.md and any existing reports
-   (resume, don't restart). Mark it `in progress`.
+   `main` (when reusing it, first `git merge --ff-only main` inside it). Resolve the
+   chapter; read its row in STATUS.md and any existing reports (resume, don't
+   restart). Mark it `in progress`. If a `.claude/review/part-*.md` report has
+   findings naming this chapter, pass that path to `quant-advice` and `quant-writer`
+   as open input.
 1. **Audit (parallel, read-only).** `quant-Rwrite` in chapter audit mode ->
    `it1-audit.md`; `quant-refcheck` on this chapter -> `it1-refs.md`.
 2. **Verdict.** `quant-advice` reads the chapter + both reports -> `it<k>-verdict.md`.
