@@ -65,7 +65,7 @@ ctx_from_pools <- function(sim, with_f = TRUE) {
   ctx <- list(X = sim$X, GL = sim$GL, fL = sim$fL, ped = sim$ped, pool = sim$pool,
               N = sim$N, m = sim$m, n_lines = sim$L, index = sim$index,
               parents = cbind(sim$ped$a, sim$ped$b))
-  if (with_f) ctx$f <- molecular_coancestry(sim$X)
+  if (with_f) ctx[["f"]] <- molecular_coancestry(sim$X)
   p <- colMeans(sim$X)
   ctx$p0 <- p
   ctx$maf_pop <- pmin(p, 1 - p)

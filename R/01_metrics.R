@@ -1,5 +1,5 @@
 # Diversity metrics. All share the signature f(idx, ctx) -> scalar.
-# All operate on the molecular coancestry `ctx$f`, never on centered G.
+# All operate on the molecular coancestry `ctx[["f"]]`, never on centered G.
 
 # --- Core --------------------------------------------------------------------
 
@@ -15,7 +15,11 @@
 #' @return A scalar in `[0, 1]`.
 #' @family diversity metrics
 #' @export
-theta_group <- function(idx, ctx) mean(ctx$f[idx, idx])
+theta_group <- function(idx, ctx) {
+  f <- ctx[["f"]]
+  if (!is.matrix(f)) stop("ctx[[\"f\"]] (hybrid coancestry) is missing")
+  mean(f[idx, idx])
+}
 
 #' Gene diversity
 #'
@@ -141,7 +145,7 @@ theta_pools <- function(idx, ctx) {
 gd_partition <- function(idx, ctx, tp = theta_pools(idx, ctx)) {
   # Hybrid-level within-individual diversity: the heterozygosity actually
   # carried inside the F1s. Needs no fL, so it always runs.
-  hyb <- c(GD_WI_hyb = 1 - mean(diag(ctx$f)[idx]))
+  hyb <- c(GD_WI_hyb = 1 - mean(diag(ctx[["f"]])[idx]))
   if (is.null(ctx$fL))
     return(c(hyb, GD_T = NA, GD_WI = NA, GD_BI = NA, GD_BS = NA, F_ST = NA))
 
@@ -242,7 +246,7 @@ freq_metrics <- function(idx, ctx, maf = 0.05, rare_lo = 0.01, eps = 1e-6) {
 #' @family diversity metrics
 #' @export
 ene <- function(idx, ctx) {
-  d <- 1 - ctx$f[idx, idx]
+  d <- 1 - ctx[["f"]][idx, idx]
   diag(d) <- Inf
   mean(apply(d, 1, min))
 }
@@ -255,7 +259,7 @@ ene <- function(idx, ctx) {
 #' @return A scalar.
 #' @family diversity metrics
 #' @export
-ane <- function(idx, ctx) mean(1 - apply(ctx$f[, idx, drop = FALSE], 1, max))
+ane <- function(idx, ctx) mean(1 - apply(ctx[["f"]][, idx, drop = FALSE], 1, max))
 
 #' Effective dimensionality
 #'
@@ -269,7 +273,7 @@ ane <- function(idx, ctx) mean(1 - apply(ctx$f[, idx, drop = FALSE], 1, max))
 #' @family diversity metrics
 #' @export
 eff_dim <- function(idx, ctx) {
-  K <- ctx$f[idx, idx]
+  K <- ctx[["f"]][idx, idx]
   K <- K - rowMeans(K) - rep(colMeans(K), each = length(idx)) + mean(K)
   l <- eigen(K, symmetric = TRUE, only.values = TRUE)$values
   sum(l)^2 / sum(l^2)
@@ -324,7 +328,7 @@ mean_index <- function(idx, ctx) mean(ctx$index[idx])
 #' @family diversity metrics
 #' @export
 mean_offdiag <- function(idx, ctx) {
-  s <- ctx$f[idx, idx]
+  s <- ctx[["f"]][idx, idx]
   n <- length(idx)
   (sum(s) - sum(diag(s))) / (n * (n - 1))
 }

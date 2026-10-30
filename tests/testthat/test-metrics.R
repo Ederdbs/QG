@@ -12,8 +12,16 @@ test_that("1 - theta is exactly Nei's He", {
 
 test_that("f is a genuine coancestry matrix, bounded to [0, 1]", {
   # Catches the mistake of using centered G instead, which goes negative.
-  expect_gte(min(ctx$f), 0)
-  expect_lte(max(ctx$f), 1)
+  expect_gte(min(ctx[["f"]]), 0)
+  expect_lte(max(ctx[["f"]]), 1)
+})
+
+test_that("a ctx without f errors instead of reading fL", {
+  # `ctx$f` would partial-match `ctx$fL` and return the line-level theta.
+  no_f <- ctx
+  no_f[["f"]] <- NULL
+  no_f[["fL"]] <- matrix(0.5, ctx$N, ctx$N)
+  expect_error(theta_group(idx, no_f))
 })
 
 test_that("the VanRaden G sums to zero, which is why diversity uses f", {
