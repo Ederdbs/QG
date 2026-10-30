@@ -16,6 +16,7 @@
 fmt <- commandArgs(trailingOnly = TRUE)[1]
 args <- c("render", "book", if (!is.na(fmt)) c("--to", fmt))
 
+
 if (Sys.which("quarto") == "") {
     stop("quarto not found on PATH")
 }
