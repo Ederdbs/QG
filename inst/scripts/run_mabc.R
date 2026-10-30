@@ -20,13 +20,16 @@
 #    cp report/mabc/analytical_sizing.csv   book/data/mabc_analytical_sizing.csv
 #    cp report/mabc/fig8.png                book/figs/mabc_sizing.png
 #    cp report/mabc/fig9.png                book/figs/mabc_policies.png
+#  The two paired index tables are written straight to the book (~2 min):
+#    Rscript inst/scripts/run_mabc.R --out=book/data \
+#      --only=index_comparison,allocation_recheck
 #
 #  Run from the repository root:  Rscript inst/scripts/run_mabc.R --out=DIR
 #  Or from an installed package:
 #    Rscript -e 'source(system.file("scripts/run_mabc.R", package = "hybdiv"))'
 #
 #  Usage:
-#    Rscript inst/scripts/run_mabc.R --test           # 35 checks (~10 s)
+#    Rscript inst/scripts/run_mabc.R --test           # 36 checks (~5 s)
 #    Rscript inst/scripts/run_mabc.R --quick --out=D  # reduced grid (~45 s)
 #    Rscript inst/scripts/run_mabc.R --out=D          # full run (~3 min)
 #
@@ -96,7 +99,14 @@ DEFAULT_OPT <- utils::modifyList(mabc_opt, list(
   # Replication must be high enough that a Clopper-Pearson LOWER bound can
   # actually cross 0.95: at 30 replicates even 30/30 gives a lower bound of
   # 0.884, so lower settings cannot support interval-based sizing at all.
-  rep_base = 12000, rep_min = 90, rep_max = 300
+  rep_base = 12000, rep_min = 90, rep_max = 300,
+  # Experiments D/E (index comparison, allocation recheck), paired indices.
+  # 1000 replicates: the CP interval half-width is <= 0.031 at any p.
+  idx_genes = c(3, 4), idx_N = c(80, 150, 250, 400), idx_s = 0.60,
+  idx_rep = 1000,
+  recheck_genes = 3, recheck_rep = 1000,
+  recheck_sched = list(c(300, 40, 20), c(120, 120, 120), c(20, 150, 190),
+                       c(40, 120, 200), c(200, 120, 40))
 ))
 
 # ----------------------------------------------------------------------------
@@ -210,6 +220,68 @@ run_f2_scan <- function(opt, map, w, verbose = TRUE) {
   do.call(rbind, rows)
 }
 
+# --- Experiments D and E: the selection index on common random numbers -----
+# Both compare the two-stage background-priority index (`script` = rec_bg, the
+# wrong index, kept as the contrast) against drag priority (`drag` = rec_drag).
+# Each cell is seeded from its own coordinates, so editing or adding a cell
+# never moves another. Each replicate gets its own seed, set immediately
+# before the shared-IBD draw and reset before each index: both arms see the
+# same backbone and start from the same RNG state (common random numbers).
+INDEX_KEYS <- c(script = "rec_bg", drag = "rec_drag")
+
+paired_cell <- function(n_sched, k, s, R, seed, map, w, opt) {
+  tg <- target_indices(map, k)
+  set.seed(seed)
+  rs <- sample.int(.Machine$integer.max, R)
+  acc <- lapply(INDEX_KEYS, function(x) vector("list", R))
+  for (rp in seq_len(R)) {
+    set.seed(rs[rp])
+    sh <- make_shared_ibd(map, s, w, opt$ibd_block_cM, tg)
+    for (ix in names(INDEX_KEYS)) {
+      set.seed(rs[rp])
+      tr <- run_bc_program(n_sched, s, INDEX_KEYS[[ix]], map, opt, tg, w, sh)$traj
+      tr$rep <- rp; acc[[ix]][[rp]] <- tr
+    }
+  }
+  do.call(rbind, lapply(names(INDEX_KEYS), function(ix) {
+    sm <- summarise_reps(do.call(rbind, acc[[ix]]), opt, k)
+    x <- round(sm$p_both * R)
+    data.frame(index = ix, strategy = INDEX_KEYS[[ix]], k = k, s = s,
+               n_rep = R, seed = seed, drag = sm$drag, ibd = sm$ibd,
+               ibd_sd = sm$ibd_sd, p_lost = sm$p_lost, p_ibd = sm$p_ibd,
+               p_both = sm$p_both, lo = cp_lo(x, R), hi = cp_hi(x, R))
+  }))
+}
+
+# D: uniform schedule, N plants in each of BC1-BC3 -> mabc_index_comparison.csv
+run_index_comparison <- function(opt, map, w, verbose = TRUE) {
+  cells <- expand.grid(N = opt$idx_N, k = opt$idx_genes)
+  out <- do.call(rbind, lapply(seq_len(nrow(cells)), function(i) {
+    k <- cells[["k"]][i]; N <- cells[["N"]][i]
+    d <- paired_cell(rep(N, opt$n_bc), k, opt$idx_s, opt$idx_rep,
+                     opt$seed + 1000 * k + N, map, w, opt)
+    if (verbose) cat(sprintf("  index k=%d N=%3d: P(both) script %.3f  drag %.3f\n",
+                             k, N, d$p_both[1], d$p_both[2]))
+    data.frame(k = k, N = N, d[, names(d) != "k"])
+  }))
+  out[order(match(out$index, names(INDEX_KEYS)), out$N, out$k), ]
+}
+
+# E: fixed total budget split across BC1/BC2/BC3 -> mabc_allocation_recheck.csv
+run_allocation_recheck <- function(opt, map, w, verbose = TRUE) {
+  out <- do.call(rbind, lapply(opt$recheck_sched, function(ns) {
+    stopifnot(length(ns) == opt$n_bc, all(ns < 1000))
+    d <- paired_cell(ns, opt$recheck_genes, opt$idx_s, opt$recheck_rep,
+                     opt$seed + sum(ns * c(1e6, 1e3, 1)), map, w, opt)
+    if (verbose) cat(sprintf("  recheck %s: P(both) script %.3f  drag %.3f\n",
+                             paste(ns, collapse = "/"), d$p_both[1], d$p_both[2]))
+    data.frame(d[, c("index", "strategy")], sched = paste(ns, collapse = "/"),
+               total = sum(ns), bc1 = ns[1], bc2 = ns[2], bc3 = ns[3],
+               d[, !names(d) %in% c("index", "strategy")])
+  }))
+  out[order(match(out$index, names(INDEX_KEYS))), ]
+}
+
 run_experiment <- function(opt = DEFAULT_OPT, verbose = TRUE) {
   set.seed(opt$seed)
   map <- build_map(CHR_LEN, opt$spacing_cM); w <- marker_weights(map)
@@ -247,18 +319,19 @@ build_figures <- function(E) {
 
   F$fig1 <- list(w = 11, h = 5.8, multi = TRUE,
     title = "Fig 1. The 90% target at BC3 is practically free",
-    cap = paste("Left: IBD with the elite at BC3 (", opt$main_strategy,
-      ", s = 0.60) as a function of the",
-      "number of plants per generation, for 1 to 4 genes. The dotted line is the",
-      "90% target and the dashed line is the expectation WITHOUT any background selection,",
-      "1-(1-s)/2^4 = 0.980. All curves are well above the target, with",
-      "any N. Right: the probability of reaching the target is 1 across the",
-      "useful range -- except at very small N with 3-4 genes, where the failure is not",
-      "and of IBD but of LOSING the genes. Conclusion: in BC3 the IBD target",
+    cap = paste0("Left: IBD with the elite at BC", opt$n_bc, " (", opt$main_strategy,
+      ", s = 0.60) as a function of the ",
+      "number of plants per generation, for 1 to 4 genes. The dotted line is the ",
+      "90% target and the dashed line is the expectation WITHOUT any background selection ",
+      "and before conditioning on the targets, 1-(1-s)/2^", opt$n_bc + 1, " = ",
+      sprintf("%.3f", expected_ibd(opt$n_bc, 0.60)), ". All curves are above the ",
+      "target at any N. Right: the probability of reaching the target is 1 across the ",
+      "useful range -- except at very small N with 3-4 genes, where the failure is not ",
+      "one of IBD but of LOSING the genes. Conclusion: in BC3 the IBD target ",
       "is not the criterion that sizes the population."),
     f = function() {
       par(mfrow = c(1, 2), mar = c(4.4, 4.6, 3.2, 1.2))
-      d <- res[res$strategy == "rec_bg" & res$s == 0.60 & res$gen == opt$n_bc, ]
+      d <- res[res$strategy == opt$main_strategy & res$s == 0.60 & res$gen == opt$n_bc, ]
       plot(NA, xlim = c(0, max(opt$n_grid)), ylim = c(0.86, 1), xaxt = "n",
            xlab = "Plants per generation", ylab = "IBD with elite in BC3",
            main = "IBD achieved"); ax(); grid(col = "grey92", lty = 1)
@@ -521,7 +594,7 @@ build_figures <- function(E) {
       "BCnF2: q = (1/4)^k and", opt$n_keep_f2, "plants are required, which uses the",
       "cumulative binomial. All values for P =", opt$P_crit, "."),
     f = function() {
-      par(mar = c(4.6, 4.8, 3.4, 1.4))
+      par(mar = c(4.6, 4.8, 1.2, 1.4))
       st <- sizing_table(max(opt$genes_grid), opt$flank_cM, opt$P_crit, opt$n_keep_f2)
       M <- rbind(st$n_BC_1plant, st$n_BC_1rec, st$n_F2_3plants, st$n_DH_3lines)
       bp <- barplot(M, beside = TRUE, log = "y", ylim = c(1, 5e4),
@@ -543,7 +616,8 @@ render_figures <- function(E, outdir) {
   figs <- build_figures(E); png_ok <- isTRUE(capabilities("png")); imgs <- list()
   for (nm in names(figs)) {
     g <- figs[[nm]]
-    draw <- function() { g$f(); if (!isTRUE(g$multi)) title(main = g$title, cex.main = 1.1) }
+    # No title() in the image: the HTML figcaption and the book caption number it.
+    draw <- g$f
     pdf(file.path(outdir, paste0(nm, ".pdf")), width = g$w, height = g$h); draw(); dev.off()
     if (png_ok) {
       fp <- file.path(outdir, paste0(nm, ".png"))
@@ -1173,6 +1247,14 @@ run_tests <- function() {
                       sprintf("(%s vs %s)", paste(stt$n_DH_3lines, collapse = "/"),
                               paste(stt$n_F2_3plants, collapse = "/"))))
 
+  # T15 paired cells are seeded on their own coordinates: a cell is
+  # reproducible in isolation, independent of what ran before it.
+  o15 <- utils::modifyList(DEFAULT_OPT, list(idx_rep = 20))
+  set.seed(1); a <- paired_cell(c(60, 60, 60), 3, 0.6, 20, 777, map, w, o15)
+  runif(5);    b <- paired_cell(c(60, 60, 60), 3, 0.6, 20, 777, map, w, o15)
+  pass <- c(pass, .ok("T15 paired_cell is seeded by its cell",
+                      as.numeric(identical(a, b)), 1, 0))
+
   cat(sprintf("\n  %d/%d tests passed\n\n", sum(pass), length(pass)))
   invisible(all(pass))
 }
@@ -1187,6 +1269,27 @@ main <- function() {
   if (length(outdir) == 0) outdir <- "mabc_multi_out"
   if ("--test" %in% args) { ok <- run_tests(); quit(status = if (isTRUE(ok)) 0 else 1) }
   dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
+
+  # --only=index_comparison,allocation_recheck runs just those paired tables
+  # and writes them under their book names, without the full scan.
+  only <- grep("^--only=", args, value = TRUE)
+  if (length(only)) {
+    only <- strsplit(sub("^--only=", "", only), ",")[[1]]
+    runners <- list(index_comparison = run_index_comparison,
+                    allocation_recheck = run_allocation_recheck)
+    bad <- setdiff(only, names(runners))
+    if (length(bad)) stop("unknown --only target(s): ", paste(bad, collapse = ", "))
+    map <- build_map(CHR_LEN, DEFAULT_OPT$spacing_cM); w <- marker_weights(map)
+    for (tgt in only) {
+      t0 <- Sys.time(); cat(sprintf("\n[%s]\n", tgt))
+      d <- runners[[tgt]](DEFAULT_OPT, map, w)
+      f <- file.path(outdir, sprintf("mabc_%s.csv", tgt))
+      write.csv(d, f, row.names = FALSE)
+      cat(sprintf("  -> %s (%.1f s)\n", f,
+                  as.numeric(difftime(Sys.time(), t0, units = "secs"))))
+    }
+    return(invisible(NULL))
+  }
 
   opt <- DEFAULT_OPT
   if ("--quick" %in% args) {

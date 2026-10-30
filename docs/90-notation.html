@@ -609,10 +609,11 @@ window.Quarto = {
   <li><a href="#selection-and-optimisation" id="toc-selection-and-optimisation" class="nav-link" data-scroll-target="#selection-and-optimisation"><span class="header-section-number">A.1.7</span> Selection and optimisation</a></li>
   <li><a href="#genomic-prediction" id="toc-genomic-prediction" class="nav-link" data-scroll-target="#genomic-prediction"><span class="header-section-number">A.1.8</span> Genomic prediction</a></li>
   <li><a href="#population-sizing" id="toc-population-sizing" class="nav-link" data-scroll-target="#population-sizing"><span class="header-section-number">A.1.9</span> Population sizing</a></li>
-  <li><a href="#mating-design" id="toc-mating-design" class="nav-link" data-scroll-target="#mating-design"><span class="header-section-number">A.1.10</span> Mating design</a></li>
-  <li><a href="#sparse-testing" id="toc-sparse-testing" class="nav-link" data-scroll-target="#sparse-testing"><span class="header-section-number">A.1.11</span> Sparse testing</a></li>
-  <li><a href="#joint-allocation" id="toc-joint-allocation" class="nav-link" data-scroll-target="#joint-allocation"><span class="header-section-number">A.1.12</span> Joint allocation</a></li>
-  <li><a href="#response-to-selection" id="toc-response-to-selection" class="nav-link" data-scroll-target="#response-to-selection"><span class="header-section-number">A.1.13</span> Response to selection</a></li>
+  <li><a href="#backcrossing" id="toc-backcrossing" class="nav-link" data-scroll-target="#backcrossing"><span class="header-section-number">A.1.10</span> Backcrossing</a></li>
+  <li><a href="#mating-design" id="toc-mating-design" class="nav-link" data-scroll-target="#mating-design"><span class="header-section-number">A.1.11</span> Mating design</a></li>
+  <li><a href="#sparse-testing" id="toc-sparse-testing" class="nav-link" data-scroll-target="#sparse-testing"><span class="header-section-number">A.1.12</span> Sparse testing</a></li>
+  <li><a href="#joint-allocation" id="toc-joint-allocation" class="nav-link" data-scroll-target="#joint-allocation"><span class="header-section-number">A.1.13</span> Joint allocation</a></li>
+  <li><a href="#response-to-selection" id="toc-response-to-selection" class="nav-link" data-scroll-target="#response-to-selection"><span class="header-section-number">A.1.14</span> Response to selection</a></li>
   </ul></li>
   <li><a href="#conventions" id="toc-conventions" class="nav-link" data-scroll-target="#conventions"><span class="header-section-number">A.2</span> Conventions</a></li>
   <li><a href="#terms" id="toc-terms" class="nav-link" data-scroll-target="#terms"><span class="header-section-number">A.3</span> Terms</a></li>
@@ -1378,8 +1379,97 @@ window.Quarto = {
 </div>
 <p>These symbols are local to <a href="04-population-sizing.html" class="quarto-xref"><span>Chapter 5</span></a>. There <span class="math inline">\(N\)</span> and <span class="math inline">\(n\)</span> count F2 and F1 plants, not candidate and selected hybrids; <span class="math inline">\(L\)</span> is a map length in Morgans, not a number of parent lines; <span class="math inline">\(k\)</span> counts loci, not a marker index or testers; <span class="math inline">\(\beta\)</span> is a scalar selection intensity, not the marker-effect vector <span class="math inline">\(\boldsymbol\beta\)</span>; <span class="math inline">\(p\)</span> is P1-ancestry frequency within one cross, not a reference-allele frequency on the frozen base <span class="math inline">\(p_0\)</span>.</p>
 </section>
-<section id="mating-design" class="level3" data-number="A.1.10">
-<h3 data-number="A.1.10" class="anchored" data-anchor-id="mating-design"><span class="header-section-number">A.1.10</span> Mating design</h3>
+<section id="backcrossing" class="level3" data-number="A.1.10">
+<h3 data-number="A.1.10" class="anchored" data-anchor-id="backcrossing"><span class="header-section-number">A.1.10</span> Backcrossing</h3>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 11%">
+<col style="width: 58%">
+<col style="width: 29%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Symbol</th>
+<th style="text-align: left;">Meaning</th>
+<th style="text-align: left;">Function</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(k\)</span></td>
+<td style="text-align: left;">target genes introgressed from one donor, coupling phase, unlinked to each other</td>
+<td style="text-align: left;"><code>target_indices(k =)</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(s\)</span></td>
+<td style="text-align: left;">fraction of the genome donor and elite share by descent</td>
+<td style="text-align: left;"><code>make_shared_ibd(s =)</code>, <code>run_bc_program(s =)</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(D\)</span></td>
+<td style="text-align: left;">donor dosage of a plant; <span class="math inline">\((1/2)^{t+1}\)</span> in expectation after t backcrosses without selection</td>
+<td style="text-align: left;"><code>expected_donor()</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\text{IBD}_E\)</span></td>
+<td style="text-align: left;">identity by descent with the elite, <span class="math inline">\(1 - (1-s)D\)</span> in expectation (<a href="04b-backcross-introgression.html#eq-bc-ibd" class="quarto-xref">Equation&nbsp;<span>6.2</span></a>)</td>
+<td style="text-align: left;"><code>expected_ibd()</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(d\)</span></td>
+<td style="text-align: left;">interval length, cM</td>
+<td style="text-align: left;"><code>build_map(spacing_cM =)</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(r\)</span></td>
+<td style="text-align: left;">recombination fraction, Haldane (<a href="04b-backcross-introgression.html#eq-bc-haldane" class="quarto-xref">Equation&nbsp;<span>6.1</span></a>)</td>
+<td style="text-align: left;"><code>haldane_r()</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(L\)</span></td>
+<td style="text-align: left;">distance between two targets in Morgans, <span class="math inline">\(d/100\)</span> – not a total map length</td>
+<td style="text-align: left;">-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(P_{\text{same}}\)</span></td>
+<td style="text-align: left;">probability that two donor-derived targets sit in one donor segment (<a href="04b-backcross-introgression.html#eq-bc-psame" class="quarto-xref">Equation&nbsp;<span>6.3</span></a>)</td>
+<td style="text-align: left;"><code>p_same_segment()</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(q\)</span></td>
+<td style="text-align: left;">per-plant probability of the wanted genotype at all k targets</td>
+<td style="text-align: left;"><code>sizing_table()</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(n\)</span></td>
+<td style="text-align: left;">plants genotyped in one generation or step</td>
+<td style="text-align: left;"><code>n_for_count()</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(N\)</span></td>
+<td style="text-align: left;">plants per backcross generation in a uniform schedule</td>
+<td style="text-align: left;"><code>run_bc_program(n_sched =)</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(P\)</span></td>
+<td style="text-align: left;">probability required of a sizing criterion (0.95)</td>
+<td style="text-align: left;"><code>n_for_count(P =)</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\nu\)</span></td>
+<td style="text-align: left;">shape of the gamma renewal model of crossover interference; not modelled</td>
+<td style="text-align: left;">-</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>These symbols are local to <a href="04b-backcross-introgression.html" class="quarto-xref"><span>Chapter 6</span></a>. <span class="math inline">\(s\)</span> carries no subscript there and is not the self-coancestry <span class="math inline">\(s_i\)</span> or the specific combining ability <span class="math inline">\(s_{ij}\)</span>; <span class="math inline">\(D\)</span> is donor dosage, not the diversity retained <span class="math inline">\(D\)</span> of <a href="04-population-sizing.html" class="quarto-xref"><span>Chapter 5</span></a>; <span class="math inline">\(N\)</span> and <span class="math inline">\(n\)</span> count plants, not candidate and selected hybrids; <span class="math inline">\(L\)</span> is an interval between two targets, not the total map length of <a href="04-population-sizing.html" class="quarto-xref"><span>Chapter 5</span></a>; <span class="math inline">\(\nu\)</span> is a gamma shape, not the degrees of freedom of the <span class="math inline">\(\chi^{-2}\)</span> prior in the genomic-prediction block; <span class="math inline">\(k\)</span> counts target genes as it counts loci in <a href="04-population-sizing.html" class="quarto-xref"><span>Chapter 5</span></a>.</p>
+</section>
+<section id="mating-design" class="level3" data-number="A.1.11">
+<h3 data-number="A.1.11" class="anchored" data-anchor-id="mating-design"><span class="header-section-number">A.1.11</span> Mating design</h3>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -1437,8 +1527,8 @@ window.Quarto = {
 </div>
 <p><span class="math inline">\(r\)</span> here is plots per cross; in the genomic-prediction table above and the response table below it is the accuracy of a selection criterion. <a href="04e-mating-design.html" class="quarto-xref"><span>Chapter 9</span></a> keeps <span class="math inline">\(\rho\)</span> for accuracy to avoid the clash.</p>
 </section>
-<section id="sparse-testing" class="level3" data-number="A.1.11">
-<h3 data-number="A.1.11" class="anchored" data-anchor-id="sparse-testing"><span class="header-section-number">A.1.11</span> Sparse testing</h3>
+<section id="sparse-testing" class="level3" data-number="A.1.12">
+<h3 data-number="A.1.12" class="anchored" data-anchor-id="sparse-testing"><span class="header-section-number">A.1.12</span> Sparse testing</h3>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -1496,8 +1586,8 @@ window.Quarto = {
 </div>
 <p>Here <span class="math inline">\(k\)</span> counts locations per hybrid; in <a href="04e-mating-design.html" class="quarto-xref"><span>Chapter 9</span></a> it counts testers per pool.</p>
 </section>
-<section id="joint-allocation" class="level3" data-number="A.1.12">
-<h3 data-number="A.1.12" class="anchored" data-anchor-id="joint-allocation"><span class="header-section-number">A.1.12</span> Joint allocation</h3>
+<section id="joint-allocation" class="level3" data-number="A.1.13">
+<h3 data-number="A.1.13" class="anchored" data-anchor-id="joint-allocation"><span class="header-section-number">A.1.13</span> Joint allocation</h3>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -1584,8 +1674,8 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="response-to-selection" class="level3" data-number="A.1.13">
-<h3 data-number="A.1.13" class="anchored" data-anchor-id="response-to-selection"><span class="header-section-number">A.1.13</span> Response to selection</h3>
+<section id="response-to-selection" class="level3" data-number="A.1.14">
+<h3 data-number="A.1.14" class="anchored" data-anchor-id="response-to-selection"><span class="header-section-number">A.1.14</span> Response to selection</h3>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">

@@ -298,7 +298,21 @@ knitr::kable(data.frame(
           "the screened corpora themselves",
           "5 schemes x 20 sizes, adaptive replication",
           "multilocus recovery across the grid",
-          "the MABC grid: 4 policies x 4 gene numbers x 11 sizes x 3 s, 300 reps",
+          local({
+            u <- read.csv(book_data("mabc_uniform.csv"))
+            x <- read.csv(book_data("mabc_index_comparison.csv"))
+            sprintf(paste0(
+              "six MABC tables, from inst/scripts/run_mabc.R or its predecessor (per-table provenance in @sec-bc-running): ",
+              "the uniform scan (rec_bg at s = %s, the other %d policies at s = %s; ",
+              "%d gene numbers x %d sizes; %d-%d reps by N), the allocation grid ",
+              "(rec_bg), BCnF2, analytical sizing, and the two paired index tables ",
+              "(target --only=index_comparison,allocation_recheck, %d reps per cell)"),
+              paste(sort(unique(u$s[u$strategy == "rec_bg"])), collapse = "/"),
+              length(unique(u$strategy)) - 1,
+              paste(unique(u$s[u$strategy != "rec_bg"]), collapse = "/"),
+              length(unique(u$genes)), length(unique(u$N)),
+              min(u$n_rep), max(u$n_rep), unique(x$n_rep))
+          }),
           "analytical sizing by stage",
           "the four recombinant-selection policies",
           "cost scaling at production scale",

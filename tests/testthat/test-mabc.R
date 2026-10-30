@@ -191,3 +191,19 @@ test_that("summarise_reps counts lost replicates as failures", {
   expect_equal(s$p_lost, 0.5)
   expect_equal(s$p_both, 0.5)      # 1 of 2 replicates, not 1 of 1 survivor
 })
+
+test_that("select_parent docstring matches mabc_index_comparison.csv", {
+  f <- testthat::test_path("..", "..", "book", "data", "mabc_index_comparison.csv")
+  skip_if_not(file.exists(f))      # book/ is .Rbuildignore'd: repo runs only
+  d <- read.csv(f)
+  a <- d[d$strategy == "rec_bg", ]
+  b <- d[d$strategy == "rec_drag", ]
+  stopifnot(identical(a$k, b$k), identical(a$N, b$N))
+  expect_true(all(b$p_both > a$p_both))
+  cost <- 100 * (a$ibd - b$ibd)                    # points of IBD
+  expect_equal(round(range(cost), 2), c(0.26, 1.19))
+  expect_equal(round(mean(cost), 2), 0.92)
+  kept_miss <- 1 - b$p_lost - b$p_ibd              # kept the genes, missed IBD
+  expect_equal(sum(kept_miss * b$n_rep > 0.5), 1L)
+  expect_equal(round(kept_miss * b$n_rep)[b$k == 3 & b$N == 80], 1)
+})

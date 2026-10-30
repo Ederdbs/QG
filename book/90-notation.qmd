@@ -325,6 +325,41 @@ $\beta$ is a scalar selection intensity, not the marker-effect vector
 $\boldsymbol\beta$; $p$ is P1-ancestry frequency within one cross, not a
 reference-allele frequency on the frozen base $p_0$.
 
+### Backcrossing
+
+```{r}
+#| echo: false
+knitr::kable(data.frame(
+  Symbol = c("$k$", "$s$", "$D$", "$\\text{IBD}_E$", "$d$", "$r$", "$L$",
+             "$P_{\\text{same}}$", "$q$", "$n$", "$N$", "$P$", "$\\nu$"),
+  Meaning = c("target genes introgressed from one donor, coupling phase, unlinked to each other",
+              "fraction of the genome donor and elite share by descent",
+              "donor dosage of a plant; $(1/2)^{t+1}$ in expectation after t backcrosses without selection",
+              "identity by descent with the elite, $1 - (1-s)D$ in expectation (@eq-bc-ibd)",
+              "interval length, cM",
+              "recombination fraction, Haldane (@eq-bc-haldane)",
+              "distance between two targets in Morgans, $d/100$ -- not a total map length",
+              "probability that two donor-derived targets sit in one donor segment (@eq-bc-psame)",
+              "per-plant probability of the wanted genotype at all k targets",
+              "plants genotyped in one generation or step",
+              "plants per backcross generation in a uniform schedule",
+              "probability required of a sizing criterion (0.95)",
+              "shape of the gamma renewal model of crossover interference; not modelled"),
+  `Function` = c("`target_indices(k =)`", "`make_shared_ibd(s =)`, `run_bc_program(s =)`",
+                 "`expected_donor()`", "`expected_ibd()`", "`build_map(spacing_cM =)`",
+                 "`haldane_r()`", "-", "`p_same_segment()`", "`sizing_table()`",
+                 "`n_for_count()`", "`run_bc_program(n_sched =)`", "`n_for_count(P =)`", "-"),
+  check.names = FALSE))
+```
+
+These symbols are local to @sec-backcross. $s$ carries no subscript there and is
+not the self-coancestry $s_i$ or the specific combining ability $s_{ij}$; $D$ is
+donor dosage, not the diversity retained $D$ of @sec-sizing; $N$ and $n$ count
+plants, not candidate and selected hybrids; $L$ is an interval between two
+targets, not the total map length of @sec-sizing; $\nu$ is a gamma shape, not
+the degrees of freedom of the $\chi^{-2}$ prior in the genomic-prediction block; $k$ counts target
+genes as it counts loci in @sec-sizing.
+
 ### Mating design
 
 ```{r}

@@ -406,12 +406,13 @@ strat_rec_until <- function(strategy, opt)
 #' `rec_bg` is the natural-looking two-stage rule and it is wrong for the stated
 #' objective: stage 2 discards stage 1, so the minimum-drag plant is retained
 #' only by coincidence. Since donor dosage at BC3 is already 6.25% without any
-#' selection, background is not the binding constraint. Paired re-runs (300
-#' replicates, common random numbers, s = 0.60) of
-#' P(drag <= 30 cM/gene AND IBD >= 0.90) at BC3 give
-#' 0.813 against 0.997 at k = 3, N = 150, and 0.767 against 0.987 at k = 4,
-#' N = 400. The cost is 1.5-2 points of IBD, on a constraint that was met in
-#' every replicate with margin -- a free trade.
+#' selection, background is not the binding constraint. In the paired re-run
+#' of P(drag <= 30 cM/gene AND IBD >= 0.90) at BC3 (common random numbers,
+#' `book/data/mabc_index_comparison.csv`, written by
+#' `inst/scripts/run_mabc.R --only=index_comparison`), `rec_drag` beats
+#' `rec_bg` at every cell; its cost is 0.26-1.19 points of mean IBD (mean 0.92),
+#' and the IBD >= 0.90 constraint fails only through loss of the targets,
+#' bar one replicate in 1000 (k = 3, N = 80).
 #'
 #' @param H An `m` x `n` 0/1 matrix of donor haplotypes.
 #' @param map A map from [build_map].
