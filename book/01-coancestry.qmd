@@ -164,8 +164,10 @@ immediately:
   matrix.**
 - Self-coancestry, the diagonal element of $\mathbf{f}$, is $s_i = f_{ii} =
   (1 + F_i)/2$ [the identity-by-descent form is
-  in @falconer1996, ch. 5], with $F_i$ the individual's molecular homozygosity,
-  the fraction of markers at which $i$ is homozygous. For a fully heterozygous F1, $s_i = 0.5$.
+  in @falconer1996, ch. 5], with $F_i$ the individual's molecular inbreeding
+  coefficient, numerically the fraction of markers at which $i$ is homozygous
+  (an individual quantity, not the population-level `F_hom` of
+  @sec-genomic-era). For a fully heterozygous F1, $s_i = 0.5$.
 - No centering, no scaling, no arbitrary base population.
 
 ### Computable form
@@ -226,14 +228,18 @@ fd <- mean(diag(ctx[["f"]]))
 fmt(c(diagonal_mean         = fd,
       molecular_F           = 2 * fd - 1,     # s_i = (1 + F_i) / 2
       heterozygous_fraction = 2 * (1 - fd)))
-F_i <- rowMeans(X != 0.5)                      # molecular homozygosity
+F_i <- rowMeans(X != 0.5)                      # molecular inbreeding F_i
 stopifnot(isTRUE(all.equal(diag(f), (1 + F_i) / 2)))
 ```
 
-This fraction depends directly on the divergence between the heterotic pools
-(`fst` in the configuration): more divergent pools give more heterozygous F1
-hybrids and a diagonal closer to 0.5. That relationship is what
-@sec-simulating-crosses puts under experimental control.
+This fraction is not set by how far apart the heterotic pools are. Its
+expectation over the A $\times$ B factorial is one minus the mean coancestry
+between a pool-A and a pool-B line, and when the two pools diverge neutrally
+from a common ancestral population that quantity does not depend on the
+divergence: what the between-pool term of diversity gains, the shared term
+loses (@sec-heterosis-flat). @sec-simulating-crosses measures the heterozygous
+fraction flat across its grid of `fst`, the divergence parameter of the
+simulation.
 
 ## `f` is not an ad hoc substitute
 

@@ -60,7 +60,7 @@ book_fig  <- function(...) .book_get('figs', ...)
 #' accessions, or landraces, or cycles -- and the diversity of the whole is not the
 #' average of the diversity of the parts. @caballero2002 give the partition that
 #' makes this precise, and it is the analytical backbone of everything that
-#' follows: the constraint in @sec-ocs is a special case of it, and the
+#' follows: the $\alpha$ constraint of @sec-ocs bounds its total (@tbl-keystone), and the
 #' within/between asymmetry that makes plant hybrid breeding different from animal
 #' breeding is a statement about which term of it you are allowed to minimise.
 #' 
@@ -548,19 +548,32 @@ stopifnot(max(abs(oc[["c_i"]] - c(0.522, 0, 0.270, 0.208))) < 5e-4)
 #' Three direct uses in plant breeding:
 #' 
 #' - **Base population for recurrent selection.** $c_i$ gives the seed proportion
-#'   from each source that maximises the neutral-marker $GD_T$ of the base. That
-#'   equals maximising its additive (genic) variance only under additive gene
-#'   action, effects of equal size at every locus, and markers whose frequencies
-#'   represent those of the quantitative trait loci; @sec-response shows the two differ by the
-#'   squared-effect weighting.
+#'   from each source that maximises the neutral-marker $GD_T$ of the base. With
+#'   $f_{ij}$ built from population frequencies as above, $GD_T = 1 - \sum_{i,j}
+#'   f_{ij} c_i c_j$ is the mean over loci of $2\bar p_k \bar q_k$, where $\bar p_k
+#'   = \sum_i c_i p_{ik}$ is the frequency of the mixture and $\bar q_k = 1 - \bar
+#'   p_k$; it keeps the between-source term in full. If the mixture is intermated
+#'   to Hardy-Weinberg proportions, the variance of the 0/0.5/1 genotype at locus
+#'   $k$ is $\bar p_k \bar q_k / 2$, so the genic variance of the base
+#'   (@eq-response-genic, additive action, @falconer1996, ch. 8) is
+#'   $\sum_k \beta_k^2 \bar p_k \bar q_k / 2$. With effects of equal size
+#'   $\beta$ at every one of the $m$ loci and markers whose frequencies represent
+#'   those of the quantitative trait loci, that is $m \beta^2 GD_T / 4$:
+#'   maximising $GD_T$ maximises genic variance; with unequal effects the two
+#'   differ by the squared-effect weighting. The case is different when the
+#'   candidates are A $\times$ B hybrids of two pools that are never intermated:
+#'   @sec-response shows that their genic variance contains only the within-pool
+#'   part of gene diversity, not the between-pool term. In both cases neither
+#'   frequency-based quantity sees linkage disequilibrium.
 #' - **Core collection.** Instead of clustering heuristics plus proportional
 #'   sampling, solve the quadratic programme directly with operational constraints
 #'   ($c_i \le$ multiplication capacity, $c_i \ge$ a policy minimum for accessions
 #'   of cultural importance).
 #' - **Optimal contribution selection.** @meuwissen1997 maximises
 #'   $\mathbf{c}'\mathbf{u}$ subject to a bound on the group coancestry
-#'   $\mathbf{c}'\mathbf{f}\mathbf{c}$, with $\mathbf{u}$ the vector of
-#'   breeding values; its Lagrangian form is
+#'   $\mathbf{c}'\mathbf{f}\mathbf{c}$, with $\mathbf{u}$ the vector of the
+#'   candidates' selection-criterion values (estimated breeding values in
+#'   @meuwissen1997, the multi-trait index $u_i$ in @sec-ocs); its Lagrangian form is
 #'   $\max \mathbf{c}'\mathbf{u} - \lambda\,\mathbf{c}'\mathbf{f}\mathbf{c}$,
 #'   $\lambda \ge 0$. This chapter is
 #'   the case $\lambda \to \infty$, pure diversity. A breeder operates in the middle
@@ -569,7 +582,13 @@ stopifnot(max(abs(oc[["c_i"]] - c(0.522, 0, 0.270, 0.208))) < 5e-4)
 #' ## Equal contributions and effective size
 #' 
 #' Minimising $\bar f$ maximises the status number $N_s = 1/(2\bar f)$
-#' [@lindgren1997] by definition. $N_s$ is a static function of the current
+#' [@lindgren1997] by definition. With census weights $N_i/N_T$, $\bar f$ is the
+#' mean of the individual coancestry matrix over all pairs, diagonal included,
+#' which is the group coancestry $\theta$ of @sec-coancestry whatever the
+#' subdivision; this $N_s$ is then the $1/(2\theta)$ of that chapter, and
+#' @tbl-keystone writes $GD_T = 1 - \bar f$ as $1 - \theta$ (asserted in
+#' `keystone-check`).
+#' $N_s$ is a static function of the current
 #' coancestry; the effective size $N_e$ is defined from the *rate* at which
 #' inbreeding or coancestry rises across generations, so the two are not the same
 #' quantity, and lowering $\bar f$ today does not by itself fix $N_e$.
@@ -711,7 +730,10 @@ round(gp, 4)
 #' where diversity *is*, not which direction to move it.
 #' 
 #' **The within term is the one with a future.** $GD_{BI}$ is the raw material of
-#' next cycle's response, which @sec-response makes precise: it is the same sum over
-#' the same loci as genic variance, weighted equally instead of by squared effect.
-#' That is the entire reason a diversity constraint is worth writing down, and
-#' @sec-limits is where the equivalence is pushed until it breaks.
+#' next cycle's response, which @sec-response makes precise: among A $\times$ B
+#' hybrids genic variance is a sum over loci of the within-pool part of gene
+#' diversity, weighted by squared effect, while $GD_T$ also carries the
+#' between-pool term that genic variance does not contain. Gene diversity is
+#' therefore a proxy for genic variance only through its within-pool part, only if
+#' effect sizes are unrelated to which loci lose diversity, and blind to
+#' disequilibrium; @sec-limits is where the proxy is pushed until it breaks.

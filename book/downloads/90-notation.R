@@ -111,7 +111,7 @@ knitr::kable(data.frame(
 knitr::kable(data.frame(
   Symbol = c("$\\theta_S$", "$GD$, $H_e$", "$N_s$", "$N_{e,\\text{par}}$",
              "$f_{ii}$", "$s_i$", "$\\tilde x$", "$\\bar x$"),
-  Definition = c("$n^{-2}\\sum_i\\sum_j f_{ij}$, diagonal **included**",
+  Definition = c("$n^{-2}\\sum_i\\sum_j f_{ij}$, diagonal **included**; the $\\bar f$ of the partition below, with census weights (@sec-subdivided)",
                  "$1 - \\theta$; these are the same quantity",
                  "$1/(2\\theta)$",
                  "$1/\\sum_i p_i^2$ over parent-line usage",
@@ -141,12 +141,57 @@ knitr::kable(data.frame(
   `In hybrid breeding` = c("the pool's diversity",
                            "0 for inbred lines; use `GD_WI_hyb` for the F1s",
                            "segregating variation available to selection",
-                           "what erodes -- defend it",
+                           "within-pool diversity; equals $GD_{BI}$ with inbred lines, the term recurrent selection erodes (@tbl-keystone)",
                            "the heterosis engine -- **maintain**, do not maximise (@sec-heterosis)"),
   check.names = FALSE))
 
 #' 
 #' with $GD_T = GD_{WI} + GD_{BI} + GD_{BS}$ and $F_{ST} = GD_{BS}/GD_T$.
+#' 
+## -----------------------------------------------------------------------------
+#| label: notation-fst-parameter
+#| include: false
+fst_bn <- 0.15
+sim_bn <- simulate_pools(n_A = book_cfg$n_pool_A, n_B = book_cfg$n_pool_B,
+                         m = book_cfg$m, fst = fst_bn, seed = 1)
+fst_stat <- ct_partition(2 * sim_bn$GL, sim_bn$pool)[["global"]][["F_ST"]]
+# Unbounded pools: per-locus GD_BS = (pA - pB)^2 / 2 and GD_T = 2 pbar (1 - pbar)
+set.seed(1)
+pa <- runif(2e5, 0.05, 0.95)
+sh <- (1 - fst_bn) / fst_bn
+pA <- rbeta(2e5, pa * sh, (1 - pa) * sh)
+pB <- rbeta(2e5, pa * sh, (1 - pa) * sh)
+pm <- (pA + pB) / 2
+fst_inf <- mean((pA - pB)^2 / 2) / mean(2 * pm * (1 - pm))
+stopifnot(abs(fst_inf - fst_bn / (2 - fst_bn)) < 0.005)
+# Same statistic with self-coancestry dropped: the finite-pool excess disappears
+f_off <- sim_bn$fL; diag(f_off) <- NA
+in_A  <- sim_bn$pool == "A"
+f_til <- mean(in_A) * mean(f_off[in_A, in_A], na.rm = TRUE) +
+         mean(!in_A) * mean(f_off[!in_A, !in_A], na.rm = TRUE)
+f_bar <- mean(f_off, na.rm = TRUE)
+fst_off <- (f_til - f_bar) / (1 - f_bar)
+stopifnot(fst_stat > fst_inf, abs(fst_off - fst_bn / (2 - fst_bn)) < 0.005)
+
+#' 
+#' That $F_{ST}$ is a statistic computed on a set of genotypes. The Balding-Nichols
+#' parameter of the simulations, `fst` in the code and written $F_{BN}$ here, is a
+#' different quantity: it is the variance of a pool's allele frequency around the
+#' ancestral one, in units of $p(1-p)$ (see Terms). @sec-simulating-crosses,
+#' @sec-heterosis, @sec-choosing, @sec-stages, @sec-plant-literature,
+#' @sec-case-study and @sec-verification write that
+#' parameter as $F_{ST}$ wherever it is a simulation setting or a Balding-Nichols
+#' expectation; read it there as $F_{BN}$. With two pools of unbounded size the expected
+#' $GD_{BS}$ per locus is $F_{BN}\,p(1-p)$ and the expected $GD_T$ is
+#' $(2 - F_{BN})\,p(1-p)$, so the statistic estimates approximately
+#' $F_{BN}/(2 - F_{BN})$ (a ratio of expectations), not $F_{BN}$: at
+#' $F_{BN}$ = `r fst_bn` that is `r fmt(fst_bn / (2 - fst_bn), 3)`, against
+#' `r fmt(fst_inf, 3)` computed from simulated frequencies. On finite pools the
+#' statistic is larger again, because $\tilde f$ includes each line's
+#' self-coancestry: on the `r book_cfg$n_pool_A` + `r book_cfg$n_pool_B` lines that
+#' `simulate_pools()` draws at `fst` = `r fst_bn` (seed 1), the $F_{ST}$ of
+#' @sec-subdivided is `r fmt(fst_stat, 3)`, and `r fmt(fst_off, 3)` once the
+#' diagonal is dropped from both $\tilde f$ and $\bar f$.
 #' 
 #' ### Subdivided population
 #' 
@@ -189,8 +234,8 @@ knitr::kable(data.frame(
               "$p_{Ak} - p_{Bk}$, the divergence at locus $k$",
               "general combining ability for heterosis; weighted by the **opposite** pool's frequencies",
               "specific combining ability; $-2\\sum_k d_k\\,\\delta u_{ik}\\,\\delta v_{jk}$",
-              "$4\\sum_k d_k^2 p_{Ak}q_{Ak}p_{Bk}q_{Bk}$; falls as $(1 - F_{ST})^2$",
-              "weight on within- against between-pool diversity",
+              "$4\\sum_k d_k^2 p_{Ak}q_{Ak}p_{Bk}q_{Bk}$; its Balding-Nichols expectation falls as $(1 - F_{BN})^2$",
+              "weight on within- against between-pool diversity -- **not** the OCS penalty $\\lambda$ of the selection table",
               "cycle index",
               "base frequencies, frozen at the founding cycle"),
   `Function` = c("argument to `heterosis_value()`", "`heterosis_value()`",
@@ -237,7 +282,7 @@ knitr::kable(data.frame(
               "continuous contributions, summing to 1",
               "line-usage weights, $w_a = k_a/(2n)$",
               "times line a is used as a parent",
-              "weight on the coancestry penalty in continuous OCS",
+              "weight on the coancestry penalty in continuous OCS -- **not** the within/between weight of the heterosis table",
               "progeny variance of a DH family",
               "usefulness criterion, $\\mu + i h \\sigma$"),
   `Function` = c("`ctx$index`", "`alpha_loss()`", "argument to `stage2_select()`",
@@ -322,8 +367,8 @@ knitr::kable(data.frame(
   check.names = FALSE))
 
 #' 
-#' $r$ here is plots per cross; in the next table it is the accuracy of a selection
-#' criterion. @sec-mating keeps $\rho$ for accuracy to avoid the clash.
+#' $r$ here is plots per cross; in the genomic-prediction table above and the
+#' response table below it is the accuracy of a selection criterion. @sec-mating keeps $\rho$ for accuracy to avoid the clash.
 #' 
 #' ### Sparse testing
 #' 
@@ -382,7 +427,7 @@ knitr::kable(data.frame(
   Symbol = c("$R$", "$i$", "$z$, $\\varphi$", "$r$", "$b$", "$S_I$", "$\\sigma_A$",
              "$V_{\\text{genic}}$", "$\\beta_k$", "$p_{Ak}$, $p_{Bk}$; $q = 1 - p$",
              "$u_k$, $v_k$", "$d_k$", "$ID$", "$W$", "$\\mathbf{g}$; $\\hat{\\mathbf{g}}$",
-             "$\\boldsymbol\\Sigma_P$, $\\boldsymbol\\Sigma_G$", "$\\mathbf{b}$",
+             "$\\boldsymbol\\Sigma_P$, $\\boldsymbol\\Sigma_G$", "$\\mathbf{b}$", "$\\boldsymbol\\xi$",
              "$\\mathbf{a}$", "$\\mathbf{R}$", "$n_t$, $n_r$", "$\\mathbf{C}$",
              "$2 N_e R_1$"),
   Meaning = c("response to one cycle of selection",
@@ -394,7 +439,7 @@ knitr::kable(data.frame(
               "additive standard deviation",
               "variance if the loci were independent; the realised variance minus this is the disequilibrium term",
               "marker effect at locus k",
-              "frequency of the allele coded 1 at locus $k$ among pool-A / pool-B lines",
+              "frequency of the allele coded 1 at locus $k$ among pool-A / pool-B lines; their mean is $\\bar p_k$ of the heterosis table. @sec-simulating-crosses writes $p_{A,k}$ for $p_{Ak}$ and $p_k$ for the ancestral Balding-Nichols frequency",
               "0/1 allele carried at locus $k$ by the pool-A / pool-B parent of a hybrid; the $u_{ik}$, $v_{jk}$ of @sec-heterosis-gca-sca without the line index",
               "dominance deviation at locus k",
               "inbreeding depression, $2F\\sum d_k p_k q_k$; a **constant** with fully inbred parents",
@@ -402,6 +447,7 @@ knitr::kable(data.frame(
               "vector of the traits' genetic values, one entry per trait (not over individuals); its predictor. Distinct from the GCA $g^A_i$, $g^B_j$",
               "phenotypic and genetic covariance matrices of the traits -- **not** the relationship matrix $\\mathbf{G}$",
               "selection index weights",
+              "vector of selection criteria the index $\\mathbf{b}'\\boldsymbol\\xi$ is built on ($\\hat{\\mathbf{g}}$ or the records $\\mathbf{y}$) -- **not** the contributions $\\mathbf{c}$",
               "economic weights on the aggregate genotype",
               "restriction matrix ($n_t \\times n_r$): directions held at zero expected gain",
               "number of traits; number of restrictions",
@@ -410,7 +456,7 @@ knitr::kable(data.frame(
   `In the code` = c("-", "`sel_intensity()`", "-", "-", "-", "-", "-", "`genic_var()`",
                     "`sim$beta`", "-", "rows of `sim$GL` (`U`, `V`)", "`d`",
                     "`inbreeding_depression()`", "-", "-; `traits` of `build_ctx()`", "`P`, `G`",
-                    "`index_smith_hazel()`", "-", "`index_restricted()`", "-", "-", "-"),
+                    "`index_smith_hazel()`", "-", "-", "`index_restricted()`", "-", "-", "-"),
   check.names = FALSE))
 
 #' 
@@ -444,8 +490,10 @@ knitr::kable(data.frame(
 #' ## Terms
 #' 
 #' **Balding-Nichols model.** A Beta distribution with mean $p$ and variance
-#' $F_{ST}\,p(1-p)$, used to draw pool-specific allele frequencies from an
-#' ancestral frequency. The parameter *is* the expected divergence.
+#' $F_{BN}\,p(1-p)$, used to draw pool-specific allele frequencies from an
+#' ancestral frequency $p$. $F_{BN}$ (`fst`) is the expected divergence of each
+#' pool from the ancestral population; it is not the $F_{ST}$ statistic of
+#' @sec-subdivided computed on the pools (see the partition above).
 #' 
 #' **Group coancestry.** The probability that two alleles sampled at random from a
 #' whole set are identical in state, including the case of sampling the same

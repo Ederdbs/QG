@@ -779,7 +779,7 @@ f_{ij} \;=\; \frac{1}{m}\sum_{k=1}^{m}
 <ul>
 <li><span class="math inline">\(f_{ij} \in [0, 1]\)</span> always. <strong>A negative value is a symptom of the wrong matrix.</strong></li>
 <li>Self-coancestry, the diagonal element of <span class="math inline">\(\mathbf{f}\)</span>, is <span class="math inline">\(s_i = f_{ii} =
-(1 + F_i)/2\)</span> <span class="citation" data-cites="falconer1996">(the identity-by-descent form is in <a href="99-references.html#ref-falconer1996" role="doc-biblioref">Falconer and Mackay 1996</a>, ch.&nbsp;5)</span>, with <span class="math inline">\(F_i\)</span> the individual’s molecular homozygosity, the fraction of markers at which <span class="math inline">\(i\)</span> is homozygous. For a fully heterozygous F1, <span class="math inline">\(s_i = 0.5\)</span>.</li>
+(1 + F_i)/2\)</span> <span class="citation" data-cites="falconer1996">(the identity-by-descent form is in <a href="99-references.html#ref-falconer1996" role="doc-biblioref">Falconer and Mackay 1996</a>, ch.&nbsp;5)</span>, with <span class="math inline">\(F_i\)</span> the individual’s molecular inbreeding coefficient, numerically the fraction of markers at which <span class="math inline">\(i\)</span> is homozygous (an individual quantity, not the population-level <code>F_hom</code> of <a href="05-genomic-era.html" class="quarto-xref"><span>Chapter 12</span></a>). For a fully heterozygous F1, <span class="math inline">\(s_i = 0.5\)</span>.</li>
 <li>No centering, no scaling, no arbitrary base population.</li>
 </ul>
 <section id="computable-form" class="level3" data-number="1.3.1">
@@ -844,11 +844,11 @@ f_{ij} \;=\; \frac{1}{m}\sum_{k=1}^{m}
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>      <span class="at">heterozygous_fraction =</span> <span class="dv">2</span> <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> fd)))</span>
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         diagonal_mean           molecular_F heterozygous_fraction </span></span>
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                0.8192                0.6383                0.3617</span></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>F_i <span class="ot">&lt;-</span> <span class="fu">rowMeans</span>(X <span class="sc">!=</span> <span class="fl">0.5</span>)                      <span class="co"># molecular homozygosity</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>F_i <span class="ot">&lt;-</span> <span class="fu">rowMeans</span>(X <span class="sc">!=</span> <span class="fl">0.5</span>)                      <span class="co"># molecular inbreeding F_i</span></span>
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">isTRUE</span>(<span class="fu">all.equal</span>(<span class="fu">diag</span>(f), (<span class="dv">1</span> <span class="sc">+</span> F_i) <span class="sc">/</span> <span class="dv">2</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<p>This fraction depends directly on the divergence between the heterotic pools (<code>fst</code> in the configuration): more divergent pools give more heterozygous F1 hybrids and a diagonal closer to 0.5. That relationship is what <a href="03-simulating-crosses.html" class="quarto-xref"><span>Chapter 4</span></a> puts under experimental control.</p>
+<p>This fraction is not set by how far apart the heterotic pools are. Its expectation over the A <span class="math inline">\(\times\)</span> B factorial is one minus the mean coancestry between a pool-A and a pool-B line, and when the two pools diverge neutrally from a common ancestral population that quantity does not depend on the divergence: what the between-pool term of diversity gains, the shared term loses (<a href="05b-heterosis-dominance.html#sec-heterosis-flat" class="quarto-xref"><span>Section 13.7</span></a>). <a href="03-simulating-crosses.html" class="quarto-xref"><span>Chapter 4</span></a> measures the heterozygous fraction flat across its grid of <code>fst</code>, the divergence parameter of the simulation.</p>
 </section>
 </section>
 <section id="f-is-not-an-ad-hoc-substitute" class="level2" data-number="1.4">

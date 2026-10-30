@@ -72,6 +72,17 @@ book_fig  <- function(...) .book_get('figs', ...)
 #' index theory that turns out to be the direct ancestor of this book's $\alpha$
 #' constraint.
 #' 
+#' The data come from `simulate_pools()`, a lighter form of the generator that
+#' @sec-simulating-crosses builds step by step: pool allele frequencies drawn under
+#' the Balding-Nichols model with parameter `fst` from ancestral frequencies,
+#' homozygous lines `GL` (0/1), and the complete A $\times$ B factorial of hybrids
+#' `X` (0/0.5/1). It adds a trait: `n_qtl` markers taken at random as quantitative
+#' trait loci with independent standard-normal effects `beta` (zero elsewhere), and
+#' an `index` equal to the standardised true genetic value plus independent normal
+#' noise of variance $1/h^2 - 1$, then standardised: before that last step the
+#' genetic value has unit variance, so $h^2$ is the share of the index variance
+#' it contributes in expectation.
+#' 
 ## -----------------------------------------------------------------------------
 sim <- simulate_pools(n_A = book_cfg$n_pool_A, n_B = book_cfg$n_pool_B,
                       m = book_cfg$m, fst = 0.15, n_qtl = 300, h2 = 0.5, seed = 1)
@@ -99,7 +110,7 @@ c(hybrids = nrow(X), markers = ncol(X), qtl = sum(sim$beta != 0))
 #' 
 ## -----------------------------------------------------------------------------
 #| label: tbl-response-breeders
-#| tbl-cap: "One round of truncation selection of the top 60 of the 625 hybrids on the index (`simulate_pools()`, 25 + 25 lines, 2000 markers, 300 QTL, $h^2 = 0.5$, $F_{ST} = 0.15$, seed 1). $i$: normal-theory selection intensity of the selected fraction; $r$: correlation between index and true genetic value; $\\sigma_A$: standard deviation of the true genetic value; predicted: $i\\,r\\,\\sigma_A$ (@eq-response-breeders); realised: mean genetic value of the selected minus that of all hybrids. Genetic values in simulation units."
+#| tbl-cap: "One round of truncation selection of the top 60 of the 625 hybrids on the index (`simulate_pools()`, 25 + 25 lines, 2000 markers, 300 QTL, $h^2 = 0.5$, Balding-Nichols `fst` = 0.15, seed 1). $i$: normal-theory selection intensity of the selected fraction; $r$: correlation between index and true genetic value; $\\sigma_A$: standard deviation of the true genetic value; predicted: $i\\,r\\,\\sigma_A$ (@eq-response-breeders); realised: mean genetic value of the selected minus that of all hybrids. Genetic values in simulation units."
 n_sel <- 60
 N     <- nrow(X)
 i_norm <- sel_intensity(n_sel / N)
@@ -152,7 +163,7 @@ stopifnot(isTRUE(all.equal(b * (mean(I[sel]) - mean(I)), i_real * r * sd(gv))))
 #' 
 ## -----------------------------------------------------------------------------
 #| label: tbl-response-replicated
-#| tbl-cap: "The single draw of @tbl-response-breeders repeated over seeds 1 to 30 of the same `simulate_pools()` call (25 + 25 lines, 2000 markers, 300 QTL, $h^2 = 0.5$, $F_{ST} = 0.15$; top 60 of 625 hybrids on the index). Per quantity: mean over seeds, standard error of that mean (s.d./$\\sqrt{30}$), minimum and maximum. Relative gap: $1 -$ realised/predicted response (@eq-response-breeders), dimensionless; realised intensity: standardised selection differential on the index; skewness of the standardised index."
+#| tbl-cap: "The single draw of @tbl-response-breeders repeated over seeds 1 to 30 of the same `simulate_pools()` call (25 + 25 lines, 2000 markers, 300 QTL, $h^2 = 0.5$, Balding-Nichols `fst` = 0.15; top 60 of 625 hybrids on the index). Per quantity: mean over seeds, standard error of that mean (s.d./$\\sqrt{30}$), minimum and maximum. Relative gap: $1 -$ realised/predicted response (@eq-response-breeders), dimensionless; realised intensity: standardised selection differential on the index; skewness of the standardised index."
 one_seed <- function(s) {
   sm <- simulate_pools(n_A = book_cfg$n_pool_A, n_B = book_cfg$n_pool_B,
                        m = book_cfg$m, fst = 0.15, n_qtl = 300, h2 = 0.5,
@@ -197,7 +208,7 @@ fmt(data.frame(
 #' the seed-1 overprediction is consistent with sampling variation, and the
 #' equation shows no detectable bias; the replicated AlphaSimR sweep of
 #' @sec-alphasimr reaches the same reading. One limit applies: only the teaching scale
-#' (25 + 25 lines, 2000 markers, $F_{ST} = 0.15$) was measured, so nothing here
+#' (25 + 25 lines, 2000 markers, Balding-Nichols `fst` = 0.15) was measured, so nothing here
 #' says how the gap behaves at production scale or under selection across cycles.
 #' 
 #' ## Genic variance, and what it has to do with gene diversity
@@ -238,7 +249,7 @@ fmt(data.frame(
 #' 
 #' How does $V_{\text{genic}}$ relate to gene diversity? Let $p_{Ak}$ and
 #' $p_{Bk}$ be the frequencies of the allele coded 1 at locus $k$ among the inbred
-#' lines of pools A and B, $q = 1 - p$, and $p_k = (p_{Ak} + p_{Bk})/2$ the
+#' lines of pools A and B, $q = 1 - p$ (so $\bar q_k = 1 - \bar p_k$), and $\bar p_k = (p_{Ak} + p_{Bk})/2$ the
 #' hybrid-pool frequency. A hybrid of the complete A $\times$ B factorial carries
 #' $x_k = (u_k + v_k)/2$, with $u_k \in \{0, 1\}$ the allele of its pool-A parent
 #' and $v_k \in \{0, 1\}$ that of its pool-B parent (the $u_{ik}$, $v_{jk}$ of
@@ -246,7 +257,7 @@ fmt(data.frame(
 #' two pools, so over the factorial (population-variance scale)
 #' 
 #' $$\operatorname{Var}(x_k) \;=\; \frac{p_{Ak}q_{Ak} + p_{Bk}q_{Bk}}{4}
-#' \;=\; \frac{p_k q_k}{2} - \frac{(p_{Ak} - p_{Bk})^2}{8}.$$ {#eq-response-hybrid-var}
+#' \;=\; \frac{\bar p_k \bar q_k}{2} - \frac{(p_{Ak} - p_{Bk})^2}{8}.$$ {#eq-response-hybrid-var}
 #' 
 ## -----------------------------------------------------------------------------
 #| label: response-hybrid-var
@@ -263,12 +274,12 @@ c(ratio_min = min(v_pop[ok] / (pH * (1 - pH))[ok]),
 
 #' 
 #' The per-locus variance entering $V_{\text{genic}}$ (@eq-response-genic) is therefore not
-#' proportional to $p_k q_k$: the ratio $\operatorname{Var}(x_k)/(p_k q_k)$ ranges
+#' proportional to $\bar p_k \bar q_k$: the ratio $\operatorname{Var}(x_k)/(\bar p_k \bar q_k)$ ranges
 #' from `r fmt(min(v_pop[ok] / (pH * (1 - pH))[ok]), 3)` to
 #' `r fmt(max(v_pop[ok] / (pH * (1 - pH))[ok]), 3)` across these loci. Gene diversity
-#' of the hybrid pool, $\frac{1}{m}\sum_k 2 p_k q_k$, contains the between-pool
+#' of the hybrid pool, $\frac{1}{m}\sum_k 2 \bar p_k \bar q_k$, contains the between-pool
 #' divergence $(p_{Ak} - p_{Bk})^2$ that @eq-response-hybrid-var subtracts (since
-#' $2p_kq_k = p_{Ak}q_{Ak} + p_{Bk}q_{Bk} + (p_{Ak} - p_{Bk})^2/2$), the
+#' $2\bar p_k\bar q_k = p_{Ak}q_{Ak} + p_{Bk}q_{Bk} + (p_{Ak} - p_{Bk})^2/2$), the
 #' between-pool term of the partition of @sec-subdivided, while $V_{\text{genic}}$ among hybrids
 #' sees only the within-pool part, weighted by squared effect. The inference is
 #' that gene diversity is a proxy for genic variance only through its within-pool
@@ -367,10 +378,10 @@ fmt(data.frame(component = names(p), variance = p,
 #' Let $W = \mathbf{a}'\mathbf{g}$ be the aggregate genotype (the breeding
 #' objective), with $\mathbf{g}$ the vector of the traits' genetic values (one
 #' entry per trait; not a vector over individuals). The weights $\mathbf{b}$ on a
-#' vector of criteria $\mathbf{c}$ that maximise the correlation between
-#' $\mathbf{b}'\mathbf{c}$ and $W$ are
-#' $\operatorname{Var}(\mathbf{c})^{-1}\operatorname{Cov}(\mathbf{c}, \mathbf{g}')\,\mathbf{a}$.
-#' When $\mathbf{c} = \hat{\mathbf{g}}$ is the multi-trait best linear unbiased
+#' vector of criteria $\boldsymbol\xi$ that maximise the correlation between
+#' $\mathbf{b}'\boldsymbol\xi$ and $W$ are
+#' $\operatorname{Var}(\boldsymbol\xi)^{-1}\operatorname{Cov}(\boldsymbol\xi, \mathbf{g}')\,\mathbf{a}$.
+#' When $\boldsymbol\xi = \hat{\mathbf{g}}$ is the multi-trait best linear unbiased
 #' predictor (BLUP) of $\mathbf{g}$, $\operatorname{Cov}(\hat{\mathbf{g}},
 #' \mathbf{g}') = \operatorname{Var}(\hat{\mathbf{g}})$, so $\mathbf{b} =
 #' \mathbf{a}$: weighting the predictions by the economic weights is then the
@@ -378,7 +389,7 @@ fmt(data.frame(component = names(p), variance = p,
 #' predictions that are not BLUP of
 #' $\mathbf{g}$, single-trait BLUPs of genetically correlated traits included.
 #' 
-#' When $\mathbf{c}$ is instead the vector of phenotypic records $\mathbf{y} = \mathbf{g} + \mathbf{e}$, $\mathbf{e}$
+#' When $\boldsymbol\xi$ is instead the vector of phenotypic records $\mathbf{y} = \mathbf{g} + \mathbf{e}$, $\mathbf{e}$
 #' independent of $\mathbf{g}$, with $\operatorname{Var}(\mathbf{y}) = \boldsymbol\Sigma_P$ and
 #' $\operatorname{Cov}(\mathbf{y}, \mathbf{g}') = \boldsymbol\Sigma_G$, the same
 #' expression is the Smith-Hazel index [@smith1936; @hazel1943]:
@@ -473,7 +484,11 @@ stopifnot(max(abs(crossprod(R, G %*% b_r))) < 1e-12)
 #' 
 #' The restricted index moves the restricted trait by exactly zero -- not
 #' approximately, not on average. That is the property distinguishing a restriction
-#' from a penalty, and it is the property $\alpha$ inherits.
+#' from a penalty. What $\alpha$ inherits is the restriction, not the zero: it is
+#' an inequality, $\alpha \le \alpha_{\max}$, on the loss of gene diversity
+#' relative to a random subset of the same size (@sec-baseline), so the loss is
+#' bounded rather than held at zero, and @sec-ocs works out what changes when the
+#' equality restriction becomes an inequality.
 #' 
 #' ::: {.callout-important}
 #' ## What is genuinely new in this book, then
@@ -497,3 +512,5 @@ stopifnot(max(abs(crossprod(R, G %*% b_r))) < 1e-12)
 #' is assumed rather than measured. @sec-ocs is where the restricted index becomes
 #' the $\alpha$ constraint, and @sec-limits is where the disequilibrium term this
 #' chapter isolated (@eq-response-ld) turns out to matter more than @eq-response-breeders suggests.
+#' The next part opens with @sec-simulating-crosses, which builds step by step the
+#' two-pool hybrid populations that `simulate_pools()` drew here in one call.
