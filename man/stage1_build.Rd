@@ -4,11 +4,12 @@
 \alias{stage1_build}
 \title{Stage 1: from line genotypes to the hybrid contract}
 \usage{
-stage1_build(X, ped, traits, fL = NULL)
+stage1_build(X, ped, traits, fL = NULL, coding = NULL)
 }
 \arguments{
-\item{X}{Hybrid marker matrix, `N x m`. Accepts 0/1/2 or 0/0.5/1 coding; the
-coding is auto-detected and rescaled.}
+\item{X}{Hybrid marker matrix, `N x m`, coded 0/1/2 (dosage) or 0/0.5/1
+(within-individual frequency). Missing calls (`NA`) are kept and propagate
+into `f`.}
 
 \item{ped}{Data frame with columns `a` and `b`, the parent line ids, one row
 per hybrid.}
@@ -19,6 +20,11 @@ hybrid.}
 \item{fL}{Optional coancestry matrix *between lines*. Stage 2 runs without
 it; it only enables the heterotic-group decomposition
 ([theta_pools], [gd_partition]).}
+
+\item{coding}{`"012"` or `"0-0.5-1"`. `NULL` (default) auto-detects,
+ignoring `NA`: any value above 1 means 0/1/2. A matrix holding only 0 and
+1 is ambiguous (inbred 0/0.5/1, or 0/1/2 with no dosage-2 call); it is
+read as 0/0.5/1 with a warning. Declare `coding` to remove the assumption.}
 }
 \value{
 A list with `X` (markers in 0/0.5/1), `f` (hybrid molecular

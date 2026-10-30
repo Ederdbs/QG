@@ -55,3 +55,29 @@ test_that("stage1_build accepts both 0/1/2 and 0/0.5/1 marker coding", {
   expect_equal(a$X, b$X)
   expect_equal(a$f, b$f)
 })
+
+test_that("stage1_build coding: declared 012, ambiguous auto warns, NA ignored", {
+  X <- rbind(c(0, 1, 1),
+             c(1, 0, 1))                       # 0/1/2 dosages, no dosage 2
+  ped <- data.frame(a = 1:2, b = 3:4)
+  tr <- data.frame(trait1 = c(0, 0))
+  f012 <- stage1_build(X, ped, tr, coding = "012")$f
+  # every locus heterozygous or 0: self-coancestry = mean over loci of 1 or 1/2
+  expect_equal(diag(f012), c(mean(c(1, 0.5, 0.5)), mean(c(0.5, 1, 0.5))))
+  expect_equal(f012[1, 2], 0.5)                 # each locus: x1 x2 + (1-x1)(1-x2) = 0.5
+  expect_equal(f012, tcrossprod(cbind(X / 2, 1 - X / 2)) / ncol(X))
+  expect_warning(fa <- stage1_build(X, ped, tr)$f, "ambiguous")
+  expect_equal(diag(fa), c(1, 1))
+  expect_identical(stage1_build(X, ped, tr, coding = "0-0.5-1")$f, fa)
+  expect_error(stage1_build(X, ped, tr, coding = "dosage"))
+  expect_error(stage1_build(X * 2, ped, tr, coding = "0-0.5-1"))
+  # NA ignored in detection: a 2 elsewhere still means 0/1/2, no warning
+  Xna <- rbind(c(0, NA, 2), c(1, 0, 1))
+  expect_no_warning(b <- stage1_build(Xna, ped, tr))
+  expect_identical(b$X, Xna / 2)
+  expect_true(is.na(b$f[1, 2]))
+  # NA with only 0/0.5/1 present: unambiguous, no warning, unchanged
+  Xh <- rbind(c(0, NA, 0.5), c(1, 0, 0.5))
+  expect_no_warning(h <- stage1_build(Xh, ped, tr))
+  expect_identical(h$X, Xh)
+})

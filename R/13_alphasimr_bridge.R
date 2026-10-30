@@ -195,7 +195,8 @@ alphasimr_to_stage1 <- function(hybrid_pop, elite_A, elite_B, SP) {
     AlphaSimR::pullSegSiteGeno(elite_B, simParam = SP)) / 2)
 
   stage1_build(X = AlphaSimR::pullSegSiteGeno(hybrid_pop, simParam = SP),
-               ped = ped, traits = as.data.frame(hybrid_pop@pheno), fL = fL)
+               ped = ped, traits = as.data.frame(hybrid_pop@pheno), fL = fL,
+               coding = "012")
 }
 
 #' Run the full reciprocal-recurrent-selection pipeline

@@ -126,8 +126,7 @@ stopifnot(fst_stat > fst_inf, abs(fst_off - fst_bn / (2 - fst_bn)) < 0.005)
 That $F_{ST}$ is a statistic computed on a set of genotypes. The Balding-Nichols
 parameter of the simulations, `fst` in the code and written $F_{BN}$ here, is a
 different quantity: it is the variance of a pool's allele frequency around the
-ancestral one, in units of $p(1-p)$ (see Terms). @sec-simulating-crosses,
-@sec-heterosis, @sec-choosing, @sec-stages, @sec-plant-literature,
+ancestral one, in units of $p(1-p)$ (see Terms). @sec-heterosis, @sec-choosing, @sec-stages, @sec-plant-literature,
 @sec-case-study and @sec-verification write that
 parameter as $F_{ST}$ wherever it is a simulation setting or a Balding-Nichols
 expectation; read it there as $F_{BN}$. With two pools of unbounded size the expected
@@ -374,7 +373,7 @@ knitr::kable(data.frame(
 #| echo: false
 knitr::kable(data.frame(
   Symbol = c("$R$", "$i$", "$z$, $\\varphi$", "$r$", "$b$", "$S_I$", "$\\sigma_A$",
-             "$V_{\\text{genic}}$", "$\\beta_k$", "$p_{Ak}$, $p_{Bk}$; $q = 1 - p$",
+             "$V_{\\text{genic}}$", "$\\beta_k$", "$p_{Ak}$, $p_{Bk}$; $q = 1 - p$", "$p^{*}_k$",
              "$u_k$, $v_k$", "$d_k$", "$ID$", "$W$", "$\\mathbf{g}$; $\\hat{\\mathbf{g}}$",
              "$\\boldsymbol\\Sigma_P$, $\\boldsymbol\\Sigma_G$", "$\\mathbf{b}$", "$\\boldsymbol\\xi$",
              "$\\mathbf{a}$", "$\\mathbf{R}$", "$n_t$, $n_r$", "$\\mathbf{C}$",
@@ -388,7 +387,8 @@ knitr::kable(data.frame(
               "additive standard deviation",
               "variance if the loci were independent; the realised variance minus this is the disequilibrium term",
               "marker effect at locus k",
-              "frequency of the allele coded 1 at locus $k$ among pool-A / pool-B lines; their mean is $\\bar p_k$ of the heterosis table. @sec-simulating-crosses writes $p_{A,k}$ for $p_{Ak}$ and $p_k$ for the ancestral Balding-Nichols frequency",
+              "frequency of the allele coded 1 at locus $k$ among pool-A / pool-B lines; their mean is $\\bar p_k$ of the heterosis table. In @sec-simulating-crosses, the Balding-Nichols draws of @eq-balding-nichols",
+              "ancestral frequency of the allele coded 1 at locus $k$, drawn uniform on $[0.05, 0.95]$; the expectation of $p_{Ak}$ and of $p_{Bk}$ under @eq-balding-nichols (@sec-simulating-crosses)",
               "0/1 allele carried at locus $k$ by the pool-A / pool-B parent of a hybrid; the $u_{ik}$, $v_{jk}$ of @sec-heterosis-gca-sca without the line index",
               "dominance deviation at locus k",
               "inbreeding depression, $2F\\sum d_k p_k q_k$; a **constant** with fully inbred parents",
@@ -403,7 +403,7 @@ knitr::kable(data.frame(
               "$\\boldsymbol\\Sigma_G\\mathbf{R}$ in the restricted index -- **not** the MME inverse $\\mathbf{C}^{uu}$",
               "Robertson's limit; half-life $1.4 N_e$"),
   `In the code` = c("-", "`sel_intensity()`", "-", "-", "-", "-", "-", "`genic_var()`",
-                    "`sim$beta`", "-", "rows of `sim$GL` (`U`, `V`)", "`d`",
+                    "`sim$beta`", "-", "inside `simulate_lines()` (`p_anc`)", "rows of `sim$GL` (`U`, `V`)", "`d`",
                     "`inbreeding_depression()`", "-", "-; `traits` of `build_ctx()`", "`P`, `G`",
                     "`index_smith_hazel()`", "-", "-", "`index_restricted()`", "-", "-", "-"),
   check.names = FALSE))

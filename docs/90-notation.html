@@ -897,7 +897,7 @@ window.Quarto = {
 </div>
 </div>
 <p>with <span class="math inline">\(GD_T = GD_{WI} + GD_{BI} + GD_{BS}\)</span> and <span class="math inline">\(F_{ST} = GD_{BS}/GD_T\)</span>.</p>
-<p>That <span class="math inline">\(F_{ST}\)</span> is a statistic computed on a set of genotypes. The Balding-Nichols parameter of the simulations, <code>fst</code> in the code and written <span class="math inline">\(F_{BN}\)</span> here, is a different quantity: it is the variance of a pool’s allele frequency around the ancestral one, in units of <span class="math inline">\(p(1-p)\)</span> (see Terms). <a href="03-simulating-crosses.html" class="quarto-xref"><span>Chapter 4</span></a>, <a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 13</span></a>, <a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 15</span></a>, <a href="08-pipeline-stages.html" class="quarto-xref"><span>Chapter 16</span></a>, <a href="11-plant-literature.html" class="quarto-xref"><span>Chapter 21</span></a>, <a href="12-case-study.html" class="quarto-xref"><span>Chapter 24</span></a> and <a href="92-verification.html" class="quarto-xref"><span>Appendix C</span></a> write that parameter as <span class="math inline">\(F_{ST}\)</span> wherever it is a simulation setting or a Balding-Nichols expectation; read it there as <span class="math inline">\(F_{BN}\)</span>. With two pools of unbounded size the expected <span class="math inline">\(GD_{BS}\)</span> per locus is <span class="math inline">\(F_{BN}\,p(1-p)\)</span> and the expected <span class="math inline">\(GD_T\)</span> is <span class="math inline">\((2 - F_{BN})\,p(1-p)\)</span>, so the statistic estimates approximately <span class="math inline">\(F_{BN}/(2 - F_{BN})\)</span> (a ratio of expectations), not <span class="math inline">\(F_{BN}\)</span>: at <span class="math inline">\(F_{BN}\)</span> = 0.15 that is 0.081, against 0.081 computed from simulated frequencies. On finite pools the statistic is larger again, because <span class="math inline">\(\tilde f\)</span> includes each line’s self-coancestry: on the 25 + 25 lines that <code>simulate_pools()</code> draws at <code>fst</code> = 0.15 (seed 1), the <span class="math inline">\(F_{ST}\)</span> of <a href="02-subdivided.html" class="quarto-xref"><span>Chapter 2</span></a> is 0.102, and 0.084 once the diagonal is dropped from both <span class="math inline">\(\tilde f\)</span> and <span class="math inline">\(\bar f\)</span>.</p>
+<p>That <span class="math inline">\(F_{ST}\)</span> is a statistic computed on a set of genotypes. The Balding-Nichols parameter of the simulations, <code>fst</code> in the code and written <span class="math inline">\(F_{BN}\)</span> here, is a different quantity: it is the variance of a pool’s allele frequency around the ancestral one, in units of <span class="math inline">\(p(1-p)\)</span> (see Terms). <a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 13</span></a>, <a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 15</span></a>, <a href="08-pipeline-stages.html" class="quarto-xref"><span>Chapter 16</span></a>, <a href="11-plant-literature.html" class="quarto-xref"><span>Chapter 21</span></a>, <a href="12-case-study.html" class="quarto-xref"><span>Chapter 24</span></a> and <a href="92-verification.html" class="quarto-xref"><span>Appendix C</span></a> write that parameter as <span class="math inline">\(F_{ST}\)</span> wherever it is a simulation setting or a Balding-Nichols expectation; read it there as <span class="math inline">\(F_{BN}\)</span>. With two pools of unbounded size the expected <span class="math inline">\(GD_{BS}\)</span> per locus is <span class="math inline">\(F_{BN}\,p(1-p)\)</span> and the expected <span class="math inline">\(GD_T\)</span> is <span class="math inline">\((2 - F_{BN})\,p(1-p)\)</span>, so the statistic estimates approximately <span class="math inline">\(F_{BN}/(2 - F_{BN})\)</span> (a ratio of expectations), not <span class="math inline">\(F_{BN}\)</span>: at <span class="math inline">\(F_{BN}\)</span> = 0.15 that is 0.081, against 0.081 computed from simulated frequencies. On finite pools the statistic is larger again, because <span class="math inline">\(\tilde f\)</span> includes each line’s self-coancestry: on the 25 + 25 lines that <code>simulate_pools()</code> draws at <code>fst</code> = 0.15 (seed 1), the <span class="math inline">\(F_{ST}\)</span> of <a href="02-subdivided.html" class="quarto-xref"><span>Chapter 2</span></a> is 0.102, and 0.084 once the diagonal is dropped from both <span class="math inline">\(\tilde f\)</span> and <span class="math inline">\(\bar f\)</span>.</p>
 </section>
 <section id="subdivided-population" class="level3" data-number="A.1.4">
 <h3 data-number="A.1.4" class="anchored" data-anchor-id="subdivided-population"><span class="header-section-number">A.1.4</span> Subdivided population</h3>
@@ -1514,9 +1514,9 @@ window.Quarto = {
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
-<col style="width: 14%">
-<col style="width: 75%">
-<col style="width: 9%">
+<col style="width: 16%">
+<col style="width: 71%">
+<col style="width: 12%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1573,70 +1573,75 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td style="text-align: left;"><span class="math inline">\(p_{Ak}\)</span>, <span class="math inline">\(p_{Bk}\)</span>; <span class="math inline">\(q = 1 - p\)</span></td>
-<td style="text-align: left;">frequency of the allele coded 1 at locus <span class="math inline">\(k\)</span> among pool-A / pool-B lines; their mean is <span class="math inline">\(\bar p_k\)</span> of the heterosis table. <a href="03-simulating-crosses.html" class="quarto-xref"><span>Chapter 4</span></a> writes <span class="math inline">\(p_{A,k}\)</span> for <span class="math inline">\(p_{Ak}\)</span> and <span class="math inline">\(p_k\)</span> for the ancestral Balding-Nichols frequency</td>
+<td style="text-align: left;">frequency of the allele coded 1 at locus <span class="math inline">\(k\)</span> among pool-A / pool-B lines; their mean is <span class="math inline">\(\bar p_k\)</span> of the heterosis table. In <a href="03-simulating-crosses.html" class="quarto-xref"><span>Chapter 4</span></a>, the Balding-Nichols draws of <a href="03-simulating-crosses.html#eq-balding-nichols" class="quarto-xref">Equation&nbsp;<span>4.1</span></a></td>
 <td style="text-align: left;">-</td>
 </tr>
 <tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(p^{*}_k\)</span></td>
+<td style="text-align: left;">ancestral frequency of the allele coded 1 at locus <span class="math inline">\(k\)</span>, drawn uniform on <span class="math inline">\([0.05, 0.95]\)</span>; the expectation of <span class="math inline">\(p_{Ak}\)</span> and of <span class="math inline">\(p_{Bk}\)</span> under <a href="03-simulating-crosses.html#eq-balding-nichols" class="quarto-xref">Equation&nbsp;<span>4.1</span></a> (<a href="03-simulating-crosses.html" class="quarto-xref"><span>Chapter 4</span></a>)</td>
+<td style="text-align: left;">inside <code>simulate_lines()</code> (<code>p_anc</code>)</td>
+</tr>
+<tr class="even">
 <td style="text-align: left;"><span class="math inline">\(u_k\)</span>, <span class="math inline">\(v_k\)</span></td>
 <td style="text-align: left;">0/1 allele carried at locus <span class="math inline">\(k\)</span> by the pool-A / pool-B parent of a hybrid; the <span class="math inline">\(u_{ik}\)</span>, <span class="math inline">\(v_{jk}\)</span> of <a href="05b-heterosis-dominance.html#sec-heterosis-gca-sca" class="quarto-xref"><span>Section 13.10</span></a> without the line index</td>
 <td style="text-align: left;">rows of <code>sim$GL</code> (<code>U</code>, <code>V</code>)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><span class="math inline">\(d_k\)</span></td>
 <td style="text-align: left;">dominance deviation at locus k</td>
 <td style="text-align: left;"><code>d</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><span class="math inline">\(ID\)</span></td>
 <td style="text-align: left;">inbreeding depression, <span class="math inline">\(2F\sum d_k p_k q_k\)</span>; a <strong>constant</strong> with fully inbred parents</td>
 <td style="text-align: left;"><code>inbreeding_depression()</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><span class="math inline">\(W\)</span></td>
 <td style="text-align: left;">aggregate genotype (breeding objective), <span class="math inline">\(\mathbf{a}'\mathbf{g}\)</span></td>
 <td style="text-align: left;">-</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><span class="math inline">\(\mathbf{g}\)</span>; <span class="math inline">\(\hat{\mathbf{g}}\)</span></td>
 <td style="text-align: left;">vector of the traits’ genetic values, one entry per trait (not over individuals); its predictor. Distinct from the GCA <span class="math inline">\(g^A_i\)</span>, <span class="math inline">\(g^B_j\)</span></td>
 <td style="text-align: left;">-; <code>traits</code> of <code>build_ctx()</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><span class="math inline">\(\boldsymbol\Sigma_P\)</span>, <span class="math inline">\(\boldsymbol\Sigma_G\)</span></td>
 <td style="text-align: left;">phenotypic and genetic covariance matrices of the traits – <strong>not</strong> the relationship matrix <span class="math inline">\(\mathbf{G}\)</span></td>
 <td style="text-align: left;"><code>P</code>, <code>G</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><span class="math inline">\(\mathbf{b}\)</span></td>
 <td style="text-align: left;">selection index weights</td>
 <td style="text-align: left;"><code>index_smith_hazel()</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><span class="math inline">\(\boldsymbol\xi\)</span></td>
 <td style="text-align: left;">vector of selection criteria the index <span class="math inline">\(\mathbf{b}'\boldsymbol\xi\)</span> is built on (<span class="math inline">\(\hat{\mathbf{g}}\)</span> or the records <span class="math inline">\(\mathbf{y}\)</span>) – <strong>not</strong> the contributions <span class="math inline">\(\mathbf{c}\)</span></td>
 <td style="text-align: left;">-</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><span class="math inline">\(\mathbf{a}\)</span></td>
 <td style="text-align: left;">economic weights on the aggregate genotype</td>
 <td style="text-align: left;">-</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><span class="math inline">\(\mathbf{R}\)</span></td>
 <td style="text-align: left;">restriction matrix (<span class="math inline">\(n_t \times n_r\)</span>): directions held at zero expected gain</td>
 <td style="text-align: left;"><code>index_restricted()</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><span class="math inline">\(n_t\)</span>, <span class="math inline">\(n_r\)</span></td>
 <td style="text-align: left;">number of traits; number of restrictions</td>
 <td style="text-align: left;">-</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><span class="math inline">\(\mathbf{C}\)</span></td>
 <td style="text-align: left;"><span class="math inline">\(\boldsymbol\Sigma_G\mathbf{R}\)</span> in the restricted index – <strong>not</strong> the MME inverse <span class="math inline">\(\mathbf{C}^{uu}\)</span></td>
 <td style="text-align: left;">-</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><span class="math inline">\(2 N_e R_1\)</span></td>
 <td style="text-align: left;">Robertson’s limit; half-life <span class="math inline">\(1.4 N_e\)</span></td>
 <td style="text-align: left;">-</td>

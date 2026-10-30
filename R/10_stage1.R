@@ -34,8 +34,9 @@ stage1_simulate <- function(cfg = sim_config) {
 #' downstream talks only through the objects returned here, which is what makes
 #' swapping in real data a single-function change.
 #'
-#' @param X Hybrid marker matrix, `N x m`. Accepts 0/1/2 or 0/0.5/1 coding; the
-#'   coding is auto-detected and rescaled.
+#' @param X Hybrid marker matrix, `N x m`, coded 0/1/2 (dosage) or 0/0.5/1
+#'   (within-individual frequency). Missing calls (`NA`) are kept and propagate
+#'   into `f`.
 #' @param ped Data frame with columns `a` and `b`, the parent line ids, one row
 #'   per hybrid.
 #' @param traits Data frame or matrix of predicted trait values, one row per
@@ -43,13 +44,30 @@ stage1_simulate <- function(cfg = sim_config) {
 #' @param fL Optional coancestry matrix *between lines*. Stage 2 runs without
 #'   it; it only enables the heterotic-group decomposition
 #'   ([theta_pools], [gd_partition]).
+#' @param coding `"012"` or `"0-0.5-1"`. `NULL` (default) auto-detects,
+#'   ignoring `NA`: any value above 1 means 0/1/2. A matrix holding only 0 and
+#'   1 is ambiguous (inbred 0/0.5/1, or 0/1/2 with no dosage-2 call); it is
+#'   read as 0/0.5/1 with a warning. Declare `coding` to remove the assumption.
 #' @return A list with `X` (markers in 0/0.5/1), `f` (hybrid molecular
 #'   coancestry), `hybrids` (id, parent lines, traits) and `fL`.
 #' @seealso [stage2_select] for the next stage.
 #' @export
-stage1_build <- function(X, ped, traits, fL = NULL) {
-  if (max(X) > 1) X <- X / 2          # accepts 0/1/2 or 0/0.5/1 coding
-  stopifnot(nrow(X) == nrow(ped), nrow(X) == nrow(traits))
+stage1_build <- function(X, ped, traits, fL = NULL, coding = NULL) {
+  if (is.null(coding)) {
+    if (max(X, na.rm = TRUE) > 1) {
+      coding <- "012"
+    } else {
+      if (all(X[!is.na(X)] %in% c(0, 1)))
+        warning("X holds only 0 and 1: ambiguous coding, read as 0/0.5/1 ",
+                "(inbred lines). Pass coding = \"012\" if these are dosages ",
+                "with no dosage-2 call.", call. = FALSE)
+      coding <- "0-0.5-1"
+    }
+  }
+  coding <- match.arg(coding, c("012", "0-0.5-1"))
+  if (coding == "012") X <- X / 2
+  stopifnot(min(X, na.rm = TRUE) >= 0, max(X, na.rm = TRUE) <= 1,
+            nrow(X) == nrow(ped), nrow(X) == nrow(traits))
 
   hybrids <- data.frame(
     hybrid = seq_len(nrow(X)),
