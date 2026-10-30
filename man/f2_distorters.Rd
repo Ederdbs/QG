@@ -15,6 +15,6 @@ f2_distorters
 \description{
 Two gametophytic distorters (pollen-incompatibility type, acting only on the
 male gamete) and one zygotic distorter (partial hybrid lethality). The loci
-are **plausible, not measured** -- bin 4.05 (ga1-like), bin 1.10 and bin 5.03.
+are **illustrative, not measured** -- bins 4.05, 1.10 and 5.03 are placeholders.
 Replace them with your own if you have F2 genotyping data.
 }

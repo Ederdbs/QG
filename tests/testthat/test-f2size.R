@@ -59,9 +59,32 @@ test_that("segregation distortion shifts ancestry away from 0.5", {
             diversity_retained(panel_freq(neutral)))
 })
 
-test_that("f1_sizing halves the loss probability per extra plant", {
+test_that("f1_sizing halves the per-(parent, locus) allele-loss probability per extra plant", {
   s <- f1_sizing(1:10, h_res = 0.05, n_loci_eff = 5000)
   expect_equal(s$p_loss_per_locus[1], 1)
   expect_equal(s$p_loss_per_locus[-1] / s$p_loss_per_locus[-10],
                rep(0.5, 9), tolerance = 1e-12)
+})
+
+test_that("f1_sizing: expected parental alleles lost, both segregating parents (closed form and literal oracle)", {
+  h_res <- 0.05; n_loc <- 5000
+  s <- f1_sizing(1:12, h_res = h_res, n_loci_eff = n_loc)
+  # n = 1: every segregating (parent, locus) pair keeps only one allele, so one
+  # parental allele is lost per pair (not one locus made monomorphic)
+  expect_equal(s$expected_loci_lost[1], 2 * h_res * n_loc)
+  # threshold from the closed form 4 h_res n_loc 2^-n < 1, not typed in
+  expect_equal(min(s$n_F1[s$expected_loci_lost < 1]),
+               floor(log2(4 * h_res * n_loc)) + 1)
+  # literal oracle: 2 parents x n_seg heterozygous loci, n gametes each
+  n_seg <- 2000; n <- 3; reps <- 200
+  set.seed(31)
+  lost <- vapply(seq_len(reps), function(r) {
+    g <- matrix(stats::rbinom(2 * n_seg * n, 1, 0.5), ncol = n)  # rows = (parent, locus)
+    sum(rowSums(g) %in% c(0, n))  # parental alleles lost
+  }, numeric(1))
+  expected <- f1_sizing(n, h_res = n_seg / n_loc, n_loci_eff = n_loc)$expected_loci_lost
+  expect_lt(abs(mean(lost) - expected), 4 * stats::sd(lost) / sqrt(reps))
+  expect_error(run_scheme("SSD", 10, build_map(c(50, 50), 5),
+                          make_distortion(build_map(c(50, 50), 5), NULL, active = FALSE)),
+               "should be one of")
 })

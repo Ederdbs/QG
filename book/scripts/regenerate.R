@@ -9,7 +9,7 @@
 # them when the simulation configuration or a seed changes.
 #
 # Targets:
-#   f2size       the F1->F4 sizing grid and its nine figures
+#   f2size       the F1->F4 sizing grid (two tables; its figures are drawn live)
 #   benchmark    the metric benchmark: null, discriminatory power, frontier
 #   identity     the line-collapse identity sweep
 #   genpred      GBLUP/BayesA/BayesB accuracy sweep of Chapter 8b

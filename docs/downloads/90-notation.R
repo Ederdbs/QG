@@ -334,17 +334,47 @@ knitr::kable(data.frame(
 ## -----------------------------------------------------------------------------
 #| echo: false
 knitr::kable(data.frame(
-  Symbol = c("$H$", "$D$", "$N_{eq}$", "$L$ (Morgans)", "$A_t$", "$r$"),
-  Meaning = c("panel heterozygosity; 0.125 in an F4",
-              "diversity retained, $\\overline{2p(1-p)}/0.5$",
+  Symbol = c("$N$", "$n$", "$p$", "$H$", "$H_t$", "$D$", "$N_{eq}$",
+             "$L$ (Morgans)", "$A_t$", "$d$", "$r$", "$g$", "$z_i$", "$w_i$",
+             "$\\beta$", "$N_{90}$", "$k$", "$P$", "$N_{95}(k)$",
+             "$h_{res}$", "$n_{loc}$"),
+  Meaning = c("F2 plants, equal to the number of F4 lines under SSD",
+              "selfed F1 plants",
+              "frequency of P1 ancestry at a marker in the panel",
+              "panel heterozygosity; 0.125 in an F4",
+              "heterozygosity of the parent whose meiosis produces generation t + 1",
+              "diversity retained, $\\overline{2p(1-p)}/0.5$; $\\mathrm{E}[D] = 1 - (1-H)/N$ without distortion (@eq-sizing-div)",
               "$(1-H)/(1-D)$ -- a communication device, **not** a Wright Ne",
               "total map length",
               "junctions per haplotype at generation t",
-              "recombination fraction, Haldane"),
-  `Function` = c("`panel_het()`", "`diversity_retained()`", "`n_equivalent()`",
-                 "`map$total_cM / 100`", "`expected_junctions()`", "`build_map()`"),
+              "distance between adjacent markers, cM",
+              "recombination fraction, Haldane",
+              "random-mating generations after the F2 (map expansion)",
+              "share of plant i's genome from P1",
+              "seed contribution of plant i in the bulk, $e^{\\beta(z_i - \\bar z)}$",
+              "bulk selection intensity on P1 ancestry (scalar)",
+              "smallest grid N reaching 90% of the gain from the smallest to the largest grid N",
+              "unlinked loci at which a P2 homozygote is to be recovered",
+              "probability that at least one F4 line is P2P2 at all k loci",
+              "plants giving $P \\geq 0.95$ without distortion (@eq-sizing-n95)",
+              "fraction of loci still heterozygous in each parent",
+              "independent loci polymorphic between the parents"),
+  `Function` = c("`run_scheme(n_F2 =)`", "`f1_sizing(n_F1 =)`", "`panel_freq()`",
+                 "`panel_het()`", "-", "`diversity_retained()`", "`n_equivalent()`",
+                 "`map$total_cM / 100`", "`expected_junctions()`",
+                 "`build_map(spacing_cM =)`", "`build_map()`", "-", "-",
+                 "`bulk_weights()`", "`f2_opt$beta_bulk`", "-",
+                 "`multilocus_recovery(k =)`", "`multilocus_recovery()`", "-",
+                 "`f1_sizing(h_res =)`", "`f1_sizing(n_loci_eff =)`"),
   check.names = FALSE))
 
+#' 
+#' These symbols are local to @sec-sizing. There $N$ and $n$ count F2 and F1
+#' plants, not candidate and selected hybrids; $L$ is a map length in Morgans, not
+#' a number of parent lines; $k$ counts loci, not a marker index or testers;
+#' $\beta$ is a scalar selection intensity, not the marker-effect vector
+#' $\boldsymbol\beta$; $p$ is P1-ancestry frequency within one cross, not a
+#' reference-allele frequency on the frozen base $p_0$.
 #' 
 #' ### Mating design
 #' 

@@ -1255,9 +1255,9 @@ window.Quarto = {
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
-<col style="width: 14%">
-<col style="width: 62%">
-<col style="width: 23%">
+<col style="width: 9%">
+<col style="width: 73%">
+<col style="width: 17%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1268,13 +1268,33 @@ window.Quarto = {
 </thead>
 <tbody>
 <tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(N\)</span></td>
+<td style="text-align: left;">F2 plants, equal to the number of F4 lines under SSD</td>
+<td style="text-align: left;"><code>run_scheme(n_F2 =)</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(n\)</span></td>
+<td style="text-align: left;">selfed F1 plants</td>
+<td style="text-align: left;"><code>f1_sizing(n_F1 =)</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(p\)</span></td>
+<td style="text-align: left;">frequency of P1 ancestry at a marker in the panel</td>
+<td style="text-align: left;"><code>panel_freq()</code></td>
+</tr>
+<tr class="even">
 <td style="text-align: left;"><span class="math inline">\(H\)</span></td>
 <td style="text-align: left;">panel heterozygosity; 0.125 in an F4</td>
 <td style="text-align: left;"><code>panel_het()</code></td>
 </tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(H_t\)</span></td>
+<td style="text-align: left;">heterozygosity of the parent whose meiosis produces generation t + 1</td>
+<td style="text-align: left;">-</td>
+</tr>
 <tr class="even">
 <td style="text-align: left;"><span class="math inline">\(D\)</span></td>
-<td style="text-align: left;">diversity retained, <span class="math inline">\(\overline{2p(1-p)}/0.5\)</span></td>
+<td style="text-align: left;">diversity retained, <span class="math inline">\(\overline{2p(1-p)}/0.5\)</span>; <span class="math inline">\(\mathrm{E}[D] = 1 - (1-H)/N\)</span> without distortion (<a href="04-population-sizing.html#eq-sizing-div" class="quarto-xref">Equation&nbsp;<span>5.1</span></a>)</td>
 <td style="text-align: left;"><code>diversity_retained()</code></td>
 </tr>
 <tr class="odd">
@@ -1293,14 +1313,70 @@ window.Quarto = {
 <td style="text-align: left;"><code>expected_junctions()</code></td>
 </tr>
 <tr class="even">
+<td style="text-align: left;"><span class="math inline">\(d\)</span></td>
+<td style="text-align: left;">distance between adjacent markers, cM</td>
+<td style="text-align: left;"><code>build_map(spacing_cM =)</code></td>
+</tr>
+<tr class="odd">
 <td style="text-align: left;"><span class="math inline">\(r\)</span></td>
 <td style="text-align: left;">recombination fraction, Haldane</td>
 <td style="text-align: left;"><code>build_map()</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(g\)</span></td>
+<td style="text-align: left;">random-mating generations after the F2 (map expansion)</td>
+<td style="text-align: left;">-</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(z_i\)</span></td>
+<td style="text-align: left;">share of plant i’s genome from P1</td>
+<td style="text-align: left;">-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(w_i\)</span></td>
+<td style="text-align: left;">seed contribution of plant i in the bulk, <span class="math inline">\(e^{\beta(z_i - \bar z)}\)</span></td>
+<td style="text-align: left;"><code>bulk_weights()</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\beta\)</span></td>
+<td style="text-align: left;">bulk selection intensity on P1 ancestry (scalar)</td>
+<td style="text-align: left;"><code>f2_opt$beta_bulk</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(N_{90}\)</span></td>
+<td style="text-align: left;">smallest grid N reaching 90% of the gain from the smallest to the largest grid N</td>
+<td style="text-align: left;">-</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(k\)</span></td>
+<td style="text-align: left;">unlinked loci at which a P2 homozygote is to be recovered</td>
+<td style="text-align: left;"><code>multilocus_recovery(k =)</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(P\)</span></td>
+<td style="text-align: left;">probability that at least one F4 line is P2P2 at all k loci</td>
+<td style="text-align: left;"><code>multilocus_recovery()</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(N_{95}(k)\)</span></td>
+<td style="text-align: left;">plants giving <span class="math inline">\(P \geq 0.95\)</span> without distortion (<a href="04-population-sizing.html#eq-sizing-n95" class="quarto-xref">Equation&nbsp;<span>5.2</span></a>)</td>
+<td style="text-align: left;">-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(h_{res}\)</span></td>
+<td style="text-align: left;">fraction of loci still heterozygous in each parent</td>
+<td style="text-align: left;"><code>f1_sizing(h_res =)</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(n_{loc}\)</span></td>
+<td style="text-align: left;">independent loci polymorphic between the parents</td>
+<td style="text-align: left;"><code>f1_sizing(n_loci_eff =)</code></td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
+<p>These symbols are local to <a href="04-population-sizing.html" class="quarto-xref"><span>Chapter 5</span></a>. There <span class="math inline">\(N\)</span> and <span class="math inline">\(n\)</span> count F2 and F1 plants, not candidate and selected hybrids; <span class="math inline">\(L\)</span> is a map length in Morgans, not a number of parent lines; <span class="math inline">\(k\)</span> counts loci, not a marker index or testers; <span class="math inline">\(\beta\)</span> is a scalar selection intensity, not the marker-effect vector <span class="math inline">\(\boldsymbol\beta\)</span>; <span class="math inline">\(p\)</span> is P1-ancestry frequency within one cross, not a reference-allele frequency on the frozen base <span class="math inline">\(p_0\)</span>.</p>
 </section>
 <section id="mating-design" class="level3" data-number="A.1.10">
 <h3 data-number="A.1.10" class="anchored" data-anchor-id="mating-design"><span class="header-section-number">A.1.10</span> Mating design</h3>

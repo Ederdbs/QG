@@ -15,7 +15,7 @@ bulk_weights(pop, beta)
 A numeric vector of sampling probabilities.
 }
 \description{
-Plants carrying more P1 (adapted-parent) genome contribute more seed. This
-is what makes bulk the worst scheme across the whole range: natural selection
-removes precisely the germplasm the wide cross was made to introduce.
+Plants carrying more P1 (adapted-parent) genome contribute more seed, with
+weights `exp(beta * (z - mean(z)))`. Loss of P2 ancestry under the bulk is
+therefore a consequence of these declared weights, not an independent result.
 }

@@ -14,10 +14,10 @@
 #     the genetic Ne of the F1 is 1. Sizing the F1 is therefore a logistical
 #     decision, not a genetic one -- unless the parents carry residual
 #     heterozygosity, which is what f1_sizing() addresses.
-#   * Recombination follows Haldane with no interference. Real maize has strong
-#     positive interference, so the simulated block-length distribution has a
-#     slightly longer tail than reality. Mean block lengths and allele
-#     frequencies are unaffected.
+#   * Recombination follows Haldane with no interference. Real maize shows
+#     positive crossover interference (Falque et al. 2009), so the simulated
+#     block-length distribution has a longer tail than reality. Mean block
+#     lengths and allele frequencies are unaffected.
 
 # --- 1. Default configuration --------------------------------------------------
 
@@ -25,7 +25,8 @@
 #'
 #' Approximate lengths from a classical composite maize map, about 1670 cM in
 #' total. Do **not** substitute IBM-type lengths (from intermated RILs): those
-#' are inflated 5-10x by construction and will make every sizing answer wrong.
+#' are expanded by intermating (close to four-fold in Lee et al. 2002) and will
+#' make every sizing answer wrong.
 #'
 #' @format A numeric vector of 10 chromosome lengths in cM.
 #' @export
@@ -35,7 +36,7 @@ maize_chr_len <- c(240, 200, 190, 180, 175, 150, 145, 140, 130, 120)  # cM
 #'
 #' Two gametophytic distorters (pollen-incompatibility type, acting only on the
 #' male gamete) and one zygotic distorter (partial hybrid lethality). The loci
-#' are **plausible, not measured** -- bin 4.05 (ga1-like), bin 1.10 and bin 5.03.
+#' are **illustrative, not measured** -- bins 4.05, 1.10 and 5.03 are placeholders.
 #' Replace them with your own if you have F2 genotyping data.
 #'
 #' @format A data frame with columns `chr`, `pos_cM`, `type`
@@ -51,7 +52,7 @@ f2_distorters <- data.frame(
   w00    = c(NA,         1.00,      NA),     # fitness P1P1
   w01    = c(NA,         1.00,      NA),     # fitness heterozygote
   w11    = c(NA,         0.45,      NA),     # fitness P2P2 (subvital)
-  label  = c("ga1-like (4.05)", "partial lethal (1.10)", "weak gametic (5.03)"),
+  label  = c("distorter chr4 (illustrative)", "partial lethal (1.10)", "weak gametic (5.03)"),
   stringsAsFactors = FALSE
 )
 
@@ -319,9 +320,9 @@ reps_for_N <- function(N, opt) {
 
 #' Natural-selection weights for the bulk scheme
 #'
-#' Plants carrying more P1 (adapted-parent) genome contribute more seed. This
-#' is what makes bulk the worst scheme across the whole range: natural selection
-#' removes precisely the germplasm the wide cross was made to introduce.
+#' Plants carrying more P1 (adapted-parent) genome contribute more seed, with
+#' weights `exp(beta * (z - mean(z)))`. Loss of P2 ancestry under the bulk is
+#' therefore a consequence of these declared weights, not an independent result.
 #'
 #' @param pop A population.
 #' @param beta Intensity of natural selection.
@@ -351,6 +352,7 @@ bulk_weights <- function(pop, beta) {
 #' @return The final population.
 #' @export
 run_scheme <- function(scheme, n_F2, map, dist, opt = f2_opt) {
+  scheme <- match.arg(scheme, c("ssd", "ssd_attr", "bulk", "syn1", "syn2"))
   F1  <- make_F1(map, n_F2)
   pop <- cross_indices(F1, seq_len(n_F2), seq_len(n_F2), map, dist)  # F2
 
@@ -569,23 +571,37 @@ multilocus_recovery <- function(pop, map, k, n_draw = 300) {
 #' Size the F1 given residual heterozygosity in the parents
 #'
 #' With fully homozygous parents the F1 is genetically uniform and its size is a
-#' logistical decision. If the parents are not fully homozygous -- `F` around
-#' 0.95 is common in programme lines -- each parent segregates at a fraction
-#' `h_res` of loci. Each F1 plant receives one random gamete from each parent,
-#' so at a segregating locus the chance of losing one of the two parental
-#' alleles with `n` F1 plants is `2 (1/2)^n`.
+#' logistical decision. If the parents are not fully homozygous, each parent
+#' segregates at a fraction `h_res` of loci (a scenario parameter; the default
+#' 0.05 is illustrative, not an empirical value). Each F1 plant receives one
+#' random gamete from each parent, so at a locus where a parent segregates the
+#' chance that all `n` F1 plants carry the same of its two alleles, i.e. that
+#' the other parental allele is lost, is `2 (1/2)^n`. By linearity of
+#' expectation over the `2 * h_res * n_loci_eff` segregating (parent, locus)
+#' pairs, the expected number of parental alleles lost is
+#' `2 * h_res * n_loci_eff * 2 (1/2)^n`.
+#'
+#' This counts parental alleles lost, not loci made monomorphic. Under the
+#' biallelic model the allele lost from a heterozygous parent is often still
+#' carried by the other parent, so the expected number of loci that become
+#' monomorphic is about half of it, `2 * h_res * n_loci_eff * (1/2)^n`. The two
+#' coincide only when neither allele of the heterozygous parent occurs in the
+#' other parent (multiallelic loci). Column names are kept for the callers.
 #'
 #' @param n_F1 Numbers of F1 plants to evaluate.
-#' @param h_res Fraction of loci still segregating in a parent.
+#' @param h_res Fraction of loci still segregating in each parent.
 #' @param n_loci_eff Effective number of independent loci.
-#' @return A data frame with the per-locus loss probability and the expected
-#'   number of segregating loci lost.
+#' @return A data frame with `n_F1`; `p_loss_per_locus`, the probability that
+#'   a segregating (parent, locus) pair loses one of its two alleles; and
+#'   `expected_loci_lost`, the expected number of parental alleles lost (one
+#'   per (parent, locus) pair that loses an allele), not the number of loci
+#'   made monomorphic.
 #' @export
 f1_sizing <- function(n_F1 = 1:30, h_res = 0.05, n_loci_eff = 5000) {
   data.frame(
     n_F1 = n_F1,
     p_loss_per_locus = 2 * 0.5^n_F1,
-    expected_loci_lost = h_res * n_loci_eff * 2 * 0.5^n_F1
+    expected_loci_lost = 2 * h_res * n_loci_eff * 2 * 0.5^n_F1  # parental alleles lost, both parents
   )
 }
 

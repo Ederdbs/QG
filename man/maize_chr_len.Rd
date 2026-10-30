@@ -12,5 +12,6 @@ maize_chr_len
 \description{
 Approximate lengths from a classical composite maize map, about 1670 cM in
 total. Do **not** substitute IBM-type lengths (from intermated RILs): those
-are inflated 5-10x by construction and will make every sizing answer wrong.
+are expanded by intermating (close to four-fold in Lee et al. 2002) and will
+make every sizing answer wrong.
 }

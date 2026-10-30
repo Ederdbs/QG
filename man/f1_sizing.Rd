@@ -9,19 +9,34 @@ f1_sizing(n_F1 = 1:30, h_res = 0.05, n_loci_eff = 5000)
 \arguments{
 \item{n_F1}{Numbers of F1 plants to evaluate.}
 
-\item{h_res}{Fraction of loci still segregating in a parent.}
+\item{h_res}{Fraction of loci still segregating in each parent.}
 
 \item{n_loci_eff}{Effective number of independent loci.}
 }
 \value{
-A data frame with the per-locus loss probability and the expected
-  number of segregating loci lost.
+A data frame with `n_F1`; `p_loss_per_locus`, the probability that
+  a segregating (parent, locus) pair loses one of its two alleles; and
+  `expected_loci_lost`, the expected number of parental alleles lost (one
+  per (parent, locus) pair that loses an allele), not the number of loci
+  made monomorphic.
 }
 \description{
 With fully homozygous parents the F1 is genetically uniform and its size is a
-logistical decision. If the parents are not fully homozygous -- `F` around
-0.95 is common in programme lines -- each parent segregates at a fraction
-`h_res` of loci. Each F1 plant receives one random gamete from each parent,
-so at a segregating locus the chance of losing one of the two parental
-alleles with `n` F1 plants is `2 (1/2)^n`.
+logistical decision. If the parents are not fully homozygous, each parent
+segregates at a fraction `h_res` of loci (a scenario parameter; the default
+0.05 is illustrative, not an empirical value). Each F1 plant receives one
+random gamete from each parent, so at a locus where a parent segregates the
+chance that all `n` F1 plants carry the same of its two alleles, i.e. that
+the other parental allele is lost, is `2 (1/2)^n`. By linearity of
+expectation over the `2 * h_res * n_loci_eff` segregating (parent, locus)
+pairs, the expected number of parental alleles lost is
+`2 * h_res * n_loci_eff * 2 (1/2)^n`.
+}
+\details{
+This counts parental alleles lost, not loci made monomorphic. Under the
+biallelic model the allele lost from a heterozygous parent is often still
+carried by the other parent, so the expected number of loci that become
+monomorphic is about half of it, `2 * h_res * n_loci_eff * (1/2)^n`. The two
+coincide only when neither allele of the heterozygous parent occurs in the
+other parent (multiallelic loci). Column names are kept for the callers.
 }
