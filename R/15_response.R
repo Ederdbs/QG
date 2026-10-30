@@ -9,9 +9,9 @@
 # carry if they were independent, so the difference between it and the realised
 # variance is the gametic-phase disequilibrium that no single-locus diversity
 # metric can see. The two index functions are the classical construction of the
-# thing being maximised, and `index_restricted()` in particular is the sixty
-# year old ancestor of this book's alpha constraint: maximise aggregate gain
-# subject to zero expected change in a specified direction.
+# thing being maximised, and `index_restricted()` in particular is the classical
+# ancestor of this book's alpha constraint (Kempthorne & Nordskog 1959): maximise
+# aggregate gain subject to zero expected change in a specified direction.
 
 #' Genic variance: the variance if the loci were independent
 #'

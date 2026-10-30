@@ -9,11 +9,11 @@ Every chapter so far measures what selection *spends*. None of them writes down
 what it *buys*.
 
 That asymmetry is not cosmetic. @sec-cycles will show a constrained programme
-overtaking an unconstrained one after eight cycles, and the book can report that
-number because it simulated it -- not because anything in the preceding chapters
-predicts it. A reader who wants to know whether the crossover arrives at cycle 8
-in *their* programme has no way to find out except to re-run the simulation with
-their own parameters.
+overtaking an unconstrained one after several cycles, at a crossover cycle that
+varies with the simulation seed, and the book can report that because it
+simulated it -- not because anything in the preceding chapters predicts it. A
+reader who wants to know when the crossover arrives in *their* programme has no
+way to find out except to re-run the simulation with their own parameters.
 
 The quantitative genetics that answers such questions is older than any of the
 genomic machinery here, and this chapter installs it: the variance selection
@@ -34,121 +34,232 @@ c(hybrids = nrow(X), markers = ncol(X), qtl = sum(sim$beta != 0))
 
 Response to one round of truncation selection is
 
-$$R \;=\; i \, r \, \sigma_A$$
+$$R \;=\; i \, r \, \sigma_A$$ {#eq-response-breeders}
 
 with $i$ the selection intensity (a property of the selected fraction alone),
 $r$ the accuracy of the criterion as a predictor of genetic value, and
-$\sigma_A$ the additive standard deviation. `sel_intensity()` has been in this
-package since @sec-stages; it has never once been used to compute a response.
+$\sigma_A$ the additive standard deviation [@falconer1996, ch. 11]. Here the genetic value
+of the hybrids is the vector $\mathbf{X}\boldsymbol\beta$ (`gv`), purely additive in the
+marker coding by construction of `simulate_pools()`, so $\sigma_A$ is estimated
+by `sd(gv)`. `sel_intensity()` returns $i$; later chapters use it inside the
+usefulness criterion (@sec-stages) and in a replicated check of this equation
+(@sec-alphasimr). @tbl-response-breeders sets the predicted response of
+@eq-response-breeders beside the realised one for the top 60 hybrids on the index.
 
 ```{r}
+#| label: tbl-response-breeders
+#| tbl-cap: "One round of truncation selection of the top 60 of the 625 hybrids on the index (`simulate_pools()`, 25 + 25 lines, 2000 markers, 300 QTL, $h^2 = 0.5$, $F_{ST} = 0.15$, seed 1). $i$: normal-theory selection intensity of the selected fraction; $r$: correlation between index and true genetic value; $\\sigma_A$: standard deviation of the true genetic value; predicted: $i\\,r\\,\\sigma_A$ (@eq-response-breeders); realised: mean genetic value of the selected minus that of all hybrids. Genetic values in simulation units."
 n_sel <- 60
 N     <- nrow(X)
 i_norm <- sel_intensity(n_sel / N)
 r      <- cor(I, gv)
 sel    <- order(I, decreasing = TRUE)[seq_len(n_sel)]
 
-fmt(data.frame(i = i_norm, r = r, sigma_A = sd(gv),
-               predicted = i_norm * r * sd(gv),
-               realised  = mean(gv[sel]) - mean(gv)), 3)
+fmt(data.frame(`intensity i` = i_norm, `accuracy r` = r,
+               `additive s.d. (sim. units)` = sd(gv),
+               `predicted response (sim. units)` = i_norm * r * sd(gv),
+               `realised response (sim. units)` = mean(gv[sel]) - mean(gv),
+               check.names = FALSE), 3)
 ```
 
-The equation overpredicts, by about `r round(100 * (1 - (mean(gv[sel]) - mean(gv)) / (i_norm * r * sd(gv))))` percent. That is worth taking apart rather than
-rounding away, because both halves of the discrepancy are instructive.
+In this single draw (seed 1) the equation overpredicts, by about `r round(100 * (1 - (mean(gv[sel]) - mean(gv)) / (i_norm * r * sd(gv))))` percent. @tbl-response-gap splits that gap into the intensity and the regression
+parts.
 
 ```{r}
+#| label: tbl-response-gap
+#| tbl-cap: "The gap of @tbl-response-breeders split into intensity and regression parts (same draw, seed 1). Intensities: normal-theory value of the selected fraction and realised standardised selection differential on the index. Responses: @eq-response-breeders with the realised intensity; the regression of genetic value on the index times the selection differential; the realised response. Last column: skewness of the standardised index. Responses in simulation units."
 i_real <- (mean(I[sel]) - mean(I)) / sd(I)
 b      <- cov(gv, I) / var(I)                 # regression of value on criterion
 fmt(data.frame(
-  i_normal_theory = i_norm,
-  i_realised      = i_real,
-  R_with_realised_i = i_real * r * sd(gv),
-  R_from_regression = b * (mean(I[sel]) - mean(I)),
-  R_actual          = mean(gv[sel]) - mean(gv),
-  index_skew        = mean(scale(I)^3)), 3)
+  `intensity, normal theory` = i_norm,
+  `intensity, realised`      = i_real,
+  `response with realised intensity (sim. units)` = i_real * r * sd(gv),
+  `response from regression (sim. units)` = b * (mean(I[sel]) - mean(I)),
+  `realised response (sim. units)`        = mean(gv[sel]) - mean(gv),
+  `index skewness` = mean(scale(I)^3), check.names = FALSE), 3)
 ```
 
-Two separate failures, and they are different in kind.
+Two identities can be read off it. The response from regression and the
+response with realised intensity are the same quantity written twice, since $b\,S_I = i\,r\,\sigma_A$
+identically, with $S_I$ the selection differential on the index. The chunk
+below asserts it.
 
-**The realised intensity is below normal theory.** $i = \varphi(z)/q$ is exact
-for a normal criterion. This index is slightly left-skewed, so its upper tail is
-thinner than a normal's and the top `r n_sel` individuals sit closer to the mean
-than the formula assumes. This is a property of *this* population, not an error.
+```{r}
+#| label: response-identity
+stopifnot(isTRUE(all.equal(b * (mean(I[sel]) - mean(I)), i_real * r * sd(gv))))
+```
 
-**The regression is exact, and still wrong.** `R_from_regression` and
-`R_with_realised_i` agree to machine precision -- they are the same quantity
-written twice, since $b\,S_I = i\,r\,\sigma_A$ identically. Both still exceed the
-realised response. What fails is not the algebra but the assumption underneath
-it: $R = b\,S_I$ requires $E[g \mid I]$ to be linear in $I$ *in the selected
-tail*, which is a bivariate-normality claim, and bivariate normality is exactly
-what a two-pool hybrid population does not have.
+With $N =$ `r N` candidates and $n =$ `r n_sel` selected,
+$i = \varphi(z)/(n/N)$, with $z$ the standard-normal truncation point that
+leaves a fraction $n/N$ above it and $\varphi$ the standard-normal density, is
+the intensity of an infinitely large normal population [@falconer1996, ch. 11].
+At this finite $N$ the expected standardised
+mean of the top $n$ of $N$ independent normal draws is smaller. A single draw
+cannot tell whether the remaining gap is structural or sampling, so
+@tbl-response-replicated repeats the same `simulate_pools()` call over 30 seeds,
+and the finite-$N$ intensity is estimated from 4000 normal samples.
 
-::: {.callout-important}
-## Read the breeder's equation as an upper bound here
+```{r}
+#| label: tbl-response-replicated
+#| tbl-cap: "The single draw of @tbl-response-breeders repeated over seeds 1 to 30 of the same `simulate_pools()` call (25 + 25 lines, 2000 markers, 300 QTL, $h^2 = 0.5$, $F_{ST} = 0.15$; top 60 of 625 hybrids on the index). Per quantity: mean over seeds, standard error of that mean (s.d./$\\sqrt{30}$), minimum and maximum. Relative gap: $1 -$ realised/predicted response (@eq-response-breeders), dimensionless; realised intensity: standardised selection differential on the index; skewness of the standardised index."
+one_seed <- function(s) {
+  sm <- simulate_pools(n_A = book_cfg$n_pool_A, n_B = book_cfg$n_pool_B,
+                       m = book_cfg$m, fst = 0.15, n_qtl = 300, h2 = 0.5,
+                       seed = s)
+  g  <- drop(sm$X %*% sm$beta)
+  Ix <- sm$index
+  top <- order(Ix, decreasing = TRUE)[seq_len(n_sel)]
+  pred <- sel_intensity(n_sel / length(Ix)) * cor(Ix, g) * sd(g)
+  c(rel_gap = 1 - (mean(g[top]) - mean(g)) / pred,
+    i_real  = (mean(Ix[top]) - mean(Ix)) / sd(Ix),
+    skew    = mean(scale(Ix)^3))
+}
+rep_seeds <- t(vapply(1:30, one_seed, numeric(3)))
+gap_se <- sd(rep_seeds[, "rel_gap"]) / sqrt(nrow(rep_seeds))
+stopifnot(abs(mean(rep_seeds[, "rel_gap"])) < 2 * gap_se)   # the claim below
 
-Every response number in this book's cycle simulations is a *realised* response,
-measured from the simulation. Where a predicted response is quoted, it will run
-above the realised one for the reason above. The gap is not noise and does not
-shrink with more markers; it shrinks when the criterion becomes more normal and
-the population less structured.
-:::
+set.seed(11)
+i_finite <- replicate(4000, {
+  z <- rnorm(N)
+  (mean(sort(z, decreasing = TRUE)[seq_len(n_sel)]) - mean(z)) / sd(z)
+})
+
+fmt(data.frame(
+  quantity = c("relative gap 1 - realised/predicted", "realised intensity",
+               "index skewness"),
+  `mean over seeds` = colMeans(rep_seeds),
+  `s.e.`            = apply(rep_seeds, 2, sd) / sqrt(nrow(rep_seeds)),
+  minimum           = apply(rep_seeds, 2, min),
+  maximum           = apply(rep_seeds, 2, max),
+  row.names = NULL, check.names = FALSE), 3)
+```
+
+Over the 30 seeds the mean relative gap is `r fmt(mean(rep_seeds[, "rel_gap"]), 3)`
+(standard error `r fmt(gap_se, 3)`), the
+prediction exceeds the realised response in `r sum(rep_seeds[, "rel_gap"] > 0)`
+of 30 seeds, and the mean realised intensity is
+`r fmt(mean(rep_seeds[, "i_real"]), 3)` against a finite-$N$ normal expectation
+of `r fmt(mean(i_finite), 3)` (s.d. `r fmt(sd(i_finite), 3)`) and the
+infinite-population value `r fmt(i_norm, 3)`.
+
+The replicated mean gap is within two standard errors of zero, so at this scale
+the seed-1 overprediction is consistent with sampling variation, and the
+equation shows no detectable bias; the replicated AlphaSimR sweep of
+@sec-alphasimr reaches the same reading. One limit applies: only the teaching scale
+(25 + 25 lines, 2000 markers, $F_{ST} = 0.15$) was measured, so nothing here
+says how the gap behaves at production scale or under selection across cycles.
 
 ## Genic variance, and what it has to do with gene diversity
 
-The additive variance in the equation above is not a fixed property of the
+The additive variance in @eq-response-breeders is not a fixed property of the
 population. Split it in two.
 
 **Genic variance** is what the loci would contribute if they were independent:
 
-$$V_{\text{genic}} \;=\; \sum_k \beta_k^2 \operatorname{Var}(x_k)$$
+$$V_{\text{genic}} \;=\; \sum_k \beta_k^2 \operatorname{Var}(x_k)$$ {#eq-response-genic}
+
+with $\beta_k$ the effect of marker $k$ and $x_k$ its hybrid genotype.
 
 **Realised variance** is what the population actually has, $\operatorname{Var}
 (\mathbf{X}\boldsymbol\beta)$, which is the sum of the *whole* covariance matrix
 rather than only its diagonal. The difference is exactly the gametic-phase
-disequilibrium:
+disequilibrium term [@bulmer1971], which @tbl-response-genic evaluates for the
+seed-1 draw:
 
 $$\operatorname{Var}(\mathbf{X}\boldsymbol\beta) - V_{\text{genic}}
-\;=\; 2\sum_{k<l}\beta_k\beta_l \operatorname{Cov}(x_k, x_l)$$
+\;=\; 2\sum_{k<l}\beta_k\beta_l \operatorname{Cov}(x_k, x_l)$$ {#eq-response-ld}
 
 ```{r}
-c(realised = var(gv),
-  genic    = genic_var(X, sim$beta),
-  gap      = var(gv) - genic_var(X, sim$beta),
-  oracle_deviation = abs(genic_var(X, sim$beta) - ref_genic_var(X, sim$beta)))
+#| label: tbl-response-genic
+#| tbl-cap: "Realised variance $\\operatorname{Var}(\\mathbf{X}\\boldsymbol\\beta)$, genic variance (@eq-response-genic, `genic_var()`) and their difference, the disequilibrium term of @eq-response-ld, over the 625 hybrids of the seed-1 draw (25 + 25 lines, 2000 markers, 300 QTL). Last row: absolute deviation of `genic_var()` from the literal oracle `ref_genic_var()`. Variances in squared simulation units."
+Cx  <- cov(X)
+ld  <- sum(outer(sim$beta, sim$beta) * Cx) - sum(sim$beta^2 * diag(Cx))
+stopifnot(isTRUE(all.equal(var(gv) - genic_var(X, sim$beta), ld)),
+          isTRUE(all.equal(genic_var(X, sim$beta), ref_genic_var(X, sim$beta))))
+fmt(data.frame(
+  quantity = c("realised variance", "genic variance",
+               "disequilibrium term", "deviation from oracle"),
+  `value (sim. units squared)` = c(var(gv), genic_var(X, sim$beta),
+            var(gv) - genic_var(X, sim$beta),
+            abs(genic_var(X, sim$beta) - ref_genic_var(X, sim$beta))),
+  check.names = FALSE), 4)
 ```
 
-Now the sentence that ties this chapter to every one that follows.
+How does $V_{\text{genic}}$ relate to gene diversity? Let $p_{Ak}$ and
+$p_{Bk}$ be the frequencies of the allele coded 1 at locus $k$ among the inbred
+lines of pools A and B, $q = 1 - p$, and $p_k = (p_{Ak} + p_{Bk})/2$ the
+hybrid-pool frequency. A hybrid of the complete A $\times$ B factorial carries
+$x_k = (u_k + v_k)/2$, with $u_k \in \{0, 1\}$ the allele of its pool-A parent
+and $v_k \in \{0, 1\}$ that of its pool-B parent (the $u_{ik}$, $v_{jk}$ of
+@sec-heterosis-gca-sca without the line index), drawn independently from the
+two pools, so over the factorial (population-variance scale)
 
-$V_{\text{genic}}$ is $\sum_k \beta_k^2\,p_k q_k$ up to a coding constant, and
-gene diversity is $\frac{1}{m}\sum_k 2 p_k q_k$. **They are the same sum over the
-same loci, weighted differently** -- one by squared effect, one by nothing at
-all. That is the precise sense in which managing gene diversity manages the raw
-material of response, and it is why a diversity constraint is a defensible proxy
-for a variance constraint in the first place.
+$$\operatorname{Var}(x_k) \;=\; \frac{p_{Ak}q_{Ak} + p_{Bk}q_{Bk}}{4}
+\;=\; \frac{p_k q_k}{2} - \frac{(p_{Ak} - p_{Bk})^2}{8}.$$ {#eq-response-hybrid-var}
 
-It is also the precise sense in which the proxy is incomplete. Gene diversity
+```{r}
+#| label: response-hybrid-var
+#| results: hide
+pA <- colMeans(sim$GL[sim$pool == "A", ])
+pB <- colMeans(sim$GL[sim$pool == "B", ])
+pH <- (pA + pB) / 2
+v_pop <- colMeans(X^2) - colMeans(X)^2
+stopifnot(isTRUE(all.equal(v_pop, (pA * (1 - pA) + pB * (1 - pB)) / 4)),
+          isTRUE(all.equal(v_pop, pH * (1 - pH) / 2 - (pA - pB)^2 / 8)))
+ok <- pH > 0 & pH < 1
+c(ratio_min = min(v_pop[ok] / (pH * (1 - pH))[ok]),
+  ratio_max = max(v_pop[ok] / (pH * (1 - pH))[ok]))
+```
+
+The per-locus variance entering $V_{\text{genic}}$ (@eq-response-genic) is therefore not
+proportional to $p_k q_k$: the ratio $\operatorname{Var}(x_k)/(p_k q_k)$ ranges
+from `r fmt(min(v_pop[ok] / (pH * (1 - pH))[ok]), 3)` to
+`r fmt(max(v_pop[ok] / (pH * (1 - pH))[ok]), 3)` across these loci. Gene diversity
+of the hybrid pool, $\frac{1}{m}\sum_k 2 p_k q_k$, contains the between-pool
+divergence $(p_{Ak} - p_{Bk})^2$ that @eq-response-hybrid-var subtracts (since
+$2p_kq_k = p_{Ak}q_{Ak} + p_{Bk}q_{Bk} + (p_{Ak} - p_{Bk})^2/2$), the
+between-pool term of the partition of @sec-subdivided, while $V_{\text{genic}}$ among hybrids
+sees only the within-pool part, weighted by squared effect. The inference is
+that gene diversity is a proxy for genic variance only through its within-pool
+part, and only if effect sizes are unrelated to which loci lose diversity; this
+chapter does not test the second condition.
+
+The proxy is incomplete in two further ways. Gene diversity
 weights every locus equally, so it cannot distinguish a marker carrying half the
 genetic variance from one carrying none. And -- more seriously --
 
 ::: {.callout-warning}
-## No metric in this book can see the disequilibrium term
+## The frequency-based metrics cannot see the disequilibrium term
 
-$\theta$, $GD$, $N_s$, allelic richness, `F_hom` and `F_drift` are all functions
-of allele frequencies **one locus at a time**. The covariance term above does not
-move a single allele frequency. A flat gene diversity trajectory therefore does
-not imply flat additive variance, and @sec-limits measures how far apart the two
-can travel.
+$\theta$, $GD$, $N_s$, allelic richness, `F_hom` and `F_drift` -- including
+$\theta$, the only metric the differential evolution (DE) selector constrains -- are all functions of allele
+frequencies **one locus at a time**. The covariance term of @eq-response-ld does not move a
+single allele frequency. `eff_dim()` is the exception: it is computed from the
+spectrum of the double-centred $f$, a multilocus quantity, so it does respond to
+disequilibrium, but it weights loci by nothing, not by effect. A flat gene
+diversity trajectory therefore does not imply flat additive variance: reading it
+as one puts the error of @eq-response-ld, the whole disequilibrium term, into
+$\sigma_A^2$ and from there into the predicted $R$ of @eq-response-breeders.
+@sec-limits measures how far apart the two can travel.
 :::
 
-## The decomposition this book already had
+## Combining ability as the additive part
 
 Additive variance is the variance of *breeding values*, not of genotypic values,
 and in a two-pool hybrid population the average effect of an allele substitution
-depends on which pool it is substituted into. That sounds like it needs new
-machinery. It does not: @sec-heterosis-gca-sca already built the exact
-orthogonal split, and general combining ability *is* the additive part.
+depends on which pool it is substituted into. The exact orthogonal split of a
+hybrid value into general and specific combining ability (GCA, SCA)
+[@sprague1942] is developed in @sec-heterosis-gca-sca, a later chapter; it is
+used here ahead of that derivation: each line's GCA is its average
+effect against the opposite pool, i.e. the additive part *relative to that
+tester pool*, never a property of the line alone. The chunk below applies it to
+an illustrative, dominance-only value $H$ = `heterosis_value(X, d)`, with
+deviations $d_k \sim N(0.3, 0.1^2)$ drawn here and unrelated to
+$\boldsymbol\beta$. Its shares are shares of that illustrative heterosis, not
+of the genetic variance of `gv`.
 
 ```{r}
+#| results: hide
 set.seed(7)
 d  <- rnorm(ncol(X), 0.3, 0.1)                  # dominance deviations
 U  <- sim$GL[sim$pool == "A", ]
@@ -161,52 +272,115 @@ gA <- rep(gs$gca_A, times = nB)                 # ped varies pool A fastest
 gB <- rep(gs$gca_B, each  = nA)
 sc <- as.vector(gs$sca)
 
+stopifnot(isTRUE(all.equal(H, gs$mu + gA + gB + sc)),
+          isTRUE(all.equal(var(H), var(gA) + var(gB) + var(sc))),
+          max(abs(c(cov(gA, gB), cov(gA, sc), cov(gB, sc)))) < 1e-10)
 c(reconstruction_dev = max(abs(H - (gs$mu + gA + gB + sc))),
   var_H              = var(H),
   sum_of_components  = var(gA) + var(gB) + var(sc),
   identity_dev       = abs(var(H) - (var(gA) + var(gB) + var(sc))))
 ```
 
-The three components are orthogonal, so their variances add exactly. Read the
-shares:
+The three components are orthogonal, so their variances add exactly.
+@tbl-response-gca-sca gives the shares.
 
 ```{r}
+#| label: tbl-response-gca-sca
+#| tbl-cap: "Variance of the illustrative dominance-only value $H$ = `heterosis_value(X, d)` (dominance deviations $d_k \\sim N(0.3, 0.1^2)$, seed 7; one draw, 25 $\\times$ 25 factorial of the seed-1 pools) split into the general combining ability of pool A and pool B lines and the specific combining ability of their crosses. Variance in simulation units; share of the sum. These are shares of the illustrative heterosis, not of the genetic variance of the selected trait."
 p <- c(gca_A = var(gA), gca_B = var(gB), sca = var(sc))
 fmt(data.frame(component = names(p), variance = p,
                share = p / sum(p)), 3)
 ```
 
-`gca_A` and `gca_B` are the part of heterosis an additive model can express and
-that therefore behaves like additive variance under selection. `sca` is the
-part it cannot, and it does not accumulate across cycles the way the general
-components do. A programme selecting on an additive index is selecting on the
-first two and getting the third by luck.
+`gca_A` and `gca_B` are the part of $H$ that main effects of the parent lines,
+each against the opposite pool, can express; `sca` is the line-by-line
+interaction they cannot. How each share responds to recurrent selection across
+cycles is not measured in this chapter.
 
 ## What `weights = NULL` is assuming
 
-`stage2_select()` defaults to equal weight on every trait, and every chapter of
-this book including @sec-case-study takes that default. It is a choice, not a
-neutral one.
+`stage2_select()` defaults (`weights = NULL`) to equal weight on every trait, and
+every chapter of this book including @sec-case-study takes that default. The
+criteria it weights are not phenotypes but the *predicted* trait values
+$\hat{\mathbf{g}}$ of the hybrids (`hybrids` columns, passed to `build_ctx()`
+as `traits`). `build_ctx()` standardises each column before weighting, so the
+default index is $\sum_j \hat g_j / \operatorname{sd}(\hat g_j)$, up to a
+positive affine transformation that does not change the ranking. In trait units
+that is the index $\mathbf{a}'\hat{\mathbf{g}}$ with economic weights
+$a_j = 1/\operatorname{sd}(\hat g_j)$. What the default assumes is therefore an
+economic statement: one standard deviation of predicted value is worth the same
+in every trait. It is a choice, not a neutral one.
 
-The classical answer is the Smith-Hazel index (Smith 1936; Hazel 1943): the
-weights maximising the correlation between the index and the aggregate genotype
-$H = \mathbf{a}'\mathbf{g}$ are $\mathbf{b} = \mathbf{P}^{-1}\mathbf{G}\mathbf{a}$.
+Whether $\mathbf{a}'\hat{\mathbf{g}}$ is the best index for those $\mathbf{a}$
+is a separate question, and the answer depends on what $\hat{\mathbf{g}}$ is.
+Let $W = \mathbf{a}'\mathbf{g}$ be the aggregate genotype (the breeding
+objective), with $\mathbf{g}$ the vector of the traits' genetic values (one
+entry per trait; not a vector over individuals). The weights $\mathbf{b}$ on a
+vector of criteria $\mathbf{c}$ that maximise the correlation between
+$\mathbf{b}'\mathbf{c}$ and $W$ are
+$\operatorname{Var}(\mathbf{c})^{-1}\operatorname{Cov}(\mathbf{c}, \mathbf{g}')\,\mathbf{a}$.
+When $\mathbf{c} = \hat{\mathbf{g}}$ is the multi-trait best linear unbiased
+predictor (BLUP) of $\mathbf{g}$, $\operatorname{Cov}(\hat{\mathbf{g}},
+\mathbf{g}') = \operatorname{Var}(\hat{\mathbf{g}})$, so $\mathbf{b} =
+\mathbf{a}$: weighting the predictions by the economic weights is then the
+optimum, not a departure from it. The condition fails in general for
+predictions that are not BLUP of
+$\mathbf{g}$, single-trait BLUPs of genetically correlated traits included.
+
+When $\mathbf{c}$ is instead the vector of phenotypic records $\mathbf{y} = \mathbf{g} + \mathbf{e}$, $\mathbf{e}$
+independent of $\mathbf{g}$, with $\operatorname{Var}(\mathbf{y}) = \boldsymbol\Sigma_P$ and
+$\operatorname{Cov}(\mathbf{y}, \mathbf{g}') = \boldsymbol\Sigma_G$, the same
+expression is the Smith-Hazel index [@smith1936; @hazel1943]:
+
+$$\mathbf{b} \;=\; \boldsymbol\Sigma_P^{-1}\boldsymbol\Sigma_G\mathbf{a},$$ {#eq-response-smith-hazel}
+
+with $\boldsymbol\Sigma_P$ and $\boldsymbol\Sigma_G$ the phenotypic and genetic
+covariance matrices of the traits (`P` and `G` in the code; $\boldsymbol\Sigma_G$ is
+not the relationship matrix $\mathbf{G}$) and $\mathbf{a}$ the economic weights. @tbl-response-smith-hazel
+evaluates @eq-response-smith-hazel for a two-trait example.
 
 ```{r}
+#| label: tbl-response-smith-hazel
+#| tbl-cap: "Smith-Hazel index weights (@eq-response-smith-hazel) for an illustrative two-trait example with equal economic weights. Phenotypic covariance $\\boldsymbol\\Sigma_P$: variances 4.0 and 1.0, covariance 1.2; genetic covariance $\\boldsymbol\\Sigma_G$: variances 2.0 and 0.3, covariance 0.3. Values are invented for illustration, not estimated."
 P <- matrix(c(4.0, 1.2, 1.2, 1.0), 2)      # phenotypic covariance
-G <- matrix(c(2.0, 0.9, 0.9, 0.3), 2)      # genetic covariance
+G <- matrix(c(2.0, 0.3, 0.3, 0.3), 2)      # genetic covariance
 a <- c(1, 1)                               # equal economic weight
+stopifnot(all(eigen(G, only.values = TRUE)$values > 0),      # G is a covariance
+          all(eigen(P - G, only.values = TRUE)$values > 0))  # so is P - G
 
 fmt(data.frame(trait = c("yield", "moisture"),
-               economic_weight = a,
-               smith_hazel     = index_smith_hazel(P, G, a)), 3)
+               `economic weight` = a,
+               `Smith-Hazel weight` = index_smith_hazel(P, G, a),
+               check.names = FALSE), 3)
 ```
 
-Equal economic weights do **not** give equal index weights. They coincide only
-when $\mathbf{P}^{-1}\mathbf{G}$ is proportional to the identity, which requires
-the traits to be equally variable, equally heritable and mutually uncorrelated.
-Nothing guarantees that, and where it fails the index being maximised is not the
-index anyone intended.
+Equal economic weights do **not** give equal index weights on phenotypes here.
+$\mathbf{b}$ is proportional to $\mathbf{a}$ if and only if $\mathbf{a}$ is an
+eigenvector of $\boldsymbol\Sigma_P^{-1}\boldsymbol\Sigma_G$. A sufficient condition is
+$\boldsymbol\Sigma_G = c\,\boldsymbol\Sigma_P$ -- every trait with heritability $c$ and genetic
+correlations equal to the phenotypic ones -- which requires neither equal
+variances nor uncorrelated traits.
+
+```{r}
+#| label: response-sh-proportional
+stopifnot(isTRUE(all.equal(index_smith_hazel(P, 0.5 * P, a), 0.5 * a)))
+# BLUP of g from one record per trait (known means): ghat = G P^-1 y.
+K <- G %*% solve(P)
+stopifnot(isTRUE(all.equal(drop(solve(K %*% P %*% t(K), K %*% G) %*% a), a)),
+          isTRUE(all.equal(drop(t(K) %*% a), index_smith_hazel(P, G, a))))
+```
+
+The chunk also checks the two statements that tie the phenotypic and the
+predicted index together, for the BLUP from one record per trait with known
+means, $\hat{\mathbf{g}} = \boldsymbol\Sigma_G\boldsymbol\Sigma_P^{-1}\mathbf{y}$:
+$\operatorname{Var}(\hat{\mathbf{g}})^{-1}\operatorname{Cov}(\hat{\mathbf{g}},
+\mathbf{g}')\,\mathbf{a} = \mathbf{a}$, and $\mathbf{a}'\hat{\mathbf{g}}$ is the
+Smith-Hazel index $\mathbf{b}'\mathbf{y}$ of @tbl-response-smith-hazel. So the
+gap between $\mathbf{b}$ and $\mathbf{a}$ in that table is a property of an index
+on phenotypes; it is not a defect of `weights = NULL`, whose criteria are
+predictions. What the default does assume is the economic weighting
+$a_j = 1/\operatorname{sd}(\hat g_j)$, and that the predictions behave as
+multi-trait BLUP; this chapter tests neither against a real breeding objective.
 
 ## The $\alpha$ constraint is a restricted index
 
@@ -215,53 +389,63 @@ is not: "I accept losing five percent" is a sentence a breeding committee can
 sign, and "diversity is worth $\lambda$ index units" is not.
 
 That argument is usually presented as a point about human decision-making. It is
-older and harder than that. Kempthorne & Nordskog (1959) posed exactly the same
+older and harder than that. @kempthorne1959 posed exactly the same
 problem -- maximise aggregate gain subject to **zero expected change** in a
-specified direction -- and solved it:
+specified direction -- and solved it. In the $\mathbf{C} = \boldsymbol\Sigma_G\mathbf{R}$
+form used by `index_restricted()` (algebraically equivalent; not necessarily
+their notation), with $\mathbf{R}$ the $n_t \times n_r$ matrix of restricted
+directions for $n_t$ traits and $n_r$ restrictions:
 
-$$\mathbf{b} \;=\; \mathbf{P}^{-1}\left[\mathbf{G}\mathbf{a} - \mathbf{C}
-(\mathbf{C}'\mathbf{P}^{-1}\mathbf{C})^{-1}\mathbf{C}'\mathbf{P}^{-1}
-\mathbf{G}\mathbf{a}\right], \qquad \mathbf{C} = \mathbf{G}\mathbf{R}$$
+$$\mathbf{b} \;=\; \boldsymbol\Sigma_P^{-1}\left[\boldsymbol\Sigma_G\mathbf{a} - \mathbf{C}
+(\mathbf{C}'\boldsymbol\Sigma_P^{-1}\mathbf{C})^{-1}\mathbf{C}'\boldsymbol\Sigma_P^{-1}
+\boldsymbol\Sigma_G\mathbf{a}\right], \qquad \mathbf{C} = \boldsymbol\Sigma_G\mathbf{R}$$ {#eq-response-restricted}
+
+@tbl-response-restricted compares it with the unrestricted index of
+@tbl-response-smith-hazel when moisture is held at zero gain.
 
 ```{r}
+#| label: tbl-response-restricted
+#| tbl-cap: "Unrestricted (Smith-Hazel, @eq-response-smith-hazel) and restricted (@eq-response-restricted) index weights for the two-trait example of @tbl-response-smith-hazel, with the restriction holding moisture at zero expected gain ($\\mathbf{R} = (0, 1)'$). Last column: expected gain in the restricted trait, $\\mathbf{R}'\\boldsymbol\\Sigma_G\\mathbf{b}$, in trait units."
 R  <- cbind(c(0, 1))                       # hold moisture at zero gain
 b_r <- index_restricted(P, G, a, R)
 b_u <- index_smith_hazel(P, G, a)
 
 fmt(data.frame(
   index = c("Smith-Hazel", "restricted"),
-  w_yield    = c(b_u[1], b_r[1]),
-  w_moisture = c(b_u[2], b_r[2]),
-  gain_in_restricted_trait = c(drop(crossprod(R, G %*% b_u)),
-                               drop(crossprod(R, G %*% b_r)))), 4)
+  `weight on yield`    = c(b_u[1], b_r[1]),
+  `weight on moisture` = c(b_u[2], b_r[2]),
+  `expected gain in moisture (trait units)` = c(drop(crossprod(R, G %*% b_u)),
+                                                drop(crossprod(R, G %*% b_r))),
+  check.names = FALSE), 4)
+stopifnot(max(abs(crossprod(R, G %*% b_r))) < 1e-12)
 ```
 
 The restricted index moves the restricted trait by exactly zero -- not
 approximately, not on average. That is the property distinguishing a restriction
 from a penalty, and it is the property $\alpha$ inherits.
 
-::: {.callout-note}
+::: {.callout-important}
 ## What is genuinely new in this book, then
 
 Not the idea of constraining rather than pricing: that is 1959. What is new is
-the restricted direction. Kempthorne and Nordskog restricted a *trait*. This
+the restricted direction. @kempthorne1959 restricted a *trait*. This
 book restricts the loss of molecular gene diversity, which is not a trait, has no
 economic weight, and is measured on a matrix rather than a phenotype. The algebra
 of restriction carries over; the object being restricted does not.
 
-Stating the lineage makes @sec-ocs stronger, not weaker. A sixty-year-old
-theorem stands behind the move.
+Stating the lineage makes @sec-ocs stronger, not weaker. A theorem from 1959
+stands behind the move.
 :::
 
 ## Where this connects
 
-@sec-genomic-era and @sec-catalogue measure the frequencies whose weighted sum is
-the genic variance defined here, which is why a diversity constraint is a
-variance constraint in disguise. @sec-genomic-prediction measures the $r$ this
+@sec-genomic-era and @sec-catalogue measure the allele frequencies from which,
+through @eq-response-hybrid-var, the genic variance defined here is built; the
+link to variance runs through the within-pool part only. @sec-genomic-prediction measures the $r$ this
 chapter took as given, and Finding 5 of @sec-choosing shows what happens when it
 is assumed rather than measured. @sec-ocs is where the restricted index becomes
 the $\alpha$ constraint, and @sec-limits is where the disequilibrium term this
-chapter isolated turns out to matter more than the equation suggests.
+chapter isolated (@eq-response-ld) turns out to matter more than @eq-response-breeders suggests.
 
 <!-- reproduce-chapter -->
 

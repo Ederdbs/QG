@@ -1513,9 +1513,9 @@ window.Quarto = {
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
-<col style="width: 9%">
-<col style="width: 71%">
-<col style="width: 18%">
+<col style="width: 20%">
+<col style="width: 66%">
+<col style="width: 13%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1532,38 +1532,78 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td style="text-align: left;"><span class="math inline">\(i\)</span></td>
-<td style="text-align: left;">selection intensity for a selected fraction</td>
+<td style="text-align: left;">selection intensity, <span class="math inline">\(\varphi(z)/(n/N)\)</span> for an infinite normal population</td>
 <td style="text-align: left;"><code>sel_intensity()</code></td>
 </tr>
 <tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(z\)</span>, <span class="math inline">\(\varphi\)</span></td>
+<td style="text-align: left;">standard-normal truncation point leaving a fraction <span class="math inline">\(n/N\)</span> above it; standard-normal density</td>
+<td style="text-align: left;">-</td>
+</tr>
+<tr class="even">
 <td style="text-align: left;"><span class="math inline">\(r\)</span></td>
 <td style="text-align: left;">accuracy of the selection criterion</td>
 <td style="text-align: left;">-</td>
 </tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(b\)</span></td>
+<td style="text-align: left;">regression of genetic value on the index (scalar)</td>
+<td style="text-align: left;">-</td>
+</tr>
 <tr class="even">
+<td style="text-align: left;"><span class="math inline">\(S_I\)</span></td>
+<td style="text-align: left;">selection differential on the index</td>
+<td style="text-align: left;">-</td>
+</tr>
+<tr class="odd">
 <td style="text-align: left;"><span class="math inline">\(\sigma_A\)</span></td>
 <td style="text-align: left;">additive standard deviation</td>
 <td style="text-align: left;">-</td>
 </tr>
-<tr class="odd">
-<td style="text-align: left;"><span class="math inline">\(V_{genic}\)</span></td>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(V_{\text{genic}}\)</span></td>
 <td style="text-align: left;">variance if the loci were independent; the realised variance minus this is the disequilibrium term</td>
 <td style="text-align: left;"><code>genic_var()</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><span class="math inline">\(\beta_k\)</span></td>
 <td style="text-align: left;">marker effect at locus k</td>
 <td style="text-align: left;"><code>sim$beta</code></td>
 </tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(p_{Ak}\)</span>, <span class="math inline">\(p_{Bk}\)</span>; <span class="math inline">\(q = 1 - p\)</span></td>
+<td style="text-align: left;">frequency of the allele coded 1 at locus <span class="math inline">\(k\)</span> among pool-A / pool-B lines</td>
+<td style="text-align: left;">-</td>
+</tr>
 <tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(u_k\)</span>, <span class="math inline">\(v_k\)</span></td>
+<td style="text-align: left;">0/1 allele carried at locus <span class="math inline">\(k\)</span> by the pool-A / pool-B parent of a hybrid; the <span class="math inline">\(u_{ik}\)</span>, <span class="math inline">\(v_{jk}\)</span> of <a href="05b-heterosis-dominance.html#sec-heterosis-gca-sca" class="quarto-xref"><span>Section 13.10</span></a> without the line index</td>
+<td style="text-align: left;">rows of <code>sim$GL</code> (<code>U</code>, <code>V</code>)</td>
+</tr>
+<tr class="even">
 <td style="text-align: left;"><span class="math inline">\(d_k\)</span></td>
 <td style="text-align: left;">dominance deviation at locus k</td>
 <td style="text-align: left;"><code>d</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><span class="math inline">\(ID\)</span></td>
 <td style="text-align: left;">inbreeding depression, <span class="math inline">\(2F\sum d_k p_k q_k\)</span>; a <strong>constant</strong> with fully inbred parents</td>
 <td style="text-align: left;"><code>inbreeding_depression()</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(W\)</span></td>
+<td style="text-align: left;">aggregate genotype (breeding objective), <span class="math inline">\(\mathbf{a}'\mathbf{g}\)</span></td>
+<td style="text-align: left;">-</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\mathbf{g}\)</span>; <span class="math inline">\(\hat{\mathbf{g}}\)</span></td>
+<td style="text-align: left;">vector of the traits’ genetic values, one entry per trait (not over individuals); its predictor. Distinct from the GCA <span class="math inline">\(g^A_i\)</span>, <span class="math inline">\(g^B_j\)</span></td>
+<td style="text-align: left;">-; <code>traits</code> of <code>build_ctx()</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\boldsymbol\Sigma_P\)</span>, <span class="math inline">\(\boldsymbol\Sigma_G\)</span></td>
+<td style="text-align: left;">phenotypic and genetic covariance matrices of the traits – <strong>not</strong> the relationship matrix <span class="math inline">\(\mathbf{G}\)</span></td>
+<td style="text-align: left;"><code>P</code>, <code>G</code></td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;"><span class="math inline">\(\mathbf{b}\)</span></td>
@@ -1577,8 +1617,18 @@ window.Quarto = {
 </tr>
 <tr class="odd">
 <td style="text-align: left;"><span class="math inline">\(\mathbf{R}\)</span></td>
-<td style="text-align: left;">restriction matrix: directions held at zero expected gain</td>
+<td style="text-align: left;">restriction matrix (<span class="math inline">\(n_t \times n_r\)</span>): directions held at zero expected gain</td>
 <td style="text-align: left;"><code>index_restricted()</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(n_t\)</span>, <span class="math inline">\(n_r\)</span></td>
+<td style="text-align: left;">number of traits; number of restrictions</td>
+<td style="text-align: left;">-</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\mathbf{C}\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(\boldsymbol\Sigma_G\mathbf{R}\)</span> in the restricted index – <strong>not</strong> the MME inverse <span class="math inline">\(\mathbf{C}^{uu}\)</span></td>
+<td style="text-align: left;">-</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;"><span class="math inline">\(2 N_e R_1\)</span></td>
@@ -1589,7 +1639,8 @@ window.Quarto = {
 </table>
 </div>
 </div>
-<p><span class="math inline">\(R = i\,r\,\sigma_A\)</span> is a bivariate-normal result and runs above the realised response in a structured hybrid population – see <a href="02b-response.html" class="quarto-xref"><span>Chapter 3</span></a>, which measures the size of the gap rather than assuming it away.</p>
+<p><span class="math inline">\(R = i\,r\,\sigma_A\)</span> is the infinite-population, bivariate-normal result. In a structured hybrid population at the teaching scale, <a href="02b-response.html" class="quarto-xref"><span>Chapter 3</span></a> finds the replicated mean gap between predicted and realised response within two standard errors of zero; a single seed can over- or underpredict.</p>
+<p><span class="math inline">\(H\)</span> in <a href="02b-response.html" class="quarto-xref"><span>Chapter 3</span></a> is the heterosis value <span class="math inline">\(H_i\)</span> of the heterosis table above, not the aggregate genotype, which is <span class="math inline">\(W\)</span>.</p>
 </section>
 </section>
 <section id="conventions" class="level2" data-number="A.2">

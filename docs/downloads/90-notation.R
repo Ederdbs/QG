@@ -379,30 +379,48 @@ knitr::kable(data.frame(
 ## -----------------------------------------------------------------------------
 #| echo: false
 knitr::kable(data.frame(
-  Symbol = c("$R$", "$i$", "$r$", "$\\sigma_A$", "$V_{genic}$",
-             "$\\beta_k$", "$d_k$", "$ID$", "$\\mathbf{b}$", "$\\mathbf{a}$",
-             "$\\mathbf{R}$", "$2 N_e R_1$"),
+  Symbol = c("$R$", "$i$", "$z$, $\\varphi$", "$r$", "$b$", "$S_I$", "$\\sigma_A$",
+             "$V_{\\text{genic}}$", "$\\beta_k$", "$p_{Ak}$, $p_{Bk}$; $q = 1 - p$",
+             "$u_k$, $v_k$", "$d_k$", "$ID$", "$W$", "$\\mathbf{g}$; $\\hat{\\mathbf{g}}$",
+             "$\\boldsymbol\\Sigma_P$, $\\boldsymbol\\Sigma_G$", "$\\mathbf{b}$",
+             "$\\mathbf{a}$", "$\\mathbf{R}$", "$n_t$, $n_r$", "$\\mathbf{C}$",
+             "$2 N_e R_1$"),
   Meaning = c("response to one cycle of selection",
-              "selection intensity for a selected fraction",
+              "selection intensity, $\\varphi(z)/(n/N)$ for an infinite normal population",
+              "standard-normal truncation point leaving a fraction $n/N$ above it; standard-normal density",
               "accuracy of the selection criterion",
+              "regression of genetic value on the index (scalar)",
+              "selection differential on the index",
               "additive standard deviation",
               "variance if the loci were independent; the realised variance minus this is the disequilibrium term",
               "marker effect at locus k",
+              "frequency of the allele coded 1 at locus $k$ among pool-A / pool-B lines",
+              "0/1 allele carried at locus $k$ by the pool-A / pool-B parent of a hybrid; the $u_{ik}$, $v_{jk}$ of @sec-heterosis-gca-sca without the line index",
               "dominance deviation at locus k",
               "inbreeding depression, $2F\\sum d_k p_k q_k$; a **constant** with fully inbred parents",
+              "aggregate genotype (breeding objective), $\\mathbf{a}'\\mathbf{g}$",
+              "vector of the traits' genetic values, one entry per trait (not over individuals); its predictor. Distinct from the GCA $g^A_i$, $g^B_j$",
+              "phenotypic and genetic covariance matrices of the traits -- **not** the relationship matrix $\\mathbf{G}$",
               "selection index weights",
               "economic weights on the aggregate genotype",
-              "restriction matrix: directions held at zero expected gain",
+              "restriction matrix ($n_t \\times n_r$): directions held at zero expected gain",
+              "number of traits; number of restrictions",
+              "$\\boldsymbol\\Sigma_G\\mathbf{R}$ in the restricted index -- **not** the MME inverse $\\mathbf{C}^{uu}$",
               "Robertson's limit; half-life $1.4 N_e$"),
-  `In the code` = c("-", "`sel_intensity()`", "-", "-", "`genic_var()`",
-                    "`sim$beta`", "`d`", "`inbreeding_depression()`",
-                    "`index_smith_hazel()`", "-", "`index_restricted()`", "-"),
+  `In the code` = c("-", "`sel_intensity()`", "-", "-", "-", "-", "-", "`genic_var()`",
+                    "`sim$beta`", "-", "rows of `sim$GL` (`U`, `V`)", "`d`",
+                    "`inbreeding_depression()`", "-", "-; `traits` of `build_ctx()`", "`P`, `G`",
+                    "`index_smith_hazel()`", "-", "`index_restricted()`", "-", "-", "-"),
   check.names = FALSE))
 
 #' 
-#' $R = i\,r\,\sigma_A$ is a bivariate-normal result and runs above the realised
-#' response in a structured hybrid population -- see @sec-response, which measures
-#' the size of the gap rather than assuming it away.
+#' $R = i\,r\,\sigma_A$ is the infinite-population, bivariate-normal result. In a
+#' structured hybrid population at the teaching scale, @sec-response finds the
+#' replicated mean gap between predicted and realised response within two standard
+#' errors of zero; a single seed can over- or underpredict.
+#' 
+#' $H$ in @sec-response is the heterosis value $H_i$ of the heterosis table above,
+#' not the aggregate genotype, which is $W$.
 #' 
 #' ## Conventions
 #' 
