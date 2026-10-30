@@ -629,9 +629,9 @@ window.Quarto = {
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
-<col style="width: 15%">
-<col style="width: 72%">
-<col style="width: 11%">
+<col style="width: 13%">
+<col style="width: 62%">
+<col style="width: 23%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -672,21 +672,26 @@ window.Quarto = {
 <td style="text-align: left;"><code>ctx$X</code></td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;"><span class="math inline">\(\mathbf{M}\)</span></td>
-<td style="text-align: left;">hybrid dosage matrix, 0/1/2</td>
+<td style="text-align: left;"><span class="math inline">\(\mathbf{M}^H\)</span></td>
+<td style="text-align: left;">hybrid dosage matrix, N x m, 0/1/2; <span class="math inline">\(\mathbf{X} = \mathbf{M}^H/2\)</span></td>
 <td style="text-align: left;">-</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;"><span class="math inline">\(\mathbf{G}^L\)</span></td>
-<td style="text-align: left;">line genotype matrix, L x m, coded 0/1</td>
-<td style="text-align: left;"><code>ctx$GL</code></td>
+<td style="text-align: left;"><span class="math inline">\(\mathbf{M}^L\)</span></td>
+<td style="text-align: left;">line genotype matrix, L x m, reference-allele dosage coded 0/2</td>
+<td style="text-align: left;"><code>simulate_lines()</code></td>
 </tr>
 <tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\mathbf{G}^L\)</span></td>
+<td style="text-align: left;">line genotype matrix, L x m, coded 0/1; <span class="math inline">\(\mathbf{G}^L = \mathbf{M}^L/2\)</span></td>
+<td style="text-align: left;"><code>ctx$GL</code>, <code>simulate_pools()$GL</code></td>
+</tr>
+<tr class="even">
 <td style="text-align: left;"><span class="math inline">\(p_k\)</span>, <span class="math inline">\(\bar p_k\)</span></td>
 <td style="text-align: left;">allele frequency; the bar denotes a group mean</td>
 <td style="text-align: left;">-</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><span class="math inline">\(p_{0,k}\)</span></td>
 <td style="text-align: left;"><strong>frozen</strong> candidate-pool allele frequency: the base</td>
 <td style="text-align: left;"><code>ctx$p0</code></td>
@@ -701,9 +706,9 @@ window.Quarto = {
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
-<col style="width: 14%">
-<col style="width: 43%">
-<col style="width: 42%">
+<col style="width: 7%">
+<col style="width: 24%">
+<col style="width: 67%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -736,7 +741,17 @@ window.Quarto = {
 <tr class="odd">
 <td style="text-align: left;"><span class="math inline">\(\mathbf{G}_{0.5}\)</span></td>
 <td style="text-align: left;">VanRaden with the centering frequency fixed at 0.5</td>
-<td style="text-align: left;"><strong>this is f</strong>, arrived at from the VanRaden family</td>
+<td style="text-align: left;"><span class="math inline">\(4\mathbf{f} - 2\mathbf{J}\)</span>: an affine function of f, not f; orders selections as f does only when <span class="math inline">\(\mathbf{1}'\mathbf{c} = 1\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\mathbf{Z}\)</span></td>
+<td style="text-align: left;">centered dosage <span class="math inline">\(\mathbf{M}^H - \mathbf{1}\,2\mathbf{p}'\)</span>, N x m</td>
+<td style="text-align: left;">builds <span class="math inline">\(\mathbf{G}\)</span>; also the marker design matrix of <span class="math inline">\(\mathbf{u} = \mathbf{Z}\boldsymbol\beta\)</span> (genomic prediction); not the subgroup indicator <span class="math inline">\(\mathbf{Z}\)</span> of joint allocation</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\mathbf{J}\)</span></td>
+<td style="text-align: left;">matrix of ones <span class="math inline">\(\mathbf{1}\mathbf{1}'\)</span>, N x N</td>
+<td style="text-align: left;">-</td>
 </tr>
 </tbody>
 </table>
@@ -749,9 +764,9 @@ window.Quarto = {
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
-<col style="width: 16%">
-<col style="width: 54%">
-<col style="width: 28%">
+<col style="width: 10%">
+<col style="width: 71%">
+<col style="width: 17%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -783,12 +798,12 @@ window.Quarto = {
 </tr>
 <tr class="odd">
 <td style="text-align: left;"><span class="math inline">\(f_{ii}\)</span></td>
-<td style="text-align: left;">coancestry within subpopulation i; <span class="math inline">\(1 - f_{ii} = H_{e,i}\)</span></td>
+<td style="text-align: left;">coancestry within subpopulation i; <span class="math inline">\(1 - f_{ii} = H_{e,i}\)</span>. For a single individual, the diagonal of <span class="math inline">\(\mathbf{f}\)</span>, which is <span class="math inline">\(s_i\)</span></td>
 <td style="text-align: left;"><code>ct_partition()</code></td>
 </tr>
 <tr class="even">
 <td style="text-align: left;"><span class="math inline">\(s_i\)</span></td>
-<td style="text-align: left;">self-coancestry; <span class="math inline">\(F_i = 2s_i - 1\)</span></td>
+<td style="text-align: left;">self-coancestry; <span class="math inline">\(F_i = 2s_i - 1\)</span>; for a single individual <span class="math inline">\(s_i = f_{ii}\)</span></td>
 <td style="text-align: left;"><code>ct_partition()</code></td>
 </tr>
 <tr class="odd">

@@ -675,21 +675,21 @@ window.Quarto = {
 <h2 data-number="1.1" class="anchored" data-anchor-id="from-line-to-hybrid"><span class="header-section-number">1.1</span> From line to hybrid</h2>
 <p>Let <span class="math inline">\(\mathbf{M}^{L}\)</span> be the <span class="math inline">\(L \times m\)</span> matrix of line genotypes, with <span class="math inline">\(M^{L}_{ik} \in \{0, 2\}\)</span> the count of the reference allele at marker <span class="math inline">\(k\)</span>. Inbred lines are homozygous, so the value 1 never occurs – residual heterozygotes must be imputed or discarded beforehand.</p>
 <p>The F1 hybrid between lines <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> receives one gamete from each parent. Since both parents are homozygous, the gamete from <span class="math inline">\(a\)</span> carries <span class="math inline">\(M^{L}_{ak}/2\)</span> copies of the reference allele, so</p>
-<p><span class="math display">\[
+<p><span id="eq-hybrid-dosage"><span class="math display">\[
 M^{H}_{(ab)k} \;=\; \frac{M^{L}_{ak} + M^{L}_{bk}}{2} \;\in\; \{0, 1, 2\}.
-\]</span></p>
-<p>The value 1 appears exactly at markers where the two lines differ. Those are the hybrid’s heterozygous loci, and they are the ones carrying heterosis.</p>
-<p>Predicting the hybrid’s <em>genotype</em> is deterministic, not statistical. It is the one piece of information in the whole pipeline that requires no assumption at all – unlike its phenotype, which requires a great many.</p>
+\tag{1.1}\]</span></span></p>
+<p>The value 1 appears exactly at markers where the two lines differ. Those are the hybrid’s heterozygous loci. In the absence of epistasis, the heterosis of an F1 between two inbred lines (F1 minus mid-parent) is the sum of the dominance deviations <span class="math inline">\(d_k\)</span> over exactly these loci <span class="citation" data-cites="falconer1996">(<a href="99-references.html#ref-falconer1996" role="doc-biblioref">Falconer and Mackay 1996</a>, ch.&nbsp;14)</span>; <a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 13</span></a> develops that model.</p>
+<p>Predicting the hybrid’s <em>genotype</em> is deterministic, not statistical. Given the homozygous parents declared above, it requires no further assumption – unlike its phenotype, which requires a great many.</p>
 <p>From here on we work with the <strong>within-individual reference-allele frequency</strong>,</p>
-<p><span class="math display">\[
+<p><span id="eq-x-freq"><span class="math display">\[
 x_{ik} \;=\; \frac{M^{H}_{ik}}{2} \;\in\; \{0,\; 0.5,\; 1\},
-\]</span></p>
-<p>which is the natural quantity for coancestry: it is the probability that an allele drawn at random from individual <span class="math inline">\(i\)</span> at marker <span class="math inline">\(k\)</span> is the reference allele.</p>
+\tag{1.2}\]</span></span></p>
+<p>collected for the <span class="math inline">\(N\)</span> hybrids in the <span class="math inline">\(N \times m\)</span> hybrid marker matrix <span class="math inline">\(\mathbf{X} = \mathbf{M}^{H}/2\)</span> (rows hybrids, columns markers). It is the natural quantity for coancestry: it is the probability that an allele drawn at random from individual <span class="math inline">\(i\)</span> at marker <span class="math inline">\(k\)</span> is the reference allele.</p>
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>ctx <span class="ot">&lt;-</span> <span class="fu">simulate_data</span>(book_cfg)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>ctx<span class="sc">$</span>X[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>]</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>ctx[[<span class="st">"X"</span>]][<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>]</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8]</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1,]  0.5  0.5  0.5    1    0    1  0.5  0.5</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [2,]  0.5  0.0  0.0    1    0    1  1.0  0.0</span></span>
@@ -702,10 +702,10 @@ x_{ik} \;=\; \frac{M^{H}_{ik}}{2} \;\in\; \{0,\; 0.5,\; 1\},
 <section id="sec-why-not-g" class="level2" data-number="1.2">
 <h2 data-number="1.2" class="anchored" data-anchor-id="sec-why-not-g"><span class="header-section-number">1.2</span> The VanRaden matrix, and why it cannot measure diversity</h2>
 <p>With <span class="math inline">\(p_k\)</span> the reference-allele frequency in the hybrid population and <span class="math inline">\(\mathbf{Z} = \mathbf{M}^{H} - \mathbf{1}\,2\mathbf{p}'\)</span> the centered matrix,</p>
-<p><span class="math display">\[
+<p><span id="eq-vanraden-g"><span class="math display">\[
 \mathbf{G} \;=\; \frac{\mathbf{Z}\mathbf{Z}'}{2\sum_{k} p_k (1-p_k)}.
-\]</span></p>
-<p>This is VanRaden’s first parametrisation. It estimates realised additive relationship and it is the right matrix for GBLUP. It is implemented as <code>vanraden_G()</code>:</p>
+\tag{1.3}\]</span></span></p>
+<p>This is VanRaden’s first parametrisation <span class="citation" data-cites="vanraden2008">(<a href="99-references.html#ref-vanraden2008" role="doc-biblioref">VanRaden 2008</a>)</span>. It estimates realised additive relationship and it is the right matrix for genomic best linear unbiased prediction (GBLUP). It is implemented as <code>vanraden_G()</code>:</p>
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Show code</summary>
@@ -715,32 +715,52 @@ x_{ik} \;=\; \frac{M^{H}_{ik}}{2} \;\in\; \{0,\; 0.5,\; 1\},
 </details>
 </div>
 <p>Now the failure. Centering on <span class="math inline">\(2\mathbf{p}\)</span> uses frequencies from the population itself, so every column of <span class="math inline">\(\mathbf{Z}\)</span> sums to zero:</p>
-<p><span class="math display">\[
+<p><span id="eq-g-sum-zero"><span class="math display">\[
 \mathbf{Z}'\mathbf{1} = \mathbf{0}
 \quad\Longrightarrow\quad
 \mathbf{1}'\mathbf{G}\mathbf{1}
-\;=\; \frac{\lVert \mathbf{Z}'\mathbf{1}\rVert^2}{2\sum_k p_k q_k}
+\;=\; \frac{\lVert \mathbf{Z}'\mathbf{1}\rVert^2}{2\sum_k p_k (1-p_k)}
 \;=\; 0 .
-\]</span></p>
-<p>The sum of <strong>all</strong> elements of <span class="math inline">\(\mathbf{G}\)</span> is identically zero. Group coancestry is proportional to that sum, so it is zero for the whole population, and the status number <span class="math inline">\(N_s = 1/(2\theta)\)</span> diverges:</p>
+\tag{1.4}\]</span></span></p>
+<p>The sum of <strong>all</strong> elements of <span class="math inline">\(\mathbf{G}\)</span> is identically zero. The group coancestry of a set of <span class="math inline">\(n\)</span> individuals is the mean of all <span class="math inline">\(n^2\)</span> pairwise coancestries, diagonal included <span class="citation" data-cites="cockerham1967">(<a href="99-references.html#ref-cockerham1967" role="doc-biblioref">Cockerham 1967</a>)</span>: <span class="math inline">\(\theta =
+n^{-2}\,\mathbf{1}'\mathbf{f}\mathbf{1}\)</span>, with <span class="math inline">\(\mathbf{f}\)</span> the coancestry matrix of <a href="#sec-f-molecular" class="quarto-xref"><span>Section 1.3</span></a>. <span class="math inline">\(\mathbf{G}\)</span> is on the relationship scale, twice a coancestry, so substituting it gives <span class="math inline">\(\theta = (2n^2)^{-1}\,
+\mathbf{1}'\mathbf{G}\mathbf{1}\)</span> (<code>theta_on_G</code> below). That is zero for the whole population, and the status number <span class="math inline">\(N_s = 1/(2\theta)\)</span> <span class="citation" data-cites="lindgren1997">(<a href="99-references.html#ref-lindgren1997" role="doc-biblioref">Lindgren et al. 1997</a>)</span> diverges:</p>
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">sum_G      =</span> <span class="fu">sum</span>(ctx<span class="sc">$</span>G),</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">theta_on_G =</span> <span class="fu">mean</span>(ctx<span class="sc">$</span>G) <span class="sc">/</span> <span class="dv">2</span>,</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">Ns_on_G    =</span> <span class="dv">1</span> <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> <span class="fu">mean</span>(ctx<span class="sc">$</span>G) <span class="sc">/</span> <span class="dv">2</span>))</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         sum_G    theta_on_G       Ns_on_G </span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; -4.178879e-11 -5.348298e-17 -9.348769e+15</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>G <span class="ot">&lt;-</span> ctx[[<span class="st">"G"</span>]]</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">sum_G      =</span> <span class="fu">sum</span>(G),</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">theta_on_G =</span> <span class="fu">mean</span>(G) <span class="sc">/</span> <span class="dv">2</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">Ns_on_G    =</span> <span class="dv">1</span> <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> <span class="fu">mean</span>(G) <span class="sc">/</span> <span class="dv">2</span>),</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">min_G      =</span> <span class="fu">min</span>(G))</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         sum_G    theta_on_G       Ns_on_G         min_G </span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; -4.178879e-11 -5.348298e-17 -9.348769e+15 -1.389412e-01</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>N <span class="ot">&lt;-</span> <span class="fu">nrow</span>(G)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">abs</span>(<span class="fu">sum</span>(G)) <span class="sc">&lt;</span> <span class="fl">1e-6</span> <span class="sc">*</span> N<span class="sc">^</span><span class="dv">2</span>)            <span class="co"># 1'G1 = 0 up to round-off</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<p>That is not a rounding artefact to be worked around. It is exact, and it is what centering means. In a <em>subset</em> the sum is not zero, but the quantity is still centered: it oscillates around zero, takes negative values, is not a probability, and admits no identity-by-descent interpretation.</p>
-<div class="callout callout-style-simple callout-important callout-titled">
+<p>The sum is zero in exact arithmetic. The printed <code>sum_G</code> is floating-point residue, and <code>Ns_on_G</code> is the reciprocal of that residue: its magnitude and sign carry no information about the data. The zero itself is not a rounding artefact to be worked around; it is what centering means.</p>
+<p>In a <em>subset</em> <span class="math inline">\(S\)</span> of size <span class="math inline">\(n\)</span> the sum is not zero. Because <span class="math inline">\(\mathbf{G}\)</span> is a Gram matrix, <span class="math inline">\(\mathbf{1}_S'\mathbf{G}\mathbf{1}_S = \lVert
+\mathbf{Z}'\mathbf{1}_S\rVert^2 / (2\sum_k p_k (1-p_k)) \ge 0\)</span>, with <span class="math inline">\(\mathbf{1}_S\)</span> the indicator vector of <span class="math inline">\(S\)</span>, so a subset sum is never negative, even though individual off-diagonal elements are (<code>min_G</code> above). For <span class="math inline">\(S\)</span> drawn at random without replacement from the <span class="math inline">\(N\)</span> hybrids, the finite-population sampling variance of a total gives <span class="math inline">\(\mathrm{E}[\mathbf{1}_S'\mathbf{G}\mathbf{1}_S] = n\,\frac{N-n}{N-1}\,
+\overline{G}_{ii}\)</span>, with <span class="math inline">\(\overline{G}_{ii}\)</span> the mean diagonal: the value depends on <span class="math inline">\(n/N\)</span> and returns to zero at <span class="math inline">\(n = N\)</span>. It is a distance from the centroid of the population that fixed <span class="math inline">\(\mathbf{p}\)</span>, not a probability, and it admits no identity-by-descent interpretation.</p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>S_sum <span class="ot">&lt;-</span> <span class="fu">vapply</span>(<span class="fu">seq_len</span>(<span class="dv">1000</span>), <span class="cf">function</span>(r) {</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  S <span class="ot">&lt;-</span> <span class="fu">sample</span>(N, <span class="fu">sample</span>(<span class="dv">2</span><span class="sc">:</span>(N <span class="sc">-</span> <span class="dv">1</span>), <span class="dv">1</span>))</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sum</span>(G[S, S, <span class="at">drop =</span> <span class="cn">FALSE</span>])</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>}, <span class="fu">numeric</span>(<span class="dv">1</span>))</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">min</span>(S_sum) <span class="sc">&gt;</span> <span class="sc">-</span><span class="fl">1e-8</span>)                  <span class="co"># Gram matrix: 1_S'G1_S &gt;= 0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div class="callout callout-style-simple callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Important</span>The root cause is the implicit base population
+<span class="screen-reader-only">Warning</span>The root cause is the implicit base population
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -750,72 +770,82 @@ x_{ik} \;=\; \frac{M^{H}_{ik}}{2} \;\in\; \{0,\; 0.5,\; 1\},
 </section>
 <section id="sec-f-molecular" class="level2" data-number="1.3">
 <h2 data-number="1.3" class="anchored" data-anchor-id="sec-f-molecular"><span class="header-section-number">1.3</span> Molecular coancestry</h2>
-<p>Malécot’s coancestry between <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> is the probability that two randomly sampled alleles, one from each individual at the same locus, are identical. Replacing identity <em>by descent</em> with identity <em>by state</em> – which is what markers actually observe – yields molecular coancestry <span class="citation" data-cites="caballero2002 caballero2000">(<a href="99-references.html#ref-caballero2002" role="doc-biblioref">Caballero and Toro 2002</a>, <a href="99-references.html#ref-caballero2000" role="doc-biblioref">2000</a>)</span>:</p>
-<p><span class="math display">\[
+<p>Malécot’s coancestry <span class="citation" data-cites="malecot1948">(<a href="99-references.html#ref-malecot1948" role="doc-biblioref">Malécot 1948</a>)</span> between <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> is the probability that two randomly sampled alleles, one from each individual at the same locus, are identical. Replacing identity <em>by descent</em> with identity <em>by state</em> – which is what markers actually observe – yields molecular coancestry <span class="citation" data-cites="caballero2002 eding2001">(<a href="99-references.html#ref-caballero2002" role="doc-biblioref">Caballero and Toro 2002</a>; <a href="99-references.html#ref-eding2001" role="doc-biblioref">Eding and Meuwissen 2001</a>)</span>:</p>
+<p><span id="eq-f-molecular"><span class="math display">\[
 f_{ij} \;=\; \frac{1}{m}\sum_{k=1}^{m}
 \Big[\, x_{ik}\,x_{jk} \;+\; (1-x_{ik})(1-x_{jk}) \,\Big].
-\]</span></p>
+\tag{1.5}\]</span></span></p>
 <p>The first term is the probability that both sampled alleles are the reference allele; the second, that both are the alternative. Three properties follow immediately:</p>
 <ul>
 <li><span class="math inline">\(f_{ij} \in [0, 1]\)</span> always. <strong>A negative value is a symptom of the wrong matrix.</strong></li>
-<li>Self-coancestry is <span class="math inline">\(f_{ii} = (1 + F_i)/2\)</span>, with <span class="math inline">\(F_i\)</span> the individual’s molecular homozygosity. For a fully heterozygous F1, <span class="math inline">\(f_{ii} = 0.5\)</span>.</li>
+<li>Self-coancestry, the diagonal element of <span class="math inline">\(\mathbf{f}\)</span>, is <span class="math inline">\(s_i = f_{ii} =
+(1 + F_i)/2\)</span> <span class="citation" data-cites="falconer1996">(the identity-by-descent form is in <a href="99-references.html#ref-falconer1996" role="doc-biblioref">Falconer and Mackay 1996</a>, ch.&nbsp;5)</span>, with <span class="math inline">\(F_i\)</span> the individual’s molecular homozygosity, the fraction of markers at which <span class="math inline">\(i\)</span> is homozygous. For a fully heterozygous F1, <span class="math inline">\(s_i = 0.5\)</span>.</li>
 <li>No centering, no scaling, no arbitrary base population.</li>
 </ul>
 <section id="computable-form" class="level3" data-number="1.3.1">
 <h3 data-number="1.3.1" class="anchored" data-anchor-id="computable-form"><span class="header-section-number">1.3.1</span> Computable form</h3>
-<p>The double sum is <span class="math inline">\(O(n^2 m)\)</span> if computed naively. Expanding,</p>
+<p>Computed literally, with interpreted loops over pairs and markers, the double sum of <a href="#eq-f-molecular" class="quarto-xref">Equation&nbsp;<span>1.5</span></a> costs <span class="math inline">\(O(n^2 m)\)</span> scalar operations. Expanding,</p>
 <p><span class="math display">\[
 \sum_k \big[x_{ik}x_{jk} + (1-x_{ik})(1-x_{jk})\big]
 = 2\sum_k x_{ik}x_{jk} \;-\; \sum_k x_{ik} \;-\; \sum_k x_{jk} \;+\; m,
 \]</span></p>
-<p>so with <span class="math inline">\(\mathbf{s} = \mathbf{X}\mathbf{1}\)</span> the row sums,</p>
-<p><span class="math display">\[
+<p>so, in matrix form,</p>
+<p><span id="eq-f-matrix"><span class="math display">\[
 \mathbf{f} \;=\; \frac{1}{m}\Big( 2\,\mathbf{X}\mathbf{X}'
-\;-\; \mathbf{s}\mathbf{1}' \;-\; \mathbf{1}\mathbf{s}' \;+\; m\,\mathbf{J} \Big),
-\]</span></p>
-<p>a single matrix product – the same cost as building <span class="math inline">\(\mathbf{G}\)</span>.</p>
+\;-\; \mathbf{X}\mathbf{1}\mathbf{1}' \;-\; \mathbf{1}\mathbf{1}'\mathbf{X}' \;+\; m\,\mathbf{J} \Big),
+\tag{1.6}\]</span></span></p>
+<p>with <span class="math inline">\(\mathbf{1}\)</span> a vector of ones of conforming length (<span class="math inline">\(m\)</span> or <span class="math inline">\(N\)</span>) and <span class="math inline">\(\mathbf{J} = \mathbf{1}\mathbf{1}'\)</span> the <span class="math inline">\(N \times N\)</span> matrix of ones. This is a single matrix product. It is still <span class="math inline">\(O(n^2 m)\)</span> – the same order and cost as building <span class="math inline">\(\mathbf{G}\)</span> – and the gain over the literal sum is the constant factor of an optimised Basic Linear Algebra Subprograms (BLAS) product, not a lower order.</p>
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>molecular_coancestry</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (X) </span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; {</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     m &lt;- ncol(X)</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     s &lt;- rowSums(X)</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     f &lt;- (2 * tcrossprod(X) - outer(s, rep(1, nrow(X))) - outer(rep(1, </span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         nrow(X)), s) + m)/m</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     dimnames(f) &lt;- NULL</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     f</span></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x7cef7b4dd0&gt;</span></span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">deparse</span>(molecular_coancestry), <span class="at">sep =</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (X) </span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; {</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     m &lt;- ncol(X)</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     s &lt;- rowSums(X)</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     f &lt;- (2 * tcrossprod(X) - outer(s, rep(1, nrow(X))) - outer(rep(1, </span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         nrow(X)), s) + m)/m</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     dimnames(f) &lt;- NULL</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     f</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">c</span>(<span class="at">minimum       =</span> <span class="fu">min</span>(ctx<span class="sc">$</span>f),</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>      <span class="at">maximum       =</span> <span class="fu">max</span>(ctx<span class="sc">$</span>f),</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>      <span class="at">diagonal_mean =</span> <span class="fu">mean</span>(<span class="fu">diag</span>(ctx<span class="sc">$</span>f)),</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>      <span class="at">offdiag_mean  =</span> <span class="fu">mean</span>(ctx<span class="sc">$</span>f[<span class="fu">upper.tri</span>(ctx<span class="sc">$</span>f)])))</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       minimum       maximum diagonal_mean  offdiag_mean </span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        0.6448        0.8318        0.8192        0.6717</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> ctx[[<span class="st">"f"</span>]]</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">c</span>(<span class="at">minimum       =</span> <span class="fu">min</span>(f),</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>      <span class="at">maximum       =</span> <span class="fu">max</span>(f),</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>      <span class="at">diagonal_mean =</span> <span class="fu">mean</span>(<span class="fu">diag</span>(f)),</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>      <span class="at">offdiag_mean  =</span> <span class="fu">mean</span>(f[<span class="fu">upper.tri</span>(f)])))</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       minimum       maximum diagonal_mean  offdiag_mean </span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        0.6448        0.8318        0.8192        0.6717</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> ctx[[<span class="st">"X"</span>]]</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">ncol</span>(X)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>f_sum <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="dv">5</span>, <span class="dv">5</span>)                       <span class="co"># literal double sum, 5 x 5</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>) <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  f_sum[i, j] <span class="ot">&lt;-</span> <span class="fu">mean</span>(X[i, ] <span class="sc">*</span> X[j, ] <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">-</span> X[i, ]) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> X[j, ]))</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">min</span>(f) <span class="sc">&gt;=</span> <span class="dv">0</span>, <span class="fu">max</span>(f) <span class="sc">&lt;=</span> <span class="dv">1</span>,</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>          <span class="fu">isTRUE</span>(<span class="fu">all.equal</span>(f[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>], f_sum)),</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>          <span class="fu">isTRUE</span>(<span class="fu">all.equal</span>(f, <span class="fu">tcrossprod</span>(<span class="fu">cbind</span>(X, <span class="dv">1</span> <span class="sc">-</span> X)) <span class="sc">/</span> m)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <p>Everything is inside <span class="math inline">\([0, 1]\)</span>, as it must be.</p>
 </section>
 <section id="reading-the-diagonal" class="level3" data-number="1.3.2">
 <h3 data-number="1.3.2" class="anchored" data-anchor-id="reading-the-diagonal"><span class="header-section-number">1.3.2</span> Reading the diagonal</h3>
-<p>The value 0.5 is the floor of the diagonal, reached by a hybrid heterozygous at <em>every</em> marker. The excess above 0.5 measures exactly the fraction of markers at which the two parent lines carry the same allele – loci where the F1 is homozygous and therefore contributes nothing to heterosis.</p>
+<p>The value 0.5 is the floor of the diagonal, reached by a hybrid heterozygous at <em>every</em> marker. The excess above 0.5 is <span class="math inline">\(s_i - 0.5 = F_i/2\)</span>: half the fraction of markers at which the two parent lines carry the same allele. At those loci the F1 is homozygous and, in the absence of epistasis, contributes no dominance deviation to heterosis.</p>
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>fd <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">diag</span>(ctx<span class="sc">$</span>f))</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">c</span>(<span class="at">diagonal_mean         =</span> fd,</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>      <span class="at">molecular_F           =</span> <span class="dv">2</span> <span class="sc">*</span> fd <span class="sc">-</span> <span class="dv">1</span>,     <span class="co"># f_ii = (1 + F_i) / 2</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>      <span class="at">heterozygous_fraction =</span> <span class="dv">2</span> <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> fd)))</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         diagonal_mean           molecular_F heterozygous_fraction </span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                0.8192                0.6383                0.3617</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>fd <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">diag</span>(ctx[[<span class="st">"f"</span>]]))</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">c</span>(<span class="at">diagonal_mean         =</span> fd,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>      <span class="at">molecular_F           =</span> <span class="dv">2</span> <span class="sc">*</span> fd <span class="sc">-</span> <span class="dv">1</span>,     <span class="co"># s_i = (1 + F_i) / 2</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>      <span class="at">heterozygous_fraction =</span> <span class="dv">2</span> <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> fd)))</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         diagonal_mean           molecular_F heterozygous_fraction </span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                0.8192                0.6383                0.3617</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>F_i <span class="ot">&lt;-</span> <span class="fu">rowMeans</span>(X <span class="sc">!=</span> <span class="fl">0.5</span>)                      <span class="co"># molecular homozygosity</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">isTRUE</span>(<span class="fu">all.equal</span>(<span class="fu">diag</span>(f), (<span class="dv">1</span> <span class="sc">+</span> F_i) <span class="sc">/</span> <span class="dv">2</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <p>This fraction depends directly on the divergence between the heterotic pools (<code>fst</code> in the configuration): more divergent pools give more heterozygous F1 hybrids and a diagonal closer to 0.5. That relationship is what <a href="03-simulating-crosses.html" class="quarto-xref"><span>Chapter 4</span></a> puts under experimental control.</p>
@@ -824,22 +854,49 @@ f_{ij} \;=\; \frac{1}{m}\sum_{k=1}^{m}
 <section id="f-is-not-an-ad-hoc-substitute" class="level2" data-number="1.4">
 <h2 data-number="1.4" class="anchored" data-anchor-id="f-is-not-an-ad-hoc-substitute"><span class="header-section-number">1.4</span> <code>f</code> is not an ad hoc substitute</h2>
 <p>Two independent lines of work converge on this matrix, which is worth stating because it is otherwise easy to read <span class="math inline">\(\mathbf{f}\)</span> as “the thing we used because <span class="math inline">\(\mathbf{G}\)</span> broke”.</p>
-<p>Nejati-Javaremi et al. <span class="citation" data-cites="nejatijavaremi1997">(<a href="99-references.html#ref-nejatijavaremi1997" role="doc-biblioref">1997</a>)</span> proposed the <em>allelic-similarity</em> method, <span class="math inline">\(f_{ij} = \tfrac{1}{4}\sum_{k=1}^{2}\sum_{l=1}^{2}\delta_{kl}\)</span> with <span class="math inline">\(\delta_{kl} = 1\)</span> when the <span class="math inline">\(k\)</span>-th allele of <span class="math inline">\(i\)</span> equals the <span class="math inline">\(l\)</span>-th of <span class="math inline">\(j\)</span>. That is exactly the identity-by-state average above, generalised from single loci to a genome-wide mean. <span class="citation" data-cites="gomezromano2016">Gómez-Romano et al. (<a href="99-references.html#ref-gomezromano2016" role="doc-biblioref">2016</a>)</span> contrast it directly against crossproduct-based matrices: the allelic-similarity matrix is guaranteed to stay in <span class="math inline">\([0, 1]\)</span> by construction, while crossproduct matrices normalised by <em>current</em> allele frequencies are not – precisely the failure demonstrated above.</p>
-<p>The same matrix arrives from a second direction. <span class="citation" data-cites="toro2014">Toro et al. (<a href="99-references.html#ref-toro2014" role="doc-biblioref">2014</a>)</span> and <span class="citation" data-cites="meuwissen2020">Meuwissen et al. (<a href="99-references.html#ref-meuwissen2020" role="doc-biblioref">2020</a>)</span> show that fixing the VanRaden centering frequency at <span class="math inline">\(p_k = 0.5\)</span> for every marker, instead of the sample frequency, produces a matrix – written <span class="math inline">\(\mathbf{G}_{0.5}\)</span> – that is proportional to homozygosity-based inbreeding and molecular coancestry. Structurally that is <span class="math inline">\(\mathbf{f}\)</span>: replacing <span class="math inline">\(2p_k\)</span> with <span class="math inline">\(1\)</span> removes the population-dependent term that forced <span class="math inline">\(\mathbf{1}'\mathbf{G}\mathbf{1} = 0\)</span>.</p>
-<p>So <span class="math inline">\(\mathbf{f}\)</span> is the member of the VanRaden family that has an absolute scale, reached independently from two unrelated derivations. That it also happens to be the one that does not break is not a coincidence.</p>
+<p><span class="citation" data-cites="nejatijavaremi1997">Nejati-Javaremi et al. (<a href="99-references.html#ref-nejatijavaremi1997" role="doc-biblioref">1997</a>)</span> proposed the <em>allelic-similarity</em> method, <span class="math inline">\(f_{ij} = \tfrac{1}{4}\sum_{k=1}^{2}\sum_{l=1}^{2}\delta_{kl}\)</span> with <span class="math inline">\(\delta_{kl} = 1\)</span> when the <span class="math inline">\(k\)</span>-th allele of <span class="math inline">\(i\)</span> equals the <span class="math inline">\(l\)</span>-th of <span class="math inline">\(j\)</span>. That is exactly the identity-by-state average of <a href="#eq-f-molecular" class="quarto-xref">Equation&nbsp;<span>1.5</span></a>, generalised from single loci to a genome-wide mean. <span class="citation" data-cites="gomezromano2016">Gómez-Romano et al. (<a href="99-references.html#ref-gomezromano2016" role="doc-biblioref">2016</a>)</span> contrast it directly against crossproduct-based matrices: the allelic-similarity matrix is guaranteed to stay in <span class="math inline">\([0, 1]\)</span> by construction, while crossproduct matrices normalised by <em>current</em> allele frequencies are not. Their failure is a range violation (entries below 0 or above 1); the one demonstrated in <a href="#eq-g-sum-zero" class="quarto-xref">Equation&nbsp;<span>1.4</span></a> is the zero total. Both follow from the same cause, a base estimated from the data being measured.</p>
+<p>The same matrix arrives, up to a fixed affine map, from a second direction. <span class="citation" data-cites="meuwissen2020">Meuwissen et al. (<a href="99-references.html#ref-meuwissen2020" role="doc-biblioref">2020</a>)</span>, citing <span class="citation" data-cites="toro2014">Toro et al. (<a href="99-references.html#ref-toro2014" role="doc-biblioref">2014</a>)</span>, state that fixing the VanRaden centering frequency at <span class="math inline">\(p_k = 0.5\)</span> for every marker, instead of the sample frequency, produces a matrix – written <span class="math inline">\(\mathbf{G}_{0.5}\)</span> – that is “proportional to homozygosity and molecular coancestry”. With the 0/1/2 coding of <a href="#eq-hybrid-dosage" class="quarto-xref">Equation&nbsp;<span>1.1</span></a>, <span class="math inline">\(2\sum_k p_k(1-p_k) = m/2\)</span> and</p>
+<p><span id="eq-g05"><span class="math display">\[
+\mathbf{G}_{0.5} \;=\; \frac{(\mathbf{M}^{H} - \mathbf{1}\mathbf{1}')
+(\mathbf{M}^{H} - \mathbf{1}\mathbf{1}')'}{m/2}
+\;=\; 4\,\mathbf{f} - 2\,\mathbf{J},
+\tag{1.7}\]</span></span></p>
+<p>with <span class="math inline">\(\mathbf{J}\)</span> as in <a href="#eq-f-matrix" class="quarto-xref">Equation&nbsp;<span>1.6</span></a>. <span class="math inline">\(\mathbf{G}_{0.5}\)</span> is therefore an affine function of <span class="math inline">\(\mathbf{f}\)</span>, not <span class="math inline">\(\mathbf{f}\)</span> itself: its entries lie in <span class="math inline">\([-2, 2]\)</span>, negative exactly where <span class="math inline">\(f_{ij} &lt; 0.5\)</span>; on the book data every <span class="math inline">\(f_{ij}\)</span> exceeds <span class="math inline">\(0.5\)</span>, so the range printed below is positive. For a vector of contributions <span class="math inline">\(\mathbf{c}\)</span> with <span class="math inline">\(\mathbf{1}'\mathbf{c} = 1\)</span>, <span class="math inline">\(\mathbf{c}'\mathbf{J}\mathbf{c} =
+1\)</span> and <span class="math inline">\(\mathbf{c}'\mathbf{G}_{0.5}\mathbf{c} = 4\,\mathbf{c}'\mathbf{f}\mathbf{c}
+- 2\)</span>, so under that normalisation the two matrices order selections identically. Replacing <span class="math inline">\(2p_k\)</span> with <span class="math inline">\(1\)</span> removes the population-dependent term that forced <span class="math inline">\(\mathbf{1}'\mathbf{G}\mathbf{1} = 0\)</span>.</p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>G05 <span class="ot">&lt;-</span> <span class="fu">tcrossprod</span>(<span class="dv">2</span> <span class="sc">*</span> X <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">/</span> (m <span class="sc">/</span> <span class="dv">2</span>)         <span class="co"># M^H - 11' = 2X - 1</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>c_vec <span class="ot">&lt;-</span> <span class="fu">runif</span>(N); c_vec <span class="ot">&lt;-</span> c_vec <span class="sc">/</span> <span class="fu">sum</span>(c_vec)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">isTRUE</span>(<span class="fu">all.equal</span>(G05, <span class="dv">4</span> <span class="sc">*</span> f <span class="sc">-</span> <span class="dv">2</span>)),</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>          <span class="fu">isTRUE</span>(<span class="fu">all.equal</span>(<span class="fu">drop</span>(<span class="fu">crossprod</span>(c_vec, G05 <span class="sc">%*%</span> c_vec)),</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>                           <span class="dv">4</span> <span class="sc">*</span> <span class="fu">drop</span>(<span class="fu">crossprod</span>(c_vec, f <span class="sc">%*%</span> c_vec)) <span class="sc">-</span> <span class="dv">2</span>)))</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="fu">range</span>(G05)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.579 1.327</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>So, under normalised contributions, <span class="math inline">\(\mathbf{f}\)</span> is equivalent to the fixed-base member of the VanRaden family, the one with an absolute scale, reached independently from two unrelated derivations. That it also happens to be the one that does not break is not a coincidence.</p>
 </section>
 <section id="the-division-of-labour" class="level2" data-number="1.5">
 <h2 data-number="1.5" class="anchored" data-anchor-id="the-division-of-labour"><span class="header-section-number">1.5</span> The division of labour</h2>
+<p><a href="#tbl-matrix-roles" class="quarto-xref">Table&nbsp;<span>1.1</span></a> sets the two matrices side by side.</p>
 <div class="cell" data-layout-align="center">
+<div id="tbl-matrix-roles" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-matrix-roles-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1.1: The two matrices built from the same hybrid marker data and the job of each. <span class="math inline">\(\mathbf{G}\)</span>: VanRaden genomic relationship (<a href="#eq-vanraden-g" class="quarto-xref">Equation&nbsp;<span>1.3</span></a>); <span class="math inline">\(\mathbf{f}\)</span>: molecular coancestry (<a href="#eq-f-molecular" class="quarto-xref">Equation&nbsp;<span>1.5</span></a>). They must not be substituted for one another.
+</figcaption>
+<div aria-describedby="tbl-matrix-roles-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<table class="caption-top table table-sm table-striped small">
-<caption>Two matrices, two jobs. They are built from the same markers and must not be substituted for one another.</caption>
+<table class="cell caption-top table table-sm table-striped small">
 <colgroup>
-<col style="width: 23%">
-<col style="width: 22%">
-<col style="width: 14%">
-<col style="width: 18%">
 <col style="width: 21%">
+<col style="width: 21%">
+<col style="width: 18%">
+<col style="width: 17%">
+<col style="width: 20%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -854,8 +911,8 @@ f_{ij} \;=\; \frac{1}{m}\sum_{k=1}^{m}
 <tr class="odd">
 <td style="text-align: left;"><code>G</code> (VanRaden)</td>
 <td style="text-align: left;">sample allele frequencies</td>
-<td style="text-align: left;">centered, signed</td>
-<td style="text-align: left;">exactly 0</td>
+<td style="text-align: left;">no fixed bound, signed</td>
+<td style="text-align: left;">0 in exact arithmetic</td>
 <td style="text-align: left;">trait prediction (GBLUP)</td>
 </tr>
 <tr class="even">
@@ -869,8 +926,11 @@ f_{ij} \;=\; \frac{1}{m}\sum_{k=1}^{m}
 </table>
 </div>
 </div>
-<p>This split is enforced throughout <code>hybdiv</code>: every metric takes <code>ctx$f</code>, and <code>ctx$G</code> appears only where traits are predicted. The test suite asserts <code>sum(G) == 0</code> precisely so that a future change which silently starts feeding <code>G</code> to a diversity metric fails loudly.</p>
-<p>The next chapter takes <span class="math inline">\(\mathbf{f}\)</span> and asks what happens when the population it describes is not one population, but several.</p>
+</figure>
+</div>
+</div>
+<p>This split is the convention throughout <code>hybdiv</code>: every diversity metric takes <code>ctx[["f"]]</code>, and <code>ctx[["G"]]</code> appears only where traits are predicted. <code>tests/testthat/test-metrics.R</code> asserts that every element of <code>ctx[["f"]]</code> lies in <span class="math inline">\([0, 1]\)</span>, which fails if a centered matrix is stored in its place; that <span class="math inline">\(|\sum \mathbf{G}| &lt; 10^{-6} N^2\)</span>, the centering identity of <a href="#eq-g-sum-zero" class="quarto-xref">Equation&nbsp;<span>1.4</span></a> up to floating-point tolerance; and that <code>theta_group()</code> over the whole population returns the mean of <span class="math inline">\(\mathbf{f}\)</span>, a value well away from the zero that <span class="math inline">\(\mathbf{G}\)</span> would give, so a switch to <span class="math inline">\(\mathbf{G}\)</span> inside <code>theta_group()</code>, and hence in the metrics built on it, fails the suite. Metrics that read <code>ctx[["f"]]</code> directly are not covered by that assertion.</p>
+<p><a href="02-subdivided.html" class="quarto-xref"><span>Chapter 2</span></a> takes <span class="math inline">\(\mathbf{f}\)</span> and asks what happens when the population it describes is not one population, but several.</p>
 <!-- reproduce-chapter -->
 </section>
 <section id="reproduce-this-chapter" class="level2 unnumbered">
@@ -879,14 +939,26 @@ f_{ij} \;=\; \frac{1}{m}\sum_{k=1}^{m}
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
-<div id="ref-caballero2000" class="csl-entry" role="listitem">
-Caballero, A., and M. A. Toro. 2000. <span>“Interrelations Between Effective Population Size and Other Pedigree Tools for the Management of Conserved Populations.”</span> <em>Genetics Research</em> 75 (3): 331–43. <a href="https://doi.org/10.1017/S0016672399004449">https://doi.org/10.1017/S0016672399004449</a>.
-</div>
 <div id="ref-caballero2002" class="csl-entry" role="listitem">
 Caballero, A., and M. A. Toro. 2002. <span>“Analysis of Genetic Diversity for the Management of Conserved Subdivided Populations.”</span> <em>Conservation Genetics</em> 3 (3): 289–99. <a href="https://doi.org/10.1023/A:1019956205473">https://doi.org/10.1023/A:1019956205473</a>.
 </div>
+<div id="ref-cockerham1967" class="csl-entry" role="listitem">
+Cockerham, C. C. 1967. <span>“Group Inbreeding and Coancestry.”</span> <em>Genetics</em> 56 (1): 89–104. <a href="https://doi.org/10.1093/genetics/56.1.89">https://doi.org/10.1093/genetics/56.1.89</a>.
+</div>
+<div id="ref-eding2001" class="csl-entry" role="listitem">
+Eding, H., and T. H. E. Meuwissen. 2001. <span>“Marker-Based Estimates of Between and Within Population Kinships for the Conservation of Genetic Diversity.”</span> <em>Journal of Animal Breeding and Genetics</em> 118 (3): 141–59. <a href="https://doi.org/10.1046/j.1439-0388.2001.00290.x">https://doi.org/10.1046/j.1439-0388.2001.00290.x</a>.
+</div>
+<div id="ref-falconer1996" class="csl-entry" role="listitem">
+Falconer, Douglas S., and Trudy F. C. Mackay. 1996. <em>Introduction to Quantitative Genetics</em>. 4th ed. Longman.
+</div>
 <div id="ref-gomezromano2016" class="csl-entry" role="listitem">
 Gómez-Romano, F., B. Villanueva, J. Fernández, J. A. Woolliams, and R. Pong-Wong. 2016. <span>“The Use of Genomic Coancestry Matrices in the Optimisation of Contributions to Maintain Genetic Diversity at Specific Regions of the Genome.”</span> <em>Genetics Selection Evolution</em> 48: 2. <a href="https://doi.org/10.1186/s12711-015-0172-y">https://doi.org/10.1186/s12711-015-0172-y</a>.
+</div>
+<div id="ref-lindgren1997" class="csl-entry" role="listitem">
+Lindgren, D., L. D. Gea, and P. A. Jefferson. 1997. <span>“Status Number for Measuring Genetic Diversity.”</span> <em>Forest Genetics</em> 4 (2): 69–76.
+</div>
+<div id="ref-malecot1948" class="csl-entry" role="listitem">
+Malécot, G. 1948. <em>Les Math<span>é</span>matiques de l’h<span>é</span>r<span>é</span>dit<span>é</span></em>. Masson et Cie.
 </div>
 <div id="ref-meuwissen2020" class="csl-entry" role="listitem">
 Meuwissen, T. H. E., A. K. Sonesson, G. Gebregiwergis, and J. A. Woolliams. 2020. <span>“Management of Genetic Diversity in the Era of Genomics.”</span> <em>Frontiers in Genetics</em> 11: 880. <a href="https://doi.org/10.3389/fgene.2020.00880">https://doi.org/10.3389/fgene.2020.00880</a>.
@@ -895,7 +967,10 @@ Meuwissen, T. H. E., A. K. Sonesson, G. Gebregiwergis, and J. A. Woolliams. 2020
 Nejati-Javaremi, A., C. Smith, and J. P. Gibson. 1997. <span>“Effect of Total Allelic Relationship on Accuracy of Evaluation and Response to Selection.”</span> <em>Journal of Animal Science</em> 75 (7): 1738–45. <a href="https://doi.org/10.2527/1997.7571738x">https://doi.org/10.2527/1997.7571738x</a>.
 </div>
 <div id="ref-toro2014" class="csl-entry" role="listitem">
-Toro, M. A., B. Villanueva, and J. Fernández. 2014. <span>“Genomics Applied to Management Strategies for Conservation of Farm Animal Genetic Resources.”</span> <em>Animal Genetics</em> 45 (3): 1–10. <a href="https://doi.org/10.1111/age.12140">https://doi.org/10.1111/age.12140</a>.
+Toro, M. A., B. Villanueva, and J. Fernández. 2014. <span>“Genomics Applied to Management Strategies in Conservation Programmes.”</span> <em>Livestock Science</em> 166: 48–53. <a href="https://doi.org/10.1016/j.livsci.2014.04.020">https://doi.org/10.1016/j.livsci.2014.04.020</a>.
+</div>
+<div id="ref-vanraden2008" class="csl-entry" role="listitem">
+VanRaden, P. M. 2008. <span>“Efficient Methods to Compute Genomic Predictions.”</span> <em>Journal of Dairy Science</em> 91 (11): 4414–23. <a href="https://doi.org/10.3168/jds.2007-0980">https://doi.org/10.3168/jds.2007-0980</a>.
 </div>
 </div>
 </section>

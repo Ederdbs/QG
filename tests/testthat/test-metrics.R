@@ -22,6 +22,15 @@ test_that("the VanRaden G sums to zero, which is why diversity uses f", {
   expect_lt(abs(sum(ctx$G)), 1e-6 * ctx$N^2)
 })
 
+test_that("diversity metrics read f, not G", {
+  # Over the whole population G gives theta = mean(G) / 2 = 0 exactly, so a
+  # metric that silently switched to G would collapse to ~0 here.
+  all_N <- seq_len(ctx$N)
+  expect_equal(theta_group(all_N, ctx), mean(ctx[["f"]]), tolerance = 1e-12)
+  expect_lt(abs(mean(ctx[["G"]]) / 2), 1e-8)
+  expect_gt(theta_group(all_N, ctx), 0.25)
+})
+
 test_that("theta and Ns hit their analytical edge cases", {
   fake <- ctx
   fake$f <- matrix(1, 5, 5)                     # all identical and homozygous
