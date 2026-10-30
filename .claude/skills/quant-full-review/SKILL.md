@@ -61,8 +61,16 @@ start cold; pass paths, not pasted reports.
 6. **Close.**
    - `Rscript book/scripts/make_downloads.R`.
    - If `R/` changed: `devtools::document()`, `devtools::test()`, `devtools::install()`.
-   - `quarto render book/<chapter>.qmd --to html`; then run the duplicate sweep from
-     `CLAUDE.md`; list orphaned figures the editor reported.
+   - `Rscript inst/scripts/render_book.R` (full book, both formats; a single-file
+     render in the worktree has no crossref index and breaks every `@sec-` link).
+     Then run the duplicate sweep from `CLAUDE.md`; list orphaned figures the editor
+     reported.
+   - Before staging: no `book/*.html` may exist, and every chapter in `_quarto.yml`
+     must have its `docs/<chapter>.html`. Quarto once left a re-executed chapter's
+     HTML in `book/` and `git add -A` committed the move, unpublishing the chapter.
+   - Re-executed chapters with unseeded draws (`runMacs`/`runMacs2`, see
+     `CLAUDE.md`): have `quant-advice` re-check every hand-written qualitative
+     claim against the new render.
    - Update STATUS.md.
    - If this chapter is the last of its part in `_quarto.yml`: run `quant-continuity`
      on that part -> `.claude/review/part-<name>.md`, and report its findings.
