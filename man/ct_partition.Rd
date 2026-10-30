@@ -24,7 +24,7 @@ A list with the subpopulation coancestry matrix `f`, Nei's minimum
 \description{
 Implements the core of Caballero & Toro (2002): subpopulation coancestries,
 Nei's minimum distance, the F-statistics, and the partition
-`GD_T = GD_WI + GD_BI + GD_BS` (their Eq. 7), together with each
+`GD_T = GD_WI + GD_BI + GD_BS`, together with each
 subpopulation's decomposed contribution to global coancestry.
 }
 \details{

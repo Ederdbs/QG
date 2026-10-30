@@ -15,7 +15,7 @@ status_number(idx, ctx)
 A positive scalar.
 }
 \description{
-`Ns = 1 / (2 theta)` (Lindgren & Mullin 1997), read as the number of
+`Ns = 1 / (2 theta)` (Lindgren, Gea & Jefferson 1997), read as the number of
 equivalent unrelated hybrids. It is a static descriptor of the group, **not**
 a drift projection, and must not be substituted for a rate-based `Ne`.
 }

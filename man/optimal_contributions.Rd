@@ -19,13 +19,15 @@ A list with `c_i` (the contributions) and `GD_max`.
 }
 \description{
 Solves the quadratic programme `min c' f c` subject to `sum(c) = 1` and
-`lower <= c <= upper` (Caballero & Toro 2002, Eq. 9). This is how a synthetic
+`lower <= c <= upper` (Caballero & Toro 2002). This is how a synthetic
 or a core collection is composed: the `upper` bound is the operational cap on
 any single accession.
 }
 \details{
-Minimising group coancestry is the same thing as maximising effective size,
-since `Ns = 1 / (2 theta)`.
+Minimising group coancestry maximises the status number `Ns = 1 / (2 theta)`
+(Lindgren, Gea & Jefferson 1997), a static function of current coancestry. It is not
+the effective size `Ne`, which is defined from the rate of change of
+coancestry across generations.
 }
 \seealso{
 [ocs_quadprog] to trade diversity against merit, and

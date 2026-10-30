@@ -35,7 +35,7 @@ gene_diversity <- function(idx, ctx) 1 - theta_group(idx, ctx)
 
 #' Status number
 #'
-#' `Ns = 1 / (2 theta)` (Lindgren & Mullin 1997), read as the number of
+#' `Ns = 1 / (2 theta)` (Lindgren, Gea & Jefferson 1997), read as the number of
 #' equivalent unrelated hybrids. It is a static descriptor of the group, **not**
 #' a drift projection, and must not be substituted for a rate-based `Ne`.
 #'
@@ -125,7 +125,7 @@ theta_pools <- function(idx, ctx) {
 
 #' Caballero & Toro partition of gene diversity
 #'
-#' Equation 8 of Caballero & Toro (2002):
+#' The partition of Caballero & Toro (2002):
 #' `GD_T = GD_WI + GD_BI + GD_BS`, with `F_ST = GD_BS / GD_T`.
 #'
 #' Subpopulations are the two heterotic pools, weighted by the line usage the
@@ -143,7 +143,7 @@ theta_pools <- function(idx, ctx) {
 #' @family diversity metrics
 #' @export
 gd_partition <- function(idx, ctx, tp = theta_pools(idx, ctx)) {
-  # Hybrid-level within-individual diversity: the heterozygosity actually
+  # Hybrid-level within-individual diversity: 1 - s, half the heterozygosity
   # carried inside the F1s. Needs no fL, so it always runs.
   hyb <- c(GD_WI_hyb = 1 - mean(diag(ctx[["f"]])[idx]))
   if (is.null(ctx$fL))

@@ -779,8 +779,8 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td style="text-align: left;">runMacs</td>
-<td style="text-align: right;">2.7240</td>
-<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">2.6790</td>
+<td style="text-align: left;">TRUE</td>
 <td style="text-align: left;">TRUE</td>
 </tr>
 </tbody>
@@ -789,7 +789,7 @@ window.Quarto = {
 </div>
 </div>
 <p>Read the last two columns together. <strong><code>runMacs()</code> is not reproducible from <code>set.seed()</code>, and R’s own random stream is untouched by that.</strong> <code>runMacs()</code> draws a seed for MaCS from R’s stream (one <code>sample.int()</code> per chromosome) and hands it to the binary. The fourth column, asserted in the chunk, says that after two calls from the same seed R’s <code>.Random.seed</code> is identical: the amount of R’s stream the call consumes is fixed, and every draw R makes afterwards is the same in both runs. Yet the third column says the haplotypes differ. What was measured, then, is that MaCS’s output is not a deterministic function of the seed it is handed. The only thing that moves between two runs is the founder haplotypes themselves – and everything computed <em>from</em> those founders. <code>quickHaplo()</code> is pure R sampling and is exactly reproducible.</p>
-<p>(The <code>seconds_per_call</code> column is wall clock and will differ on your machine and between renders. <code>runMacs()</code> takes seconds; <code>quickHaplo()</code>, timed over 100 calls because one call is below the clock’s resolution, takes about 0.24 ms per call.)</p>
+<p>(The <code>seconds_per_call</code> column is wall clock and will differ on your machine and between renders. <code>runMacs()</code> takes seconds; <code>quickHaplo()</code>, timed over 100 calls because one call is below the clock’s resolution, takes about 0.23 ms per call.)</p>
 <div class="callout callout-style-simple callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -851,8 +851,8 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td style="text-align: left;">runMacs</td>
-<td style="text-align: right;">0.1220</td>
-<td style="text-align: right;">0.0119</td>
+<td style="text-align: right;">0.1254</td>
+<td style="text-align: right;">0.0118</td>
 <td style="text-align: right;">0.0101</td>
 </tr>
 </tbody>
@@ -1941,12 +1941,12 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                pool_A                pool_B               markers </span></span>
 <span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                12.000                12.000               750.000 </span></span>
 <span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; heterozygous_fraction                  gd_A                  gd_B </span></span>
-<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                 0.229                 0.213                 0.217</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                 0.225                 0.224                 0.208</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <p>Reading <code>alphasimr_founder_pools()</code> against Steps 1 and 2, it is <code>runMacs2(nInd = , nChr = , segSites = , split = )</code> followed by <code>SP$addTraitAD(nQtlPerChr = seg_sites, meanDD = 0.4, varDD = 0.1)</code> – the same dominance model as Step 2 – and <code>SP$setVarE(h2 = 0.4)</code>. Two things about it must be said before any number is read. <strong>The founders are outbred</strong>: <code>runMacs2()</code> is called without <code>inbred = TRUE</code>, so each pool is a sample of a random-mating population, heterozygous at the fraction of sites printed above, as an open-pollinated maize population would be; the inbred lines of the scheme are made from them by <code>makeDH()</code> inside each cycle. And there is no separate marker panel: every one of the 150 segregating sites per chromosome is a QTL, so the sites that carry the trait are the ones <code>pullSegSiteGeno()</code> reads for <code>X</code>, <code>f</code> and <code>fL</code> throughout. <code>alphasimr_gd()</code> is <code>1 - mean(f)</code>, the exact definition <code>gene_diversity()</code> uses, computed from that pull, so the two pools are already on the same scale as every diversity number in the rest of the book.</p>
 <p>Because these founders come from MaCS, no number in the rest of this section is reproducible from its seed – see Step 1: the founders move between runs, and everything below is computed from them. The chapter’s response is to replicate every Step 8 measurement over independent founder draws and report the spread.</p>
-<p><strong>What <code>split</code> does.</strong> The bridge’s default is <code>split_gen = 100</code>. The sweep below draws 20 independent founder sets at each of four split times and measures three things on each: the Caballero &amp; Toro partition of <a href="02-subdivided.html" class="quarto-xref"><span>Chapter 2</span></a> over the two pools (<code>ct_partition()</code>, the general form of <code>gd_partition()</code>: the <span class="math inline">\(F\)</span>-statistics of their Eq. 6 and the partition <span class="math inline">\(GD_T = GD_{WI} + GD_{BI} + GD_{BS}\)</span> of their Eq. 7, from which <span class="math inline">\(F_{ST} = GD_{BS} / GD_T\)</span> follows as an identity derived in <a href="02-subdivided.html" class="quarto-xref"><span>Chapter 2</span></a>, not stated in the paper), the share of expected heterosis that the divergence term carries (<code>heterosis_partition()</code>, <a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 13</span></a>), and – the Step 6 question with divergence – how much of a DH line’s exact GCA against the other pool’s DH lines its own genetic value can see. For that last one, 10 DH lines are drawn from every founder, the full factorial between the two DH sets is made, and the GCA of each pool-A line is split into its additive and dominance parts with <code>heterosis_gca_sca()</code>; the identity behind that split was asserted in Step 6. The chunk also records, per draw, an ascertainment bookkeeping that the reading of <code>GD_T</code> will need: the fraction of sites monomorphic within each pool, the fraction fixed for opposite alleles in the two pools, and the part of <code>GD_T</code> those sites carry.</p>
+<p><strong>What <code>split</code> does.</strong> The bridge’s default is <code>split_gen = 100</code>. The sweep below draws 20 independent founder sets at each of four split times and measures three things on each: the Caballero &amp; Toro partition of <a href="02-subdivided.html" class="quarto-xref"><span>Chapter 2</span></a> over the two pools (<code>ct_partition()</code>, the general form of <code>gd_partition()</code>: their <span class="math inline">\(F\)</span>-statistics and the partition <span class="math inline">\(GD_T = GD_{WI} + GD_{BI} + GD_{BS}\)</span>, from which <span class="math inline">\(F_{ST} = GD_{BS} / GD_T\)</span> follows as an identity derived in <a href="02-subdivided.html" class="quarto-xref"><span>Chapter 2</span></a>), the share of expected heterosis that the divergence term carries (<code>heterosis_partition()</code>, <a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 13</span></a>), and – the Step 6 question with divergence – how much of a DH line’s exact GCA against the other pool’s DH lines its own genetic value can see. For that last one, 10 DH lines are drawn from every founder, the full factorial between the two DH sets is made, and the GCA of each pool-A line is split into its additive and dominance parts with <code>heterosis_gca_sca()</code>; the identity behind that split was asserted in Step 6. The chunk also records, per draw, an ascertainment bookkeeping that the reading of <code>GD_T</code> will need: the fraction of sites monomorphic within each pool, the fraction fixed for opposite alleles in the two pools, and the part of <code>GD_T</code> those sites carry.</p>
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Show code</summary>
@@ -2034,33 +2034,33 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <td style="text-align: left;">split_0</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0.021</td>
-<td style="text-align: right;">0.311</td>
-<td style="text-align: right;">0.006</td>
+<td style="text-align: right;">0.309</td>
+<td style="text-align: right;">0.007</td>
 <td style="text-align: right;">0.021</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">split_10</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0.046</td>
-<td style="text-align: right;">0.309</td>
+<td style="text-align: right;">0.305</td>
 <td style="text-align: right;">0.014</td>
 <td style="text-align: right;">0.044</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">split_100</td>
 <td style="text-align: right;">100</td>
-<td style="text-align: right;">0.256</td>
-<td style="text-align: right;">0.298</td>
+<td style="text-align: right;">0.259</td>
+<td style="text-align: right;">0.296</td>
 <td style="text-align: right;">0.076</td>
-<td style="text-align: right;">0.203</td>
+<td style="text-align: right;">0.206</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">split_1000</td>
 <td style="text-align: right;">1000</td>
-<td style="text-align: right;">0.569</td>
-<td style="text-align: right;">0.332</td>
-<td style="text-align: right;">0.189</td>
-<td style="text-align: right;">0.363</td>
+<td style="text-align: right;">0.564</td>
+<td style="text-align: right;">0.328</td>
+<td style="text-align: right;">0.185</td>
+<td style="text-align: right;">0.357</td>
 </tr>
 </tbody>
 </table>
@@ -2087,8 +2087,8 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <tr class="odd">
 <td style="text-align: left;">split_0</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">0.002</td>
-<td style="text-align: right;">0.008</td>
+<td style="text-align: right;">0.003</td>
+<td style="text-align: right;">0.007</td>
 <td style="text-align: right;">0.001</td>
 <td style="text-align: right;">0.003</td>
 </tr>
@@ -2103,17 +2103,17 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <tr class="odd">
 <td style="text-align: left;">split_100</td>
 <td style="text-align: right;">100</td>
-<td style="text-align: right;">0.009</td>
-<td style="text-align: right;">0.005</td>
-<td style="text-align: right;">0.003</td>
+<td style="text-align: right;">0.012</td>
 <td style="text-align: right;">0.007</td>
+<td style="text-align: right;">0.004</td>
+<td style="text-align: right;">0.012</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">split_1000</td>
 <td style="text-align: right;">1000</td>
 <td style="text-align: right;">0.014</td>
+<td style="text-align: right;">0.005</td>
 <td style="text-align: right;">0.006</td>
-<td style="text-align: right;">0.008</td>
 <td style="text-align: right;">0.010</td>
 </tr>
 </tbody>
@@ -2155,46 +2155,46 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <tr class="odd">
 <td style="text-align: left;">split_0</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">0.311</td>
-<td style="text-align: right;">0.067</td>
-<td style="text-align: right;">0.072</td>
-<td style="text-align: right;">0.000</td>
-<td style="text-align: right;">0.000</td>
-<td style="text-align: right;">0.311</td>
-<td style="text-align: right;">0.230</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">split_10</td>
-<td style="text-align: right;">10</td>
 <td style="text-align: right;">0.309</td>
-<td style="text-align: right;">0.105</td>
-<td style="text-align: right;">0.103</td>
+<td style="text-align: right;">0.074</td>
+<td style="text-align: right;">0.067</td>
 <td style="text-align: right;">0.000</td>
 <td style="text-align: right;">0.000</td>
 <td style="text-align: right;">0.309</td>
 <td style="text-align: right;">0.228</td>
 </tr>
+<tr class="even">
+<td style="text-align: left;">split_10</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0.305</td>
+<td style="text-align: right;">0.107</td>
+<td style="text-align: right;">0.110</td>
+<td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.305</td>
+<td style="text-align: right;">0.226</td>
+</tr>
 <tr class="odd">
 <td style="text-align: left;">split_100</td>
 <td style="text-align: right;">100</td>
-<td style="text-align: right;">0.298</td>
-<td style="text-align: right;">0.329</td>
-<td style="text-align: right;">0.318</td>
+<td style="text-align: right;">0.296</td>
+<td style="text-align: right;">0.328</td>
+<td style="text-align: right;">0.326</td>
 <td style="text-align: right;">0.009</td>
-<td style="text-align: right;">0.004</td>
-<td style="text-align: right;">0.294</td>
-<td style="text-align: right;">0.220</td>
+<td style="text-align: right;">0.005</td>
+<td style="text-align: right;">0.291</td>
+<td style="text-align: right;">0.217</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">split_1000</td>
 <td style="text-align: right;">1000</td>
-<td style="text-align: right;">0.332</td>
-<td style="text-align: right;">0.561</td>
-<td style="text-align: right;">0.563</td>
-<td style="text-align: right;">0.189</td>
-<td style="text-align: right;">0.095</td>
-<td style="text-align: right;">0.238</td>
-<td style="text-align: right;">0.266</td>
+<td style="text-align: right;">0.328</td>
+<td style="text-align: right;">0.560</td>
+<td style="text-align: right;">0.564</td>
+<td style="text-align: right;">0.184</td>
+<td style="text-align: right;">0.092</td>
+<td style="text-align: right;">0.236</td>
+<td style="text-align: right;">0.262</td>
 </tr>
 </tbody>
 </table>
@@ -2233,42 +2233,42 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <tr class="odd">
 <td style="text-align: left;">split_0</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">0.507</td>
-<td style="text-align: right;">0.446</td>
-<td style="text-align: right;">0.042</td>
-<td style="text-align: right;">0.019</td>
-<td style="text-align: right;">0.085</td>
-<td style="text-align: right;">0.959</td>
+<td style="text-align: right;">0.504</td>
+<td style="text-align: right;">0.449</td>
+<td style="text-align: right;">0.051</td>
+<td style="text-align: right;">0.003</td>
+<td style="text-align: right;">0.102</td>
+<td style="text-align: right;">0.948</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">split_10</td>
 <td style="text-align: right;">10</td>
-<td style="text-align: right;">0.534</td>
-<td style="text-align: right;">0.503</td>
-<td style="text-align: right;">0.052</td>
-<td style="text-align: right;">-0.021</td>
-<td style="text-align: right;">0.099</td>
-<td style="text-align: right;">0.951</td>
+<td style="text-align: right;">0.542</td>
+<td style="text-align: right;">0.517</td>
+<td style="text-align: right;">0.058</td>
+<td style="text-align: right;">-0.033</td>
+<td style="text-align: right;">0.108</td>
+<td style="text-align: right;">0.946</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">split_100</td>
 <td style="text-align: right;">100</td>
-<td style="text-align: right;">0.400</td>
-<td style="text-align: right;">0.341</td>
-<td style="text-align: right;">0.056</td>
-<td style="text-align: right;">0.002</td>
-<td style="text-align: right;">0.145</td>
-<td style="text-align: right;">0.927</td>
+<td style="text-align: right;">0.448</td>
+<td style="text-align: right;">0.376</td>
+<td style="text-align: right;">0.053</td>
+<td style="text-align: right;">0.018</td>
+<td style="text-align: right;">0.125</td>
+<td style="text-align: right;">0.937</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">split_1000</td>
 <td style="text-align: right;">1000</td>
-<td style="text-align: right;">0.355</td>
-<td style="text-align: right;">0.280</td>
-<td style="text-align: right;">0.071</td>
-<td style="text-align: right;">0.004</td>
-<td style="text-align: right;">0.190</td>
-<td style="text-align: right;">0.903</td>
+<td style="text-align: right;">0.294</td>
+<td style="text-align: right;">0.247</td>
+<td style="text-align: right;">0.054</td>
+<td style="text-align: right;">-0.008</td>
+<td style="text-align: right;">0.183</td>
+<td style="text-align: right;">0.907</td>
 </tr>
 </tbody>
 </table>
@@ -2307,42 +2307,42 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <tr class="odd">
 <td style="text-align: left;">split_0</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">0.099</td>
-<td style="text-align: right;">0.108</td>
-<td style="text-align: right;">0.012</td>
-<td style="text-align: right;">0.057</td>
+<td style="text-align: right;">0.188</td>
+<td style="text-align: right;">0.189</td>
 <td style="text-align: right;">0.027</td>
-<td style="text-align: right;">0.013</td>
+<td style="text-align: right;">0.041</td>
+<td style="text-align: right;">0.031</td>
+<td style="text-align: right;">0.017</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">split_10</td>
 <td style="text-align: right;">10</td>
-<td style="text-align: right;">0.154</td>
-<td style="text-align: right;">0.152</td>
-<td style="text-align: right;">0.027</td>
-<td style="text-align: right;">0.073</td>
-<td style="text-align: right;">0.046</td>
+<td style="text-align: right;">0.155</td>
+<td style="text-align: right;">0.164</td>
 <td style="text-align: right;">0.022</td>
+<td style="text-align: right;">0.065</td>
+<td style="text-align: right;">0.034</td>
+<td style="text-align: right;">0.018</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">split_100</td>
 <td style="text-align: right;">100</td>
-<td style="text-align: right;">0.199</td>
-<td style="text-align: right;">0.168</td>
-<td style="text-align: right;">0.029</td>
-<td style="text-align: right;">0.049</td>
-<td style="text-align: right;">0.042</td>
-<td style="text-align: right;">0.021</td>
+<td style="text-align: right;">0.181</td>
+<td style="text-align: right;">0.150</td>
+<td style="text-align: right;">0.023</td>
+<td style="text-align: right;">0.058</td>
+<td style="text-align: right;">0.050</td>
+<td style="text-align: right;">0.028</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">split_1000</td>
 <td style="text-align: right;">1000</td>
-<td style="text-align: right;">0.269</td>
-<td style="text-align: right;">0.182</td>
-<td style="text-align: right;">0.061</td>
-<td style="text-align: right;">0.067</td>
-<td style="text-align: right;">0.049</td>
-<td style="text-align: right;">0.027</td>
+<td style="text-align: right;">0.170</td>
+<td style="text-align: right;">0.175</td>
+<td style="text-align: right;">0.036</td>
+<td style="text-align: right;">0.066</td>
+<td style="text-align: right;">0.046</td>
+<td style="text-align: right;">0.025</td>
 </tr>
 </tbody>
 </table>
@@ -2388,29 +2388,29 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">GCA_dominance_share</td>
-<td style="text-align: right;">0.190</td>
-<td style="text-align: right;">0.085</td>
-<td style="text-align: right;">0.105</td>
-<td style="text-align: right;">0.013</td>
-<td style="text-align: right;">8.351</td>
+<td style="text-align: right;">0.183</td>
+<td style="text-align: right;">0.102</td>
+<td style="text-align: right;">0.081</td>
+<td style="text-align: right;">0.012</td>
+<td style="text-align: right;">6.586</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">cor_perse_GCA</td>
-<td style="text-align: right;">0.903</td>
-<td style="text-align: right;">0.959</td>
-<td style="text-align: right;">-0.056</td>
+<td style="text-align: right;">0.907</td>
+<td style="text-align: right;">0.948</td>
+<td style="text-align: right;">-0.041</td>
 <td style="text-align: right;">0.007</td>
-<td style="text-align: right;">-8.473</td>
+<td style="text-align: right;">-6.075</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
 </div>
-<p>Read the first two tables together: the first is the mean over the 20 draws, the second their standard deviation. What was measured: <code>F_ST</code> rises from 0.021 at <code>split = 0</code> to 0.569 at <code>split = 1000</code>, and <code>GD_BS</code> from 0.006 to 0.189, each step many standard deviations wide; the divergence share of expected heterosis rises from 0.021 to 0.363. <code>GD_T</code> does not stay flat: it is 0.311 at <code>split = 0</code>, 0.298 at <code>split = 100</code> and 0.332 at <code>split = 1000</code>, and the rise from <code>split = 100</code> to <code>split = 1000</code>, 0.034, is 19 standard errors at this replication. The third table is the bookkeeping behind that rise. Across the same range the fraction of sites monomorphic within pool A goes from 0.067 to 0.561 (pool B: 0.072 to 0.563), the fraction of sites fixed for opposite alleles in the two pools from 0 to 0.189, the part of <code>GD_T</code> those sites carry (<code>GD_T_fixed</code>) from 0 to 0.095, and the part carried by every other site (<code>GD_T_other</code>) falls from 0.311 to 0.238.</p>
+<p>Read the first two tables together: the first is the mean over the 20 draws, the second their standard deviation. What was measured: <code>F_ST</code> rises from 0.021 at <code>split = 0</code> to 0.564 at <code>split = 1000</code>, and <code>GD_BS</code> from 0.007 to 0.185, each step many standard deviations wide; the divergence share of expected heterosis rises from 0.021 to 0.357. <code>GD_T</code> does not stay flat: it is 0.309 at <code>split = 0</code>, 0.296 at <code>split = 100</code> and 0.328 at <code>split = 1000</code>, and the rise from <code>split = 100</code> to <code>split = 1000</code>, 0.033, is 17 standard errors at this replication. The third table is the bookkeeping behind that rise. Across the same range the fraction of sites monomorphic within pool A goes from 0.074 to 0.56 (pool B: 0.067 to 0.564), the fraction of sites fixed for opposite alleles in the two pools from 0 to 0.184, the part of <code>GD_T</code> those sites carry (<code>GD_T_fixed</code>) from 0 to 0.092, and the part carried by every other site (<code>GD_T_other</code>) falls from 0.309 to 0.236.</p>
 <p>What is inferred from those three tables: <code>runMacs2()</code> returns the sites that segregate in the <em>pooled</em> sample of the two demes, so a site fixed for opposite alleles in the two pools is kept and, with equal pool sizes, sits at pooled frequency one half – the maximum of <span class="math inline">\(2\bar p \bar q\)</span>, which is exactly what <code>GD_T</code> averages over sites (asserted in the chunk). The rise in <code>GD_T</code> therefore comes entirely from sites fixed for opposite alleles, an ascertainment effect of how the founder sites are sampled, while diversity at every other site falls with divergence. At those other sites the reading is the one <a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 13</span></a> gives for expected heterosis: drift moves diversity from within pools to between them and does not create it. How much of <code>GD_T</code> a marker panel shows under divergence therefore depends on how its sites were ascertained, which is a property of the panel and not of the pools.</p>
-<p>The fourth and fifth tables are the combining-ability side, mean and standard deviation, and the sixth is the contrast between the two extreme split times, unpaired because the draws are independent. GCA is the sum of its additive and dominance parts (asserted in the chunk), so its variance is <span class="math inline">\(\mathrm{var}(\mathrm{add}) + \mathrm{var}(\mathrm{dom}) + 2\,\mathrm{cov}(\mathrm{add}, \mathrm{dom})\)</span>, three terms. What was measured, from <code>split = 0</code> to <code>split = 1000</code>: <code>GCA_var</code> goes from 0.507 to 0.355, <code>GCA_var_add</code> from 0.446 to 0.28, <code>GCA_var_dom</code> from 0.042 to 0.071, and <code>GCA_cov2</code> (<span class="math inline">\(2\,\mathrm{cov}\)</span>) from 0.019 to 0.004, the last with between-draw standard deviations of 0.057 and 0.067, so at every split it is within 1.5 standard errors of zero. The ratio <code>GCA_dominance_share</code> <span class="math inline">\(= \mathrm{var}(\mathrm{dom}) / \mathrm{var}(\mathrm{GCA})\)</span> rises from 0.085 to 0.19 (<code>t = 8.4</code>). Which part drives it: holding the dominance part at its <code>split = 0</code> value and moving only the additive part to its <code>split = 1000</code> value gives a ratio of 0.124; holding the additive part and moving only the dominance part gives 0.133. And the per se-versus-GCA correlation falls from 0.959 to 0.903 (<code>t = -8.5</code>). Both correlations are below the 0.997 of Step 6’s undifferentiated halves, but that comparison crosses a change of founders, trait draw and line number, so the within-sweep contrast is the one that isolates <code>split</code>.</p>
-<p>What is inferred: in this render the growth of the dominance part of the GCA variance accounts for more of the rise in the ratio than the fall of the additive part; the additive part falls with divergence because the sites that fix within a pool stop contributing to it, so the ratio can rise without the dominance part growing at all. The ratio is a partition of <span class="math inline">\(\mathrm{var}(\mathrm{GCA})\)</span> only insofar as the covariance term is negligible; here that term is within 1.5 standard errors of zero at every split, which is the only sense in which “share” is used. As the pools separate, the dominance weights <span class="math inline">\((1 - 2 p_{Bk})\)</span> of Step 6 move away from zero and a growing part of a line’s combining ability is invisible to its own genetic value; the evidence for that at this scale is the <code>t</code> of the contrast, and nothing here separates how much of the between-draw spread is the trait drawn with each founder set and how much is the DH sampling. The limit of the inference is the scale: 12 individuals per pool, 750 sites, 20 draws per split, and a <code>split</code> in coalescent generations that is not calibrated to any named heterotic-pool pair. The direction transfers; the numbers do not.</p>
+<p>The fourth and fifth tables are the combining-ability side, mean and standard deviation, and the sixth is the contrast between the two extreme split times, unpaired because the draws are independent. GCA is the sum of its additive and dominance parts (asserted in the chunk), so its variance is <span class="math inline">\(\mathrm{var}(\mathrm{add}) + \mathrm{var}(\mathrm{dom}) + 2\,\mathrm{cov}(\mathrm{add}, \mathrm{dom})\)</span>, three terms. What was measured, from <code>split = 0</code> to <code>split = 1000</code>: <code>GCA_var</code> goes from 0.504 to 0.294, <code>GCA_var_add</code> from 0.449 to 0.247, <code>GCA_var_dom</code> from 0.051 to 0.054, and <code>GCA_cov2</code> (<span class="math inline">\(2\,\mathrm{cov}\)</span>) from 0.003 to -0.008, the last with between-draw standard deviations of 0.041 and 0.066; its largest <span class="math inline">\(|\text{mean}|/\text{s.e.}\)</span> across splits is 2.25, against the two-sided 5% point <span class="math inline">\(t_{0.975,\,19} =\)</span> 2.09. The ratio <code>GCA_dominance_share</code> <span class="math inline">\(= \mathrm{var}(\mathrm{dom}) / \mathrm{var}(\mathrm{GCA})\)</span> rises from 0.102 to 0.183 (<code>t = 6.6</code>). Which part drives it: holding the dominance part at its <code>split = 0</code> value and moving only the additive part to its <code>split = 1000</code> value gives a ratio of 0.17; holding the additive part and moving only the dominance part gives 0.107. And the per se-versus-GCA correlation falls from 0.948 to 0.907 (<code>t = -6.1</code>). Both correlations are below the 0.997 of Step 6’s undifferentiated halves, but that comparison crosses a change of founders, trait draw and line number, so the within-sweep contrast is the one that isolates <code>split</code>.</p>
+<p>What is inferred: in this render the fall of the <em>additive</em> part of the GCA variance accounts for more of the rise in the ratio than the growth of the dominance part; the additive part falls with divergence because the sites that fix within a pool stop contributing to it, so the ratio can rise without the dominance part growing at all. The ratio is a partition of <span class="math inline">\(\mathrm{var}(\mathrm{GCA})\)</span> only insofar as the covariance term is negligible. In this render that term is beyond the two-sided 5% point at split = 10; with 20 draws, a term within that point is not shown to differ from zero, which is not a bound on its size. In magnitude, at <code>split = 0</code> <span class="math inline">\(|2\,\mathrm{cov}|\)</span> is 0.07 times <code>GCA_var_dom</code>, and dropping it changes the ratio of the <code>split = 0</code> means from 0.102 to <span class="math inline">\(\mathrm{var}(\mathrm{dom}) / [\mathrm{var}(\mathrm{add}) + \mathrm{var}(\mathrm{dom})] =\)</span> 0.102. “Share” is used only in that qualified sense, and each founder draw calls <code>runMacs2()</code>, whose coalescent <code>set.seed()</code> does not control, so that verdict is this render’s and may change with the next. As the pools separate, the dominance weights <span class="math inline">\((1 - 2 p_{Bk})\)</span> of Step 6 move away from zero and a growing part of a line’s combining ability is invisible to its own genetic value; the evidence for that at this scale is the <code>t</code> of the contrast, and nothing here separates how much of the between-draw spread is the trait drawn with each founder set and how much is the DH sampling. The limit of the inference is the scale: 12 individuals per pool, 750 sites, 20 draws per split, and a <code>split</code> in coalescent generations that is not calibrated to any named heterotic-pool pair. The direction transfers; the numbers do not.</p>
 </section>
 <section id="one-cycle" class="level3" data-number="7.8.2">
 <h3 data-number="7.8.2" class="anchored" data-anchor-id="one-cycle"><span class="header-section-number">7.8.2</span> One cycle</h3>
@@ -2434,10 +2434,10 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: right;">2.1862</td>
-<td style="text-align: right;">1.6707</td>
-<td style="text-align: right;">0.1768</td>
-<td style="text-align: right;">0.1942</td>
+<td style="text-align: right;">3.4173</td>
+<td style="text-align: right;">3.1668</td>
+<td style="text-align: right;">0.171</td>
+<td style="text-align: right;">0.1762</td>
 </tr>
 </tbody>
 </table>
@@ -2543,58 +2543,58 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
-<td style="text-align: right;">0.225</td>
-<td style="text-align: right;">0.222</td>
-<td style="text-align: right;">0.076</td>
-<td style="text-align: right;">0.254</td>
+<td style="text-align: right;">0.237</td>
+<td style="text-align: right;">0.204</td>
+<td style="text-align: right;">0.081</td>
+<td style="text-align: right;">0.269</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">1.641</td>
-<td style="text-align: right;">1.914</td>
-<td style="text-align: right;">0.194</td>
-<td style="text-align: right;">0.176</td>
-<td style="text-align: right;">3.095</td>
-<td style="text-align: right;">0.194</td>
-<td style="text-align: right;">0.175</td>
-<td style="text-align: right;">0.098</td>
-<td style="text-align: right;">0.347</td>
+<td style="text-align: right;">1.576</td>
+<td style="text-align: right;">1.550</td>
+<td style="text-align: right;">0.218</td>
+<td style="text-align: right;">0.179</td>
+<td style="text-align: right;">2.068</td>
+<td style="text-align: right;">0.217</td>
+<td style="text-align: right;">0.178</td>
+<td style="text-align: right;">0.099</td>
+<td style="text-align: right;">0.335</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">2</td>
-<td style="text-align: right;">3.231</td>
-<td style="text-align: right;">2.876</td>
-<td style="text-align: right;">0.142</td>
-<td style="text-align: right;">0.155</td>
-<td style="text-align: right;">3.855</td>
-<td style="text-align: right;">0.138</td>
-<td style="text-align: right;">0.154</td>
-<td style="text-align: right;">0.117</td>
-<td style="text-align: right;">0.445</td>
+<td style="text-align: right;">1.982</td>
+<td style="text-align: right;">2.078</td>
+<td style="text-align: right;">0.168</td>
+<td style="text-align: right;">0.145</td>
+<td style="text-align: right;">2.395</td>
+<td style="text-align: right;">0.167</td>
+<td style="text-align: right;">0.143</td>
+<td style="text-align: right;">0.126</td>
+<td style="text-align: right;">0.448</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">3</td>
-<td style="text-align: right;">3.655</td>
-<td style="text-align: right;">3.883</td>
-<td style="text-align: right;">0.120</td>
-<td style="text-align: right;">0.125</td>
-<td style="text-align: right;">4.343</td>
-<td style="text-align: right;">0.120</td>
-<td style="text-align: right;">0.128</td>
-<td style="text-align: right;">0.132</td>
-<td style="text-align: right;">0.515</td>
+<td style="text-align: right;">2.533</td>
+<td style="text-align: right;">2.618</td>
+<td style="text-align: right;">0.139</td>
+<td style="text-align: right;">0.117</td>
+<td style="text-align: right;">2.632</td>
+<td style="text-align: right;">0.141</td>
+<td style="text-align: right;">0.118</td>
+<td style="text-align: right;">0.134</td>
+<td style="text-align: right;">0.508</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">4</td>
-<td style="text-align: right;">4.374</td>
-<td style="text-align: right;">4.348</td>
-<td style="text-align: right;">0.101</td>
-<td style="text-align: right;">0.098</td>
-<td style="text-align: right;">4.726</td>
+<td style="text-align: right;">2.549</td>
+<td style="text-align: right;">2.920</td>
+<td style="text-align: right;">0.071</td>
 <td style="text-align: right;">0.099</td>
-<td style="text-align: right;">0.092</td>
-<td style="text-align: right;">0.150</td>
-<td style="text-align: right;">0.611</td>
+<td style="text-align: right;">2.756</td>
+<td style="text-align: right;">0.071</td>
+<td style="text-align: right;">0.093</td>
+<td style="text-align: right;">0.165</td>
+<td style="text-align: right;">0.669</td>
 </tr>
 </tbody>
 </table>
@@ -2646,91 +2646,91 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">mean_tc_A</td>
-<td style="text-align: right;">4.718</td>
-<td style="text-align: right;">2.186</td>
-<td style="text-align: right;">2.532</td>
-<td style="text-align: right;">1.233</td>
-<td style="text-align: right;">14.222</td>
+<td style="text-align: right;">4.708</td>
+<td style="text-align: right;">2.246</td>
+<td style="text-align: right;">2.462</td>
+<td style="text-align: right;">1.148</td>
+<td style="text-align: right;">14.857</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">mean_tc_B</td>
-<td style="text-align: right;">4.670</td>
-<td style="text-align: right;">2.309</td>
-<td style="text-align: right;">2.362</td>
-<td style="text-align: right;">1.157</td>
-<td style="text-align: right;">14.137</td>
+<td style="text-align: right;">4.650</td>
+<td style="text-align: right;">2.251</td>
+<td style="text-align: right;">2.399</td>
+<td style="text-align: right;">1.160</td>
+<td style="text-align: right;">14.326</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">hybrid_meanG</td>
-<td style="text-align: right;">5.224</td>
-<td style="text-align: right;">2.292</td>
-<td style="text-align: right;">2.932</td>
-<td style="text-align: right;">1.328</td>
-<td style="text-align: right;">15.297</td>
+<td style="text-align: right;">5.228</td>
+<td style="text-align: right;">2.323</td>
+<td style="text-align: right;">2.904</td>
+<td style="text-align: right;">1.377</td>
+<td style="text-align: right;">14.611</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">gd_A</td>
-<td style="text-align: right;">0.092</td>
+<td style="text-align: right;">0.098</td>
 <td style="text-align: right;">0.110</td>
-<td style="text-align: right;">-0.019</td>
-<td style="text-align: right;">0.023</td>
-<td style="text-align: right;">-5.531</td>
+<td style="text-align: right;">-0.012</td>
+<td style="text-align: right;">0.025</td>
+<td style="text-align: right;">-3.324</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">gd_B</td>
-<td style="text-align: right;">0.099</td>
-<td style="text-align: right;">0.111</td>
-<td style="text-align: right;">-0.013</td>
-<td style="text-align: right;">0.030</td>
-<td style="text-align: right;">-2.971</td>
+<td style="text-align: right;">0.100</td>
+<td style="text-align: right;">0.108</td>
+<td style="text-align: right;">-0.008</td>
+<td style="text-align: right;">0.027</td>
+<td style="text-align: right;">-2.030</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">gd_elite_mean</td>
-<td style="text-align: right;">0.095</td>
-<td style="text-align: right;">0.111</td>
-<td style="text-align: right;">-0.016</td>
-<td style="text-align: right;">0.020</td>
-<td style="text-align: right;">-5.456</td>
+<td style="text-align: right;">0.099</td>
+<td style="text-align: right;">0.109</td>
+<td style="text-align: right;">-0.010</td>
+<td style="text-align: right;">0.018</td>
+<td style="text-align: right;">-3.745</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">gd_pool_A</td>
-<td style="text-align: right;">0.091</td>
-<td style="text-align: right;">0.110</td>
-<td style="text-align: right;">-0.019</td>
-<td style="text-align: right;">0.024</td>
-<td style="text-align: right;">-5.546</td>
+<td style="text-align: right;">0.097</td>
+<td style="text-align: right;">0.109</td>
+<td style="text-align: right;">-0.012</td>
+<td style="text-align: right;">0.025</td>
+<td style="text-align: right;">-3.330</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">gd_pool_B</td>
-<td style="text-align: right;">0.097</td>
-<td style="text-align: right;">0.110</td>
-<td style="text-align: right;">-0.013</td>
-<td style="text-align: right;">0.029</td>
-<td style="text-align: right;">-3.079</td>
+<td style="text-align: right;">0.099</td>
+<td style="text-align: right;">0.107</td>
+<td style="text-align: right;">-0.008</td>
+<td style="text-align: right;">0.027</td>
+<td style="text-align: right;">-2.034</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">gd_pool_mean</td>
-<td style="text-align: right;">0.094</td>
-<td style="text-align: right;">0.110</td>
-<td style="text-align: right;">-0.016</td>
-<td style="text-align: right;">0.020</td>
-<td style="text-align: right;">-5.563</td>
+<td style="text-align: right;">0.098</td>
+<td style="text-align: right;">0.108</td>
+<td style="text-align: right;">-0.010</td>
+<td style="text-align: right;">0.018</td>
+<td style="text-align: right;">-3.775</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">GD_BS</td>
-<td style="text-align: right;">0.148</td>
+<td style="text-align: right;">0.146</td>
 <td style="text-align: right;">0.134</td>
-<td style="text-align: right;">0.014</td>
-<td style="text-align: right;">0.015</td>
-<td style="text-align: right;">6.604</td>
+<td style="text-align: right;">0.012</td>
+<td style="text-align: right;">0.013</td>
+<td style="text-align: right;">6.672</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">F_ST</td>
-<td style="text-align: right;">0.612</td>
-<td style="text-align: right;">0.549</td>
-<td style="text-align: right;">0.063</td>
-<td style="text-align: right;">0.070</td>
-<td style="text-align: right;">6.202</td>
+<td style="text-align: right;">0.599</td>
+<td style="text-align: right;">0.554</td>
+<td style="text-align: right;">0.046</td>
+<td style="text-align: right;">0.064</td>
+<td style="text-align: right;">4.933</td>
 </tr>
 </tbody>
 </table>
@@ -2767,27 +2767,27 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">gd_elite</td>
-<td style="text-align: right;">0.117</td>
-<td style="text-align: right;">0.023</td>
-<td style="text-align: right;">0.030</td>
-<td style="text-align: right;">0.020</td>
-<td style="text-align: right;">0.019</td>
+<td style="text-align: right;">0.005</td>
+<td style="text-align: right;">0.025</td>
+<td style="text-align: right;">0.027</td>
+<td style="text-align: right;">0.018</td>
+<td style="text-align: right;">0.018</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">gd_pool</td>
-<td style="text-align: right;">0.120</td>
-<td style="text-align: right;">0.024</td>
-<td style="text-align: right;">0.029</td>
-<td style="text-align: right;">0.020</td>
-<td style="text-align: right;">0.019</td>
+<td style="text-align: right;">-0.007</td>
+<td style="text-align: right;">0.025</td>
+<td style="text-align: right;">0.027</td>
+<td style="text-align: right;">0.018</td>
+<td style="text-align: right;">0.018</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">mean_tc</td>
-<td style="text-align: right;">0.933</td>
-<td style="text-align: right;">1.233</td>
-<td style="text-align: right;">1.157</td>
-<td style="text-align: right;">1.175</td>
-<td style="text-align: right;">0.846</td>
+<td style="text-align: right;">0.907</td>
+<td style="text-align: right;">1.148</td>
+<td style="text-align: right;">1.160</td>
+<td style="text-align: right;">1.127</td>
+<td style="text-align: right;">0.816</td>
 </tr>
 </tbody>
 </table>
@@ -2824,23 +2824,23 @@ v_e = \frac{\sigma^2_e}{t\,r}\]</span></p>
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">pool A, selected</td>
-<td style="text-align: right;">0.591</td>
-<td style="text-align: right;">0.082</td>
+<td style="text-align: right;">0.561</td>
+<td style="text-align: right;">0.086</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">pool A, control</td>
-<td style="text-align: right;">0.506</td>
-<td style="text-align: right;">0.077</td>
+<td style="text-align: right;">0.507</td>
+<td style="text-align: right;">0.073</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">pool B, selected</td>
-<td style="text-align: right;">0.564</td>
-<td style="text-align: right;">0.094</td>
+<td style="text-align: right;">0.552</td>
+<td style="text-align: right;">0.093</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">pool B, control</td>
-<td style="text-align: right;">0.506</td>
-<td style="text-align: right;">0.079</td>
+<td style="text-align: right;">0.516</td>
+<td style="text-align: right;">0.080</td>
 </tr>
 </tbody>
 </table>
@@ -2870,8 +2870,8 @@ Figure&nbsp;7.1: Reciprocal recurrent selection over 4 cycles at book scale, 48 
 </div>
 </div>
 </div>
-<p>What was measured (<a href="#fig-alphasimr-cycles" class="quarto-xref">Figure&nbsp;<span>7.1</span></a> and the tables): over 48 paired replicates, the selected arm’s mean testcross phenotype at cycle 4 differs from the control’s by +2.53 (pool A) and +2.36 (pool B) trait units, with paired standard deviations of 1.23 and 1.16; the elite factorial’s genetic value – the product – differs by +2.93 (<code>t = 15.3</code>). Gene diversity of the elite lines, averaged over the two pools, differs by -0.016 (paired s.d. 0.02, <code>t = -5.5</code>), and that of the recombined pools by -0.016 (<code>t = -5.6</code>). Between the pools, <code>GD_BS</code> differs by +0.014 (<code>t = 6.6</code>) and <code>F_ST</code> by +0.063 (<code>t = 6.2</code>). The two-sided 5% point of <code>t</code> with 47 degrees of freedom is 2.01. Against it, in this render, the response – both pools and the product – is beyond it; the pooled elite-line gene-diversity difference is beyond it; the pooled recombined-pool difference is beyond it; the <code>GD_BS</code> difference is beyond it; the <code>F_ST</code> difference is beyond it.</p>
-<p>Pooling the two pools’ differences is not free noise reduction, and <code>pool_tab</code> measures what it buys. Averaging halves the variance only if the two pools’ paired differences are independent across founder draws. For the elite-line gene diversity they are correlated at 0.12, and the pooled standard deviation, 0.02, is close to the 0.019 it would be if they were independent: pooling does what it should there. For the testcross mean they are correlated at 0.93, and the pooled standard deviation is 1.18 against 0.85 if independent: pooling does not reduce that noise, because the founder draw moves both pools’ response together. The per-pool rows are there to show the asymmetry between two exchangeable pools that any one set of 48 draws produces. The loss table says how much of the pools’ loss is selection: the control loses gene diversity too – 6 elites recombined into 12 individuals is a bottleneck whether or not the elites were chosen – and the selected arm’s mean loss exceeds the control’s, with the pooled <code>t</code> just stated as the evidence.</p>
+<p>What was measured (<a href="#fig-alphasimr-cycles" class="quarto-xref">Figure&nbsp;<span>7.1</span></a> and the tables): over 48 paired replicates, the selected arm’s mean testcross phenotype at cycle 4 differs from the control’s by +2.46 (pool A) and +2.40 (pool B) trait units, with paired standard deviations of 1.15 and 1.16; the elite factorial’s genetic value – the product – differs by +2.90 (<code>t = 14.6</code>). Gene diversity of the elite lines, averaged over the two pools, differs by -0.010 (paired s.d. 0.018, <code>t = -3.7</code>), and that of the recombined pools by -0.010 (<code>t = -3.8</code>). Between the pools, <code>GD_BS</code> differs by +0.012 (<code>t = 6.7</code>) and <code>F_ST</code> by +0.046 (<code>t = 4.9</code>). The two-sided 5% point of <code>t</code> with 47 degrees of freedom is 2.01. Against it, in this render, the response – both pools and the product – is beyond it; the pooled elite-line gene-diversity difference is beyond it; the pooled recombined-pool difference is beyond it; the <code>GD_BS</code> difference is beyond it; the <code>F_ST</code> difference is beyond it.</p>
+<p>Pooling the two pools’ differences is not free noise reduction, and <code>pool_tab</code> measures what it buys. Averaging halves the variance only if the two pools’ paired differences are independent across founder draws. For the elite-line gene diversity they are correlated at 0, and the pooled standard deviation, 0.018, is close to the 0.018 it would be if they were independent: pooling does what it should there. For the testcross mean they are correlated at 0.91, and the pooled standard deviation is 1.13 against 0.82 if independent: pooling does not reduce that noise, because the founder draw moves both pools’ response together. The per-pool rows are there to show the asymmetry between two exchangeable pools that any one set of 48 draws produces. The loss table says how much of the pools’ loss is selection: the control loses gene diversity too – 6 elites recombined into 12 individuals is a bottleneck whether or not the elites were chosen – and the selected arm’s mean loss exceeds the control’s, with the pooled <code>t</code> just stated as the evidence.</p>
 <p>What is inferred: with real meiosis and a dominance trait behind it, reciprocal recurrent selection responds in both pools, and at this replication the response is beyond <code>t_crit</code>. Whether it spends within-pool diversity faster than the same bottleneck under drift alone is what the pooled gene-diversity <code>t</code> decides, and in this render it does for the elite lines and does for the recombined pools: the selection component of the loss is of the same order as its paired standard deviation at this scale, so the conclusion, not only the number, is what the <code>t</code> decides. Where the sign holds, the control isolates that component from the drift part, which is the distinction <a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 22</span></a> draws with the package’s own faster simulator over a longer trajectory and a grid of selection intensities, and <a href="04d-breeding-programme.html" class="quarto-xref"><span>Chapter 8</span></a> draws a third time in an inbred-line programme. The between-pool rows: the <code>GD_BS</code> difference is beyond <code>t_crit</code>; where it is, and positive, RRS is moving the pools apart faster than drift does, which is what a scheme selecting on the cross is expected to do. <code>F_ST</code> rises partly because <code>GD_T</code> falls, so <code>GD_BS</code> is the row to read. What limits the inference is the scale – 12 founders per pool, 4 cycles, 2 testers at one location, 48 draws – and the fact that the founders come from MaCS, so both the numbers in this paragraph and any verdict that rests on a <code>t</code> near <code>t_crit</code> may differ between renders.</p>
 </section>
 <section id="the-final-hybrid-pool-through-stage2_select-unchanged" class="level3" data-number="7.8.4">
@@ -2898,31 +2898,31 @@ Figure&nbsp;7.1: Reciprocal recurrent selection over 4 cycles at book scale, 48 
 <tbody>
 <tr class="odd">
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">2.4969</td>
-<td style="text-align: right;">1.8150</td>
-<td style="text-align: right;">0.1824</td>
-<td style="text-align: right;">0.1768</td>
+<td style="text-align: right;">3.4533</td>
+<td style="text-align: right;">3.0557</td>
+<td style="text-align: right;">0.1678</td>
+<td style="text-align: right;">0.1979</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">2</td>
-<td style="text-align: right;">4.3112</td>
-<td style="text-align: right;">3.9181</td>
-<td style="text-align: right;">0.1567</td>
-<td style="text-align: right;">0.1190</td>
+<td style="text-align: right;">5.8034</td>
+<td style="text-align: right;">4.9086</td>
+<td style="text-align: right;">0.1060</td>
+<td style="text-align: right;">0.1473</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">3</td>
-<td style="text-align: right;">5.3055</td>
-<td style="text-align: right;">5.1639</td>
-<td style="text-align: right;">0.1479</td>
-<td style="text-align: right;">0.0923</td>
+<td style="text-align: right;">6.2778</td>
+<td style="text-align: right;">6.3817</td>
+<td style="text-align: right;">0.0859</td>
+<td style="text-align: right;">0.1339</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">4</td>
-<td style="text-align: right;">6.1456</td>
-<td style="text-align: right;">5.7683</td>
-<td style="text-align: right;">0.1037</td>
-<td style="text-align: right;">0.0859</td>
+<td style="text-align: right;">8.4571</td>
+<td style="text-align: right;">7.9329</td>
+<td style="text-align: right;">0.0621</td>
+<td style="text-align: right;">0.0903</td>
 </tr>
 </tbody>
 </table>
@@ -2953,75 +2953,75 @@ Figure&nbsp;7.1: Reciprocal recurrent selection over 4 cycles at book scale, 48 
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">DE_alpha_0.00</td>
-<td style="text-align: right;">-0.0060</td>
-<td style="text-align: right;">0.2435</td>
-<td style="text-align: right;">0.1529</td>
-<td style="text-align: right;">0.6281</td>
-<td style="text-align: right;">1.3034</td>
+<td style="text-align: right;">-0.0026</td>
+<td style="text-align: right;">0.2365</td>
+<td style="text-align: right;">0.1686</td>
+<td style="text-align: right;">0.7129</td>
+<td style="text-align: right;">1.2835</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">DE_alpha_-0.15</td>
-<td style="text-align: right;">-0.0060</td>
-<td style="text-align: right;">0.2435</td>
-<td style="text-align: right;">0.1529</td>
-<td style="text-align: right;">0.6281</td>
-<td style="text-align: right;">1.3034</td>
+<td style="text-align: left;">DE_alpha_0.22</td>
+<td style="text-align: right;">0.0004</td>
+<td style="text-align: right;">0.2358</td>
+<td style="text-align: right;">0.1680</td>
+<td style="text-align: right;">0.7125</td>
+<td style="text-align: right;">1.2938</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">DE_alpha_-0.30</td>
-<td style="text-align: right;">-0.0060</td>
-<td style="text-align: right;">0.2435</td>
-<td style="text-align: right;">0.1529</td>
-<td style="text-align: right;">0.6281</td>
-<td style="text-align: right;">1.3034</td>
+<td style="text-align: left;">DE_alpha_0.44</td>
+<td style="text-align: right;">0.0004</td>
+<td style="text-align: right;">0.2358</td>
+<td style="text-align: right;">0.1680</td>
+<td style="text-align: right;">0.7125</td>
+<td style="text-align: right;">1.2938</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">DE_alpha_-0.45</td>
-<td style="text-align: right;">-0.0060</td>
-<td style="text-align: right;">0.2435</td>
-<td style="text-align: right;">0.1529</td>
-<td style="text-align: right;">0.6281</td>
-<td style="text-align: right;">1.3034</td>
+<td style="text-align: left;">DE_alpha_0.65</td>
+<td style="text-align: right;">0.0004</td>
+<td style="text-align: right;">0.2358</td>
+<td style="text-align: right;">0.1680</td>
+<td style="text-align: right;">0.7125</td>
+<td style="text-align: right;">1.2938</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">DE_alpha_-0.60</td>
-<td style="text-align: right;">-0.0060</td>
-<td style="text-align: right;">0.2435</td>
-<td style="text-align: right;">0.1529</td>
-<td style="text-align: right;">0.6281</td>
-<td style="text-align: right;">1.3034</td>
+<td style="text-align: left;">DE_alpha_0.87</td>
+<td style="text-align: right;">0.0087</td>
+<td style="text-align: right;">0.2338</td>
+<td style="text-align: right;">0.1704</td>
+<td style="text-align: right;">0.7289</td>
+<td style="text-align: right;">1.3110</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">ref_truncation</td>
-<td style="text-align: right;">-0.0060</td>
-<td style="text-align: right;">0.2435</td>
-<td style="text-align: right;">0.1529</td>
-<td style="text-align: right;">0.6281</td>
-<td style="text-align: right;">1.3034</td>
+<td style="text-align: right;">0.0087</td>
+<td style="text-align: right;">0.2338</td>
+<td style="text-align: right;">0.1704</td>
+<td style="text-align: right;">0.7289</td>
+<td style="text-align: right;">1.3110</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">ref_trunc_cap</td>
-<td style="text-align: right;">-0.0060</td>
-<td style="text-align: right;">0.2435</td>
-<td style="text-align: right;">0.1529</td>
-<td style="text-align: right;">0.6281</td>
-<td style="text-align: right;">1.3034</td>
+<td style="text-align: right;">0.0087</td>
+<td style="text-align: right;">0.2338</td>
+<td style="text-align: right;">0.1704</td>
+<td style="text-align: right;">0.7289</td>
+<td style="text-align: right;">1.3110</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">ref_max_div</td>
-<td style="text-align: right;">-0.0510</td>
-<td style="text-align: right;">0.2544</td>
-<td style="text-align: right;">0.1500</td>
-<td style="text-align: right;">0.5895</td>
-<td style="text-align: right;">0.5824</td>
+<td style="text-align: right;">-0.0223</td>
+<td style="text-align: right;">0.2412</td>
+<td style="text-align: right;">0.1681</td>
+<td style="text-align: right;">0.6970</td>
+<td style="text-align: right;">0.0926</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">ref_random</td>
-<td style="text-align: right;">0.0106</td>
-<td style="text-align: right;">0.2394</td>
-<td style="text-align: right;">0.1574</td>
-<td style="text-align: right;">0.6575</td>
-<td style="text-align: right;">-0.5061</td>
+<td style="text-align: right;">0.0138</td>
+<td style="text-align: right;">0.2326</td>
+<td style="text-align: right;">0.1709</td>
+<td style="text-align: right;">0.7348</td>
+<td style="text-align: right;">-0.0516</td>
 </tr>
 </tbody>
 </table>

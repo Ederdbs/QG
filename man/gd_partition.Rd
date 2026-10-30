@@ -19,7 +19,7 @@ A named numeric vector `GD_WI_hyb`, `GD_T`, `GD_WI`, `GD_BI`,
   `GD_BS`, `F_ST`.
 }
 \description{
-Equation 8 of Caballero & Toro (2002):
+The partition of Caballero & Toro (2002):
 `GD_T = GD_WI + GD_BI + GD_BS`, with `F_ST = GD_BS / GD_T`.
 }
 \details{

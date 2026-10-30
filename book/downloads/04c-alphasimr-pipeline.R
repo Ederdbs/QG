@@ -1253,10 +1253,9 @@ c(pool_A = fp[["pop_A"]]@nInd, pool_B = fp[["pop_B"]]@nInd,
 #' The sweep below draws `r n_split_draws` independent founder sets at each of four split
 #' times and measures three things on each: the Caballero & Toro partition of
 #' @sec-subdivided over the two pools (`ct_partition()`, the general form of
-#' `gd_partition()`: the $F$-statistics of their Eq. 6 and the partition
-#' $GD_T = GD_{WI} + GD_{BI} + GD_{BS}$ of their Eq. 7, from which
-#' $F_{ST} = GD_{BS} / GD_T$ follows as an identity derived in @sec-subdivided,
-#' not stated in the paper), the share of expected heterosis that the divergence
+#' `gd_partition()`: their $F$-statistics and the partition
+#' $GD_T = GD_{WI} + GD_{BI} + GD_{BS}$, from which
+#' $F_{ST} = GD_{BS} / GD_T$ follows as an identity derived in @sec-subdivided), the share of expected heterosis that the divergence
 #' term carries (`heterosis_partition()`, @sec-heterosis), and -- the Step 6
 #' question with divergence -- how much of a DH line's exact GCA against the
 #' other pool's DH lines its own genetic value can see. For that last one,
@@ -1370,6 +1369,12 @@ cov_se   <- abs(sw_mean[["GCA_cov2"]]) / (sw_sd[["GCA_cov2"]] / sqrt(n_split_dra
 names(cov_frac) <- names(cov_se) <- rownames(sw_mean)
 cov_frac_max <- max(cov_frac)
 cov_se_max   <- max(cov_se)
+cov_t_crit   <- stats::qt(0.975, df = n_split_draws - 1)   # two-sided 5% point
+cov_sig      <- names(cov_se)[cov_se > cov_t_crit]          # splits where 2 cov differs from 0
+g0 <- sw_mean["split_0", ]
+cov_dom_0    <- abs(g0[["GCA_cov2"]]) / g0[["GCA_var_dom"]] # |2 cov| relative to var(dom), split 0
+share_cov_0   <- g0[["GCA_var_dom"]] / g0[["GCA_var"]]       # ratio of the split-0 means
+share_nocov_0 <- g0[["GCA_var_dom"]] / (g0[["GCA_var_add"]] + g0[["GCA_var_dom"]])
 dom_change   <- sw_mean["split_1000", "GCA_var_dom"] - sw_mean["split_0", "GCA_var_dom"]
 
 #' 
@@ -1431,8 +1436,9 @@ dom_change   <- sw_mean["split_1000", "GCA_var_dom"] - sw_mean["split_0", "GCA_v
 #' ($2\,\mathrm{cov}$) from `r fmt(sw_mean["split_0", "GCA_cov2"], 3)` to
 #' `r fmt(sw_mean["split_1000", "GCA_cov2"], 3)`, the last with between-draw
 #' standard deviations of `r fmt(sw_sd["split_0", "GCA_cov2"], 3)` and
-#' `r fmt(sw_sd["split_1000", "GCA_cov2"], 3)`, so at every split it is within
-#' `r fmt(cov_se_max, 1)` standard errors of zero. The ratio
+#' `r fmt(sw_sd["split_1000", "GCA_cov2"], 3)`; its largest $|\text{mean}|/\text{s.e.}$
+#' across splits is `r fmt(cov_se_max, 2)`, against the two-sided 5% point
+#' $t_{0.975,\,`r n_split_draws - 1`} =$ `r fmt(cov_t_crit, 2)`. The ratio
 #' `GCA_dominance_share` $= \mathrm{var}(\mathrm{dom}) / \mathrm{var}(\mathrm{GCA})$
 #' rises from `r fmt(ctr["GCA_dominance_share", "at_split_0"], 3)` to
 #' `r fmt(ctr["GCA_dominance_share", "at_split_max"], 3)`
@@ -1453,10 +1459,18 @@ dom_change   <- sw_mean["split_1000", "GCA_var_dom"] - sw_mean["split_0", "GCA_v
 #' the additive part falls with divergence because the sites that fix within a
 #' pool stop contributing to it, so the ratio can rise without the dominance
 #' part growing at all. The ratio is a partition of $\mathrm{var}(\mathrm{GCA})$
-#' only insofar as the covariance term is negligible; here that term is within
-#' `r fmt(cov_se_max, 1)` standard errors of zero at every split, which is the
-#' only sense in which "share" is used. As the pools separate, the dominance
-#' weights $(1 - 2 p_{Bk})$ of Step 6 move away from zero and a growing part of
+#' only insofar as the covariance term is negligible. In this render that term
+#' is `r if (length(cov_sig) == 0) "within the two-sided 5% point at every split" else paste0("beyond the two-sided 5% point at ", paste(sub("split_", "split = ", cov_sig), collapse = ", "))`;
+#' with `r n_split_draws` draws, a term within that point is not shown to differ
+#' from zero, which is not a bound on its size. In magnitude, at `split = 0`
+#' $|2\,\mathrm{cov}|$ is `r fmt(cov_dom_0, 2)` times `GCA_var_dom`, and
+#' dropping it changes the ratio of the `split = 0` means from
+#' `r fmt(share_cov_0, 3)` to
+#' $\mathrm{var}(\mathrm{dom}) / [\mathrm{var}(\mathrm{add}) + \mathrm{var}(\mathrm{dom})] =$
+#' `r fmt(share_nocov_0, 3)`. "Share" is used only in that qualified sense, and
+#' each founder draw calls `runMacs2()`, whose coalescent `set.seed()` does not
+#' control, so that verdict is this render's and may change with the next.
+#' As the pools separate, the dominance weights $(1 - 2 p_{Bk})$ of Step 6 move away from zero and a growing part of
 #' a line's combining ability is invisible to its own genetic value; the evidence
 #' for that at this scale is the `t` of the contrast, and nothing here separates
 #' how much of the between-draw spread is the trait drawn with each founder set

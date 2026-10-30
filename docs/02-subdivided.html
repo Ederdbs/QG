@@ -649,12 +649,12 @@ window.Quarto = {
   </ul></li>
   <li><a href="#the-worked-example-reproduced" id="toc-the-worked-example-reproduced" class="nav-link" data-scroll-target="#the-worked-example-reproduced"><span class="header-section-number">2.7</span> The worked example, reproduced</a>
   <ul class="collapse">
-  <li><a href="#removing-an-accession-can-increase-diversity" id="toc-removing-an-accession-can-increase-diversity" class="nav-link" data-scroll-target="#removing-an-accession-can-increase-diversity"><span class="header-section-number">2.7.1</span> Removing an accession can <em>increase</em> diversity</a></li>
+  <li><a href="#sec-ct-removal" id="toc-sec-ct-removal" class="nav-link" data-scroll-target="#sec-ct-removal"><span class="header-section-number">2.7.1</span> Removing an accession can <em>increase</em> diversity</a></li>
   <li><a href="#optimal-contributions" id="toc-optimal-contributions" class="nav-link" data-scroll-target="#optimal-contributions"><span class="header-section-number">2.7.2</span> Optimal contributions</a></li>
   </ul></li>
-  <li><a href="#minimising-coancestry-is-maximising-n_e" id="toc-minimising-coancestry-is-maximising-n_e" class="nav-link" data-scroll-target="#minimising-coancestry-is-maximising-n_e"><span class="header-section-number">2.8</span> Minimising coancestry is maximising <span class="math inline">\(N_e\)</span></a></li>
+  <li><a href="#equal-contributions-and-effective-size" id="toc-equal-contributions-and-effective-size" class="nav-link" data-scroll-target="#equal-contributions-and-effective-size"><span class="header-section-number">2.8</span> Equal contributions and effective size</a></li>
   <li><a href="#the-honest-caveats" id="toc-the-honest-caveats" class="nav-link" data-scroll-target="#the-honest-caveats"><span class="header-section-number">2.9</span> The honest caveats</a></li>
-  <li><a href="#two-errata-found-while-verifying" id="toc-two-errata-found-while-verifying" class="nav-link" data-scroll-target="#two-errata-found-while-verifying"><span class="header-section-number">2.10</span> Two errata, found while verifying</a></li>
+  <li><a href="#a-correction-published-by-the-authors" id="toc-a-correction-published-by-the-authors" class="nav-link" data-scroll-target="#a-correction-published-by-the-authors"><span class="header-section-number">2.10</span> A correction published by the authors</a></li>
   <li><a href="#what-manages-this-quantity-and-where" id="toc-what-manages-this-quantity-and-where" class="nav-link" data-scroll-target="#what-manages-this-quantity-and-where"><span class="header-section-number">2.11</span> What manages this quantity, and where</a></li>
   <li><a href="#reproduce-this-chapter" id="toc-reproduce-this-chapter" class="nav-link" data-scroll-target="#reproduce-this-chapter">Reproduce this chapter</a></li>
   </ul>
@@ -684,11 +684,14 @@ window.Quarto = {
 
 
 <p>A breeding programme is never one population. It is heterotic groups, or accessions, or landraces, or cycles – and the diversity of the whole is not the average of the diversity of the parts. <span class="citation" data-cites="caballero2002">Caballero and Toro (<a href="99-references.html#ref-caballero2002" role="doc-biblioref">2002</a>)</span> give the partition that makes this precise, and it is the analytical backbone of everything that follows: the constraint in <a href="09-optimal-contributions.html" class="quarto-xref"><span>Chapter 18</span></a> is a special case of it, and the within/between asymmetry that makes plant hybrid breeding different from animal breeding is a statement about which term of it you are allowed to minimise.</p>
-<p>The paper’s central claim is uncomfortable and worth stating first: <strong>a method that ranks accessions by distance alone can invert the correct conclusion.</strong> An accession can be the most distant <em>because</em> it is internally fixed, and removing it can <em>raise</em> the diversity of the pool. We reproduce that result numerically below.</p>
+<p>The paper’s central claim is uncomfortable and worth stating first: <strong>a method that ranks accessions by distance alone can invert the correct conclusion.</strong> An accession can be the most distant <em>because</em> it is internally fixed, and removing it can <em>raise</em> the diversity of the pool. <a href="#sec-ct-removal" class="quarto-xref"><span>Section 2.7.1</span></a> reproduces that result numerically.</p>
 <section id="notation" class="level2" data-number="2.1">
 <h2 data-number="2.1" class="anchored" data-anchor-id="notation"><span class="header-section-number">2.1</span> Notation</h2>
 <ul>
-<li>A metapopulation of <span class="math inline">\(n\)</span> subpopulations; subpopulation <span class="math inline">\(i\)</span> has <span class="math inline">\(N_i\)</span> individuals, <span class="math inline">\(N_T = \sum_i N_i\)</span>.</li>
+<li>A metapopulation of <span class="math inline">\(n\)</span> subpopulations; subpopulation <span class="math inline">\(i\)</span> has <span class="math inline">\(N_i\)</span> individuals, <span class="math inline">\(N_T = \sum_i N_i\)</span>. In this chapter <span class="math inline">\(n\)</span> and <span class="math inline">\(N\)</span> count subpopulations and individuals, not the selected and candidate hybrids of
+<ol class="example" type="1">
+<li></li>
+</ol></li>
 <li>A tilde, <span class="math inline">\(\tilde{x}\)</span>, is a weighted mean <strong>within</strong> subpopulations: <span class="math inline">\(\tilde{f} = \sum_i f_{ii} N_i / N_T\)</span>.</li>
 <li>A bar, <span class="math inline">\(\bar{x}\)</span>, is a mean over <strong>all pairs</strong> in the metapopulation, between-subpopulation pairs included: <span class="math inline">\(\bar{f} = \sum_{i,j} f_{ij} N_i N_j / N_T^2\)</span>.</li>
 <li>Always <span class="math inline">\(\bar{f} \le \tilde{f} \le \tilde{s}\)</span>. The differences between those three numbers <em>are</em> the partition of diversity.</li>
@@ -704,7 +707,7 @@ window.Quarto = {
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Every coancestry here includes the pairs of an individual with <strong>itself</strong> – group coancestry in the sense of Cockerham. That is what makes <span class="math inline">\(1 - f_{ii}\)</span> exactly Nei’s expected heterozygosity, and it is what makes the algebra close. Drop the diagonal and none of the identities below hold.</p>
+<p>Every coancestry here includes the pairs of an individual with <strong>itself</strong> – group coancestry in the sense of <span class="citation" data-cites="cockerham1967">Cockerham (<a href="99-references.html#ref-cockerham1967" role="doc-biblioref">1967</a>)</span>. That is what makes <span class="math inline">\(1 - f_{ii}\)</span> exactly Nei’s gene diversity <span class="math inline">\(1 - \sum_k \tilde p_{k,i}^2\)</span> <span class="citation" data-cites="nei1973">(<a href="99-references.html#ref-nei1973" role="doc-biblioref">Nei 1973</a>)</span> – the plug-in form, without the small-sample correction <span class="math inline">\(2N_i/(2N_i - 1)\)</span> – and it is what makes the algebra close. Drop the diagonal and none of the identities of this chapter hold.</p>
 </div>
 </div>
 </section>
@@ -715,30 +718,45 @@ window.Quarto = {
 <p>The probability that two alleles, one sampled at random in subpopulation <span class="math inline">\(i\)</span> and one in <span class="math inline">\(j\)</span>, are identical. From markers, <span class="math inline">\(f_{ij} = \sum_k \tilde p_{k,i}
 \tilde p_{k,j}\)</span>.</p>
 <p>Read it as <strong>redundancy</strong> between two materials. If you cross plants of <span class="math inline">\(i\)</span> with plants of <span class="math inline">\(j\)</span>, the progeny has expected inbreeding <span class="math inline">\(F = f_{ij}\)</span>. It answers: what do I gain by recombining these two accessions?</p>
-<p>In maize, <span class="math inline">\(f_{ij}\)</span> between a Stiff Stalk pool and a Non-Stiff Stalk pool is typically low – and that low between-group coancestry is exactly what sustains the heterotic pattern. Between two elite lines of the same family it can exceed 0.6, and the cross generates nothing new.</p>
+<p>On this molecular scale no fixed level of <span class="math inline">\(f_{ij}\)</span> marks two materials as redundant: the reference is a base in which all alleles are distinct, so <span class="math inline">\(f_{ij}\)</span> between unrelated lines is already high on a biallelic panel. The book’s simulated pools (<code>book_cfg</code>, <a href="01-coancestry.html" class="quarto-xref"><span>Chapter 1</span></a>) show it:</p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>ctx <span class="ot">&lt;-</span> <span class="fu">simulate_data</span>(book_cfg)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>fL  <span class="ot">&lt;-</span> ctx[[<span class="st">"fL"</span>]]</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>inA <span class="ot">&lt;-</span> ctx[[<span class="st">"pool"</span>]] <span class="sc">==</span> <span class="st">"A"</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>fAB <span class="ot">&lt;-</span> fL[inA, <span class="sc">!</span>inA]</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>fWI <span class="ot">&lt;-</span> <span class="fu">c</span>(fL[inA, inA][<span class="fu">upper.tri</span>(fL[inA, inA])],</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>         fL[<span class="sc">!</span>inA, <span class="sc">!</span>inA][<span class="fu">upper.tri</span>(fL[<span class="sc">!</span>inA, <span class="sc">!</span>inA])])</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>fl_rng <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">between_min =</span> <span class="fu">min</span>(fAB), <span class="at">between_max =</span> <span class="fu">max</span>(fAB),</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">between_mean =</span> <span class="fu">mean</span>(fAB), <span class="at">within_min =</span> <span class="fu">min</span>(fWI),</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>            <span class="at">within_max =</span> <span class="fu">max</span>(fWI), <span class="at">within_mean =</span> <span class="fu">mean</span>(fWI))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>The coancestry between two inbred lines from <em>opposite</em> heterotic pools ranges from 0.608 to 0.663 (mean 0.638), and between two lines of the <em>same</em> pool from 0.668 to 0.719 (mean 0.693). What separates complementary from redundant material is therefore the contrast between the two distributions, measured on one panel, and not a threshold carried over from another panel. The ranges above come from one simulated draw at the teaching scale and are not a property of maize pools.</p>
 </section>
 <section id="f_ii-within-a-subpopulation" class="level3" data-number="2.2.2">
 <h3 data-number="2.2.2" class="anchored" data-anchor-id="f_ii-within-a-subpopulation"><span class="header-section-number">2.2.2</span> <span class="math inline">\(f_{ii}\)</span>, within a subpopulation</h3>
 <p>The case <span class="math inline">\(i = j\)</span>. From markers <span class="math inline">\(f_{ii} = \sum_k \tilde p_{k,i}^2\)</span>, the expected homozygosity, so</p>
-<p><span class="math display">\[1 - f_{ii} \;=\; H_{e,i} \;=\; \text{Nei's gene diversity of accession } i.\]</span></p>
+<p><span id="eq-fii-he"><span class="math display">\[1 - f_{ii} \;=\; H_{e,i} \;=\; \text{Nei's gene diversity of accession } i. \tag{2.1}\]</span></span></p>
 <p>A landrace accession regenerated twenty times with forty ears per cycle accumulates coancestry and watches <span class="math inline">\(f_{ii}\)</span> rise silently. It is the cheapest alarm for genetic erosion <em>inside</em> a genebank – and it is precisely what a distance tree cannot see.</p>
 </section>
 <section id="s_i-and-f_i-self-coancestry-and-molecular-inbreeding" class="level3" data-number="2.2.3">
 <h3 data-number="2.2.3" class="anchored" data-anchor-id="s_i-and-f_i-self-coancestry-and-molecular-inbreeding"><span class="header-section-number">2.2.3</span> <span class="math inline">\(s_i\)</span> and <span class="math inline">\(F_i\)</span>, self-coancestry and molecular inbreeding</h3>
-<p><span class="math display">\[s_i = \sum_k \sum_l \frac{p_{k,l,i}^2}{N_i}, \qquad
-  F_i = 2 s_i - 1, \qquad 1 - s_i = H_{o,i}\]</span></p>
-<p>with <span class="math inline">\(p_{k,l,i}\)</span> the dosage of allele <span class="math inline">\(k\)</span> in individual <span class="math inline">\(l\)</span>.</p>
-<div class="callout callout-style-simple callout-important callout-titled">
+<p><span id="eq-self-coancestry"><span class="math display">\[s_i = \sum_k \sum_l \frac{p_{k,l,i}^2}{N_i}, \qquad
+  F_i = 2 s_i - 1, \qquad 2(1 - s_i) = 1 - F_i = H_{o,i} \tag{2.2}\]</span></span></p>
+<p>with <span class="math inline">\(p_{k,l,i}\)</span> the frequency of allele <span class="math inline">\(k\)</span> <em>within</em> individual <span class="math inline">\(l\)</span> of subpopulation <span class="math inline">\(i\)</span>: 0, 0.5 or 1 for a diploid, that is, the 0/1/2 dosage divided by 2 (<code>ct_partition()</code> does exactly this). For a biallelic marker and the reference allele, <span class="math inline">\(p_{k,l,i}\)</span> is the within-individual frequency that 1 writes <span class="math inline">\(x\)</span>; there <span class="math inline">\(x_{ik}\)</span> indexes an individual and a marker, here <span class="math inline">\(k\)</span> indexes an allele. On the 0/1/2 scale itself <span class="math inline">\(s_i\)</span> would leave <span class="math inline">\([0.5, 1]\)</span> and <span class="math inline">\(F_i\)</span> would leave <span class="math inline">\([0, 1]\)</span>. <span class="math inline">\(H_{o,i}\)</span> is the observed heterozygosity, the mean over individuals of the fraction of loci at which the individual is heterozygous. A heterozygote has self-coancestry 0.5 at the locus, so <span class="math inline">\(1 - s_i\)</span> is <em>half</em> the observed heterozygosity, not all of it.</p>
+<div class="callout callout-style-simple callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Important</span><span class="math inline">\(F_i\)</span> here is molecular, and is not <span class="math inline">\(F_{IS}\)</span>
+<span class="screen-reader-only">Warning</span><span class="math inline">\(F_i\)</span> here is molecular, and is not <span class="math inline">\(F_{IS}\)</span>
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>It is measured against a hypothetical base in which all alleles are distinct. It is <strong>not</strong> comparable across studies using different marker panels. For the question “is this population mating at random?”, use <span class="math inline">\(\alpha_i\)</span> below.</p>
+<p>It is measured against a hypothetical base in which all alleles are distinct. It is <strong>not</strong> comparable across studies using different marker panels. For the question “is this population mating at random?”, use <span class="math inline">\(\alpha_i\)</span> of <a href="#eq-alpha-g" class="quarto-xref">Equation&nbsp;<span>2.3</span></a>.</p>
 </div>
 </div>
 <p>In soybean, rice and wheat, pure lines have <span class="math inline">\(s_i \to 1\)</span>, so <span class="math inline">\(F_i \to 1\)</span> and <span class="math inline">\(H_o \to 0\)</span>. That is expected, not a symptom. It changes only <em>where</em> the diversity resides.</p>
@@ -746,39 +764,44 @@ window.Quarto = {
 </section>
 <section id="two-per-subpopulation-metrics" class="level2" data-number="2.3">
 <h2 data-number="2.3" class="anchored" data-anchor-id="two-per-subpopulation-metrics"><span class="header-section-number">2.3</span> Two per-subpopulation metrics</h2>
-<p><span class="math display">\[\alpha_i = \frac{F_i - f_{ii}}{1 - f_{ii}}, \qquad
-  G_i = \frac{s_i - f_{ii}}{1 - f_{ii}} = \frac{1 + \alpha_i}{2}\]</span></p>
-<p><span class="math inline">\(\alpha_i\)</span> is the subpopulation’s analogue of <span class="math inline">\(F_{IS}\)</span>: positive means an excess of homozygotes (selfing, mating among relatives, a Wahlund effect from internal substructure, null alleles); negative means an excess of heterozygotes (dioecy, self-incompatibility, selection, or a freshly formed F1 or synthetic).</p>
-<p><span class="math inline">\(G_i\)</span> is the proportion of the accession’s diversity that sits <strong>between</strong> individuals rather than inside them, and it is probably the most underused quantity in the paper. It is a mating-system meter:</p>
+<p><span id="eq-alpha-g"><span class="math display">\[\alpha_i = \frac{F_i - f_{ii}}{1 - f_{ii}}, \qquad
+  G_i = \frac{s_i - f_{ii}}{1 - f_{ii}} = \frac{1 + \alpha_i}{2} \tag{2.3}\]</span></span></p>
+<p><span class="math inline">\(\alpha_i\)</span> is the subpopulation’s analogue of <span class="math inline">\(F_{IS}\)</span>, not the diversity-loss constraint <span class="math inline">\(\alpha\)</span> of <a href="09-optimal-contributions.html" class="quarto-xref"><span>Chapter 18</span></a>, and <span class="math inline">\(G_i\)</span> is not a genomic relationship matrix <span class="math inline">\(\mathbf{G}\)</span>. A positive <span class="math inline">\(\alpha_i\)</span> means an excess of homozygotes (selfing, mating among relatives, a Wahlund effect from internal substructure, null alleles); negative means an excess of heterozygotes (dioecy, self-incompatibility, selection, or a freshly formed F1 or synthetic).</p>
+<p><span class="math inline">\(G_i\)</span> is the proportion of the accession’s diversity that sits <strong>between</strong> individuals rather than inside them, and it is probably the most underused quantity in the paper. It is a mating-system meter (<a href="#tbl-mating-meter" class="quarto-xref">Table&nbsp;<span>2.1</span></a>):</p>
 <div class="cell" data-layout-align="center">
+<div id="tbl-mating-meter" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-mating-meter-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2.1: <span class="math inline">\(G_i\)</span> (<a href="#eq-alpha-g" class="quarto-xref">Equation&nbsp;<span>2.3</span></a>), the share of an accession’s gene diversity that lies between individuals rather than within them, read as a mating-system meter: its value under each mating situation and the material in which that situation is typical.
+</figcaption>
+<div aria-describedby="tbl-mating-meter-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<table class="caption-top table table-sm table-striped small">
-<caption>G_i as a mating-system meter.</caption>
+<table class="cell caption-top table table-sm table-striped small">
 <colgroup>
-<col style="width: 8%">
-<col style="width: 27%">
-<col style="width: 63%">
+<col style="width: 15%">
+<col style="width: 25%">
+<col style="width: 59%">
 </colgroup>
 <thead>
 <tr class="header">
-<th style="text-align: left;">G_i</th>
+<th style="text-align: left;"><span class="math inline">\(G_i\)</span></th>
 <th style="text-align: left;">Situation</th>
 <th style="text-align: left;">Typical material</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">~ 0.5</td>
+<td style="text-align: left;"><span class="math inline">\(\approx 0.5\)</span></td>
 <td style="text-align: left;">perfect panmixia</td>
 <td style="text-align: left;">maize, sunflower, open populations</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">&lt; 0.5</td>
+<td style="text-align: left;"><span class="math inline">\(&lt; 0.5\)</span></td>
 <td style="text-align: left;">excess of heterozygotes</td>
 <td style="text-align: left;">F1 synthetics, heterozygous clones, self-incompatibles</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">-&gt; 1.0</td>
+<td style="text-align: left;"><span class="math inline">\(\to 1\)</span></td>
 <td style="text-align: left;">all homozygous</td>
 <td style="text-align: left;">inbred lines, doubled haploids, selfing species</td>
 </tr>
@@ -786,34 +809,37 @@ window.Quarto = {
 </table>
 </div>
 </div>
+</figure>
+</div>
+</div>
 <p>Operationally, <span class="math inline">\(1 - G_i\)</span> is the fraction of an accession’s diversity stored <em>inside</em> each plant, and it decides the sampling design. With <span class="math inline">\(G_i \to 1\)</span> (selfers), one individual captures almost nothing and you need many plants per accession. With <span class="math inline">\(G_i \approx 0.5\)</span> (maize), a few plants already capture half.</p>
 </section>
 <section id="distances-and-what-they-actually-are" class="level2" data-number="2.4">
 <h2 data-number="2.4" class="anchored" data-anchor-id="distances-and-what-they-actually-are"><span class="header-section-number">2.4</span> Distances, and what they actually are</h2>
-<p>Nei’s minimum distance between subpopulations is</p>
-<p><span class="math display">\[\mathbf{D}_{ij} = \frac{f_{ii} + f_{jj}}{2} - f_{ij}
-                  = \sum_k \tfrac{1}{2}(\tilde p_{k,i} - \tilde p_{k,j})^2 .\]</span></p>
-<p>Note what that is: <strong>half the sum of squared allele-frequency differences</strong> – a variance component, not an evolutionary distance calibrated in time. It is the piece that enters <span class="math inline">\(F_{ST}\)</span>, and it is legitimate. The error in a distance-only method is not using <span class="math inline">\(\mathbf{D}_{ij}\)</span>; it is using <em>only</em> <span class="math inline">\(\mathbf{D}_{ij}\)</span>.</p>
+<p>Nei’s minimum distance between subpopulations <span class="citation" data-cites="toro2005">(<a href="99-references.html#ref-toro2005" role="doc-biblioref">Toro and Caballero 2005, sec. 3a</a>)</span> is</p>
+<p><span id="eq-nei-distance"><span class="math display">\[D_{ij} = \frac{f_{ii} + f_{jj}}{2} - f_{ij}
+                  = \sum_k \tfrac{1}{2}(\tilde p_{k,i} - \tilde p_{k,j})^2 . \tag{2.4}\]</span></span></p>
+<p>Note what that is: <strong>half the sum of squared allele-frequency differences</strong> – a variance component, not an evolutionary distance calibrated in time. It is the piece that enters <span class="math inline">\(F_{ST}\)</span>, and it is legitimate. The error in a distance-only method is not using <span class="math inline">\(D_{ij}\)</span>; it is using <em>only</em> <span class="math inline">\(D_{ij}\)</span>.</p>
 <div class="callout callout-style-simple callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>A free <span class="math inline">\(O(N^2)\)</span> saving
+<span class="screen-reader-only">Tip</span>No double sum over individuals is needed
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>The paper’s Eq. 13 computes <span class="math inline">\(D_{ij}\)</span> by a double sum over all pairs of individuals, at cost <span class="math inline">\(O(N_i N_j m)\)</span>. That is unnecessary: the identity <span class="math inline">\(D_{ij} = (s_i + s_j)/2 - f_{ij}\)</span> is <strong>exact</strong> and reduces the cost to <span class="math inline">\(O(Nm)\)</span>. For a 50k-SNP panel and 5000 accessions this is the difference between hours and seconds.</p>
+<p>Between individuals <span class="math inline">\(l\)</span> and <span class="math inline">\(l'\)</span> the distance is <span class="math inline">\(d_{ll'} = (s_l + s_{l'})/2 - f_{ll'}\)</span>, with <span class="math inline">\(s_l\)</span> and <span class="math inline">\(f_{ll'}\)</span> the self-coancestry and coancestry of single individuals (<a href="#eq-self-coancestry" class="quarto-xref">Equation&nbsp;<span>2.2</span></a> with <span class="math inline">\(N_i = 1\)</span>); at a biallelic locus it equals <span class="math inline">\((p_l - p_{l'})^2\)</span>, <span class="math inline">\(p_l\)</span> the within-individual frequency, and over loci it is averaged. The mean of <span class="math inline">\(d_{ll'}\)</span> over all pairs of an individual of <span class="math inline">\(i\)</span> and an individual of <span class="math inline">\(j\)</span>, <span class="math inline">\(\bar d_{ij}\)</span>, computed literally as a double sum over all pairs of individuals, costs <span class="math inline">\(O(N_i N_j m)\)</span>. The identity <span class="math inline">\(\bar d_{ij} = (s_i + s_j)/2 - f_{ij}\)</span> is exact and needs only the subpopulation frequencies and self-coancestries, at cost <span class="math inline">\(O(N_T m + n^2 m)\)</span>. <span class="math inline">\(\bar d_{ij}\)</span> is not the <span class="math inline">\(D_{ij}\)</span> of <a href="#eq-nei-distance" class="quarto-xref">Equation&nbsp;<span>2.4</span></a>: its diagonal <span class="math inline">\(\bar d_{ii} = s_i - f_{ii}\)</span> is not zero, and Nei’s distance is recovered as <span class="math inline">\(D_{ij} = \bar d_{ij} - (\bar d_{ii} + \bar d_{jj})/2\)</span>. Both identities follow by substituting the definitions of <span class="math inline">\(d_{ll'}\)</span>, <span class="math inline">\(s_i\)</span> (<a href="#eq-self-coancestry" class="quarto-xref">Equation&nbsp;<span>2.2</span></a>) and <span class="math inline">\(f_{ij}\)</span>. No timing at genebank scale was run for this chapter.</p>
 </div>
 </div>
 </section>
 <section id="the-equation-that-matters-most-in-practice" class="level2" data-number="2.5">
 <h2 data-number="2.5" class="anchored" data-anchor-id="the-equation-that-matters-most-in-practice"><span class="header-section-number">2.5</span> The equation that matters most in practice</h2>
-<p><span class="math display">\[\bar{f} = \sum_{i} \frac{N_i}{N_T}
+<p><span id="eq-fbar-decomp"><span class="math display">\[\bar{f} = \sum_{i} \frac{N_i}{N_T}
   \Big[\, \underbrace{f_{ii}}_{\text{internal coancestry}}
-        - \underbrace{\textstyle\sum_j \mathbf{D}_{ij} N_j / N_T}_{\text{mean distance to the others}} \Big]\]</span></p>
-<p>Each accession’s contribution to global coancestry – that is, to the <em>loss</em> of diversity in the pool – has <strong>two terms of opposite sign</strong>:</p>
+        - \underbrace{\textstyle\sum_j D_{ij} N_j / N_T}_{\text{mean distance to the others}} \Big] \tag{2.5}\]</span></span></p>
+<p>In <a href="#eq-fbar-decomp" class="quarto-xref">Equation&nbsp;<span>2.5</span></a>, each accession’s contribution to global coancestry – that is, to the <em>loss</em> of diversity in the pool – has <strong>two terms of opposite sign</strong>:</p>
 <ul>
 <li><strong>Term 1 (+).</strong> The more internally fixed an accession is, the more it <em>raises</em> global coancestry: it dilutes the pool with copies of the same allele.</li>
 <li><strong>Term 2 (−).</strong> The more distant it is from the others, the more it <em>reduces</em> global coancestry.</li>
@@ -822,22 +848,27 @@ window.Quarto = {
 </section>
 <section id="f-statistics-and-the-partition" class="level2" data-number="2.6">
 <h2 data-number="2.6" class="anchored" data-anchor-id="f-statistics-and-the-partition"><span class="header-section-number">2.6</span> F statistics and the partition</h2>
-<p><span class="math display">\[F_{IS} = \frac{\tilde F - \tilde f}{1 - \tilde f}, \qquad
+<p><span id="eq-f-stats"><span class="math display">\[F_{IS} = \frac{\tilde F - \tilde f}{1 - \tilde f}, \qquad
   F_{ST} = \frac{\tilde f - \bar f}{1 - \bar f} = \frac{\bar D}{1 - \bar f}, \qquad
-  F_{IT} = \frac{\tilde F - \bar f}{1 - \bar f}\]</span></p>
-<p>with <span class="math inline">\((1 - F_{IT}) = (1 - F_{IS})(1 - F_{ST})\)</span>.</p>
-<p>The partition itself is the heart of the paper:</p>
-<p><span class="math display">\[(1 - \bar f) = \underbrace{(1 - \tilde s)}_{GD_{WI}}
+  F_{IT} = \frac{\tilde F - \bar f}{1 - \bar f} \tag{2.6}\]</span></span></p>
+<p>with <span class="math inline">\((1 - F_{IT}) = (1 - F_{IS})(1 - F_{ST})\)</span>. These are Wright’s fixation indices <span class="citation" data-cites="wright1951">(<a href="99-references.html#ref-wright1951" role="doc-biblioref">Wright 1951</a>)</span> written in coancestries; the form <span class="math inline">\(F_{ST} = \bar D/(1 - \bar f)\)</span> is due to <span class="citation" data-cites="cockerham1969">Cockerham (<a href="99-references.html#ref-cockerham1969" role="doc-biblioref">1969</a>)</span>, as restated by <span class="citation" data-cites="toro2005">Toro and Caballero (<a href="99-references.html#ref-toro2005" role="doc-biblioref">2005, sec. 3a</a>)</span>.</p>
+<p>The partition itself, of gene diversity (<span class="math inline">\(GD\)</span>) into the terms named in <a href="#tbl-gd-partition" class="quarto-xref">Table&nbsp;<span>2.2</span></a>, is the heart of <span class="citation" data-cites="caballero2002">Caballero and Toro (<a href="99-references.html#ref-caballero2002" role="doc-biblioref">2002</a>)</span>:</p>
+<p><span id="eq-gd-partition"><span class="math display">\[(1 - \bar f) = \underbrace{(1 - \tilde s)}_{GD_{WI}}
               + \underbrace{(\tilde s - \tilde f)}_{GD_{BI}}
-              + \underbrace{(\tilde f - \bar f)}_{GD_{BS}}\]</span></p>
+              + \underbrace{(\tilde f - \bar f)}_{GD_{BS}} \tag{2.7}\]</span></span></p>
 <div class="cell" data-layout-align="center">
+<div id="tbl-gd-partition" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-gd-partition-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2.2: The partition of gene diversity of <span class="citation" data-cites="caballero2002">Caballero and Toro (<a href="99-references.html#ref-caballero2002" role="doc-biblioref">2002</a>)</span> (<a href="#eq-gd-partition" class="quarto-xref">Equation&nbsp;<span>2.7</span></a>): each component, its definition in coancestries and its biological reading. <span class="math inline">\(\bar f\)</span>: mean coancestry over all pairs; <span class="math inline">\(\tilde f\)</span>, <span class="math inline">\(\tilde s\)</span>: within-subpopulation weighted means of coancestry and self-coancestry; <span class="math inline">\(H_e\)</span>, <span class="math inline">\(H_o\)</span>: expected and observed heterozygosity.
+</figcaption>
+<div aria-describedby="tbl-gd-partition-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<table class="caption-top table table-sm table-striped small">
-<caption>The partition of gene diversity (Caballero &amp; Toro 2002, Eq. 7).</caption>
+<table class="cell caption-top table table-sm table-striped small">
 <colgroup>
-<col style="width: 17%">
-<col style="width: 30%">
-<col style="width: 51%">
+<col style="width: 24%">
+<col style="width: 28%">
+<col style="width: 47%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -848,27 +879,27 @@ window.Quarto = {
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">GD_T = 1 - f_bar</td>
+<td style="text-align: left;"><span class="math inline">\(GD_T = 1 - \bar f\)</span></td>
 <td style="text-align: left;">total diversity</td>
-<td style="text-align: left;">He of the whole pool if everything were recombined</td>
+<td style="text-align: left;"><span class="math inline">\(H_e\)</span> of the whole pool if everything were recombined</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">GD_WI = 1 - s_til</td>
+<td style="text-align: left;"><span class="math inline">\(GD_{WI} = 1 - \tilde s\)</span></td>
 <td style="text-align: left;">within individuals</td>
-<td style="text-align: left;">heterozygosity carried inside each plant</td>
+<td style="text-align: left;">half the observed heterozygosity inside each plant, <span class="math inline">\(H_o/2\)</span></td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">GD_BI = s_til - f_til</td>
+<td style="text-align: left;"><span class="math inline">\(GD_{BI} = \tilde s - \tilde f\)</span></td>
 <td style="text-align: left;">between individuals, within accession</td>
 <td style="text-align: left;">segregating variation available to within-population selection</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">GD_WS = 1 - f_til</td>
+<td style="text-align: left;"><span class="math inline">\(GD_{WS} = 1 - \tilde f\)</span></td>
 <td style="text-align: left;">within subpopulations</td>
-<td style="text-align: left;">GD_WI + GD_BI</td>
+<td style="text-align: left;"><span class="math inline">\(GD_{WI} + GD_{BI}\)</span></td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">GD_BS = f_til - f_bar</td>
+<td style="text-align: left;"><span class="math inline">\(GD_{BS} = \tilde f - \bar f\)</span></td>
 <td style="text-align: left;">between subpopulations</td>
 <td style="text-align: left;">divergence; the only component a distance method sees</td>
 </tr>
@@ -876,94 +907,180 @@ window.Quarto = {
 </table>
 </div>
 </div>
-<p>with the clean identities</p>
-<p><span class="math display">\[\frac{GD_{WI}}{GD_T} = (1-G)(1-F_{ST}), \quad
+</figure>
+</div>
+</div>
+<p>The four components satisfy the identities</p>
+<p><span id="eq-ratio-identities"><span class="math display">\[\frac{GD_{WI}}{GD_T} = (1-G)(1-F_{ST}), \quad
   \frac{GD_{BI}}{GD_T} = G(1-F_{ST}), \quad
   \frac{GD_{WS}}{GD_T} = 1-F_{ST}, \quad
-  \frac{GD_{BS}}{GD_T} = F_{ST}.\]</span></p>
+  \frac{GD_{BS}}{GD_T} = F_{ST}, \tag{2.8}\]</span></span></p>
+<p>where <span class="math inline">\(G = (\tilde s - \tilde f)/(1 - \tilde f)\)</span> is the metapopulation analogue of <span class="math inline">\(G_i\)</span> (<a href="#eq-alpha-g" class="quarto-xref">Equation&nbsp;<span>2.3</span></a>). Since <span class="math inline">\(s_i - f_{ii} = G_i (1 - f_{ii})\)</span>, <span class="math inline">\(G = \sum_i N_i (1 - f_{ii}) G_i / \sum_i N_i (1 - f_{ii})\)</span>: a mean of the <span class="math inline">\(G_i\)</span> weighted by <span class="math inline">\(N_i (1 - f_{ii})\)</span>, not the census mean <span class="math inline">\(\sum_i (N_i/N_T)\, G_i\)</span>. The two coincide when all <span class="math inline">\(G_i\)</span> are equal or all <span class="math inline">\(f_{ii}\)</span> are equal, and the first two identities then hold with either; when both the <span class="math inline">\(G_i\)</span> and the <span class="math inline">\(f_{ii}\)</span> differ the two means generally differ, and the first two identities fail with the census mean (the chunk below exhibits one such case). They follow from <span class="math inline">\(1 - F_{ST} = (1 - \tilde f)/(1 - \bar f)\)</span>.</p>
+<p>Every identity of this chapter so far needs individual genotypes, so the chunk below draws a toy metapopulation – two random-mating subpopulations and one of inbred lines, 400 biallelic loci – runs <code>ct_partition()</code> on it, and asserts each identity, the distance identities against a literal double sum over pairs of individuals:</p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>m_toy <span class="ot">&lt;-</span> <span class="dv">400</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>N_toy <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">6</span>, <span class="dv">8</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>pop   <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">"a_out"</span>, <span class="st">"b_out"</span>, <span class="st">"c_inbred"</span>), N_toy)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>p_toy <span class="ot">&lt;-</span> <span class="fu">matrix</span>(stats<span class="sc">::</span><span class="fu">runif</span>(<span class="dv">3</span> <span class="sc">*</span> m_toy), <span class="dv">3</span>)          <span class="co"># subpopulation frequencies</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>geno  <span class="ot">&lt;-</span> <span class="fu">rbind</span>(                                       <span class="co"># 0/1/2 dosage</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">matrix</span>(stats<span class="sc">::</span><span class="fu">rbinom</span>(N_toy[<span class="dv">1</span>] <span class="sc">*</span> m_toy, <span class="dv">2</span>, <span class="fu">rep</span>(p_toy[<span class="dv">1</span>, ], <span class="at">each =</span> N_toy[<span class="dv">1</span>])), N_toy[<span class="dv">1</span>]),</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">matrix</span>(stats<span class="sc">::</span><span class="fu">rbinom</span>(N_toy[<span class="dv">2</span>] <span class="sc">*</span> m_toy, <span class="dv">2</span>, <span class="fu">rep</span>(p_toy[<span class="dv">2</span>, ], <span class="at">each =</span> N_toy[<span class="dv">2</span>])), N_toy[<span class="dv">2</span>]),</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">matrix</span>(<span class="dv">2</span> <span class="sc">*</span> stats<span class="sc">::</span><span class="fu">rbinom</span>(N_toy[<span class="dv">3</span>] <span class="sc">*</span> m_toy, <span class="dv">1</span>, <span class="fu">rep</span>(p_toy[<span class="dv">3</span>, ], <span class="at">each =</span> N_toy[<span class="dv">3</span>])), N_toy[<span class="dv">3</span>]))</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>ct  <span class="ot">&lt;-</span> <span class="fu">ct_partition</span>(geno, pop)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>gl  <span class="ot">&lt;-</span> ct[[<span class="st">"global"</span>]]; GD <span class="ot">&lt;-</span> ct[[<span class="st">"diversity"</span>]]; bs <span class="ot">&lt;-</span> ct[[<span class="st">"by_subpop"</span>]]</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>s_i <span class="ot">&lt;-</span> bs[[<span class="st">"s_i"</span>]]; f_ct <span class="ot">&lt;-</span> <span class="fu">unname</span>(ct[[<span class="st">"f"</span>]])</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co"># 2(1 - s_i) = 1 - F_i = H_o, with H_o counted from the genotypes</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>H_o <span class="ot">&lt;-</span> <span class="fu">as.vector</span>(<span class="fu">tapply</span>(<span class="fu">rowMeans</span>(geno <span class="sc">==</span> <span class="dv">1</span>), <span class="fu">factor</span>(pop), mean))</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">all.equal</span>(<span class="dv">2</span> <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> s_i), H_o), <span class="fu">all.equal</span>(<span class="dv">1</span> <span class="sc">-</span> bs[[<span class="st">"F_i"</span>]], H_o),</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>          <span class="fu">identical</span>(s_i[<span class="dv">3</span>], <span class="dv">1</span>))                       <span class="co"># inbred lines: 1 - s_i = 0</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">mean</span>(geno<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">-</span> geno)<span class="sc">^</span><span class="dv">2</span>) <span class="sc">&gt;</span> <span class="dv">1</span>)            <span class="co"># 0/1/2 used as p: s leaves [0.5, 1]</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">all.equal</span>(bs[[<span class="st">"G_i"</span>]], (<span class="dv">1</span> <span class="sc">+</span> bs[[<span class="st">"alpha_i"</span>]]) <span class="sc">/</span> <span class="dv">2</span>))</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="co"># f_bar &lt;= f_til &lt;= s_til, and f_bar = sum_i w_i [f_ii - sum_j D_ij w_j]</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(gl[[<span class="st">"f_bar"</span>]] <span class="sc">&lt;=</span> gl[[<span class="st">"f_til"</span>]], gl[[<span class="st">"f_til"</span>]] <span class="sc">&lt;=</span> gl[[<span class="st">"s_til"</span>]],</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>          <span class="fu">all.equal</span>(<span class="fu">sum</span>(bs[[<span class="st">"contrib_fbar"</span>]]), gl[[<span class="st">"f_bar"</span>]]))</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="co"># F statistics</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">all.equal</span>(gl[[<span class="st">"F_ST"</span>]], (gl[[<span class="st">"f_til"</span>]] <span class="sc">-</span> gl[[<span class="st">"f_bar"</span>]]) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> gl[[<span class="st">"f_bar"</span>]])),</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>          <span class="fu">all.equal</span>(<span class="dv">1</span> <span class="sc">-</span> gl[[<span class="st">"F_IT"</span>]], (<span class="dv">1</span> <span class="sc">-</span> gl[[<span class="st">"F_IS"</span>]]) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> gl[[<span class="st">"F_ST"</span>]])))</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="co"># the partition and the ratio identities, with the metapopulation G</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">all.equal</span>(GD[[<span class="st">"GD_T"</span>]], GD[[<span class="st">"GD_WI"</span>]] <span class="sc">+</span> GD[[<span class="st">"GD_BI"</span>]] <span class="sc">+</span> GD[[<span class="st">"GD_BS"</span>]]),</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>          <span class="fu">all.equal</span>(GD[[<span class="st">"GD_WS"</span>]], GD[[<span class="st">"GD_WI"</span>]] <span class="sc">+</span> GD[[<span class="st">"GD_BI"</span>]]))</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>G_meta  <span class="ot">&lt;-</span> (gl[[<span class="st">"s_til"</span>]] <span class="sc">-</span> gl[[<span class="st">"f_til"</span>]]) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> gl[[<span class="st">"f_til"</span>]])</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>G_wmean <span class="ot">&lt;-</span> <span class="fu">sum</span>(ct[[<span class="st">"w"</span>]] <span class="sc">*</span> bs[[<span class="st">"G_i"</span>]])</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>w_he    <span class="ot">&lt;-</span> ct[[<span class="st">"w"</span>]] <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">diag</span>(f_ct))                <span class="co"># G is the (1 - f_ii)-weighted mean</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">all.equal</span>(G_meta, <span class="fu">sum</span>(w_he <span class="sc">*</span> bs[[<span class="st">"G_i"</span>]]) <span class="sc">/</span> <span class="fu">sum</span>(w_he)))</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>F_ST    <span class="ot">&lt;-</span> gl[[<span class="st">"F_ST"</span>]]</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">all.equal</span>(GD[[<span class="st">"GD_WI"</span>]] <span class="sc">/</span> GD[[<span class="st">"GD_T"</span>]], (<span class="dv">1</span> <span class="sc">-</span> G_meta) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> F_ST)),</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>          <span class="fu">all.equal</span>(GD[[<span class="st">"GD_BI"</span>]] <span class="sc">/</span> GD[[<span class="st">"GD_T"</span>]], G_meta <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> F_ST)),</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>          <span class="fu">all.equal</span>(GD[[<span class="st">"GD_WS"</span>]] <span class="sc">/</span> GD[[<span class="st">"GD_T"</span>]], <span class="dv">1</span> <span class="sc">-</span> F_ST),</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>          <span class="fu">all.equal</span>(GD[[<span class="st">"GD_BS"</span>]] <span class="sc">/</span> GD[[<span class="st">"GD_T"</span>]], F_ST),</span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>          <span class="sc">!</span><span class="fu">isTRUE</span>(<span class="fu">all.equal</span>(GD[[<span class="st">"GD_WI"</span>]] <span class="sc">/</span> GD[[<span class="st">"GD_T"</span>]], (<span class="dv">1</span> <span class="sc">-</span> G_wmean) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> F_ST))))</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a><span class="co"># d_bar_ij = (s_i + s_j)/2 - f_ij against the literal double sum; per locus the</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a><span class="co"># distance between individuals l, l' is (s_l + s_l')/2 - f_ll' = (p_l - p_l')^2</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>P     <span class="ot">&lt;-</span> geno <span class="sc">/</span> <span class="dv">2</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>idv   <span class="ot">&lt;-</span> <span class="fu">split</span>(<span class="fu">seq_len</span>(<span class="fu">nrow</span>(P)), <span class="fu">factor</span>(pop))</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>d_lit <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="dv">3</span>)</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_along</span>(idv)) <span class="cf">for</span> (j <span class="cf">in</span> <span class="fu">seq_along</span>(idv)) {</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (l <span class="cf">in</span> idv[[i]]) <span class="cf">for</span> (l2 <span class="cf">in</span> idv[[j]])</span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>    d_lit[i, j] <span class="ot">&lt;-</span> d_lit[i, j] <span class="sc">+</span> <span class="fu">mean</span>((P[l, ] <span class="sc">-</span> P[l2, ])<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>  d_lit[i, j] <span class="ot">&lt;-</span> d_lit[i, j] <span class="sc">/</span> (<span class="fu">length</span>(idv[[i]]) <span class="sc">*</span> <span class="fu">length</span>(idv[[j]]))</span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>d_bar <span class="ot">&lt;-</span> <span class="fu">outer</span>(s_i, s_i, <span class="st">"+"</span>) <span class="sc">/</span> <span class="dv">2</span> <span class="sc">-</span> f_ct</span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">all.equal</span>(d_lit, d_bar),</span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>          <span class="fu">all.equal</span>(<span class="fu">unname</span>(ct[[<span class="st">"D_nei"</span>]]),</span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>                    d_bar <span class="sc">-</span> <span class="fu">outer</span>(<span class="fu">diag</span>(d_bar), <span class="fu">diag</span>(d_bar), <span class="st">"+"</span>) <span class="sc">/</span> <span class="dv">2</span>))</span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">c</span>(<span class="at">G_meta =</span> G_meta, <span class="at">G_wmean =</span> G_wmean, GD), <span class="dv">4</span>)</span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  G_meta G_wmean    GD_T   GD_WI   GD_BI   GD_WS   GD_BS </span></span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  0.6441  0.6490  0.4304  0.1097  0.1986  0.3083  0.1221</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
 <section id="why-the-partition-changes-the-strategy-by-species" class="level3" data-number="2.6.1">
 <h3 data-number="2.6.1" class="anchored" data-anchor-id="why-the-partition-changes-the-strategy-by-species"><span class="header-section-number">2.6.1</span> Why the partition changes the strategy by species</h3>
 <ul>
 <li><strong>Outcrossers</strong> (maize, sunflower, forages, forest trees): <span class="math inline">\(GD_{WI}\)</span> is large. The diversity is literally <em>inside</em> the plants. Conserving means maintaining heterozygosity – regenerate with many individuals and balanced contributions.</li>
-<li><strong>Selfers</strong> (soybean, wheat, rice, beans) <strong>and DH or line collections</strong>: <span class="math inline">\(GD_{WI} \approx 0\)</span>. All diversity is <span class="math inline">\(GD_{BI} + GD_{BS}\)</span>. Conserving means maintaining the <em>number of distinct lines</em>; heterozygosity is not a target. Regenerating with few plants per line is acceptable; losing lines is not.</li>
+<li><strong>Selfers</strong> (soybean, wheat, rice, beans) <strong>and doubled-haploid or line collections</strong>: <span class="math inline">\(GD_{WI} \approx 0\)</span>. All diversity is <span class="math inline">\(GD_{BI} + GD_{BS}\)</span>. Conserving means maintaining the <em>number of distinct lines</em>; heterozygosity is not a target. Regenerating with few plants per line is acceptable; losing lines is not.</li>
 <li><strong>Clonal crops</strong> (potato, sugarcane, fruit trees): <span class="math inline">\(GD_{WI}\)</span> is high and <strong>frozen</strong> – it does not decay by drift while the clone exists. The <span class="math inline">\(N_e\)</span> algebra does not apply without adaptation.</li>
 </ul>
-<p>This is the reason a hybrid maize programme cannot manage diversity with a single pool-wide number: it needs <span class="math inline">\(GD_{WS}\)</span> defended and <span class="math inline">\(GD_{BS}\)</span> held, and those two pull in opposite directions under selection.</p>
+<p>This is the reason a hybrid maize programme cannot manage diversity with a single pool-wide number: it needs <span class="math inline">\(GD_{WS}\)</span> and <span class="math inline">\(GD_{BS}\)</span> reported separately. Under drift alone in two closed pools of equal weight, <span class="math inline">\(f_{AB}\)</span> is unchanged in expectation while <span class="math inline">\(f_{AA}\)</span> and <span class="math inline">\(f_{BB}\)</span> rise, so an expected rise <span class="math inline">\(\Delta\)</span> in <span class="math inline">\(\tilde f\)</span> raises <span class="math inline">\(\bar f\)</span> by <span class="math inline">\(\Delta/2\)</span>: <span class="math inline">\(GD_{WS}\)</span> falls by <span class="math inline">\(\Delta\)</span>, <span class="math inline">\(GD_{BS}\)</span> rises by <span class="math inline">\(\Delta/2\)</span>, and <span class="math inline">\(GD_T\)</span> falls by only <span class="math inline">\(\Delta/2\)</span>. A single total understates the within-pool loss; <a href="05b-heterosis-dominance.html#sec-heterosis-flat" class="quarto-xref"><span>Section 13.7</span></a> shows what the between-pool gain is worth. Selection is not covered by this argument.</p>
 </section>
 </section>
 <section id="the-worked-example-reproduced" class="level2" data-number="2.7">
 <h2 data-number="2.7" class="anchored" data-anchor-id="the-worked-example-reproduced"><span class="header-section-number">2.7</span> The worked example, reproduced</h2>
-<p>The paper’s metapopulation: four subpopulations of <span class="math inline">\(N\)</span> = 12, 4, 8, 6, three loci with 5, 3 and 3 alleles. Its published coancestry matrix:</p>
+<p>The metapopulation of <span class="citation" data-cites="caballero2002">Caballero and Toro (<a href="99-references.html#ref-caballero2002" role="doc-biblioref">2002</a>)</span>: four subpopulations of <span class="math inline">\(N\)</span> = 12, 4, 8, 6, three loci with 5, 3 and 3 alleles. Its published coancestry matrix, transcribed from the paper:</p>
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fl">0.3391</span>, <span class="fl">0.3021</span>, <span class="fl">0.2535</span>, <span class="fl">0.3229</span>,</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>              <span class="fl">0.3021</span>, <span class="fl">0.8750</span>, <span class="fl">0.3073</span>, <span class="fl">0.3889</span>,</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>              <span class="fl">0.2535</span>, <span class="fl">0.3073</span>, <span class="fl">0.4766</span>, <span class="fl">0.2483</span>,</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>              <span class="fl">0.3229</span>, <span class="fl">0.3889</span>, <span class="fl">0.2483</span>, <span class="fl">0.3704</span>), <span class="dv">4</span>, <span class="dv">4</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="fu">paste0</span>(<span class="st">"Sub"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>), <span class="fu">paste0</span>(<span class="st">"Sub"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>)))</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>N <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">12</span>, <span class="dv">4</span>, <span class="dv">8</span>, <span class="dv">6</span>)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>w <span class="ot">&lt;-</span> N <span class="sc">/</span> <span class="fu">sum</span>(N)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fl">0.3391</span>, <span class="fl">0.3021</span>, <span class="fl">0.2535</span>, <span class="fl">0.3229</span>,</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>              <span class="fl">0.3021</span>, <span class="fl">0.8750</span>, <span class="fl">0.3073</span>, <span class="fl">0.3889</span>,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>              <span class="fl">0.2535</span>, <span class="fl">0.3073</span>, <span class="fl">0.4766</span>, <span class="fl">0.2483</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>              <span class="fl">0.3229</span>, <span class="fl">0.3889</span>, <span class="fl">0.2483</span>, <span class="fl">0.3704</span>), <span class="dv">4</span>, <span class="dv">4</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="fu">paste0</span>(<span class="st">"Sub"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>), <span class="fu">paste0</span>(<span class="st">"Sub"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>)))</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>N <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">12</span>, <span class="dv">4</span>, <span class="dv">8</span>, <span class="dv">6</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>w <span class="ot">&lt;-</span> N <span class="sc">/</span> <span class="fu">sum</span>(N)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<p>Note subpopulation 2: <span class="math inline">\(f_{22} = 0.875\)</span>, so <span class="math inline">\(H_e = 0.125\)</span>. It is nearly fixed internally. Now the global quantities, with the paper’s published values beside them:</p>
+<p>Note subpopulation 2: <span class="math inline">\(f_{22} = 0.875\)</span>, so <span class="math inline">\(H_e = 0.125\)</span>. It is nearly fixed internally. Now the global quantities, with the paper’s published values beside them (<a href="#tbl-ct-example-global" class="quarto-xref">Table&nbsp;<span>2.3</span></a>):</p>
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>f_bar <span class="ot">&lt;-</span> <span class="fu">drop</span>(w <span class="sc">%*%</span> f <span class="sc">%*%</span> w)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>f_til <span class="ot">&lt;-</span> <span class="fu">sum</span>(w <span class="sc">*</span> <span class="fu">diag</span>(f))</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>s_til <span class="ot">&lt;-</span> <span class="fl">0.7056</span>                       <span class="co"># published; needs individual genotypes</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">quantity =</span> <span class="fu">c</span>(<span class="st">"f_bar"</span>, <span class="st">"f_til"</span>, <span class="st">"GD_T"</span>, <span class="st">"GD_WI"</span>, <span class="st">"GD_BI"</span>, <span class="st">"GD_BS"</span>, <span class="st">"F_ST"</span>),</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">computed =</span> <span class="fu">round</span>(<span class="fu">c</span>(f_bar, f_til, <span class="dv">1</span> <span class="sc">-</span> f_bar, <span class="dv">1</span> <span class="sc">-</span> s_til, s_til <span class="sc">-</span> f_til,</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>                     f_til <span class="sc">-</span> f_bar, (f_til <span class="sc">-</span> f_bar) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> f_bar)), <span class="dv">4</span>),</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">published =</span> <span class="fu">c</span>(<span class="fl">0.3256</span>, <span class="fl">0.4535</span>, <span class="fl">0.6744</span>, <span class="fl">0.2944</span>, <span class="fl">0.2521</span>, <span class="fl">0.1279</span>, <span class="fl">0.1897</span>)</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>f_bar <span class="ot">&lt;-</span> <span class="fu">drop</span>(w <span class="sc">%*%</span> f <span class="sc">%*%</span> w)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>f_til <span class="ot">&lt;-</span> <span class="fu">sum</span>(w <span class="sc">*</span> <span class="fu">diag</span>(f))</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>s_til <span class="ot">&lt;-</span> <span class="fl">0.7056</span>                       <span class="co"># published; needs individual genotypes</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>computed  <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">f_bar =</span> f_bar, <span class="at">f_til =</span> f_til, <span class="at">GD_T =</span> <span class="dv">1</span> <span class="sc">-</span> f_bar,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">GD_WI =</span> <span class="dv">1</span> <span class="sc">-</span> s_til, <span class="at">GD_BI =</span> s_til <span class="sc">-</span> f_til, <span class="at">GD_BS =</span> f_til <span class="sc">-</span> f_bar,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>               <span class="at">F_ST =</span> (f_til <span class="sc">-</span> f_bar) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> f_bar))</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>published <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">f_bar =</span> <span class="fl">0.3256</span>, <span class="at">f_til =</span> <span class="fl">0.4535</span>, <span class="at">GD_T =</span> <span class="fl">0.6744</span>, <span class="at">GD_WI =</span> <span class="fl">0.2944</span>,</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>               <span class="at">GD_BI =</span> <span class="fl">0.2521</span>, <span class="at">GD_BS =</span> <span class="fl">0.1279</span>, <span class="at">F_ST =</span> <span class="fl">0.1897</span>)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co"># rows computed from f alone must match to half a unit of the 4th decimal</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>from_f <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"f_bar"</span>, <span class="st">"f_til"</span>, <span class="st">"GD_T"</span>, <span class="st">"GD_BS"</span>, <span class="st">"F_ST"</span>)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">max</span>(<span class="fu">abs</span>(computed[from_f] <span class="sc">-</span> published[from_f])) <span class="sc">&lt;</span> <span class="fl">5e-5</span>)</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co"># the published partition must close: three 4-dp roundings, at most 1.5e-4</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">abs</span>(<span class="fu">sum</span>(published[<span class="fu">c</span>(<span class="st">"GD_WI"</span>, <span class="st">"GD_BI"</span>, <span class="st">"GD_BS"</span>)]) <span class="sc">-</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>              published[[<span class="st">"GD_T"</span>]]) <span class="sc">&lt;</span> <span class="fl">1.5e-4</span>)</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>ct_glob <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">quantity =</span> <span class="fu">names</span>(computed),</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>                      <span class="at">computed =</span> <span class="fu">round</span>(<span class="fu">unname</span>(computed), <span class="dv">4</span>),</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>                      <span class="at">published =</span> <span class="fu">unname</span>(published))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
+</div>
+<div class="cell" data-layout-align="center">
+<div id="tbl-ct-example-global" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ct-example-global-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2.3: Global quantities of the worked example of <span class="citation" data-cites="caballero2002">Caballero and Toro (<a href="99-references.html#ref-caballero2002" role="doc-biblioref">2002</a>)</span> (four subpopulations, <span class="math inline">\(N\)</span> = 12, 4, 8, 6), computed from the published coancestry matrix <span class="math inline">\(\mathbf{f}\)</span> and census weights <span class="math inline">\(N_i/N_T\)</span>, beside the published values. <span class="math inline">\(\bar f\)</span>: mean coancestry over all pairs; <span class="math inline">\(\tilde f\)</span>: within-subpopulation weighted mean coancestry; <span class="math inline">\(GD_T\)</span>, <span class="math inline">\(GD_{WI}\)</span>, <span class="math inline">\(GD_{BI}\)</span>, <span class="math inline">\(GD_{BS}\)</span>: the components of <a href="#eq-gd-partition" class="quarto-xref">Equation&nbsp;<span>2.7</span></a>; <span class="math inline">\(F_{ST}\)</span>: <a href="#eq-f-stats" class="quarto-xref">Equation&nbsp;<span>2.6</span></a>. Computed <span class="math inline">\(GD_{WI}\)</span> and <span class="math inline">\(GD_{BI}\)</span> use the published <span class="math inline">\(\tilde s\)</span>, which needs individual genotypes, and therefore agree with the published values by construction.
+</figcaption>
+<div aria-describedby="tbl-ct-example-global-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<div class="kable-table">
-<table class="caption-top table table-sm table-striped small">
+<table class="cell caption-top table table-sm table-striped small">
 <thead>
 <tr class="header">
-<th style="text-align: left;">quantity</th>
-<th style="text-align: right;">computed</th>
-<th style="text-align: right;">published</th>
+<th style="text-align: left;">Quantity</th>
+<th style="text-align: right;">Computed</th>
+<th style="text-align: right;">Published</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">f_bar</td>
+<td style="text-align: left;"><span class="math inline">\(\bar f\)</span></td>
 <td style="text-align: right;">0.3256</td>
 <td style="text-align: right;">0.3256</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">f_til</td>
+<td style="text-align: left;"><span class="math inline">\(\tilde f\)</span></td>
 <td style="text-align: right;">0.4535</td>
 <td style="text-align: right;">0.4535</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">GD_T</td>
+<td style="text-align: left;"><span class="math inline">\(GD_T\)</span></td>
 <td style="text-align: right;">0.6744</td>
 <td style="text-align: right;">0.6744</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">GD_WI</td>
+<td style="text-align: left;"><span class="math inline">\(GD_{WI}\)</span></td>
 <td style="text-align: right;">0.2944</td>
 <td style="text-align: right;">0.2944</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">GD_BI</td>
+<td style="text-align: left;"><span class="math inline">\(GD_{BI}\)</span></td>
 <td style="text-align: right;">0.2521</td>
 <td style="text-align: right;">0.2521</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">GD_BS</td>
+<td style="text-align: left;"><span class="math inline">\(GD_{BS}\)</span></td>
 <td style="text-align: right;">0.1279</td>
 <td style="text-align: right;">0.1279</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">F_ST</td>
+<td style="text-align: left;"><span class="math inline">\(F_{ST}\)</span></td>
 <td style="text-align: right;">0.1897</td>
 <td style="text-align: right;">0.1897</td>
 </tr>
@@ -971,67 +1088,93 @@ window.Quarto = {
 </table>
 </div>
 </div>
+</figure>
 </div>
-<p>Every value reproduces exactly. Note that <span class="math inline">\(GD_{BS}\)</span> is only 19% of the total: the between-subpopulation divergence – the only thing a distance method measures – accounts for less than a fifth of the diversity in this metapopulation.</p>
-<section id="removing-an-accession-can-increase-diversity" class="level3" data-number="2.7.1">
-<h3 data-number="2.7.1" class="anchored" data-anchor-id="removing-an-accession-can-increase-diversity"><span class="header-section-number">2.7.1</span> Removing an accession can <em>increase</em> diversity</h3>
+</div>
+<p>The five values computed from <span class="math inline">\(\mathbf{f}\)</span> alone (<span class="math inline">\(\bar f\)</span>, <span class="math inline">\(\tilde f\)</span>, <span class="math inline">\(GD_T\)</span>, <span class="math inline">\(GD_{BS}\)</span>, <span class="math inline">\(F_{ST}\)</span>) reproduce the published ones within half a unit of the fourth decimal, and the chunk asserts it. The chunk also asserts that the published <span class="math inline">\(GD_{WI}\)</span>, <span class="math inline">\(GD_{BI}\)</span> and <span class="math inline">\(GD_{BS}\)</span> sum to the published <span class="math inline">\(GD_T\)</span>, a check of the paper’s internal consistency. The computed <span class="math inline">\(GD_{WI}\)</span> and <span class="math inline">\(GD_{BI}\)</span> are not a check: they are derived from the published <span class="math inline">\(\tilde s\)</span>, which needs individual genotypes this chapter does not have, so they agree by construction. Note that <span class="math inline">\(GD_{BS}\)</span> is only 19 % of the total: the between-subpopulation divergence – the only thing a distance method measures – accounts for less than a fifth of the diversity in this metapopulation.</p>
+<section id="sec-ct-removal" class="level3" data-number="2.7.1">
+<h3 data-number="2.7.1" class="anchored" data-anchor-id="sec-ct-removal"><span class="header-section-number">2.7.1</span> Removing an accession can <em>increase</em> diversity</h3>
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">f =</span> f, <span class="at">by_subpop =</span> <span class="fu">data.frame</span>(<span class="at">N =</span> N))</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cbind</span>(<span class="fu">ct_loss_gain</span>(res),</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>      <span class="at">delta_pct_equal =</span> <span class="fu">round</span>(<span class="fu">ct_loss_gain</span>(res, <span class="st">"equal"</span>)<span class="sc">$</span>delta_pct, <span class="dv">2</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">f =</span> f, <span class="at">by_subpop =</span> <span class="fu">data.frame</span>(<span class="at">N =</span> N))</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>lg  <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="fu">ct_loss_gain</span>(res),</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">delta_pct_equal =</span> <span class="fu">ct_loss_gain</span>(res, <span class="st">"equal"</span>)<span class="sc">$</span>delta_pct)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>D_nei   <span class="ot">&lt;-</span> <span class="fu">outer</span>(<span class="fu">diag</span>(f), <span class="fu">diag</span>(f), <span class="st">"+"</span>) <span class="sc">/</span> <span class="dv">2</span> <span class="sc">-</span> f</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>lg<span class="sc">$</span>dist <span class="ot">&lt;-</span> <span class="fu">drop</span>(D_nei <span class="sc">%*%</span> w)               <span class="co"># mean distance to the pool</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">which.max</span>(lg<span class="sc">$</span>dist) <span class="sc">==</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
+</div>
+<div class="cell" data-layout-align="center">
+<div id="tbl-ct-loss" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ct-loss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2.4: Effect of removing each subpopulation of the worked example of <span class="citation" data-cites="caballero2002">Caballero and Toro (<a href="99-references.html#ref-caballero2002" role="doc-biblioref">2002</a>)</span> on pool gene diversity <span class="math inline">\(GD_T = 1 - \bar f\)</span>, computed from the published <span class="math inline">\(\mathbf{f}\)</span>. The change is relative to <span class="math inline">\(GD_T\)</span> of all four subpopulations, with census weights <span class="math inline">\(N_i/N_T\)</span> or equal weights; a positive change means removal raises diversity. The last column is the mean Nei minimum distance to the pool, <span class="math inline">\(\sum_j D_{ij} N_j/N_T\)</span> (<a href="#eq-nei-distance" class="quarto-xref">Equation&nbsp;<span>2.4</span></a>).
+</figcaption>
+<div aria-describedby="tbl-ct-loss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<div class="kable-table">
-<table class="caption-top table table-sm table-striped small">
+<table class="cell caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 13%">
+<col style="width: 25%">
+<col style="width: 18%">
+<col style="width: 17%">
+<col style="width: 25%">
+</colgroup>
 <thead>
 <tr class="header">
-<th style="text-align: left;">pop</th>
-<th style="text-align: right;">GD_without</th>
-<th style="text-align: right;">delta_pct</th>
-<th style="text-align: right;">delta_pct_equal</th>
+<th style="text-align: left;">Subpopulation</th>
+<th style="text-align: right;"><span class="math inline">\(GD_T\)</span> without it (census)</th>
+<th style="text-align: right;">Change, census (%)</th>
+<th style="text-align: right;">Change, equal (%)</th>
+<th style="text-align: right;">Mean distance to the pool</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">Sub1</td>
-<td style="text-align: right;">0.6296049</td>
-<td style="text-align: right;">-6.6468853</td>
+<td style="text-align: right;">0.6296</td>
+<td style="text-align: right;">-6.65</td>
 <td style="text-align: right;">-6.92</td>
+<td style="text-align: right;">0.0882</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Sub2</td>
-<td style="text-align: right;">0.6868734</td>
-<td style="text-align: right;">1.8444502</td>
+<td style="text-align: right;">0.6869</td>
+<td style="text-align: right;">1.84</td>
 <td style="text-align: right;">6.47</td>
+<td style="text-align: right;">0.2670</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Sub3</td>
-<td style="text-align: right;">0.6480760</td>
-<td style="text-align: right;">-3.9081294</td>
+<td style="text-align: right;">0.6481</td>
+<td style="text-align: right;">-3.91</td>
 <td style="text-align: right;">-6.94</td>
+<td style="text-align: right;">0.1459</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Sub4</td>
-<td style="text-align: right;">0.6689694</td>
-<td style="text-align: right;">-0.8102105</td>
+<td style="text-align: right;">0.6690</td>
+<td style="text-align: right;">-0.81</td>
 <td style="text-align: right;">-3.56</td>
+<td style="text-align: right;">0.0906</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
+</figure>
 </div>
-<p>The number to look at is subpopulation 2. A Weitzman-style analysis calls it the most valuable in the set – losing it would cost 65.5% of the diversity, because it is the most divergent. The coancestry analysis says removing it <strong>raises</strong> pool diversity by 1.8% (census weights) or 6.5% (equal weights).</p>
-<p>It is distant <em>because</em> it is fixed. Alleles fixed in a sample of four individuals are not a genetic resource; they are the result of drift. The same pattern appears in the paper’s reanalysis of eleven European pig breeds: the breed a distance method nominates as most valuable turns out to raise diversity by 0.67% when removed.</p>
-<div class="callout callout-style-simple callout-caution callout-titled">
+</div>
+<p>The number to look at is subpopulation 2. Its mean distance to the pool, <span class="math inline">\(\sum_j D_{2j} N_j/N_T\)</span> (last column of <a href="#tbl-ct-loss" class="quarto-xref">Table&nbsp;<span>2.4</span></a>), is the largest of the four, so a method that ranks accessions by distance alone – the Weitzman approach discussed by <span class="citation" data-cites="toro2005">Toro and Caballero (<a href="99-references.html#ref-toro2005" role="doc-biblioref">2005, sec. 3d</a>)</span> is one – ranks it first. The coancestry analysis says removing it <strong>raises</strong> pool diversity by 1.8 % (census weights) or 6.5 % (equal weights).</p>
+<p>It is distant <em>because</em> it is fixed. Alleles fixed in a sample of four individuals are not a genetic resource; they are the result of drift. The same pattern appears in the reanalysis of eleven European pig breeds in <span class="citation" data-cites="caballero2002">Caballero and Toro (<a href="99-references.html#ref-caballero2002" role="doc-biblioref">2002</a>)</span>, as published in corrected form by <span class="citation" data-cites="toro2005">Toro and Caballero (<a href="99-references.html#ref-toro2005" role="doc-biblioref">2005</a>, Table 4)</span>: the breed with the largest Weitzman loss (FRBA) raises gene diversity by 0.67 % when removed. That value is quoted from the table, not recomputed here.</p>
+<div class="callout callout-style-simple callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Caution</span>What this does and does not license
+<span class="screen-reader-only">Note</span>What this does and does not license
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -1045,60 +1188,82 @@ window.Quarto = {
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>oc <span class="ot">&lt;-</span> <span class="fu">optimal_contributions</span>(f)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>oc<span class="sc">$</span>c_i</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     Sub1     Sub2     Sub3     Sub4 </span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 0.522398 0.000000 0.269890 0.207711</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">GD_before =</span> <span class="dv">1</span> <span class="sc">-</span> f_bar, <span class="at">GD_after =</span> oc<span class="sc">$</span>GD_max,</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">gain_pct =</span> <span class="dv">100</span> <span class="sc">*</span> (oc<span class="sc">$</span>GD_max <span class="sc">-</span> (<span class="dv">1</span> <span class="sc">-</span> f_bar)) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> f_bar))</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; GD_before  GD_after  gain_pct </span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 0.6744338 0.6873675 1.9177220</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>oc <span class="ot">&lt;-</span> <span class="fu">optimal_contributions</span>(f)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">max</span>(<span class="fu">abs</span>(oc[[<span class="st">"c_i"</span>]] <span class="sc">-</span> <span class="fu">c</span>(<span class="fl">0.522</span>, <span class="dv">0</span>, <span class="fl">0.270</span>, <span class="fl">0.208</span>))) <span class="sc">&lt;</span> <span class="fl">5e-4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<p>Subpopulation 2 receives weight <strong>zero</strong>, and total diversity rises from 0.6744 to 0.6874. This reproduces the paper’s published solution <span class="math inline">\(\mathbf{c} = (0.522,\, 0,\, 0.270,\, 0.208)\)</span> exactly.</p>
+<p>Subpopulation 2 receives weight <strong>zero</strong> (computed <span class="math inline">\(\mathbf{c} = (0.522,\, 0.000,\, 0.270,\, 0.208)\)</span>), and total diversity rises from 0.6744 to 0.6874, a gain of 1.9 %. Rounded to three decimals the solution equals the published <span class="math inline">\(\mathbf{c} = (0.522,\, 0,\, 0.270,\, 0.208)\)</span> of <span class="citation" data-cites="caballero2002">Caballero and Toro (<a href="99-references.html#ref-caballero2002" role="doc-biblioref">2002</a>)</span>; the chunk asserts it.</p>
 <p>Three direct uses in plant breeding:</p>
 <ul>
-<li><strong>Base population for recurrent selection.</strong> <span class="math inline">\(c_i\)</span> gives the seed proportion from each source that maximises long-term additive variance.</li>
+<li><strong>Base population for recurrent selection.</strong> <span class="math inline">\(c_i\)</span> gives the seed proportion from each source that maximises the neutral-marker <span class="math inline">\(GD_T\)</span> of the base. That equals maximising its additive (genic) variance only under additive gene action, effects of equal size at every locus, and markers whose frequencies represent those of the quantitative trait loci; <a href="02b-response.html" class="quarto-xref"><span>Chapter 3</span></a> shows the two differ by the squared-effect weighting.</li>
 <li><strong>Core collection.</strong> Instead of clustering heuristics plus proportional sampling, solve the quadratic programme directly with operational constraints (<span class="math inline">\(c_i \le\)</span> multiplication capacity, <span class="math inline">\(c_i \ge\)</span> a policy minimum for accessions of cultural importance).</li>
-<li><strong>Optimal contribution selection.</strong> Replace the objective with <span class="math inline">\(\max \mathbf{c}'\mathbf{g} - \lambda\,\mathbf{c}'\mathbf{F}\mathbf{c}\)</span> and you have Meuwissen’s framework, now standard in genomic programmes. This chapter is the case <span class="math inline">\(\lambda \to \infty\)</span>, pure diversity. A breeder operates in the middle of the curve – which is <a href="09-optimal-contributions.html" class="quarto-xref"><span>Chapter 18</span></a>.</li>
+<li><strong>Optimal contribution selection.</strong> <span class="citation" data-cites="meuwissen1997">Meuwissen (<a href="99-references.html#ref-meuwissen1997" role="doc-biblioref">1997</a>)</span> maximises <span class="math inline">\(\mathbf{c}'\mathbf{u}\)</span> subject to a bound on the group coancestry <span class="math inline">\(\mathbf{c}'\mathbf{f}\mathbf{c}\)</span>, with <span class="math inline">\(\mathbf{u}\)</span> the vector of breeding values; its Lagrangian form is <span class="math inline">\(\max \mathbf{c}'\mathbf{u} - \lambda\,\mathbf{c}'\mathbf{f}\mathbf{c}\)</span>, <span class="math inline">\(\lambda \ge 0\)</span>. This chapter is the case <span class="math inline">\(\lambda \to \infty\)</span>, pure diversity. A breeder operates in the middle of the curve – which is <a href="09-optimal-contributions.html" class="quarto-xref"><span>Chapter 18</span></a>.</li>
 </ul>
 </section>
 </section>
-<section id="minimising-coancestry-is-maximising-n_e" class="level2" data-number="2.8">
-<h2 data-number="2.8" class="anchored" data-anchor-id="minimising-coancestry-is-maximising-n_e"><span class="header-section-number">2.8</span> Minimising coancestry is maximising <span class="math inline">\(N_e\)</span></h2>
-<p>Since <span class="math inline">\(N_s = 1/(2\bar f)\)</span>, minimising group coancestry and maximising effective size are the same operation. The paper’s Eq. 14 makes the operational consequence explicit. With <strong>equal</strong> contributions (<span class="math inline">\(S_W^2 = S_B^2 = 0\)</span>), <span class="math inline">\(N_e \approx 2Nn/(1 - F_{IT})\)</span> – roughly <strong>double</strong> the <span class="math inline">\(N_e\)</span> obtained under random (Poisson) contributions.</p>
-<blockquote class="blockquote">
-<p>Harvesting the same number of seeds from every plant, and the same number of plants from every family, doubles the effective size. No genotyping, no technology, no cost.</p>
-</blockquote>
-<p>It is probably the best cost-benefit intervention available in germplasm management. The opposite – bulk harvest from a plot, which in practice samples the most productive plants disproportionately – inflates <span class="math inline">\(S_W^2\)</span> and collapses <span class="math inline">\(N_e\)</span>.</p>
+<section id="equal-contributions-and-effective-size" class="level2" data-number="2.8">
+<h2 data-number="2.8" class="anchored" data-anchor-id="equal-contributions-and-effective-size"><span class="header-section-number">2.8</span> Equal contributions and effective size</h2>
+<p>Minimising <span class="math inline">\(\bar f\)</span> maximises the status number <span class="math inline">\(N_s = 1/(2\bar f)\)</span> <span class="citation" data-cites="lindgren1997">(<a href="99-references.html#ref-lindgren1997" role="doc-biblioref">Lindgren et al. 1997</a>)</span> by definition. <span class="math inline">\(N_s\)</span> is a static function of the current coancestry; the effective size <span class="math inline">\(N_e\)</span> is defined from the <em>rate</em> at which inbreeding or coancestry rises across generations, so the two are not the same quantity, and lowering <span class="math inline">\(\bar f\)</span> today does not by itself fix <span class="math inline">\(N_e\)</span>.</p>
+<p>What links contributions to <span class="math inline">\(N_e\)</span> is the asymptotic metapopulation effective size of <span class="citation" data-cites="caballero2002">Caballero and Toro (<a href="99-references.html#ref-caballero2002" role="doc-biblioref">2002</a>)</span>, in the form restated by <span class="citation" data-cites="toro2005">Toro and Caballero (<a href="99-references.html#ref-toro2005" role="doc-biblioref">2005, sec. 4a</a>)</span>:</p>
+<p><span id="eq-ne-meta"><span class="math display">\[N_e \approx \frac{2Nn}{(V_W + V_B + 1)(1 - F_{ST})}, \tag{2.9}\]</span></span></p>
+<p>with <span class="math inline">\(n\)</span> subpopulations of equal size <span class="math inline">\(N\)</span>, and <span class="math inline">\(V_W\)</span> and <span class="math inline">\(V_B\)</span> the variances of the long-term contributions of individuals within and between subpopulations. It assumes random mating within subpopulations and a size and structure constant over generations, and it holds only after enough generations for <span class="math inline">\(N_e\)</span> to reach its asymptote. With random (Poisson) contributions within subpopulations and equal contributions of the subpopulations (<span class="math inline">\(V_W = 1\)</span>, <span class="math inline">\(V_B = 0\)</span>) <a href="#eq-ne-meta" class="quarto-xref">Equation&nbsp;<span>2.9</span></a> gives <span class="math inline">\(Nn/(1 - F_{ST})\)</span>; equalising contributions within subpopulations (<span class="math inline">\(V_W = 0\)</span>, <span class="math inline">\(V_B = 0\)</span>) gives <span class="math inline">\(2Nn/(1 - F_{ST})\)</span>, <strong>double</strong>.</p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ne_fm  <span class="ot">&lt;-</span> <span class="cf">function</span>(N, Vk) <span class="dv">4</span> <span class="sc">*</span> N <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">+</span> Vk)           <span class="co"># Falconer &amp; Mackay, ch. 4</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>ne_ct  <span class="ot">&lt;-</span> <span class="cf">function</span>(N, VW) <span class="dv">2</span> <span class="sc">*</span> N <span class="sc">/</span> (VW <span class="sc">+</span> <span class="dv">1</span>)            <span class="co"># @eq-ne-meta, n = 1, F_ST = 0</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>N0     <span class="ot">&lt;-</span> <span class="dv">100</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">all.equal</span>(<span class="fu">ne_fm</span>(N0, <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">0</span>)), <span class="fu">ne_ct</span>(N0, <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">0</span>) <span class="sc">/</span> <span class="dv">2</span>)))</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>ne_gain <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">seed_only =</span> <span class="fu">ne_fm</span>(N0, <span class="dv">1</span>) <span class="sc">/</span> <span class="fu">ne_fm</span>(N0, <span class="dv">2</span>),</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>             <span class="at">both      =</span> <span class="fu">ne_fm</span>(N0, <span class="dv">0</span>) <span class="sc">/</span> <span class="fu">ne_fm</span>(N0, <span class="dv">2</span>))</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">all.equal</span>(ne_gain[[<span class="st">"seed_only"</span>]], <span class="dv">4</span> <span class="sc">/</span> <span class="dv">3</span>), <span class="fu">all.equal</span>(ne_gain[[<span class="st">"both"</span>]], <span class="dv">2</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>The doubling assumes that each individual’s contribution is equalised as both female and male parent, which needs controlled pollination. In the single-population case <a href="#eq-ne-meta" class="quarto-xref">Equation&nbsp;<span>2.9</span></a> reduces to <span class="math inline">\(2N/(V_W + 1)\)</span>, which is <span class="math inline">\(N_e = 4N/(2 + V_k)\)</span> <span class="citation" data-cites="falconer1996">(<a href="99-references.html#ref-falconer1996" role="doc-biblioref">Falconer and Mackay 1996</a>, ch.&nbsp;4)</span> with <span class="math inline">\(V_W = V_k/2\)</span>, <span class="math inline">\(V_k\)</span> the variance of the number of gametes an individual contributes. Harvesting the same number of seeds from every plant of an open-pollinated population equalises only the maternal contribution; with a maternal variance of 0 and a Poisson paternal variance of 1, <span class="math inline">\(V_k = 1\)</span> and <span class="math inline">\(N_e = 4N/3\)</span>, a gain of 1.333 over Poisson contributions, not 2.</p>
+<div class="callout callout-style-simple callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Equal contributions of both parents double <span class="math inline">\(N_e\)</span>
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Under controlled pollination, equal numbers of seeds from every plant as female and as male parent, and the same number of plants from every family, double the effective size (<span class="math inline">\(V_W = 0\)</span> against <span class="math inline">\(V_W = 1\)</span>). Equal seed numbers from open-pollinated plants alone give a factor of 4/3. Neither needs genotyping.</p>
+</div>
+</div>
+<p>It is an intervention in germplasm management. The opposite – bulk harvest from a plot, which in practice samples the most productive plants disproportionately – inflates <span class="math inline">\(V_W\)</span> and collapses <span class="math inline">\(N_e\)</span>.</p>
 </section>
 <section id="the-honest-caveats" class="level2" data-number="2.9">
 <h2 data-number="2.9" class="anchored" data-anchor-id="the-honest-caveats"><span class="header-section-number">2.9</span> The honest caveats</h2>
-<p>The paper makes these, and a breeder should take them seriously.</p>
-<p>Criteria based on within-population variation systematically <strong>favour larger populations</strong>. A <span class="math inline">\(\bar f\)</span> criterion can push a genebank toward abundant elite material – the opposite of the conservation objective. Beyond that:</p>
+<p>A breeder should take these seriously.</p>
+<p>Criteria based on within-population variation <strong>favour the largest populations</strong>, which are often the commercial and least endangered ones <span class="citation" data-cites="toro2005">(<a href="99-references.html#ref-toro2005" role="doc-biblioref">Toro and Caballero 2005, sec. 3e</a>)</span>. A <span class="math inline">\(\bar f\)</span> criterion can push a genebank toward abundant elite material – the opposite of the conservation objective. Beyond that:</p>
 <ul>
 <li>Neutral markers do not measure adaptive value, disease resistance, stress adaptation or cultural value. A fixed accession may carry the only resistance allele to an emerging rust.</li>
-<li><strong>Allelic richness</strong> is more sensitive to bottlenecks than heterozygosity and is often the more relevant criterion for pre-breeding. The argument that minimising <span class="math inline">\(\bar f\)</span> maximises allelic richness in the long run (via the effective number of alleles being the inverse of mean coancestry) is valid asymptotically but does <strong>not</strong> protect rare alleles in the short term. This is why allelic richness survives the redundancy analysis in <a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 15</span></a> as the one genuinely independent axis.</li>
-<li>Weighting between-group variation more heavily is arbitrary. A more defensible fix is to optimise <span class="math inline">\(\mathbf{c}\)</span> with per-accession minimum constraints.</li>
+<li><strong>Allelic richness</strong> is more sensitive to bottlenecks than heterozygosity and is often the more relevant criterion for pre-breeding. The argument that minimising <span class="math inline">\(\bar f\)</span> maximises allelic richness in the long run (via the effective number of alleles being, by definition, the inverse of mean coancestry; <span class="citation" data-cites="toro2005">Toro and Caballero (<a href="99-references.html#ref-toro2005" role="doc-biblioref">2005, sec. 2</a>)</span>) is valid asymptotically but does <strong>not</strong> protect rare alleles in the short term. This is why allelic richness survives the redundancy analysis in <a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 15</span></a> as the one genuinely independent axis.</li>
+<li>Weighting between-group variation more heavily is arbitrary. A more defensible fix is to optimise <span class="math inline">\(\mathbf{c}\)</span> with per-accession minimum constraints, as <span class="citation" data-cites="toro2005">Toro and Caballero (<a href="99-references.html#ref-toro2005" role="doc-biblioref">2005, sec. 3e</a>, Table 5)</span> do for five Iberian pig strains.</li>
 </ul>
 <p><strong>Rule of thumb:</strong> use <span class="math inline">\(\bar f\)</span> to decide <em>proportions and regeneration effort</em>; never use <span class="math inline">\(\bar f\)</span> alone to decide <em>discard</em>.</p>
 </section>
-<section id="two-errata-found-while-verifying" class="level2" data-number="2.10">
-<h2 data-number="2.10" class="anchored" data-anchor-id="two-errata-found-while-verifying"><span class="header-section-number">2.10</span> Two errata, found while verifying</h2>
-<p>Worth recording, since the numbers above were checked against the published tables.</p>
-<ul>
-<li>Table 2b lists <span class="math inline">\(F_2 = 0.8383\)</span>, but <span class="math inline">\(F_i = 2s_i - 1 = 2(0.9167) - 1 = 0.8333\)</span>. A typographical error. Every other value in Tables 2 and 3 reproduces exactly.</li>
-<li>Conceptually, the Discussion states that equal contributions (<span class="math inline">\(S_B^2 = S_W^2 = 0\)</span>) are required “to minimise effective size” and “maximise mean coancestry”. That is inverted: Eq. 15 and the entire argument of the paper show that equal contributions <strong>maximise</strong> <span class="math inline">\(N_e\)</span> and <strong>minimise</strong> <span class="math inline">\(\bar f\)</span>.</li>
-</ul>
+<section id="a-correction-published-by-the-authors" class="level2" data-number="2.10">
+<h2 data-number="2.10" class="anchored" data-anchor-id="a-correction-published-by-the-authors"><span class="header-section-number">2.10</span> A correction published by the authors</h2>
+<p><span class="citation" data-cites="toro2005">Toro and Caballero (<a href="99-references.html#ref-toro2005" role="doc-biblioref">2005</a>, Table 4, footnote a)</span> republish the pig-breed reanalysis of <span class="citation" data-cites="caballero2002">Caballero and Toro (<a href="99-references.html#ref-caballero2002" role="doc-biblioref">2002</a>)</span> and mark one entry (breed DESH) as correcting a mistake in the 2002 paper. Any value from that reanalysis, including the 0.67 % quoted in <a href="#sec-ct-removal" class="quarto-xref"><span>Section 2.7.1</span></a>, should be read from the 2005 table. The same review restates the effective-size result of <a href="#eq-ne-meta" class="quarto-xref">Equation&nbsp;<span>2.9</span></a>: equalising contributions within subpopulations doubles <span class="math inline">\(N_e\)</span> <span class="citation" data-cites="toro2005">(<a href="99-references.html#ref-toro2005" role="doc-biblioref">Toro and Caballero 2005, sec. 4a</a>)</span>. Only the 2005 review was accessible when this chapter was checked; values attributed to the 2002 paper without a 2005 counterpart (the worked example’s matrix, <span class="math inline">\(\tilde s\)</span> and contributions) are transcribed from it and were not re-checked against its full text.</p>
 </section>
 <section id="what-manages-this-quantity-and-where" class="level2" data-number="2.11">
 <h2 data-number="2.11" class="anchored" data-anchor-id="what-manages-this-quantity-and-where"><span class="header-section-number">2.11</span> What manages this quantity, and where</h2>
-<p>This chapter is the book’s keystone, and it is easy to read it as a self-contained treatment of Caballero &amp; Toro. The partition it derives is not background: it is the object every later chapter operates on. Stated once, so the rest of the book can refer back rather than re-introduce it:</p>
+<p>This chapter is the book’s keystone, and it is easy to read it as a self-contained treatment of <span class="citation" data-cites="caballero2002">Caballero and Toro (<a href="99-references.html#ref-caballero2002" role="doc-biblioref">2002</a>)</span>. The partition it derives (<a href="#eq-gd-partition" class="quarto-xref">Equation&nbsp;<span>2.7</span></a>) is not background: it is the object every later chapter operates on. Stated once, so the rest of the book can refer back rather than re-introduce it (<a href="#tbl-keystone" class="quarto-xref">Table&nbsp;<span>2.5</span></a>):</p>
+<div id="tbl-keystone" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-keystone-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2.5: The three terms of the gene-diversity partition (<a href="#eq-gd-partition" class="quarto-xref">Equation&nbsp;<span>2.7</span></a>), what each measures, and the chapter of this book in which each is managed. <span class="math inline">\(\tilde s\)</span>, <span class="math inline">\(\tilde H_o\)</span>: within-pool means of self-coancestry and observed heterozygosity; <span class="math inline">\(\theta\)</span>: mean coancestry of the selected hybrids; <span class="math inline">\(\alpha\)</span>: the diversity-loss constraint.
+</figcaption>
+<div aria-describedby="tbl-keystone-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
 <colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
+<col style="width: 10%">
+<col style="width: 27%">
+<col style="width: 62%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1110,13 +1275,13 @@ window.Quarto = {
 <tbody>
 <tr class="odd">
 <td><span class="math inline">\(GD_{WI}\)</span></td>
-<td>diversity within individuals</td>
-<td>exactly zero with inbred parents (<a href="06-metric-catalogue.html" class="quarto-xref"><span>Chapter 14</span></a>); the hybrid-level <span class="math inline">\(GD_{WI\text{-}hyb}\)</span> is what carries signal</td>
+<td>diversity within individuals, <span class="math inline">\(1 - \tilde s = \tilde H_o/2\)</span></td>
+<td>exactly zero with inbred parents (<a href="06-metric-catalogue.html" class="quarto-xref"><span>Chapter 14</span></a>); the hybrid-level <span class="math inline">\(GD_{WI\text{-}hyb}\)</span>, half the mean heterozygosity of the selected hybrids, is what carries signal</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(GD_{BI}\)</span></td>
 <td>between individuals, within pool</td>
-<td>the quantity <span class="math inline">\(\alpha\)</span> budgets (<a href="09-optimal-contributions.html" class="quarto-xref"><span>Chapter 18</span></a>), and the one recurrent selection erodes (<a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 22</span></a>)</td>
+<td>the one recurrent selection erodes (<a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 22</span></a>); with inbred parents <span class="math inline">\(\alpha\)</span> (<a href="09-optimal-contributions.html" class="quarto-xref"><span>Chapter 18</span></a>) budgets <span class="math inline">\(GD_T = 1 - \theta = GD_{BI} + GD_{BS}\)</span>, not <span class="math inline">\(GD_{BI}\)</span> alone</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(GD_{BS}\)</span></td>
@@ -1125,8 +1290,29 @@ window.Quarto = {
 </tr>
 </tbody>
 </table>
+</div>
+</figure>
+</div>
+<p>The two claims of the first two rows, checked on 30 random hybrids of the book’s simulated pools with <code>gd_partition()</code>:</p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">7</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>idx_h <span class="ot">&lt;-</span> <span class="fu">sample</span>(ctx[[<span class="st">"N"</span>]], <span class="dv">30</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>gp    <span class="ot">&lt;-</span> <span class="fu">gd_partition</span>(idx_h, ctx)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>theta <span class="ot">&lt;-</span> <span class="fu">mean</span>(ctx[[<span class="st">"f"</span>]][idx_h, idx_h])</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>H_hyb <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">rowMeans</span>(ctx[[<span class="st">"X"</span>]][idx_h, , <span class="at">drop =</span> <span class="cn">FALSE</span>] <span class="sc">==</span> <span class="fl">0.5</span>))</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">abs</span>(gp[[<span class="st">"GD_WI"</span>]]) <span class="sc">&lt;</span> <span class="fl">1e-12</span>,                 <span class="co"># inbred parents</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>          <span class="fu">all.equal</span>(gp[[<span class="st">"GD_WI_hyb"</span>]], H_hyb <span class="sc">/</span> <span class="dv">2</span>),     <span class="co"># half the F1 heterozygosity</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>          <span class="fu">all.equal</span>(<span class="dv">1</span> <span class="sc">-</span> theta, gp[[<span class="st">"GD_T"</span>]]),</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>          <span class="fu">all.equal</span>(gp[[<span class="st">"GD_T"</span>]], gp[[<span class="st">"GD_BI"</span>]] <span class="sc">+</span> gp[[<span class="st">"GD_BS"</span>]]))</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(gp, <span class="dv">4</span>)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; GD_WI_hyb      GD_T     GD_WI     GD_BI     GD_BS      F_ST </span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    0.1806    0.3215    0.0000    0.2809    0.0406    0.1263</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
 <p>Three consequences follow, and each is a chapter.</p>
-<p><strong>A single pool-wide statistic cannot express “conserve within, hold between”.</strong> That is why <a href="06-metric-catalogue.html" class="quarto-xref"><span>Chapter 14</span></a> reports the partition rather than only <span class="math inline">\(GD_T\)</span>, and why <a href="08-pipeline-stages.html" class="quarto-xref"><span>Chapter 16</span></a> makes S1 a separate monitoring stage instead of folding pool conservation into the hybrid-selection constraint.</p>
+<p><strong>A single pool-wide statistic cannot express “conserve within, hold between”.</strong> That is why <a href="06-metric-catalogue.html" class="quarto-xref"><span>Chapter 14</span></a> reports the partition rather than only <span class="math inline">\(GD_T\)</span>, and why <a href="08-pipeline-stages.html" class="quarto-xref"><span>Chapter 16</span></a> makes stage S1 a separate monitoring stage instead of folding pool conservation into the hybrid-selection constraint.</p>
 <p><strong>The between term is not a bonus to be maximised.</strong> <a href="05b-heterosis-dominance.html#sec-heterosis-flat" class="quarto-xref"><span>Section 13.7</span></a> shows that under neutral drift every unit of <span class="math inline">\(GD_{BS}\)</span> gained is paid for out of the shared term, so pushing the pools apart buys nothing. The partition tells you where diversity <em>is</em>, not which direction to move it.</p>
 <p><strong>The within term is the one with a future.</strong> <span class="math inline">\(GD_{BI}\)</span> is the raw material of next cycle’s response, which <a href="02b-response.html" class="quarto-xref"><span>Chapter 3</span></a> makes precise: it is the same sum over the same loci as genic variance, weighted equally instead of by squared effect. That is the entire reason a diversity constraint is worth writing down, and <a href="11c-limits.html" class="quarto-xref"><span>Chapter 23</span></a> is where the equivalence is pushed until it breaks.</p>
 <!-- reproduce-chapter -->
@@ -1139,6 +1325,30 @@ window.Quarto = {
 <div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
 <div id="ref-caballero2002" class="csl-entry" role="listitem">
 Caballero, A., and M. A. Toro. 2002. <span>“Analysis of Genetic Diversity for the Management of Conserved Subdivided Populations.”</span> <em>Conservation Genetics</em> 3 (3): 289–99. <a href="https://doi.org/10.1023/A:1019956205473">https://doi.org/10.1023/A:1019956205473</a>.
+</div>
+<div id="ref-cockerham1967" class="csl-entry" role="listitem">
+Cockerham, C. C. 1967. <span>“Group Inbreeding and Coancestry.”</span> <em>Genetics</em> 56 (1): 89–104. <a href="https://doi.org/10.1093/genetics/56.1.89">https://doi.org/10.1093/genetics/56.1.89</a>.
+</div>
+<div id="ref-cockerham1969" class="csl-entry" role="listitem">
+Cockerham, C. C. 1969. <span>“Variance of Gene Frequencies.”</span> <em>Evolution</em> 23 (1): 72–84. <a href="https://doi.org/10.1111/j.1558-5646.1969.tb03496.x">https://doi.org/10.1111/j.1558-5646.1969.tb03496.x</a>.
+</div>
+<div id="ref-falconer1996" class="csl-entry" role="listitem">
+Falconer, Douglas S., and Trudy F. C. Mackay. 1996. <em>Introduction to Quantitative Genetics</em>. 4th ed. Longman.
+</div>
+<div id="ref-lindgren1997" class="csl-entry" role="listitem">
+Lindgren, D., L. D. Gea, and P. A. Jefferson. 1997. <span>“Status Number for Measuring Genetic Diversity.”</span> <em>Forest Genetics</em> 4 (2): 69–76.
+</div>
+<div id="ref-meuwissen1997" class="csl-entry" role="listitem">
+Meuwissen, T. H. E. 1997. <span>“Maximizing the Response of Selection with a Predefined Rate of Inbreeding.”</span> <em>Journal of Animal Science</em> 75 (4): 934–40. <a href="https://doi.org/10.2527/1997.754934x">https://doi.org/10.2527/1997.754934x</a>.
+</div>
+<div id="ref-nei1973" class="csl-entry" role="listitem">
+Nei, M. 1973. <span>“Analysis of Gene Diversity in Subdivided Populations.”</span> <em>Proceedings of the National Academy of Sciences</em> 70 (12): 3321–23. <a href="https://doi.org/10.1073/pnas.70.12.3321">https://doi.org/10.1073/pnas.70.12.3321</a>.
+</div>
+<div id="ref-toro2005" class="csl-entry" role="listitem">
+Toro, M. A., and A. Caballero. 2005. <span>“Characterization and Conservation of Genetic Diversity in Subdivided Populations.”</span> <em>Philosophical Transactions of the Royal Society B: Biological Sciences</em> 360 (1459): 1367–78. <a href="https://doi.org/10.1098/rstb.2005.1680">https://doi.org/10.1098/rstb.2005.1680</a>.
+</div>
+<div id="ref-wright1951" class="csl-entry" role="listitem">
+Wright, S. 1951. <span>“The Genetical Structure of Populations.”</span> <em>Annals of Eugenics</em> 15 (1): 323–54. <a href="https://doi.org/10.1111/j.1469-1809.1949.tb02451.x">https://doi.org/10.1111/j.1469-1809.1949.tb02451.x</a>.
 </div>
 </div>
 </section>

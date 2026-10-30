@@ -12,7 +12,7 @@
 #'
 #' Implements the core of Caballero & Toro (2002): subpopulation coancestries,
 #' Nei's minimum distance, the F-statistics, and the partition
-#' `GD_T = GD_WI + GD_BI + GD_BS` (their Eq. 7), together with each
+#' `GD_T = GD_WI + GD_BI + GD_BS`, together with each
 #' subpopulation's decomposed contribution to global coancestry.
 #'
 #' The partition is what changes the conservation strategy by species. When most
@@ -42,28 +42,28 @@ ct_partition <- function(G, pop, weights = c("census", "equal")) {
   n    <- length(pops)
   m    <- ncol(G)
 
-  P <- G / 2                                   # reference-allele dosage per individual
+  P <- G / 2                                   # within-individual frequency: 0, 0.5, 1
 
-  ## --- allele frequencies per subpopulation (Eq. 10) -------------------
+  ## --- allele frequencies per subpopulation ------------------------------
   Pbar <- t(vapply(pops, function(k)
               colMeans(P[pop == k, , drop = FALSE], na.rm = TRUE),
               numeric(m)))
   rownames(Pbar) <- pops
 
-  ## --- coancestry between subpopulations (Eq. 11) ----------------------
+  ## --- coancestry between subpopulations --------------------------------
   ## biallelic: f_ij = mean_loci( p_i p_j + q_i q_j )
   Q <- 1 - Pbar
   f <- (tcrossprod(Pbar) + tcrossprod(Q)) / m
   dimnames(f) <- list(pops, pops)
 
-  ## --- self-coancestry (Eq. 12) and molecular inbreeding ---------------
+  ## --- self-coancestry and molecular inbreeding -------------------------
   s <- vapply(pops, function(k) {
          Pk <- P[pop == k, , drop = FALSE]
          mean(rowMeans(Pk^2 + (1 - Pk)^2, na.rm = TRUE))
        }, numeric(1))
   Fi <- 2 * s - 1
 
-  ## --- Nei's minimum distance (Eq. 3) ----------------------------------
+  ## --- Nei's minimum distance -------------------------------------------
   fii <- diag(f)
   D   <- outer(fii, fii, "+") / 2 - f
   dimnames(D) <- list(pops, pops)
@@ -72,30 +72,30 @@ ct_partition <- function(G, pop, weights = c("census", "equal")) {
   Ni <- as.numeric(table(pop)[pops])
   w  <- if (weights == "census") Ni / sum(Ni) else rep(1 / n, n)
 
-  ## --- metapopulation means (Eq. 1, 4, 5) -------------------------------
+  ## --- metapopulation means ---------------------------------------------
   f_til <- sum(w * fii)                     # mean coancestry WITHIN
   s_til <- sum(w * s)
   F_til <- sum(w * Fi)
   f_bar <- as.numeric(t(w) %*% f %*% w)     # GLOBAL coancestry
   D_bar <- as.numeric(t(w) %*% D %*% w)
 
-  ## --- HW deviation and the between-individual share (Eq. 2) -----------
+  ## --- HW deviation and the between-individual share --------------------
   alpha <- (Fi - fii) / (1 - fii)
   Gi    <- (s  - fii) / (1 - fii)
 
-  ## --- F statistics (Eq. 6) ---------------------------------------------
+  ## --- F statistics -----------------------------------------------------
   F_IS <- (F_til - f_til) / (1 - f_til)
   F_ST <- D_bar / (1 - f_bar)
   F_IT <- (F_til - f_bar) / (1 - f_bar)
 
-  ## --- the diversity partition (Eq. 7) ----------------------------------
+  ## --- the diversity partition ------------------------------------------
   GD <- c(GD_T  = 1 - f_bar,
           GD_WI = 1 - s_til,
           GD_BI = s_til - f_til,
           GD_WS = 1 - f_til,
           GD_BS = f_til - f_bar)
 
-  ## --- each subpopulation's contribution to f_bar (Eq. 5, decomposed) ---
+  ## --- each subpopulation's contribution to f_bar -----------------------
   contrib <- data.frame(
     pop         = pops,
     N           = Ni,
@@ -153,12 +153,14 @@ ct_loss_gain <- function(res, weights = c("census", "equal")) {
 #' Optimal contributions that maximise pool diversity
 #'
 #' Solves the quadratic programme `min c' f c` subject to `sum(c) = 1` and
-#' `lower <= c <= upper` (Caballero & Toro 2002, Eq. 9). This is how a synthetic
+#' `lower <= c <= upper` (Caballero & Toro 2002). This is how a synthetic
 #' or a core collection is composed: the `upper` bound is the operational cap on
 #' any single accession.
 #'
-#' Minimising group coancestry is the same thing as maximising effective size,
-#' since `Ns = 1 / (2 theta)`.
+#' Minimising group coancestry maximises the status number `Ns = 1 / (2 theta)`
+#' (Lindgren, Gea & Jefferson 1997), a static function of current coancestry. It is not
+#' the effective size `Ne`, which is defined from the rate of change of
+#' coancestry across generations.
 #'
 #' @param f Coancestry matrix.
 #' @param lower,upper Bounds on each contribution.

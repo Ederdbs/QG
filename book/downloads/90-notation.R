@@ -148,6 +148,33 @@ knitr::kable(data.frame(
 #' 
 #' with $GD_T = GD_{WI} + GD_{BI} + GD_{BS}$ and $F_{ST} = GD_{BS}/GD_T$.
 #' 
+#' ### Subdivided population
+#' 
+## -----------------------------------------------------------------------------
+#| echo: false
+knitr::kable(data.frame(
+  Symbol = c("$n$, $N_i$, $N_T$", "$p_{k,l,i}$", "$F_i$", "$H_{o,i}$",
+             "$\\alpha_i$", "$G_i$, $G$", "$D_{ij}$, $\\bar D$", "$\\bar d_{ij}$",
+             "$N_e$", "$V_W$, $V_B$"),
+  Meaning = c("subpopulations; size of subpopulation i; $\\sum_i N_i$ -- **not** the hybrids selected and candidates above",
+              "frequency of allele k within individual l of subpopulation i; for the reference allele of a biallelic marker, the within-individual frequency $x$ above (whose second index is a marker, not an allele)",
+              "molecular inbreeding, $2s_i - 1$, against a base with all alleles distinct",
+              "observed heterozygosity of subpopulation i; $2(1 - s_i)$",
+              "$(F_i - f_{ii})/(1 - f_{ii})$, the $F_{IS}$ analogue -- **not** the diversity-loss constraint $\\alpha$",
+              "$(s_i - f_{ii})/(1 - f_{ii}) = (1 + \\alpha_i)/2$; $G$ the same with $\\tilde s$, $\\tilde f$ -- **not** a relationship matrix $\\mathbf{G}$",
+              "Nei's minimum distance $(f_{ii} + f_{jj})/2 - f_{ij}$, an element of $\\mathbf{D}$; $\\bar D = \\tilde f - \\bar f$",
+              "mean distance between individuals of i and j, $(s_i + s_j)/2 - f_{ij}$; $\\bar d_{ii} \\neq 0$",
+              "asymptotic effective size of the metapopulation",
+              "variances of long-term contributions within / between subpopulations"),
+  `Function` = c("`ct_partition()$by_subpop$N`", "inside `ct_partition()`",
+                 "`ct_partition()$by_subpop$F_i`", "-",
+                 "`ct_partition()$by_subpop$alpha_i`", "`ct_partition()$by_subpop$G_i`",
+                 "`ct_partition()$D_nei`", "-", "-", "-"),
+  check.names = FALSE))
+
+#' 
+#' These are the symbols of @sec-subdivided, which follow @caballero2002.
+#' 
 #' ### Heterosis and cycles
 #' 
 ## -----------------------------------------------------------------------------

@@ -246,7 +246,7 @@ knitr::kable(data.frame(
 #' $\bar p = (\tilde p_A + \tilde p_B)/2$, with $\tilde p_A$ and $\tilde p_B$ the
 #' two pools' frequencies weighted by the line usage the selection induces. So the
 #' $He$ column of the same call is $\overline{2\bar p(1 - \bar p)}$, which is
-#' $GD_T = 1 - \bar f$ of the Caballero & Toro partition [@caballero2002, Eq. 7]
+#' $GD_T = 1 - \bar f$ of the Caballero & Toro partition [@caballero2002]
 #' *identically*, not approximately: $\bar f = (\theta_A + 2\theta_{AB} +
 #' \theta_B)/4 = \overline{\bar p^2 + (1 - \bar p)^2}$ under A2.
 #' 
@@ -1273,7 +1273,7 @@ fmt(as.data.frame(pr), 4)
 #' `r fmt(pr["truncation", "F_ST"], 4)` under truncation, and so does $GD_{BS}$.
 #' Read as divergence, that looks like a gain in heterosis potential. It is not: by
 #' the Caballero & Toro definitions `gd_partition()` implements
-#' [@caballero2002, Eq. 7], $GD_{BS} = \tilde f - \bar f$ with
+#' [@caballero2002], $GD_{BS} = \tilde f - \bar f$ with
 #' $\tilde f = (\theta_A + \theta_B)/2$ and
 #' $\bar f = (\theta_A + 2\theta_{AB} + \theta_B)/4$, so concentrating usage inside
 #' *one* pool raises $\tilde f$ twice as fast as it raises $\bar f$ and therefore

@@ -192,7 +192,7 @@ idx(
   c("`alleles_lost()`", "markers polymorphic in the pool, rare in the selection"),
   c("`freq_metrics()`", "**one marker sweep**: He, F_hom, F_drift, cov_diag, rare_retained"),
   c("`line_weights()` / `theta_pools()`", "per-pool usage weights and coancestries"),
-  c("`gd_partition()`", "Caballero & Toro Eq. 8 over the heterotic pools"),
+  c("`gd_partition()`", "the Caballero & Toro partition over the heterotic pools"),
   c("`ene()` / `ane()`", "Core Hunter entry- and accession-to-nearest-entry"),
   c("`eff_dim()`", "effective dimensionality, on the **double-centered** submatrix"),
   c("`gst()`", "Nei's Gst, selected against non-selected"),
@@ -337,7 +337,7 @@ idx(
 ## -----------------------------------------------------------------------------
 #| echo: false
 idx(
-  c("`ct_partition()`", "subpopulation coancestries, F statistics, the Eq. 7 partition"),
+  c("`ct_partition()`", "subpopulation coancestries, F statistics, the GD partition"),
   c("`ct_loss_gain()`", "loss **or gain** from removing each subpopulation")
 )
 

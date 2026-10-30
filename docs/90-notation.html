@@ -26,7 +26,26 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
@@ -584,15 +603,16 @@ window.Quarto = {
   <li><a href="#matrices" id="toc-matrices" class="nav-link" data-scroll-target="#matrices"><span class="header-section-number">A.1.1</span> Matrices</a></li>
   <li><a href="#coancestry-and-diversity" id="toc-coancestry-and-diversity" class="nav-link" data-scroll-target="#coancestry-and-diversity"><span class="header-section-number">A.1.2</span> Coancestry and diversity</a></li>
   <li><a href="#the-partition" id="toc-the-partition" class="nav-link" data-scroll-target="#the-partition"><span class="header-section-number">A.1.3</span> The partition</a></li>
-  <li><a href="#heterosis-and-cycles" id="toc-heterosis-and-cycles" class="nav-link" data-scroll-target="#heterosis-and-cycles"><span class="header-section-number">A.1.4</span> Heterosis and cycles</a></li>
-  <li><a href="#inbreeding-the-three-lenses" id="toc-inbreeding-the-three-lenses" class="nav-link" data-scroll-target="#inbreeding-the-three-lenses"><span class="header-section-number">A.1.5</span> Inbreeding, the three lenses</a></li>
-  <li><a href="#selection-and-optimisation" id="toc-selection-and-optimisation" class="nav-link" data-scroll-target="#selection-and-optimisation"><span class="header-section-number">A.1.6</span> Selection and optimisation</a></li>
-  <li><a href="#genomic-prediction" id="toc-genomic-prediction" class="nav-link" data-scroll-target="#genomic-prediction"><span class="header-section-number">A.1.7</span> Genomic prediction</a></li>
-  <li><a href="#population-sizing" id="toc-population-sizing" class="nav-link" data-scroll-target="#population-sizing"><span class="header-section-number">A.1.8</span> Population sizing</a></li>
-  <li><a href="#mating-design" id="toc-mating-design" class="nav-link" data-scroll-target="#mating-design"><span class="header-section-number">A.1.9</span> Mating design</a></li>
-  <li><a href="#sparse-testing" id="toc-sparse-testing" class="nav-link" data-scroll-target="#sparse-testing"><span class="header-section-number">A.1.10</span> Sparse testing</a></li>
-  <li><a href="#joint-allocation" id="toc-joint-allocation" class="nav-link" data-scroll-target="#joint-allocation"><span class="header-section-number">A.1.11</span> Joint allocation</a></li>
-  <li><a href="#response-to-selection" id="toc-response-to-selection" class="nav-link" data-scroll-target="#response-to-selection"><span class="header-section-number">A.1.12</span> Response to selection</a></li>
+  <li><a href="#subdivided-population" id="toc-subdivided-population" class="nav-link" data-scroll-target="#subdivided-population"><span class="header-section-number">A.1.4</span> Subdivided population</a></li>
+  <li><a href="#heterosis-and-cycles" id="toc-heterosis-and-cycles" class="nav-link" data-scroll-target="#heterosis-and-cycles"><span class="header-section-number">A.1.5</span> Heterosis and cycles</a></li>
+  <li><a href="#inbreeding-the-three-lenses" id="toc-inbreeding-the-three-lenses" class="nav-link" data-scroll-target="#inbreeding-the-three-lenses"><span class="header-section-number">A.1.6</span> Inbreeding, the three lenses</a></li>
+  <li><a href="#selection-and-optimisation" id="toc-selection-and-optimisation" class="nav-link" data-scroll-target="#selection-and-optimisation"><span class="header-section-number">A.1.7</span> Selection and optimisation</a></li>
+  <li><a href="#genomic-prediction" id="toc-genomic-prediction" class="nav-link" data-scroll-target="#genomic-prediction"><span class="header-section-number">A.1.8</span> Genomic prediction</a></li>
+  <li><a href="#population-sizing" id="toc-population-sizing" class="nav-link" data-scroll-target="#population-sizing"><span class="header-section-number">A.1.9</span> Population sizing</a></li>
+  <li><a href="#mating-design" id="toc-mating-design" class="nav-link" data-scroll-target="#mating-design"><span class="header-section-number">A.1.10</span> Mating design</a></li>
+  <li><a href="#sparse-testing" id="toc-sparse-testing" class="nav-link" data-scroll-target="#sparse-testing"><span class="header-section-number">A.1.11</span> Sparse testing</a></li>
+  <li><a href="#joint-allocation" id="toc-joint-allocation" class="nav-link" data-scroll-target="#joint-allocation"><span class="header-section-number">A.1.12</span> Joint allocation</a></li>
+  <li><a href="#response-to-selection" id="toc-response-to-selection" class="nav-link" data-scroll-target="#response-to-selection"><span class="header-section-number">A.1.13</span> Response to selection</a></li>
   </ul></li>
   <li><a href="#conventions" id="toc-conventions" class="nav-link" data-scroll-target="#conventions"><span class="header-section-number">A.2</span> Conventions</a></li>
   <li><a href="#terms" id="toc-terms" class="nav-link" data-scroll-target="#terms"><span class="header-section-number">A.3</span> Terms</a></li>
@@ -878,8 +898,82 @@ window.Quarto = {
 </div>
 <p>with <span class="math inline">\(GD_T = GD_{WI} + GD_{BI} + GD_{BS}\)</span> and <span class="math inline">\(F_{ST} = GD_{BS}/GD_T\)</span>.</p>
 </section>
-<section id="heterosis-and-cycles" class="level3" data-number="A.1.4">
-<h3 data-number="A.1.4" class="anchored" data-anchor-id="heterosis-and-cycles"><span class="header-section-number">A.1.4</span> Heterosis and cycles</h3>
+<section id="subdivided-population" class="level3" data-number="A.1.4">
+<h3 data-number="A.1.4" class="anchored" data-anchor-id="subdivided-population"><span class="header-section-number">A.1.4</span> Subdivided population</h3>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 7%">
+<col style="width: 78%">
+<col style="width: 13%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Symbol</th>
+<th style="text-align: left;">Meaning</th>
+<th style="text-align: left;">Function</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(n\)</span>, <span class="math inline">\(N_i\)</span>, <span class="math inline">\(N_T\)</span></td>
+<td style="text-align: left;">subpopulations; size of subpopulation i; <span class="math inline">\(\sum_i N_i\)</span> – <strong>not</strong> the hybrids selected and candidates above</td>
+<td style="text-align: left;"><code>ct_partition()$by_subpop$N</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(p_{k,l,i}\)</span></td>
+<td style="text-align: left;">frequency of allele k within individual l of subpopulation i; for the reference allele of a biallelic marker, the within-individual frequency <span class="math inline">\(x\)</span> above (whose second index is a marker, not an allele)</td>
+<td style="text-align: left;">inside <code>ct_partition()</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(F_i\)</span></td>
+<td style="text-align: left;">molecular inbreeding, <span class="math inline">\(2s_i - 1\)</span>, against a base with all alleles distinct</td>
+<td style="text-align: left;"><code>ct_partition()$by_subpop$F_i</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(H_{o,i}\)</span></td>
+<td style="text-align: left;">observed heterozygosity of subpopulation i; <span class="math inline">\(2(1 - s_i)\)</span></td>
+<td style="text-align: left;">-</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\alpha_i\)</span></td>
+<td style="text-align: left;"><span class="math inline">\((F_i - f_{ii})/(1 - f_{ii})\)</span>, the <span class="math inline">\(F_{IS}\)</span> analogue – <strong>not</strong> the diversity-loss constraint <span class="math inline">\(\alpha\)</span></td>
+<td style="text-align: left;"><code>ct_partition()$by_subpop$alpha_i</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(G_i\)</span>, <span class="math inline">\(G\)</span></td>
+<td style="text-align: left;"><span class="math inline">\((s_i - f_{ii})/(1 - f_{ii}) = (1 + \alpha_i)/2\)</span>; <span class="math inline">\(G\)</span> the same with <span class="math inline">\(\tilde s\)</span>, <span class="math inline">\(\tilde f\)</span> – <strong>not</strong> a relationship matrix <span class="math inline">\(\mathbf{G}\)</span></td>
+<td style="text-align: left;"><code>ct_partition()$by_subpop$G_i</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(D_{ij}\)</span>, <span class="math inline">\(\bar D\)</span></td>
+<td style="text-align: left;">Nei’s minimum distance <span class="math inline">\((f_{ii} + f_{jj})/2 - f_{ij}\)</span>, an element of <span class="math inline">\(\mathbf{D}\)</span>; <span class="math inline">\(\bar D = \tilde f - \bar f\)</span></td>
+<td style="text-align: left;"><code>ct_partition()$D_nei</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\bar d_{ij}\)</span></td>
+<td style="text-align: left;">mean distance between individuals of i and j, <span class="math inline">\((s_i + s_j)/2 - f_{ij}\)</span>; <span class="math inline">\(\bar d_{ii} \neq 0\)</span></td>
+<td style="text-align: left;">-</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(N_e\)</span></td>
+<td style="text-align: left;">asymptotic effective size of the metapopulation</td>
+<td style="text-align: left;">-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(V_W\)</span>, <span class="math inline">\(V_B\)</span></td>
+<td style="text-align: left;">variances of long-term contributions within / between subpopulations</td>
+<td style="text-align: left;">-</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>These are the symbols of <a href="02-subdivided.html" class="quarto-xref"><span>Chapter 2</span></a>, which follow <span class="citation" data-cites="caballero2002">Caballero and Toro (<a href="99-references.html#ref-caballero2002" role="doc-biblioref">2002</a>)</span>.</p>
+</section>
+<section id="heterosis-and-cycles" class="level3" data-number="A.1.5">
+<h3 data-number="A.1.5" class="anchored" data-anchor-id="heterosis-and-cycles"><span class="header-section-number">A.1.5</span> Heterosis and cycles</h3>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -952,8 +1046,8 @@ window.Quarto = {
 </div>
 <p>Expected heterosis splits as <span class="math inline">\(\sum_k d_k[\,2\bar p_k(1-\bar p_k) + y_k^2/2\,]\)</span>, whose two halves are <span class="math inline">\(GD_T\)</span> and <span class="math inline">\(GD_{BS}\)</span> when <span class="math inline">\(d_k \equiv 1\)</span>, and whose sum is <span class="math inline">\(1 - \theta_{AB}\)</span> (<a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 13</span></a>). Over a complete factorial the realised values split orthogonally as <span class="math inline">\(H_{ij} = \mu + g^A_i + g^B_j + s_{ij}\)</span>.</p>
 </section>
-<section id="inbreeding-the-three-lenses" class="level3" data-number="A.1.5">
-<h3 data-number="A.1.5" class="anchored" data-anchor-id="inbreeding-the-three-lenses"><span class="header-section-number">A.1.5</span> Inbreeding, the three lenses</h3>
+<section id="inbreeding-the-three-lenses" class="level3" data-number="A.1.6">
+<h3 data-number="A.1.6" class="anchored" data-anchor-id="inbreeding-the-three-lenses"><span class="header-section-number">A.1.6</span> Inbreeding, the three lenses</h3>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -1007,8 +1101,8 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="selection-and-optimisation" class="level3" data-number="A.1.6">
-<h3 data-number="A.1.6" class="anchored" data-anchor-id="selection-and-optimisation"><span class="header-section-number">A.1.6</span> Selection and optimisation</h3>
+<section id="selection-and-optimisation" class="level3" data-number="A.1.7">
+<h3 data-number="A.1.7" class="anchored" data-anchor-id="selection-and-optimisation"><span class="header-section-number">A.1.7</span> Selection and optimisation</h3>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -1075,8 +1169,8 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="genomic-prediction" class="level3" data-number="A.1.7">
-<h3 data-number="A.1.7" class="anchored" data-anchor-id="genomic-prediction"><span class="header-section-number">A.1.7</span> Genomic prediction</h3>
+<section id="genomic-prediction" class="level3" data-number="A.1.8">
+<h3 data-number="A.1.8" class="anchored" data-anchor-id="genomic-prediction"><span class="header-section-number">A.1.8</span> Genomic prediction</h3>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -1154,8 +1248,8 @@ window.Quarto = {
 </div>
 <p><strong>CV0, CV1, CV2</strong> name what the training set had already seen of a candidate hybrid’s <em>parents</em>: neither, one, or both. In a factorial between two pools these are three different questions, and only CV2 is easy – see <a href="08b-genomic-prediction.html#sec-hybrid-cv" class="quarto-xref"><span>Section 17.4</span></a>.</p>
 </section>
-<section id="population-sizing" class="level3" data-number="A.1.8">
-<h3 data-number="A.1.8" class="anchored" data-anchor-id="population-sizing"><span class="header-section-number">A.1.8</span> Population sizing</h3>
+<section id="population-sizing" class="level3" data-number="A.1.9">
+<h3 data-number="A.1.9" class="anchored" data-anchor-id="population-sizing"><span class="header-section-number">A.1.9</span> Population sizing</h3>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -1207,8 +1301,8 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="mating-design" class="level3" data-number="A.1.9">
-<h3 data-number="A.1.9" class="anchored" data-anchor-id="mating-design"><span class="header-section-number">A.1.9</span> Mating design</h3>
+<section id="mating-design" class="level3" data-number="A.1.10">
+<h3 data-number="A.1.10" class="anchored" data-anchor-id="mating-design"><span class="header-section-number">A.1.10</span> Mating design</h3>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -1266,8 +1360,8 @@ window.Quarto = {
 </div>
 <p><span class="math inline">\(r\)</span> here is plots per cross; in the next table it is the accuracy of a selection criterion. <a href="04e-mating-design.html" class="quarto-xref"><span>Chapter 9</span></a> keeps <span class="math inline">\(\rho\)</span> for accuracy to avoid the clash.</p>
 </section>
-<section id="sparse-testing" class="level3" data-number="A.1.10">
-<h3 data-number="A.1.10" class="anchored" data-anchor-id="sparse-testing"><span class="header-section-number">A.1.10</span> Sparse testing</h3>
+<section id="sparse-testing" class="level3" data-number="A.1.11">
+<h3 data-number="A.1.11" class="anchored" data-anchor-id="sparse-testing"><span class="header-section-number">A.1.11</span> Sparse testing</h3>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -1325,8 +1419,8 @@ window.Quarto = {
 </div>
 <p>Here <span class="math inline">\(k\)</span> counts locations per hybrid; in <a href="04e-mating-design.html" class="quarto-xref"><span>Chapter 9</span></a> it counts testers per pool.</p>
 </section>
-<section id="joint-allocation" class="level3" data-number="A.1.11">
-<h3 data-number="A.1.11" class="anchored" data-anchor-id="joint-allocation"><span class="header-section-number">A.1.11</span> Joint allocation</h3>
+<section id="joint-allocation" class="level3" data-number="A.1.12">
+<h3 data-number="A.1.12" class="anchored" data-anchor-id="joint-allocation"><span class="header-section-number">A.1.12</span> Joint allocation</h3>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -1413,8 +1507,8 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="response-to-selection" class="level3" data-number="A.1.12">
-<h3 data-number="A.1.12" class="anchored" data-anchor-id="response-to-selection"><span class="header-section-number">A.1.12</span> Response to selection</h3>
+<section id="response-to-selection" class="level3" data-number="A.1.13">
+<h3 data-number="A.1.13" class="anchored" data-anchor-id="response-to-selection"><span class="header-section-number">A.1.13</span> Response to selection</h3>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -1527,6 +1621,11 @@ window.Quarto = {
 <p>All the code of this chapter, in order and with the explanation kept as comments, is one script: <a href="https://ederdbs.github.io/QG/downloads/90-notation.R" download="90-notation.R"><strong>90-notation.R</strong></a>. Download it, install <code>hybdiv</code>, and run it top to bottom in an empty directory; cached results are fetched on first use.</p>
 
 
+<div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
+<div id="ref-caballero2002" class="csl-entry" role="listitem">
+Caballero, A., and M. A. Toro. 2002. <span>“Analysis of Genetic Diversity for the Management of Conserved Subdivided Populations.”</span> <em>Conservation Genetics</em> 3 (3): 289–99. <a href="https://doi.org/10.1023/A:1019956205473">https://doi.org/10.1023/A:1019956205473</a>.
+</div>
+</div>
 </section>
 
 </main> <!-- /main -->

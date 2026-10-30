@@ -105,7 +105,7 @@ need to change — everything else operates on `ctx`/`X`/`f`/`hybrids` and is ag
   (their Eq. 3, asserted in `tests/testthat/test-lenses.R`). Drift is `O(n*m)`, so it stays post-hoc: do not move it
   into `metrics_cheap` or the DE fitness. Both are anchored on `ctx$p0`, the frozen
   candidate-pool frequencies — never recompute a base per scenario.
-- **`gd_partition()` splits `GD_T` into `GD_WI + GD_BI + GD_BS`** (Caballero & Toro 2002 Eq. 8)
+- **`gd_partition()` splits `GD_T` into `GD_WI + GD_BI + GD_BS`** (Caballero & Toro 2002)
   over the heterotic pools. `GD_BS` is between-pool divergence — the heterosis engine, to be
   *preserved*, not minimised. With inbred parent lines `GD_WI == 0` exactly; the hybrid-level
   `GD_WI_hyb` is the one that carries signal and it needs no `fL`.
