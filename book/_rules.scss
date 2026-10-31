@@ -26,7 +26,15 @@ main a:not(.nav-link):not(.btn) { text-underline-offset: 0.18em; text-decoration
 
 // Code is secondary to prose in a theory book.
 pre, code, .sourceCode { font-family: $font-family-monospace; }
-div.sourceCode { border: 0; border-left: 3px solid rgba($pool-a, 0.55); border-radius: 0 3px 3px 0; margin: 1rem 0; }
+// Every code block sits in a light grey box so it reads apart from the prose.
+div.sourceCode, pre.sourceCode, .cell-output pre {
+  background-color: $code-bg !important;
+}
+div.sourceCode, .cell-output pre {
+  border: 1px solid rgba(128, 128, 128, 0.22); border-left: 3px solid rgba($pool-a, 0.55);
+  border-radius: 0 4px 4px 0; margin: 1.1rem 0;
+}
+pre.sourceCode, .cell-output pre { padding: 0.7rem 0.9rem; }
 pre.sourceCode { font-size: 0.82em; line-height: 1.5; }
 details > summary { font-family: $font-family-sans-serif; font-size: 0.85em; cursor: pointer; }
 
