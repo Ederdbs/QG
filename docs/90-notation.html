@@ -746,9 +746,9 @@ window.Quarto = {
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
-<col style="width: 7%">
-<col style="width: 24%">
-<col style="width: 67%">
+<col style="width: 5%">
+<col style="width: 39%">
+<col style="width: 55%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -789,9 +789,19 @@ window.Quarto = {
 <td style="text-align: left;">builds <span class="math inline">\(\mathbf{G}\)</span>; also the marker design matrix of <span class="math inline">\(\mathbf{u} = \mathbf{Z}\boldsymbol\beta\)</span> (genomic prediction); not the subgroup indicator <span class="math inline">\(\mathbf{Z}\)</span> of joint allocation</td>
 </tr>
 <tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\mathbf{Z}_h\)</span></td>
+<td style="text-align: left;">hybrid marker matrix centred at 0.5, <span class="math inline">\(\mathbf{X} - \tfrac12\mathbf{J}_{N \times m}\)</span>, N x m</td>
+<td style="text-align: left;"><span class="math inline">\(\mathbf{G}_{0.5} = 8\mathbf{Z}_h\mathbf{Z}_h'/m\)</span> (<a href="05-genomic-era.html#sec-era-step7" class="quarto-xref"><span>Section 10.7.7</span></a>)</td>
+</tr>
+<tr class="even">
 <td style="text-align: left;"><span class="math inline">\(\mathbf{J}\)</span></td>
-<td style="text-align: left;">matrix of ones <span class="math inline">\(\mathbf{1}\mathbf{1}'\)</span>, N x N</td>
+<td style="text-align: left;">matrix of ones <span class="math inline">\(\mathbf{1}\mathbf{1}'\)</span>, N x N; <span class="math inline">\(\mathbf{J}_{r \times c}\)</span> when rectangular</td>
 <td style="text-align: left;">-</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\mathbf{B}\)</span></td>
+<td style="text-align: left;">parent-usage incidence, N x L: a 1 in the two columns of each hybrid’s parents; <span class="math inline">\(\mathbf{X} = \tfrac12\mathbf{B}\mathbf{G}^L\)</span></td>
+<td style="text-align: left;">rank bounds that of <span class="math inline">\(\mathbf{f}\)</span> (<a href="05-genomic-era.html#eq-era-rank" class="quarto-xref">Equation&nbsp;<span>10.5</span></a>); not the field budget <span class="math inline">\(B\)</span></td>
 </tr>
 </tbody>
 </table>
@@ -1173,10 +1183,10 @@ window.Quarto = {
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
-<col style="width: 9%">
-<col style="width: 15%">
-<col style="width: 53%">
-<col style="width: 21%">
+<col style="width: 7%">
+<col style="width: 11%">
+<col style="width: 64%">
+<col style="width: 16%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1216,6 +1226,12 @@ window.Quarto = {
 <td style="text-align: left;">-</td>
 <td style="text-align: left;"><span class="math inline">\(2\,\text{cov}(\delta p/s,\,(p_0 - \tfrac12)/s) = F_{hom} - F_{drift}\)</span></td>
 <td style="text-align: left;"><code>freq_metrics()$cov_diag</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\kappa\)</span></td>
+<td style="text-align: left;">-</td>
+<td style="text-align: left;">panel statistic <span class="math inline">\(\overline{(p_0 - \tfrac12)^2/[p_0(1-p_0)]}\)</span> (<a href="05-genomic-era.html" class="quarto-xref"><span>Chapter 10</span></a>); not the aggregate genotype <span class="math inline">\(W\)</span></td>
+<td style="text-align: left;">-</td>
 </tr>
 </tbody>
 </table>

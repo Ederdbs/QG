@@ -68,8 +68,8 @@ P0   <- pool_freqs(L / 2, pool)
 #' inbreeding measured as **drift of allele frequencies** are the same thing.
 #' @meuwissen2020 show that inside genomic optimal-contribution schemes they stop
 #' being the same thing, and can diverge badly, whenever diversity is controlled
-#' through **identity by state** on a marker panel. Only when control is through
-#' **identity by descent** is the classical equivalence restored.
+#' through **identity by state** (IBS) on a marker panel. Only when control is through
+#' **identity by descent** (IBD) is the classical equivalence restored.
 #' 
 #' The practical consequence is uncomfortable:
 #' 
@@ -77,7 +77,7 @@ P0   <- pool_freqs(L / 2, pool)
 #' > pay an unmonitored price in the metric you did not write.
 #' 
 #' If you constrain $\tfrac{1}{2}\mathbf{c}'\mathbf{G}\mathbf{c}$ using a VanRaden
-#' $\mathbf{G}$, you are constraining **drift**. The loss of heterozygosity in your
+#' $\mathbf{G}$ [@vanraden2008], you are constraining **drift**. The loss of heterozygosity in your
 #' germplasm may be running at a different rate, in either direction, from the one
 #' you believe you are controlling.
 #' 
@@ -102,17 +102,20 @@ P0   <- pool_freqs(L / 2, pool)
 #' cross -- both change which quantity is the product and therefore which loss
 #' matters.
 #' 
-#' **A2. Parent lines are fully inbred, by DH induction or by selfing to fixation.**
+#' **A2. Parent lines are fully inbred, by doubled-haploid (DH) induction or by selfing to fixation.**
 #' This is a property of the *programme*, not of the mating system: an allogamous
 #' crop bred for hybrids still delivers inbred parents. In this simulation the
 #' lines are homozygous at every locus, which the coancestry kernel reports exactly:
 #' 
 ## -----------------------------------------------------------------------------
 #| label: era-inbred-check
-c(het_fraction_lines   = mean(L / 2 == 0.5),
-  self_coancestry_min  = min(diag(molecular_coancestry(L / 2))),
-  het_fraction_F1      = mean(ctx$X == 0.5),
-  twice_GD_WI_hyb      = 2 * gd_partition(seq_len(ctx$N), ctx)[["GD_WI_hyb"]])
+inb <- c(het_fraction_lines   = mean(L / 2 == 0.5),
+         self_coancestry_min  = min(diag(molecular_coancestry(L / 2))),
+         het_fraction_F1      = mean(ctx$X == 0.5),
+         twice_GD_WI_hyb      = 2 * gd_partition(seq_len(ctx$N), ctx)[["GD_WI_hyb"]])
+stopifnot(inb[["het_fraction_lines"]] == 0, inb[["self_coancestry_min"]] == 1,
+          isTRUE(all.equal(inb[["het_fraction_F1"]], inb[["twice_GD_WI_hyb"]])))
+inb  # verification echo: every value is asserted by the stopifnot() above
 
 #' 
 #' Line heterozygosity is zero and every line's self-coancestry is 1, so
@@ -146,20 +149,25 @@ c(het_fraction_lines   = mean(L / 2 == 0.5),
 #' recomputed. This is `ctx$p0`, set once in `build_ctx()`. @sec-era-step1 is that
 #' step and measures what happens without it.
 #' 
-#' **A7. No dominance enters any metric in this chapter.** $\theta$, $GD$ and
-#' $\alpha$ are functions of allele frequencies alone. The dominance side of the
+#' **A7. No dominance enters any metric in this chapter.** $\theta$, gene diversity
+#' $GD = 1 - \theta$ and $\alpha$ are functions of allele frequencies alone. The dominance side of the
 #' same germplasm -- what the divergence between pools is worth in heterosis -- is
 #' @sec-heterosis, and the two must not be mixed inside one constraint.
 #' 
 #' **A8. The scale is the book's teaching scale**: `r book_cfg$n_pool_A` +
 #' `r book_cfg$n_pool_B` lines, `r book_cfg$m` markers, `r ctx$N` hybrids in the
-#' full factorial. The production scale is 71 + 71 lines and 25000 markers. Where a
+#' full factorial. The production scale, a declared programme size that no chunk of
+#' this chapter runs, is 71 + 71 lines and 25000 markers. Where a
 #' result is scale-dependent, it says so.
 #' 
 #' ## Three lenses, not three synonyms
 #' 
+#' @tbl-era-lenses sets out what each lens sees, the inbreeding coefficient that
+#' reads it and the relationship matrices built on it.
+#' 
 ## -----------------------------------------------------------------------------
-#| label: era-lenses
+#| label: tbl-era-lenses
+#| tbl-cap: "The three lenses of the section title, plus the hybrid of two of them: G_ROH reads homozygosity and is interpreted as IBD, which is why it gets a row of its own and not a lens of its own. G_0.5 [@toro2014] = 4f - 2J, an affine function of the matrix this book calls f -- see @sec-coancestry."
 #| echo: false
 knitr::kable(data.frame(
   Lens = c("Drift", "Homozygosity", "IBD", "Hybrid"),
@@ -169,13 +177,12 @@ knitr::kable(data.frame(
     "segments inherited by descent from a defined base",
     "haplotype homozygosity used as a proxy for IBD"),
   `Inbreeding metric` = c("F_drift", "F_hom", "F_IBD", "F_ROH"),
-  `Relationship matrix` = c("G_VR2, G_VR1, G_i(p)", "G_0.5 (molecular coancestry)",
+  `Relationship matrix` = c("G_VR2, G_VR1, G_i(p)", "G_0.5 (affine in molecular coancestry)",
                             "A, G_LA", "G_ROH"),
-  check.names = FALSE),
-  caption = "The three lenses of the section title, plus the hybrid of two of them: G_ROH reads homozygosity and is interpreted as IBD, which is why it gets a row of its own and not a lens of its own. G_0.5 = 4f - 2J, an affine function of the matrix this book calls f -- see @sec-coancestry.")
+  check.names = FALSE))
 
 #' 
-#' ::: {.callout-important}
+#' ::: {.callout-warning}
 #' ## Every inbreeding metric is a ratio to a reference population
 #' 
 #' Without explicitly declaring your base -- cycle 0 of the recurrent programme? a
@@ -190,13 +197,13 @@ knitr::kable(data.frame(
 #' 
 #' ### Rate of inbreeding and effective size
 #' 
-#' What you manage is not $F$ but its rate of accumulation. $F$ is a stock;
-#' $\Delta F$ is a flow.
+#' What you manage is not $F$ but its rate of accumulation, @eq-era-rate. $F$ is a
+#' stock; $\Delta F$ is a flow.
 #' 
-#' $$\Delta F = \frac{F_t - F_{t-1}}{1 - F_{t-1}}, \qquad N_e = \frac{1}{2\Delta F}$$
+#' $$\Delta F = \frac{F_t - F_{t-1}}{1 - F_{t-1}}, \qquad N_e = \frac{1}{2\Delta F}$$ {#eq-era-rate}
 #' 
 #' with $F_t \in (-\infty, 1]$ the inbreeding coefficient of cycle $t$ against the
-#' frozen base (negative values are possible for $F_{hom}$, see below),
+#' frozen base (negative values are possible for $F_{hom}$, see @sec-era-fhom),
 #' $\Delta F$ the per-cycle rate and $N_e$ the effective size it implies
 #' [@falconer1996, Ch. 3-4].
 #' 
@@ -205,7 +212,7 @@ knitr::kable(data.frame(
 #' $-\text{slope}$ is only its first-order approximation. **The linearity of that
 #' regression is itself a diagnostic:** in @meuwissen2020, $\log(1 - F_{drift})$
 #' was approximately linear under every scheme, while $\log(1 - F_{hom})$ showed
-#' marked curvature under some, notably the ROH-based one. Curvature means a
+#' marked curvature under some, notably the one based on runs of homozygosity (ROH). Curvature means a
 #' non-constant rate -- your $N_e$ target is not being met steadily.
 #' 
 #' A tropical maize recurrent programme targeting $N_e = 50$ per cycle needs
@@ -216,12 +223,15 @@ knitr::kable(data.frame(
 #' 
 #' ### `F_hom`, homozygosity-based {#sec-era-fhom}
 #' 
-#' Wright defined an inbreeding coefficient to run from 0 to 1 as heterozygosity
-#' under random mating falls from its initial state to zero. So the metric is the
-#' fraction of heterozygosity already lost relative to the base:
+#' @wright1922 defined the inbreeding coefficient $F$ as the correlation between
+#' uniting gametes; under random drift in a closed population its consequence is
+#' $H_t = H_0(1 - F_t)$, so $F$ is the proportional loss of heterozygosity relative
+#' to the base [@falconer1996, Ch. 3]. The homozygosity lens takes that consequence
+#' as its definition -- the fraction of heterozygosity already lost relative to the
+#' base, @eq-era-fhom:
 #' 
 #' $$F_{hom} = 1 - \frac{1}{N_{SNP}}\sum_k \frac{2p_{t,k}(1 - p_{t,k})}{2p_{0,k}(1 - p_{0,k})}
-#'           = 1 - \frac{1}{N_{SNP}}\sum_k \frac{H_{t,k}}{H_{0,k}}$$
+#'           = 1 - \frac{1}{N_{SNP}}\sum_k \frac{H_{t,k}}{H_{0,k}}$$ {#eq-era-fhom}
 #' 
 #' with $p_{t,k} \in [0,1]$ the frequency of the reference allele at marker $k$ in
 #' the population being scored, $p_{0,k} \in (0,1)$ the same frequency in the frozen
@@ -262,10 +272,12 @@ knitr::kable(data.frame(
 #' assumption A2 -- and on the full factorial it equals $GD_T + GD_{BS}$, the
 #' between-pool component counted twice (@sec-heterosis-identity). The difference
 #' between the two quantities is therefore $GD_{BS}$, which the $F_{hom}$ lens does
-#' not carry, and which moves with the selection:
+#' not carry, and which moves with the selection (@tbl-era-hom-two-levels for the
+#' merged-pool quantities, @tbl-era-hom-two-levels-het for the hybrid-level ones):
 #' 
 ## -----------------------------------------------------------------------------
-#| label: era-hom-two-levels
+#| label: tbl-era-hom-two-levels
+#| tbl-cap: "Merged-pool level of diversity for four 60-hybrid selections from the teaching-scale candidate set (@sec-era-programme, A8): one random draw (seed 31), the max-diversity greedy (`w = 0`), the index-weighted greedy (`w = 1`) and truncation on the index. He_merged and F_hom: `freq_metrics()` on the merged hybrid frequencies against the frozen base; GD_T and GD_BS: `gd_partition()`. All dimensionless."
 set.seed(31)
 sels <- list(random     = sample.int(ctx$N, 60),
              max_div    = sel_greedy(ctx, 60, w = 0),
@@ -281,10 +293,39 @@ two_levels <- t(sapply(sels, function(i) {
 }))
 stopifnot(isTRUE(all.equal(two_levels[, "He_merged"], two_levels[, "GD_T"])),
           isTRUE(all.equal(two_levels[, "F1_het"], two_levels[, "two_GD_WI_hyb"])))
-fmt(as.data.frame(two_levels), 4)
+fmt(as.data.frame(two_levels[, c("He_merged", "GD_T", "F_hom", "GD_BS")]), 4)
 
 #' 
-#' Two identities hold to machine precision in that table and the `stopifnot()`
+## -----------------------------------------------------------------------------
+#| label: tbl-era-hom-two-levels-het
+#| tbl-cap: "Hybrid level of diversity for the four selections of @tbl-era-hom-two-levels. F1_het: fraction of heterozygous loci in the selected hybrids; two_GD_WI_hyb: twice the hybrid-level within-individual gene diversity (`gd_partition()`); GD_T_plus_BS: GD_T + GD_BS of @tbl-era-hom-two-levels. All dimensionless."
+fmt(as.data.frame(two_levels[, c("F1_het", "two_GD_WI_hyb", "GD_T_plus_BS")]), 4)
+
+#' 
+#' The ranking below is read against a **resampled** null
+#' (@tbl-era-hom-two-levels-null), not against the single `random` row, for the reason @sec-era-step2 makes explicit. The null is the
+#' package's `null_distribution()`: random 60-hybrid subsets, the same object
+#' @sec-era-step2 reuses. Realised F1 heterozygosity is $2\,GD_{WI\text{-}hyb}$,
+#' asserted above, so its null is read off the `GD_WI_hyb` column:
+#' 
+## -----------------------------------------------------------------------------
+#| label: tbl-era-hom-two-levels-null
+#| tbl-cap: "Random-subset null for the selections of @tbl-era-hom-two-levels: mean and standard deviation of F_hom, GD_BS and realised F1 heterozygosity (twice GD_WI_hyb) over `B_full = 1000` random 60-hybrid subsets (`null_distribution()`, seed 7), then each selection's z-score against that null, in null standard deviations."
+null60 <- null_distribution(ctx, 60, B = 2000, B_full = 1000, seed = 7)
+nl <- cbind(F_hom  = null60$full[, "F_hom"],
+            GD_BS  = null60$full[, "GD_BS"],
+            F1_het = 2 * null60$full[, "GD_WI_hyb"])
+z_two <- sapply(colnames(nl), function(k)
+  (two_levels[, k] - mean(nl[, k])) / stats::sd(nl[, k]))
+share_two <- sapply(colnames(nl), function(k)
+  sapply(two_levels[, k], function(v) mean(nl[, k] >= v)))
+dimnames(share_two) <- dimnames(z_two)
+fmt(rbind(null_mean = colMeans(nl), null_sd = apply(nl, 2, stats::sd),
+          as.data.frame(z_two)), 4)
+
+#' 
+#' Two identities hold to machine precision in @tbl-era-hom-two-levels and
+#' @tbl-era-hom-two-levels-het, and the `stopifnot()`
 #' enforces both on every render: $He = GD_T$, and the realised F1 heterozygosity
 #' equals $2\,GD_{WI\text{-}hyb}$. The third comparison is *not* an identity on a
 #' selected subset: $GD_T + GD_{BS}$ departs from the realised heterozygosity by at
@@ -294,20 +335,38 @@ fmt(as.data.frame(two_levels), 4)
 #' $GD_{WI\text{-}hyb}$ scores the pairs actually chosen (@sec-heterosis states the
 #' same limit from the other side).
 #' 
-#' Now read the ranking. Truncation has the **highest** $F_{hom}$,
-#' `r fmt(two_levels["truncation", "F_hom"], 4)` against
-#' `r fmt(two_levels["random", "F_hom"], 4)` for the random draw, which on the usual
-#' reading is "most heterozygosity lost". Yet its hybrids are *more* heterozygous
-#' than the random draw's:
-#' `r fmt(two_levels["truncation", "F1_het"], 4)` against
-#' `r fmt(two_levels["random", "F1_het"], 4)`. The two readings are not in conflict
-#' because they are two quantities: truncation concentrated usage inside the pools
+#' Now read the ranking. The table has three distinct plans, not four: `balanced`
+#' (`w = 1`) returns exactly the truncation set, as @sec-era-step2 shows, so the
+#' two rows are identical in every column of both tables. Truncation has the **highest** $F_{hom}$
+#' of the three, `r fmt(two_levels["truncation", "F_hom"], 4)`, which is
+#' `r fmt(z_two["truncation", "F_hom"], 1)` null s.d. above the resampled mean of
+#' `r fmt(mean(nl[, "F_hom"]), 4)` and on the usual reading is "most heterozygosity
+#' lost". Yet its hybrids are *more* heterozygous than random subsets of the same
+#' size: realised F1 heterozygosity
+#' `r fmt(two_levels["truncation", "F1_het"], 4)` against a null mean of
+#' `r fmt(mean(nl[, "F1_het"]), 4)`, z = `r fmt(z_two["truncation", "F1_het"], 2)`,
+#' reached or exceeded by `r fmt(100 * share_two["truncation", "F1_het"], 1)`% of the
+#' `r nrow(nl)` resampled subsets. The two readings are not in conflict because they
+#' are two quantities: truncation concentrated usage inside the pools
 #' (@sec-era-step6 measures that) and so lost merged-pool gene diversity, while the
-#' $A \times B$ pairs it kept happen to be more divergent --
-#' $GD_{BS}$ = `r fmt(two_levels["truncation", "GD_BS"], 4)` against
-#' `r fmt(two_levels["random", "GD_BS"], 4)`. Reported alone, $F_{hom}$ would have
-#' called that plan the worst of the four for the very quantity -- product
-#' heterozygosity -- on which it beats the random draw.
+#' $A \times B$ pairs it kept are more heterozygous than random pairs, which is what
+#' the F1 heterozygosity column scores. $GD_{BS}$ is not evidence for the second
+#' half: it is computed from line-usage weights, not from the pairs kept (see
+#' above), and it ranks the plans in the opposite order to F1 heterozygosity --
+#' truncation has $GD_{BS}$ at z = `r fmt(z_two["truncation", "GD_BS"], 1)` and F1
+#' heterozygosity at z = `r fmt(z_two["truncation", "F1_het"], 2)`, the
+#' max-diversity plan $GD_{BS}$ at z = `r fmt(z_two["max_div", "GD_BS"], 2)` and F1
+#' heterozygosity at z = `r fmt(z_two["max_div", "F1_het"], 2)`. The rise of
+#' $GD_{BS}$ under truncation is the usage-concentration effect that
+#' @sec-era-step6 derives. The pair-level advantage of truncation is therefore
+#' real against the null but smaller than that of the plan built for diversity.
+#' Reported alone, $F_{hom}$ would have
+#' called that plan the worst of the three for the very quantity -- product
+#' heterozygosity -- on which it beats the random-subset null. The size of that
+#' advantage is small (`r fmt(z_two["truncation", "F1_het"], 2)` null s.d.) and is
+#' measured on one candidate set at the teaching scale. The `random` row, a single
+#' draw, sits at z = `r fmt(z_two["random", "F1_het"], 2)` on the same column, so a
+#' comparison against it alone would have overstated the advantage.
 #' 
 #' Within a heterotic pool under reciprocal recurrent selection, $F_{hom}$ on the
 #' *pool's* own frequencies is still the right lens for one thing, and that one
@@ -343,9 +402,9 @@ fmt(as.data.frame(two_levels), 4)
 #' 
 #' ### `F_drift`, drift-based
 #' 
-#' $$F_{drift} = \frac{1}{N_{SNP}}\sum_k \frac{(p_{t,k} - p_{0,k})^2}{p_{0,k}(1 - p_{0,k})}$$
+#' $$F_{drift} = \frac{1}{N_{SNP}}\sum_k \frac{(p_{t,k} - p_{0,k})^2}{p_{0,k}(1 - p_{0,k})}$$ {#eq-era-fdrift}
 #' 
-#' with the same symbols [@meuwissen2020].
+#' with the same symbols as @eq-era-fhom [@meuwissen2020].
 #' 
 #' **Never negative.** It has the algebraic form of the standardised-variance
 #' definition of $F_{ST}$ -- a variance of allele frequencies divided by
@@ -354,7 +413,7 @@ fmt(as.data.frame(two_levels), 4)
 #' population through time* rather than to a set of populations in space. That is
 #' an analogy of form, not an identity: nothing here is a between-subpopulation
 #' variance, and the chapter's own $F_{ST}$ column (@sec-era-step6) is the Nei
-#' $G_{ST}$ of `gd_partition()`, a different statistic on a different partition.
+#' $G_{ST}$ [@nei1973] of `gd_partition()`, a different statistic on a different partition.
 #' $F_{drift}$ is exactly the quantity constrained when `G_VR2` goes into the
 #' optimiser.
 #' 
@@ -365,14 +424,14 @@ fmt(as.data.frame(two_levels), 4)
 #' **It must not be read as a measure of *this programme's* selection intensity,
 #' even though @meuwissen2020 offer exactly that reading for a locus under
 #' directional selection.** They call $\delta p^2/[p_0(1-p_0)]$ "an approximation
-#' to the squared total intensity ($i^2$) applied to the marker" (citing Liu &
-#' Woolliams 2010 for the underlying non-linearity), and where the only thing
+#' to the squared total intensity ($i^2$) applied to the marker" (citing
+#' @liu2010 for the underlying non-linearity), and where the only thing
 #' moving frequencies is truncation selection on a trait, that reading is theirs
 #' to make. But $F_{drift}$ is accumulated over **every** source of displacement a
 #' scheme has -- selection, pure drift, and a diversity constraint that pushes
 #' frequencies on its own -- and the three are not separable from the statistic
 #' alone. @sec-era-step4 runs a crossing block with **no selection of any kind**
-#' and $F_{drift}$ climbs over twelve cycles to a value the step reports, which
+#' and $F_{drift}$ climbs across the cycles to a value the step reports, which
 #' under an unconditional intensity reading would be a large intensity applied by
 #' nothing; @sec-era-step2's `max_div` plan moves $F_{drift}$ by minimising
 #' coancestry, not by selecting on any trait. Even where selection is the only
@@ -390,7 +449,7 @@ fmt(as.data.frame(two_levels), 4)
 #' $\mathbf{G}$ and reporting $\Delta F \approx 1\%$ has reported
 #' $\Delta F_{drift}$ on the training panel. Quantitative disease-resistance loci
 #' not yet prioritised may have hitch-hiked to extreme frequencies alongside yield
-#' QTL, and none of that appears in the reported metric.
+#' quantitative trait loci (QTL), and none of that appears in the reported metric.
 #' 
 #' ## The classical equivalence, and the covariance that destroys it
 #' 
@@ -399,11 +458,11 @@ fmt(as.data.frame(two_levels), 4)
 #' $$\frac{\mathrm{var}(p_{t,k})}{p_0(1-p_0)} = 1 - \frac{H_t}{H_0}
 #'   \;\;\Longrightarrow\;\; F_{drift} = F_{hom}.$$
 #' 
-#' The paper's central result quantifies the departure:
+#' The paper's central result, @eq-era-cov, quantifies the departure:
 #' 
 #' $$F_{hom} - F_{drift} \;=\; 2\,\mathrm{cov}\!\left(
 #'   \frac{\delta p_{t,k}}{\sqrt{p_{0,k}(1-p_{0,k})}},\;
-#'   \frac{p_{0,k} - 1/2}{\sqrt{p_{0,k}(1-p_{0,k})}}\right)$$
+#'   \frac{p_{0,k} - 1/2}{\sqrt{p_{0,k}(1-p_{0,k})}}\right)$$ {#eq-era-cov}
 #' 
 #' [@meuwissen2020, their Eq. 3], where $\delta p_{t,k} = p_{t,k} - p_{0,k}$ and
 #' the covariance is taken over markers with divisor $N_{SNP}$ -- which is why
@@ -417,23 +476,27 @@ fmt(as.data.frame(two_levels), 4)
 #' frequency, the two measures diverge.** The non-obvious part is that this
 #' covariance is induced by the *diversity management itself*, not by directional
 #' selection -- @meuwissen2020 demonstrate this by running the scheme with random
-#' GEBVs, and the divergence persists.
+#' genomic estimated breeding values (GEBVs), and the divergence persists.
 #' 
 #' ### Verifying the identity
 #' 
-#' `freq_metrics()` returns all three quantities in one marker sweep. The identity
-#' is asserted in `tests/testthat/test-lenses.R`; here it is on live data:
+#' `freq_metrics()` returns all three quantities -- @eq-era-fhom, @eq-era-fdrift and
+#' @eq-era-cov -- in one marker sweep. The identity
+#' is asserted in `tests/testthat/test-lenses.R`; here it is on live data
+#' (@tbl-era-identity, @tbl-era-identity-residual):
 #' 
 ## -----------------------------------------------------------------------------
-#| label: era-identity
+#| label: tbl-era-identity
+#| tbl-cap: "F_hom, F_drift and cov_diag of one random 60-hybrid selection (seed 31) against the frozen base, from a single `freq_metrics()` call. Dimensionless."
 set.seed(31)
 idx <- sample.int(ctx$N, 60)
 fm <- freq_metrics(idx, ctx)
-fmt(fm[c("F_hom", "F_drift", "cov_diag")], 6)
+fmt(as.data.frame(t(fm[c("F_hom", "F_drift", "cov_diag")])), 6)
 
 #' 
 ## -----------------------------------------------------------------------------
-#| label: era-identity-residual
+#| label: tbl-era-identity-residual
+#| tbl-cap: "The identity of @eq-era-cov on the selection of @tbl-era-identity, over the markers polymorphic in the base. F_hom_minus_F_drift and cov_diag: the two sides; residual: their difference; mean_x, mean_y: marker-wise means of the two standardised vectors of @eq-era-cov; two_times_R_cov: `2 * cov(x, y)` with the n - 1 divisor of `stats::cov()`. Dimensionless, six significant digits."
 stopifnot(isTRUE(all.equal(fm[["cov_diag"]], fm[["F_hom"]] - fm[["F_drift"]])))
 # The two standardised marker vectors of Eq. 3, on the markers polymorphic in
 # the base, so `2 * mean(x * y)` can be put next to `2 * cov(x, y)`.
@@ -442,30 +505,37 @@ sdv  <- sqrt(ctx$p0[keep] * (1 - ctx$p0[keep]))
 x    <- (colMeans(ctx$X[idx, keep, drop = FALSE]) - ctx$p0[keep]) / sdv
 y    <- (ctx$p0[keep] - 0.5) / sdv
 stopifnot(isTRUE(all.equal(2 * mean(x * y), unname(fm[["cov_diag"]]))))
-c(F_hom_minus_F_drift = unname(fm[["F_hom"]] - fm[["F_drift"]]),
+data.frame(value = formatC(c(
+  F_hom_minus_F_drift = unname(fm[["F_hom"]] - fm[["F_drift"]]),
   cov_diag            = unname(fm[["cov_diag"]]),
   residual            = unname(fm[["cov_diag"]] - (fm[["F_hom"]] - fm[["F_drift"]])),
   mean_x              = mean(x),
   mean_y              = mean(y),
-  two_times_R_cov     = 2 * stats::cov(x, y))
+  two_times_R_cov     = 2 * stats::cov(x, y)), digits = 6, format = "g"))
 
 #' 
 #' Exact to machine precision, and the two `stopifnot()`s mean this page cannot
-#' render if it stops being. The last three entries are the point of the previous
+#' render if it stops being. The last three rows of @tbl-era-identity-residual are the point of the previous
 #' paragraph: neither marker-wise mean is zero, so `2 * cov(x, y)` returns
-#' `r sprintf("%.6f", 2 * stats::cov(x, y))` where the quantity Eq. 3 defines is
+#' `r sprintf("%.6f", 2 * stats::cov(x, y))` where the quantity @eq-era-cov defines is
 #' `r sprintf("%.6f", fm[["cov_diag"]])`. And when the selection *is* the base,
 #' both lenses must read zero:
 #' 
 ## -----------------------------------------------------------------------------
 #| label: era-base-zero
-fmt(freq_metrics(seq_len(ctx$N), ctx)[c("F_hom", "F_drift", "cov_diag")], 12)
+base0 <- freq_metrics(seq_len(ctx$N), ctx)[c("F_hom", "F_drift", "cov_diag")]
+stopifnot(all(abs(base0) < 1e-12))
+fmt(base0, 12)  # verification echo: asserted zero by the stopifnot() above
 
 #' 
 #' ### Why each matrix generates a sign
 #' 
+#' @tbl-era-matrix-signs gives the sign of the covariance in @eq-era-cov that each
+#' relationship matrix generates when it is the constraint, and the mechanism.
+#' 
 ## -----------------------------------------------------------------------------
-#| label: era-matrix-signs
+#| label: tbl-era-matrix-signs
+#| tbl-cap: "The sign of the bias is a property of the matrix, not of the data: sign of the covariance of @eq-era-cov generated by each matrix used as the optimiser's constraint. Mechanisms as set out by @meuwissen2020, their Discussion and Supplementary Information 1; the di/dp expression in the last row is theirs, after @liu2010."
 #| echo: false
 knitr::kable(data.frame(
   Matrix = c("G_VR2", "G_0.5", "G_VR1", "G_i(p)"),
@@ -475,12 +545,11 @@ knitr::kable(data.frame(
     "frequencies are measured as deviations from 0.5, so the optimiser buys 'diversity' by pushing everything to intermediate frequencies",
     "G_VR2 reweighted by 2p0(1-p0), giving more weight to already-intermediate loci and less room at the extremes",
     "uses accumulated intensity instead of delta-p^2; since di/dp = [p(1-p)]^-1/2, moves toward the extremes get more expensive"),
-  check.names = FALSE),
-  caption = "The sign of the bias is a property of the matrix, not of the data. Mechanisms as set out by Meuwissen et al. (2020), their Discussion and Supplementary Information 1; the di/dp expression in the last row is theirs, after Liu and Woolliams (2010).")
+  check.names = FALSE))
 
 #' 
 #' ::: {.callout-warning}
-#' ## Your MAF spectrum decides how bad this is
+#' ## Your minor-allele-frequency (MAF) spectrum decides how bad this is
 #' 
 #' @meuwissen2020 state this as an expectation rather than as a measured
 #' comparison: "the covariance generated is expected to be larger for WGS data
@@ -489,9 +558,10 @@ knitr::kable(data.frame(
 #' second Conclusion bullet), having observed that the strength of the covariance
 #' "depends on the distribution of $(p_0 - \tfrac12)$" (their Discussion). Their own
 #' simulation used four panels, all random samples of the same whole-genome
-#' sequence data (an SNP-BLUP panel, a neutral panel, a QTL panel and a second
+#' sequence (WGS) data (a single-nucleotide polymorphism (SNP) panel for best linear
+#' unbiased prediction (SNP-BLUP), a neutral panel, a QTL panel and a second
 #' management panel) -- none a SNP chip -- so the comparison across a WGS panel
-#' and a chip panel is an inference from the algebra of Eq. 3 and not a result of
+#' and a chip panel is an inference from the algebra of @eq-era-cov and not a result of
 #' their experiment either.
 #' 
 #' The algebra can be made a number, which is worth doing because it decides whether
@@ -499,10 +569,11 @@ knitr::kable(data.frame(
 #' 5% of the way toward 0.5, the caricature of a heterozygosity-maximising
 #' constraint used again in @sec-era-step4 -- to a sequence-like panel whose folded
 #' site-frequency spectrum has density proportional to $1/[p(1-p)]$, and then to
-#' MAF-filtered subsets of the *same* draw:
+#' MAF-filtered subsets of the *same* draw (@tbl-era-maf-weight):
 #' 
 ## -----------------------------------------------------------------------------
-#| label: era-maf-weight
+#| label: tbl-era-maf-weight
+#| tbl-cap: "One deterministic management rule, every frequency moved 5% of the way toward 0.5, applied to a simulated sequence-like panel (200000 sites, folded spectrum with density proportional to 1/[p(1-p)] on [0.001, 0.999], seed 21) and to MAF-filtered subsets of the same draw. maf_floor: smallest minor-allele frequency kept; markers: sites retained; kappa: the panel statistic, mean of (p0 - 0.5)^2/[p0(1-p0)]; F_hom, F_drift, cov_diag: the three lenses after one application of the rule. Dimensionless."
 set.seed(21)
 # Folded site-frequency spectrum with density proportional to 1/[p(1-p)] on
 # [1e-3, 1 - 1e-3]: the logit of p is uniform. One draw, filtered four ways.
@@ -512,35 +583,35 @@ maf_row <- function(floor, pull = 0.05) {
   p1 <- p0 + pull * (0.5 - p0)                 # the rule, applied exactly
   s2 <- p0 * (1 - p0)
   c(maf_floor = floor, markers = length(p0),
-    W = mean((p0 - 0.5)^2 / s2),               # the panel's own weight
+    kappa = mean((p0 - 0.5)^2 / s2),           # the panel's own weight
     F_hom = 1 - mean(p1 * (1 - p1) / s2),
     F_drift = mean((p1 - p0)^2 / s2),
     cov_diag = 2 * mean((p0 - 0.5) * (p1 - p0) / s2))
 }
 mafw <- as.data.frame(t(sapply(c(0.001, 0.01, 0.05, 0.20), maf_row)))
-# Under this rule all three lenses are multiples of one panel statistic, W.
-stopifnot(isTRUE(all.equal(mafw$F_drift, 0.05^2 * mafw$W)),
-          isTRUE(all.equal(mafw$cov_diag, -2 * 0.05 * mafw$W)))
+# Under this rule all three lenses are multiples of one panel statistic, kappa.
+stopifnot(isTRUE(all.equal(mafw$F_drift, 0.05^2 * mafw$kappa)),
+          isTRUE(all.equal(mafw$cov_diag, -2 * 0.05 * mafw$kappa)))
 keep0  <- ctx$p0 > 1e-6 & ctx$p0 < 1 - 1e-6        # as freq_metrics() drops them
-W_book <- mean((ctx$p0[keep0] - 0.5)^2 / (ctx$p0[keep0] * (1 - ctx$p0[keep0])))
+kappa_book <- mean((ctx$p0[keep0] - 0.5)^2 / (ctx$p0[keep0] * (1 - ctx$p0[keep0])))
 fmt(mafw, 4)
 
 #' 
 #' Under a rule of this form $\delta p = c\,(0.5 - p_0)$ the algebra is exact:
-#' $F_{drift} = c^2 W$ and `cov_diag` $= -2cW$ with
-#' $W = \overline{(p_0 - 0.5)^2 / [p_0(1-p_0)]}$, the panel statistic the
-#' `stopifnot()` above verifies. Everything about the panel enters through $W$, and
-#' $W$ is `r fmt(mafw$W[1] / mafw$W[3], 1)` times larger at a MAF floor of 0.001
+#' $F_{drift} = c^2 \kappa$ and `cov_diag` $= -2c\kappa$ with
+#' $\kappa = \overline{(p_0 - 0.5)^2 / [p_0(1-p_0)]}$, the panel statistic the
+#' `stopifnot()` above verifies. Everything about the panel enters through $\kappa$, and
+#' $\kappa$ is `r fmt(mafw$kappa[1] / mafw$kappa[3], 1)` times larger at a MAF floor of 0.001
 #' than at 0.05 on the same draw: `cov_diag` moves from
 #' `r fmt(mafw$cov_diag[1], 3)` to `r fmt(mafw$cov_diag[3], 3)` for the same 5%
-#' pull. For reference, this book's own hybrid panel has $W =$ `r fmt(W_book, 2)`
+#' pull. For reference, this book's own hybrid panel has $\kappa =$ `r fmt(kappa_book, 2)`
 #' over the `r sum(keep0)` markers polymorphic in the base, which sits at the
 #' chip-like end of that table -- a consequence of the $U(0.05, 0.95)$ ancestral
 #' draw of `simulate_lines()`, not of anything biological.
 #' 
 #' **Translated to plants, as a stated expectation and not as a measurement on real
-#' germplasm:** GBS or skim-seq retaining the full spectrum puts a programme at the
-#' high-$W$ end; a 20-50k chip filtered to MAF > 0.05 puts it at the low-$W$ end. The
+#' germplasm:** genotyping-by-sequencing (GBS) or skim-seq retaining the full spectrum puts a programme at the
+#' high-$\kappa$ end; a 20-50k chip filtered to MAF > 0.05 puts it at the low-$\kappa$ end. The
 #' rule above is a caricature, not an optimiser, so the *ratio* between panels is
 #' the transferable part and the absolute values are not.
 #' :::
@@ -566,8 +637,8 @@ fmt(mafw, 4)
 #' where the news is best. In biparental populations and backcross families
 #' `G_LA` is natural and cheap -- phase is known and the number of meioses since
 #' the base is small. In a maize recurrent-selection population with a complete
-#' recycling pedigree, which commercial programmes generally have because every DH
-#' line records its F1 parents, it is feasible. In a germplasm panel *without*
+#' recycling pedigree -- which a programme that records the F1 parents of every DH
+#' line has -- it is feasible. In a germplasm panel *without*
 #' pedigree it is inapplicable, and the honest alternative is segment-based IBD.
 #' 
 #' **`F_ROH`.** A run of homozygosity is an uninterrupted stretch of homozygous
@@ -593,34 +664,38 @@ fmt(mafw, 4)
 #' 
 #' ### Side by side
 #' 
+#' @tbl-era-side-by-side summarises how each of the seven matrices behaved in the
+#' optimiser of @meuwissen2020.
+#' 
 ## -----------------------------------------------------------------------------
-#| label: era-side-by-side
+#| label: tbl-era-side-by-side
+#| tbl-cap: "Seven matrices in the same optimiser [@meuwissen2020, their Tables 2 and 3, Figure 5 and Discussion]. The Behaviour column is qualitative and no number from either panel is transcribed in this table; where a rate is invoked (@tbl-era-reference-results), it is always the *unmonitored neutral* panel N. The one exception is G_VR2's 'only on the managed panel', a paraphrase of their Discussion that reports a Panel M outcome without a Panel M number appearing anywhere in this chapter. Class is the lens the matrix is *computed* from, which is why G_ROH sits with homozygosity -- the Hybrid row of @tbl-era-lenses is the same matrix labelled by its intended *interpretation*."
 #| echo: false
 knitr::kable(data.frame(
   Matrix = c("A", "G_VR2", "G_VR1", "G_0.5", "G_i(p)", "G_LA", "G_ROH"),
   Class = c("IBD (expectation)", "drift", "drift", "homozygosity", "drift",
             "IBD", "homozygosity, read as IBD"),
   `Behaviour in the optimiser` = c(
-    "high gain, but exceeded targets by ~40% by not accounting for within-family LD",
+    "high gain, but exceeded both rate targets, the drift one by more, by not accounting for within-family linkage disequilibrium",
     "meets the drift target *only on the managed panel*; F_hom runs away",
     "reweighted version; smaller bias, smaller gain",
-    "misses the drift target by the widest margin of the eight schemes; loses genetic variance early",
+    "misses the drift target by the widest margin of the nine schemes they ran; loses genetic variance early",
     "inverts the sign of the bias; constraint only indirectly tied to F",
     "the only one meeting both targets; highest gain at equal averaged inbreeding",
     "high gain, uncontrolled drift, numerical problems"),
-  check.names = FALSE),
-  caption = "Seven matrices in the same optimiser (Meuwissen et al. 2020, their Tables 2 and 3, Figure 5 and Discussion). The Behaviour column is qualitative and no number from either panel is transcribed in this table; where a rate is invoked (the reference-results table below), it is always the *unmonitored neutral* panel N. The one exception is G_VR2's 'only on the managed panel', a paraphrase of their Discussion that reports a Panel M outcome without a Panel M number appearing anywhere in this chapter. Class is the lens the matrix is *computed* from, which is why G_ROH sits with homozygosity -- the Hybrid row of the first table is the same matrix labelled by its intended *interpretation*.")
+  check.names = FALSE))
 
 #' 
 #' ## Reference results
 #' 
 #' Target $\Delta F = 0.005$ per generation ($N_e = 100$). Values at the
 #' **unmonitored neutral loci** (their Panel N), generation 20, as reported by
-#' @meuwissen2020. Four columns are transcribed and one is derived:
+#' @meuwissen2020. @tbl-era-reference-results transcribes four columns and derives
+#' one:
 #' 
 #' - `dF_hom`, `dF_drift` and `gap` are the three Panel N columns of their Table 2.
 #'   `gap` is the *level* $F_{hom} - F_{drift}$ reached in generation 20, not a
-#'   rate and not a difference of the two rate columns; it is `cov_diag` of Eq. 3
+#'   rate and not a difference of the two rate columns; it is `cov_diag` of @eq-era-cov
 #'   accumulated over the 20 generations. Their reported standard errors are
 #'   $< 2.5 \times 10^{-5}$ on the rates and $< 2.2 \times 10^{-4}$ on `gap`.
 #' - `gain` is their Table 3: cumulative genetic gain after 20 generations,
@@ -631,11 +706,12 @@ knitr::kable(data.frame(
 #'   Figure 5) compares gains at a common generation-20 *level* of averaged
 #'   inbreeding, $(F_{hom} + F_{drift})/2$ from their Table 3 -- a stock -- not at
 #'   a common mean of the two *rate* columns used here. `gain_per_dF` is offered
-#'   only as a same-chapter summary of the reference table above, and reading 1
+#'   only as a same-chapter summary of @tbl-era-reference-results, and reading 1
 #'   below states explicitly which ordering it does and does not support.
 #' 
 ## -----------------------------------------------------------------------------
-#| label: era-reference-results
+#| label: tbl-era-reference-results
+#| tbl-cap: "Eight schemes of @meuwissen2020 at the unmonitored neutral loci (Panel N), generation 20. dF_hom and dF_drift: rates of inbreeding per generation on the two lenses; gap: level of F_hom - F_drift reached in generation 20; gain: cumulative genetic gain after 20 generations, in initial genetic standard deviations (their Tables 2 and 3). gain_per_dF: gain divided by the mean of the two rate columns, derived in this chunk. Both rate targets are 0.005 per generation; only G_LA meets both."
 #| echo: false
 ref_res <- data.frame(
   Scheme = c("G_VR2(M,M)", "G_VR2(M,D)", "G_VR1(M,M)", "G_i(p)(M,M)",
@@ -649,19 +725,30 @@ ref_res <- data.frame(
   check.names = FALSE)
 ref_res$gain_per_dF <- round(ref_res$gain /
                                ((ref_res$dF_hom + ref_res$dF_drift) / 2))
-# The one qualitative claim the previous table makes about a rate: G_0.5 is the
-# scheme furthest from the 0.005 drift target of the eight transcribed here.
-stopifnot(ref_res$Scheme[which.max(ref_res$dF_drift)] == "G_0.5(M,M)")
-knitr::kable(ref_res,
-  caption = "Both rate targets are 0.005. Only G_LA meets both. gain_per_dF is derived in the chunk, the other columns are transcribed from their Tables 2 and 3.")
+# The qualitative claims the previous table makes about a rate: G_0.5 is the
+# scheme furthest from the 0.005 drift target of the eight transcribed here (the
+# ninth they ran, G_VR2(~,M) with random GEBVs, has dF_drift = 0.0059 in their
+# Table 2, Panel N, below G_0.5's), A exceeds both targets and the drift one by more,
+# and G_LA is the only scheme within both.
+stopifnot(ref_res$Scheme[which.max(ref_res$dF_drift)] == "G_0.5(M,M)",
+          0.0059 < max(ref_res$dF_drift))
+a_row  <- ref_res$Scheme == "A(M,~)"
+la_row <- ref_res$Scheme == "G_LA(M,M)"
+stopifnot(ref_res$dF_drift[a_row] > ref_res$dF_hom[a_row],
+          ref_res$dF_hom[a_row] > 0.005,
+          ref_res$Scheme[ref_res$dF_hom <= 0.005 & ref_res$dF_drift <= 0.005] == "G_LA(M,M)")
+knitr::kable(ref_res)
 
 #' 
 #' Four readings:
 #' 
-#' 1. **No IBS scheme met both targets.** `G_LA` came closest: within about 2% of
-#'    the 0.005 target on `dF_drift` on both panels M and N (their own figure for
-#'    that lens), but 14% below target on `dF_hom` (0.0043 against 0.005) -- the
-#'    2% is a drift-lens precision, not a joint one. It also has
+#' 1. **No IBS scheme met both targets; the IBD scheme `G_LA` met both**, the
+#'    targets being ceilings [@meuwissen2020, Conclusion]. On Panel N its
+#'    `dF_drift` is `r fmt(100 * (1 - ref_res$dF_drift[la_row] / 0.005), 0)`% under
+#'    0.005 (their Table 2 gives the same 0.0049 for Panel M, not transcribed here,
+#'    and their text states "within 2% of the target for both Panels M and N")
+#'    and its `dF_hom` `r fmt(100 * (1 - ref_res$dF_hom[la_row] / 0.005), 0)`% under
+#'    it (`r ref_res$dF_hom[la_row]` against 0.005). It also has
 #'    the largest `gain_per_dF`, `r max(ref_res$gain_per_dF)` against
 #'    `r ref_res$gain_per_dF[ref_res$Scheme == "A(M,~)"]` for $\mathbf{A}$ and
 #'    `r ref_res$gain_per_dF[ref_res$Scheme == "G_ROH(M,M)"]` for `G_ROH` -- but
@@ -672,11 +759,14 @@ knitr::kable(ref_res,
 #'    `r round(ref_res$gain[ref_res$Scheme == "G_LA(M,M)"] / ref_res$dF_hom[ref_res$Scheme == "G_LA(M,M)"])`).
 #'    The claim that survives is the replicate-level one in reading 4, not a ratio
 #'    of table means.
-#' 2. Pedigree $\mathbf{A}$ gave the highest absolute gain but overshot by ~40% --
-#'    neutral loci hitch-hiking with QTL through within-family LD, which the
+#' 2. Pedigree $\mathbf{A}$ gave the highest absolute gain but overshot the 0.005
+#'    target by `r fmt(100 * (ref_res$dF_hom[a_row] / 0.005 - 1), 0)`% on `dF_hom`
+#'    and by `r fmt(100 * (ref_res$dF_drift[a_row] / 0.005 - 1), 0)`% on `dF_drift`
+#'    (Panel N; their Results text rounds both to 40%) -- neutral loci hitch-hiking with QTL through within-family linkage disequilibrium, which the
 #'    pedigree expectation of IBD cannot capture.
 #' 3. Using a separate panel for management instead of the GEBV panel changed gain
-#'    by **less than 0.3%**. Not worth the complexity as a *gain* measure; it is
+#'    by `r fmt(100 * abs(1 - ref_res$gain[ref_res$Scheme == "G_VR2(M,D)"] / ref_res$gain[ref_res$Scheme == "G_VR2(M,M)"]), 2)`%
+#'    (`G_VR2(M,D)` against `G_VR2(M,M)`). Not worth the complexity as a *gain* measure; it is
 #'    still worth it as an *audit* measure, which is a different use and is the
 #'    subject of @sec-era-step5 below.
 #' 4. At equal mean inbreeding, `G_LA` beat $\mathbf{A}$ in 65 of 100 replicates
@@ -698,10 +788,11 @@ knitr::kable(ref_res,
 #' `run_cycles()`.
 #' 
 #' At the hybrid level the base is not a free choice: on the full factorial it is
-#' the average of the two pool bases, exactly.
+#' the average of the two pool bases, exactly (@tbl-era-p0-identity).
 #' 
 ## -----------------------------------------------------------------------------
-#| label: era-p0-identity
+#| label: tbl-era-p0-identity
+#| tbl-cap: "Largest marker-wise absolute difference between the hybrid-level base (column means of the hybrid set) and the average of the two pool bases (p_A + p_B)/2, in allele-frequency units, for four hybrid sets: the full factorial of the teaching scale (A8), a complete factorial with unequal pool sizes, a balanced incomplete factorial with every line in the same number of hybrids (sizes in the text below) and the 60-hybrid truncation selection. The first three are asserted equal to zero to numerical tolerance."
 stopifnot(isTRUE(all.equal(ctx$p0, as.vector((P0["A", ] + P0["B", ]) / 2))))
 # Unequal pool sizes, still a complete factorial: each pool-A line appears in
 # n_pool_B hybrids and each pool-B line in n_pool_A, so the internal weight
@@ -721,10 +812,13 @@ idx_bal <- unlist(lapply(seq_len(book_cfg$n_pool_A), function(a) {
 p_bal <- colMeans(ctx$X[idx_bal, , drop = FALSE])
 # An UNbalanced candidate set with concentrated line usage: it is not.
 p_sub <- colMeans(ctx$X[sel_truncation(ctx, 60), , drop = FALSE])
-c(complete_balanced     = max(abs(ctx$p0 - (P0["A", ] + P0["B", ]) / 2)),
+stopifnot(isTRUE(all.equal(ctx_u$p0, as.vector((Pu["A", ] + Pu["B", ]) / 2))),
+          isTRUE(all.equal(p_bal, as.vector((P0["A", ] + P0["B", ]) / 2))))
+data.frame(max_abs_deviation = formatC(c(
+  complete_balanced      = max(abs(ctx$p0 - (P0["A", ] + P0["B", ]) / 2)),
   complete_unequal_pools = max(abs(ctx_u$p0 - (Pu["A", ] + Pu["B", ]) / 2)),
-  incomplete_balanced   = max(abs(p_bal - (P0["A", ] + P0["B", ]) / 2)),
-  truncation_subset     = max(abs(p_sub - (P0["A", ] + P0["B", ]) / 2)))
+  incomplete_balanced    = max(abs(p_bal - (P0["A", ] + P0["B", ]) / 2)),
+  truncation_subset      = max(abs(p_sub - (P0["A", ] + P0["B", ]) / 2))), digits = 3, format = "g"))
 
 #' 
 #' Each pool-A line appears in `r book_cfg$n_pool_B` hybrids and each pool-B line
@@ -741,7 +835,7 @@ c(complete_balanced     = max(abs(ctx$p0 - (P0["A", ] + P0["B", ]) / 2)),
 #' just as exactly (`r sprintf("%.1e", max(abs(p_bal - (P0["A", ] + P0["B", ]) / 2)))`)
 #' on a **balanced but incomplete** factorial -- `r length(idx_bal)` of the
 #' `r book_cfg$n_pool_A * book_cfg$n_pool_B` possible hybrids, each line used
-#' exactly `r k` times, the shape of a real NCII design -- because each pool's
+#' exactly `r k` times, the shape of a real North Carolina Design II (NCII) -- because each pool's
 #' lines are still used equally often *within* that pool. What re-weights the two
 #' pools inside the base is unequal **line usage**, which a balanced partial
 #' factorial does not have and a selected subset typically does: the column means
@@ -755,18 +849,21 @@ c(complete_balanced     = max(abs(ctx$p0 - (P0["A", ] + P0["B", ]) / 2)),
 #' Now the failure mode. `build_ctx()` recomputes `p0 <- colMeans(X)` on every
 #' call, so rebuilding the context from the *selected* hybrids each cycle -- which
 #' is what re-running a `G`-construction function per cycle amounts to -- re-anchors
-#' the base on the population you were about to measure:
+#' the base on the population you were about to measure (@tbl-era-rebase):
 #' 
 ## -----------------------------------------------------------------------------
-#| label: era-rebase
+#| label: tbl-era-rebase
+#| tbl-cap: "F_hom, F_drift and cov_diag of the 60-hybrid max-diversity greedy selection (`w = 0`) scored against the frozen base `ctx$p0` (frozen_base) and against a base recomputed from the selected hybrids themselves (rebased). Dimensionless."
 i_md   <- sel_greedy(ctx, 60, w = 0)
 Xs     <- ctx$X[i_md, , drop = FALSE]
 rebase <- build_ctx(X = Xs, f = molecular_coancestry(Xs), G = NULL,
                     traits = ctx$traits[i_md, , drop = FALSE],
                     ped = ctx$ped[i_md, ], n_lines = ctx$n_lines,
                     pool = ctx$pool, fL = ctx$fL, cfg = NULL)
-fmt(rbind(frozen_base   = freq_metrics(i_md, ctx)[c("F_hom", "F_drift", "cov_diag")],
-          rebased       = freq_metrics(seq_along(i_md), rebase)[c("F_hom", "F_drift", "cov_diag")]), 6)
+rb <- rbind(frozen_base = freq_metrics(i_md, ctx)[c("F_hom", "F_drift", "cov_diag")],
+            rebased     = freq_metrics(seq_along(i_md), rebase)[c("F_hom", "F_drift", "cov_diag")])
+stopifnot(all(abs(rb["rebased", ]) < 1e-12))
+fmt(rb, 6)
 
 #' 
 #' Not attenuated -- **identically zero, both lenses**. A rebased report is not a
@@ -780,10 +877,11 @@ fmt(rbind(frozen_base   = freq_metrics(i_md, ctx)[c("F_hom", "F_drift", "cov_dia
 #' $p_0$, the same number whether the base moved or not -- here
 #' `r fmt(diff(range(ctx$p0)), 2)`, the whole unit interval, because
 #' `r sum(ctx$p0 <= 1e-6 | ctx$p0 >= 1 - 1e-6)` of the `r ctx$m` markers are fixed
-#' in the candidate pool:
+#' in the candidate pool (@tbl-era-p0-frozen-check):
 #' 
 ## -----------------------------------------------------------------------------
-#| label: era-p0-frozen-check
+#| label: tbl-era-p0-frozen-check
+#| tbl-cap: "Three checks on a stored three-cycle history of the base: every cycle carrying cycle 0's p0 (frozen), and the last cycle carrying the rebased p0 of @tbl-era-rebase (rebased). all_identical_to_cycle0: every stored vector identical to cycle 0's; max_abs_deviation: largest marker-wise absolute difference from cycle 0, in allele-frequency units; collapsed_range: range of the flattened history."
 chk <- function(h) {
   data.frame(
     all_identical_to_cycle0 = all(vapply(h, identical, logical(1), h[[1]])),
@@ -819,15 +917,16 @@ fmt(rbind(frozen  = chk(list(ctx$p0, ctx$p0, ctx$p0)),
 #' molecular coancestry and nothing else. Its signature has to be read against a
 #' **resampled** baseline rather than against one random draw, for the reason the
 #' numbers below make explicit. The baseline is the package's own
-#' `null_distribution()`, 1000 resampled subsets of the same size, and the z-scores
+#' `null_distribution()` (built in @sec-era-fhom, `r nrow(null60$full)` resampled
+#' subsets of the same size), and the z-scores
 #' come from `discriminatory_power()`, so the comparison is the same machinery
-#' every scenario in @sec-case-study is reported through:
+#' every scenario in @sec-case-study is reported through (@tbl-era-signature, @tbl-era-signature-z):
 #' 
 ## -----------------------------------------------------------------------------
-#| label: era-signature
-# `sels` is the set of four selections built in @sec-era-fhom.
+#| label: tbl-era-signature
+#| tbl-cap: "Both lenses and their covariance for the four 60-hybrid selections of @tbl-era-hom-two-levels: mean (null_mean) and standard deviation (null_sd) over the random-subset null of @tbl-era-hom-two-levels-null, then each selection's value. He: merged-pool gene diversity; rare_retained: share of the markers rare in the candidate pool that still segregate in the selection (`freq_metrics()`). Dimensionless."
+# `sels` and the random-subset null `null60` are built in @sec-era-fhom.
 cols   <- c("He", "F_hom", "F_drift", "cov_diag", "rare_retained")
-null60 <- null_distribution(ctx, 60, B = 2000, B_full = 1000, seed = 7)
 panel  <- t(sapply(sels, freq_metrics, ctx = ctx))[, cols]
 fmt(rbind(null_mean = colMeans(null60$full[, cols]),
           null_sd   = apply(null60$full[, cols], 2, stats::sd),
@@ -835,7 +934,8 @@ fmt(rbind(null_mean = colMeans(null60$full[, cols]),
 
 #' 
 ## -----------------------------------------------------------------------------
-#| label: era-signature-z
+#| label: tbl-era-signature-z
+#| tbl-cap: "z-scores of the selections of @tbl-era-signature against the same random-subset null, from `discriminatory_power()`, in null standard deviations."
 z <- discriminatory_power(evaluate(sels, ctx, null60$gd_ref), null60)[, cols]
 fmt(as.data.frame(z), 2)
 
@@ -852,7 +952,7 @@ fmt(as.data.frame(z), 2)
 #' `r fmt(mean(null60$full[, "F_drift"]), 4)`: a z of
 #' `r fmt(z["max_div", "F_drift"], 2)`, and
 #' `r fmt(100 * mean(null60$full[, "F_drift"] > panel["max_div", "F_drift"]), 0)`%
-#' of the 1000 resampled subsets pay **more** drift than it does. Truncation is the
+#' of the `r nrow(null60$full)` resampled subsets pay **more** drift than it does. Truncation is the
 #' row with the drift bill: $F_{drift}$ = `r fmt(panel["truncation", "F_drift"], 4)`,
 #' z = `r fmt(z["truncation", "F_drift"], 1)`.
 #' 
@@ -860,7 +960,7 @@ fmt(as.data.frame(z), 2)
 #' and its $F_{drift}$ sits `r fmt(abs(z["random", "F_drift"]), 1)` s.d. below the
 #' resampled mean -- *further* below it than `max_div` is -- so a two-row
 #' `random`-versus-`max_div` comparison reports max-diversity as paying more drift
-#' than random, which the 1000-subset null says it does not. The failure is not the
+#' than random, which the `r nrow(null60$full)`-subset null says it does not. The failure is not the
 #' metric, it is the baseline: with a null s.d. of
 #' `r sprintf("%.4f", sd(null60$full[, "F_drift"]))` on a quantity whose value is
 #' `r fmt(panel["max_div", "F_drift"], 4)`, no single draw can serve as a control.
@@ -869,21 +969,23 @@ fmt(as.data.frame(z), 2)
 #' selection from a fixed candidate set, **minimising** molecular coancestry (the
 #' `max_div` plan, `w = 0`, which maximises gene diversity `GD = 1 - theta`) buys a
 #' measurable divergence between the two lenses -- the negative covariance that the
-#' `G_0.5` row of the matrix-sign table predicts -- and **no** measurable drift
+#' `G_0.5` row of @tbl-era-matrix-signs predicts -- and **no** measurable drift
 #' excess over random sampling. The drift excess @meuwissen2020 report for `G_0.5`
-#' ($\Delta F_{drift} = 0.0176$ against a 0.005 target) is a 20-generation
+#' ($\Delta F_{drift} =$ `r ref_res$dF_drift[ref_res$Scheme == "G_0.5(M,M)"]` against a 0.005 target) is a 20-generation
 #' *cumulative* result under recurrent optimal contributions, where each cycle's
 #' frequency change compounds on the last; one subset drawn once from one candidate
 #' pool is not that experiment, and the honest way to run it here is the
 #' multi-cycle arm of @sec-era-step4, where the same pull toward 0.5 does produce
-#' drift at more than twice the neutral rate. What survives at one cycle is the
+#' a drift stock larger than the neutral one, accumulated at a rate that is not
+#' constant (both measured there). What survives at one cycle is the
 #' covariance, and a report carrying only $F_{hom}$ would not show it.
 #' 
-#' One thing the table quietly says about the *weight* rather than the metric:
+#' One thing @tbl-era-signature quietly says about the *weight* rather than the metric:
 #' 
 ## -----------------------------------------------------------------------------
 #| label: era-w1-equals-truncation
-identical(sort(sel_greedy(ctx, 60, w = 1)), sort(sel_truncation(ctx, 60)))
+# The balanced greedy (w = 1) and truncation return the same 60 hybrids.
+stopifnot(identical(sort(sel_greedy(ctx, 60, w = 1)), sort(sel_truncation(ctx, 60))))
 
 #' 
 #' At this scale `w = 1` is not a compromise between index and coancestry -- it
@@ -908,18 +1010,18 @@ identical(sort(sel_greedy(ctx, 60, w = 1)), sort(sel_truncation(ctx, 60)))
 #' **Threshold.** Not the $\Delta F$ target. Both columns here are *stocks*
 #' accumulated against the frozen base, and a stock cannot be compared with a rate
 #' -- @sec-era-step4 opens on exactly that point. Within one cycle the reference is
-#' the resampled null in the same table, i.e. the z columns above, read on **both**
+#' the resampled null of @tbl-era-signature, i.e. the z-scores of @tbl-era-signature-z, read on **both**
 #' lenses separately and never on their average. The comparison with the
 #' programme's $\Delta F$ budget requires a trajectory and happens only through the
 #' regression of @sec-era-step4.
 #' 
 #' ### Step 3 -- Report the covariance, not just the two lenses {#sec-era-step3}
 #' 
-#' `cov_diag` is the gap between the two lenses, and by Eq. 3 it is not an
+#' `cov_diag` is the gap between the two lenses, and by @eq-era-cov it is not an
 #' approximation of the gap -- it *is* the gap, which the `stopifnot()` above
 #' enforces on every render. The operational point is that `cov_diag` is the only
 #' column that tells you *why* the two lenses disagree, and its sign identifies the
-#' mechanism from the matrix-sign table above: negative means the management pushed
+#' mechanism from @tbl-era-matrix-signs: negative means the management pushed
 #' frequencies toward 0.5, positive means it pushed them to the extremes.
 #' 
 #' **Call.** `freq_metrics(idx, ctx)[["cov_diag"]]`, already computed by step 2 at
@@ -935,7 +1037,7 @@ identical(sort(sel_greedy(ctx, 60, w = 1)), sort(sel_truncation(ctx, 60)))
 #' **Threshold.** No absolute one, and not the $\Delta F$ budget -- `cov_diag` is a
 #' stock like the two lenses it separates. Compare it with $F_{drift}$ in the same
 #' row, as just done, and with the resampled null: the `null_sd` row of
-#' @sec-era-step2's table puts the max-diversity plan
+#' @tbl-era-signature puts the max-diversity plan
 #' `r fmt(abs(z["max_div", "cov_diag"]), 1)` s.d. out, which is the statement that
 #' the covariance was induced by the management rather than by the sampling.
 #' 
@@ -951,10 +1053,11 @@ identical(sort(sel_greedy(ctx, 60, w = 1)), sort(sel_truncation(ctx, 60)))
 #' **re-derived as $n$ doubled-haploid lines** ($n_{gam} = n$, $N_e = n/2$) differ
 #' by a factor of two. The DH regime is literally what `next_pool()` does in
 #' @sec-cycles: one Bernoulli draw per locus per new line. What this step adds is
-#' the calibration of the $\log(1 - F)$ regression against those two known rates.
+#' the calibration of the $\log(1 - F)$ regression against those two known rates;
+#' @tbl-era-traj-block gives the crossing-block trajectory.
 #' 
 ## -----------------------------------------------------------------------------
-#| label: era-traj-fun
+#| label: era-traj-setup
 # One heterotic pool, n_gam allele copies sampled per cycle, n_cyc cycles,
 # `reps` independent replicates. `pull` first moves every frequency a fixed
 # fraction toward 0.5: a caricature of a heterozygosity-maximising constraint,
@@ -1000,27 +1103,76 @@ dF_fit <- function(a, col) {
 
 n_line <- 50
 n_cyc  <- 12
-block  <- per_cycle(pool_traj(2 * n_line, book_cfg$m, n_cyc), 2 * n_line)
-dh     <- per_cycle(pool_traj(n_line, book_cfg$m, n_cyc), n_line)
+n_rep  <- 20
+pull_m <- 0.05                          # the caricature pull of the managed arm
+# Table captions of this step, built from the run parameters above.
+seeds_traj <- formals(pool_traj)[["seed"]] + c(1, n_rep)
+cap_block <- sprintf(paste(
+  "Unmanaged crossing block of %d plants (%d allele copies sampled per cycle)",
+  "over %d cycles: per-cycle means over %d replicates of %d loci (`pool_traj()`,",
+  "seeds %d to %d) of F_hom, F_drift and cov_diag against the base frozen at",
+  "cycle 0. expected: the closed form 1 - (1 - 1/n_gam)^t; sd_hom, sd_drift:",
+  "between-replicate standard deviations of the two lenses. Dimensionless."),
+  n_line, 2 * n_line, n_cyc, n_rep, book_cfg$m, seeds_traj[1], seeds_traj[2])
+cap_nfit <- sprintf(paste(
+  "Constant-rate fits of log(1 - F) on cycle (cycles 1 to %d) for both lenses",
+  "of the two unmanaged arms: the crossing block of @tbl-era-traj-block (block)",
+  "and the same %d lines re-derived as doubled haploids (dh). dF = 1 - exp(slope)",
+  "per cycle, the implied Ne = 1/(2 dF), and R2."), n_cyc, n_line)
+cap_managed <- sprintf(paste(
+  "The crossing block of @tbl-era-traj-block with every frequency moved %g%% of",
+  "the way toward 0.5 before each drift step: per-cycle means over the same %d",
+  "replicates of F_hom, F_drift and cov_diag against the frozen base, and the",
+  "between-replicate standard deviation of F_drift (sd_drift). Dimensionless."),
+  100 * pull_m, n_rep)
+cap_mfit <- sprintf(paste(
+  "Constant-rate fits of log(1 - F) on cycle (cycles 1 to %d) for the two lenses",
+  "of the managed arm (@tbl-era-traj-managed): dF = 1 - exp(slope) per cycle, the",
+  "implied Ne = 1/(2 dF), and R2. Both R2 values are below the 0.995 threshold of",
+  "@sec-era-step4, so neither dF is read as a constant rate."), n_cyc)
+
+#' 
+## -----------------------------------------------------------------------------
+#| label: tbl-era-traj-block
+#| tbl-cap: !expr cap_block
+block  <- per_cycle(pool_traj(2 * n_line, book_cfg$m, n_cyc, reps = n_rep), 2 * n_line)
+dh     <- per_cycle(pool_traj(n_line, book_cfg$m, n_cyc, reps = n_rep), n_line)
 fmt(block, 5)
 
 #' 
 #' The `expected` column is the closed form, not a fit. Both lenses agree with it
-#' and with each other, in both regimes:
+#' and with each other, in both regimes (@tbl-era-traj-targets,
+#' @tbl-era-traj-drift-fit):
 #' 
 ## -----------------------------------------------------------------------------
-#| label: era-traj-drift-fit
+#| label: tbl-era-traj-targets
+#| tbl-cap: "Calibration of the two unmanaged arms against the closed form. target_dF, target_Ne: the known rate and effective size (crossing block of n plants: 1/(2n) and n; pool of n doubled-haploid lines: 1/n and n/2); max_deviation: largest absolute deviation of either lens's replicate mean from the closed form over all cycles; sd_hom_final, sd_drift_final: between-replicate standard deviations of the two lenses at the last cycle. Dimensionless except target_Ne, in individuals."
 dev <- function(a) max(abs(c(a$F_hom, a$F_drift) - rep(a$expected, 2)))
+# The deviation of a mean over n_rep replicates is scaled by the standard error
+# of that mean, cycle by cycle and lens by lens (cycle 0 is exactly zero).
+dev_se <- function(a) {
+  d <- a[a$cycle > 0, ]
+  max(abs(d$F_hom - d$expected) / (d$sd_hom / sqrt(n_rep)),
+      abs(d$F_drift - d$expected) / (d$sd_drift / sqrt(n_rep)))
+}
+n_cmp  <- 2 * n_cyc                                  # 2 lenses x n_cyc cycles
+z_bonf <- stats::qnorm(1 - 0.025 / n_cmp)            # two-sided 5%, Bonferroni
 fit_n <- rbind(block_F_hom   = dF_fit(block, "F_hom"),
                block_F_drift = dF_fit(block, "F_drift"),
                dh_F_hom      = dF_fit(dh, "F_hom"),
                dh_F_drift    = dF_fit(dh, "F_drift"))
+stopifnot(all(fit_n[, "R2"] >= 0.999), dev_se(block) < z_bonf, dev_se(dh) < z_bonf)
 fmt(rbind(crossing_block = c(target_dF = 1 / (2 * n_line), target_Ne = n_line,
                              max_deviation = dev(block),
                              sd_hom_final = block$sd_hom[nrow(block)],
                              sd_drift_final = block$sd_drift[nrow(block)]),
           dh_pool        = c(1 / n_line, n_line / 2, dev(dh),
                              dh$sd_hom[nrow(dh)], dh$sd_drift[nrow(dh)])), 5)
+
+#' 
+## -----------------------------------------------------------------------------
+#| label: tbl-era-traj-drift-fit
+#| tbl-cap: !expr cap_nfit
 fmt(fit_n, 5)
 
 #' 
@@ -1035,18 +1187,24 @@ fmt(fit_n, 5)
 #' $N_e \approx$ `r fmt(fit_n["dh_F_drift", "Ne"], 0)` against the true
 #' `r n_line / 2`. In both regimes the largest deviation of either lens from the
 #' closed form (`r fmt(dev(block), 4)` and `r fmt(dev(dh), 4)`) falls on the
-#' homozygosity lens, and is within *its* between-replicate standard deviation at
-#' the last cycle (`r fmt(block$sd_hom[nrow(block)], 4)` and
-#' `r fmt(dh$sd_hom[nrow(dh)], 4)`, 20 replicates); the drift lens is the tighter
-#' of the two on both counts, deviating by at most
+#' homozygosity lens; the drift lens deviates by at most
 #' `r sprintf("%.4f", max(abs(block$F_drift - block$expected)))` and
-#' `r sprintf("%.4f", max(abs(dh$F_drift - dh$expected)))`. $R^2 \ge 0.999$ on all
-#' four fits.
+#' `r sprintf("%.4f", max(abs(dh$F_drift - dh$expected)))`. The yardstick for a
+#' deviation of a mean over `r n_rep` replicates is the standard error of that mean,
+#' the between-replicate s.d. divided by $\sqrt{`r n_rep`}$, taken per cycle and per
+#' lens: scaled that way the largest deviation over the `r n_cmp` comparisons
+#' (`r n_cyc` cycles, two lenses) is `r fmt(dev_se(block), 2)` standard errors for
+#' the crossing block and `r fmt(dev_se(dh), 2)` for the DH pool, both below the
+#' two-sided 5% Bonferroni bound for `r n_cmp` comparisons,
+#' $z =$ `r fmt(z_bonf, 2)`. The bound is conservative here because the comparisons
+#' are positively correlated (one trajectory per replicate feeds all cycles). The
+#' smallest $R^2$ of the four fits is `r fmt(min(fit_n[, "R2"]), 4)`, and the chunk
+#' asserts $R^2 \ge 0.999$ on all four.
 #' 
 #' Two things to carry out of that. The regression recovers $N_e$ to within the
-#' sampling noise of 20 replicates of `r book_cfg$m` loci, which is what licenses
-#' the $R^2$ threshold used below -- *at this scale only*: 20 replicates,
-#' `r book_cfg$m` loci, 12 cycles, one pool, one seed family. And a pool maintained
+#' sampling noise of `r n_rep` replicates of `r book_cfg$m` loci, which is what licenses
+#' the $R^2$ threshold used below -- *at this scale only*: `r n_rep` replicates,
+#' `r book_cfg$m` loci, `r n_cyc` cycles, one pool, one seed family. And a pool maintained
 #' as doubled-haploid lines drifts at twice the rate of a crossing block of the same
 #' count, so a programme that recycles `r n_line` DH lines per pool per cycle is
 #' running at $N_e \approx$ `r n_line / 2`, not `r n_line`. That factor of two is
@@ -1061,44 +1219,80 @@ fmt(fit_n, 5)
 #' values under pure drift is not an accumulated selection intensity, and reading
 #' it as one would attribute an intensity to a process that has none.
 #' 
-#' Now the crossing block again with the caricature constraint switched on: every
-#' frequency moved 5% of the way toward 0.5 before each drift step, which is what a
+#' Now the crossing block again with the caricature constraint switched on (right
+#' panel of @fig-era-lens-divergence): every
+#' frequency moved `r 100 * pull_m`% of the way toward 0.5 before each drift step, which is what a
 #' heterozygosity-maximising objective does to the frequencies without needing an
-#' optimiser to do it.
+#' optimiser to do it. @tbl-era-traj-managed gives the trajectory and
+#' @tbl-era-traj-managed-fit the two constant-rate fits.
 #' 
 ## -----------------------------------------------------------------------------
-#| label: era-traj-managed
-managed <- per_cycle(pool_traj(2 * n_line, book_cfg$m, n_cyc, pull = 0.05),
-                     2 * n_line)
+#| label: tbl-era-traj-managed
+#| tbl-cap: !expr cap_managed
+managed <- per_cycle(pool_traj(2 * n_line, book_cfg$m, n_cyc, pull = pull_m,
+                               reps = n_rep), 2 * n_line)
 fmt(managed[, c("cycle", "F_hom", "F_drift", "cov_diag", "sd_drift")], 5)
 
 #' 
 ## -----------------------------------------------------------------------------
-#| label: era-traj-managed-fit
+#| label: tbl-era-traj-managed-fit
+#| tbl-cap: !expr cap_mfit
 stopifnot(isTRUE(all.equal(managed$cov_diag, managed$F_hom - managed$F_drift)))
 fit_m <- rbind(F_hom = dF_fit(managed, "F_hom"), F_drift = dF_fit(managed, "F_drift"))
+# The calibrated threshold of this step (R^2 < 0.995 = non-constant rate) fires
+# on both lenses of the managed arm, so no constant-rate dF or Ne is read off it.
+stopifnot(all(fit_m[, "R2"] < 0.995))
+inc_m   <- diff(managed$F_drift)                    # per-cycle increments
+stock_m <- managed$F_drift[nrow(managed)] / block$F_drift[nrow(block)]
+# Caption and alt text of the next figure, built from the run parameters.
+cap_div <- sprintf(paste(
+  "The two lenses on one heterotic pool over %d cycles, averaged over %d",
+  "replicates of %d loci, against a base frozen at cycle 0. Points are replicate",
+  "means, filled circles F_drift and triangles F_hom; no dispersion is drawn,",
+  "the between-replicate standard deviations are in @tbl-era-traj-block,",
+  "@tbl-era-traj-managed and @tbl-era-traj-targets. Left: a crossing",
+  "block of %d plants (%d allele copies per cycle). Centre: the same %d lines",
+  "re-derived as doubled haploids (%d allele copies per cycle), which drifts at",
+  "twice the rate. In both, the closed form 1 - (1 - 1/n_gam)^t is the dashed",
+  "line and the two lenses sit on it. Right: the crossing block with every",
+  "frequency moved %g%% toward 0.5 before each drift step, where the",
+  "homozygosity lens reports a gain of heterozygosity against the frozen base",
+  "while the drift lens ends at %.2f times the unmanaged block's value and",
+  "rises at a non-constant rate; the dashed line is the same neutral closed",
+  "form, here a reference both lenses leave. Nothing is selected in any panel;",
+  "the divergence in the right-hand panel is produced by the management rule",
+  "alone."),
+  n_cyc, n_rep, book_cfg$m, n_line, 2 * n_line, n_line, n_line, 100 * pull_m,
+  stock_m)
+alt_div <- sprintf(paste(
+  "Three panels of F against cycle (0 to %d) for F_drift, F_hom and the",
+  "neutral closed form: a %d-plant crossing block, the same lines as doubled",
+  "haploids, and the crossing block with a %g%% pull toward 0.5, where F_hom",
+  "falls below zero and F_drift rises above the closed form."),
+  n_cyc, n_line, 100 * pull_m)
 fmt(fit_m, 5)
 
 #' 
 ## -----------------------------------------------------------------------------
 #| label: fig-era-lens-divergence
-#| fig-cap: "The two lenses on one heterotic pool over 12 cycles, averaged over 20 replicates, against a base frozen at cycle 0. Left: a crossing block of 50 plants (100 gametes per cycle). Centre: the same 50 lines re-derived as doubled haploids (50 allele copies per cycle), which drifts at twice the rate. In both, the closed form 1 - (1 - 1/n_gam)^t is the dashed line and the two lenses sit on it. Right: the crossing block with every frequency moved 5% toward 0.5 before each drift step, where the homozygosity lens reports a gain of heterozygosity against the frozen base while the drift lens reports more than twice the neutral rate; the dashed line is the same neutral closed form, here a reference both lenses leave. Nothing is selected in any panel; the divergence in the right-hand panel is produced by the management rule alone."
-#| fig-alt: "The two lenses on one heterotic pool over 12 cycles, averaged over 20 replicates, against a base frozen at cycle 0. Left: a crossing block of 50 plants (100 gametes per cycle)"
-#| fig-width: 9
+#| fig-cap: !expr cap_div
+#| fig-alt: !expr alt_div
+#| fig-width: 6.5
 #| fig-height: 3.4
 arms <- list(`crossing block` = block, `DH pool` = dh, `pull toward 0.5` = managed)
+yl   <- range(unlist(lapply(arms, function(a) c(a$F_hom, a$F_drift, a$expected))))
 op <- par(mfrow = c(1, 3), mar = c(4, 4, 2.5, 1))
 for (nm in names(arms)) {
   a <- arms[[nm]]
-  plot(a$cycle, a$F_drift, type = "b", pch = 19, col = "#b2182b",
-       ylim = c(-0.42, 0.26), xlab = "cycle", ylab = "F against frozen p0",
+  plot(a$cycle, a$F_drift, type = "o", pch = 19, col = book_pal[["loss"]],
+       ylim = yl, xlab = "cycle", ylab = "F against frozen p0",
        main = nm)
-  lines(a$cycle, a$F_hom, type = "b", pch = 17, col = "#1f5f8b")
-  lines(a$cycle, a$expected, lty = 2, col = "grey40")
-  abline(h = 0, col = "grey70")
+  lines(a$cycle, a$F_hom, type = "o", pch = 17, col = book_pal[["ink"]])
+  lines(a$cycle, a$expected, lty = 2, col = book_pal[["mid"]])
+  abline(h = 0, col = book_pal[["light"]])
   legend("bottomleft", c("F_drift", "F_hom", "closed form"), bty = "n",
-         cex = 0.75, pch = c(19, 17, NA), lty = c(NA, NA, 2),
-         col = c("#b2182b", "#1f5f8b", "grey40"))
+         cex = 0.75, pch = c(19, 17, NA), lty = c(1, 1, 2),
+         col = book_pal[c("loss", "ink", "mid")])
 }
 par(op)
 
@@ -1108,29 +1302,40 @@ par(op)
 #' $F_{hom} =$ `r fmt(managed$F_hom[nrow(managed)], 3)` and
 #' $F_{drift} =$ `r fmt(managed$F_drift[nrow(managed)], 3)`, a gap of
 #' `r fmt(managed$cov_diag[nrow(managed)], 3)` which is exactly `cov_diag`. The
-#' fitted drift rate is `r fmt(fit_m["F_drift", "dF"], 4)`, or
-#' `r fmt(fit_m["F_drift", "dF"] / fit_n["block_F_drift", "dF"], 2)` times the
-#' unmanaged crossing-block rate, implying $N_e =$
-#' `r fmt(fit_m["F_drift", "Ne"], 1)` instead of `r n_line`. The fit on
+#' calibrated diagnostic of this step fires on **both** lenses. On
+#' $\log(1 - F_{drift})$, $R^2 =$ `r fmt(fit_m["F_drift", "R2"], 4)`, below the
+#' 0.995 threshold set below, against `r fmt(fit_n["block_F_drift", "R2"], 5)` in
+#' the unmanaged arm; the per-cycle increment of $F_{drift}$ rises from
+#' `r fmt(inc_m[1], 4)` in the first cycle to `r fmt(inc_m[length(inc_m)], 4)` in
+#' the last, because the deterministic displacement toward 0.5 compounds on the
+#' drift. The rate is therefore not constant, and this chapter does not convert
+#' the slope (`r fmt(fit_m["F_drift", "dF"], 4)` per cycle, an average over `r n_cyc` cycles and
+#' nothing more) into an $N_e$. The comparison that needs no constant rate is the
+#' stock: at cycle `r n_cyc` the managed pool's $F_{drift}$ is
+#' `r fmt(stock_m, 2)` times the unmanaged crossing block's. The fit on
 #' $\log(1 - F_{hom})$ returns a **negative** rate,
 #' `r fmt(fit_m["F_hom", "dF"], 4)`, and therefore a negative $N_e$, which is the
 #' arithmetic telling you the series it was handed is not an inbreeding trajectory
-#' at all. $R^2$ falls to `r fmt(fit_m["F_hom", "R2"], 3)` on that lens against
+#' at all; $R^2$ falls to `r fmt(fit_m["F_hom", "R2"], 3)` on that lens against
 #' `r fmt(fit_n["block_F_hom", "R2"], 5)` in the unmanaged arm.
 #' 
 #' The inference, and its limits: a rule that pushes frequencies toward 0.5
-#' generates exactly the negative covariance that the `G_0.5` row of the
-#' matrix-sign table predicts, and it does so with no selection whatsoever, which
-#' is the point @meuwissen2020 make with random GEBVs. What this arm does **not**
-#' establish is the magnitude -- `pull = 0.05` is a stipulated caricature, not a
-#' fitted optimiser, and the factor of
-#' `r fmt(fit_m["F_drift", "dF"] / fit_n["block_F_drift", "dF"], 2)`
+#' generates exactly the negative covariance that the `G_0.5` row of
+#' @tbl-era-matrix-signs predicts, and it does so with no selection whatsoever.
+#' @meuwissen2020 make the corresponding point with random GEBVs: their
+#' `G_VR2(~,M)` arm has no directional selection, although it still maximises an
+#' index (a random one), and the divergence persists. What this arm does **not**
+#' establish is the magnitude -- `pull` = `r pull_m` is a stipulated caricature,
+#' not a fitted optimiser, and the stock ratio of `r fmt(stock_m, 2)`
 #' would move with `pull`, with $n_{gam}$ and with the ancestral frequency
 #' distribution.
 #' The direction is algebra; the size is this parameterisation.
 #' 
 #' **Call.** `lm(log(1 - F) ~ cycle)` on cycles $1..t$, separately for each lens;
-#' $\Delta F = 1 - e^{\text{slope}}$; @sec-cycles does this on `run_cycles()`
+#' $\Delta F = 1 - e^{\text{slope}}$, because $1 - F_t = (1 - \Delta F)^t (1 - F_0)$
+#' makes the slope $\log(1 - \Delta F)$. The approximation
+#' $\Delta F \approx -\text{slope}$ errs by $O(\text{slope}^2)$, a relative error of about $\Delta F / 2$
+#' (`r sprintf("%.2f", 100 * (-log(1 - 0.02) / 0.02 - 1))`% at $\Delta F = 0.02$); @sec-cycles fits the same regression to `run_cycles()`
 #' output.
 #' **Check.** $R^2$ on both fits, and the sign of $\Delta F$.
 #' **Warning sign.** A negative fitted $\Delta F$ (the series is not an inbreeding
@@ -1146,10 +1351,12 @@ par(op)
 #' 
 #' The constraint is met on the panel it is computed on. Whether it is met anywhere
 #' else is a separate measurement, and it needs loci the optimiser never saw. Split
-#' the marker panel in two, manage on one half, and read the report on the other:
+#' the marker panel in two, manage on one half, and read the report on the other (@tbl-era-audit,
+#' @tbl-era-audit-gaps):
 #' 
 ## -----------------------------------------------------------------------------
-#| label: era-audit
+#| label: tbl-era-audit
+#| tbl-cap: "Split-panel audit. Two 60-hybrid selections made on the odd-numbered markers only (management half): the max-diversity greedy (`w = 0`) and the index-weighted greedy (`w = 1`). Each is scored on the management half (rows ending managed) and on the even-numbered markers it never saw (rows ending audit), against the corresponding slice of the frozen base. Dimensionless."
 mgmt  <- seq(1, ctx$m, by = 2)
 audit <- seq(2, ctx$m, by = 2)
 sub_ctx <- function(k) {
@@ -1175,7 +1382,8 @@ fmt(as.data.frame(aud), 4)
 
 #' 
 ## -----------------------------------------------------------------------------
-#| label: era-audit-gaps
+#| label: tbl-era-audit-gaps
+#| tbl-cap: "Audit-half minus management-half value of F_hom and F_drift for the two selections of @tbl-era-audit."
 gaps <- rbind(max_div = aud["max_div_audit", ] - aud["max_div_managed", ],
               index   = aud["index_audit", ]   - aud["index_managed", ])
 fmt(as.data.frame(gaps[, c("F_hom", "F_drift")]), 4)
@@ -1221,10 +1429,12 @@ fmt(as.data.frame(gaps[, c("F_hom", "F_drift")]), 4)
 #' $\Delta F$; between pools, *preserve* divergence, because that is the heterosis
 #' engine (@sec-heterosis proves the identity, @sec-stages Trap 3 states the
 #' prescription). A single global
-#' $\tfrac{1}{2}\mathbf{c}'\mathbf{G}\mathbf{c}$ cannot express that.
+#' $\tfrac{1}{2}\mathbf{c}'\mathbf{G}\mathbf{c}$ cannot express that. @tbl-era-pools reads the two pools
+#' separately for four selections, and @tbl-era-pools-usage gives the line usage behind them.
 #' 
 ## -----------------------------------------------------------------------------
-#| label: era-pools
+#| label: tbl-era-pools
+#| tbl-cap: "Pool-level diversity for four 60-hybrid selections: one random draw (seed 31), truncation on the index, the max-diversity greedy (`w = 0`) and the index-weighted greedy with at most 4 hybrids per line (`max_use = 4`). GD: 1 - theta from f; index: mean index of the selected hybrids, in index standard deviations; theta_A, theta_B: within-pool coancestry; GD_T, GD_BS, F_ST: the partition of `gd_partition()`. Dimensionless except index."
 pool_row <- function(i) {
   c(GD = gene_diversity(i, ctx), index = mean(ctx$index[i]),
     theta_pools(i, ctx)[c("theta_A", "theta_B")],
@@ -1238,10 +1448,16 @@ pr <- rbind(random     = pool_row(sample.int(ctx$N, 60)),
             max_div    = pool_row(sel_greedy(ctx, 60, w = 0)),
             capped     = pool_row(sel_greedy(ctx, 60, w = 1, max_use = 4)))
 stopifnot(isTRUE(all.equal(unname(pr[, "GD"]), unname(pr[, "GD_T"]))))
-fmt(as.data.frame(pr), 4)
+fmt(as.data.frame(pr[, c("GD", "index", "theta_A", "theta_B", "GD_T", "GD_BS", "F_ST")]), 4)
 
 #' 
-#' Two gene-diversity columns sit in that table and they are the **same** quantity
+## -----------------------------------------------------------------------------
+#| label: tbl-era-pools-usage
+#| tbl-cap: "Line usage of the four selections of @tbl-era-pools. Ne_lines_A, Ne_lines_B: effective number of lines used per pool; Ne_parents: effective number of parent lines; max_line: largest number of selected hybrids sharing one line. Ne columns in lines, max_line in hybrids."
+fmt(as.data.frame(pr[, c("Ne_lines_A", "Ne_lines_B", "Ne_parents", "max_line")]), 4)
+
+#' 
+#' Two gene-diversity columns sit in @tbl-era-pools and they are the **same** quantity
 #' reached by two routes, which the `stopifnot()` in the chunk enforces on every
 #' render: `GD` is $1 - \theta$ from $\mathbf{f}$ over the selected hybrids
 #' (@sec-catalogue), `GD_T` is $1 - \bar f$ from the line-usage weights of the
@@ -1249,7 +1465,7 @@ fmt(as.data.frame(pr), 4)
 #' $\overline{\bar p_k^2 + (1 - \bar p_k)^2}$ with $\bar p$ the usage-weighted
 #' merged frequency, because under A2 a hybrid's marker row is the average of its
 #' two parents'. It is the same identity as $He = GD_T$ in @sec-era-fhom, and
-#' `GD`, `GD_T` and Nei's $He$ are one number on this germplasm. The columns that
+#' `GD`, `GD_T` and Nei's $He$ [@nei1973] are one number on this germplasm. The columns that
 #' *are* a different quantity are $GD_{BS}$ and $F_{ST}$: both are built from
 #' $\tilde f = (\theta_A + \theta_B)/2$, which no hybrid-level average can
 #' reproduce, and both are read below.
@@ -1278,7 +1494,7 @@ fmt(as.data.frame(pr), 4)
 #' raises the between-pool component -- even though the two pools' lines are
 #' unchanged and their coancestry matrix $\mathbf{f}^L$ is fixed. All that moved is
 #' the weight the selection puts on each line. $F_{ST}$ then divides by a $GD_T$
-#' that fell at the same time -- the `GD_T` column of the table above, from
+#' that fell at the same time -- the `GD_T` column of @tbl-era-pools, from
 #' `r fmt(pr["max_div", "GD_T"], 4)` to `r fmt(pr["truncation", "GD_T"], 4)` -- which
 #' amplifies the artefact: the numerator rises by
 #' `r fmt(100 * (pr["truncation", "GD_BS"] / pr["max_div", "GD_BS"] - 1), 0)`% while
@@ -1294,26 +1510,29 @@ fmt(as.data.frame(pr), 4)
 #' eroded. The pool-level attribution comes from three other places: $\theta_A$ and
 #' $\theta_B$ (`theta_pools()`), the effective number of lines used per pool
 #' (`ne_lines_pool()`), and the pool-level panel `s1_monitor()` returns from the
-#' line matrix:
+#' line matrix (@tbl-era-s1-monitor):
 #' 
 ## -----------------------------------------------------------------------------
-#| label: era-s1-monitor
+#| label: tbl-era-s1-monitor
+#| tbl-cap: "The pool-level monitoring panel `s1_monitor()` returns for the founding line matrix (cycle 0, both pools): within-pool and total gene diversity, two definitions of F_ST (Wright, Nei's G_ST), status number, per-pool gene diversity and between-pool complementarity of allele frequencies, one row per quantity. Ns_total: status number of the two pools together."
 s1 <- s1_monitor(L / 2, pool, cycle = 0)
-fmt(s1, 4)
+fmt(data.frame(value = unlist(s1)), 4)  # transposed: one row per quantity
 
 #' 
 #' The two panels are the same quantities computed from the two ends of the
 #' contract, and on the full factorial -- where line usage is uniform -- they agree
-#' exactly:
+#' exactly (@tbl-era-s1-identity):
 #' 
 ## -----------------------------------------------------------------------------
-#| label: era-s1-identity
+#| label: tbl-era-s1-identity
+#| tbl-cap: "The two ends of the contract on the full factorial: GD_T and F_ST from `gd_partition()` over all hybrids, against GD_total, Nei's G_ST and Wright's F_ST from `s1_monitor()` over the founding line matrix of @tbl-era-s1-monitor. Dimensionless."
 gp_full <- gd_partition(seq_len(ctx$N), ctx)
 stopifnot(isTRUE(all.equal(gp_full[["GD_T"]], s1$GD_total)),
           isTRUE(all.equal(gp_full[["F_ST"]], s1$Gst_Nei)))
-c(gd_partition_GD_T = gp_full[["GD_T"]], s1_GD_total = s1$GD_total,
+fmt(data.frame(value = c(
+  gd_partition_GD_T = gp_full[["GD_T"]], s1_GD_total = s1$GD_total,
   gd_partition_F_ST = gp_full[["F_ST"]], s1_Gst_Nei = s1$Gst_Nei,
-  s1_Fst_Wright = s1$Fst_Wright)
+  s1_Fst_Wright = s1$Fst_Wright)), 6)
 
 #' 
 #' Note which two agree. `gd_partition()`'s `F_ST` is $GD_{BS}/GD_T$, which is the
@@ -1343,30 +1562,34 @@ c(gd_partition_GD_T = gp_full[["GD_T"]], s1_GD_total = s1$GD_total,
 #' is the price, and @sec-cycles is where it is paid back or not. `max_use`
 #' defaults to `NULL` everywhere in this package, so the cap is opt-in.
 #' 
-#' > **The diagnostic nobody runs.** Schemes based on IBD selected many parents in
-#' > @meuwissen2020; VanRaden-style schemes selected few. If your
-#' > optimal-contribution run is delivering high gain with a suspiciously small
-#' > number of parents and $\Delta F$ on target, compute $F_{hom}$ and $F_{drift}$
-#' > separately on a panel **not used** in the management (@sec-era-step5). The
-#' > difference between them is your hidden bill. This book's
-#' > implementation is `ne_parents()`, which @sec-case-study reports alongside the
-#' > two lenses for every scenario. The `era-pools` table above is the small
-#' > version of the same diagnostic: between the `random` and `truncation` rows
-#' > gene diversity falls by
-#' > `r sprintf("%.1f", 100 * (1 - pr["truncation", "GD"] / pr["random", "GD"]))`%
-#' > while the effective number of parents falls from
-#' > `r sprintf("%.1f", pr["random", "Ne_parents"])` to
-#' > `r sprintf("%.1f", pr["truncation", "Ne_parents"])`, which is
-#' > `r sprintf("%.0f", 100 * (1 - pr["truncation", "Ne_parents"] / pr["random", "Ne_parents"]))`%
-#' > -- the two relative drops differ by a factor of
-#' > `r sprintf("%.0f", (1 - pr["truncation", "Ne_parents"] / pr["random", "Ne_parents"]) / (1 - pr["truncation", "GD"] / pr["random", "GD"]))`.
-#' > A budget written on gene diversity alone is therefore a weak constraint on the
-#' > parent count, and the `capped` row -- the same greedy with `max_use = 4` -- is
-#' > what holding the parent count directly costs:
-#' > `r sprintf("%.1f", pr["capped", "Ne_parents"])` effective parents at an index
-#' > of `r fmt(pr["capped", "index"], 2)` where truncation reached
-#' > `r fmt(pr["truncation", "index"], 2)`. Measured on one candidate set at the
-#' > teaching scale, with a single random draw as the `random` row.
+#' ::: {.callout-tip}
+#' ## The diagnostic nobody runs
+#' 
+#' Schemes based on IBD selected many parents in
+#' @meuwissen2020; VanRaden-style schemes selected few. If your
+#' optimal-contribution run is delivering high gain with a suspiciously small
+#' number of parents and $\Delta F$ on target, compute $F_{hom}$ and $F_{drift}$
+#' separately on a panel **not used** in the management (@sec-era-step5). The
+#' difference between them is your hidden bill. This book's
+#' implementation is `ne_parents()`, which @sec-case-study reports alongside the
+#' two lenses for every scenario. @tbl-era-pools and @tbl-era-pools-usage are the small
+#' version of the same diagnostic: between the `random` and `truncation` rows
+#' gene diversity falls by
+#' `r sprintf("%.1f", 100 * (1 - pr["truncation", "GD"] / pr["random", "GD"]))`%
+#' while the effective number of parents falls from
+#' `r sprintf("%.1f", pr["random", "Ne_parents"])` to
+#' `r sprintf("%.1f", pr["truncation", "Ne_parents"])`, which is
+#' `r sprintf("%.0f", 100 * (1 - pr["truncation", "Ne_parents"] / pr["random", "Ne_parents"]))`%
+#' -- the two relative drops differ by a factor of
+#' `r sprintf("%.0f", (1 - pr["truncation", "Ne_parents"] / pr["random", "Ne_parents"]) / (1 - pr["truncation", "GD"] / pr["random", "GD"]))`.
+#' A budget written on gene diversity alone is therefore a weak constraint on the
+#' parent count, and the `capped` row -- the same greedy with `max_use = 4` -- is
+#' what holding the parent count directly costs:
+#' `r sprintf("%.1f", pr["capped", "Ne_parents"])` effective parents at an index
+#' of `r fmt(pr["capped", "index"], 2)` where truncation reached
+#' `r fmt(pr["truncation", "index"], 2)`. Measured on one candidate set at the
+#' teaching scale, with a single random draw as the `random` row.
+#' :::
 #' 
 #' ### Step 7 -- Check the matrix you are about to invert {#sec-era-step7}
 #' 
@@ -1380,33 +1603,56 @@ c(gd_partition_GD_T = gp_full[["GD_T"]], s1_GD_total = s1$GD_total,
 #' positive definite by construction.
 #' 
 #' **The mechanism is not the same for all four, and the difference matters here.**
-#' For the centred VanRaden forms it is the centring: $\mathbf{Z}$ is centred on the
+#' @meuwissen2020 (their Methods) attribute the zero eigenvalue of all four to the
+#' centring of the genotypes; for `G_0.5` this chapter departs from that, and
+#' @tbl-era-centering-vs-structure shows why. For the centred VanRaden forms [@vanraden2008] it is the
+#' centring: $\mathbf{Z}$ is centred on the
 #' *population's own* allele frequencies, so its columns sum to zero over
 #' individuals, the constant vector lies in the null space and one degree of
-#' freedom is gone by construction. For `G_0.5`, which is the molecular coancestry
-#' this book calls $\mathbf{f}$, it is **not** the centring -- $\mathbf{f}$ is not
-#' centred on anything and stays in $[0, 1]$ by design (@sec-coancestry). Its
+#' freedom is gone by construction. For `G_0.5` $= 4\mathbf{f} - 2\mathbf{J}$ --
+#' an affine map of the molecular coancestry this book calls $\mathbf{f}$, with
+#' $\mathbf{J}$ the $N \times N$ matrix of ones -- it is **not** the centring:
+#' $\mathbf{f}$ is not centred on anything and stays in $[0, 1]$ by design
+#' (@sec-coancestry), and `G_0.5` inherits non-zero row sums from it. Their
 #' deficiency has a different cause, derived below. Both statements are checkable:
 #' 
 ## -----------------------------------------------------------------------------
-#| label: era-centering-vs-structure
+#| label: tbl-era-centering-vs-structure
+#| tbl-cap: "Centring against structure on the full factorial. f_equals_half_plus_gram: largest absolute difference between f and 0.5 + 2 Z_h Z_h'/m; f_rowsum_min, f_rowsum_max, G05_rowsum_min: extreme row sums of f and of G_0.5; G_sum: sum of all elements of VanRaden's G; G_rowsum_max_abs: largest absolute row sum of G; rank_f, rank_G05, rank_G: numerical ranks (`qr()`); n_lines: parent lines L; N: hybrids. Four significant digits."
 Zh  <- ctx$X - 0.5
+G05 <- 4 * ctx[["f"]] - 2                       # G_0.5 = 4f - 2J
 rkf <- qr(ctx[["f"]])$rank
 rkG <- qr(ctx[["G"]])$rank
-c(f_equals_half_plus_gram = max(abs(ctx[["f"]] -
+rk05 <- qr(G05)$rank
+# Identities: f is half plus a Gram matrix; VanRaden G sums to zero (centring).
+stopifnot(isTRUE(all.equal(ctx[["f"]], 2 * tcrossprod(Zh) / ctx$m + 0.5)),
+          isTRUE(all.equal(G05, 8 * tcrossprod(Zh) / ctx$m)),
+          abs(sum(ctx[["G"]])) < 1e-8,
+          min(rowSums(G05)) > 0)
+# Measured on this data set, not theorems: rank(G) = rank(f) - 1 and
+# rank(G_0.5) = rank(f) (G_0.5 = 4 f - 2 J is affine in f, not equal to it).
+stopifnot(rkG == rkf - 1, rk05 == rkf)
+data.frame(value = formatC(c(
+  f_equals_half_plus_gram = max(abs(ctx[["f"]] -
                                       (2 * tcrossprod(Zh) / ctx$m + 0.5))),
   f_rowsum_min            = min(rowSums(ctx[["f"]])),
   f_rowsum_max            = max(rowSums(ctx[["f"]])),
+  G05_rowsum_min          = min(rowSums(G05)),
   G_sum                   = sum(ctx[["G"]]),
   G_rowsum_max_abs        = max(abs(rowSums(ctx[["G"]]))),
-  rank_f = rkf, rank_G = rkG, n_lines = ctx$n_lines, N = ctx$N)
+  rank_f = rkf, rank_G05 = rk05, rank_G = rkG, n_lines = ctx$n_lines, N = ctx$N), digits = 4, format = "g"))
 
 #' 
 #' $\mathbf{f} = 0.5 + \tfrac{2}{m}\mathbf{Z}_h\mathbf{Z}_h'$ with
-#' $\mathbf{Z}_h = \mathbf{X} - 0.5$, to machine precision -- a Gram matrix plus the
+#' $\mathbf{Z}_h = \mathbf{X} - \tfrac12\mathbf{J}_{N \times m}$ (the hybrid marker matrix centred at 0.5, with $\mathbf{J}_{N \times m}$ the $N \times m$ matrix of ones), to machine precision -- a Gram matrix plus the
 #' positive rank-one term $0.5\,\mathbf{1}\mathbf{1}'$, hence positive
 #' semi-definite, and with row sums nowhere near zero (`f_rowsum_min` above), so
-#' neither $\mathbf{1}$ nor any other constant vector is in its null space.
+#' neither $\mathbf{1}$ nor any other constant vector is in its null space. The
+#' same holds for `G_0.5` $= \tfrac{8}{m}\mathbf{Z}_h\mathbf{Z}_h'$ (the
+#' $0.5\,\mathbf{J}$ term cancels in $4\mathbf{f} - 2\mathbf{J}$): its row sums
+#' are positive (`G05_rowsum_min`), and its rank, `r rk05`, equals that of
+#' $\mathbf{f}$ on this data set, so every rank statement below about
+#' $\mathbf{f}$ applies to `G_0.5` as measured here.
 #' VanRaden's
 #' $\mathbf{G}$ on the same hybrids has `sum(G)` and every row sum at numerical
 #' zero, which *is* the centring, and its rank comes out exactly one below
@@ -1418,34 +1664,52 @@ c(f_equals_half_plus_gram = max(abs(ctx[["f"]] -
 #' 
 #' In a hybrid programme the deficiency is far worse than one zero eigenvalue, and
 #' it is structural rather than numerical. A hybrid's marker row is the average of
-#' its two parents' rows, so $\mathbf{X} = \tfrac12 \mathbf{B}\mathbf{M}_L$ with
+#' its two parents' rows, so $\mathbf{X} = \tfrac12 \mathbf{B}\mathbf{G}^L$ with
 #' $\mathbf{B}$ the $N \times L$ parent-usage incidence matrix (a 1 in the two
-#' columns of its parents) and $\mathbf{M}_L$ the $L \times m$ line matrix (the
-#' `L / 2` object of `simulate_lines()`; the subscript keeps it apart from the
-#' $\mathbf{G}_\bullet$ relationship matrices of this chapter). The hybrid
-#' coancestry matrix is a Gram matrix of that,
-#' $\mathbf{f} = [\mathbf{X}, 1 - \mathbf{X}][\mathbf{X}, 1 - \mathbf{X}]'/m$. Its
-#' column space lies in the span of the columns of $\mathbf{X}$ plus the constant
-#' vector, so its rank is bounded by
-#' $\min(\mathrm{rank}(\mathbf{B}),\, m) + 1$ however many hybrids you have.
-#' Measured:
+#' columns of its parents) and $\mathbf{G}^L$ the $L \times m$ line genotype
+#' matrix coded 0/1 of @sec-notation (the `L / 2` object of `simulate_lines()`; the
+#' superscript keeps it apart from the $\mathbf{G}_\bullet$ relationship matrices
+#' of this chapter). With $\mathbf{J}_{r \times c}$ the $r \times c$ matrix of
+#' ones, the hybrid coancestry matrix is a Gram matrix,
+#' $\mathbf{f} = [\mathbf{X}, \mathbf{J}_{N \times m} - \mathbf{X}]\,
+#' [\mathbf{X}, \mathbf{J}_{N \times m} - \mathbf{X}]'/m$, so its
+#' column space is that of $[\mathbf{X}, \mathbf{J}_{N \times m} - \mathbf{X}]$. Every row of $\mathbf{B}$ has exactly two
+#' 1s, so $\mathbf{B}\mathbf{1}_L = 2\,\mathbf{1}_N$: the constant vector already
+#' lies in the column space of $\mathbf{B}$. Hence
+#' $\mathbf{X} = \mathbf{B}\mathbf{G}^L/2$ and
+#' $\mathbf{J}_{N \times m} - \mathbf{X} = \mathbf{B}(\mathbf{J}_{L \times m} - \mathbf{G}^L)/2$
+#' both have their columns in that space, and so does $\mathbf{f}$. That is a
+#' theorem, @eq-era-rank, for any selection and any line genotypes:
+#' $$\mathrm{rank}(\mathbf{f}) \le \mathrm{rank}(\mathbf{B})$$ {#eq-era-rank}
+#' however many hybrids there are (and also $\le m + 1$, because every column of
+#' $\mathbf{J} - \mathbf{X}$ is $\mathbf{1}_N$ minus a column of $\mathbf{X}$; that
+#' second bound is not binding at this scale). The same argument covers `G_0.5`
+#' $= \tfrac{8}{m}\mathbf{Z}_h\mathbf{Z}_h'$, since
+#' $\mathbf{Z}_h = \mathbf{B}(\mathbf{G}^L - 0.5\,\mathbf{J}_{L \times m})/2$.
+#' Whether the bound is attained depends on $\mathbf{G}^L$ and is a measurement.
+#' Measured in @tbl-era-rank and @tbl-era-rank-check:
 #' 
 ## -----------------------------------------------------------------------------
-#| label: era-rank
+#| label: tbl-era-rank
+#| tbl-cap: "Rank of the hybrid coancestry matrix f and of the parent-usage incidence matrix B for five selections: the full factorial, one random 60-hybrid draw (seed 31), truncation, the max-diversity greedy (`w = 0`) and one random 20-hybrid draw (seed 32). lines_used: distinct parent lines in the selection; deficiency: n_sel - rank_f."
 incidence <- function(idx, ctx) {
   B <- matrix(0, length(idx), ctx$n_lines)
   B[cbind(seq_along(idx), ctx$ped$a[idx])] <- 1
   B[cbind(seq_along(idx), ctx$ped$b[idx])] <- 1
   B
 }
-set.seed(31)
 # A separate set from the `sels` of @sec-era-fhom: these vary n_sel, which is
 # the axis the rank depends on. Named apart so neither chunk shadows the other.
+# set.seed(31) reproduces `sels$random`; random_20 gets its own seed.
+set.seed(31)
+r60 <- sample.int(ctx$N, 60)
+set.seed(32)
+r20 <- sample.int(ctx$N, 20)
 rk_sels <- list(full_factorial = seq_len(ctx$N),
-                random_60      = sample.int(ctx$N, 60),
+                random_60      = r60,
                 truncation_60  = sel_truncation(ctx, 60),
                 max_div_60     = sel_greedy(ctx, 60, w = 0),
-                random_20      = sample.int(ctx$N, 20))
+                random_20      = r20)
 rk <- do.call(rbind, lapply(names(rk_sels), function(n) {
   i <- rk_sels[[n]]
   data.frame(selection = n, n_sel = length(i),
@@ -1458,18 +1722,43 @@ fmt(rk)
 
 #' 
 ## -----------------------------------------------------------------------------
-#| label: era-rank-check
+#| label: tbl-era-rank-check
+#| tbl-cap: "Rank checks beyond the five selections of @tbl-era-rank. Over independent random 20-hybrid draws (seed 33; their number is given in the text): full_rank_share, share of draws with rank(f) = 20; equality_share, share with rank(f) = rank(B); min_rank_f, smallest rank(f). On the full factorial: rank_full_factorial, rank of f; n_lines, parent lines L; min_eigenvalue_f, smallest eigenvalue of f, a numerical zero. Three significant digits."
+# The theorem (B 1 = 2 1, so col(f) lies in col(B)) and, separately, the equality,
+# which is measured, not proved.
+stopifnot(all(vapply(rk_sels, function(i) all(rowSums(incidence(i, ctx)) == 2), NA)),
+          all(rk$rank_f <= rk$rank_incidence))
 stopifnot(all(rk$rank_f == rk$rank_incidence))
+# Full rank of a 20-hybrid subset is generic, not guaranteed: measured over
+# n_draw independent random draws.
+n_draw <- 1000
+set.seed(33)
+rk20 <- t(replicate(n_draw, {
+  i <- sample.int(ctx$N, 20)
+  c(rank_f = qr(ctx[["f"]][i, i])$rank, rank_B = qr(incidence(i, ctx))$rank)
+}))
+stopifnot(all(rk20[, "rank_f"] <= rk20[, "rank_B"]))
 ev_min <- min(eigen(ctx[["f"]], symmetric = TRUE, only.values = TRUE)$values)
-c(rank_full_factorial = rk$rank_f[1], n_lines = ctx$n_lines)
-c(min_eigenvalue_f = signif(ev_min, 3))
+data.frame(value = formatC(c(
+  full_rank_share     = mean(rk20[, "rank_f"] == 20),
+  equality_share      = mean(rk20[, "rank_f"] == rk20[, "rank_B"]),
+  min_rank_f          = min(rk20[, "rank_f"]),
+  rank_full_factorial = rk$rank_f[1],
+  n_lines             = ctx$n_lines,
+  min_eigenvalue_f    = ev_min), digits = 3, format = "g"))
 
 #' 
 #' Result. In all five selections the rank of $\mathbf{f}$ equals the rank of the
 #' parent-usage incidence matrix exactly. On the full factorial that is
 #' `r rk$rank_f[1]` $= L - 1$ for `r ctx$n_lines` lines, against `r ctx$N` hybrids:
 #' a deficiency of `r rk$deficiency[1]`, with a smallest eigenvalue at
-#' `r signif(ev_min, 2)`. A subset of 20 hybrids drawn from 50 lines is full rank.
+#' `r signif(ev_min, 2)`. The `random_20` draw, which uses
+#' `r rk$lines_used[rk$selection == "random_20"]` lines, is full rank. That is
+#' generic, not guaranteed: over `r n_draw` independent random 20-hybrid draws
+#' (seed 33) `r fmt(100 * mean(rk20[, "rank_f"] == 20), 1)`% are full rank, the
+#' smallest rank is `r min(rk20[, "rank_f"])`, and
+#' $\mathrm{rank}(\mathbf{f}) = \mathrm{rank}(\mathbf{B})$ in
+#' `r fmt(100 * mean(rk20[, "rank_f"] == rk20[, "rank_B"]), 1)`% of them.
 #' 
 #' Interpretation. The deficiency is not a rounding artefact and does not shrink
 #' with more markers; it is the factorial structure. $N$ hybrids built from $L$
@@ -1477,16 +1766,20 @@ c(min_eigenvalue_f = signif(ev_min, 3))
 #' that needs $\mathbf{f}^{-1}$ must regularise, and the amount of regularisation
 #' required is predictable *before* any eigendecomposition: compute
 #' $\mathrm{rank}(\mathbf{B})$, which costs one `qr()` on an $N \times L$ 0/1
-#' matrix. The equality `rank_f == rank_incidence` is a measurement over five
-#' selections at one scale, not a theorem -- the algebra above bounds
-#' $\mathrm{rank}(\mathbf{f})$ by $\mathrm{rank}(\mathbf{B}) + 1$, and the extra
-#' dimension the bound allows is not attained in any of the five. It is also the
+#' matrix. Two statements are asserted in the chunk and they have different
+#' standing. $\mathrm{rank}(\mathbf{f}) \le \mathrm{rank}(\mathbf{B})$ is the
+#' theorem of @eq-era-rank, so $\mathrm{rank}(\mathbf{B})$ is a guaranteed upper bound on what
+#' the inversion has to work with. The equality `rank_f == rank_incidence` is a
+#' measurement -- five selections plus `r n_draw` random draws, at one scale and on
+#' one draw of line genotypes -- and a set of lines whose genotypes are linearly
+#' dependent would break it without breaking the theorem. The rank deficiency is also the
 #' reason this book's selection machinery never inverts $\mathbf{f}$:
-#' `metrics_cheap()` and the DE fitness only ever evaluate the quadratic form
+#' `metrics_cheap()` and the differential-evolution (DE) fitness only ever evaluate the quadratic form
 #' $\mathbf{c}'\mathbf{f}\mathbf{c}$, which needs no inverse. The
 #' quadratic-programming routes do need a definite matrix, and both
 #' `optimal_contributions()` and `ocs_quadprog()` add `diag(1e-8, n)` for exactly
-#' this reason -- four orders of magnitude above the numerical zero reported above,
+#' this reason -- `r fmt(log10(1e-8 / abs(ev_min)), 1)` orders of magnitude above the
+#' numerical zero reported above,
 #' and small enough not to move the optimum. See @sec-ocs and @sec-g-singular.
 #' 
 #' **Call.** `qr()` on the usage incidence matrix, or on $\mathbf{f}$ restricted to
@@ -1526,7 +1819,7 @@ c(min_eigenvalue_f = signif(ev_min, 3))
 #' **Region-specific diversity targets rarely earn their complexity.** *Their
 #' argument.* @meuwissen2020 give two grounds in the same paragraph: that causative
 #' alleles of quantitative traits are quite evenly distributed across the genome
-#' (their Discussion, citing Wood et al. 2014 on human stature -- an observation
+#' (their Discussion, citing @wood2014 on human stature -- an observation
 #' about one species and one trait, not about maize), and that "what happens in a
 #' sample of loci does not necessarily predict what happens at loci outside that
 #' subset", which is the claim @sec-era-step5 does test, at the marker level. They
@@ -1552,16 +1845,21 @@ c(min_eigenvalue_f = signif(ev_min, 3))
 #' the change in allele frequency and the initial frequency is expected to
 #' increase, since the inbreeding management term is more important in pure
 #' conservation schemes" [@meuwissen2020, Discussion], which is why they argue the
-#' IBD recommendation is stronger there. Their simulations all carry selection, so
-#' no conservation scheme was run to test it; the sign of the mechanism is
+#' IBD recommendation is stronger there. Their only arm without directional
+#' selection, `G_VR2(~,M)` with random GEBVs, still maximises an index, so no pure
+#' conservation scheme was run to test it; the sign of the mechanism is
 #' nevertheless the same algebra as everything above -- a constraint that is the
 #' only thing moving frequencies is a constraint that generates the whole
 #' covariance.
 #' 
 #' ## Limits of the animal-to-plant transposition {#sec-era-transposition}
 #' 
+#' @tbl-era-transposition sets each assumption of the simulation of @meuwissen2020
+#' against the situation in a hybrid crop programme.
+#' 
 ## -----------------------------------------------------------------------------
-#| label: era-transposition
+#| label: tbl-era-transposition
+#| tbl-cap: "Assumptions of the simulation of @meuwissen2020 (left) and the corresponding situation in a two-pool hybrid crop programme (right). The Ne_parents values in the fourth row are computed in @sec-era-step6 (@tbl-era-pools-usage) at the book's teaching scale."
 #| echo: false
 knitr::kable(data.frame(
   `Assumption in the paper` = c(
@@ -1575,7 +1873,7 @@ knitr::kable(data.frame(
     "same line reused for years, cloning of parents through DH maintenance, overlapping cycles, one line used in dozens of crosses",
     "recycling pedigree usually complete inside the programme, absent for introduced germplasm and genebank accessions",
     "base is an administrative choice (cycle 0) with pre-existing heterotic structure already in it",
-    "shorter cycles with GS; this book measures no commercial elite Ne, but @sec-era-step6's own teaching-scale example shows Ne_parents falling well below the pool size under plain truncation (39.3 to 13.0)",
+    sprintf("shorter cycles with genomic selection; this book measures no commercial elite Ne, but @sec-era-step6's own teaching-scale example shows Ne_parents falling well below the pool size under plain truncation (%.1f to %.1f)", pr["random", "Ne_parents"], pr["truncation", "Ne_parents"]),
     "two heterotic pools with opposite-signed constraints, several target environments",
     "desirable in the product, undesirable in the parents, irrelevant at the individual level once lines are fixed -- and in none of the three cases is it what F_hom measures, which is merged-pool gene diversity (@sec-era-fhom)"),
   check.names = FALSE))

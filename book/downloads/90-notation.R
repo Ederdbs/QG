@@ -90,21 +90,26 @@ knitr::kable(data.frame(
 #| echo: false
 knitr::kable(data.frame(
   Symbol = c("$\\mathbf{f}$", "$\\mathbf{f}^L$", "$\\mathbf{G}$", "$\\mathbf{A}$",
-             "$\\mathbf{G}_{0.5}$", "$\\mathbf{Z}$", "$\\mathbf{J}$"),
+             "$\\mathbf{G}_{0.5}$", "$\\mathbf{Z}$", "$\\mathbf{Z}_h$", "$\\mathbf{J}$",
+             "$\\mathbf{B}$"),
   Meaning = c("molecular coancestry of the **hybrids**, N x N, in [0, 1]",
               "molecular coancestry **between lines**, L x L",
               "VanRaden genomic relationship, centered -- prediction only",
               "pedigree relationship",
               "VanRaden with the centering frequency fixed at 0.5",
               "centered dosage $\\mathbf{M}^H - \\mathbf{1}\\,2\\mathbf{p}'$, N x m",
-              "matrix of ones $\\mathbf{1}\\mathbf{1}'$, N x N"),
+              "hybrid marker matrix centred at 0.5, $\\mathbf{X} - \\tfrac12\\mathbf{J}_{N \\times m}$, N x m",
+              "matrix of ones $\\mathbf{1}\\mathbf{1}'$, N x N; $\\mathbf{J}_{r \\times c}$ when rectangular",
+              "parent-usage incidence, N x L: a 1 in the two columns of each hybrid's parents; $\\mathbf{X} = \\tfrac12\\mathbf{B}\\mathbf{G}^L$"),
   Note = c("the diversity kernel; never centered",
            "the sufficient statistic in disguise -- see the collapse",
            "sum of all elements is exactly 0; unusable for diversity",
            "expectation of IBD, no markers",
            "$4\\mathbf{f} - 2\\mathbf{J}$: an affine function of f, not f; orders selections as f does only when $\\mathbf{1}'\\mathbf{c} = 1$",
            "builds $\\mathbf{G}$; also the marker design matrix of $\\mathbf{u} = \\mathbf{Z}\\boldsymbol\\beta$ (genomic prediction); not the subgroup indicator $\\mathbf{Z}$ of joint allocation",
-           "-"),
+           "$\\mathbf{G}_{0.5} = 8\\mathbf{Z}_h\\mathbf{Z}_h'/m$ (@sec-era-step7)",
+           "-",
+           "rank bounds that of $\\mathbf{f}$ (@eq-era-rank); not the field budget $B$"),
   check.names = FALSE))
 
 #' 
@@ -290,15 +295,16 @@ knitr::kable(data.frame(
 ## -----------------------------------------------------------------------------
 #| echo: false
 knitr::kable(data.frame(
-  Symbol = c("$F_{hom}$", "$F_{drift}$", "$F_{IBD}$", "$F_{ROH}$", "$\\text{cov}$"),
-  Lens = c("homozygosity", "drift", "identity by descent", "hybrid", "-"),
+  Symbol = c("$F_{hom}$", "$F_{drift}$", "$F_{IBD}$", "$F_{ROH}$", "$\\text{cov}$", "$\\kappa$"),
+  Lens = c("homozygosity", "drift", "identity by descent", "hybrid", "-", "-"),
   Definition = c("$1 - \\overline{H_t/H_0}$; **can be negative**",
                  "$\\overline{\\delta p^2 / [p_0(1-p_0)]}$; never negative",
                  "segments inherited from a defined base",
                  "genome fraction in runs of homozygosity",
-                 "$2\\,\\text{cov}(\\delta p/s,\\,(p_0 - \\tfrac12)/s) = F_{hom} - F_{drift}$"),
+                 "$2\\,\\text{cov}(\\delta p/s,\\,(p_0 - \\tfrac12)/s) = F_{hom} - F_{drift}$",
+                 "panel statistic $\\overline{(p_0 - \\tfrac12)^2/[p_0(1-p_0)]}$ (@sec-genomic-era); not the aggregate genotype $W$"),
   `Function` = c("`freq_metrics()`", "`freq_metrics()`", "requires pedigree + linkage",
-                 "not implemented", "`freq_metrics()$cov_diag`"),
+                 "not implemented", "`freq_metrics()$cov_diag`", "-"),
   check.names = FALSE))
 
 #' 
