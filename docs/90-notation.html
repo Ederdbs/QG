@@ -1028,9 +1028,9 @@ window.Quarto = {
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
-<col style="width: 16%">
-<col style="width: 53%">
-<col style="width: 30%">
+<col style="width: 10%">
+<col style="width: 74%">
+<col style="width: 15%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1099,6 +1099,66 @@ window.Quarto = {
 <td style="text-align: left;"><span class="math inline">\(p_0^{(0)}\)</span></td>
 <td style="text-align: left;">base frequencies, frozen at the founding cycle</td>
 <td style="text-align: left;"><code>ctx$p0</code>, set once</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(M\)</span></td>
+<td style="text-align: left;">one-locus population mean under random mating, <span class="math inline">\(a(p - q) + 2pqd\)</span></td>
+<td style="text-align: left;">-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(G(\mathbf{x})\)</span></td>
+<td style="text-align: left;">genotypic value of an individual with marker row <span class="math inline">\(\mathbf{x}\)</span> (0/0.5/1); not the VanRaden <span class="math inline">\(\mathbf{G}\)</span></td>
+<td style="text-align: left;">-</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(h_i\)</span></td>
+<td style="text-align: left;">heterozygous fraction of hybrid <span class="math inline">\(i\)</span>; its self-coancestry is <span class="math inline">\(1 - h_i/2\)</span></td>
+<td style="text-align: left;"><code>rowMeans(ctx$X == 0.5)</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(GD_{WI\text{-}hyb}\)</span></td>
+<td style="text-align: left;">within-individual gene diversity of the F1s, half their mean heterozygosity</td>
+<td style="text-align: left;"><code>gd_partition()$GD_WI_hyb</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\theta_A\)</span>, <span class="math inline">\(\theta_B\)</span>, <span class="math inline">\(\theta_{AB}\)</span></td>
+<td style="text-align: left;">coancestry within pool A, within pool B, and between them, <span class="math inline">\(\mathbf{w}_A'\mathbf{f}^L\mathbf{w}_B\)</span> with <span class="math inline">\(\mathbf{w}_A\)</span> the pool-A block of <span class="math inline">\(\mathbf{w}\)</span> rescaled to sum to 1 within pool A (and <span class="math inline">\(\mathbf{w}_B\)</span> likewise), as <code>line_weights()</code> returns; the unrescaled block gives <span class="math inline">\(\theta_{AB}/4\)</span></td>
+<td style="text-align: left;"><code>theta_pools()</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(p_{A,w}\)</span></td>
+<td style="text-align: left;">pool-A allele frequency at the within-pool weights <span class="math inline">\(\mathbf{w}_A\)</span> (summing to 1 over pool A), <span class="math inline">\(\sum_i w_{A,i} u_{ik}\)</span></td>
+<td style="text-align: left;">-</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\mathrm{MRD}_{ij}\)</span></td>
+<td style="text-align: left;">modified Rogers distance between lines <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>; <span class="math inline">\(\mathrm{MRD}_{ij}^2 = 1 - f^L_{ij}\)</span> for inbred lines</td>
+<td style="text-align: left;"><code>mrd_matrix()</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\mu\)</span></td>
+<td style="text-align: left;">grand mean of <span class="math inline">\(H_{ij}\)</span> over the complete factorial (in the UC of the selection table, a population mean)</td>
+<td style="text-align: left;"><code>heterosis_gca_sca()$mu</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\mathrm{DC}(\cdot)\)</span></td>
+<td style="text-align: left;">double centring over the <span class="math inline">\(A \times B\)</span> block: minus row and column means, plus the grand mean</td>
+<td style="text-align: left;">-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\sigma^2_{GCA_A}\)</span>, <span class="math inline">\(\sigma^2_{GCA_B}\)</span></td>
+<td style="text-align: left;">variance of <span class="math inline">\(g^A_i\)</span>, <span class="math inline">\(g^B_j\)</span> over the factorial; <span class="math inline">\(\sum_k d_k^2 (1 - 2p_{Bk})^2 p_{Ak}q_{Ak}\)</span> and symmetrically</td>
+<td style="text-align: left;">closed form; see <a href="05b-heterosis-dominance.html#sec-heterosis-relocation" class="quarto-xref"><span>Section 5.11</span></a></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(F^\star_k\)</span></td>
+<td style="text-align: left;">divergence <span class="math inline">\(F_{ST}\)</span> (Balding-Nichols expectation) at which locus <span class="math inline">\(k\)</span>’s GCA variance turns over; <span class="math inline">\(\bar F^\star\)</span> is their <span class="math inline">\(d_k^2(p_kq_k)^2\)</span>-weighted mean, where the summed GCA variance turns over</td>
+<td style="text-align: left;">-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\rho_k\)</span></td>
+<td style="text-align: left;">the <span class="math inline">\(\rho\)</span> of the mating-design table with <span class="math inline">\(k\)</span> random testers from a finite pool</td>
+<td style="text-align: left;">see <a href="05b-heterosis-dominance.html#sec-heterosis-step6" class="quarto-xref"><span>Section 5.12.6</span></a></td>
 </tr>
 </tbody>
 </table>

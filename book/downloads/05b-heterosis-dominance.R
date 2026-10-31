@@ -82,7 +82,7 @@ d    <- rgamma(ctx$m, 2, 4)
 #' pair is worth on average; what a breeder selects on is how heterosis is
 #' *distributed* across the crosses of the factorial. Those are different questions
 #' with different answers, and the second one is where general and specific combining
-#' ability come from.
+#' ability (GCA, SCA) come from.
 #' 
 #' The derivations come first and @sec-heterosis-protocol turns them into the eight
 #' steps that compute them on a real programme's data, with the check and the
@@ -91,7 +91,7 @@ d    <- rgamma(ctx$m, 2, 4)
 #' 
 #' The data come from `simulate_lines()` and `simulate_data()`, drawn with the
 #' generator @sec-simulating-crosses builds (in the Simulation part that follows),
-#' and the `fst` sweep below redraws the pools from it; `pool_complementarity()` is
+#' and the `fst` sweep of @sec-heterosis-flat redraws the pools from it; `pool_complementarity()` is
 #' the S1 monitor that @sec-stages will define.
 #' 
 #' Three premises carry everything below. They are stated here once, because every
@@ -103,11 +103,12 @@ d    <- rgamma(ctx$m, 2, 4)
 #' additive effects cancel from the mid-parent difference and what makes `GD_WI`
 #' zero. Note that this is a property of the *programme*, not of the mating system:
 #' the crop here is allogamous -- maize-type, two heterotic pools under reciprocal
-#' recurrent selection -- and it is DH induction or selfing to fixation that
+#' recurrent selection -- and it is doubled-haploid (DH) induction or selfing to fixation that
 #' delivers homozygous parents from it. Nothing here transfers to a programme
-#' crossing non-inbred parents (an inter-population cross, a synthetic, S1 parents)
+#' crossing non-inbred parents (an inter-population cross, a synthetic, parents selfed once)
 #' without re-derivation, and @sec-heterosis-step1 measures how large the error is
-#' if the formulae below are applied anyway: a factor of five, not a few per cent.
+#' if the formulae below are applied anyway: a multiple of the true gain, not a few
+#' per cent.
 #' 
 #' **The genotypic model is dominance within loci and additivity between them.**
 #' There is no epistatic term anywhere below: the genotypic value is a sum over
@@ -134,9 +135,9 @@ d    <- rgamma(ctx$m, 2, 4)
 #' The classical parameterisation puts the origin at the midpoint of the two
 #' homozygotes: one homozygote is worth $+a$, the other $-a$, and the heterozygote
 #' $d$. Under random mating at frequency $p$, with $q = 1 - p$, the population mean
-#' is [@falconer1996, Eq. 7.2]
+#' is [@falconer1996, Ch. 7]
 #' 
-#' $$M = a\,(p - q) + 2pq\,d$$
+#' $$M = a\,(p - q) + 2pq\,d$$ {#eq-het-mean-one-locus}
 #' 
 #' The first term is the additive contribution, and the mid-parent of any cross
 #' already carries it. The second is the dominance contribution. It is the only part
@@ -146,11 +147,11 @@ d    <- rgamma(ctx$m, 2, 4)
 #' ::: {.callout-note}
 #' ## $a$ is a scale, not a quantity this chapter computes
 #' 
-#' The symbols in that display are the textbook ones. This book's additive marker
+#' The symbols in @eq-het-mean-one-locus are the textbook ones. This book's additive marker
 #' effects are $\beta_k$ (estimated in @sec-genomic-prediction, later), and its $\alpha$ is the
 #' diversity-loss statistic of @sec-catalogue, not the classical average effect of a
 #' substitution. The per-locus $a_k$ reappears three times below and never as a
-#' result: in the genotypic-value model used to show that it cancels, in the
+#' result: in the genotypic-value model (@eq-het-genotypic-value) used to show that it cancels, in the
 #' definition of overdominance as $|d| > |a|$, and in the average effect of a
 #' substitution $a + d(q - p)$. No quantity this chapter reports depends on it.
 #' :::
@@ -161,9 +162,9 @@ d    <- rgamma(ctx$m, 2, 4)
 #' homozygote midpoint at locus $k$. It is a property of the locus. It does not move
 #' when allele frequencies move.
 #' 
-#' Fisher's *statistical* dominance deviation is a different object: the residual
-#' left after projecting genotypic values onto the best additive model **in a
-#' particular population**. It is a property of the population as much as of the
+#' Fisher's *statistical* dominance deviation [@fisher1918; @falconer1996, Ch. 7]
+#' is a different object: the residual left after projecting genotypic values onto
+#' the best additive model **in a particular population**. It is a property of the population as much as of the
 #' locus, and it changes when frequencies change.
 #' 
 #' Both appear in this chapter, and keeping them apart is the whole trick.
@@ -190,7 +191,7 @@ d    <- rgamma(ctx$m, 2, 4)
 #' within the individual, and take the genotypic value to be the additive part plus
 #' the dominance deviation at every heterozygous locus:
 #' 
-#' $$G(\mathbf{x}) = \sum_k a_k\,(2x_k - 1) + \sum_k d_k\,\mathbb{1}\{x_k = 0.5\}$$
+#' $$G(\mathbf{x}) = \sum_k a_k\,(2x_k - 1) + \sum_k d_k\,\mathbb{1}\{x_k = 0.5\}$$ {#eq-het-genotypic-value}
 #' 
 #' The parents are fully inbred, so each is homozygous at every locus and the F1's
 #' row is the average of its two parents' rows. The additive part is linear in
@@ -198,7 +199,7 @@ d    <- rgamma(ctx$m, 2, 4)
 #' and cancel from the mid-parent difference. What survives is the dominance
 #' deviation at the loci where the F1 is heterozygous:
 #' 
-#' $$H_i = \sum_k d_k \, \mathbb{1}\{x_{ik} = 0.5\}$$
+#' $$H_i = \sum_k d_k \, \mathbb{1}\{x_{ik} = 0.5\}$$ {#eq-het-value}
 #' 
 #' The additive effects never appear. That is the result, not an omission, and it is
 #' why `heterosis_value()` takes no additive-effect argument:
@@ -240,7 +241,7 @@ c(mid_parent_difference = val(ctx$X[i, ]) - mid,
 #' The expected heterosis over all $A \times B$ crosses therefore follows from the
 #' pool frequencies alone:
 #' 
-#' $$\mathbb{E}[H] = \sum_k d_k \left[\, p_{A k} + p_{B k} - 2 p_{A k} p_{B k} \right]$$
+#' $$\mathbb{E}[H] = \sum_k d_k \left[\, p_{A k} + p_{B k} - 2 p_{A k} p_{B k} \right]$$ {#eq-het-expected}
 #' 
 #' The candidate pool here *is* the full factorial, every $A \times B$ pairing
 #' exactly once, and the frequencies are the means of those same lines. The closed
@@ -261,16 +262,18 @@ abs(heterosis_expected(pA, pB, d) - mean(heterosis_value(ctx$X, d)))
 #' per-locus F1 heterozygosity separates exactly:
 #' 
 #' $$p_A + p_B - 2 p_A p_B \;=\; \underbrace{2 \bar p (1 - \bar p)}_{\text{shared}}
-#'                             \;+\; \underbrace{y^2 / 2}_{\text{divergence}}$$
+#'                             \;+\; \underbrace{y^2 / 2}_{\text{divergence}}$$ {#eq-het-split}
 #' 
 #' The first term is the heterozygosity a single merged pool at frequency $\bar p$
 #' would produce under random mating. The second is what keeping the pools apart
 #' adds on top of it. Average both over loci with $d_k \equiv 1$, so that the
 #' weighting does not obscure the algebra, and they are exactly the $GD_T$ and
-#' $GD_{BS}$ of the Caballero & Toro partition that @sec-subdivided derived and
-#' `gd_partition()` computes:
+#' $GD_{BS}$ of the partition of @caballero2002 that @sec-subdivided derived and
+#' `gd_partition()` computes (@tbl-het-partition-identity):
 #' 
 ## -----------------------------------------------------------------------------
+#| label: tbl-het-partition-identity
+#| tbl-cap: "Expected heterosis per locus under flat dominance ($d_k \\equiv 1$), split into its shared and divergence terms by `heterosis_partition()` (@eq-het-split), beside $GD_T$ and $GD_{BS}$ of `gd_partition()` on the full A x B factorial of the book's teaching scale (25 + 25 inbred lines, 2000 markers). Residual: absolute difference between the two columns."
 hp <- heterosis_partition(pA, pB, rep(1, ctx$m)) / ctx$m
 gp <- gd_partition(seq_len(ctx$N), ctx)
 fmt(data.frame(term       = c("shared", "divergence"),
@@ -289,9 +292,9 @@ fmt(data.frame(term       = c("shared", "divergence"),
 #' with inbred lines, $GD_T = GD_{BI} + GD_{BS}$. Expected F1 heterozygosity is
 #' therefore $GD_{BI} + 2\,GD_{BS}$, the between-pool component counted twice --
 #' once inside the shared term, once as the divergence term. That factor of two is
-#' where the classical result sits. Falconer & Mackay's heterosis of a cross
-#' between two *random-mating* populations is $\sum_k d_k y_k^2$
-#' [@falconer1996, Ch. 14], exactly twice the divergence term here. The two do not
+#' where the classical result sits. The heterosis of a cross between two
+#' *random-mating* populations is $\sum_k d_k y_k^2$ [@falconer1996, Ch. 14],
+#' exactly twice the divergence term of @eq-het-split. The two do not
 #' conflict; they use different mid-parents. Theirs is two random-mating
 #' populations, each carrying its own within-pool heterozygosity, so their $H$ is
 #' the total above $\sum_k d_k (p_{Ak}q_{Ak} + p_{Bk}q_{Bk})$. Ours is two inbred
@@ -332,7 +335,7 @@ c(F1_total          = hpd[["total"]],
 #' that an allele drawn from a pool-A line and an allele drawn from a pool-B line
 #' are identical in state. Its complement is the whole bracket:
 #' 
-#' $$GD_T + GD_{BS} \;=\; 1 - \theta_{AB}$$
+#' $$GD_T + GD_{BS} \;=\; 1 - \theta_{AB}$$ {#eq-het-theta-ab}
 #' 
 ## -----------------------------------------------------------------------------
 tp <- theta_pools(seq_len(ctx$N), ctx)
@@ -356,7 +359,7 @@ c(shared_plus_divergence = gp[["GD_T"]] + gp[["GD_BS"]],
 #' self-coancestry is $1 - h_i/2$, with $h_i$ its heterozygous fraction, so
 #' `GD_WI_hyb` is half the mean F1 heterozygosity and the two levels are linked:
 #' 
-#' $$2 \cdot GD_{WI\text{-}hyb} = GD_T + GD_{BS}$$
+#' $$2 \cdot GD_{WI\text{-}hyb} = GD_T + GD_{BS}$$ {#eq-het-wi-hyb}
 #' 
 ## -----------------------------------------------------------------------------
 c(lhs = 2 * gp[["GD_WI_hyb"]], rhs = gp[["GD_T"]] + gp[["GD_BS"]],
@@ -370,22 +373,25 @@ c(lhs = 2 * gp[["GD_WI_hyb"]], rhs = gp[["GD_T"]] + gp[["GD_BS"]],
 #' actually chosen. The gap is the pairing structure of the subset.
 #' `tests/testthat/test-dominance.R` asserts the identity to `1e-12` on the full
 #' factorial and, on a *random* 40-hybrid subset at one scale (12 lines per pool,
-#' 800 markers), bounds the gap with `expect_equal(tolerance = 5e-3)`. That
+#' 800 markers; `tests/testthat/setup.R`), bounds the gap with
+#' `expect_equal(tolerance = 5e-3)` (`test-dominance.R`). That
 #' tolerance is **relative**, not absolute: on a gene-diversity value of order 0.4
 #' the absolute bound it enforces is of order `2e-3`, and the gap the test actually
 #' sees is smaller again. A subset chosen by an optimiser, which concentrates line
-#' usage deliberately, is not covered by that bound; @sec-era-fhom, in the Metrics
-#' and prediction part, is where it will be measured, on four such subsets at this
-#' book's scale, reporting the largest departure of the four.
+#' usage deliberately, is not covered by that bound. @sec-era-fhom, in the Metrics
+#' and prediction part, measures the gap on four 60-hybrid subsets at this book's
+#' scale -- one random draw and three heuristic selections (two greedy, one
+#' truncation), none of them an optimiser's output -- and reports the largest
+#' departure of the four.
 #' 
 #' ## Inbreeding depression, and why it does not price $\alpha$ {#sec-heterosis-id}
 #' 
-#' The same model run backwards gives inbreeding depression. A locus at frequency
+#' The same model run backwards gives inbreeding depression ($ID$). A locus at frequency
 #' $p$ in a population with inbreeding coefficient $F$ is heterozygous with
 #' probability $2pq(1-F)$, so the mean declines linearly in $F$
 #' [@falconer1996, Ch. 14]:
 #' 
-#' $$ID \;=\; 2F\sum_k d_k \, p_k q_k$$
+#' $$ID \;=\; 2F\sum_k d_k \, p_k q_k$$ {#eq-het-id}
 #' 
 #' At $F = 1$ that is exactly the *shared* term of `heterosis_partition()` evaluated
 #' at $p_A = p_B = p$. So the depression of a pool driven to complete homozygosity
@@ -407,7 +413,7 @@ c(inbreeding_depression = inbreeding_depression(pA, d),
 #' alleles otherwise, so the agreement is to Monte Carlo error:
 #' 
 ## -----------------------------------------------------------------------------
-k <- 1:300
+k <- seq_len(300)
 c(closed_form = inbreeding_depression(pA[k], d[k], 0.6),
   simulated   = ref_inbreeding_depression(pA[k], d[k], 0.6, n = 20000, seed = 2))
 
@@ -415,11 +421,13 @@ c(closed_form = inbreeding_depression(pA[k], d[k], 0.6),
 #' Now the part that matters, because the obvious next step is wrong.
 #' 
 #' It is tempting to argue: $\alpha$ budgets a loss of within-pool gene diversity;
-#' gene diversity is $\sum_k p_kq_k$; inbreeding depression is $\sum_k d_k\,p_kq_k$;
+#' gene diversity is $\frac{1}{m}\sum_k 2p_kq_k$, the mean over loci; inbreeding
+#' depression is $2F\sum_k d_k\,p_kq_k$;
 #' therefore spending $\alpha$ costs yield in the current cycle, and *that* is the
 #' price of the budget. The algebra does not support it.
 #' 
 ## -----------------------------------------------------------------------------
+stopifnot(max(abs(heterosis_value(rbind(U, V), d))) == 0)
 c(max_dominance_contribution_of_an_inbred_line = max(abs(heterosis_value(U, d))))
 
 #' 
@@ -427,12 +435,12 @@ c(max_dominance_contribution_of_an_inbred_line = max(abs(heterosis_value(U, d)))
 #' contribution is zero **whatever the pool's allele frequencies are**. In a
 #' programme whose parents are inbred lines the depression was paid in full when the
 #' lines were made; it is a constant, and it does not move when the pool
-#' subsequently loses diversity. The formula above describes the gap between a
+#' subsequently loses diversity. @eq-het-id describes the gap between a
 #' hypothetical random-mating pool and its inbred derivatives, and that gap
 #' *shrinks* as $p_kq_k$ shrinks -- but nothing in the programme stands at the
 #' random-mating end of it.
 #' 
-#' ::: {.callout-important}
+#' ::: {.callout-warning}
 #' ## Inbreeding depression is not the current-cycle price of the diversity budget
 #' 
 #' This is the same fact that makes $GD_{WI}$ exactly zero in @sec-catalogue's
@@ -466,9 +474,11 @@ c(max_dominance_contribution_of_an_inbred_line = max(abs(heterosis_value(U, d)))
 #' Set $d_k \equiv d$, constant across loci. Then $H$ stops being a weighted count and
 #' becomes a plain one: $d$ times the number of loci at which the two parents differ.
 #' For inbred lines that count is exactly what the coancestry kernel of
-#' @sec-coancestry measures, so for a cross between lines $a$ and $b$
+#' @sec-coancestry measures, so for a cross between pool-A line $i$ and pool-B line $j$
 #' 
-#' $$H_{ab} \;=\; d\,m\,(1 - f^L_{ab}) \;=\; d\,m\,\mathrm{MRD}_{ab}^2$$
+#' $$H_{ij} \;=\; d\,m\,(1 - f^L_{ij}) \;=\; d\,m\,\mathrm{MRD}_{ij}^2$$ {#eq-het-distance}
+#' 
+#' where $\mathrm{MRD}_{ij}$ is the modified Rogers distance between the two lines.
 #' 
 ## -----------------------------------------------------------------------------
 h1 <- heterosis_value(ctx$X, rep(1, ctx$m))
@@ -499,8 +509,8 @@ c(cor_uniform_d = cor(h1, 1 - fL[ab]),
 #' of the germplasm rather than of the statistic: how $d$ is spread over the loci at
 #' which the parents differ, which is what @sec-heterosis-alignment is about, and --
 #' once the third premise is relaxed -- how well the panel tags the causal loci.
-#' Under flat $d$ on a panel that *is* the causal set the correlation is 1 by the
-#' identity above. Departing from either condition generally lowers it -- not
+#' Under flat $d$ on a panel that *is* the causal set the correlation is 1 by
+#' @eq-het-distance. Departing from either condition generally lowers it -- not
 #' always, since a $d$ that varies only across loci at which no pair of parents
 #' differs changes no $H_i$ at all -- and by how much is something this chapter does
 #' not attempt to predict.
@@ -509,14 +519,28 @@ c(cor_uniform_d = cor(h1, 1 - fL[ab]),
 #' 
 #' Read `divergence` as free money and you will reach for $F_{ST}$. Do not.
 #' 
-#' Draw the pools further apart and watch all three terms. Nothing here is selected.
+#' Draw the pools further apart and watch all three terms (@tbl-het-sweep). Nothing
+#' here is selected.
 #' Each point re-draws both pools from the *same* ancestral frequencies -- the
 #' ancestral vector is fixed by `seed = 5` and shared across the sweep, while the two
-#' pool-frequency vectors are fresh Balding-Nichols draws at each `fst`
+#' pool-frequency vectors are fresh Balding-Nichols draws [@balding1995] at each `fst`
 #' (@sec-notation) -- so what varies along the sweep is how far the draw scatters
-#' and nothing else:
+#' and nothing else.
+#' 
+#' One convention, stated here because the chapter uses both meanings. In every
+#' expectation below, and as `fst` in the code, $F_{ST}$ is the Balding-Nichols
+#' parameter, $F_{BN}$ in @sec-notation: the variance of a pool's allele frequency
+#' around the ancestral one, in units of $p(1-p)$. Where the text says that $F_{ST}$
+#' "is a function of the frequencies only" (@sec-heterosis-alignment,
+#' @sec-heterosis-step8) it means the statistic computed from the two pools'
+#' frequencies, which under Balding-Nichols estimates approximately
+#' $F_{BN}/(2 - F_{BN})$ rather than $F_{BN}$ (@sec-notation). No conclusion here
+#' depends on the difference: both are functions of the frequencies, and $d$ enters
+#' neither.
 #' 
 ## -----------------------------------------------------------------------------
+#| label: tbl-het-sweep
+#| tbl-cap: "Neutral divergence sweep. For each target `fst` (the Balding-Nichols parameter), both pools are redrawn from one fixed ancestral frequency vector (seed 5) at the book's teaching scale (25 + 25 inbred lines, 2000 markers); one draw per row, no replication. Shared, divergence and total: expected heterosis per locus at $d_k \\equiv 1$ (@eq-het-split). Last three columns: the complementarity statistics of `pool_complementarity()`."
 sweep_het <- function(fst) {
   cf <- modifyList(book_cfg, list(fst = fst, seed = 5))
   Lf <- simulate_lines(cf)
@@ -551,7 +575,7 @@ fmt(sw, 4)
 #' common ancestral frequency $p$, so $\mathbb{E}[p_A] = \mathbb{E}[p_B] = p$ and
 #' $\mathbb{E}[p_A p_B] = p^2$. Therefore
 #' 
-#' $$\mathbb{E}\!\left[p_A + p_B - 2 p_A p_B\right] = 2p(1-p),$$
+#' $$\mathbb{E}\!\left[p_A + p_B - 2 p_A p_B\right] = 2p(1-p),$$ {#eq-het-bn-total}
 #' 
 #' which contains no $F_{ST}$ at all. With ancestral frequencies drawn uniformly on
 #' $[0.05, 0.95]$ the predicted level is $\mathbb{E}[2p(1-p)] =$ `r round(2*(0.5 - (0.9^2/12 + 0.25)), 4)`,
@@ -565,14 +589,17 @@ fmt(sw, 4)
 #' 
 #' $$\mathbb{E}\!\left[2\bar p(1 - \bar p)\right] = 2p(1-p)\left(1 - \tfrac{F_{ST}}{2}\right),
 #' \qquad
-#' \mathbb{E}\!\left[y^2/2\right] = F_{ST}\,p(1-p)$$
+#' \mathbb{E}\!\left[y^2/2\right] = F_{ST}\,p(1-p)$$ {#eq-het-bn-halves}
 #' 
 #' The shared term loses $F_{ST}\,p(1-p)$ and the divergence term gains
 #' $F_{ST}\,p(1-p)$: the same expression with opposite signs, not approximately and
 #' not on average over some range. Both predictions are parameter-free once the
-#' ancestral distribution is fixed, so they can be laid straight on top of the sweep:
+#' ancestral distribution is fixed, so they can be laid straight on top of the sweep (@tbl-het-sweep-bn,
+#' @fig-heterosis-sweep):
 #' 
 ## -----------------------------------------------------------------------------
+#| label: tbl-het-sweep-bn
+#| tbl-cap: "Measured shared and divergence terms of @tbl-het-sweep (per locus, $d_k \\equiv 1$) beside their Balding-Nichols predictions (@eq-het-bn-halves), computed with no fitted parameter from $E[2p(1-p)]$ for ancestral $p$ uniform on [0.05, 0.95]."
 Ep <- 2 * (0.5 - (0.9^2 / 12 + 0.25))      # E[2p(1-p)] for p ~ U(0.05, 0.95)
 sw$pred_shared     <- Ep * (1 - sw$fst / 2)
 sw$pred_divergence <- Ep * sw$fst / 2
@@ -581,18 +608,20 @@ fmt(sw[, c("fst", "shared", "pred_shared", "divergence", "pred_divergence")], 4)
 #' 
 ## -----------------------------------------------------------------------------
 #| label: fig-heterosis-sweep
-#| fig-cap: "Expected heterosis and its two components as the pools are driven apart by drift alone. Dashed lines are the Balding-Nichols predictions for each component separately, with no fitted parameter. Each measured component is offset from its prediction -- divergence above, shared below -- by sampling error in the pool frequencies; that offset narrows along the axis, and the text quantifies both it and the measured gap. The divergence term grows several-fold; the shared term pays for all of it, unit for unit; the total is flat. Nothing is selected here -- this is what neutral divergence does."
-#| fig-alt: "Expected heterosis and its two components as the pools are driven apart by drift alone"
-plot(sw$fst, sw$total, type = "b", pch = 19, col = "#d98e04", ylim = c(0, 0.40),
-     xlab = "target fst between pools", ylab = "expected heterosis per locus (d = 1)")
-lines(sw$fst, sw$shared, type = "b", pch = 17, col = "#1f5f8b")
-lines(sw$fst, sw$divergence, type = "b", pch = 15, col = "#b2182b")
-lines(sw$fst, sw$pred_shared, lty = 2, col = "#1f5f8b")
-lines(sw$fst, sw$pred_divergence, lty = 2, col = "#b2182b")
-abline(h = mean(sw$total), lty = 2, col = "grey45")
-legend("right", c("total", "shared", "divergence", "predicted"), bty = "n",
-       cex = 0.8, pch = c(19, 17, 15, NA), lty = c(NA, NA, NA, 2),
-       col = c("#d98e04", "#1f5f8b", "#b2182b", "grey45"))
+#| fig-cap: "Expected heterosis per locus at $d_k \\equiv 1$ (total, black filled circles) and its shared (grey triangles) and divergence (black open squares) components (@eq-het-split) as the pools are driven apart by drift alone, against the target Balding-Nichols `fst` ($F_{BN}$). Each point is one draw of both pools from one fixed ancestral frequency vector (seed 5) at the book's teaching scale (25 + 25 inbred lines, 2000 markers), with no replication. Dashed lines are the Balding-Nichols predictions for the shared (grey) and divergence (black) components separately (@eq-het-bn-halves), with no fitted parameter; the dotted line is the mean total over the sweep. Each measured component is offset from its prediction -- divergence above, shared below -- by sampling error in the pool frequencies; that offset narrows along the axis, and the text quantifies both it and the measured gap. The divergence term grows several-fold; the shared term pays for all of it, unit for unit; the total is flat. Nothing is selected here -- this is what neutral divergence does."
+#| fig-alt: "Line chart of expected heterosis per locus against target fst from 0.02 to 0.45. The divergence component rises from near zero, the shared component falls by the same amount, and their total stays flat; dashed lines show the Balding-Nichols prediction for each component and a dotted line the mean total."
+plot(sw$fst, sw$total, type = "b", pch = 19, col = book_pal[["ink"]], ylim = c(0, 0.40),
+     xlab = expression("target " * F[BN] * " between pools"),
+     ylab = expression("expected heterosis per locus (units of " * d * ", " * d[k] == 1 * ")"))
+lines(sw$fst, sw$shared, type = "b", pch = 17, col = book_pal[["mid"]])
+lines(sw$fst, sw$divergence, type = "b", pch = 0, col = book_pal[["ink"]])
+lines(sw$fst, sw$pred_shared, lty = 2, col = book_pal[["mid"]])
+lines(sw$fst, sw$pred_divergence, lty = 2, col = book_pal[["ink"]])
+abline(h = mean(sw$total), lty = 3, col = book_pal[["ink"]])
+legend("right", c("total", "shared", "divergence", "Balding-Nichols prediction",
+                  "mean total"), bty = "n", cex = 0.8,
+       pch = c(19, 17, 0, NA, NA), lty = c(NA, NA, NA, 2, 3),
+       col = book_pal[c("ink", "mid", "ink", "mid", "ink")])
 grid()
 
 #' 
@@ -601,9 +630,9 @@ grid()
 #' estimation. The
 #' pool frequencies are estimated from `r book_cfg$n_pool_A` and
 #' `r book_cfg$n_pool_B` sampled lines, and a frequency estimated from $n$ lines
-#' carries sampling variance $V = pq/n$. Conditional on the true pool frequencies,
-#' $\mathbb{E}[\hat y^2/2] = y^2/2 + (V_A + V_B)/2$ and
-#' $\mathbb{E}[2\hat{\bar p}(1 - \hat{\bar p})] = 2\bar p(1 - \bar p) - (V_A + V_B)/2$:
+#' carries sampling variance $\mathrm{Var}(\hat p) = pq/n$. Conditional on the true pool frequencies,
+#' $\mathbb{E}[\hat y^2/2] = y^2/2 + [\mathrm{Var}(\hat p_A) + \mathrm{Var}(\hat p_B)]/2$ and
+#' $\mathbb{E}[2\hat{\bar p}(1 - \hat{\bar p})] = 2\bar p(1 - \bar p) - [\mathrm{Var}(\hat p_A) + \mathrm{Var}(\hat p_B)]/2$:
 #' equal and opposite, so the total estimated from sample frequencies is unbiased
 #' while each half is not.
 #' 
@@ -619,9 +648,9 @@ grid()
 #' 
 #' Those two pairs do not agree equally well. At `fst =` `r sw$fst[1]` prediction
 #' and measurement are within
-#' `r round(100 * abs((sw$divergence[1] - sw$pred_divergence[1]) / (Ep * (1 - sw$fst[1]) * (1 / book_cfg$n_pool_A + 1 / book_cfg$n_pool_B) / 4) - 1))`%
+#' `r round(100 * abs((sw$divergence[1] - sw$pred_divergence[1]) / (Ep * (1 - sw$fst[1]) * (1 / book_cfg$n_pool_A + 1 / book_cfg$n_pool_B) / 4) - 1))` %
 #' of each other; at `fst =` `r sw$fst[nrow(sw)]` the measured gap is
-#' `r round(100 * (1 - (sw$divergence[nrow(sw)] - sw$pred_divergence[nrow(sw)]) / (Ep * (1 - sw$fst[nrow(sw)]) * (1 / book_cfg$n_pool_A + 1 / book_cfg$n_pool_B) / 4)))`%
+#' `r round(100 * (1 - (sw$divergence[nrow(sw)] - sw$pred_divergence[nrow(sw)]) / (Ep * (1 - sw$fst[nrow(sw)]) * (1 / book_cfg$n_pool_A + 1 / book_cfg$n_pool_B) / 4)))` %
 #' *below* the predicted offset. The formula gives an expectation; each row of the
 #' sweep is one draw of `r book_cfg$m` loci at one seed, and the scatter of that
 #' draw is not constant either. $\mathrm{Var}(y)$ is $2F_{ST}\,p(1-p)$, so the
@@ -637,20 +666,17 @@ grid()
 #' it. A pool pair's *apparent* divergence overstates its true divergence, most
 #' severely when the true divergence is small and the pools are few.
 #' 
-#' :::: {.callout-important}
-#' ## Every unit of divergence is paid for out of the shared term
-#' 
-#' Under neutral divergence the trade is exactly one for one. Drifting the pools
-#' apart does not create heterosis; it relocates it from the shared term to the
-#' divergence term. A programme that maximises $F_{ST}$ has bought nothing and spent
-#' its within-pool diversity to do it.
+#' > **Every unit of divergence is paid for out of the shared term.** Under neutral
+#' > divergence the trade is exactly one for one. Drifting the pools apart does not
+#' > create heterosis; it relocates it from the shared term to the divergence term. A
+#' > programme that maximises $F_{ST}$ has bought nothing and spent its within-pool
+#' > diversity to do it.
 #' 
 #' This is the mechanism behind @sec-stages Trap 3, in the Metrics and prediction
 #' part. That section states the symptom
 #' -- "$F_{ST}$ keeps rising as pools drift apart at loci that are *already*
 #' divergent, which buys no additional heterosis" -- and points here for the reason.
-#' The sweep table and @fig-heterosis-sweep are that reason.
-#' ::::
+#' @tbl-het-sweep and @fig-heterosis-sweep are that reason.
 #' 
 #' ## What actually buys heterosis {#sec-heterosis-alignment}
 #' 
@@ -668,10 +694,12 @@ grid()
 #' with divisor $m$, which is why the chunk rescales `cov()`:
 #' 
 #' $$\sum_k d_k\,y_k^2 / 2 \;=\; \frac{m}{2}\Big[\, \bar d \; \overline{y^2}
-#'   \;+\; \mathrm{cov}(d,\, y^2) \,\Big]$$
+#'   \;+\; \mathrm{cov}(d,\, y^2) \,\Big]$$ {#eq-het-alignment}
 #' 
 ## -----------------------------------------------------------------------------
 y2 <- (pA - pB)^2
+stopifnot(isTRUE(all.equal(sum(d * y2 / 2),
+  ctx$m / 2 * (mean(d) * mean(y2) + cov(d, y2) * (ctx$m - 1) / ctx$m))))
 c(divergence = sum(d * y2 / 2),
   from_parts = ctx$m / 2 * (mean(d) * mean(y2) + cov(d, y2) * (ctx$m - 1) / ctx$m))
 
@@ -686,9 +714,11 @@ c(divergence = sum(d * y2 / 2),
 #' Hold the pools fixed, hold $F_{ST}$ fixed, hold the multiset of dominance
 #' deviations fixed, and change only which locus gets which $d_k$. `aligned` gives
 #' the largest $d_k$ to the largest $y_k^2$, `anti-aligned` does the reverse, and
-#' `independent` is the draw as made:
+#' `independent` is the draw as made (@tbl-het-alignment, @fig-heterosis-alignment):
 #' 
 ## -----------------------------------------------------------------------------
+#| label: tbl-het-alignment
+#| tbl-cap: "Expected heterosis of one pool pair (25 + 25 inbred lines, 2000 markers) under three placements of the same dominance deviations across loci: largest $d_k$ on largest $y_k^2$ (aligned), the reverse (anti-aligned), and as drawn (independent; $d_k$ gamma with shape 2 and rate 4, seed 4). `cor_d_y2`: correlation between $d$ and $y^2$ over loci. Shared, divergence, total: sums over loci, in units of $d$. Relative: total over the total of the independent placement."
 mk <- function(dec) { v <- numeric(ctx$m); v[order(y2)] <- sort(d, decreasing = dec); v }
 scen <- list(`anti-aligned` = mk(TRUE), `independent` = d, `aligned` = mk(FALSE))
 al <- do.call(rbind, lapply(names(scen), function(n) {
@@ -702,18 +732,19 @@ fmt(al, 3)
 #' 
 ## -----------------------------------------------------------------------------
 #| label: fig-heterosis-alignment
-#| fig-cap: "The same two pools, the same F_ST, and the same set of dominance deviations in all three bars -- only their placement across loci differs. Expected heterosis moves by half again between the extremes. F_ST cannot see any of this, because d does not enter it."
-#| fig-alt: "The same two pools, the same FST, and the same set of dominance deviations in all three bars -- only their placement across loci differs"
+#| fig-cap: !expr sprintf("Expected heterosis of one pool pair (25 + 25 inbred lines, 2000 markers) under three placements of the same dominance deviations across loci (@tbl-het-alignment), as stacked shared (grey) and divergence (black) terms, summed over loci in units of $d$; the label above each bar is its total relative to the independent placement. The same two pools, the same $F_{ST}$, and the same set of dominance deviations in all three bars -- only their placement across loci differs. Expected heterosis moves by a factor of %.2f between the extremes. $F_{ST}$ cannot see any of this, because $d$ does not enter it.", max(al$total) / min(al$total))
+#| fig-alt: "Stacked bar chart with three bars, anti-aligned, independent and aligned, each split into a shared and a divergence part of expected heterosis. The bars rise from anti-aligned to aligned, and each is labelled with its total relative to the independent bar."
 bp <- barplot(rbind(al$shared, al$divergence), beside = FALSE,
-              names.arg = al$scenario, col = c("#1f5f8b", "#b2182b"),
-              ylab = "expected heterosis", border = NA)
-legend("topleft", c("shared", "divergence"), fill = c("#1f5f8b", "#b2182b"),
+              names.arg = al$scenario, col = book_pal[c("mid", "ink")],
+              ylab = expression("expected heterosis (units of " * d * ", summed over loci)"),
+              border = NA)
+legend("topleft", c("shared", "divergence"), fill = book_pal[c("mid", "ink")],
        bty = "n", cex = 0.8, border = NA)
 text(bp, al$total, sprintf("%.2fx", al$relative), pos = 3, cex = 0.8, xpd = NA)
 grid(nx = NA, ny = NULL)
 
 #' 
-#' $F_{ST}$ is identical in all three columns of the table and in all three bars of
+#' $F_{ST}$ is identical in all three rows of @tbl-het-alignment and in all three bars of
 #' @fig-heterosis-alignment -- it is a function of the frequencies only, and $d$
 #' never enters it. Expected heterosis ranges over a factor of
 #' `r round(max(al$total)/min(al$total), 2)`.
@@ -729,9 +760,11 @@ grid(nx = NA, ny = NULL)
 #' The channel can be separated. Permute $d$ only *within* groups of loci that share
 #' a value of the shared weight $2\bar p(1 - \bar p)$. The shared term is then
 #' invariant by construction -- exactly, not approximately -- and whatever moves is
-#' the divergence channel alone:
+#' the divergence channel alone (@tbl-het-alignment-stratified):
 #' 
 ## -----------------------------------------------------------------------------
+#| label: tbl-het-alignment-stratified
+#| tbl-cap: "The aligned and anti-aligned placements of @tbl-het-alignment repeated with $d$ permuted only within groups of loci sharing the same shared weight $2\\bar p(1 - \\bar p)$, so the shared term is identical in both rows by construction. Sums over loci, in units of $d$."
 hz  <- 2 * ((pA + pB) / 2) * (1 - (pA + pB) / 2)
 grp <- split(seq_len(ctx$m), round(hz, 9))
 strat <- function(dec) {
@@ -741,39 +774,37 @@ strat <- function(dec) {
 }
 st <- do.call(rbind, lapply(c(aligned = FALSE, `anti-aligned` = TRUE), function(dec)
   as.data.frame(as.list(heterosis_partition(pA, pB, strat(dec))))))
+stopifnot(isTRUE(all.equal(st$shared[1], st$shared[2])))
 fmt(st, 4)
 
 #' 
 #' The shared column is identical to the digit; the divergence term still moves by
 #' a factor of `r round(st$divergence[1] / st$divergence[2], 1)` and the total by
-#' `r round(100 * (st$total[1] / st$total[2] - 1))`%. The alignment result survives
+#' `r round(100 * (st$total[1] / st$total[2] - 1))` %. The alignment result survives
 #' its own control.
 #' 
 #' ## Reading the S1 panel
 #' 
 #' @sec-stages will log `frac_opposite_fixed` and `mean_abs_delta_p` every cycle as
-#' stand-ins for heterosis potential. The sweep above says how good they are.
+#' stand-ins for heterosis potential. The sweep of @sec-heterosis-flat says how good they are.
 #' 
 #' `mean_sq_delta_p` is not a proxy at all. It is $\overline{y^2}$, so half of it is
 #' the unweighted divergence term $GD_{BS}$, exactly:
 #' 
 ## -----------------------------------------------------------------------------
+stopifnot(isTRUE(all.equal(sw$mean_sq_delta_p / 2, sw$divergence)))
 c(half_mean_sq = mean(sw$mean_sq_delta_p) / 2,
   divergence   = mean(sw$divergence))
 
 #' 
-#' What it cannot carry is the weighting by $d$, which is the previous section's
-#' point; the frequency half of the divergence term it reports without loss.
+#' What it cannot carry is the weighting by $d$, which is the point of
+#' @sec-heterosis-alignment; the frequency half of the divergence term it reports without loss.
 #' 
-#' `frac_opposite_fixed` is a different matter:
-#' 
-## -----------------------------------------------------------------------------
-fmt(sw[, c("fst", "divergence", "frac_opposite_fixed", "mean_abs_delta_p",
-           "mean_sq_delta_p")], 4)
-
+#' `frac_opposite_fixed` is a different matter (its column in @tbl-het-sweep).
 #' 
 #' Up to `fst = 0.10` it is exactly zero -- not one marker in `r book_cfg$m`
-#' qualifies -- and it first exceeds 1% of markers at `fst = 0.30`, near the top of
+#' qualifies -- and it first exceeds 1 % of markers at
+#' `fst` = `r sw$fst[which(sw$frac_opposite_fixed > 0.01)[1]]`, near the top of
 #' the sweep. It counts *near-fixed* opposite loci, and the divergence lives at
 #' intermediate frequency differences, which the threshold discards.
 #' 
@@ -795,24 +826,25 @@ fmt(sw[, c("fst", "divergence", "frac_opposite_fixed", "mean_abs_delta_p",
 #' $$u + v - 2uv \;=\; \underbrace{p_A + p_B - 2p_Ap_B}_{\text{mean}}
 #'   \;+\; \underbrace{(1 - 2p_B)\,\delta u}_{\text{parent A}}
 #'   \;+\; \underbrace{(1 - 2p_A)\,\delta v}_{\text{parent B}}
-#'   \;-\; \underbrace{2\,\delta u\, \delta v}_{\text{both}}$$
+#'   \;-\; \underbrace{2\,\delta u\, \delta v}_{\text{both}}$$ {#eq-het-expansion}
 #' 
 #' Four terms: one constant, one linear in each parent, one bilinear. Weight by $d_k$,
-#' sum over loci, and the classical decomposition falls out,
+#' sum over loci, and the classical decomposition into general and specific
+#' combining ability [@sprague1942; @griffing1956] falls out,
 #' 
-#' $$H_{ij} = \mu + g^A_i + g^B_j + s_{ij}$$
+#' $$H_{ij} = \mu + g^A_i + g^B_j + s_{ij}$$ {#eq-het-gca-sca}
 #' 
 #' with
 #' 
 #' $$g^A_i = \sum_k d_k (1 - 2p_{Bk})\,\delta u_{ik}, \qquad
-#'   s_{ij} = -2 \sum_k d_k\, \delta u_{ik}\, \delta v_{jk}$$
+#'   s_{ij} = -2 \sum_k d_k\, \delta u_{ik}\, \delta v_{jk}$$ {#eq-het-gca-sca-terms}
 #' 
 #' and $g^B_j$ symmetrically. What is linear in one parent is general combining
 #' ability: it is carried into every cross that parent enters. What is bilinear
 #' depends on *which two* lines met, and is specific combining ability. Because the
 #' deviations are taken from each pool's own line frequencies they sum to zero over
 #' that pool's lines, which is what makes the three components mean zero and
-#' mutually orthogonal. `heterosis_gca_sca()` is that expansion and nothing more:
+#' mutually orthogonal. `heterosis_gca_sca()` is @eq-het-expansion weighted by $d_k$ and nothing more:
 #' 
 ## -----------------------------------------------------------------------------
 heterosis_gca_sca
@@ -843,9 +875,9 @@ max(abs(resid(lm(H ~ factor(ia) + factor(ib))) - cs$sca[cbind(ia, ib)]))
 #' 
 #' @comstock1949 designed reciprocal recurrent selection around the distinction
 #' between these two components. The algebra above says what each one is made of --
-#' and the next section says which of the two their scheme actually selects on.
+#' and @sec-heterosis-gca-average says which of the two their scheme actually selects on.
 #' 
-#' ### GCA is an average effect in the other pool's background
+#' ### GCA is an average effect in the other pool's background {#sec-heterosis-gca-average}
 #' 
 #' Look at the weight on $\delta u$: it is $d_k(1 - 2p_{Bk})$, and $1 - 2p_B$ is
 #' $q_B - p_B$. That is the frequency factor of the classical average effect of a
@@ -879,7 +911,7 @@ max(abs(resid(lm(H ~ factor(ia) + factor(ib))) - cs$sca[cbind(ia, ib)]))
 #' candidates. Note what that does *not* say: cross performance is a genotypic
 #' value, not a mid-parent difference, so it also carries the candidate's own
 #' additive contribution -- the part that cancelled out of $H$ in the mid-parent
-#' derivation above and is not in this decomposition at all.
+#' derivation (@eq-het-value) and is not in this decomposition at all.
 #' Selection on testcross means therefore acts on the additive part and $g^A_i$
 #' together. What the algebra here delimits is the dominance share of that response,
 #' and it says the share is general combining ability against the tester pool.
@@ -895,7 +927,7 @@ max(abs(resid(lm(H ~ factor(ia) + factor(ib))) - cs$sca[cbind(ia, ib)]))
 #' Read in words: two parents that resemble each other -- after removing what is
 #' typical of each pool -- cross badly, and the resemblance that counts is weighted
 #' by $d$, not by marker count. Similarity enters negatively throughout this chapter
-#' -- $1 - \theta_{AB}$, $d\,m\,(1 - f^L_{ab})$ -- but everywhere else it is
+#' -- $1 - \theta_{AB}$, $d\,m\,(1 - f^L_{ij})$ -- but everywhere else it is
 #' similarity measured against a fixed base. Here it is measured against each pool's
 #' own mean, which is what makes the term specific to a *pair* rather than a
 #' property either parent carries into all its crosses.
@@ -905,10 +937,20 @@ max(abs(resid(lm(H ~ factor(ia) + factor(ib))) - cs$sca[cbind(ia, ib)]))
 #' $H$ matrix. Under flat $d$, $H_{ij} = d\,m\,(1 - f^L_{ij})$, and double-centring
 #' annihilates the constant and flips the sign of what remains:
 #' 
-#' $$s_{ij} \;=\; -\,d\,m \cdot \mathrm{DC}\big(f^L\big)_{ij},$$
+#' $$s_{ij} \;=\; -\,d\,m \cdot \mathrm{DC}\big(f^L\big)_{ij},$$ {#eq-het-sca-dc}
 #' 
-#' with $\mathrm{DC}(M)_{ij} = M_{ij} - \bar M_{i\cdot} - \bar M_{\cdot j} + \bar
-#' M_{\cdot\cdot}$ over the $A \times B$ block. The factor $-dm$ is not cosmetic:
+#' with $\mathrm{DC}(f^L)_{ij} = f^L_{ij} - \bar f^L_{i\cdot} - \bar f^L_{\cdot j} + \bar
+#' f^L_{\cdot\cdot}$ over the $A \times B$ block (row, column and grand means).
+#' 
+## -----------------------------------------------------------------------------
+#| label: het-sca-dc-coancestry
+s_flat <- heterosis_gca_sca(U, V, rep(1, ctx$m))$sca
+fAB    <- fL[seq_len(nA), nA + seq_len(book_cfg$n_pool_B)]
+DC_fAB <- fAB - outer(rowMeans(fAB), colMeans(fAB), "+") + mean(fAB)
+stopifnot(isTRUE(all.equal(s_flat, -ctx$m * DC_fAB, check.attributes = FALSE)))
+c(max_residual = max(abs(s_flat + ctx$m * DC_fAB)))
+
+#'  The factor $-dm$ is not cosmetic:
 #' $s_{ij}$ is on the trait scale and $f^L$ is a probability, and the minus is the
 #' same minus as in $-2\sum_k d_k \delta u\, \delta v$ -- more coancestry than the
 #' two margins predict means *less* SCA. So the coancestry kernel determines SCA
@@ -921,27 +963,32 @@ max(abs(resid(lm(H ~ factor(ia) + factor(ib))) - cs$sca[cbind(ia, ib)]))
 #' factorial splits with them. Under the sampling model of the simulation -- each
 #' line's genotype an independent Bernoulli($p_{Ak}$) draw at every locus, so
 #' unrelated lines and linkage equilibrium within each pool -- each piece has a
-#' closed form in the pool frequencies:
+#' closed form in the pool frequencies, compared with the observed variances in
+#' @tbl-het-var-components:
 #' 
 #' $$\sigma^2_{GCA_A} = \sum_k d_k^2\,(1 - 2p_{Bk})^2\,p_{Ak}q_{Ak},
 #' \qquad
-#' \sigma^2_{SCA} = 4 \sum_k d_k^2\,p_{Ak}q_{Ak}\,p_{Bk}q_{Bk}$$
+#' \sigma^2_{SCA} = 4 \sum_k d_k^2\,p_{Ak}q_{Ak}\,p_{Bk}q_{Bk}$$ {#eq-het-var-components}
 #' 
 ## -----------------------------------------------------------------------------
+#| label: tbl-het-var-components
+#| tbl-cap: "Variance over the full factorial of each combining-ability component of heterosis (@eq-het-gca-sca), observed (divisor $n$) against the closed forms of @eq-het-var-components evaluated at the sample pool frequencies, in squared units of $d$. GCA rows: over the 25 lines of a pool; SCA row: over the 625 crosses. One realisation of the pools (25 + 25 inbred lines, 2000 markers) and of $d$ (seed 4)."
 qa <- pA * (1 - pA)
 qb <- pB * (1 - pB)
+pvar <- function(x) mean((x - mean(x))^2)   # divisor n, as in the closed forms
 fmt(data.frame(
   component = c("GCA_A", "GCA_B", "SCA"),
-  observed  = c(var(cs$gca_A), var(cs$gca_B), var(as.vector(cs$sca))),
+  observed  = c(pvar(cs$gca_A), pvar(cs$gca_B), pvar(as.vector(cs$sca))),
   closed_form = c(sum(d^2 * (1 - 2 * pB)^2 * qa),
                   sum(d^2 * (1 - 2 * pA)^2 * qb),
                   4 * sum(d^2 * qa * qb))), 2)
 
 #' 
-#' The closed forms take the sample frequencies as the pool frequencies; the observed
-#' column is one realisation of them. The GCA rows are variances over
+#' The closed forms of @eq-het-var-components take the sample frequencies as the pool frequencies; the observed
+#' column is one realisation of them, computed with divisor $n$ (a population
+#' variance over the lines), which is the divisor the closed forms carry. The GCA rows are variances over
 #' `r book_cfg$n_pool_A` lines, whose relative sampling error is about
-#' $\sqrt{2/n} \approx$ `r round(100 * sqrt(2 / book_cfg$n_pool_A))`%, and the
+#' $\sqrt{2/n} \approx$ `r round(100 * sqrt(2 / book_cfg$n_pool_A))` %, and the
 #' agreement is within that. That error rate belongs to the independent-Bernoulli
 #' sampling model declared immediately above, not to the statistic: it is the
 #' sampling error of a variance over $n$ *independent* observations, and a recycled
@@ -956,7 +1003,7 @@ fmt(data.frame(
 #' 
 #' ## Divergence destroys SCA faster than it builds GCA {#sec-heterosis-relocation}
 #' 
-#' Put the two closed forms next to the drift argument of @sec-heterosis-flat and
+#' Put the two closed forms of @eq-het-var-components next to the drift argument of @sec-heterosis-flat and
 #' the variance tells a different story from the mean. The mean was flat; the
 #' variance is not, and it does not merely change shape.
 #' 
@@ -967,7 +1014,7 @@ fmt(data.frame(
 #' $$\mathbb{E}\big[\sigma^2_{SCA,k}\big] = 4d_k^2\,p^2(1-p)^2\,(1 - F_{ST})^2,
 #' \qquad
 #' \mathbb{E}\big[\sigma^2_{GCA_A,k}\big] = d_k^2\,p(1-p)\,(1 - F_{ST})
-#'   \left[(1-2p)^2 + 4F_{ST}\,p(1-p)\right]$$
+#'   \left[(1-2p)^2 + 4F_{ST}\,p(1-p)\right]$$ {#eq-het-var-bn}
 #' 
 #' Read the two expressions before reading the sweep, because they already say what
 #' it will show.
@@ -988,7 +1035,7 @@ fmt(data.frame(
 #' from $F_{ST} = 0$ at a locus if and only if $8p(1-p) > 1$, that is
 #' $\tfrac12(1 - 1/\sqrt2) < p < \tfrac12(1 + 1/\sqrt2)$, and turns over at
 #' 
-#' $$F^\star_k = \frac{8p_k(1-p_k) - 1}{8p_k(1-p_k)},$$
+#' $$F^\star_k = \frac{8p_k(1-p_k) - 1}{8p_k(1-p_k)},$$ {#eq-het-gca-peak}
 #' 
 #' which is negative outside that interval -- at such loci GCA variance falls from
 #' the start. A sum of concave parabolas is a concave parabola, and its maximum
@@ -997,21 +1044,52 @@ fmt(data.frame(
 #' distribution, not a theorem: pools founded mostly at extreme frequencies would
 #' put it below zero and GCA variance would decline monotonically. Under the
 #' $U(0.05, 0.95)$ ancestral draw used here enough loci sit in the interval to place
-#' it inside the range, which is why the sweep below straddles a peak. The sweep's
-#' grid can show that the peak is interior; it cannot locate it.
+#' it inside the range, which is why the sweep of @tbl-het-relocation straddles a peak. The sweep's
+#' grid can show that the peak is interior; the weighted mean locates it. With $d$
+#' drawn independently of $p$ the weight reduces to $(p_kq_k)^2$ in expectation, and
+#' $(pq)^2 F^\star = pq(8pq - 1)/8$:
+#' 
+## -----------------------------------------------------------------------------
+#| label: het-gca-peak
+pq <- function(p) p * (1 - p)
+F_peak <- integrate(function(p) pq(p) * (8 * pq(p) - 1) / 8, 0.05, 0.95)$value /
+          integrate(function(p) pq(p)^2, 0.05, 0.95)$value
+# the sweep evaluates the closed form at sample frequencies of n inbred lines,
+# whose divergence from the ancestral p is F_eff = F + (1 - F)/n; on the
+# target-F_BN axis the peak therefore sits at (F_peak - 1/n)/(1 - 1/n)
+stopifnot(book_cfg$n_pool_A == book_cfg$n_pool_B)
+n_ln <- book_cfg$n_pool_A
+F_peak_axis <- (F_peak - 1 / n_ln) / (1 - 1 / n_ln)
+c(expected_GCA_peak_fst = F_peak, on_target_axis = F_peak_axis)
+
+#' 
+#' Call this weighted mean $\bar F^\star$; here $\bar F^\star =$
+#' `r round(F_peak, 3)`. It is the turnover in the divergence, from the ancestral
+#' frequencies, of whatever frequencies the closed form is evaluated at. The sweep
+#' below evaluates it at frequencies estimated from $n =$ `r book_cfg$n_pool_A`
+#' inbred lines per pool. Given the ancestral $p$, such an estimate has variance
+#' $pqF_{BN} + \mathbb{E}[p_{\mathrm{pool}}q_{\mathrm{pool}}]/n = pq\,[F_{BN} + (1 - F_{BN})/n]$,
+#' so its divergence is $F_{\mathrm{eff}} = F_{BN} + (1 - F_{BN})/n$, not the target
+#' $F_{BN}$ -- the same sampling term sized for the mean in @sec-heterosis-flat. On
+#' the target-$F_{BN}$ axis of the sweep the expected peak is therefore
+#' $(\bar F^\star - 1/n)/(1 - 1/n) =$ `r round(F_peak_axis, 3)`.
+#' 
 #' 
 #' What is monotone is the ratio,
 #' 
 #' $$\frac{\mathbb{E}[\sigma^2_{SCA,k}]}{\mathbb{E}[\sigma^2_{GCA_A,k}]}
-#'   = \frac{4p(1-p)\,(1 - F_{ST})}{(1-2p)^2 + 4F_{ST}\,p(1-p)},$$
+#'   = \frac{4p(1-p)\,(1 - F_{ST})}{(1-2p)^2 + 4F_{ST}\,p(1-p)},$$ {#eq-het-sca-gca-ratio}
 #' 
 #' which falls in $F_{ST}$ at every locus. So the defensible statement is about the
 #' *share*, not about a transfer. Expected heterosis, we already know, does not move
 #' at all. Sweeping the pools apart -- same ancestral frequencies, fresh
 #' Balding-Nichols draws at each `fst`, as in @sec-heterosis-flat -- and evaluating
-#' the closed forms on the realised frequencies:
+#' the closed forms on the realised frequencies (@tbl-het-relocation,
+#' @fig-heterosis-relocation):
 #' 
 ## -----------------------------------------------------------------------------
+#| label: tbl-het-relocation
+#| tbl-cap: "Closed-form variances of heterosis over the factorial (@eq-het-var-components) along the neutral sweep of @tbl-het-sweep, evaluated at the realised pool frequencies of each draw, in squared units of $d$. `var_GCA`: sum of both pools' GCA variances; `var_SCA`: SCA variance; `frac_SCA`: SCA share of their sum. One draw per row (seed 5 for the pools, seed 4 for $d$), no replication."
 reloc <- function(fst) {
   cf <- modifyList(book_cfg, list(fst = fst, seed = 5))
   Pf <- pool_freqs(simulate_lines(cf) / 2,
@@ -1024,20 +1102,22 @@ reloc <- function(fst) {
              frac_SCA = vs / (va + vb + vs))
 }
 rl <- do.call(rbind, lapply(c(0.02, 0.05, 0.10, 0.15, 0.20, 0.30, 0.45), reloc))
+i_pk <- which.max(rl$var_GCA)                # the expected peak sits in the grid's bracket
+stopifnot(F_peak_axis > rl$fst[i_pk - 1], F_peak_axis < rl$fst[i_pk + 1])
 fmt(rl, 3)
 
 #' 
 ## -----------------------------------------------------------------------------
 #| label: fig-heterosis-relocation
-#| fig-cap: "The same neutral divergence sweep, read through the combining-ability decomposition rather than through the mean. Expected heterosis is flat across this entire range (@fig-heterosis-sweep); its decomposition is not. Specific combining ability falls steeply throughout. General combining ability rises, by much less than SCA loses, and itself turns over inside the range -- both components vanish at F_ST = 1. The two curves do not sum to a constant: most of the SCA variance lost is destroyed rather than relocated, and the exact percentages are in the text."
-#| fig-alt: "The same neutral divergence sweep, read through the combining-ability decomposition rather than through the mean"
-plot(rl$fst, rl$var_GCA, type = "b", pch = 19, col = "#d98e04",
+#| fig-cap: "The same neutral divergence sweep, read through the combining-ability decomposition rather than through the mean: closed-form variances of heterosis over the factorial (@eq-het-var-components), evaluated at the realised pool frequencies of each draw, in squared units of $d$, against the target Balding-Nichols `fst` ($F_{BN}$). GCA is the sum of both pools' GCA variances. One draw per point (seed 5 for the pools, seed 4 for $d$; 25 + 25 inbred lines, 2000 markers), no replication; values in @tbl-het-relocation. Expected heterosis is flat across this entire range (@fig-heterosis-sweep); its decomposition is not. Specific combining ability falls steeply throughout. General combining ability rises, by much less than SCA loses, and itself turns over inside the range -- both components vanish at $F_{ST} = 1$. The two curves do not sum to a constant: most of the SCA variance lost is destroyed rather than relocated, and the exact percentages are in the text."
+#| fig-alt: "Line chart of the variance of heterosis over the factorial against target fst from 0.02 to 0.45. The SCA variance falls steeply across the whole range; the GCA variance of both pools rises much less, peaks inside the range and turns down."
+plot(rl$fst, rl$var_GCA, type = "b", pch = 19, col = book_pal[["ink"]],
      ylim = range(0, rl$var_GCA, rl$var_SCA),
-     xlab = "target fst between pools",
-     ylab = "variance of heterosis over the factorial")
-lines(rl$fst, rl$var_SCA, type = "b", pch = 15, col = "#b2182b")
+     xlab = expression("target " * F[BN] * " between pools"),
+     ylab = expression("variance of heterosis over the factorial (units of " * d^2 * ")"))
+lines(rl$fst, rl$var_SCA, type = "b", pch = 15, col = book_pal[["mid"]])
 legend("right", c("GCA (both pools)", "SCA"), bty = "n", cex = 0.8,
-       pch = c(19, 15), col = c("#d98e04", "#b2182b"))
+       pch = c(19, 15), col = book_pal[c("ink", "mid")])
 grid()
 
 #' 
@@ -1045,27 +1125,29 @@ grid()
 #' between them.
 #' 
 #' SCA variance falls by
-#' `r round(100 * (1 - rl$var_SCA[nrow(rl)] / rl$var_SCA[1]))`% across the sweep, a
+#' `r round(100 * (1 - rl$var_SCA[nrow(rl)] / rl$var_SCA[1]))` % across the sweep, a
 #' drop of `r round(rl$var_SCA[1] - rl$var_SCA[nrow(rl)], 1)` units. GCA variance
-#' ends `r round(100 * (rl$var_GCA[nrow(rl)] / rl$var_GCA[1] - 1))`% above where it
+#' ends `r round(100 * (rl$var_GCA[nrow(rl)] / rl$var_GCA[1] - 1))` % above where it
 #' started, a gain of `r round(rl$var_GCA[nrow(rl)] - rl$var_GCA[1], 1)` units, and
 #' peaks at an `fst` of `r rl$fst[which.max(rl$var_GCA)]` -- interior, as the
 #' ancestral distribution used here leads one to expect, though a grid whose
 #' neighbouring points are `r rl$fst[which.max(rl$var_GCA) - 1]` and
 #' `r rl$fst[which.max(rl$var_GCA) + 1]` locates the peak only to that interval and
-#' cannot resolve it further. So the GCA gain recovers about
-#' `r round(100 * (rl$var_GCA[nrow(rl)] - rl$var_GCA[1]) / (rl$var_SCA[1] - rl$var_SCA[nrow(rl)]))`%
+#' cannot resolve it further; the expected peak on this axis, computed from
+#' @eq-het-gca-peak with the sample-frequency offset above, `r round(F_peak_axis, 2)`,
+#' lies inside that interval. So the GCA gain recovers about
+#' `r round(100 * (rl$var_GCA[nrow(rl)] - rl$var_GCA[1]) / (rl$var_SCA[1] - rl$var_SCA[nrow(rl)]))` %
 #' of what SCA lost. The rest is gone: total variance in heterosis over the
 #' factorial falls from `r round(rl$var_GCA[1] + rl$var_SCA[1], 1)` to
 #' `r round(rl$var_GCA[nrow(rl)] + rl$var_SCA[nrow(rl)], 1)`, a
-#' `r round(100 * (1 - (rl$var_GCA[nrow(rl)] + rl$var_SCA[nrow(rl)]) / (rl$var_GCA[1] + rl$var_SCA[1])))`%
+#' `r round(100 * (1 - (rl$var_GCA[nrow(rl)] + rl$var_SCA[nrow(rl)]) / (rl$var_GCA[1] + rl$var_SCA[1])))` %
 #' decline, while the mean stays fixed throughout.
 #' 
 #' Read those four percentages as one realisation, not as constants. They come from
 #' a single pair of seeds -- `seed = 5` for the pool frequencies, `set.seed(4)` for
 #' $d$ -- with no replication and no dispersion reported, and they will move if
 #' either changes. What does not depend on the seed is the direction, which is
-#' already in the two closed forms above: $\sigma^2_{SCA}$ is a positive multiple of
+#' already in @eq-het-var-bn: $\sigma^2_{SCA}$ is a positive multiple of
 #' $(1 - F_{ST})^2$ and can only fall, and both components vanish at $F_{ST} = 1$,
 #' so no amount of neutral divergence can hold the total up. The ordering of the
 #' columns is algebra; their magnitudes are this draw.
@@ -1073,7 +1155,8 @@ grid()
 #' The share of that variance which is specific falls from
 #' `r round(rl$frac_SCA[1], 3)` to `r round(rl$frac_SCA[nrow(rl)], 3)`. That
 #' statement -- about the share -- is the one the sweep supports; "the dominance
-#' expressed as SCA reappears as GCA" is not, and the two columns above are why.
+#' expressed as SCA reappears as GCA" is not, and the two variance columns of
+#' @tbl-het-relocation are why.
 #' 
 #' The share result itself is not new in direction. @reif2007 prove that the ratio
 #' of dominance to additive variance in a hybrid population falls as its two parent
@@ -1082,13 +1165,13 @@ grid()
 #' result is theirs; the quantity is not the same one. Their ratio is
 #' $\sigma^2_D / \sigma^2_A$ over the hybrid population, whose denominator contains
 #' the additive variance contributed by the parents -- the part that cancelled out
-#' of $H$ in the mid-parent derivation and is absent from everything computed here.
-#' The ratio in the table above is $\sigma^2_{SCA}$ over
-#' $\sigma^2_{GCA} + \sigma^2_{SCA}$ *within heterosis only*. The two move the same
+#' of $H$ in the mid-parent derivation (@eq-het-value) and is absent from everything computed here.
+#' The ratio in @tbl-het-relocation (`frac_SCA`) is $\sigma^2_{SCA}$ over
+#' $\sigma^2_{GCA_A} + \sigma^2_{GCA_B} + \sigma^2_{SCA}$ *within heterosis only*. The two move the same
 #' way and are not interchangeable. What the sweep adds is the denominator, which a
 #' ratio hides: a ratio can fall because its
-#' numerator falls, because its denominator rises, or both, and the columns above
-#' say which. Here the numerator collapses and the denominator recovers only part of
+#' numerator falls, because its denominator rises, or both, and the columns of
+#' @tbl-het-relocation say which. Here the numerator collapses and the denominator recovers only part of
 #' it, so the share falls and the total falls with it.
 #' 
 #' > *Neutral* divergence -- drift, the only kind on this sweep -- does not buy
@@ -1143,15 +1226,20 @@ grid()
 #' It does not follow that the ranking is easy. The *mean* of an F1 contains an SCA
 #' term that an additive $\mathbf{G}$ omits entirely, and @sec-heterosis-relocation
 #' sized its share of the variance in heterosis: a majority of it against weakly
-#' separated pools, a minority against well separated ones, and zero only at the
-#' degenerate limit where one pool is fixed at every locus. The
+#' separated pools, a minority against well separated ones, and zero only where, at
+#' every locus, at least one of the two pools is fixed -- one pool fixed everywhere
+#' is a special case of that, not the condition. The
 #' progeny variance collapses; the dominance deviation does not.
 #' 
 #' ## Running this on a real programme {#sec-heterosis-protocol}
 #' 
 #' Eight steps, in the order they have to be executed on a maize-type programme's
 #' own data. Each one names the function to call, the quantity to check and what
-#' failure looks like. Steps 1-5 need only genotypes and pool labels.
+#' failure looks like. Steps 1-5 need only genotypes and pool labels. In every
+#' **Call** line `GL` is the line genotype matrix coded 0/1, the package convention
+#' for line-level functions; this chapter's `simulate_lines()` returns 0/2, which is
+#' why its code passes `L / 2`. Data coded 0/1/2 must be halved once, before step 1,
+#' and never again.
 #' 
 #' Steps 6-8 need more, and the requirement is worth naming because it is the
 #' reason these steps are rarely run. $H_{ij}$ is a **mid-parent difference**, so
@@ -1174,6 +1262,9 @@ grid()
 #' 
 ## -----------------------------------------------------------------------------
 #| label: het-step1-check
+stopifnot(isTRUE(all.equal(diag(molecular_coancestry(L / 2)), rep(1, nrow(L)),
+                           check.attributes = FALSE)),
+          max(abs(heterosis_value(rbind(U, V), d))) == 0)
 c(min_self_coancestry = min(diag(molecular_coancestry(L / 2))),
   max_het_fraction    = max(rowMeans(L / 2 == 0.5)),
   dominance_value_of_the_most_heterozygous_line =
@@ -1185,10 +1276,11 @@ c(min_self_coancestry = min(diag(molecular_coancestry(L / 2))),
 #' small. Build parents that are *intra-pool* F1s instead of inbred lines -- one
 #' random cross within each pool, so each parent sits at its pool's random-mating
 #' heterozygosity -- then cross them across pools by drawing one gamete per parent
-#' per locus:
+#' per locus (@tbl-het-step1-noninbred):
 #' 
 ## -----------------------------------------------------------------------------
-#| label: het-step1-noninbred
+#| label: tbl-het-step1-noninbred
+#| tbl-cap: "Intra-pool F1 parents (one random cross within each pool per parent, 25 + 25 parents, seeds 101 and 102) crossed over the full A x B factorial with one gamete per parent per locus, five independent gamete draws (seeds 201 to 205), $d_k$ as drawn for the chapter (seed 4). `parent_het_fraction`: fraction of parental loci heterozygous; `closed_form`: `heterosis_expected()` at the parents' pool frequencies (@eq-het-expected); `simulated_hybrid`, `simulated_gain`: mean dominance value of the hybrids, and mean hybrid minus mid-parent, averaged over the five draws; `sd_across_draws`: s.d. over draws of the mean hybrid value, equal for the gain because the parental term is fixed; `exact_sum_d_y2`: $\\sum_k d_k y_k^2$ at the inbred lines' pool frequencies; `overstatement`: `closed_form` over `simulated_gain`. All but the first and last rows are sums over loci in units of $d$."
 intra_pool_f1 <- function(W, n, seed) {
   set.seed(seed)
   (W[sample.int(nrow(W), n, TRUE), ] + W[sample.int(nrow(W), n, TRUE), ]) / 2
@@ -1198,7 +1290,7 @@ ZB  <- intra_pool_f1(V, nrow(V), 102)
 pd2 <- expand.grid(a = seq_len(nrow(ZA)), b = seq_len(nrow(ZB)))
 
 # One gamete per parent per locus, five independent draws of the whole factorial.
-draw <- t(vapply(1:5, function(r) {
+draw <- t(vapply(seq_len(5), function(r) {
   set.seed(200 + r)
   gA <- matrix(rbinom(length(ZA), 1, ZA), nrow(ZA))[pd2$a, ]
   gB <- matrix(rbinom(length(ZB), 1, ZB), nrow(ZB))[pd2$b, ]
@@ -1208,14 +1300,14 @@ draw <- t(vapply(1:5, function(r) {
 }, numeric(2)))
 
 closed_form <- heterosis_expected(colMeans(ZA), colMeans(ZB), d)
-c(parent_het_fraction   = mean(c(ZA, ZB) == 0.5),
-  closed_form           = closed_form,
-  simulated_hybrid      = mean(draw[, "hybrid_value"]),
-  simulated_gain        = mean(draw[, "mid_parent_gain"]),
-  # The parental term is fixed across draws, so both columns carry the same s.d.
-  sd_across_draws       = sd(draw[, "hybrid_value"]),
-  exact_sum_d_y2        = sum(d * (pA - pB)^2),
-  overstatement         = closed_form / mean(draw[, "mid_parent_gain"]))
+fmt(data.frame(quantity = c("parent_het_fraction", "closed_form", "simulated_hybrid",
+                            "simulated_gain", "sd_across_draws", "exact_sum_d_y2",
+                            "overstatement"),
+               value = c(mean(c(ZA, ZB) == 0.5), closed_form,
+                         mean(draw[, "hybrid_value"]), mean(draw[, "mid_parent_gain"]),
+                         # parental term fixed across draws: same s.d. for the gain
+                         sd(draw[, "hybrid_value"]), sum(d * (pA - pB)^2),
+                         closed_form / mean(draw[, "mid_parent_gain"]))), 3)
 
 #' 
 #' Result. The parents carry
@@ -1255,7 +1347,7 @@ c(parent_het_fraction   = mean(c(ZA, ZB) == 0.5),
 #' matrix, not only on the hybrids.
 #' **Check.** Self-coancestry 1 and heterozygous fraction 0 for every parent.
 #' **Warning sign.** Any parent with a heterozygous fraction above the marker error
-#' rate. Partially inbred parents (S1, S2, clonal maintenance of a heterozygous
+#' rate. Partially inbred parents (one or two generations of selfing, clonal maintenance of a heterozygous
 #' plant) invalidate the mid-parent cancellation, not the hybrid prediction.
 #' **Threshold.** `heterosis_value()` on the parent set must return zero to machine
 #' precision. If it does not, subtract it: the mid-parent gain is the hybrid value
@@ -1269,7 +1361,7 @@ c(parent_het_fraction   = mean(c(ZA, ZB) == 0.5),
 #' are frequency vectors over the same markers and confusing them produces a
 #' heterosis prediction anchored to a population that no longer exists.
 #' 
-#' **Call.** `pool_freqs(GL / 2, pool)` on the current cycle's line matrix.
+#' **Call.** `pool_freqs(GL, pool)` on the current cycle's line matrix.
 #' **Check.** `nrow() == 2` and the pool labels are the heterotic groups, not
 #' families or locations.
 #' **Warning sign.** A pool frequency vector computed over *hybrids* rather than
@@ -1319,10 +1411,11 @@ c(parent_het_fraction   = mean(c(ZA, ZB) == 0.5),
 #' but only if the two calls are given the **same line weights**, and by default
 #' they are not.
 #' 
-#' The algebra says why. For any weights $w$ over the lines of a pool, with inbred
-#' lines, $\theta_A = \overline{p_{A,w}^2 + q_{A,w}^2}$ where $p_{A,w} = \sum_i w_i
-#' u_{ik}$ is the *weighted* pool frequency, and the same for $B$ and for
-#' $\theta_{AB}$. Substituting into `gd_partition()`'s definitions,
+#' The algebra says why. For any weights $\mathbf{w}_A$ over the lines of pool A
+#' summing to 1 within the pool (`line_weights()` rescales usage this way), with
+#' inbred lines, $\theta_A = \overline{p_{A,w}^2 + q_{A,w}^2}$ where
+#' $p_{A,w} = \sum_i w_{A,i} u_{ik}$ is the *weighted* pool frequency, and the same
+#' for $B$ and for $\theta_{AB}$. Substituting into `gd_partition()`'s definitions,
 #' $GD_T = 1 - \bar f = \overline{2\bar p(1 - \bar p)}$ and
 #' $GD_{BS} = \tilde f - \bar f = \overline{(p_{A,w} - p_{B,w})^2}/2$, which are
 #' exactly `heterosis_partition()`'s two terms evaluated at $p_{A,w}$ and
@@ -1330,10 +1423,11 @@ c(parent_het_fraction   = mean(c(ZA, ZB) == 0.5),
 #' the same one. `gd_partition(idx, ctx)` weights each line by how often the
 #' selection uses it (`line_weights()`), while `pool_freqs()` is unweighted. On the
 #' full factorial usage is uniform and the two coincide; on a selected subset they
-#' do not, and the discrepancy is not small:
+#' do not, and the discrepancy is not small (@tbl-het-step4-usage):
 #' 
 ## -----------------------------------------------------------------------------
-#| label: het-step4-usage
+#| label: tbl-het-step4-usage
+#| tbl-cap: "Shared and divergence terms per locus ($d_k \\equiv 1$) for one 60-hybrid index-truncation selection, from four sets of pool frequencies: all lines unweighted, the lines used unweighted, usage-weighted (`line_weights()`), and $GD_T$, $GD_{BS}$ of `gd_partition()` on the same selection. Error columns: per cent deviation from `gd_partition()`."
 i_trunc <- sel_truncation(ctx, 60)     # index truncation: deliberately unbalanced
 gp_sel  <- gd_partition(i_trunc, ctx)
 GLh <- L / 2
@@ -1350,6 +1444,11 @@ cmp <- rbind(
   `gd_partition(idx, ctx)` = c(gp_sel[["GD_T"]], gp_sel[["GD_BS"]]))
 stopifnot(isTRUE(all.equal(unname(cmp["usage-weighted", ]),
                            c(gp_sel[["GD_T"]], gp_sel[["GD_BS"]]))))
+# theta_AB uses weights rescaled to 1 within each pool, not the global block
+pAw <- as.vector(wt[["A"]] %*% GLh); pBw <- as.vector(wt[["B"]] %*% GLh)
+th_AB <- theta_pools(i_trunc, ctx)[["theta_AB"]]
+stopifnot(isTRUE(all.equal(th_AB, mean(pAw * pBw + (1 - pAw) * (1 - pBw)))),
+          isTRUE(all.equal(th_AB / 4, drop((wt[["A"]] / 2) %*% ctx[["fL"]] %*% (wt[["B"]] / 2)))))
 fmt(data.frame(cmp,
                shared_err_pct     = 100 * (cmp[, "shared"] / gp_sel[["GD_T"]] - 1),
                divergence_err_pct = 100 * (cmp[, "divergence"] / gp_sel[["GD_BS"]] - 1)), 3)
@@ -1365,9 +1464,9 @@ c(lines_used_A = length(unique(ctx$ped$a[i_trunc])),
 #' Result. With usage weights on both sides the identity is exact to machine
 #' precision -- the `stopifnot()` enforces it -- while the unweighted pool
 #' frequencies of `pool_freqs()` overstate `shared` by
-#' `r sprintf("%+.1f", 100 * (cmp["all lines, unweighted", "shared"] / gp_sel[["GD_T"]] - 1))`%
+#' `r sprintf("%+.1f", 100 * (cmp["all lines, unweighted", "shared"] / gp_sel[["GD_T"]] - 1))` %
 #' and understate `divergence` by
-#' `r sprintf("%.1f", abs(100 * (cmp["all lines, unweighted", "divergence"] / gp_sel[["GD_BS"]] - 1)))`%
+#' `r sprintf("%.1f", abs(100 * (cmp["all lines, unweighted", "divergence"] / gp_sel[["GD_BS"]] - 1)))` %
 #' on this 60-hybrid truncation set, which uses only
 #' `r length(unique(ctx$ped$a[i_trunc]))` pool-A lines with one of them in
 #' `r max_line_use(i_trunc, ctx)` of the 60 crosses. Restricting the unweighted mean to
@@ -1401,13 +1500,17 @@ c(lines_used_A = length(unique(ctx$ped$a[i_trunc])),
 #' 
 #' ### Step 5 -- Log `mean_sq_delta_p` every cycle {#sec-heterosis-step5}
 #' 
-#' `s1_monitor(GL / 2, pool, cycle)` is the per-cycle panel. Of its three
-#' divergence columns only `mean_sq_delta_p` is exact -- it is $\overline{y^2}$, so
+#' `s1_monitor(GL, pool, cycle)` is the per-cycle panel. Of its three
+#' complementarity columns only `mean_sq_delta_p` is exact -- it is $\overline{y^2}$, so
 #' half of it is $GD_{BS}$ -- and `frac_opposite_fixed` is zero across most of the
 #' useful range, as the sweep in @sec-heterosis-flat shows.
 #' 
 #' **Call.** `s1_monitor()` once per cycle, appended to a single data frame.
-#' **Check.** `mean_sq_delta_p / 2` against `gd_partition()`'s `GD_BS`.
+#' **Check.** `mean_sq_delta_p / 2` against `gd_partition()`'s `GD_BS`, on the full
+#' factorial, where line usage is uniform. On a selected subset the two agree only
+#' if the pool frequencies are usage-weighted (@sec-heterosis-step4); with the
+#' unweighted frequencies `s1_monitor()` uses, expect a gap of the size measured
+#' there.
 #' **Warning sign.** `frac_opposite_fixed` used as the divergence statistic. In the
 #' sweep of @sec-heterosis-flat it is exactly zero at every `fst` up to 0.10 -- not
 #' one marker in `r book_cfg$m` -- while over the same span the divergence term has
@@ -1424,12 +1527,19 @@ c(lines_used_A = length(unique(ctx$ped$a[i_trunc])),
 #' ### Step 6 -- Check that the crossing layout identifies what you intend to fit {#sec-heterosis-step6}
 #' 
 #' This is the step most often skipped, and it is arithmetic, not opinion. The
-#' decomposition $H_{ij} = \mu + g^A_i + g^B_j + s_{ij}$ is the two-way layout with
-#' identified rows and columns. Count the degrees of freedom the layout actually
-#' provides:
+#' general rule -- a crossing plan as a bipartite graph, the rank of the GCA design
+#' matrix as lines minus connected components, and the accuracy of a testcross mean
+#' against the number of testers with plot error included -- is developed in the
+#' Mating and testing design part, later, at @sec-mating-connectivity and
+#' @sec-mating-tester. This step keeps only what the heterosis decomposition adds:
+#' the layout check on the chapter's own factorial, and the finite-population
+#' correction for drawing testers from a pool of $n_B$. The decomposition
+#' $H_{ij} = \mu + g^A_i + g^B_j + s_{ij}$ is the two-way layout with identified rows
+#' and columns. Count the degrees of freedom the layout actually provides (@tbl-het-step6-layout):
 #' 
 ## -----------------------------------------------------------------------------
-#| label: het-step6-layout
+#| label: tbl-het-step6-layout
+#| tbl-cap: "Degrees of freedom of the two-way layout when all 25 pool-A lines are crossed to the first 1, 2, 5 or 25 pool-B testers, one observation per cross. `rank_mu_gca`: rank of the design matrix with mean and GCA effects; `rank_with_sca`: rank with the GCA x GCA interaction added; `sca_df`: their difference; `residual_df`: crosses minus the saturated rank."
 layout_df <- function(n_testers) {
   k <- which(ib <= n_testers)
   a <- factor(ia[k]); b <- factor(ib[k])
@@ -1455,20 +1565,25 @@ fmt(do.call(rbind, lapply(c(1, 2, 5, book_cfg$n_pool_B), layout_df)))
 #' leaves it with $g^A_i$ plus the mean of $k$ specific deviations, so the
 #' correlation between the testcross mean and the true $g^A$ is
 #' 
-#' $$r_k = \left[1 + \frac{\sigma^2_{SCA}}{\sigma^2_{GCA_A}}
-#'         \cdot \frac{n_B - k}{k\,(n_B - 1)}\right]^{-1/2}$$
+#' $$\rho_k = \left[1 + \frac{\sigma^2_{SCA}}{\sigma^2_{GCA_A}}
+#'         \cdot \frac{n_B - k}{k\,(n_B - 1)}\right]^{-1/2}$$ {#eq-het-rho-k}
 #' 
 #' where the second factor is the finite-population correction for drawing $k$ of
 #' the $n_B$ available testers without replacement; at $k = n_B$ it vanishes and
-#' $r_k = 1$ exactly, because the row mean of the complete factorial *is*
-#' $\mu + g^A_i$. Twenty random tester sets per $k$:
+#' $\rho_k = 1$ exactly, because the row mean of the complete factorial *is*
+#' $\mu + g^A_i$. This is the least-squares accuracy $\rho$ of @sec-mating-tester
+#' with $\sigma^2_g = \sigma^2_{GCA_A}$, $\sigma^2_s = \sigma^2_{SCA}$, $c = k$ and
+#' no plot error ($\sigma^2_e = 0$, since $H$ here is known exactly); as
+#' $n_B \to \infty$ the correction tends to $1/k$ and the two expressions coincide.
+#' Twenty random tester sets per $k$ (@tbl-het-step6-testers):
 #' 
 ## -----------------------------------------------------------------------------
-#| label: het-step6-testers
+#| label: tbl-het-step6-testers
+#| tbl-cap: "Correlation between a pool-A line's mean heterosis over $k$ randomly drawn pool-B testers and its $g^A_i$: mean and s.d. over 20 tester sets per $k$ (`cor_mean`, `cor_sd`), the closed form $\\rho_k$ of @eq-het-rho-k (`predicted`), and the residual `cor_mean` minus `predicted` in units of `cor_sd` (`resid_sd`; NA at $k = n_B = 25$, where only one tester set exists). One realisation of the pools and of $d$."
 Htab  <- matrix(H, nA, book_cfg$n_pool_B)   # rows = pool A, columns = pool B
 stopifnot(isTRUE(all.equal(Htab, cs$mu + outer(cs$gca_A, cs$gca_B, "+") + cs$sca)))
-v_gca <- var(cs$gca_A)
-v_sca <- var(as.vector(cs$sca))
+v_gca <- pvar(cs$gca_A)                     # divisor n, as rho_k assumes
+v_sca <- pvar(as.vector(cs$sca))
 nBt   <- book_cfg$n_pool_B
 tester_scan <- function(k, reps = 20) {
   r <- vapply(seq_len(reps), function(i) {
@@ -1498,15 +1613,15 @@ fmt(ts, 4)
 #' `r fmt(ts$resid_sd[ts$testers == 3], 1)` s.d., in opposite directions, and
 #' $k = 3$ is the larger of the two. Singling out $k = 1$ would be reading the
 #' *absolute* gap (`r fmt(abs(ts$cor_mean[1] - ts$predicted[1]), 3)`, the largest
-#' in the table) while ignoring that $k = 1$ also has by far the largest dispersion
+#' in @tbl-het-step6-testers) while ignoring that $k = 1$ also has by far the largest dispersion
 #' by construction -- one tester, one draw of $s_{ij}$, nothing averaged. Measured
 #' against the standard error of a 20-replicate mean rather than against the
 #' single-draw spread, both residuals are larger than the noise
 #' (`r fmt(ts$resid_sd[ts$testers == 1] * sqrt(20), 1)` and
 #' `r fmt(ts$resid_sd[ts$testers == 3] * sqrt(20), 1)` standard errors), so the
 #' closed form is not exact at small $k$ and this section does not claim it is.
-#' Two reasons are identifiable and neither is modelled here: $r_k$ is a function
-#' of an *expected* sampling variance, whereas the table averages 20
+#' Two reasons are identifiable and neither is modelled here: $\rho_k$ is a function
+#' of an *expected* sampling variance, whereas @tbl-het-step6-testers averages 20
 #' correlations, and $x \mapsto (1 + x)^{-1/2}$ is convex, so the two are not the
 #' same quantity; and $\mathrm{cov}_i(g^A_i, \overline{s}_{i\cdot})$ vanishes only
 #' when the mean runs over all $n_B$ testers, not over a subset. The scan is
@@ -1519,7 +1634,7 @@ fmt(ts, 4)
 #' separated pools need fewer. Two limits. This is heterosis only -- the parental
 #' additive contribution to testcross performance is not in $H$ and is not tested
 #' here -- and it is one realisation of $d$ and one pool pair, so the ratio, and
-#' with it every entry in the table, moves with the seed.
+#' with it every entry in @tbl-het-step6-testers, moves with the seed.
 #' 
 #' **Call.** `qr(model.matrix(...))$rank` on the layout you actually have, before
 #' fitting anything; `heterosis_gca_sca()` only once the layout supports it.
@@ -1528,13 +1643,22 @@ fmt(ts, 4)
 #' **Warning sign.** A testcross file against one inbred tester per pool, analysed
 #' as though it estimated SCA. It estimates
 #' $\mu + g^A_i + (\text{that tester's contribution})$ and nothing else.
-#' **Threshold.** Two testers to identify SCA; from the scan above, five to ten to
-#' rank GCA at $r > 0.85$ at this $\sigma^2_{SCA}/\sigma^2_{GCA}$ ratio -- and
-#' recompute the requirement when the ratio changes.
+#' **Threshold.** Two testers to identify SCA. For ranking GCA, at this
+#' $\sigma^2_{SCA}/\sigma^2_{GCA_A}$ ratio of `r fmt(v_sca / v_gca, 2)` -- one
+#' pool's GCA variance in the denominator, not the two-pool sum of
+#' @sec-heterosis-relocation -- @eq-het-rho-k first exceeds $\rho_k = 0.85$ at
+#' $k =$ `r min(which(1 / sqrt(1 + (v_sca / v_gca) * (nBt - seq_len(nBt)) / (seq_len(nBt) * (nBt - 1))) > 0.85))`
+#' testers. At five testers the scan's mean is
+#' `r fmt(ts$cor_mean[ts$testers == 5], 4)`, which is
+#' `r fmt((ts$cor_mean[ts$testers == 5] - 0.85) / (ts$cor_sd[ts$testers == 5] / sqrt(20)), 1)`
+#' standard errors of a 20-set mean from 0.85, so the scan locates the requirement
+#' near five testers but does not resolve which side of 0.85 five falls on; ten
+#' testers give `r fmt(ts$cor_mean[ts$testers == 10], 2)`. Recompute the requirement
+#' when the ratio changes.
 #' 
 #' ### Step 7 -- Fit the decomposition and check it reconstructs {#sec-heterosis-step7}
 #' 
-#' `heterosis_gca_sca(U, V, d)` is the expansion, not a model fit: it needs no
+#' `heterosis_gca_sca(U, V, d)` is @eq-het-gca-sca-terms, not a model fit: it needs no
 #' solver and returns $\mu$, `gca_A`, `gca_B` and the `sca` matrix. On simulated $d$
 #' it must reconstruct every hybrid exactly, and the chunk in
 #' @sec-heterosis-gca-sca asserts that together with the `lm()` interaction
@@ -1561,18 +1685,21 @@ fmt(ts, 4)
 #' A3 (@sec-hp-cycle; declared in @sec-era-programme) makes within-pool recycling the normal state of this
 #' system, so its lines share ancestors.
 #' 
-#' The size of the failure can be measured, at least for the relatedness half of
-#' it. Re-derive each pool as `r book_cfg$n_pool_A` doubled haploids drawn from
-#' crosses among six of its own members -- one Bernoulli draw per locus, so the
-#' lines are **related but carry no linkage disequilibrium** -- and compare the
-#' closed forms with the observed variances on five such pairs of pools:
+#' The size of the failure can be measured, at least for the part that founder
+#' sampling causes. Re-derive each pool as `r book_cfg$n_pool_A` doubled haploids
+#' drawn from crosses among six of its own members -- one Bernoulli draw per locus,
+#' so loci recombine freely and there is **no physical linkage**, but the lines are
+#' related, and descent from six founders induces linkage disequilibrium among them
+#' all the same -- and compare the closed forms with the observed variances on five
+#' such pairs of pools (@tbl-het-step7-recycled):
 #' 
 ## -----------------------------------------------------------------------------
-#| label: het-step7-recycled
+#| label: tbl-het-step7-recycled
+#| tbl-cap: "Per cent deviation of the observed variance (divisor $n$) of each combining-ability component from its closed form (@eq-het-var-components). Rows draw1 to draw5: pairs of pools re-derived as 25 doubled haploids per pool from crosses among six founders of that pool (seeds 501 to 505); last row: the original, independently drawn lines."
 rel_dev <- function(A, B) {                     # % deviation, observed vs closed form
   p1 <- colMeans(A); p2 <- colMeans(B)
   cc <- heterosis_gca_sca(A, B, d)
-  obs <- c(var(cc$gca_A), var(cc$gca_B), var(as.vector(cc$sca)))
+  obs <- c(pvar(cc$gca_A), pvar(cc$gca_B), pvar(as.vector(cc$sca)))
   cf  <- c(sum(d^2 * (1 - 2 * p2)^2 * p1 * (1 - p1)),
            sum(d^2 * (1 - 2 * p1)^2 * p2 * (1 - p2)),
            4 * sum(d^2 * p1 * (1 - p1) * p2 * (1 - p2)))
@@ -1585,35 +1712,39 @@ recycle <- function(W, n_found) {               # DH lines from crosses among fo
     rbinom(ncol(W), 1, (fo[pr[1], ] + fo[pr[2], ]) / 2)
   }, numeric(ncol(W))))
 }
-dev <- t(vapply(1:5, function(r) {
+dev <- t(vapply(seq_len(5), function(r) {
   set.seed(500 + r)                             # seeded per draw, not once
   rel_dev(recycle(U, 6), recycle(V, 6))
 }, numeric(3)))
-dimnames(dev) <- list(paste0("draw", 1:5), c("GCA_A", "GCA_B", "SCA"))
-fmt(rbind(dev, `independent lines` = rel_dev(U, V)), 1)
+dimnames(dev) <- list(paste0("draw", seq_len(5)), c("GCA_A", "GCA_B", "SCA"))
+tab7 <- rbind(dev, `independent lines` = rel_dev(U, V))
+colnames(tab7) <- paste(colnames(tab7), "(%)")
+fmt(tab7, 1)
 
 #' 
 #' Result. On the independently drawn lines the three closed forms are within
-#' `r sprintf("%.1f", max(abs(rel_dev(U, V))))`% of the observed variances, inside
-#' the $\sqrt{2/n} =$ `r round(100 * sqrt(2 / book_cfg$n_pool_A))`% band. On the
+#' `r sprintf("%.1f", max(abs(rel_dev(U, V))))` % of the observed variances, inside
+#' the $\sqrt{2/n} =$ `r round(100 * sqrt(2 / book_cfg$n_pool_A))` % band. On the
 #' five recycled pairs `r sum(abs(dev) > 100 * sqrt(2 / book_cfg$n_pool_A))` of the
 #' `r length(dev)` components fall outside that band and the largest deviation is
-#' `r sprintf("%.0f", max(abs(dev)))`%. The two GCA columns carry almost all of it;
+#' `r sprintf("%.0f", max(abs(dev)))` %. The two GCA columns carry almost all of it;
 #' the SCA column stays within
-#' `r sprintf("%.1f", max(abs(dev[, "SCA"])))`%.
+#' `r sprintf("%.1f", max(abs(dev[, "SCA"])))` %.
 #' 
-#' Interpretation, and its limits. A variance of a sum over loci picks up the
-#' between-line covariance that relatedness induces, which the closed forms --
-#' being sums of per-locus terms -- do not contain; the GCA components are sums over
+#' Interpretation, and its limits. A variance over lines of a sum over loci
+#' contains the covariances between loci across those lines -- linkage
+#' disequilibrium, here induced by descent from few founders -- which the closed
+#' forms, being sums of per-locus terms, do not contain; the GCA components are sums over
 #' loci weighted by the tester pool's frequencies and are the ones exposed. This
 #' says the tolerance must be recalibrated empirically on the programme's own
 #' pedigree, not that the closed forms are wrong: they remain exact statements about
 #' the sampling model they are derived under. The construction here is a caricature
-#' (six founders, one DH per F1, five draws, one seed family) and it isolates
-#' *relatedness only* -- there is no linkage disequilibrium in it, because each
-#' locus is drawn independently. A real recycled pool violates the sampling model on
-#' both counts at once, and the size of the linkage contribution is not measured
-#' anywhere in this book.
+#' (six founders, one DH per F1, five draws, one seed family) and it isolates the
+#' disequilibrium that founder sampling creates under free recombination -- there is
+#' no physical linkage in it, because each locus is drawn independently. A real
+#' recycled pool also carries disequilibrium that physical linkage maintains across
+#' cycles, and the size of that contribution is not measured anywhere in this
+#' book.
 #' 
 #' ### Step 8 -- Decide the $F_{ST}$ band on alignment, not on $F_{ST}$ {#sec-heterosis-step8}
 #' 
@@ -1624,7 +1755,7 @@ fmt(rbind(dev, `independent lines` = rel_dev(U, V)), 1)
 #' `r round(max(al$total)/min(al$total), 2)` at constant $F_{ST}$).
 #' 
 #' **Call.** $\mathrm{cov}(d, y^2)$ with the population divisor, alongside
-#' $\bar d\,\overline{y^2}$; the two-term identity of @sec-heterosis-alignment is
+#' $\bar d\,\overline{y^2}$; the two-term identity @eq-het-alignment is
 #' the check.
 #' **Check.** The sign and magnitude of the covariance relative to
 #' $\bar d\,\overline{y^2}$.
@@ -1638,7 +1769,7 @@ fmt(rbind(dev, `independent lines` = rel_dev(U, V)), 1)
 #' 
 #' ## What this does not change
 #' 
-#' :::: {.callout-warning}
+#' :::: {.callout-important}
 #' ## The diversity constraint stays additive
 #' 
 #' Nothing in this chapter reopens the optimisation. $\theta$, $GD$ and $\alpha$ are
@@ -1654,12 +1785,20 @@ fmt(rbind(dev, `independent lines` = rel_dev(U, V)), 1)
 #' inside the constraint.
 #' ::::
 #' 
-#' What it does change is the interpretation of the constraint's output. Two plans
-#' with the same $\alpha$ and the same $GD_{BS}$ can differ in expected heterosis by
-#' half again, if one of them concentrated its divergence on the dominance loci --
-#' that is the scenario table of @sec-heterosis-alignment, whose three columns share
-#' every frequency-based statistic. The partition cannot distinguish them. Only an
-#' estimate of $d$ can.
+#' What it does change is the interpretation of the constraint's output. By the
+#' two-term identity @eq-het-alignment, the divergence term of a plan's
+#' selected lines is $\tfrac{m}{2}[\bar d\,\overline{y^2} + \mathrm{cov}(d, y^2)]$,
+#' and $GD_{BS}$ fixes only $\overline{y^2}$. Two plans with the same $\alpha$ and the
+#' same $GD_{BS}$ therefore differ in that term by exactly $m/2$ times the difference
+#' in their $\mathrm{cov}(d, y^2)$ (both computed on usage-weighted frequencies,
+#' @sec-heterosis-step4), a quantity the partition does not contain and
+#' only an estimate of $d$ can supply. How large that difference can be between two
+#' *attainable* plans is not measured in this book. The scenario table,
+#' @tbl-het-alignment, a factor of `r round(max(al$total)/min(al$total), 2)`
+#' between its extremes, does not measure it: it holds one pool pair's frequencies
+#' fixed and re-places $d$ across loci, which compares genetic architectures, while
+#' a selection plan cannot move $d$ and changes only the selected lines'
+#' frequencies, within what the candidate pool and the budget on $\alpha$ allow.
 #' 
 #' ### What it would take to use $d$ {#sec-heterosis-lambda}
 #' 
@@ -1679,13 +1818,10 @@ fmt(rbind(dev, `independent lines` = rel_dev(U, V)), 1)
 #'   two specific parents, so it needs the deviations locus by locus. This is the
 #'   extension @sec-case-study names and the book does not attempt.
 #' - **Fitting it needs a factorial, and a testcross file is not one.** The
-#'   decomposition above is the two-way layout with *identified* rows and columns:
-#'   each pool-A line crossed to several named pool-B lines and each pool-B line to
-#'   several named pool-A lines, which is what makes $g^A$, $g^B$ and $s_{ij}$
-#'   separately estimable and what the `lm()` above fits. Testcrosses against a
-#'   single common tester give only a column of $\mu + g^A_i + \text{(one tester's
-#'   contribution)}$ -- no SCA is identifiable, because there is no second tester to
-#'   contrast against. Programmes that already cross two pools in a partial
+#'   decomposition is the two-way layout with *identified* rows and columns, and
+#'   against a single common tester no SCA is identifiable (@sec-heterosis-step6
+#'   counts the degrees of freedom; @sec-mating-connectivity gives the general rank
+#'   rule). Programmes that already cross two pools in a partial
 #'   factorial for hybrid evaluation have the layout; programmes that testcross
 #'   against one inbred tester per pool do not.
 #' 
@@ -1710,7 +1846,7 @@ fmt(rbind(dev, `independent lines` = rel_dev(U, V)), 1)
 #' It also gives a reason why a heterotic *pattern* -- which pool crosses well onto
 #' which -- is not recoverable from how far apart the pools have drifted:
 #' @sec-heterosis-alignment's three scenarios share every frequency-based statistic
-#' and differ by half again in expected heterosis. @white2020 describe heterotic
+#' and differ by a factor of `r round(max(al$total)/min(al$total), 2)` in expected heterosis. @white2020 describe heterotic
 #' patterns and diversity separately in North American proprietary dent germplasm;
 #' this chapter says why the two need describing separately.
 #' 
