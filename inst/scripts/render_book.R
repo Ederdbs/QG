@@ -37,9 +37,15 @@ pdf <- "docs/Genetic-Diversity-in-Hybrid-Breeding.pdf"
 if (file.exists(pdf) && file.exists("README.md")) {
     b <- readBin(pdf, "raw", file.size(pdf))
     b[b == as.raw(0)] <- as.raw(32)
-    pages <- lengths(regmatches(rawToChar(b), gregexpr(
-        "/Type\\s*/Page\\b(?!s)", rawToChar(b), perl = TRUE, useBytes = TRUE
-    )))
+    pages <- lengths(regmatches(
+        rawToChar(b),
+        gregexpr(
+            "/Type\\s*/Page\\b(?!s)",
+            rawToChar(b),
+            perl = TRUE,
+            useBytes = TRUE
+        )
+    ))
     yml <- readLines("book/_quarto.yml")
     app <- seq_along(yml) > grep("^  appendices:", yml)
     n_ch <- sum(grepl("^ {8}- .*\\.qmd$", yml))
@@ -50,7 +56,10 @@ if (file.exists(pdf) && file.exists("README.md")) {
         "\\d+ chapters \u00b7 \\d+ parts \u00b7 \\d+ appendices \u00b7 \\d+ pages",
         sprintf(
             "%d chapters \u00b7 %d parts \u00b7 %d appendices \u00b7 %d pages",
-            n_ch, n_part, n_app, pages
+            n_ch,
+            n_part,
+            n_app,
+            pages
         ),
         rd
     )
