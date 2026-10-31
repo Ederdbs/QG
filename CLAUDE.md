@@ -218,9 +218,9 @@ The `find` form catches both and the `git ls-files --error-unmatch` guard means 
 ever delete untracked files. **Sweep last**, after the final render: Quarto's post-render copy
 can land *after* the render command returns, so a sweep run too early is silently undone.
 
-There are currently **64 such duplicates already tracked** (committed in `d186437` and
-earlier). The sweep above will not touch them — clearing those needs an explicit `git rm` and
-is a deliberate decision, not routine cleanup.
+The 360 tracked duplicates that had accumulated were removed with `git rm` (2026-10-30);
+`git ls-files | grep -E ' [0-9]+(\.[A-Za-z0-9]+)?$'` must stay empty. The sweep above never
+touches tracked files, so a duplicate that slips into a commit needs an explicit `git rm`.
 
 Adding or removing a chunk also renumbers `unnamed-chunk-N-1.png`, orphaning the old tracked
 figures in both `docs/<chapter>_files/` and `book/_freeze/<chapter>/`. Check what the rendered
