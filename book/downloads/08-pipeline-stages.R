@@ -60,7 +60,8 @@ led  <- read.csv(book_data("pipeline_loss_ledger.csv"))
 
 #' 
 #' The previous chapters established *which* metrics to use. This one places them
-#' at the four stages of a hybrid maize programme, and names five traps -- each one
+#' at the four stages of a hybrid maize programme (introduced in @sec-hp-cycle),
+#' and names five traps -- each one
 #' a thing that looks correct, returns a number, and is wrong.
 #' 
 #' | Stage | What is selected |

@@ -58,6 +58,10 @@ book_fig  <- function(...) .book_get('figs', ...)
 #' 
 #' ## Symbols
 #' 
+#' The population-genetic quantities below are introduced together in
+#' @sec-hp-popgen; the tables give each one's symbol and the function that
+#' computes it.
+#' 
 ## -----------------------------------------------------------------------------
 #| echo: false
 knitr::kable(data.frame(
@@ -110,7 +114,8 @@ knitr::kable(data.frame(
 #| echo: false
 knitr::kable(data.frame(
   Symbol = c("$\\theta_S$", "$GD$, $H_e$", "$N_s$", "$N_{e,\\text{par}}$",
-             "$f_{ii}$", "$s_i$", "$\\tilde x$", "$\\bar x$"),
+             "$f_{ii}$", "$s_i$", "$\\tilde x$", "$\\bar x$",
+             "$H_o$", "$n_{gam}$", "$\\Delta F$", "$N_e$"),
   Definition = c("$n^{-2}\\sum_i\\sum_j f_{ij}$, diagonal **included**; the $\\bar f$ of the partition below, with census weights (@sec-subdivided)",
                  "$1 - \\theta$; these are the same quantity",
                  "$1/(2\\theta)$",
@@ -118,10 +123,15 @@ knitr::kable(data.frame(
                  "coancestry within subpopulation i; $1 - f_{ii} = H_{e,i}$. For a single individual, the diagonal of $\\mathbf{f}$, which is $s_i$",
                  "self-coancestry; $F_i = 2s_i - 1$; for a single individual $s_i = f_{ii}$",
                  "weighted mean **within** subpopulations",
-                 "mean over **all pairs**, between-subpopulation pairs included"),
+                 "mean over **all pairs**, between-subpopulation pairs included",
+                 "observed heterozygosity: fraction of heterozygous loci, averaged over the individuals of the set; 0 for inbred lines, $GD_T + GD_{BS}$ over the full hybrid factorial (@sec-hp-popgen)",
+                 "allele copies sampled per generation under drift (@eq-hp-drift)",
+                 "per-generation rate of inbreeding, $1/n_{gam}$ (@eq-hp-drift)",
+                 "effective size, $1/(2\\Delta F)$ (@eq-hp-drift); not the asymptotic metapopulation $N_e$ of the subdivided table below"),
   `Function` = c("`theta_group()`, `fast_theta()`", "`gene_diversity()`, `he_nei()`",
                  "`status_number()`", "`ne_parents()`", "`ct_partition()`",
-                 "`ct_partition()`", "-", "-"),
+                 "`ct_partition()`", "-", "-",
+                 "-", "-", "-", "-"),
   check.names = FALSE))
 
 #' 

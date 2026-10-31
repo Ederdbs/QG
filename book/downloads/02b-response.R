@@ -311,7 +311,7 @@ c(ratio_min = min(v_pop[ok] / (pH * (1 - pH))[ok]),
 #' and in a two-pool hybrid population the average effect of an allele substitution
 #' depends on which pool it is substituted into. The exact orthogonal split of a
 #' hybrid value into general and specific combining ability (GCA, SCA)
-#' [@sprague1942] is developed in @sec-heterosis-gca-sca, a later chapter; it is
+#' [@sprague1942] is developed in @sec-heterosis-gca-sca, in the next chapter; it is
 #' used here ahead of that derivation: each line's GCA is its average
 #' effect against the opposite pool, i.e. the additive part *relative to that
 #' tester pool*, never a property of the line alone. The chunk below applies it to
@@ -512,5 +512,7 @@ stopifnot(max(abs(crossprod(R, G %*% b_r))) < 1e-12)
 #' is assumed rather than measured. @sec-ocs is where the restricted index becomes
 #' the $\alpha$ constraint, and @sec-limits is where the disequilibrium term this
 #' chapter isolated (@eq-response-ld) turns out to matter more than @eq-response-breeders suggests.
-#' The next part opens with @sec-simulating-crosses, which builds step by step the
-#' two-pool hybrid populations that `simulate_pools()` drew here in one call.
+#' The next chapter, @sec-heterosis, completes the Foundations part with the
+#' dominance side of the hybrid value; the Simulation part then opens with
+#' @sec-simulating-crosses, which builds step by step the two-pool hybrid
+#' populations that `simulate_pools()` drew here in one call.

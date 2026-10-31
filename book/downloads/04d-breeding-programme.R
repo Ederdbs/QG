@@ -57,7 +57,12 @@ book_fig  <- function(...) .book_get('figs', ...)
 library(AlphaSimR)
 
 #' 
-#' @sec-alphasimr assembled AlphaSimR's primitives into a *hybrid* scheme: two
+#' The seventh consequence for the pipeline drawn in @sec-plant-literature is to
+#' report the diversity cost per cycle explicitly whenever cycles are shortened. This chapter measures that
+#' cost in a whole programme.
+#' 
+#' @sec-alphasimr, built back in the Simulation part, assembled AlphaSimR's
+#' primitives into a *hybrid* scheme: two
 #' heterotic pools, reciprocal testers, a commercial cross at the end. This chapter
 #' assembles the same primitives into the other kind of programme -- an
 #' **inbred-line** pipeline, where the product is a variety rather than a hybrid,

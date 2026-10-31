@@ -59,7 +59,7 @@ ani <- read.csv(book_data("bibliography_animal.csv"), stringsAsFactors = FALSE)
 mu  <- read.csv(book_data("plant_metric_usage.csv"))
 
 #' 
-#' The preceding chapters derived a recommendation. This one asks what the applied
+#' @sec-choosing derived a recommendation. This one asks what the applied
 #' literature actually does, where it agrees, and -- more usefully -- where it is
 #' silent.
 #' 

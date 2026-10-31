@@ -38,6 +38,11 @@ steps that compute them on a real programme's data, with the check and the
 failure mode of each one. Read that section first if the question is what to run
 rather than why it holds.
 
+The data come from `simulate_lines()` and `simulate_data()`, drawn with the
+generator @sec-simulating-crosses builds (in the Simulation part that follows),
+and the `fst` sweep below redraws the pools from it; `pool_complementarity()` is
+the S1 monitor that @sec-stages will define.
+
 Three premises carry everything below. They are stated here once, because every
 result in the chapter uses all three and two of them are restrictive.
 
@@ -91,7 +96,7 @@ part a cross can add over its own mid-parent.
 ## $a$ is a scale, not a quantity this chapter computes
 
 The symbols in that display are the textbook ones. This book's additive marker
-effects are $\beta_k$ (@sec-genomic-prediction), and its $\alpha$ is the
+effects are $\beta_k$ (estimated in @sec-genomic-prediction, later), and its $\alpha$ is the
 diversity-loss statistic of @sec-catalogue, not the classical average effect of a
 substitution. The per-locus $a_k$ reappears three times below and never as a
 result: in the genotypic-value model used to show that it cancels, in the
@@ -318,9 +323,9 @@ factorial and, on a *random* 40-hybrid subset at one scale (12 lines per pool,
 tolerance is **relative**, not absolute: on a gene-diversity value of order 0.4
 the absolute bound it enforces is of order `2e-3`, and the gap the test actually
 sees is smaller again. A subset chosen by an optimiser, which concentrates line
-usage deliberately, is not covered by that bound; @sec-era-fhom is where it is
-measured, on four such subsets at this book's scale, and reports the largest
-departure of the four.
+usage deliberately, is not covered by that bound; @sec-era-fhom, in the Metrics
+and prediction part, is where it will be measured, on four such subsets at this
+book's scale, reporting the largest departure of the four.
 
 ## Inbreeding depression, and why it does not price $\alpha$ {#sec-heterosis-id}
 
@@ -423,8 +428,8 @@ c(vs_coancestry = max(abs(h1 - ctx$m * (1 - fL[ab]))),
 ```
 
 Both residuals are at machine precision. Under flat dominance, heterosis and
-molecular coancestry are one statistic seen twice -- Trap 1 of @sec-stages read
-from the other side -- and the diversity kernel this whole book runs on turns out
+molecular coancestry are one statistic seen twice -- Trap 1 of @sec-stages, met
+later, read from the other side -- and the diversity kernel this whole book runs on turns out
 to be the right object for the heterosis question as well.
 
 Flat $d$ is also precisely the condition under which $H$ is a function of marker
@@ -589,7 +594,8 @@ apart does not create heterosis; it relocates it from the shared term to the
 divergence term. A programme that maximises $F_{ST}$ has bought nothing and spent
 its within-pool diversity to do it.
 
-This is the mechanism behind @sec-stages Trap 3. That section states the symptom
+This is the mechanism behind @sec-stages Trap 3, in the Metrics and prediction
+part. That section states the symptom
 -- "$F_{ST}$ keeps rising as pools drift apart at loci that are *already*
 divergent, which buys no additional heterosis" -- and points here for the reason.
 The sweep table and @fig-heterosis-sweep are that reason.
@@ -692,9 +698,9 @@ a factor of `r round(st$divergence[1] / st$divergence[2], 1)` and the total by
 `r round(100 * (st$total[1] / st$total[2] - 1))`%. The alignment result survives
 its own control.
 
-## Reading the S1 panel again
+## Reading the S1 panel
 
-@sec-stages logs `frac_opposite_fixed` and `mean_abs_delta_p` every cycle as
+@sec-stages will log `frac_opposite_fixed` and `mean_abs_delta_p` every cycle as
 stand-ins for heterosis potential. The sweep above says how good they are.
 
 `mean_sq_delta_p` is not a proxy at all. It is $\overline{y^2}$, so half of it is
@@ -1043,8 +1049,8 @@ it, so the share falls and the total falls with it.
 > different matter and @sec-heterosis-alignment is where it is measured; the
 > sweep here holds alignment at zero by construction.
 
-This sharpens a question @sec-genomic-prediction had to leave open. That chapter
-fits one additive effect per marker and notes that such a model cannot represent
+This sharpens a question @sec-genomic-prediction will have to leave open. That
+chapter fits one additive effect per marker and notes that such a model cannot represent
 SCA at all. The sweep says how large the unrepresentable share is, and how it
 moves: against poorly separated pools most of the variance in heterosis is
 specific; against well separated ones a minority is. These are shares of the
@@ -1070,8 +1076,8 @@ The falling SCA share is therefore a fact about what a predictor can express, no
 a gain. A programme reading it as one would be congratulating itself on having
 less to predict.
 
-So this is a second, independent reason for @sec-stages Trap 3's prescription to
-hold $F_{ST}$ in a band rather than at a maximum. @sec-heterosis-flat gave the
+So this is a second, independent reason for the prescription @sec-stages Trap 3
+will make, to hold $F_{ST}$ in a band rather than at a maximum. @sec-heterosis-flat gave the
 diversity-side reason. This is the prediction-side one, and it points the same
 way.
 ::::
@@ -1079,7 +1085,7 @@ way.
 ### What this says about ranking crosses
 
 The F1 of two fixed lines is genetically uniform, so the progeny-variance term
-that drives the usefulness criterion at @sec-stages S2 is zero for the hybrid
+that drives the usefulness criterion at @sec-stages S2 (defined there) is zero for the hybrid
 itself, and cross ranking reduces to ranking means. That is true, and it is why
 this book ranks hybrids on an index rather than on $\mu + i h \sigma$.
 
@@ -1208,7 +1214,7 @@ minus the parents' mean, always.
 
 `pool_freqs(GL, pool)` returns one row per pool. These are the *current* cycle's
 frequencies and they are supposed to move; they are not the frozen base $p_0$
-that @sec-genomic-era's two inbreeding lenses are measured against. Both objects
+against which the two inbreeding lenses @sec-genomic-era will define are measured. Both objects
 are frequency vectors over the same markers and confusing them produces a
 heterosis prediction anchored to a population that no longer exists.
 
@@ -1217,7 +1223,7 @@ heterosis prediction anchored to a population that no longer exists.
 families or locations.
 **Warning sign.** A pool frequency vector computed over *hybrids* rather than
 lines. On the full factorial that gives $(p_A + p_B)/2$ for both pools --
-@sec-era-step1 proves the identity -- which sets $y \equiv 0$ and reports the
+@sec-era-step1 will prove the identity -- which sets $y \equiv 0$ and reports the
 divergence term as zero.
 **Threshold.** None; this is a bookkeeping step, and the only failure is silent.
 
@@ -1501,7 +1507,7 @@ observations, and it is valid there only because the closed forms are derived
 under the simulation's sampling model -- each line's genotype an independent
 Bernoulli($p_k$) draw at every locus, hence unrelated lines and linkage
 equilibrium within pool. A recycled heterotic pool satisfies neither: assumption
-A3 of @sec-era-programme makes within-pool recycling the normal state of this
+A3 (@sec-hp-cycle; declared in @sec-era-programme) makes within-pool recycling the normal state of this
 system, so its lines share ancestors.
 
 The size of the failure can be measured, at least for the relatedness half of
@@ -1636,8 +1642,8 @@ be estimated to set it, and it is not much:
 
 @sec-subdivided supplied the partition and @sec-catalogue will use it; this chapter
 supplies the reason the $GD_{BS}$ component is singled out for protection, and the
-reason protecting it is not the same as maximising it. @sec-stages Trap 3 already
-recommended holding $F_{ST}$ in a band: @sec-heterosis-flat is why a band, and
+reason protecting it is not the same as maximising it. @sec-stages Trap 3, later,
+recommends holding $F_{ST}$ in a band: @sec-heterosis-flat is why a band, and
 @sec-heterosis-alignment is what to watch instead of the band.
 @sec-heterosis-distance closes the loop with the coancestry kernel of
 @sec-coancestry: under flat dominance, the diversity matrix and the heterosis

@@ -107,30 +107,34 @@ table that lists them:
    (@sec-backcross). @sec-simulating-crosses and @sec-alphasimr build that panel
    two different ways, and everything downstream is blind to which --
    @sec-alphasimr from the primitives up, so the generative model is something a
-   reader can rebuild rather than accept, and @sec-programme pointing the same
-   primitives at an inbred-line programme, where the diversity cost of running
-   faster is measured directly. Before any of it, the crossing plan decides which
+   reader can rebuild rather than accept. Before any of it, the crossing plan decides which
    candidates are seen at all (@sec-mating), and the trial layout which
    locations each one is seen in (@sec-sparse).
 6. Spending the budget optimally is a combinatorial problem with structure worth
    naming (@sec-combinatorial, @sec-advanced).
 7. The budget is worth paying because of what it leaves for later cycles, which
-   is a claim about trajectories and is checked as one (@sec-cycles) -- and then
+   is a claim about trajectories and is checked as one (@sec-cycles, with
+   @sec-programme pointing the same AlphaSimR primitives at an inbred-line
+   programme, where the diversity cost of running faster is measured directly)
+   -- and then
    predicted, which turns out to work only where the constraint holds
    (@sec-limits).
 
-The parts are ordered so that each depends only on what came before:
+The parts are ordered so that each is readable after the ones before it; forward
+pointers are marked as such:
 
 | Part | What it establishes |
 |---|---|
-| Foundations | The coancestry kernel, the partition of diversity in a subdivided population, and the equation that says what selection buys |
+| Introduction | The hybrid programme end to end, and the population genetics the rest of the book assumes |
+| Foundations | The coancestry kernel, the partition of diversity in a subdivided population, the equation that says what selection buys, and what divergence between the pools buys through heterosis |
 | Simulation | How the candidate pool is generated, and how large a segregating population has to be |
-| Mating and testing design | Which few hundred of the 40,000 possible crosses to grow, what each design can estimate, and how to spread them over locations |
-| Metrics | What can be measured, what it costs, and which measurements are redundant |
+| Metrics and prediction | What can be measured, what it costs, which measurements are redundant, and how the index being selected on is predicted |
 | Optimisation | How the constraint enters an optimiser, and which optimiser to use |
-| Evidence and practice | What the literature does and does not establish, and a worked end-to-end run |
+| Mating and testing design | Which few hundred of the 40,000 possible crosses to grow, what each design can estimate, and how to spread them over locations |
+| Evidence and practice | What the literature does and does not establish, what a whole programme spends across cycles, and a worked end-to-end run |
 
-Readers who only want the operational answer can read @sec-choosing (which
+Readers new to hybrid breeding or to population genetics should start with
+@sec-hybrid-programme. Readers who only want the operational answer can read @sec-choosing (which
 metrics), @sec-stages (at which stage) and @sec-case-study (the whole pipeline
 in one script), then come back for the derivations.
 

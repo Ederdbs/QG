@@ -57,9 +57,11 @@ book_fig  <- function(...) .book_get('figs', ...)
 
 #' 
 #' The Foundations part defined the quantities the book manages -- coancestry
-#' (@sec-coancestry) and its partition over two pools (@sec-subdivided) -- and the
-#' response they are traded against (@sec-response). @sec-response drew its data
-#' from `simulate_pools()` without deriving it. This chapter builds the generator
+#' (@sec-coancestry) and its partition over two pools (@sec-subdivided) -- the
+#' response they are traded against (@sec-response), and the heterosis that pool
+#' divergence is maintained for (@sec-heterosis). @sec-response drew its data
+#' from `simulate_pools()` and @sec-heterosis from `simulate_lines()` and
+#' `simulate_data()`, both without deriving them. This chapter builds the generator
 #' step by step, with `simulate_lines()` and `simulate_data()`. `simulate_pools()`
 #' uses the same Balding-Nichols pool frequencies, homozygous lines and A x B
 #' factorial, but a different trait: `n_qtl` loci with independent effects plus

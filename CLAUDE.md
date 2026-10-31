@@ -154,12 +154,15 @@ findings, not fixed constants; they change if `sim_config` or the DE seeds chang
 
 ## The book (`book/`)
 
-A Quarto book: **24 chapters in 6 parts, plus 5 appendices**. `book/_quarto.yml` lists them and
+A Quarto book: **25 chapters in 7 parts, plus 5 appendices**. `book/_quarto.yml` lists them and
 is the only source of truth for the order. A suffixed number (`02b`, `04b`, `04c`, `04d`, `04e`,
 `04f`, `04g`, `05b`, `08b`, `10b`, `11b`, `11c`) is the established naming for a chapter inserted after the fact —
 renumbering the whole book would break every `docs/` URL, which GitHub Pages serves directly.
-The Simulation part is the largest at five chapters (`03`, `04`, `04b`, `04c`, `04d`).
-The Mating and testing design part holds `04e` (which crosses), `04f` (which locations;
+File numbers no longer follow reading order: parts were reordered (2026-10) so that no part
+leans on a later one -- `00` (Introduction) opens the book, `05b` sits in Foundations, `08b`
+closes Metrics and prediction, Mating and testing design comes after Optimisation, and `04d`
+sits in Evidence and practice before `11b`. Reordering lives in `_quarto.yml` only; never
+rename a file to match its position. The Mating and testing design part holds `04e` (which crosses), `04f` (which locations;
 `R/17_sparse_testing.R`) and `04g` (both at once; `R/18_joint_allocation.R`). Unlike its two
 neighbours `04g` has no cached external study: all three of its data files,
 `book/data/joint_core_sweep.csv`, `joint_contrasts.csv` and `joint_optimiser.csv`, ARE

@@ -58,11 +58,11 @@ acc  <- read.csv(book_data("genomic_prediction_accuracy.csv"))
 sens <- read.csv(book_data("genomic_prediction_pi_sensitivity.csv"))
 
 #' 
-#' Three earlier chapters flagged the same gap and moved on. @sec-simulating-crosses
+#' Two earlier chapters flagged the same gap and moved on. @sec-simulating-crosses
 #' built `ctx$traits` from *known* marker effects and called the result "an
 #' optimistic ceiling." @sec-choosing's Finding 5 showed what happens once the index
 #' carries real error, but manufactured that error rather than fitting a model to
-#' produce it. @sec-case-study repeats the caveat and still moves on. This chapter
+#' produce it, and @sec-case-study will repeat the caveat. This chapter
 #' is where the gap closes: it fits actual prediction models to a training
 #' population with real phenotypic noise, and hands the result to the same
 #' `stage1_build()` contract every later chapter already consumes.

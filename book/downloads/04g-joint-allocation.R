@@ -1353,5 +1353,6 @@ n_plans <- 30 * sum(js$plan == "random" & js$c == 4 & js$strategy == "coverage")
 #'   with locations in place of pools.
 #' 
 #' This closes the Part. The crossing plan and its field decide which hybrids, and
-#' which lines, are seen at all; the Metrics part that follows measures the
-#' diversity of the hybrids a programme has, starting with @sec-genomic-era.
+#' which lines, are seen at all; the Evidence and practice part that follows sets
+#' these tools against what the applied literature establishes, starting with
+#' @sec-plant-literature.

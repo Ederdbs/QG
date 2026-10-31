@@ -9,6 +9,10 @@ pool <- rep(c("A", "B"), c(book_cfg$n_pool_A, book_cfg$n_pool_B))
 P0   <- pool_freqs(L / 2, pool)
 ```
 
+The Simulation part produced populations whose true history is known; this part
+measures them, because a diversity metric can only be judged against a
+population whose drift and inbreeding are known independently of the metric.
+
 In classical theory, inbreeding measured as **loss of heterozygosity** and
 inbreeding measured as **drift of allele frequencies** are the same thing.
 @meuwissen2020 show that inside genomic optimal-contribution schemes they stop
@@ -35,7 +39,9 @@ cycle report, with the check and the failure mode of each step.
 ## The programme this chapter is written for {#sec-era-programme}
 
 Every number below is computed under these assumptions. They are declared here
-because several of the results are false outside them.
+because several of the results are false outside them. @sec-hybrid-programme
+describes the programme itself, stage by stage; this section states only what
+every number below assumes about it.
 
 **A1. The species is allogamous and the product is an F1 hybrid.** Maize-type:
 two heterotic pools, A and B, crossed to produce single-cross hybrids. The
@@ -888,21 +894,13 @@ A single cycle's $F$ is a stock and cannot be compared to a rate target. The
 rate comes from the trajectory. Before trusting the regression on a real
 programme, calibrate it on a case whose answer is known.
 
-Let $n_{gam}$ be the number of allele copies the pool samples per cycle. Drawing
-them at random from the previous cycle's frequencies gives
-$\mathbb{E}[H_t] = H_0\,(1 - 1/n_{gam})^t$ exactly, so
-$\Delta F = 1/n_{gam}$ and $N_e = n_{gam}/2$; with $n_{gam} = 2N$ this is the
-idealised population of [@falconer1996, Ch. 3] and $\Delta F = 1/(2N)$. In a
-two-pool programme $n_{gam}$ is not a matter of taste, and the two natural
-regimes differ by a factor of two:
-
-- a **crossing block** of $n$ plants intermated at random passes $2n$ gametes,
-  so $\Delta F = 1/(2n)$ and $N_e = n$;
-- a pool **re-derived as $n$ doubled-haploid lines** passes only $n$ distinct
-  allele copies, because each DH is homozygous and contributes one allele
-  identity per locus, so $\Delta F = 1/n$ and $N_e = n/2$. This is literally
-  what `next_pool()` does in @sec-cycles: one Bernoulli draw per locus per new
-  line.
+The known case is the drift model of @eq-hp-drift: with $n_{gam}$ allele copies
+sampled per cycle, $\Delta F = 1/n_{gam}$ and $N_e = n_{gam}/2$, so a
+**crossing block** of $n$ plants ($n_{gam} = 2n$, $N_e = n$) and a pool
+**re-derived as $n$ doubled-haploid lines** ($n_{gam} = n$, $N_e = n/2$) differ
+by a factor of two. The DH regime is literally what `next_pool()` does in
+@sec-cycles: one Bernoulli draw per locus per new line. What this step adds is
+the calibration of the $\log(1 - F)$ regression against those two known rates.
 
 ```{r}
 #| label: era-traj-fun
