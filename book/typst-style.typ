@@ -14,3 +14,8 @@
 #set table(stroke: (x, y) => if y == 0 { (bottom: 0.8pt) } else { (bottom: 0.3pt + luma(200)) }, inset: (x: 6pt, y: 4pt))
 #show table: set text(size: 8.8pt)
 #set page(numbering: "1", footer: context { set text(font: sans, size: 8pt, fill: luma(120)); align(center)[#counter(page).display()] })
+
+// Cover (book/cover.pdf, drawn by book/scripts/make_cover.R). Header includes
+// sit before the title page in Quarto's Typst template, so this is page one.
+#page(margin: 0pt, header: none, footer: none, image("cover.pdf", width: 100%, height: 100%))
+#counter(page).update(0)
