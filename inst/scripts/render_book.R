@@ -30,6 +30,33 @@ if (status != 0L) {
     stop("quarto render failed (exit ", status, ")")
 }
 
+# Keep the README's "N chapters, N parts, N appendices, N pages" line in
+# step with the book. Pages are counted as /Type /Page objects, which needs
+# no PDF tooling.
+pdf <- "docs/Genetic-Diversity-in-Hybrid-Breeding.pdf"
+if (file.exists(pdf) && file.exists("README.md")) {
+    b <- readBin(pdf, "raw", file.size(pdf))
+    b[b == as.raw(0)] <- as.raw(32)
+    pages <- lengths(regmatches(rawToChar(b), gregexpr(
+        "/Type\\s*/Page\\b(?!s)", rawToChar(b), perl = TRUE, useBytes = TRUE
+    )))
+    yml <- readLines("book/_quarto.yml")
+    app <- seq_along(yml) > grep("^  appendices:", yml)
+    n_ch <- sum(grepl("^ {8}- .*\\.qmd$", yml))
+    n_app <- sum(app & grepl("^ {4}- .*\\.qmd$", yml))
+    n_part <- sum(grepl("^ {4}- part:", yml))
+    rd <- readLines("README.md", encoding = "UTF-8")
+    rd <- sub(
+        "\\d+ chapters \u00b7 \\d+ parts \u00b7 \\d+ appendices \u00b7 \\d+ pages",
+        sprintf(
+            "%d chapters \u00b7 %d parts \u00b7 %d appendices \u00b7 %d pages",
+            n_ch, n_part, n_app, pages
+        ),
+        rd
+    )
+    writeLines(rd, "README.md", useBytes = TRUE)
+}
+
 cat(sprintf(
     "done in %.1f min -> docs/\n",
     as.numeric(difftime(Sys.time(), t0, units = "mins"))

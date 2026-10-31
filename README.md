@@ -6,7 +6,7 @@
 
 **[📖 Read the book online](https://ederdbs.github.io/QG/)** · **[⬇️ Download the PDF](https://ederdbs.github.io/QG/Genetic-Diversity-in-Hybrid-Breeding.pdf)** · **[📦 Install the R package](#-install-the-package)**
 
-*23 chapters · 5 appendices · 369 pages · every derivation runnable in R*
+*25 chapters · 7 parts · 5 appendices · 419 pages · every derivation runnable in R*
 
 </div>
 
@@ -35,19 +35,21 @@ It combines three things that don't usually sit in one repository:
 
 Every number quoted in the book is reproduced live from the code in this
 repository — nothing here is a black box, with one declared exception: the
-mating-design and sparse-testing sweeps come from external simulation studies, and
-both chapters say so and re-run their phenotypic core in-repo.
+headline mating-design and sparse-testing sweeps come from external simulation
+studies, and both chapters say so and re-run their phenotypic core in-repo. The
+joint-allocation chapter has no such exception: all its data are regenerated here.
 
 ## What's inside the book
 
 | Part | What you'll find |
 |---|---|
-| 🧩 **Foundations** | The coancestry matrix vs. the genomic relationship matrix — and why conflating them silently breaks your diversity metric · gene diversity in a subdivided population · the classical response-to-selection machinery, rebuilt from first principles |
-| 🌱 **Simulation** | Simulating founder lines, heterotic pools and crosses from scratch · sizing a segregating population (F1→F4) · introgressing several genes by backcrossing · AlphaSimR from the ground up · a complete, staged plant breeding programme end to end |
-| 🌽 **Mating and testing design** | How few hybrids are enough: testers vs. sparse factorials at equal field budget · connectivity and what a crossing plan can estimate · why least squares ruins a sparse factorial and BLUP rescues it · where genomic information pays · what the nursery costs · sparse testing: which hybrids go to which locations, and why spreading plots beats concentrating them |
-| 📊 **Metrics** | A full catalogue of diversity metrics, benchmarked against a random-sampling null so you know which ones actually discriminate · heterosis and dominance, and what pool divergence buys you · metrics mapped onto every stage of a real pipeline · genomic prediction |
+| 🧭 **Introduction** | One cycle of a hybrid programme, the four stages the rest of the book refers to, and where in that cycle diversity is lost · the population genetics every later chapter assumes — allele frequency, gene diversity, IBD vs. IBS, coancestry, drift and effective size — each identity checked numerically |
+| 🧩 **Foundations** | The coancestry matrix vs. the genomic relationship matrix — and why conflating them silently breaks your diversity metric · gene diversity in a subdivided population · the classical response-to-selection machinery, rebuilt from first principles · heterosis and dominance, GCA/SCA, and what pool divergence buys you |
+| 🌱 **Simulation** | Simulating founder lines, heterotic pools and crosses from scratch · sizing a segregating population (F1→F4) · introgressing several genes by backcrossing · AlphaSimR from the ground up |
+| 📊 **Metrics and prediction** | Diversity metrics in the genomic era · a full catalogue, benchmarked against a random-sampling null so you know which ones actually discriminate · how to choose among them · metrics mapped onto every stage of a real pipeline · genomic prediction with GBLUP, BayesA and BayesB |
 | ⚙️ **Optimisation** | Optimal contribution selection and the alpha diversity constraint · differential evolution for combinatorial selection · structure-aware search, certified bounds, and an exact oracle that proves optimality at small scale |
-| 🔬 **Evidence & practice** | What the plant breeding literature actually establishes (and what it doesn't) · how diversity erodes across recurrent selection cycles · the limits of every metric here · a worked, end-to-end case study with a checklist you can reuse |
+| 🌽 **Mating and testing design** | Which crosses: testers vs. sparse factorials at equal field budget, connectivity, why least squares ruins a sparse factorial and BLUP rescues it, what the nursery costs · which locations: sparse testing, and why spreading plots beats concentrating them · both at once: joint allocation of crosses × locations, optimised on prediction error before anything is planted |
+| 🔬 **Evidence and practice** | What the plant breeding literature actually establishes (and what it doesn't) · a complete, staged breeding programme and what it costs in diversity · how diversity erodes across recurrent selection cycles · the limits of every metric here · a worked, end-to-end case study with a checklist you can reuse |
 
 **Highlights you can check yourself, in the book, with code:**
 - Why `1 − θ` and Nei's expected heterozygosity are the *same number* — one exact identity, one fewer metric to argue about.
@@ -86,7 +88,12 @@ for the core workflow (only `DEoptim` is a hard dependency).
 Rscript inst/scripts/render_book.R   # HTML + Typst PDF, both into docs/
 quarto render book --to html         # HTML only, while iterating
 cd book && quarto preview            # live reload while editing
+Rscript book/scripts/make_downloads.R  # per-chapter R scripts, after editing a chapter
 ```
+
+`render_book.R` also refreshes the chapter, appendix and page counts at the top
+of this README from `book/_quarto.yml` and the rendered PDF, so commit the README
+together with `docs/`.
 
 The book renders against the **installed** package, so run
 `Rscript -e 'devtools::install()'` after any change to `R/` that a chapter
@@ -94,8 +101,10 @@ calls — otherwise a new export is invisible and the chapter fails with
 `object 'foo' not found`.
 
 Light examples run live at render; expensive results are cached in `book/data`
-and `book/figs` and refreshed with `book/scripts/regenerate.R`. `docs/` is
-committed, because GitHub Pages serves it straight from `main`.
+and `book/figs` and refreshed with `book/scripts/regenerate.R` (`search`,
+`mating`, `sparse`, `joint`, ...), which `quarto render` never calls. `docs/` and
+`book/_freeze/` are committed, because GitHub Pages serves `docs/` straight from
+`main` and a clean clone renders from the freeze.
 
 </details>
 
@@ -104,13 +113,9 @@ committed, because GitHub Pages serves it straight from `main`.
 
 ```sh
 Rscript -e 'devtools::document(); devtools::load_all()'
-Rscript -e 'devtools::test()'     # 390 checks, ~1 min
-Rscript -e 'devtools::check()'    # 0 errors, 0 warnings, 1 known note
+Rscript -e 'devtools::test()'     # 442 checks, ~1 min
+Rscript -e 'devtools::check()'    # 0 errors, 0 warnings, 0 notes
 ```
-
-The one note is `.cursorignore`: tracked, but absent from `.Rbuildignore`, so
-`R CMD check` flags it as a stray hidden file. Adding `^\.cursorignore$` there
-(or untracking it) restores 0/0/0.
 
 Only `DEoptim` is a hard dependency (used solely by `sel_de()`/`sel_de_fast()`).
 `quadprog`, `highs`, `bWGR` and `AlphaSimR` are suggested, each guarded by
@@ -129,8 +134,8 @@ Rscript inst/scripts/run_mabc.R         # MABC scans + figures, ~3 min
 Rscript inst/scripts/run_alphasimr.R    # reciprocal recurrent selection, ~2 min
 ```
 
-`run_benchmark.R` produces the numeric results quoted below. All ship with the
-installed package, so `system.file("scripts", "run_all.R", package = "hybdiv")`
+`run_benchmark.R` is the only caller of the `plot_null()`/`plot_correlation()`/
+`plot_frontier()` exports. All ship with the installed package, so `system.file("scripts", "run_all.R", package = "hybdiv")`
 finds them from anywhere.
 
 </details>
