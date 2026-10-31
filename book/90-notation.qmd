@@ -516,6 +516,30 @@ errors of zero; a single seed can over- or underpredict.
 $H$ in @sec-response is the heterosis value $H_i$ of the heterosis table above,
 not the aggregate genotype, which is $W$.
 
+### AlphaSimR pipeline
+
+```{r}
+#| echo: false
+knitr::kable(data.frame(
+  Symbol = c("$x_{ik}$", "$G_i$, $G_{ij}$", "$\\mu_0$", "$\\delta_k$",
+             "$M_{HW}$, $M_{F_t}$", "$\\bar H$", "$\\alpha_k$, $\\alpha^{(B)}_k$",
+             "$\\hat g^A_i$", "$t$, $r$, $\\rho(t, r)$", "$v_g$, $v_s$, $v_e$", "$n_A$, $n_B$"),
+  Meaning = c("0/1/2 dosage of individual $i$ at QTL $k$, an entry of $\\mathbf{M}^H$ -- **not** the 0/0.5/1 entry of $\\mathbf{X}$",
+              "genetic value of individual $i$ under AlphaSimR's `TraitAD` (the $G(\\mathbf{x})$ above on the 0/1/2 dosage); of the F1 between inbred lines $i$ and $j$ -- **not** the Caballero-Toro $G_i$",
+              "intercept of that genetic value",
+              "dominance degree $d_k / |a_k|$, drawn from $N(\\texttt{meanDD}, \\texttt{varDD})$",
+              "population mean under Hardy-Weinberg proportions; mean of selfed generation $F_t$",
+              "mean of $H_{ij}$ over the A x B factorial: the $\\mu$ of the heterosis table, renamed because $\\mu_0$ is the intercept there",
+              "average effect of a gene substitution, $a_k + d_k(q_k - p_k)$; the same at pool-B frequencies, $a_k + d_k(1 - 2p_{Bk})$ -- **not** the diversity-loss budget $\\alpha$ nor the Caballero-Toro $\\alpha_i$",
+              "testcross estimate of the GCA $g^A_i$",
+              "testers, locations, and the first-order accuracy of $\\hat g^A_i$: the $k$, $r$, $\\rho$ of the mating-design table, $k$ renamed because it indexes QTL there",
+              "sample variance of $g^A_i$ over the candidates, and the SCA and error terms of $\\rho(t, r)$",
+              "candidate pool-A lines; pool-B lines the testers are drawn from"),
+  check.names = FALSE))
+```
+
+These symbols are local to @sec-alphasimr.
+
 ## Conventions
 
 **Coancestry always includes the diagonal.** Group coancestry in the sense of

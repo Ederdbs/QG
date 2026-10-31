@@ -4,20 +4,16 @@
 #
 #  Runs the AlphaSimR bridge (R/13_alphasimr_bridge.R) at a heavier scale than
 #  the book, then feeds the resulting hybrid pool through the package's own
-#  stage2_select() unchanged. Writes the CSVs the book reads.
+#  stage2_select() unchanged. Writes CSVs to --out; the book does not read
+#  them (its chapter runs a smaller configuration live, with no caching).
 #
 #  The engine is in the package (rrs_config, alphasimr_pipeline() and the
 #  functions it calls); this is the driver only -- the production-scale run
 #  and the CLI, same split as inst/scripts/run_mabc.R.
 #
-#  To refresh the cached tables:
-#    Rscript inst/scripts/run_alphasimr.R --out=report/alphasimr
-#    cp report/alphasimr/cycles.csv   book/data/alphasimr_cycles.csv
-#    cp report/alphasimr/metrics.csv book/data/alphasimr_metrics.csv
-#
 #  Usage:
-#    Rscript inst/scripts/run_alphasimr.R --test          # smoke run, ~10 s
-#    Rscript inst/scripts/run_alphasimr.R --out=DIR        # full run, ~2 min
+#    Rscript inst/scripts/run_alphasimr.R --test          # smoke run
+#    Rscript inst/scripts/run_alphasimr.R --out=DIR        # full run
 #
 #  Dependencies: hybdiv, AlphaSimR.
 # =============================================================================

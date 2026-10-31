@@ -631,6 +631,7 @@ window.Quarto = {
   <li><a href="#sparse-testing" id="toc-sparse-testing" class="nav-link" data-scroll-target="#sparse-testing"><span class="header-section-number">A.1.12</span> Sparse testing</a></li>
   <li><a href="#joint-allocation" id="toc-joint-allocation" class="nav-link" data-scroll-target="#joint-allocation"><span class="header-section-number">A.1.13</span> Joint allocation</a></li>
   <li><a href="#response-to-selection" id="toc-response-to-selection" class="nav-link" data-scroll-target="#response-to-selection"><span class="header-section-number">A.1.14</span> Response to selection</a></li>
+  <li><a href="#alphasimr-pipeline" id="toc-alphasimr-pipeline" class="nav-link" data-scroll-target="#alphasimr-pipeline"><span class="header-section-number">A.1.15</span> AlphaSimR pipeline</a></li>
   </ul></li>
   <li><a href="#conventions" id="toc-conventions" class="nav-link" data-scroll-target="#conventions"><span class="header-section-number">A.2</span> Conventions</a></li>
   <li><a href="#terms" id="toc-terms" class="nav-link" data-scroll-target="#terms"><span class="header-section-number">A.3</span> Terms</a></li>
@@ -1936,6 +1937,72 @@ window.Quarto = {
 </div>
 <p><span class="math inline">\(R = i\,r\,\sigma_A\)</span> is the infinite-population, bivariate-normal result. In a structured hybrid population at the teaching scale, <a href="02b-response.html" class="quarto-xref"><span>Chapter 4</span></a> finds the replicated mean gap between predicted and realised response within two standard errors of zero; a single seed can over- or underpredict.</p>
 <p><span class="math inline">\(H\)</span> in <a href="02b-response.html" class="quarto-xref"><span>Chapter 4</span></a> is the heterosis value <span class="math inline">\(H_i\)</span> of the heterosis table above, not the aggregate genotype, which is <span class="math inline">\(W\)</span>.</p>
+</section>
+<section id="alphasimr-pipeline" class="level3" data-number="A.1.15">
+<h3 data-number="A.1.15" class="anchored" data-anchor-id="alphasimr-pipeline"><span class="header-section-number">A.1.15</span> AlphaSimR pipeline</h3>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 12%">
+<col style="width: 87%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Symbol</th>
+<th style="text-align: left;">Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(x_{ik}\)</span></td>
+<td style="text-align: left;">0/1/2 dosage of individual <span class="math inline">\(i\)</span> at QTL <span class="math inline">\(k\)</span>, an entry of <span class="math inline">\(\mathbf{M}^H\)</span> – <strong>not</strong> the 0/0.5/1 entry of <span class="math inline">\(\mathbf{X}\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(G_i\)</span>, <span class="math inline">\(G_{ij}\)</span></td>
+<td style="text-align: left;">genetic value of individual <span class="math inline">\(i\)</span> under AlphaSimR’s <code>TraitAD</code> (the <span class="math inline">\(G(\mathbf{x})\)</span> above on the 0/1/2 dosage); of the F1 between inbred lines <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> – <strong>not</strong> the Caballero-Toro <span class="math inline">\(G_i\)</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\mu_0\)</span></td>
+<td style="text-align: left;">intercept of that genetic value</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\delta_k\)</span></td>
+<td style="text-align: left;">dominance degree <span class="math inline">\(d_k / &amp;#124;a_k&amp;#124;\)</span>, drawn from <span class="math inline">\(N(\texttt{meanDD}, \texttt{varDD})\)</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(M_{HW}\)</span>, <span class="math inline">\(M_{F_t}\)</span></td>
+<td style="text-align: left;">population mean under Hardy-Weinberg proportions; mean of selfed generation <span class="math inline">\(F_t\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\bar H\)</span></td>
+<td style="text-align: left;">mean of <span class="math inline">\(H_{ij}\)</span> over the A x B factorial: the <span class="math inline">\(\mu\)</span> of the heterosis table, renamed because <span class="math inline">\(\mu_0\)</span> is the intercept there</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\alpha_k\)</span>, <span class="math inline">\(\alpha^{(B)}_k\)</span></td>
+<td style="text-align: left;">average effect of a gene substitution, <span class="math inline">\(a_k + d_k(q_k - p_k)\)</span>; the same at pool-B frequencies, <span class="math inline">\(a_k + d_k(1 - 2p_{Bk})\)</span> – <strong>not</strong> the diversity-loss budget <span class="math inline">\(\alpha\)</span> nor the Caballero-Toro <span class="math inline">\(\alpha_i\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\hat g^A_i\)</span></td>
+<td style="text-align: left;">testcross estimate of the GCA <span class="math inline">\(g^A_i\)</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(t\)</span>, <span class="math inline">\(r\)</span>, <span class="math inline">\(\rho(t, r)\)</span></td>
+<td style="text-align: left;">testers, locations, and the first-order accuracy of <span class="math inline">\(\hat g^A_i\)</span>: the <span class="math inline">\(k\)</span>, <span class="math inline">\(r\)</span>, <span class="math inline">\(\rho\)</span> of the mating-design table, <span class="math inline">\(k\)</span> renamed because it indexes QTL there</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(v_g\)</span>, <span class="math inline">\(v_s\)</span>, <span class="math inline">\(v_e\)</span></td>
+<td style="text-align: left;">sample variance of <span class="math inline">\(g^A_i\)</span> over the candidates, and the SCA and error terms of <span class="math inline">\(\rho(t, r)\)</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(n_A\)</span>, <span class="math inline">\(n_B\)</span></td>
+<td style="text-align: left;">candidate pool-A lines; pool-B lines the testers are drawn from</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>These symbols are local to <a href="04c-alphasimr-pipeline.html" class="quarto-xref"><span>Chapter 9</span></a>.</p>
 </section>
 </section>
 <section id="conventions" class="level2" data-number="A.2">

@@ -76,18 +76,18 @@ rrs_config <- list(
 alphasimr_founder_pools <- function(cfg = rrs_config) {
   if (!requireNamespace("AlphaSimR", quietly = TRUE))
     stop("Package 'AlphaSimR' is required for alphasimr_founder_pools().")
-  set.seed(cfg$seed)
-  founders <- AlphaSimR::runMacs2(nInd = cfg$n_pool_A + cfg$n_pool_B,
-                                   nChr = cfg$n_chr, segSites = cfg$seg_sites,
-                                   split = cfg$split_gen)
+  set.seed(cfg[["seed"]])
+  founders <- AlphaSimR::runMacs2(nInd = cfg[["n_pool_A"]] + cfg[["n_pool_B"]],
+                                   nChr = cfg[["n_chr"]], segSites = cfg[["seg_sites"]],
+                                   split = cfg[["split_gen"]])
   SP <- AlphaSimR::SimParam$new(founders)
-  for (i in seq_len(cfg$n_traits))
-    SP$addTraitAD(nQtlPerChr = cfg$seg_sites, mean = 0, var = 1,
-                   meanDD = cfg$mean_dd, varDD = cfg$var_dd)
-  SP$setVarE(h2 = rep(cfg$h2, cfg$n_traits))
+  for (i in seq_len(cfg[["n_traits"]]))
+    SP$addTraitAD(nQtlPerChr = cfg[["seg_sites"]], mean = 0, var = 1,
+                   meanDD = cfg[["mean_dd"]], varDD = cfg[["var_dd"]])
+  SP$setVarE(h2 = rep(cfg[["h2"]], cfg[["n_traits"]]))
   pop <- AlphaSimR::newPop(founders, simParam = SP)
-  list(pop_A = pop[seq_len(cfg$n_pool_A)],
-       pop_B = pop[cfg$n_pool_A + seq_len(cfg$n_pool_B)], SP = SP)
+  list(pop_A = pop[seq_len(cfg[["n_pool_A"]])],
+       pop_B = pop[cfg[["n_pool_A"]] + seq_len(cfg[["n_pool_B"]])], SP = SP)
 }
 
 #' Group coancestry of an AlphaSimR population
@@ -132,23 +132,23 @@ alphasimr_rrs_cycle <- function(pop_A, pop_B, SP, cfg = rrs_config,
   if (!requireNamespace("AlphaSimR", quietly = TRUE))
     stop("Package 'AlphaSimR' is required for alphasimr_rrs_cycle().")
 
-  dh_A <- AlphaSimR::makeDH(pop_A, nDH = cfg$n_dh, simParam = SP)
-  dh_B <- AlphaSimR::makeDH(pop_B, nDH = cfg$n_dh, simParam = SP)
-  tester_A <- pop_A[seq_len(min(cfg$n_testers, pop_A@nInd))]
-  tester_B <- pop_B[seq_len(min(cfg$n_testers, pop_B@nInd))]
+  dh_A <- AlphaSimR::makeDH(pop_A, nDH = cfg[["n_dh"]], simParam = SP)
+  dh_B <- AlphaSimR::makeDH(pop_B, nDH = cfg[["n_dh"]], simParam = SP)
+  tester_A <- pop_A[seq_len(min(cfg[["n_testers"]], pop_A@nInd))]
+  tester_B <- pop_B[seq_len(min(cfg[["n_testers"]], pop_B@nInd))]
 
   tc_A <- AlphaSimR::setPheno(AlphaSimR::hybridCross(dh_A, tester_B, simParam = SP), simParam = SP)
   tc_B <- AlphaSimR::setPheno(AlphaSimR::hybridCross(dh_B, tester_A, simParam = SP), simParam = SP)
 
   gca_A <- sort(tapply(tc_A@pheno[, 1], tc_A@mother, mean), decreasing = TRUE)
   gca_B <- sort(tapply(tc_B@pheno[, 1], tc_B@mother, mean), decreasing = TRUE)
-  pick <- function(g) if (random_elite) sample(names(g), cfg$n_sel)
-                      else names(g)[seq_len(cfg$n_sel)]
+  pick <- function(g) if (random_elite) sample(names(g), cfg[["n_sel"]])
+                      else names(g)[seq_len(cfg[["n_sel"]])]
   elite_A <- dh_A[dh_A@id %in% pick(gca_A)]
   elite_B <- dh_B[dh_B@id %in% pick(gca_B)]
 
-  list(pop_A = AlphaSimR::randCross(elite_A, nCrosses = cfg$n_pool_A, simParam = SP),
-       pop_B = AlphaSimR::randCross(elite_B, nCrosses = cfg$n_pool_B, simParam = SP),
+  list(pop_A = AlphaSimR::randCross(elite_A, nCrosses = cfg[["n_pool_A"]], simParam = SP),
+       pop_B = AlphaSimR::randCross(elite_B, nCrosses = cfg[["n_pool_B"]], simParam = SP),
        elite_A = elite_A, elite_B = elite_B,
        summary = data.frame(mean_tc_A = mean(gca_A), mean_tc_B = mean(gca_B),
                             gd_A = alphasimr_gd(elite_A, SP),
@@ -223,14 +223,14 @@ alphasimr_pipeline <- function(cfg = rrs_config) {
     stop("Package 'AlphaSimR' is required for alphasimr_pipeline().")
 
   fp <- alphasimr_founder_pools(cfg)
-  pop_A <- fp$pop_A; pop_B <- fp$pop_B; SP <- fp$SP
-  cycles <- vector("list", cfg$n_cycles)
-  for (i in seq_len(cfg$n_cycles)) {
+  pop_A <- fp[["pop_A"]]; pop_B <- fp[["pop_B"]]; SP <- fp[["SP"]]
+  cycles <- vector("list", cfg[["n_cycles"]])
+  for (i in seq_len(cfg[["n_cycles"]])) {
     cy <- alphasimr_rrs_cycle(pop_A, pop_B, SP, cfg)
-    pop_A <- cy$pop_A; pop_B <- cy$pop_B
-    cycles[[i]] <- cbind(cycle = i, cy$summary)
+    pop_A <- cy[["pop_A"]]; pop_B <- cy[["pop_B"]]
+    cycles[[i]] <- cbind(cycle = i, cy[["summary"]])
   }
-  hybrids <- alphasimr_make_hybrids(cy$elite_A, cy$elite_B, SP)
-  list(stage1 = alphasimr_to_stage1(hybrids, cy$elite_A, cy$elite_B, SP),
+  hybrids <- alphasimr_make_hybrids(cy[["elite_A"]], cy[["elite_B"]], SP)
+  list(stage1 = alphasimr_to_stage1(hybrids, cy[["elite_A"]], cy[["elite_B"]], SP),
        cycles = do.call(rbind, cycles))
 }
