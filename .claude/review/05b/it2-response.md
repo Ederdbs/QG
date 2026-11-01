@@ -1,0 +1,8 @@
+# 05b response, iteration 2
+
+| ID | fixed / contested | what changed / evidence |
+|---|---|---|
+| 05b-D3 | fixed | `book/90-notation.qmd:212`: theta_AB = w_A' f^L w_B with w_A, w_B the pool blocks of w **rescaled to sum to 1 within each pool**, as `line_weights()` returns (R/01_metrics.R:103-105); the row now also states that the unrescaled block gives theta_AB/4. `:213`: p_{A,w} = sum_i w_{A,i} u_ik at the within-pool weights w_A. 05b (Step 4 algebra, "For any weights w_A over the lines of pool A summing to 1 within the pool ...", p_{A,w} = sum_i w_{A,i} u_ik) aligned to the same notation. New asserts in chunk `tbl-het-step4-usage`: `theta_pools(i_trunc, ctx)[["theta_AB"]]` = mean_k(p_{A,w} p_{B,w} + q_{A,w} q_{B,w}) = 0.6352, and the global-w block (wt/2)' f^L (wt/2) = theta_AB/4 (both `all.equal`). |
+| 05b-M4 | fixed | Chunk `het-gca-peak` now computes `F_peak_axis = (F_peak - 1/n)/(1 - 1/n)` with n = `book_cfg$n_pool_A` = 25 (asserted equal to n_pool_B): 0.3826 -> 0.3569. New paragraph names the weighted mean bar F*, derives F_eff = F_BN + (1 - F_BN)/n from Var(p-hat | p) = pq F_BN + E[p_pool q_pool]/n, and points to the same sampling term in @sec-heterosis-flat. The bracket `stopifnot` in `tbl-het-relocation` and the inline sentence after the figure now use `F_peak_axis` (0.36, inside (0.2, 0.45); grid argmax 0.3). `90-notation` F*_k row adds bar F*. |
+
+Verification: both chapters purled and run end to end under `pkgload::load_all` in the worktree; every `stopifnot` passes. Not rendered. `book/scripts/make_downloads.R` re-run; no `book/Rplots.pdf` or `book/figure/` left.

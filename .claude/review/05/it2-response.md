@@ -1,0 +1,11 @@
+# Response 05-genomic-era -- iteration 2
+
+| ID | fixed / contested | what changed / evidence |
+|---|---|---|
+| 05-D10 | fixed | `@sec-era-fhom` ranking paragraph: the pair-level claim now rests on F1 heterozygosity only. Added an explicit statement that GD_BS is not evidence for it (usage-weight quantity, consistent with the GD_T + GD_BS caveat above) and the inline contrast, all `r` expressions on `z_two`: truncation GD_BS z = 27.4, F1_het z = 2.51; max_div GD_BS z = 0.47, F1_het z = 7.85 (re-run). The GD_BS rise is attributed to the usage-concentration effect of @sec-era-step6. Conclusion stated: truncation's pair-level advantage is real against the null but smaller than the max-diversity plan's. |
+| 05-M7 | fixed | Call line no longer says what @sec-cycles computes. It now derives Delta F = 1 - e^slope from 1 - F_t = (1 - Delta F)^t (1 - F_0), states that -slope errs by O(slope^2), relative error ~ Delta F / 2 (inline: 1.01% at Delta F = 0.02), and says only that @sec-cycles "fits the same regression" -- true: 11b fits `lm(log(1 - F_drift) ~ cycle)`. 11b not edited. |
+| 05-M12 | fixed | Comment in `tbl-era-centering-vs-structure` now reads "rank(G) = rank(f) - 1 and rank(G_0.5) = rank(f) (G_0.5 = 4 f - 2 J is affine in f, not equal to it)". |
+| 05-M13 | fixed (both attributions confirmed; citations made specific) | Checked against the full text (Europe PMC PMC7438563 = Meuwissen et al. 2020, Front. Genet. 11:880, doi 10.3389/fgene.2020.00880, matching references.bib). Table 2, Panel N: G_VR2(~,M) dF_hom 0.0085, dF_drift 0.0059 -- confirmed. Table 2, Panel M: G_LA(M,M) dF_drift 0.0049 (= Panel N 0.0049); text: "Delta F_drift for G LA (M,M) was within 2% of the target for both Panels M and N". Chunk comment now cites "Table 2, Panel N"; reading 1 now cites Table 2 for the Panel M value and quotes the source sentence. |
+| Editor (figure) | fixed | `fig-era-lens-divergence`: `type = "b"` -> `type = "o"` in both calls; label, palette, legend and `!expr` captions untouched. |
+
+Run: knitr::purl + pkgload::load_all + sys.source, all stopifnot() pass. Not rendered (freeze/docs not updated). book/Rplots.pdf removed; make_downloads.R re-run. The untracked "fig-era-lens-divergence-1 2.png" duplicate is still in book/_freeze and must be swept before commit.

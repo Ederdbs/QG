@@ -1,0 +1,38 @@
+# Audit 06-metric-catalogue.qmd -- iteration 1
+
+Method: `knitr::purl` of the chapter, run from `book/` after `pkgload::load_all()` of the
+`review` worktree; outputs compared with `book/_freeze/06-metric-catalogue/execute-results/html.json`;
+extra checks in scratch. Read-only: nothing under `book/`, `docs/`, `R/` was edited, no Rplots.pdf created.
+
+Passed: every chunk runs (~1 s); frozen output matches the live run exactly (timings included,
+by coincidence); no file read from book/data, book/figs, report/, data/ or reference/ (chapter is
+fully live, no cached artefacts); all 24 functions used are exported by the installed `hybdiv`
+and their bodies are identical to the worktree; no figures, so no `unnamed-chunk-*` orphan risk.
+The chapter has **zero** inline `` `r ...` `` expressions.
+
+| ID | file:line | Sev | Evidence | Fix |
+|---|---|---|---|---|
+| 06-R1 | book/06-metric-catalogue.qmd:399 | High | "At the full simulated scale that ceiling comes out near **3.6%**" is hand-typed; no source in book/data, README or any chapter (grep). The chunk just above prints the book-scale value 0.0412, which the prose never cites. | Cite the live value inline (`` `r fmt(100*attainable, 1)` ``%); if the production number is wanted, have `regenerate.R` write it to a book/data CSV and read it. |
+| 06-R2 | :414-416 | High | "Truncation is many s.d. from random on `F_drift` and on `Ne_parents` while being far less extreme on `GD`". Own table: truncation GD -17.9, Ne_parents -11.4, F_drift 30.1. Ne_parents is *less* extreme than GD; with B_full = 1000: GD -18.0, Ne_parents -12.6, F_drift 36.0. The pattern described actually holds for `trunc_cap` (GD -1.3, Ne_parents -2.7, F_drift 3.1, alleles_lost 3.3, ANE 17.9). | Rewrite with inline z values; make the claim about F_drift (truncation) and about trunc_cap, drop Ne_parents for truncation. |
+| 06-R3 | :113-125 | High | "N_s is the number of unrelated, non-inbred individuals that would have the same gene diversity". On molecular `f` with biallelic markers theta = mean(p^2+q^2) >= 0.5, so Ns in [0.5, 1] for every set. The chapter's own edge case shows it: 5 "unrelated" individuals (f = 0.5) give Ns = 1, not 5; the five selections give Ns 0.727-0.747. Lindgren's count reading holds for pedigree coancestry against a base, not here. | State that on molecular coancestry Ns is bounded by 1 and is a monotone rescaling of theta, not a head count (or define it against a base, e.g. (f - f0)/(1 - f0)); add `stopifnot(all(vapply(sels, status_number, 0, ctx = ctx) <= 1))`. |
+| 06-R4 | :166 | Medium | "Truncation collapses the parent base far more than it moves theta" -- true in relative units (Ne_parents -66.9 %, theta +1.98 %), false on the z scale the chapter adopts at :405 (Ne_parents -11.4 vs GD -17.9). | Say "in relative terms" and inline both percentages. |
+| 06-R5 | :46 (all tables) | Medium | `greedy_w1` is identical to `truncation` (`setequal` TRUE): index is in s.d. units (range -2.4..3.6) while a theta increment is ~1e-5, so w = 1 is pure truncation. Overlap with truncation: 53/60 at w = 0.001 (alpha 0.031), 59 at 0.01, 60 from 0.05. Every table carries two identical rows and the Spearman at :53 is on 5 points with a tie. | Use w = 0.001 (a real trade-off point) or drop the row and say why; needs re-render. |
+| 06-R6 | :184-185 | Medium | "the only metric in this catalogue genuinely non-redundant with theta" -- the chapter's own final table (:409) shows F_drift separating truncation from random at z = 30.1 vs GD -17.9, and the redundancy analysis it defers to (`book/data/metric_redundancy.csv`) contains neither F_drift nor F_hom, so the claim was never tested for them. Also R/01_metrics.R:178 roxygen repeats it. | Restrict to "among the metrics of the redundancy analysis" or add F_drift to that analysis. |
+| 06-R7 | :98-104 | Medium | Timing with fixed reps = 40 is clock-quantised (theta_group ~8 us x 40 = 0.3 ms < 1 ms resolution): 5 reruns gave ratio 7, Inf, Inf, 4, Inf. Adaptive timing (repeat until > 0.4 s): 8.0 vs 118.9 us, ratio 14.8. Violates the CLAUDE.md adaptive-repetition rule. Related: R/01_metrics.R:51 says "roughly 100x slower here" (hand-typed, 14.8x at book scale). | Use a `bench_us`-style adaptive loop; reword the roxygen without a number or with its scale. |
+| 06-R8 | :79-83, :270, :274, :344, :349, :53 | Low | Printed identities/claims with no `stopifnot`: theta submatrix == frequency route and GD == He (diff 0 here); GD_WI "exactly zero" (actually -4.4e-16..0, so to machine precision); GD_BS rises under truncation (0.0350 -> 0.0524); predicted vs observed bias (0.002222 vs 0.002277, MC SE 4.1e-5, z = 1.32); off-diagonal mean unbiased; Eq. (1). | `stopifnot(all.equal(theta_group(idx,ctx), theta_from_freq(idx,ctx)), all.equal(gene_diversity(idx,ctx), he_nei(idx,ctx)))`; `stopifnot(all(abs(gdp[,"GD_WI"]) < 1e-12))`; `stopifnot(abs(observed_bias - predicted_bias) < 4 * sd(th)/sqrt(400))` (keep the draws); Eq. (1) check `all.equal(theta, fd_S/n + (n-1)/n*fo_S)`. |
+| 06-R9 | :233-234 | Low | "n if spread evenly" -- after double-centering rank <= n-1 (roxygen R/01_metrics.R:270 says `(0, n-1]`); measured rank 45 for the random idx. | "n - 1". |
+| 06-R10 | :241 | Low | "the leading eigenvalue is just n theta" -- it is >= n theta (Rayleigh quotient at 1/sqrt(n)) and only approximately equal: 40.4566 vs 40.4559 (random), 41.2621 vs 41.2555 (truncation). | "approximately (and at least) n theta". |
+| 06-R11 | :208-210; R/01_metrics.R:262 | Low | `ane()` uses d = 1 - f including i = j: d_ii = 1 - f_ii (mean 0.181), not 0 as in Core Hunter's distances. For the random set all 60 selected entries are their own nearest entry. With d_ii = 0: 0.2298/0.2387/0.2348/0.2326/0.2348 vs code 0.2471/0.2561/0.2523/0.2504/0.2523; ranking unchanged here (offset ~ n/N mean d_ii). | Note it in the prose, or zero the self term in `ane()` (package change; moves 07 numbers). |
+| 06-R12 | :44 | Low | `sel_random()` draws with no `set.seed()` immediately before; it inherits the stream after `sample.int` at :9. Deterministic today, moves if a draw is inserted earlier. | `set.seed(<n>)` right before `sels <- list(...)`. |
+| 06-R13 | :366 | Low | `B_full = 60` makes the z table noisy: vs B_full = 1000, F_drift(trunc) 30.1 -> 36.0, Ne_parents -11.4 -> -12.6, ANE(trunc_cap) 17.9 -> 16.4. | Raise B_full (cost is seconds at book scale) or state the MC error. |
+| 06-R14 | :277-283 | Low | Callout "erodes one pool while global theta looks fine": the chapter's eroded case (truncation, Ne_lines_A 4.49 vs B 11.84) has GD z = -17.9, so global theta does not look fine in the example shown. | Soften, or demonstrate at matched global theta (e.g. two plans at the same alpha). |
+| 06-R15 | :329-330 | Low | `theta_S - theta_N = ...` is stated for a set; it holds for E[theta_S] over random S. | Write E[theta_S] - theta_N. |
+| 06-R16 | :95-96, :158-160 | Info | Hand-typed illustrative numbers (n = 200, m = 25000 -> 4e4 vs 5e6; "200 hybrids ... 12 lines"). Arithmetic correct; hypothetical, acceptable, could be inline. | Optional. |
+
+## Summary
+3 High (R1 hand-typed 3.6 %; R2 closing claim contradicted by its own z table; R3 Ns read as a
+head count although Ns <= 1 on molecular f, refuted by the chapter's own edge case), 4 Medium
+(R4 scale-ambiguous Ne_parents claim; R5 greedy_w1 == truncation; R6 "only non-redundant metric"
+vs F_drift; R7 quantised timing), 8 Low, 1 Info. Code runs, is reproducible against `_freeze`,
+reads no forbidden paths, uses the installed API correctly. Fixing R5/R7/R12/R13 changes
+printed outputs: re-render 06 (html + typst); no figures, so no orphaned PNGs.

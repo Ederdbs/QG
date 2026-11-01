@@ -39,21 +39,26 @@ knitr::kable(data.frame(
 #| echo: false
 knitr::kable(data.frame(
   Symbol = c("$\\mathbf{f}$", "$\\mathbf{f}^L$", "$\\mathbf{G}$", "$\\mathbf{A}$",
-             "$\\mathbf{G}_{0.5}$", "$\\mathbf{Z}$", "$\\mathbf{J}$"),
+             "$\\mathbf{G}_{0.5}$", "$\\mathbf{Z}$", "$\\mathbf{Z}_h$", "$\\mathbf{J}$",
+             "$\\mathbf{B}$"),
   Meaning = c("molecular coancestry of the **hybrids**, N x N, in [0, 1]",
               "molecular coancestry **between lines**, L x L",
               "VanRaden genomic relationship, centered -- prediction only",
               "pedigree relationship",
               "VanRaden with the centering frequency fixed at 0.5",
               "centered dosage $\\mathbf{M}^H - \\mathbf{1}\\,2\\mathbf{p}'$, N x m",
-              "matrix of ones $\\mathbf{1}\\mathbf{1}'$, N x N"),
+              "hybrid marker matrix centred at 0.5, $\\mathbf{X} - \\tfrac12\\mathbf{J}_{N \\times m}$, N x m",
+              "matrix of ones $\\mathbf{1}\\mathbf{1}'$, N x N; $\\mathbf{J}_{r \\times c}$ when rectangular",
+              "parent-usage incidence, N x L: a 1 in the two columns of each hybrid's parents; $\\mathbf{X} = \\tfrac12\\mathbf{B}\\mathbf{G}^L$"),
   Note = c("the diversity kernel; never centered",
            "the sufficient statistic in disguise -- see the collapse",
            "sum of all elements is exactly 0; unusable for diversity",
            "expectation of IBD, no markers",
            "$4\\mathbf{f} - 2\\mathbf{J}$: an affine function of f, not f; orders selections as f does only when $\\mathbf{1}'\\mathbf{c} = 1$",
            "builds $\\mathbf{G}$; also the marker design matrix of $\\mathbf{u} = \\mathbf{Z}\\boldsymbol\\beta$ (genomic prediction); not the subgroup indicator $\\mathbf{Z}$ of joint allocation",
-           "-"),
+           "$\\mathbf{G}_{0.5} = 8\\mathbf{Z}_h\\mathbf{Z}_h'/m$ (@sec-era-step7)",
+           "-",
+           "rank bounds that of $\\mathbf{f}$ (@eq-era-rank); not the field budget $B$"),
   check.names = FALSE))
 ```
 
@@ -64,7 +69,10 @@ knitr::kable(data.frame(
 knitr::kable(data.frame(
   Symbol = c("$\\theta_S$", "$GD$, $H_e$", "$N_s$", "$N_{e,\\text{par}}$",
              "$f_{ii}$", "$s_i$", "$\\tilde x$", "$\\bar x$",
-             "$H_o$", "$n_{gam}$", "$\\Delta F$", "$N_e$"),
+             "$H_o$", "$n_{gam}$", "$\\Delta F$", "$N_e$",
+             "$\\bar f_d$, $\\bar f_o$", "$F_{(ab)}$",
+             "$\\eta_{ij}$", "E-NE, A-NE", "MAF, $A_{\\text{lost}}$",
+             "$D_{\\text{eff}}$, $\\gamma_i$"),
   Definition = c("$n^{-2}\\sum_i\\sum_j f_{ij}$, diagonal **included**; the $\\bar f$ of the partition below, with census weights (@sec-subdivided)",
                  "$1 - \\theta$; these are the same quantity",
                  "$1/(2\\theta)$",
@@ -76,11 +84,18 @@ knitr::kable(data.frame(
                  "observed heterozygosity: fraction of heterozygous loci, averaged over the individuals of the set; 0 for inbred lines, $GD_T + GD_{BS}$ over the full hybrid factorial (@sec-hp-popgen)",
                  "allele copies sampled per generation under drift (@eq-hp-drift)",
                  "per-generation rate of inbreeding, $1/n_{gam}$ (@eq-hp-drift)",
-                 "effective size, $1/(2\\Delta F)$ (@eq-hp-drift); not the asymptotic metapopulation $N_e$ of the subdivided table below"),
+                 "effective size, $1/(2\\Delta F)$ (@eq-hp-drift); not the asymptotic metapopulation $N_e$ of the subdivided table below",
+                 "mean of the diagonal (self-coancestries) and mean of the off-diagonal elements of $\\mathbf{f}$ over a set; $\\theta_S = \\bar f_d/n + (n-1)\\bar f_o/n$ (@sec-catalogue)",
+                 "molecular inbreeding coefficient of the single cross $a \\times b$, the fraction of markers at which it is homozygous; equals $f^L_{ab}$ for inbred parents (@sec-hp-popgen)",
+                 "distance $1 - f_{ij}$ used by E-NE and A-NE (@eq-catalogue-ene-ane); not $D_{ij}$, $\\bar d_{ij}$ or $\\mathrm{MRD}_{ij}$",
+                 "entry-to-nearest-entry and accession-to-nearest-entry distances (@eq-catalogue-ene-ane)",
+                 "minor allele frequency; $A_{\\text{lost}}$ the markers with MAF $\\ge 0.05$ in the population and $< 0.05$ in the selection (@eq-catalogue-alleles-lost)",
+                 "participation ratio $(\\sum_i\\gamma_i)^2/\\sum_i\\gamma_i^2$ over the eigenvalues $\\gamma_i$ of the double-centered $\\mathbf{f}_S$ (@eq-catalogue-deff)"),
   `Function` = c("`theta_group()`, `fast_theta()`", "`gene_diversity()`, `he_nei()`",
                  "`status_number()`", "`ne_parents()`", "`ct_partition()`",
                  "`ct_partition()`", "-", "-",
-                 "-", "-", "-", "-"),
+                 "-", "-", "-", "-", "-", "`rowMeans(ctx$X != 0.5)`",
+                 "-", "`ene()`, `ane()`", "`alleles_lost()`", "`eff_dim()`"),
   check.names = FALSE))
 ```
 
@@ -183,10 +198,18 @@ These are the symbols of @sec-subdivided, which follow @caballero2002.
 ```{r}
 #| echo: false
 knitr::kable(data.frame(
-  Symbol = c("$d_k$", "$H_i$", "$\\bar p_k$", "$y_k$",
+  Symbol = c("$d_k$", "$a_k$", "$\\delta u_{ik}$, $\\delta v_{jk}$", "$H_i$", "$\\bar p_k$", "$y_k$",
              "$g^A_i$, $g^B_j$", "$s_{ij}$", "$\\sigma^2_{SCA}$",
-             "$\\lambda$", "$t$", "$p_0^{(0)}$"),
+             "$\\lambda$", "$t$", "$p_0^{(0)}$",
+             "$M$", "$G(\\mathbf{x})$", "$h_i$", "$GD_{WI\\text{-}hyb}$",
+             "$\\theta_A$, $\\theta_B$, $\\theta_{AB}$", "$p_{A,w}$",
+             "$\\mathrm{MRD}_{ij}$", "$\\mu$", "$\\mathrm{DC}(\\cdot)$",
+             "$\\sigma^2_{GCA_A}$, $\\sigma^2_{GCA_B}$", "$F^\\star_k$", "$\\rho_k$",
+             "$H_T$, $H_S$, $D_G$", "$A_T$, $A_S$, $D_A$",
+             "$\\lambda_d$, $\\bar d_H$, $\\bar d_D$"),
   Meaning = c("dominance deviation at locus $k$",
+              "additive effect at locus $k$; enters the GCA, not the SCA (@sec-mating-estimation)",
+              "centred 0/1 genotype of pool-A line $i$ / pool-B line $j$ at locus $k$: $u_{ik} - p_{Ak}$, $v_{jk} - p_{Bk}$",
               "mid-parent heterosis of hybrid $i$; $\\sum_k d_k$ over its heterozygous loci",
               "$(p_{Ak} + p_{Bk})/2$, the merged-pool frequency",
               "$p_{Ak} - p_{Bk}$, the divergence at locus $k$",
@@ -195,13 +218,32 @@ knitr::kable(data.frame(
               "$4\\sum_k d_k^2 p_{Ak}q_{Ak}p_{Bk}q_{Bk}$; its Balding-Nichols expectation falls as $(1 - F_{BN})^2$",
               "weight on within- against between-pool diversity -- **not** the OCS penalty $\\lambda$ of the selection table",
               "cycle index",
-              "base frequencies, frozen at the founding cycle"),
-  `Function` = c("argument to `heterosis_value()`", "`heterosis_value()`",
+              "base frequencies, frozen at the founding cycle",
+              "one-locus population mean under random mating, $a(p - q) + 2pqd$",
+              "genotypic value of an individual with marker row $\\mathbf{x}$ (0/0.5/1); not the VanRaden $\\mathbf{G}$",
+              "heterozygous fraction of hybrid $i$; its self-coancestry is $1 - h_i/2$",
+              "within-individual gene diversity of the F1s, half their mean heterozygosity",
+              "coancestry within pool A, within pool B, and between them, $\\mathbf{w}_A'\\mathbf{f}^L\\mathbf{w}_B$ with $\\mathbf{w}_A$ the pool-A block of $\\mathbf{w}$ rescaled to sum to 1 within pool A (and $\\mathbf{w}_B$ likewise), as `line_weights()` returns; the unrescaled block gives $\\theta_{AB}/4$",
+              "pool-A allele frequency at the within-pool weights $\\mathbf{w}_A$ (summing to 1 over pool A), $\\sum_i w_{A,i} u_{ik}$",
+              "modified Rogers distance between lines $i$ and $j$; $\\mathrm{MRD}_{ij}^2 = 1 - f^L_{ij}$ for inbred lines",
+              "grand mean of $H_{ij}$ over the complete factorial (in the UC of the selection table, a population mean)",
+              "double centring over the $A \\times B$ block: minus row and column means, plus the grand mean",
+              "variance of $g^A_i$, $g^B_j$ over the factorial; $\\sum_k d_k^2 (1 - 2p_{Bk})^2 p_{Ak}q_{Ak}$ and symmetrically",
+              "divergence $F_{ST}$ (Balding-Nichols expectation) at which locus $k$'s GCA variance turns over; $\\bar F^\\star$ is their $d_k^2(p_kq_k)^2$-weighted mean, where the summed GCA variance turns over",
+              "the $\\rho$ of the mating-design table with $k$ random testers from a finite pool",
+              "total, within- and between-subpopulation gene diversity, $H_T = H_S + D_G$ [@nei1973]; per locus $H_{T,k}$, $H_{S,k}$, $D_{G,k}$; with two pools $H_T = GD_T$, $D_G = GD_{BS}$ (@sec-catalogue)",
+              "the allelic-diversity analogue, $A_T = A_S + D_A$ (@eq-catalogue-lambda)",
+              "the $\\lambda$ fixed by expected heterosis, $\\bar d_H/(2\\bar d_D)$, with $\\bar d_H$, $\\bar d_D$ the $H_S$- and $D_G$-weighted means of $d_k$ (@eq-catalogue-lambda-d)"),
+  `Function` = c("argument to `heterosis_value()`", "-", "inside `heterosis_gca_sca()`", "`heterosis_value()`",
                  "inside `heterosis_partition()`", "`pool_complementarity()$mean_sq_delta_p` is $\\overline{y^2}$",
                  "`heterosis_gca_sca()$gca_A`", "`heterosis_gca_sca()$sca`",
                  "closed form; see @sec-heterosis-relocation",
                  "not implemented; see @sec-catalogue", "`run_cycles()`",
-                 "`ctx$p0`, set once"),
+                 "`ctx$p0`, set once",
+                 "-", "-", "`rowMeans(ctx$X == 0.5)`", "`gd_partition()$GD_WI_hyb`",
+                 "`theta_pools()`", "-", "`mrd_matrix()`", "`heterosis_gca_sca()$mu`", "-",
+                 "closed form; see @sec-heterosis-relocation", "-", "see @sec-heterosis-step6",
+                 "`gd_partition()`", "-", "-"),
   check.names = FALSE))
 ```
 
@@ -215,15 +257,16 @@ split orthogonally as $H_{ij} = \mu + g^A_i + g^B_j + s_{ij}$.
 ```{r}
 #| echo: false
 knitr::kable(data.frame(
-  Symbol = c("$F_{hom}$", "$F_{drift}$", "$F_{IBD}$", "$F_{ROH}$", "$\\text{cov}$"),
-  Lens = c("homozygosity", "drift", "identity by descent", "hybrid", "-"),
+  Symbol = c("$F_{hom}$", "$F_{drift}$", "$F_{IBD}$", "$F_{ROH}$", "$\\text{cov}$", "$\\kappa$"),
+  Lens = c("homozygosity", "drift", "identity by descent", "hybrid", "-", "-"),
   Definition = c("$1 - \\overline{H_t/H_0}$; **can be negative**",
                  "$\\overline{\\delta p^2 / [p_0(1-p_0)]}$; never negative",
                  "segments inherited from a defined base",
                  "genome fraction in runs of homozygosity",
-                 "$2\\,\\text{cov}(\\delta p/s,\\,(p_0 - \\tfrac12)/s) = F_{hom} - F_{drift}$"),
+                 "$2\\,\\text{cov}(\\delta p/s,\\,(p_0 - \\tfrac12)/s) = F_{hom} - F_{drift}$",
+                 "panel statistic $\\overline{(p_0 - \\tfrac12)^2/[p_0(1-p_0)]}$ (@sec-genomic-era); not the aggregate genotype $W$"),
   `Function` = c("`freq_metrics()`", "`freq_metrics()`", "requires pedigree + linkage",
-                 "not implemented", "`freq_metrics()$cov_diag`"),
+                 "not implemented", "`freq_metrics()$cov_diag`", "-"),
   check.names = FALSE))
 ```
 
@@ -233,7 +276,8 @@ knitr::kable(data.frame(
 #| echo: false
 knitr::kable(data.frame(
   Symbol = c("$u_i$", "$\\alpha$", "$\\alpha_{\\max}$", "$\\mathbf{c}$",
-             "$\\mathbf{w}$", "$k_a$", "$\\lambda$", "$\\sigma^2_{DH}$", "UC"),
+             "$\\mathbf{w}$", "$k_a$", "$\\lambda$", "$\\sigma^2_{DH}$", "UC",
+             "$GD_{\\text{random}(n)}$", "$\\omega$"),
   Meaning = c("multi-trait index of hybrid i",
               "$(GD_{\\text{ref}} - GD_S)/GD_{\\text{ref}}$; negative means more diverse than chance",
               "the diversity budget -- a policy decision",
@@ -242,11 +286,14 @@ knitr::kable(data.frame(
               "times line a is used as a parent",
               "weight on the coancestry penalty in continuous OCS -- **not** the within/between weight of the heterosis table",
               "progeny variance of a DH family",
-              "usefulness criterion, $\\mu + i h \\sigma$"),
+              "usefulness criterion, $\\mu + i h \\sigma$",
+              "mean $GD$ of random subsets of size $n$, the reference of $\\alpha$; the same quantity as $GD_{\\text{ref}}$ (@eq-catalogue-alpha)",
+              "index weight of the greedy score $\\omega\\,u_i - \\theta$ (written $w$ in @sec-combinatorial); not the line-usage weights $\\mathbf{w}$"),
   `Function` = c("`ctx$index`", "`alpha_loss()`", "argument to `stage2_select()`",
                  "`ocs_quadprog()`", "`line_weights()`, `line_usage_freq()`",
                  "`line_counts()`", "`ocs_relaxation()`", "`sigma2_dh()`",
-                 "`usefulness_criterion()`"),
+                 "`usefulness_criterion()`",
+                 "`null_distribution()$gd_ref`", "argument `w` of `sel_greedy()`"),
   check.names = FALSE))
 ```
 
@@ -492,6 +539,30 @@ errors of zero; a single seed can over- or underpredict.
 $H$ in @sec-response is the heterosis value $H_i$ of the heterosis table above,
 not the aggregate genotype, which is $W$.
 
+### AlphaSimR pipeline
+
+```{r}
+#| echo: false
+knitr::kable(data.frame(
+  Symbol = c("$x_{ik}$", "$G_i$, $G_{ij}$", "$\\mu_0$", "$\\delta_k$",
+             "$M_{HW}$, $M_{F_t}$", "$\\bar H$", "$\\alpha_k$, $\\alpha^{(B)}_k$",
+             "$\\hat g^A_i$", "$t$, $r$, $\\rho(t, r)$", "$v_g$, $v_s$, $v_e$", "$n_A$, $n_B$"),
+  Meaning = c("0/1/2 dosage of individual $i$ at QTL $k$, an entry of $\\mathbf{M}^H$ -- **not** the 0/0.5/1 entry of $\\mathbf{X}$",
+              "genetic value of individual $i$ under AlphaSimR's `TraitAD` (the $G(\\mathbf{x})$ above on the 0/1/2 dosage); of the F1 between inbred lines $i$ and $j$ -- **not** the Caballero-Toro $G_i$",
+              "intercept of that genetic value",
+              "dominance degree $d_k / |a_k|$, drawn from $N(\\texttt{meanDD}, \\texttt{varDD})$",
+              "population mean under Hardy-Weinberg proportions; mean of selfed generation $F_t$",
+              "mean of $H_{ij}$ over the A x B factorial: the $\\mu$ of the heterosis table, renamed because $\\mu_0$ is the intercept there",
+              "average effect of a gene substitution, $a_k + d_k(q_k - p_k)$; the same at pool-B frequencies, $a_k + d_k(1 - 2p_{Bk})$ -- **not** the diversity-loss budget $\\alpha$ nor the Caballero-Toro $\\alpha_i$",
+              "testcross estimate of the GCA $g^A_i$",
+              "testers, locations, and the first-order accuracy of $\\hat g^A_i$: the $k$, $r$, $\\rho$ of the mating-design table, $k$ renamed because it indexes QTL there",
+              "sample variance of $g^A_i$ over the candidates, and the SCA and error terms of $\\rho(t, r)$",
+              "candidate pool-A lines; pool-B lines the testers are drawn from"),
+  check.names = FALSE))
+```
+
+These symbols are local to @sec-alphasimr.
+
 ## Conventions
 
 **Coancestry always includes the diagonal.** Group coancestry in the sense of
@@ -553,8 +624,10 @@ argument lives.
 \mathbf{f}^L \mathbf{w}$ for F1 hybrids of homozygous lines, which removes the
 need for the $N \times N$ hybrid matrix. See @sec-collapse.
 
-**Status number.** $N_s = 1/(2\theta)$, the number of unrelated non-inbred
-individuals with the same gene diversity. A static descriptor.
+**Status number.** $N_s = 1/(2\theta)$. A head count of unrelated non-inbred
+individuals only on coancestry measured against a base population; on molecular
+$\mathbf{f}$, $N_s \in [1/2, 1]$ and is a monotone rescaling of $\theta$
+(@sec-ns). A static descriptor.
 
 **Truncation selection.** Take the top $n$ by index, ignore everything else. The
 ceiling on gain and the floor on diversity.

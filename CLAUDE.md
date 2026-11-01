@@ -2,6 +2,20 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Git workflow: every session works on a branch and ends with a pull request
+
+Several Claude sessions share this repo. **Never commit directly to `main`.** Every session:
+
+1. Creates its own branch from an up-to-date `main`, in its own git worktree
+   (`git fetch origin && git worktree add ../SB_quanti_gen-<topic> -b <topic> origin/main`),
+   so it never stashes, checks out or renders in a tree another session is using.
+2. Commits its work on that branch only.
+3. Pushes the branch and opens a pull request against `main` (`gh pr create --base main`).
+   The PR is the hand-off: merging is the user's decision, not the session's.
+
+A long-running task (e.g. the chapter-by-chapter review) may keep pushing to its open PR's
+branch; once that PR is merged, the next piece of work starts a new branch from `main`.
+
 ## What this is
 
 Hybrid selection under a diversity constraint (quantitative/population genetics). Given a
