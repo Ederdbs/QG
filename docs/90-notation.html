@@ -814,8 +814,8 @@ window.Quarto = {
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
-<col style="width: 9%">
-<col style="width: 76%">
+<col style="width: 11%">
+<col style="width: 75%">
 <col style="width: 13%">
 </colgroup>
 <thead>
@@ -895,6 +895,26 @@ window.Quarto = {
 <td style="text-align: left;"><span class="math inline">\(F_{(ab)}\)</span></td>
 <td style="text-align: left;">molecular inbreeding coefficient of the single cross <span class="math inline">\(a \times b\)</span>, the fraction of markers at which it is homozygous; equals <span class="math inline">\(f^L_{ab}\)</span> for inbred parents (<a href="00-hybrid-programme.html#sec-hp-popgen" class="quarto-xref"><span>Section 1.2</span></a>)</td>
 <td style="text-align: left;"><code>rowMeans(ctx$X != 0.5)</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\eta_{ij}\)</span></td>
+<td style="text-align: left;">distance <span class="math inline">\(1 - f_{ij}\)</span> used by E-NE and A-NE (<a href="06-metric-catalogue.html#eq-catalogue-ene-ane" class="quarto-xref">Equation&nbsp;<span>11.7</span></a>); not <span class="math inline">\(D_{ij}\)</span>, <span class="math inline">\(\bar d_{ij}\)</span> or <span class="math inline">\(\mathrm{MRD}_{ij}\)</span></td>
+<td style="text-align: left;">-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">E-NE, A-NE</td>
+<td style="text-align: left;">entry-to-nearest-entry and accession-to-nearest-entry distances (<a href="06-metric-catalogue.html#eq-catalogue-ene-ane" class="quarto-xref">Equation&nbsp;<span>11.7</span></a>)</td>
+<td style="text-align: left;"><code>ene()</code>, <code>ane()</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">MAF, <span class="math inline">\(A_{\text{lost}}\)</span></td>
+<td style="text-align: left;">minor allele frequency; <span class="math inline">\(A_{\text{lost}}\)</span> the markers with MAF <span class="math inline">\(\ge 0.05\)</span> in the population and <span class="math inline">\(&lt; 0.05\)</span> in the selection (<a href="06-metric-catalogue.html#eq-catalogue-alleles-lost" class="quarto-xref">Equation&nbsp;<span>11.6</span></a>)</td>
+<td style="text-align: left;"><code>alleles_lost()</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(D_{\text{eff}}\)</span>, <span class="math inline">\(\gamma_i\)</span></td>
+<td style="text-align: left;">participation ratio <span class="math inline">\((\sum_i\gamma_i)^2/\sum_i\gamma_i^2\)</span> over the eigenvalues <span class="math inline">\(\gamma_i\)</span> of the double-centered <span class="math inline">\(\mathbf{f}_S\)</span> (<a href="06-metric-catalogue.html#eq-catalogue-deff" class="quarto-xref">Equation&nbsp;<span>11.8</span></a>)</td>
+<td style="text-align: left;"><code>eff_dim()</code></td>
 </tr>
 </tbody>
 </table>
@@ -1171,6 +1191,21 @@ window.Quarto = {
 <td style="text-align: left;">the <span class="math inline">\(\rho\)</span> of the mating-design table with <span class="math inline">\(k\)</span> random testers from a finite pool</td>
 <td style="text-align: left;">see <a href="05b-heterosis-dominance.html#sec-heterosis-step6" class="quarto-xref"><span>Section 5.12.6</span></a></td>
 </tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(H_T\)</span>, <span class="math inline">\(H_S\)</span>, <span class="math inline">\(D_G\)</span></td>
+<td style="text-align: left;">total, within- and between-subpopulation gene diversity, <span class="math inline">\(H_T = H_S + D_G\)</span> <span class="citation" data-cites="nei1973">(<a href="99-references.html#ref-nei1973" role="doc-biblioref">Nei 1973</a>)</span>; per locus <span class="math inline">\(H_{T,k}\)</span>, <span class="math inline">\(H_{S,k}\)</span>, <span class="math inline">\(D_{G,k}\)</span>; with two pools <span class="math inline">\(H_T = GD_T\)</span>, <span class="math inline">\(D_G = GD_{BS}\)</span> (<a href="06-metric-catalogue.html" class="quarto-xref"><span>Chapter 11</span></a>)</td>
+<td style="text-align: left;"><code>gd_partition()</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(A_T\)</span>, <span class="math inline">\(A_S\)</span>, <span class="math inline">\(D_A\)</span></td>
+<td style="text-align: left;">the allelic-diversity analogue, <span class="math inline">\(A_T = A_S + D_A\)</span> (<a href="06-metric-catalogue.html#eq-catalogue-lambda" class="quarto-xref">Equation&nbsp;<span>11.10</span></a>)</td>
+<td style="text-align: left;">-</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\lambda_d\)</span>, <span class="math inline">\(\bar d_H\)</span>, <span class="math inline">\(\bar d_D\)</span></td>
+<td style="text-align: left;">the <span class="math inline">\(\lambda\)</span> fixed by expected heterosis, <span class="math inline">\(\bar d_H/(2\bar d_D)\)</span>, with <span class="math inline">\(\bar d_H\)</span>, <span class="math inline">\(\bar d_D\)</span> the <span class="math inline">\(H_S\)</span>- and <span class="math inline">\(D_G\)</span>-weighted means of <span class="math inline">\(d_k\)</span> (<a href="06-metric-catalogue.html#eq-catalogue-lambda-d" class="quarto-xref">Equation&nbsp;<span>11.12</span></a>)</td>
+<td style="text-align: left;">-</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -1244,9 +1279,9 @@ window.Quarto = {
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
-<col style="width: 9%">
-<col style="width: 67%">
-<col style="width: 23%">
+<col style="width: 12%">
+<col style="width: 68%">
+<col style="width: 19%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1300,6 +1335,16 @@ window.Quarto = {
 <td style="text-align: left;">UC</td>
 <td style="text-align: left;">usefulness criterion, <span class="math inline">\(\mu + i h \sigma\)</span></td>
 <td style="text-align: left;"><code>usefulness_criterion()</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(GD_{\text{random}(n)}\)</span></td>
+<td style="text-align: left;">mean <span class="math inline">\(GD\)</span> of random subsets of size <span class="math inline">\(n\)</span>, the reference of <span class="math inline">\(\alpha\)</span>; the same quantity as <span class="math inline">\(GD_{\text{ref}}\)</span> (<a href="06-metric-catalogue.html#eq-catalogue-alpha" class="quarto-xref">Equation&nbsp;<span>11.14</span></a>)</td>
+<td style="text-align: left;"><code>null_distribution()$gd_ref</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\omega\)</span></td>
+<td style="text-align: left;">index weight of the greedy score <span class="math inline">\(\omega\,u_i - \theta\)</span> (written <span class="math inline">\(w\)</span> in <a href="10-combinatorial-selection.html" class="quarto-xref"><span>Chapter 16</span></a>); not the line-usage weights <span class="math inline">\(\mathbf{w}\)</span></td>
+<td style="text-align: left;">argument <code>w</code> of <code>sel_greedy()</code></td>
 </tr>
 </tbody>
 </table>
@@ -2040,7 +2085,7 @@ window.Quarto = {
 <p><strong>Identity by state (IBS) vs by descent (IBD).</strong> IBS is what markers observe: two alleles are the same allele. IBD adds the requirement of common ancestry from a defined base. The gap between them is where <a href="05-genomic-era.html" class="quarto-xref"><span>Chapter 10</span></a>’s whole argument lives.</p>
 <p><strong>Line-level collapse.</strong> The exact identity <span class="math inline">\(\theta_S = \mathbf{w}'
 \mathbf{f}^L \mathbf{w}\)</span> for F1 hybrids of homozygous lines, which removes the need for the <span class="math inline">\(N \times N\)</span> hybrid matrix. See <a href="07-choosing-metrics.html#sec-collapse" class="quarto-xref"><span>Section 12.1</span></a>.</p>
-<p><strong>Status number.</strong> <span class="math inline">\(N_s = 1/(2\theta)\)</span>, the number of unrelated non-inbred individuals with the same gene diversity. A static descriptor.</p>
+<p><strong>Status number.</strong> <span class="math inline">\(N_s = 1/(2\theta)\)</span>. A head count of unrelated non-inbred individuals only on coancestry measured against a base population; on molecular <span class="math inline">\(\mathbf{f}\)</span>, <span class="math inline">\(N_s \in [1/2, 1]\)</span> and is a monotone rescaling of <span class="math inline">\(\theta\)</span> (<a href="06-metric-catalogue.html#sec-ns" class="quarto-xref"><span>Section 11.3</span></a>). A static descriptor.</p>
 <p><strong>Truncation selection.</strong> Take the top <span class="math inline">\(n\)</span> by index, ignore everything else. The ceiling on gain and the floor on diversity.</p>
 <p><strong>Warm start.</strong> Seeding an optimiser’s initial population with heuristic solutions. Not optional here: without it the differential evolution finishes below a plain greedy.</p>
 <!-- reproduce-chapter -->
@@ -2053,6 +2098,9 @@ window.Quarto = {
 <div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
 <div id="ref-caballero2002" class="csl-entry" role="listitem">
 Caballero, A., and M. A. Toro. 2002. <span>“Analysis of Genetic Diversity for the Management of Conserved Subdivided Populations.”</span> <em>Conservation Genetics</em> 3 (3): 289–99. <a href="https://doi.org/10.1023/A:1019956205473">https://doi.org/10.1023/A:1019956205473</a>.
+</div>
+<div id="ref-nei1973" class="csl-entry" role="listitem">
+Nei, M. 1973. <span>“Analysis of Gene Diversity in Subdivided Populations.”</span> <em>Proceedings of the National Academy of Sciences</em> 70 (12): 3321–23. <a href="https://doi.org/10.1073/pnas.70.12.3321">https://doi.org/10.1073/pnas.70.12.3321</a>.
 </div>
 </div>
 </section>

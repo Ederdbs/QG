@@ -1803,14 +1803,17 @@ fmt(tab7, 1)
 #' ### What it would take to use $d$ {#sec-heterosis-lambda}
 #' 
 #' @sec-catalogue leaves a weight $\lambda$ undetermined between within- and
-#' between-pool diversity and observes that the ratio of the two heterosis terms is
-#' what $\lambda$ is trying to express. This chapter can now say what would have to
+#' between-pool diversity and shows that, with expected heterosis as the objective,
+#' $\lambda$ is $1/2$ under flat dominance and otherwise $\lambda_d$, a ratio of
+#' two weighted means of $d$ (@eq-catalogue-lambda-d). This chapter can now say what would have to
 #' be estimated to set it, and it is not much:
 #' 
-#' - **$\lambda$ needs two covariances, not $d$ itself.** Each heterosis term is $m$
-#'   times a mean times a mean plus a covariance, so their ratio needs
-#'   $\mathrm{cov}(d, y^2)$ and $\mathrm{cov}(d, 2\bar p(1 - \bar p))$, each relative
-#'   to $\bar d$, on top of what the frequencies already give. A programme does not
+#' - **$\lambda$ needs two covariances, not $d$ itself.** Each weighted mean of $d$
+#'   in $\lambda_d$ is $\bar d$ plus a covariance divided by a mean, as in
+#'   @eq-het-alignment, so $\lambda_d$ needs $\mathrm{cov}(d, y^2)$ and
+#'   $\mathrm{cov}(d, H_S)$, with $H_{S,k} = p_{Ak}q_{Ak} + p_{Bk}q_{Bk}$ the
+#'   within-pool heterozygosity of locus $k$, each relative to $\bar d$, on top of
+#'   what the frequencies already give. A programme does not
 #'   need per-locus dominance deviations to weight the two diversity terms against
 #'   each other; it needs to know whether its divergence is landing on its dominance
 #'   loci.

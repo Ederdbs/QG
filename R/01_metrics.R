@@ -48,8 +48,8 @@ status_number <- function(idx, ctx) 1 / (2 * theta_group(idx, ctx))
 #' Group coancestry from allele frequencies
 #'
 #' The same quantity as [theta_group], computed as `mean(p^2 + (1 - p)^2)`.
-#' Costs `O(n m)` instead of `O(n^2)` and runs roughly 100x slower here: use it
-#' for validation, never inside the differential-evolution fitness.
+#' Costs `O(n m)` instead of `O(n^2)`, so it is the slower route whenever
+#' `m > n`: use it for validation, never inside the differential-evolution fitness.
 #'
 #' @inheritParams theta_group
 #' @return A scalar in `[0, 1]`.
