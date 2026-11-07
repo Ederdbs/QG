@@ -11,4 +11,5 @@
 | 05b | APPROVED | 3 | 8e73d42 | 2026-10-31 |
 | 04c | APPROVED | 2 | 12c1ee6 | 2026-10-31 |
 | 05 | APPROVED | 3 | c6281c7 | 2026-10-31 |
-| 06 | in progress | 0 | - | 2026-10-31 |
+| 06 | in progress | 2 | - | 2026-10-31 |
+| part-foundations | OPEN after 2 (fixes to C2, C4 have no closing verdict) | 2 | 2bceea7 | 2026-10-30 |
