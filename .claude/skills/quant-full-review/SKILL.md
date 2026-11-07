@@ -21,7 +21,7 @@ Optional: `iter=N` (max iterations, default 3).
 | `quant-advice` | verdict APPROVED / REJECTED | nothing | `<ch>-D<n>`, `<ch>-M<n>` |
 | `quant-writer` | fixes content (D, M, B) | prose | `ID -> fixed/contested` table |
 | `quant-editor` | form: figures, tables, eq, callouts | chunk options, captions | `<ch>-E<n>` |
-| `quant-continuity` | once per finished **part** | nothing | `C<n>` |
+| `quant-continuity` | once per finished **part** | nothing | `<part>-C<n>` |
 
 ## State
 
@@ -35,20 +35,23 @@ row per chapter:
 
 Every agent prompt names: the worktree path, the chapter file, the iteration number,
 the file it must write its report to, and the paths of the reports it must read. Agents
-start cold; pass paths, not pasted reports.
+start cold; pass paths, not pasted reports. Never lower an agent's effort: its definition
+sets `effort: max`, and that is the review standard.
 
 ## Procedure
 
-0. **Setup.** Work in a git worktree (several sessions share the main tree): reuse
-   `../SB_quanti_gen-review` on branch `review` if it exists, else create it from
-   `main` (when reusing it, first `git merge --ff-only main` inside it). Resolve the
-   chapter; read its row in STATUS.md and any existing reports (resume, don't
+0. **Setup.** Follow the git workflow in `CLAUDE.md`: a worktree on a branch cut from an
+   up-to-date `origin/main`. Reuse an existing review branch only while its PR is open;
+   once it is merged, start a new one. `reference/` is gitignored and absent from the
+   worktree: pass its path in the main checkout to `quant-refcheck`, `quant-advice` and
+   `quant-writer`. Resolve the chapter; read its row in STATUS.md and any existing reports (resume, don't
    restart). Mark it `in progress`. If a `.claude/review/part-*.md` report has
    findings naming this chapter, pass that path to `quant-advice` and `quant-writer`
    as open input.
 1. **Audit (parallel, read-only).** `quant-Rwrite` in chapter audit mode ->
    `it1-audit.md`; `quant-refcheck` on this chapter -> `it1-refs.md`.
 2. **Verdict.** `quant-advice` reads the chapter + both reports -> `it<k>-verdict.md`.
+   Update the chapter's iteration count in STATUS.md after every verdict.
    APPROVED with no open R/B findings -> go to 6.
 3. **Fix content, then code (sequential, same file).** `quant-writer` addresses every
    D, M and B ID; `quant-Rwrite` addresses every R ID; both append their
@@ -72,11 +75,15 @@ start cold; pass paths, not pasted reports.
      `CLAUDE.md`): have `quant-advice` re-check every hand-written qualitative
      claim against the new render.
    - Update STATUS.md.
-   - If this chapter is the last of its part in `_quarto.yml`: run `quant-continuity`
-     on that part -> `.claude/review/part-<name>.md`, and report its findings.
+   - If every chapter of its part in `_quarto.yml` is now APPROVED (review order is not
+     book order): run `quant-continuity` on that part ->
+     `.claude/review/part-<name>.md`. Its fixes follow steps 3-5, and the part closes
+     only on an APPROVED `quant-advice` verdict with no H finding open. Keep a
+     `part-<name>` row in STATUS.md.
 7. **Report and stop.** One chapter per invocation. Tell the user: verdict, iterations
-   used, IDs fixed / contested / still open, files changed, render result. Ask before
-   committing, merging to `main` or pushing.
+   used, IDs fixed / contested / still open, every item left UNVERIFIED or NOT VERIFIED,
+   files changed, render result. Commit on the branch and push to its PR against `main`,
+   as `CLAUDE.md` says; merging is the user's decision.
 
 **Not approved after `iter` iterations:** stop, mark `OPEN after N`, list the open IDs
 with both sides' evidence, and ask the user to arbitrate. Do not run a 4th iteration
