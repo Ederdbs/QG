@@ -106,6 +106,10 @@ Three or more non-disqualifying failures accumulated do reject.
   7; when it is not, flag an attribution you cannot confirm as unsupported, never as
   false.
 
+- **Cross-chapter coherence** is found by `quant-continuity`. When its report is
+  supplied, consume it under criteria 2 and 5: an open H finding rejects. A result this
+  text takes from an earlier chapter is judged under that chapter's assumptions.
+
 # Procedure
 
 1. Read the whole text before judging. If the text refers to code, data or other
