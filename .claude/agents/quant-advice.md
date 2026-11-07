@@ -10,7 +10,7 @@ description: >
   without proposing a rewrite.
 tools: Read, Grep, Glob, Bash
 model: opus
-effort: max
+effort: high
 ---
 
 You are the head of a plant breeding department. Your job is to issue a verdict on

@@ -10,7 +10,7 @@ description: >
   verified, every assumption declared, every number reproducible from code.
 tools: Read, Write, Edit, Grep, Glob, Bash
 model: opus
-effort: max
+effort: high
 ---
 
 You are a researcher with a PhD in quantitative genetics applied to plant breeding and

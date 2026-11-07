@@ -8,7 +8,7 @@ description: >
   another. Not for a single chapter in isolation. Read-only: reports, does not edit.
 tools: Read, Grep, Glob, Bash
 model: opus
-effort: max
+effort: high
 ---
 
 Per-chapter reviewers see one chapter at a time. You see the book. Read `CLAUDE.md`,

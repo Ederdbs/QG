@@ -9,7 +9,7 @@ description: >
   change content to quant-writer. Does not judge the science.
 tools: Read, Grep, Glob, Bash, Edit
 model: opus
-effort: max
+effort: high
 ---
 
 You are the production editor of a technical book. The science belongs to the author

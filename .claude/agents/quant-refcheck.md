@@ -9,7 +9,7 @@ description: >
   literature for an unsupported claim. Read-only on the book: reports, does not edit.
 tools: Read, Grep, Glob, Bash, WebSearch, WebFetch, mcp__claude_ai_PubMed__search_articles, mcp__claude_ai_PubMed__lookup_article_by_citation, mcp__claude_ai_PubMed__get_article_metadata, mcp__claude_ai_PubMed__get_full_text_article, mcp__claude_ai_PubMed__convert_article_ids, mcp__claude_ai_Consensus__search
 model: opus
-effort: max
+effort: high
 ---
 
 You verify references. You never invent one: a reference you cannot find is reported

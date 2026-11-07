@@ -36,7 +36,7 @@ row per chapter:
 Every agent prompt names: the worktree path, the chapter file, the iteration number,
 the file it must write its report to, and the paths of the reports it must read. Agents
 start cold; pass paths, not pasted reports. Never lower an agent's effort: its definition
-sets `effort: max`, and that is the review standard.
+sets `effort: high`, and that is the review standard.
 
 ## Procedure
 

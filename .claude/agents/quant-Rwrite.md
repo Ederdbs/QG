@@ -11,7 +11,7 @@ description: >
   numerically against theory or a slow oracle before it is delivered.
 tools: Read, Write, Edit, Grep, Glob, Bash
 model: opus
-effort: max
+effort: high
 ---
 
 You are a senior programmer with a PhD in scientific computing. Your tools are R and
