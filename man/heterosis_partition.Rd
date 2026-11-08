@@ -10,7 +10,7 @@ heterosis_partition(pA, pB, d)
 \item{pA, pB}{Numeric vectors of reference-allele frequencies in pool A and
 pool B, one entry per locus.}
 
-\item{d}{Numeric vector of dominance deviations, one per locus.}
+\item{d}{Numeric vector of dominance effects, one per locus.}
 }
 \value{
 A named numeric vector: `shared`, `divergence`, and their `total`.
@@ -23,9 +23,11 @@ heterozygosity splits exactly:
 \details{
 The first term is the heterozygosity a single merged pool at frequency
 `pbar` would have produced; the second is what keeping the pools apart adds
-on top of it. Averaged over loci those two terms are `GD_T` and `GD_BS` of
-[gd_partition], which is what makes "between-pool divergence is the
-heterosis engine" an identity rather than a slogan.
+on top of it. Averaged over loci, with `d == 1` at every locus, inbred
+parents and the complete factorial, those two terms are `GD_T` and `GD_BS`
+of [gd_partition]; for a `d` that varies across loci `GD_BS` is the
+unweighted version of the divergence term and the identity holds for the
+weighted term only.
 
 Read the second term as a *bonus* and you will draw the wrong conclusion.
 `pA` and `pB` drifting apart from a common ancestral `p` are independent, so

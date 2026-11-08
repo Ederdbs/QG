@@ -23,21 +23,20 @@ Numeric vector of index weights, length `t`.
 }
 \description{
 Maximum aggregate gain subject to **zero expected genetic change** in a
-specified set of directions (Kempthorne & Nordskog 1959). With `C = G R`,
-the solution is
+specified set of directions. Kempthorne and Nordskog (1959) is the reference
+the book cites for restricted indices; it was not read, and the matrix form
+below, with `C = G R`, is the book's own statement. The solution is
 }
 \details{
 `b = P^-1 [ G a - C (C' P^-1 C)^-1 C' P^-1 G a ]`
 
-and it satisfies `R' G b = 0` exactly, which is the property that makes it a
-restriction rather than a penalty.
+and by direct substitution `R' G b = 0`: the expected gain in each restricted
+direction is zero. That is an expectation under the model, not a property of
+a realised selected set.
 
-This is the classical ancestor of the `alpha` constraint. The book argues
-that a budget ("I accept losing five percent") is approvable where a weighted
-sum ("diversity is worth lambda index units") is not. That argument is not
-merely rhetorical: it is the same distinction Kempthorne and Nordskog drew in
-1959 between restricting a direction and pricing it. The only novelty here is
-that the restricted direction is not a trait.
+Constraining a group coancestry while maximising gain is the lineage of
+Meuwissen et al. (1997, 2020), which the book implements; the restricted
+direction here is a trait combination, not a coancestry.
 }
 \examples{
 P <- diag(c(4, 1)); G <- diag(c(2, 0.5))

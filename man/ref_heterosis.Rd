@@ -12,14 +12,14 @@ ref_heterosis(L, ped, d)
 
 \item{ped}{Data frame with columns `a` and `b`, the parent line ids.}
 
-\item{d}{Numeric vector of dominance deviations, one per locus.}
+\item{d}{Numeric vector of dominance effects, one per locus.}
 }
 \value{
 Numeric vector of length `nrow(ped)`.
 }
 \description{
 The literal definition: form each F1 explicitly from its two inbred parents,
-scan its loci one at a time, and add up the dominance deviations at the
+scan its loci one at a time, and add up the dominance effects at the
 heterozygous ones. Two nested loops, no vectorisation, no algebra.
 }
 \details{

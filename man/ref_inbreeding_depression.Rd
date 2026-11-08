@@ -10,7 +10,7 @@ ref_inbreeding_depression(p, d, F_coef = 1, n = 20000, seed = 1)
 \item{p}{Numeric vector of reference-allele frequencies in the pool, one
 entry per locus, taken at the base against which `F_coef` is measured.}
 
-\item{d}{Numeric vector of dominance deviations, one per locus.}
+\item{d}{Numeric vector of dominance effects, one per locus.}
 
 \item{F_coef}{Inbreeding coefficient relative to that base. The default, 1,
 is complete homozygosity and gives the maximum depression.}

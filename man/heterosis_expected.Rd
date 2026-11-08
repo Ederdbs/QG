@@ -10,7 +10,7 @@ heterosis_expected(pA, pB, d)
 \item{pA, pB}{Numeric vectors of reference-allele frequencies in pool A and
 pool B, one entry per locus.}
 
-\item{d}{Numeric vector of dominance deviations, one per locus.}
+\item{d}{Numeric vector of dominance effects, one per locus.}
 }
 \value{
 A single number.

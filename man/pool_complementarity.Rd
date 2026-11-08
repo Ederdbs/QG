@@ -19,10 +19,12 @@ A named numeric vector `frac_opposite_fixed`, `frac_fixed_same`,
 }
 \description{
 The fraction of markers at which the two pools are near-fixed for opposite
-alleles. This is the quantity that actually generates heterosis under a
-dominance model, and unlike `F_ST` it does not keep rising as the pools drift
-further apart at loci that were already divergent -- which is why `F_ST` is
-the wrong thing to maximise.
+alleles. It is an indicative statistic, not the quantity that generates
+heterosis under a dominance model: that is the divergence term
+`sum(d * (pA - pB)^2) / 2`. On the book's neutral-divergence sweep it is
+exactly zero at every grid point up to `fst = 0.10`, while the divergence
+term has already risen (chapter on heterosis and dominance), so it is a poor
+stand-in for it.
 }
 \details{
 `mean_sq_delta_p` is the one of these that is exact rather than indicative:

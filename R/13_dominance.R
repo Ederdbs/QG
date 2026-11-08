@@ -15,7 +15,7 @@
 #' With fully inbred parent lines every parent is homozygous, so the additive
 #' contributions of the two parents average exactly to the F1's own additive
 #' value and cancel from the mid-parent difference. What survives is the
-#' dominance deviation at the loci where the F1 is heterozygous:
+#' dominance effect at the loci where the F1 is heterozygous:
 #' `H_i` is the sum of `d_k` over the loci where `x_ik` equals 0.5.
 #'
 #' The additive effects therefore never appear as an argument. That is the
@@ -23,7 +23,7 @@
 #'
 #' @param X Hybrid marker matrix, values in 0/0.5/1. Heterozygous loci are the
 #'   entries equal to 0.5, which is exact only because the parents are inbred.
-#' @param d Numeric vector of `ncol(X)` dominance deviations, one per locus.
+#' @param d Numeric vector of `ncol(X)` dominance effects, one per locus.
 #' @return Numeric vector of length `nrow(X)`, the mid-parent heterosis of each
 #'   hybrid on the trait scale.
 #' @seealso [heterosis_expected] for the closed form over a pool pair,
@@ -46,7 +46,7 @@ heterosis_value <- function(X, d) {
 #'
 #' @param pA,pB Numeric vectors of reference-allele frequencies in pool A and
 #'   pool B, one entry per locus.
-#' @param d Numeric vector of dominance deviations, one per locus.
+#' @param d Numeric vector of dominance effects, one per locus.
 #' @return A single number.
 #' @export
 heterosis_expected <- function(pA, pB, d) {
@@ -62,9 +62,11 @@ heterosis_expected <- function(pA, pB, d) {
 #'
 #' The first term is the heterozygosity a single merged pool at frequency
 #' `pbar` would have produced; the second is what keeping the pools apart adds
-#' on top of it. Averaged over loci those two terms are `GD_T` and `GD_BS` of
-#' [gd_partition], which is what makes "between-pool divergence is the
-#' heterosis engine" an identity rather than a slogan.
+#' on top of it. Averaged over loci, with `d == 1` at every locus, inbred
+#' parents and the complete factorial, those two terms are `GD_T` and `GD_BS`
+#' of [gd_partition]; for a `d` that varies across loci `GD_BS` is the
+#' unweighted version of the divergence term and the identity holds for the
+#' weighted term only.
 #'
 #' Read the second term as a *bonus* and you will draw the wrong conclusion.
 #' `pA` and `pB` drifting apart from a common ancestral `p` are independent, so
@@ -122,7 +124,7 @@ heterosis_partition <- function(pA, pB, d) {
 #'
 #' @param p Numeric vector of reference-allele frequencies in the pool, one
 #'   entry per locus, taken at the base against which `F_coef` is measured.
-#' @param d Numeric vector of dominance deviations, one per locus.
+#' @param d Numeric vector of dominance effects, one per locus.
 #' @param F_coef Inbreeding coefficient relative to that base. The default, 1,
 #'   is complete homozygosity and gives the maximum depression.
 #' @return A single number, the decline in the population mean on the trait
@@ -163,7 +165,7 @@ inbreeding_depression <- function(p, d, F_coef = 1) {
 #'
 #' @param U,V Line genotype matrices for pool A and pool B, coded 0/1, one row
 #'   per line and one column per locus. For homozygous lines these are `L / 2`.
-#' @param d Numeric vector of `ncol(U)` dominance deviations, one per locus.
+#' @param d Numeric vector of `ncol(U)` dominance effects, one per locus.
 #' @return A list with `mu`, the factorial mean (see [heterosis_expected]),
 #'   `gca_A` and `gca_B`, one entry per line of each pool, and `sca`, an
 #'   `nrow(U)` x `nrow(V)` matrix.
