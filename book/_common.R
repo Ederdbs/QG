@@ -14,10 +14,11 @@ if (!requireNamespace("hybdiv", quietly = TRUE)) {
 
 set.seed(2026)
 
-# The teaching scale. Every live example in the book runs at this size: small
-# enough that a full render takes minutes, large enough that none of the
-# identities hold by accident. The production scale is n_pool_A = n_pool_B = 71
-# and m = 25000; see the note in each chapter where the difference matters.
+# The teaching scale, the default of the live examples: small enough that a
+# full render takes minutes, large enough that none of the identities hold by
+# accident. Chapters that need another scale set it in their own chunks. The
+# production scale is n_pool_A = n_pool_B = 71 and m = 25000; see the note in
+# each chapter where the difference matters.
 book_cfg <- utils::modifyList(
   hybdiv::sim_config,
   list(n_pool_A = 25, n_pool_B = 25, m = 2000, seed = 1)
@@ -39,6 +40,17 @@ fmt <- function(x, digits = 4) {
     x
   } else round(x, digits)
 }
+
+# A value in scientific notation for inline prose, as a complete math span. A
+# numeric inline value that small or large leaves knitr as bare TeX,
+# `4\times 10^{-13}`, from which Pandoc drops `\times 10` (the book printed
+# 4^{-13}); a string passes through untouched. Not for use inside $...$.
+fmt_sci <- function(x, digits = 2) {
+  s <- sprintf("%.*e", digits - 1, x)
+  sprintf("$%s \\times 10^{%d}$", sub("e.*", "", s), as.integer(sub(".*e", "", s)))
+}
+stopifnot(identical(fmt_sci(c(3.7e-13, 9.96e-5)),
+                    c("$3.7 \\times 10^{-13}$", "$1.0 \\times 10^{-4}$")))
 
 # One palette for every live figure: the two heterotic pools get fixed colours
 # (A blue, B amber, a colour-blind-safe pair); red marks the constraint or the

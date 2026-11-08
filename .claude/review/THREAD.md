@@ -1,0 +1,84 @@
+# THREAD -- the book's argument so far
+
+One entry per approved chapter, in book order.
+
+## 00-hybrid-programme -- The hybrid breeding programme, and the population genetics it rests on
+- Question: what the selection problem of the preface is a part of -- one cycle of a two-pool hybrid programme, its four stages and the steps at which diversity can be lost -- and which population-genetic quantities, each defined with the identity later chapters lean on, the book assumes. It follows the preface because the preface states the optimisation problem and this chapter states the programme around it (00:8-16).
+- Establishes:
+  - A1-A8 restated for use before @sec-era-programme declares them; neutrality holds only in this chapter's diversity examples, not in the book's data (`simulate_data()` traits have effects at every marker) (00:18-42).
+  - Selfing series $1 - F^{(t)} = (1/2)^t$, superscript counting generations of the mating system under discussion; DH reaches $F = 1$ in one step; the F1 of two homozygous lines is determined without sampling (00:78-96).
+  - @eq-hp-gca-sca, the GCA/SCA model on cross means $\bar y_{ij}$ (Design II), defined relative to a reference set of crosses; the dominance part of GCA is an average effect at the opposite pool's frequencies, so under dominance GCA is a property of a line against a tester pool (00:98-132); illustration, dominance part alone, one draw: correlation 0.859 between two tester halves, 3 of top 5 shared (00:153-171).
+  - S1-S4 and @tbl-hp-stages, distinct from the package's stage 1/2 and from trial stages; testing in cross and recycling are not stages; S4 is the preface's problem (00:173-197).
+  - Recycling within pool only (A3); the scheme is what @kadoumi2025 call tester-based or modified RRS, as their report, not the book's attribution (00:199-211); `run_cycles()` is a reduced form of the loop (no trials, no S3, index known; 11b C7, C8) (00:213-219); @fig-hp-cycle (00:221-265).
+  - Random-subset bias: a random subset of $n_{sel}$ of $N$ has expected $\theta_S$ larger by $(1/n_{sel} - 1/N)(\bar f_d - \bar f_o)$; a selected subset has no such guarantee (00:267-282); measured: candidates 0.3281, random 0.3209 (expected 0.3210), diversity greedy 0.3296 (00:304-309); hence $\alpha = (GD_{\text{ref}} - GD_S)/GD_{\text{ref}}$ with $GD_{\text{ref}}$ the mean GD of random subsets of the same size; the algebra covers S3 and S4, not S2 (00:310-321).
+  - Where the largest loss falls depends on the S2 cross-selection strategy; the ledger is 08's, cached, S2-S4 only (00:322-331).
+  - Under drift alone in two closed pools of equal weight, between-pool divergence rises while within-pool diversity falls; not an argument for selection; the rise of $GD_{BS}$ under `run_cycles()` is a simulation result with drift and selection not separated (00:333-341). @kadoumi2025 numbers and limits (00:343-360).
+  - Local symbols $p_k$, $q_k$, $p_{Ak}$, $p_{Bk}$, $\bar p_k$, $p_{0,k}$ (00:364-368); Hardy-Weinberg used only as a reference, never as a description of a pool of lines or a set of single crosses (00:370-383).
+  - @eq-hp-gd, $GD_S = 1 - \theta_S = H_e$ (plug-in Nei, own frequencies); $GD_T$ is $GD_S$ for a set spanning the pools, partitioned over usage-weighted parent lines, $GD_{WI} = 0$ with inbred parents; $H_o$ defined (00:385-406); $H_o = GD_T + GD_{BS}$ on the complete factorial, 0.3617 = 0.3281 + 0.0336 at the teaching scale (00:435-447).
+  - IBD/IBS; pedigree coancestry $A_{ij}/2$; molecular $f_{ij}$; @eq-hp-ibs-ibd with base $p_{b,k}$ (distinct from the frozen $p_{0,k}$): $f$ is a floor set by base frequencies plus scaled pedigree coancestry, so unrelated pairs are not at 0 and $\mathbf f$ is read as a comparison between sets on the same markers (00:449-525).
+  - $s_i = (1 + F_i)/2$; $\theta_S$ includes the diagonal (00:527-533); molecular $F_i$; $F_{(ab)} = f^L_{ab}$; $\theta_S = \mathbf w'\mathbf f^L\mathbf w$ in line usage (00:537-559).
+  - The letter $F$: $F_{drift}$ (against the frozen base, never negative), $F_{hom}$ (can be negative), both on merged hybrid frequencies; $F_{ST} = GD_{BS}/GD_T$, which 08 calls $G_{ST}$, against $(\theta_w - \theta_{AB})/(1 - \theta_{AB})$, near twice it; $F_{BN}$ a simulation setting (00:561-585).
+  - @eq-hp-drift ($\Delta F = 1/n_{gam}$, $N_e = 1/(2\Delta F)$); in a DH pool $\Delta F$ is the rate of rise of group coancestry (00:587-614); a crossing block of $n$ passes $2n$ copies ($N_e = n$, approximate without selfing), a pool of $n$ DH lines passes $n$ ($N_e = n/2$); simulated on individuals: 0.597 (0.599), 0.612 (0.613), 0.346 (0.349) (00:616-695). Selection is outside @eq-hp-drift, and 11b's rates are on another level (00:696-700). $N_s$ is static and lies in $[1/2, 1]$ on molecular $\mathbf f$ (00:701-707).
+  - The three departures from the animal-breeding setting (00:709-732); reading map (00:734-754).
+- Assumes: A2 (inbred parents) for $GD_{WI} = 0$, $F_{(ab)} = f^L_{ab}$, $\theta_S = \mathbf w'\mathbf f^L\mathbf w$; the complete A x B factorial for $H_o = GD_T + GD_{BS}$ and the GCA row-effect check; two pools; neutral, unlinked markers, a known base and HW parents for @eq-hp-ibs-ibd; neutrality, discrete generations, no selection, mutation or migration for @eq-hp-drift; equal pool weights and closed pools for the drift trade-off; the dominance-only GCA example ($a_k \equiv 0$, gamma $d_k$, illustrative); the teaching scale (A8) and one seed for every number.
+- Takes from: index: the problem statement, $n_{sel}$ of $N$ under $\alpha_{\max}$ against a random-subset reference (index:18-47), and the three departures (index:48-66). Everything else is a forward pointer, declared as such (00:15-16): `05`: A1-A8, $F_{drift}$, $F_{hom}$; `01`: @eq-x-freq, @eq-hybrid-dosage, @eq-f-molecular; `02`: @eq-gd-partition; `05b`: GCA dominance part, $H_o$ identity; `04e`: the GCA model; `06`: @sec-baseline, @sec-identity, $N_s$; `07`: @sec-collapse; `08`: stages, ledger, $G_{ST}$ form; `11b`: C7, C8, $GD_{BS}$ trajectories.
+- Owed:
+  - -> `01`: `01:320` "every diversity metric takes `ctx[["f"]]`" against 00:463-465 (frequency-based metrics such as $F_{drift}$ are not computed on $\mathbf f$) (00-C26).
+  - -> `01`: cross-reference 00's coancestry, $s_i$, $F_i$ instead of restating them (`01:147-172`) (00-C25).
+  - -> `01`: opening (`01:8-15`) does not say why it follows 00 (introduction-C2).
+  - -> `01`: "Diversity requires an *absolute* scale" (`01:142`) and "no arbitrary base population" (`01:172`) against the base-frequency floor of 00:465-475, 00:514-524 (introduction-C3).
+  - -> `02`: the attribution of $F_{ST} = GD_{BS}/GD_T$ to Wright (`02:219-222`) is the opposite of 08's (`08:91`); reconcile with 08 (00-C1).
+  - -> `05b`: Comstock et al. (1949) at `05b:825` and `05b:855-860` ("@comstock1949's scheme" built on a decomposition over lines). The paper is unread and is decisive here: read it, or rewrite as a report of a read source.
+  - -> `05b`: $F_{BN}$ written $F_{ST}$ by the declared exception of `90:152-157` (46 lines with $F_{ST}$) (00-C18).
+  - -> `05b`: "candidate pool" for the hybrid set at `05b:195`, `05b:1750` (00-M14, 00-C13).
+  - -> `05b`: "the S1 monitor that @sec-stages will define" (`05b:44`) and "S2 (defined there)" (`05b:1171`), while the stages are named in 00 (@tbl-hp-stages) (introduction-C4).
+  - -> `03`: "candidate pool" at `03:29`, `03:412`, `03:414`, `03:419`, `03:441` and the label `fig-candidate-pool` (`03:418`).
+  - -> `04`: "candidate pool" at `04:15`.
+  - -> `04`: `04:28`, a cross "between two divergent heterotic groups", against A3 (00:26-27, 00:199-205); state the conflict (00-C2).
+  - -> `04c`: Comstock et al. (1949) at `04c:20-23` (RRS of DH lines judged by testcrosses) and `04c:916`. Unread and decisive here.
+  - -> `05`: Comstock et al. (1949) as the attribution of A3 at `05:80-81`. Unread and decisive here.
+  - -> `05`: `05:83-84` "`run_cycles()` ... implements exactly this loop" against 00:216-219 (reduced form; 11b C7, C8) (00-C6).
+  - -> `05`: A5 must say which simulator it covers (`simulate_data()` effects at every marker; `simulate_pools()` 300 QTL) (00-C6, 00:37-42).
+  - -> `05`: two values of "production scale": `05:108` (71 + 71, 25000) against `06:620` and `12:34-36` (`sim_config`, 50 + 50, 5000); 06 and 12 follow (00-C22).
+  - -> `05`: inline values in scientific form bare in prose at `05:1704`, `05:1743`; use `fmt_sci()`.
+  - -> `05`: "candidate pool" at `05:829`, `05:876`.
+  - -> `06`: `06:395` bare scientific inline value; use `fmt_sci()`.
+  - -> `06`: one quantity, two symbols, $GD_{\text{ref}}$ and $GD_{\text{random}(n)}$ (`06:568-572`, `90:280-290`) (00-C28).
+  - -> `06`: cross-reference @eq-hp-gd instead of restating (`06:92-94`) (00-C25).
+  - -> `07`: $F_{ST} = 0.15$ and $F_{ST} \in \{0.05, 0.15, 0.35\}$ are the setting $F_{BN}$ (`07:87`, `07:257`) (00-C18).
+  - -> `07`: "candidate pool" at `07:481`.
+  - -> `08`: rename $\theta_B$ to $\theta_{AB}$ at `08:91`, `08:105` (`08:93` carries no symbol); until then 00 and 08 print different symbols and 08 contradicts `90:205,226` (00-E4).
+  - -> `08`: package clash, `theta_decompose()$theta_B` is between pools, `theta_pools()[["theta_B"]]` within pool B; with more than two pools the first is a weighted mean of pair means (`R/05_pipeline_metrics.R`) (00-E4).
+  - -> `08`: $F_{ST}$ / $G_{ST}$ naming of Trap 2 (`08:86-106`) against 00:575-581 and `02:219` (00-C1).
+  - -> `08`: `08:69-71` (within-pool erodes "under selection", between-pool inflates) against the drift-only argument of 00:333-341 (00-C3).
+  - -> `08`: `08:160-163` "found exactly the two opposite trends" against the Hamming result and the stated cause at 00:343-357.
+  - -> `08`: `08:167` "This is where the largest share of pipeline diversity is lost" unconditional, like `08:376` and `08:451-452`; 00:322-331 conditions it on the S2 strategy (00-C15).
+  - -> `08`: ledger provenance: `pipeline_loss_ledger.csv` (`08:8`) and `pipeline_loss.png` (`08:378`) have no writer in the repository (index:186-194); 08 must not present them as reproducible.
+  - -> `08`: `08:352` labels `ne_parents_from_counts()` as `Ne`, which is $N_{e,\text{par}}$ (`90:79`); $N_e$ is reserved for a size defined by a rate (00:701) (00-C35).
+  - -> `08`: `08:16-21` restates @tbl-hp-stages verbatim; cross-reference it (00-C25).
+  - -> `08`: target $F_{ST} = 0.15$ at `08:359` is $F_{BN}$ (00-C18).
+  - -> `09`: "candidate pool" at `09:327`.
+  - -> `10`: "candidate pool" at `10:45`, `10:125`.
+  - -> `10b`: "candidate pool" at `10b:209`, `10b:1184`, `10b:1233`.
+  - -> `04e`: Comstock et al. (1949) at `04e:157`. Unread and decisive here.
+  - -> `04e`: `04e:82-83` "its tables are in `book/data/mating_*.csv`" captures `mating_core_findings.csv` and `mating_core_sweep.csv`, which index:184-186 excludes.
+  - -> `04e`: cross-reference @eq-hp-gca-sca instead of restating it (`04e:164`) (00-C25).
+  - -> `04f`: 04f-D1, `sparse_literature_parameters.csv` "264-2000" genotypes and "2-440" locations (@tbl-sparse-parameters, `04f:901`) against `sparse_primary_studies.csv` (@tbl-sparse-primary, `04f:491`: 256 genotypes, 1-440 locations); Werner et al. `CT-220_5` (220 lines) is absent from the primary table; the published `docs/04f-sparse-testing.html` prints the wrong ranges.
+  - -> `04g`: `04g:523` `n_unc` prints 2e4 with the $\times 10$ dropped; a count, so format it as one.
+  - -> `11`: `11:135-137` quotes @kadoumi2025 without the Hamming result, the NSS concentration, the stated cause (Iodent/Lancaster merger) or "can only speculate" (00:343-357) (00-B1).
+  - -> `11`: "invariant to $F_{ST}$ under neutral divergence" (`11:333`) is $F_{BN}$ (00-C18).
+  - -> `11b`: `11b:252` the unconstrained fitted $\Delta F$ is the middle value (0.0292 against 0.0358 and 0.0265), not "the *lowest*".
+  - -> `11b`: no neutral (unselected) reference arm for the rate, and `F_drift` is on merged hybrid frequencies, a different level from @eq-hp-drift; `11b:261-263` reads its $N_e$ as a "realised effective size" (00-C5).
+  - -> `11b`: $\Delta F$ as $-$slope at `11b:241-242`, against `05:1045-1050` and `05:1850` ($1 - e^{\text{slope}}$) (00-C19).
+  - -> `11c`: `11c:33-46` builds Robertson's limit on 11b's $N_e$ (same level issue, 00-C5) and uses $-$slope at `11c:41` (00-C19).
+  - -> `12`: $F_{ST}$ for the setting at `12:179` (00-C18).
+  - -> `90`: "candidate hybrids in the pool" (`90:20`) and "frozen candidate-pool allele frequency" (`90:30`) (00-C13).
+  - -> `90`: rows for the shared symbols $\bar y_{ij}$, $\bar e_{ij}$ (00:109, `04e:164`), $\theta_w$, $G_{ST}$ (00, 05, 08), $GD_S$ and $GD_{\text{ref}}$ as rows of their own (now only inside `90:282,290`), and S1-S4 (00-C8, 00-E5). Symbols used only in 00 ($F^{(t)}$, $\bar F^{(t)}$, $p_{b,k}$, $q_{b,k}$, $\theta_t$, $H_t$) need no row (00:364).
+  - -> `90`: the $\Delta F$ row (`90:86`, "per-generation rate of inbreeding") should follow @eq-hp-drift, where in a DH pool $\Delta F$ is the rate of rise of group coancestry (00:607-614) (00-C8).
+  - -> `90`: $p_0^{(0)}$ (`90:202`) is a third symbol for `ctx$p0` (00-C32).
+  - -> `90`: link the two $g^A_i$, $\mu$ rows (whole GCA on $\bar y_{ij}$, `90:555`; dominance part on $H_{ij}$, `90:206-216`) (00-C33).
+  - -> `92`: `92:343` "hand-extracted from the six primary papers" against "compiled" at index:199 and `regenerate.R:42`.
+  - -> `92`: `92:364` "The script is the single place where the expensive computations live" is false (`run_mabc.R`, external studies, 12 files with no writer; index:174-194).
+  - -> `92`: the cached-files table has no rows for `genomic_prediction_*`, `joint_*`, `limits_*`, `plant_lit_landscape.png`, `mating_core_findings.csv`, `search_anytime.csv`, and states no writer for the files without one (index:171 says "most").
+  - -> `92`: $F_{ST} = 0.15$ and $F_{ST} \in \{0.05, 0.15, 0.35\}$ at `92:57`, `92:396` are $F_{BN}$ (00-C18).
+  - Not a chapter: source bundle (24 full-text core papers stated, 23 marked; the `Technow2014` row whose `key` and `context` name different papers; 13 of 73 core papers "no abstract retrieved"); `CLAUDE.md` wording ("`regenerate.R` is the only place the expensive computations live"; the 04e `mating_*.csv` wildcard). Book-wide production, OPEN: 00-E1 (Typst prints "Chapter N.." at every level-1 reference, 38 lines in the PDF; fix in `book/typst-style.typ`), 00-E2 (every prose @sec-notation prints a bare "1" in the PDF, confirmed: "Shared symbols follow 1", "1 collects the book's shared symbols"), 00-E8 (justified table cells); 38 tracked " N" duplicates under `docs/` need `git rm`.

@@ -25,10 +25,13 @@
 #   bibliography_animal.csv, bibliography_plant.csv  (literature screens)
 #   plant_metric_usage.csv                           (derived from those)
 #   mating_scenarios_summary.csv, mating_optimizer_frontier.csv,
-#   mating_validation.csv, mating_core_findings.csv, figs/mating_*.png
+#   mating_validation.csv, figs/mating_*.png
 #                         (the external `sparsex` study: AlphaSimR founders,
 #                          AI-REML, GBLUP, CDmean; Chapter 4e says so. The
 #                          `mating` target below reproduces its phenotypic core.)
+#   mating_core_findings.csv
+#                         (a literature extraction: values from published
+#                          papers, not study output; read by no chapter)
 #   sparse_scenarios.csv, sparse_min_allocation.csv, sparse_contrasts.csv,
 #   sparse_two_stage.csv, sparse_genomic_layer.csv, sparse_validation.csv
 #                         (an external study: REML by `sommer`, AlphaSimR for
@@ -36,7 +39,7 @@
 #                          translated; Chapter 4f says so. The `sparse` target
 #                          below reproduces its phenotypic core.)
 #   sparse_primary_studies.csv, sparse_literature_parameters.csv
-#                         (hand-extracted from the six primary papers)
+#                         (compiled from the six primary papers)
 
 suppressMessages(pkgload::load_all(quiet = TRUE))
 
