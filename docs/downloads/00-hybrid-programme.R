@@ -70,7 +70,7 @@ book_fig  <- function(...) .book_get('figs', ...)
 #' 
 #' The preface states the optimisation problem. This chapter states what that
 #' problem is a part of. Its first half follows a hybrid programme through one
-#' cycle, names the four stages the rest of the book refers to, and marks where in
+#' cycle, names the four stages that @sec-stages measures, and marks where in
 #' that cycle diversity can be lost. Its second half gives the population genetics the
 #' later chapters assume: allele frequency, Hardy-Weinberg proportions, gene
 #' diversity, identity by descent and by state, coancestry, the inbreeding
@@ -100,7 +100,7 @@ book_fig  <- function(...) .book_get('figs', ...)
 #' Neutrality holds in the diversity examples of this chapter because nothing in
 #' them selects on a trait. It is not a property of the book's data in general. The
 #' combining-ability example of @sec-hp-cycle gives every marker a dominance
-#' deviation, so there the marker set is the set of quantitative trait loci; and the
+#' effect, so there the marker set is the set of quantitative trait loci; and the
 #' traits of `simulate_data()` have effects at every marker (@sec-simulating-crosses), so wherever the book selects
 #' on that index, the markers its metrics read are themselves under selection.
 #' 
@@ -185,7 +185,7 @@ c(lines_A = sum(pool == "A"), lines_B = sum(pool == "B"),
 #' $\sum_k [a_k + d_k(1 - 2p_{Bk})]\,\delta u_{ik}$, and @sec-heterosis-gca-sca
 #' derives its dominance part $\sum_k d_k(1 - 2p_{Bk})\,\delta u_{ik}$: an average effect of
 #' substitution evaluated at **pool B's** frequencies $p_{Bk}$, with $a_k$ and $d_k$
-#' the additive effect and the dominance deviation at locus $k$ and
+#' the additive effect and the dominance effect at locus $k$ and
 #' $\delta u_{ik}$ line $i$'s centred 0/1 genotype. Without dominance
 #' ($d_k \equiv 0$) the GCA of a line is the same against every tester set; with
 #' dominance it moves with the testers' frequencies. The chunk takes the
@@ -198,7 +198,7 @@ c(lines_A = sum(pool == "A"), lines_B = sum(pool == "B"),
 #| label: hp-gca-tester
 U <- GL[pool == "A", , drop = FALSE]; V <- GL[pool == "B", , drop = FALSE]
 set.seed(4)
-d <- rgamma(ncol(GL), 2, 4)                      # dominance deviations, d_k > 0
+d <- rgamma(ncol(GL), 2, 4)                      # dominance effects, d_k > 0
 half <- seq_len(nrow(V)) <= nrow(V) / 2
 g1 <- heterosis_gca_sca(U, V[half, , drop = FALSE],  d)[["gca_A"]]
 g2 <- heterosis_gca_sca(U, V[!half, , drop = FALSE], d)[["gca_A"]]
@@ -225,7 +225,7 @@ c(correlation = gca_cor, top5_shared = top5_shr)
 #' dominance part alone ($a_k \equiv 0$), one dominance draw, one seed and testers
 #' of `r sum(half)` and `r sum(!half)` lines, and is not a general estimate. The additive part
 #' $\sum_k a_k\,\delta u_{ik}$ is the same against both halves. With additive
-#' effects independent of the dominance deviations, and the two dominance parts of
+#' effects independent of the dominance effects, and the two dominance parts of
 #' similar variance (s.d. `r sprintf("%.2f", sd(g1))` and
 #' `r sprintf("%.2f", sd(g2))` here), it tends over draws of the $a_k$ to raise the
 #' correlation. On a single draw it can lower it, because on `r nrow(U)` lines the
@@ -235,7 +235,8 @@ c(correlation = gca_cor, top5_shared = top5_shr)
 #' 
 #' **The four stages.** @sec-stages divides a cycle of the programme into four
 #' stages and measures diversity at each. The names, listed in @tbl-hp-stages, are
-#' used throughout the book. They are not the package's stage 1 and stage 2
+#' the ones @sec-stages uses; the chapters of the last column treat the stages, and
+#' not all of them use the names. They are not the package's stage 1 and stage 2
 #' (@sec-simulating-crosses), which are steps of the data flow, nor the trial stages
 #' of @sec-sparse, which are steps of field testing.
 #' 
@@ -505,11 +506,12 @@ fmt(het, 4)
 #' @sec-subdivided. Interpretation. In inbred lines observed heterozygosity is a
 #' purity check and carries no information on diversity; in the hybrids it exceeds
 #' the Hardy-Weinberg reference by the divergence between the pools. That excess
-#' is the identity $H_o = GD_T + GD_{BS}$ derived in @sec-heterosis-identity, which
+#' is the identity $H_o = GD_T + GD_{BS}$, derived as @eq-het-wi-hyb in
+#' @sec-heterosis-hybrid-identity (@sec-heterosis-identity gives the per-locus expectation, @eq-het-split), which
 #' holds for the complete factorial; the decomposition is exact, the magnitudes are
 #' those of one simulated pool pair.
 #' 
-#' ### Identity by descent, identity by state, coancestry {#sec-hp-ibd}
+#' ### Identity by descent, identity in state, coancestry {#sec-hp-ibd}
 #' 
 #' Two alleles are **identical by descent** (IBD) if both are copies of one allele
 #' in a defined base population; they are **identical in state** (IBS) if they are
@@ -584,7 +586,7 @@ fmt(ibs, 4)
 #' $1/4$, and unrelated individuals do not have $f_{ij} = 0$ but $f_{ij}$ near the
 #' floor. That is why $\mathbf{f}$ is read as a
 #' comparison between sets measured on the same markers, and why it is never
-#' centred to make that floor vanish (@sec-why-not-g). The agreement is a Monte
+#' centred to make that floor vanish (@sec-why-not-g, @sec-f-molecular). The agreement is a Monte
 #' Carlo one, under unlinked loci and a known base, from one seed.
 #' 
 #' The diagonal of $\mathbf{f}$ is the **self-coancestry** $s_i = f_{ii}$, the
@@ -812,6 +814,6 @@ round(dr, 4)
 #' 
 #' : Reading map: the questions the book answers, the part of the book in which each is answered, and the chapters that answer it, in reading order. {#tbl-hp-reading-map}
 #' 
-#' The parts are ordered so that each is readable after the ones before it.
+#' The Preface tabulates the same order, one sentence per part.
 #' @sec-notation collects the book's shared symbols and, where a function computes
 #' one, that function.

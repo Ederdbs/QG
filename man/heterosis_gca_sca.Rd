@@ -10,7 +10,7 @@ heterosis_gca_sca(U, V, d)
 \item{U, V}{Line genotype matrices for pool A and pool B, coded 0/1, one row
 per line and one column per locus. For homozygous lines these are `L / 2`.}
 
-\item{d}{Numeric vector of `ncol(U)` dominance deviations, one per locus.}
+\item{d}{Numeric vector of `ncol(U)` dominance effects, one per locus.}
 }
 \value{
 A list with `mu`, the factorial mean (see [heterosis_expected]),

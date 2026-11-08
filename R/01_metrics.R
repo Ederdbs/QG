@@ -1,5 +1,7 @@
 # Diversity metrics. All share the signature f(idx, ctx) -> scalar.
-# All operate on the molecular coancestry `ctx[["f"]]`, never on centered G.
+# The coancestry-based metrics operate on the molecular coancestry `ctx[["f"]]`,
+# never on centered G. theta_from_freq(), he_nei() and freq_metrics() read
+# colMeans(X[idx, ]) instead; freq_metrics() also uses the frozen base `ctx[["p0"]]`.
 
 # --- Core --------------------------------------------------------------------
 

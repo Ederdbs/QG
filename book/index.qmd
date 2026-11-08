@@ -21,17 +21,19 @@ Given a set of $N$ candidate F1 hybrids -- each a cross between one line from
 heterotic group A and one from group B, each with a predicted multi-trait index
 -- choose $n_{sel}$ of them so that the mean index is as high as possible,
 subject to losing no more than a fraction $\alpha_{\max}$ of the molecular gene
-diversity that a *random* set of the same size would have carried.
+diversity that a *random* set of the same size carries on average.
 
 Three of those words carry the entire argument.
 
-**Molecular.** Diversity is measured on the Caballero & Toro molecular
-coancestry matrix $f$, never on a VanRaden genomic relationship matrix $G$.
+**Molecular.** The coancestry-based diversity metrics are computed on the Caballero & Toro molecular
+coancestry matrix $\mathbf{f}$, never on a VanRaden genomic relationship matrix $\mathbf{G}$.
 This is not a stylistic preference. $G$ is centered on its own population by
-construction, so the sum of all its elements is exactly zero; every diversity
-quantity computed from it is meaningless. @sec-coancestry shows this happening.
+construction, so the sum of all its elements is exactly zero; the group
+coancestry and the status number computed from it are zero and divergent by
+construction, and carry no information about the set. @sec-coancestry shows this
+happening.
 
-**Random.** The reference for "no loss" is the distribution of random subsets of
+**Random.** The reference for "no loss" is the mean over random subsets of
 size $n_{sel}$, not the full candidate set. Comparing a selected set of 100
 against a candidate set of 2500 confounds a selection effect with a sampling effect, and
 the sampling effect alone can look like a loss of half a percent.
@@ -57,24 +59,28 @@ hybrid breeding departs from that setting in three ways:
 - The population is **permanently subdivided** into heterotic groups, and the
   divergence between them is not a problem to be minimised -- it is the engine
   of heterosis, to be *maintained*. A single pool-wide statistic cannot express
-  "conserve within, hold between". @sec-heterosis derives that claim as an exact
-  identity, and then bounds it: divergence pays only where it coincides with
-  dominance, and drifting the pools apart buys nothing at all.
+  "conserve within, hold between". @sec-heterosis derives that claim as an identity
+  (under flat dominance, inbred parents and the complete factorial), and then
+  bounds it: divergence pays only where it coincides with dominance, and drifting
+  the pools apart buys no expected heterosis.
 - The candidates are **crosses of fixed lines**, so the progeny variance term
   that drives cross-selection criteria elsewhere collapses to zero, and the
   hybrid-by-hybrid coancestry matrix turns out never to be needed at all
   (@sec-collapse).
 
 Each of these changes what should be measured. None of them changes the
-underlying theory, which is why the book starts with the theory.
+underlying theory, which is why the book builds the theory first (the second half of the Introduction, then Foundations).
 
 ## How to read this
 
 The book is meant to be run, not only read. Every derivation that could be
 checked numerically is checked numerically, in a code block you can execute.
-Where a result is an exact algebraic identity, the deviation from a simulated
-oracle is printed next to it; where it is a Monte Carlo agreement, the residual
-is printed.
+Where a result is an exact algebraic identity, the code asserts it against a
+simulated oracle or a second computation with a stated tolerance, so that the
+book does not render if the identity fails; the achieved deviation is printed
+where a chapter reports one, not for every assertion. Where a result is a Monte
+Carlo agreement, the estimate is given with its dispersion and the value it is
+compared with.
 
 The argument of the book is a chain, worth stating before the table that lists
 the parts. It is given in logical order, not reading order, and not every chapter
@@ -94,9 +100,11 @@ is a link in it:
    (@sec-response). The between-pool part of gene diversity does not enter it,
    and neither quantity sees linkage disequilibrium, so a diversity constraint
    protects variance only through its within-pool part and only if effect sizes
-   are unrelated to which loci lose diversity. That restricting rather than
-   pricing is the right form for such a constraint is a sixty-year-old theorem
-   rather than a preference (@sec-response).
+   are unrelated to which loci lose diversity. Restricting rather than
+   pricing is not specific to this book: restricted selection indices and
+   optimum contribution selection with a bound on a group coancestry both have
+   that form (@sec-response), which is a precedent for the constraint, not a
+   proof that it is the right one.
 4. So the loss of gene diversity, $\alpha$, is held under a
    **budget** $\alpha_{\max}$: the loss is the relative shortfall of the selected hybrids' $GD_T = 1 - \theta$, with
    $\theta$ their group coancestry (@sec-coancestry), below that of a random
@@ -156,7 +164,7 @@ res <- stage2_select(st1$X, st1$f, st1$hybrids, n_sel = 100, fL = st1$fL)
 res$metrics
 ```
 
-The default scale of the live examples is deliberately small -- 25 lines per pool
+The teaching scale of the live examples (assumption A8 of @sec-hybrid-programme) is deliberately small -- 25 lines per pool
 and 2000 markers, giving 625 candidate hybrids -- so that a full render takes
 minutes. It is set once, in `_common.R`; chapters that need another scale (for
 example @sec-stages, at 30 lines per pool and 3000 markers) set it in their own

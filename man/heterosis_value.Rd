@@ -10,7 +10,7 @@ heterosis_value(X, d)
 \item{X}{Hybrid marker matrix, values in 0/0.5/1. Heterozygous loci are the
 entries equal to 0.5, which is exact only because the parents are inbred.}
 
-\item{d}{Numeric vector of `ncol(X)` dominance deviations, one per locus.}
+\item{d}{Numeric vector of `ncol(X)` dominance effects, one per locus.}
 }
 \value{
 Numeric vector of length `nrow(X)`, the mid-parent heterosis of each
@@ -20,7 +20,7 @@ Numeric vector of length `nrow(X)`, the mid-parent heterosis of each
 With fully inbred parent lines every parent is homozygous, so the additive
 contributions of the two parents average exactly to the F1's own additive
 value and cancel from the mid-parent difference. What survives is the
-dominance deviation at the loci where the F1 is heterozygous:
+dominance effect at the loci where the F1 is heterozygous:
 `H_i` is the sum of `d_k` over the loci where `x_ik` equals 0.5.
 }
 \details{

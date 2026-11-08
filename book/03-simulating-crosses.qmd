@@ -3,6 +3,17 @@
 ```{r}
 #| include: false
 source("_common.R")
+# Exact identities are asserted to a relative deviation of 1e-12: double
+# precision (2.2e-16) times the ~1e3 terms summed in the largest sums here.
+# rel_dev = max |x - y| / max(1, max |y|); the achieved value is printed in the text.
+tol_exact <- 1e-12
+rel_dev <- function(x, y) max(abs(x - y)) / max(1, max(abs(y)))
+# a deviation for inline prose: exactly 0 is said, not printed as 0.0e+00
+dev_txt <- function(x) if (x == 0) "exactly 0" else fmt_sci(x)
+# fixed-digit inline number with a true minus sign (the book's `$-$` convention)
+num <- function(x, d = 4) sub("-", "$-$", sprintf("%.*f", d, x), fixed = TRUE)
+# production scale of R/00_data.R (documented there, not an object of the package)
+n_prod <- 71
 ```
 
 The Foundations part defined the quantities the book manages -- coancestry
@@ -11,24 +22,33 @@ response they are traded against (@sec-response), and the heterosis that pool
 divergence is maintained for (@sec-heterosis). @sec-response drew its data
 from `simulate_pools()` and @sec-heterosis from `simulate_lines()` and
 `simulate_data()`, both without deriving them. This chapter builds the generator
-step by step, with `simulate_lines()` and `simulate_data()`. `simulate_pools()`
-uses the same Balding-Nichols pool frequencies, homozygous lines and A x B
+step by step, with `simulate_lines()` and `simulate_data()`.
+
+`simulate_pools()` uses the same Balding-Nichols pool frequencies, homozygous lines and A x B
 factorial, but a different trait: `n_qtl` loci with independent effects plus
 noise, where the traits built here have correlated effects at every marker and
 no noise. Up to the lines the two generators consume R's random stream in the
-same order, so with the arguments of @sec-response (`r book_cfg$n_pool_A` +
-`r book_cfg$n_pool_B` lines, $m$ = `r book_cfg$m`, `fst` = 0.15, seed 1) they
-return the same lines and the same hybrid marker matrix `X` (asserted below);
-only the traits differ.
+same order, so called with `book_cfg`'s values (`r book_cfg$n_pool_A` +
+`r book_cfg$n_pool_B` lines, $m$ = `r book_cfg$m`, `fst` = `r book_cfg$fst`,
+seed `r book_cfg$seed`) they return the same lines and the same hybrid marker
+matrix `X` (asserted in @sec-sim-lines); only the traits differ.
+
+The `book_cfg` values coincide
+with the arguments written in @sec-response's chunk, which asserts that its
+`fst` and seed equal `book_cfg`'s. `simulate_pools()` also clamps its pool frequencies to
+$[10^{-6}, 1 - 10^{-6}]$ and `simulate_lines()` does not, so the pool
+frequencies of the two functions agree to within $10^{-6}$ and not exactly;
+at the arguments of @sec-sim-lines the lines are identical (asserted there).
 
 Everything downstream of this chapter consumes three objects and knows nothing
 about where they came from. That is deliberate: it is the seam at which a
 simulation is swapped for real data, and it is the only place that has to change
 when it is.
 
-This chapter builds those objects. It also builds the candidate pool the rest of
-the book selects from, so the choices made here -- how divergent the pools are,
-how the index is constructed -- determine what the later chapters have to work
+This chapter builds those objects. It also builds the candidate set the rest of
+the book selects from, so the choices made here -- how divergent the pools are
+(@sec-sim-divergence), how the index is constructed (@sec-sim-traits) --
+determine what the later chapters have to work
 with.
 
 ## What has to be produced
@@ -53,10 +73,15 @@ knitr::kable(data.frame(
   check.names = FALSE))
 ```
 
-## Simulating the lines
+## Simulating the lines {#sec-sim-lines}
 
-Two heterotic pools are generated with the Balding-Nichols model
-[@balding1995]. Ancestral allele frequencies $p^{*}_k$ are drawn uniform on
+Two heterotic pools are generated with a Balding-Nichols-type model. From
+@balding1995 this chapter takes the name of the model and the idea of
+expressing the divergence of a population from a common ancestral one in a
+single parameter; the Beta densities of @eq-balding-nichols and the reading of
+$F_{BN}$ given with it are this book's own specification for a biallelic locus,
+implemented in `simulate_lines()`, and are not quoted from that paper; the book
+attributes to @balding1995 no particular parameterisation. Ancestral allele frequencies $p^{*}_k$ are drawn uniform on
 $[0.05, 0.95]$, then pool A's frequency at marker $k$ is drawn as
 
 $$p_{Ak} \sim \text{Beta}\!\left(p^{*}_k \frac{1 - F_{BN}}{F_{BN}},\;
@@ -67,53 +92,136 @@ markers, $p^{*}_k \in [0.05, 0.95]$ is the ancestral frequency of the allele
 coded 1, $p_{Ak}, p_{Bk} \in (0, 1)$ are the pool frequencies of that allele,
 and $F_{BN} \in (0, 1)$ is the parameter `fst` of the configuration
 (@sec-notation). The Beta of @eq-balding-nichols has mean $p^{*}_k$ and variance
-$F_{BN}\, p^{*}_k (1 - p^{*}_k)$: $F_{BN}$ is the expected divergence of *each*
-pool from the ancestral frequency, not between the two pools. Between them,
+$F_{BN}\, p^{*}_k (1 - p^{*}_k)$ (from $\mathrm{Var} = ab/[(a+b)^2(a+b+1)]$
+with $a + b = (1 - F_{BN})/F_{BN}$): $F_{BN}$ is the divergence of *each* pool from
+the ancestral frequency, measured as that variance in units of
+$p^{*}_k(1 - p^{*}_k)$, not a divergence between the two pools. The ancestral
+frequency $p^{*}_k$ belongs to the draw: it is a parameter of the simulation
+and is never observed in the data. It is neither a pool frequency
+$p_{Ak}$, $p_{Bk}$ nor the frozen base `ctx$p0` of the candidate set, which is
+a sample quantity of the hybrids (defined at the end of @sec-ctx-built). Between the pools,
 $\mathrm{Var}(p_{Ak} - p_{Bk}) = 2 F_{BN}\, p^{*}_k (1 - p^{*}_k)$, and the
 $F_{ST}$ statistic of @eq-f-stats computed on two pools of unbounded size
 estimates approximately $F_{BN}/(2 - F_{BN})$ (@sec-notation): at the book's
-$F_{BN}$ = `r book_cfg$fst` that is `r fmt(book_cfg$fst / (2 - book_cfg$fst), 3)`,
+$F_{BN}$ = `r book_cfg$fst` that is `r num(book_cfg$fst / (2 - book_cfg$fst), 3)`,
 not `r book_cfg$fst`.
 
 Genotypes are then drawn as $2 \times \text{Bernoulli}(p)$, which makes every
-line fully homozygous, as an inbred line should be.
+line fully homozygous, as an inbred line should be. @tbl-line-genotypes checks
+the result.
 
 ```{r}
-simulate_lines
+cat(deparse(simulate_lines), sep = "\n")
 ```
 
 ```{r}
+#| label: tbl-line-genotypes
+#| tbl-cap: "Line genotype matrix `L` at the teaching scale: its size (lines by markers) and the number of elements equal to 0 and to 2 among its first 5 lines and 200 markers. No element of the whole matrix takes another value (asserted in the chunk)."
 L <- simulate_lines(book_cfg)
 stopifnot(all(L %in% c(0, 2)))
-# same lines and X as the simulate_pools() call of @sec-response
+# same lines and X as simulate_pools() called with book_cfg's values. The values
+# of @sec-response's chunk coincide with these (that chunk asserts its fst and
+# seed equal book_cfg's)
 sim_02b <- simulate_pools(n_A = book_cfg$n_pool_A, n_B = book_cfg$n_pool_B,
-                          m = book_cfg$m, fst = 0.15, seed = 1)
+                          m = book_cfg$m, fst = book_cfg$fst, seed = book_cfg$seed)
 stopifnot(identical(2 * sim_02b[["GL"]], L),
           identical(sim_02b[["X"]], simulate_data(book_cfg)[["X"]]))
-dim(L)
-table(as.vector(L[1:5, 1:200]))
+blk <- L[1:5, 1:200]
+data.frame(
+  quantity = c("lines (rows of L)", "markers (columns of L)",
+               "elements equal to 0, first 5 lines x 200 markers",
+               "elements equal to 2, first 5 lines x 200 markers"),
+  value = c(nrow(L), ncol(L), sum(blk == 0), sum(blk == 2)))
 ```
 
 Only 0 and 2 appear: no residual heterozygotes. With real data those must be
 imputed or dropped before this point, because the hybrid-genotype identity in
 @sec-coancestry assumes homozygous parents.
 
-### The divergence knob
+### What the generator assumes {#sec-sim-assumptions}
 
-`fst` is the single most consequential parameter in the simulation, because it
-sets how much of the pools' diversity sits *between* them rather than within.
-What that buys is less obvious than it looks: @fig-divergence-het plots the
+The data of this chapter are generated under the assumptions listed here, and the
+numbers it reports (the grid, the replicates, the expectations derived for the
+divergence knob) are conditional on them. The exact algebraic identities it
+checks do not need them all: the per-hybrid heterozygous fraction equals
+$1 - f^L_{ab}$ for any inbred parents, the identity of $f$ with
+`tcrossprod(cbind(X, 1 - X)) / m` holds for any marker matrix coded 0, 0.5, 1,
+and $\sum G = 0$ holds for any panel centred on its own sample frequencies.
+Independence across loci enters the dispersion of the replicates, not the
+expectations, which are sums over loci.
+
+- *Biallelic, neutral, unlinked markers.* The pools diverge by drift alone from
+  one ancestral frequency vector (no selection, mutation or migration after the
+  split), and the loci are independent of one another: $p^{*}_k$, $p_{Ak}$,
+  $p_{Bk}$ and every genotype are drawn independently across $k$. There is no
+  genetic map and no recombination, so no linkage disequilibrium arises beyond
+  sampling noise. @sec-alphasimr relaxes this (linkage, outbred founders,
+  directional dominance and several generations of selection).
+- *Unrelated lines, inbred by fiat.* Given $p_{Ak}$, the lines of pool A are
+  independent draws of $2 \times \text{Bernoulli}(p_{Ak})$ at each locus, and
+  likewise for pool B: there is no pedigree and no shared descent among lines of
+  a pool beyond what the pool frequency carries. Each line is drawn directly
+  at fixation (0 or 2 at every marker); the generator does not model the
+  doubled-haploid or selfing path that produces inbred lines in a programme
+  (@sec-hp-cycle).
+- *Equal pool sizes and the complete A x B factorial.* $n_A = n_B$ in the
+  configuration, and every A x B combination is formed once, with equal weight
+  (@sec-sim-hybrids). This is an assumption, not a property of hybrid programmes:
+  the identities of the grid of @tbl-divergence-grid that tie the heterozygous fraction to
+  $GD_T + GD_{BS}$ need it. @sec-mating and @sec-joint choose which crosses
+  are made instead.
+- *Additive traits, effects at every marker, known without error* (section
+  "Predicted traits"): no dominance and no prediction error. Dominance enters in
+  @sec-heterosis and @sec-alphasimr, and prediction error in
+  @sec-genomic-prediction.
+
+### The divergence knob {#sec-sim-divergence}
+
+`fst` sets how much of the pools' diversity sits *between* them rather than
+within; it is not compared here with the number of markers, the number of lines
+or the trait correlation, so nothing is claimed about its rank among the
+parameters. What the divergence buys is less obvious than it looks:
+@fig-divergence-het plots the
 heterozygous fraction of the F1 over a grid of $F_{BN}$,
 @tbl-divergence-grid gives the coancestries and diversity components behind it,
-and @tbl-divergence-trade the changes between the two ends of the grid.
+and @tbl-divergence-trade the changes between the two ends of the grid. The
+grid uses the teaching configuration (`r book_cfg$n_pool_A` + `r book_cfg$n_pool_B`
+lines, $m$ = `r book_cfg$m`) with `fst` replaced by the grid value, so its row at
+$F_{BN}$ = `r book_cfg$fst` is the F1 of the lines `L` of @sec-sim-lines and the heterozygous
+fraction of @tbl-diagonal of @sec-coancestry (asserted against `L` in the chunk).
 
 ```{r}
-#| label: fig-divergence-het
-#| fig-cap: "Heterozygous fraction of the A x B F1 (fraction of markers at which the two inbred parent lines differ, averaged over every A x B hybrid) against the Balding-Nichols parameter, one simulated pair of pools per point at the book scale with m = 1500 markers, the same ancestral frequencies at every point. Dashed line: its expectation, 2 E[p*(1 - p*)] for p* uniform on [0.05, 0.95], which does not depend on the parameter."
-#| fig-alt: "Line plot of the heterozygous fraction of the F1, on a 0 to 1 axis, against the Balding-Nichols parameter from 0.02 to 0.40; the points stay flat along a dashed horizontal line at the expectation"
+#| include: false
 fst_grid <- c(0.02, 0.05, 0.10, 0.15, 0.25, 0.40)
+cfg_txt <- sprintf("%d + %d lines, %d markers", book_cfg$n_pool_A,
+                   book_cfg$n_pool_B, book_cfg$m)
+```
+
+```{r}
+#| label: divergence-trade-replicates
+# the two trade ratios and the heterozygous fraction over replicate grids at the
+# two ends; simulate_lines() seeds from cfg$seed, so seed s is explicit
+gd_ends <- function(fst, seed) {
+  cfg <- modifyList(book_cfg, list(fst = fst, seed = seed))
+  fL  <- molecular_coancestry(simulate_lines(cfg) / 2)
+  A <- seq_len(cfg$n_pool_A); B <- cfg$n_pool_A + seq_len(cfg$n_pool_B)
+  f_til <- mean(c(fL[A, A], fL[B, B])); f_bar <- mean(fL)
+  c(GD_WS = 1 - f_til, GD_BS = f_til - f_bar, GD_T = 1 - f_bar,
+    het = 1 - mean(fL[A, B]))
+}
+n_rep <- 200
+rep_lo <- vapply(seq_len(n_rep), function(s) gd_ends(min(fst_grid), s), numeric(4))
+rep_hi <- vapply(seq_len(n_rep), function(s) gd_ends(max(fst_grid), s), numeric(4))
+rep_x  <- rep_hi - rep_lo                        # change, largest minus smallest
+rep_ratio <- rbind(-rep_x["GD_BS", ] / rep_x["GD_T", ],
+                   -rep_x["GD_WS", ] / rep_x["GD_BS", ])
+rep_het_diff <- rep_x["het", ]                   # paired by seed
+```
+
+```{r}
+#| include: false
 div <- vapply(fst_grid, function(fst) {
-  cfg <- modifyList(book_cfg, list(fst = fst, m = 1500))
+  cfg <- modifyList(book_cfg, list(fst = fst))
   Lx  <- simulate_lines(cfg)
   fL  <- molecular_coancestry(Lx / 2)
   A   <- seq_len(cfg$n_pool_A); B <- cfg$n_pool_A + seq_len(cfg$n_pool_B)
@@ -126,21 +234,52 @@ div <- vapply(fst_grid, function(fst) {
     GD_WS = 1 - f_til, GD_BS = f_til - f_bar, GD_T = 1 - f_bar)
 }, numeric(6))
 
-d <- data.frame(fst = fst_grid, t(div))
-# equal pool sizes: 1 - f_AB = GD_T + GD_BS exactly
-stopifnot(isTRUE(all.equal(d$het_fraction, d$GD_T + d$GD_BS)))
 het_exp <- 2 * (0.5 - (0.9^2 / 12 + 0.25))   # 2 E[p(1-p)], p ~ U(0.05, 0.95)
-plot(d$fst, d$het_fraction, type = "b", pch = 19, ylim = c(0, 1),
+cap_het <- sprintf("Heterozygous fraction of the A x B F1 (fraction of markers at which the two inbred parent lines differ, averaged over every A x B hybrid) against the Balding-Nichols parameter. Filled circles joined by a line: one simulated pair of pools per grid point (teaching scale: %s; seed %d, so the same ancestral frequencies at every point). Open squares with bars: mean and s.d. over %d replicate pairs of pools (seeds 1 to %d) at the two ends of the grid only; the bar is the scatter of a single draw. Dashed line: the expectation, 2 E[p*(1 - p*)] for p* uniform on [0.05, 0.95], which does not depend on the parameter. The vertical axis is zoomed to the range of the draws, not 0 to 1.", cfg_txt, book_cfg$seed, n_rep, n_rep)
+alt_het <- sprintf("Line plot of the heterozygous fraction of the F1, on a vertical axis zoomed to the range of the draws, against the Balding-Nichols parameter from %.2f to %.2f; the six single-draw points scatter over a range of %.4f around a dashed horizontal line at the expectation, %.3f, about as much as the replicate bars, and the figure cannot separate a flat line from a small trend. At the two ends of the grid an open square with a bar marks the mean and standard deviation over %d replicate draws: %.3f and %.3f at %.2f, %.3f and %.3f at %.2f.", min(fst_grid), max(fst_grid), diff(range(div["het_fraction", ])), het_exp, n_rep, mean(rep_lo["het", ]), sd(rep_lo["het", ]), min(fst_grid), mean(rep_hi["het", ]), sd(rep_hi["het", ]), max(fst_grid))
+cap_grid <- sprintf("Divergence grid behind @fig-divergence-het, one simulated pair of pools per row (teaching scale: %s). $F_{BN}$: the Balding-Nichols parameter; $\\bar f^{L}_{AB}$: mean line coancestry between a pool-A and a pool-B line; $\\tilde f$: group coancestry within a pool, self-coancestry included; heterozygous fraction: of the A x B F1; $GD_{WS}$, $GD_{BS}$, $GD_T$: the gene-diversity components of @sec-subdivided.", cfg_txt)
+```
+
+```{r}
+#| label: fig-divergence-het
+#| fig-cap: !expr cap_het
+#| fig-alt: !expr alt_het
+
+d <- data.frame(fst = fst_grid, t(div))
+# equal pool sizes: 1 - mean f^L_AB = GD_T + GD_BS exactly
+dev_grid <- rel_dev(d$het_fraction, d$GD_T + d$GD_BS)
+# the row at book_cfg$fst is the F1 of the lines L of this chapter
+i_cfg <- which(d$fst == book_cfg$fst)
+a_L <- seq_len(book_cfg$n_pool_A); b_L <- book_cfg$n_pool_A + seq_len(book_cfg$n_pool_B)
+dev_row <- abs(d$het_fraction[i_cfg] -
+               (1 - mean(molecular_coancestry(L / 2)[a_L, b_L])))
+stopifnot(dev_grid < tol_exact, length(i_cfg) == 1, dev_row < tol_exact)
+# replicate mean +/- s.d. at the two ends (rep_lo, rep_hi of the chunk above)
+rep_end <- cbind(lo = rep_lo["het", ], hi = rep_hi["het", ])
+m_end <- colMeans(rep_end); s_end <- apply(rep_end, 2, sd)
+x_end <- range(fst_grid)
+# axis zoomed to the draws (a 0-1 axis hides a bar of s.d. 0.003)
+y_rng <- range(d$het_fraction, het_exp, m_end - s_end, m_end + s_end)
+plot(d$fst, d$het_fraction, type = "b", pch = 19,
+     ylim = y_rng + c(-1, 1) * 0.25 * diff(y_rng),
      xlab = expression(F[BN]),
      ylab = "heterozygous fraction of the F1")
 abline(h = het_exp, lty = 2)
+arrows(x_end, m_end - s_end, x_end, m_end + s_end, angle = 90, code = 3,
+       length = 0.05, col = "grey35")
+points(x_end, m_end, pch = 22, bg = "white", col = "grey35")
 grid()
+legend("bottomright", bty = "n", lty = c(1, NA, 2), pch = c(19, 22, NA),
+       pt.bg = "white", col = c("black", "grey35", "black"),
+       legend = c("one draw per point",
+                  sprintf("mean +/- s.d., %d draws", n_rep), "expectation"))
 ```
 
 ```{r}
 #| label: tbl-divergence-grid
-#| tbl-cap: "Divergence grid behind @fig-divergence-het, one simulated pair of pools per row (book scale, m = 1500 markers). `fst`: the Balding-Nichols parameter $F_{BN}$; `between_pool_f`: mean line coancestry between pools; `within_pool_f`: group coancestry within a pool, self-coancestry included ($\\tilde f$); `het_fraction`: heterozygous fraction of the A x B F1; `GD_WS`, `GD_BS`, `GD_T`: the gene-diversity components of @sec-subdivided."
-fmt(d)
+#| tbl-cap: !expr cap_grid
+knitr::kable(fmt(d), col.names = c("$F_{BN}$", "$\\bar f^{L}_{AB}$", "$\\tilde f$",
+                                   "het. fraction", "$GD_{WS}$", "$GD_{BS}$", "$GD_T$"))
 ```
 
 ```{r}
@@ -152,23 +291,6 @@ dT  <- d$GD_T[n_g]  - d$GD_T[1]
 ```
 
 ```{r}
-#| label: divergence-trade-replicates
-# the two trade ratios over replicate grids; simulate_lines() seeds from cfg$seed
-gd_ends <- function(fst, seed) {
-  cfg <- modifyList(book_cfg, list(fst = fst, m = 1500, seed = seed))
-  fL  <- molecular_coancestry(simulate_lines(cfg) / 2)
-  A <- seq_len(cfg$n_pool_A); B <- cfg$n_pool_A + seq_len(cfg$n_pool_B)
-  f_til <- mean(c(fL[A, A], fL[B, B])); f_bar <- mean(fL)
-  c(GD_WS = 1 - f_til, GD_BS = f_til - f_bar, GD_T = 1 - f_bar)
-}
-n_rep <- 200
-rep_ratio <- vapply(seq_len(n_rep), function(s) {
-  x <- gd_ends(max(fst_grid), s) - gd_ends(min(fst_grid), s)
-  c(-x[["GD_BS"]] / x[["GD_T"]], -x[["GD_WS"]] / x[["GD_BS"]])
-}, numeric(2))
-```
-
-```{r}
 #| label: tbl-divergence-trade
 #| tbl-cap: "Change in each gene-diversity component of @tbl-divergence-grid from the smallest to the largest $F_{BN}$ of the grid (largest minus smallest), and the two ratios between those changes. Same single draw per grid point as @tbl-divergence-grid."
 fmt(data.frame(
@@ -177,29 +299,50 @@ fmt(data.frame(
   value = c(dWS, dBS, dT, -dBS / dT, -dWS / dBS)))
 ```
 
-Across a `r fmt(max(fst_grid) / min(fst_grid), 1)`-fold range of $F_{BN}$ the
-heterozygous fraction stays between `r fmt(min(d$het_fraction), 4)` and
-`r fmt(max(d$het_fraction), 4)`, against an expectation of
-`r fmt(het_exp, 4)` that contains no $F_{BN}$. Each point is one draw of a
-finite pair of pools, and the spread over replicate draws was not measured
-here. Over the same range, in the terms of @sec-subdivided with $\tilde f$ the
+Across a `r num(max(fst_grid) / min(fst_grid), 0)`-fold range of $F_{BN}$ the
+heterozygous fraction stays between `r num(min(d$het_fraction))` and
+`r num(max(d$het_fraction))`, against an expectation of
+`r num(het_exp)` that contains no $F_{BN}$. Each point is one draw of a
+finite pair of pools. Over `r n_rep` replicate draws (seeds 1 to `r n_rep`, the
+two ends of the grid only) the heterozygous fraction has mean
+`r num(mean(rep_lo["het", ]))` (s.d. `r num(sd(rep_lo["het", ]))`) at
+$F_{BN}$ = `r num(min(fst_grid), 2)` and `r num(mean(rep_hi["het", ]))` (s.d.
+`r num(sd(rep_hi["het", ]))`) at $F_{BN}$ = `r num(max(fst_grid), 2)`; the mean change
+between the ends, paired by seed, is `r fmt_sci(mean(rep_het_diff), 2)` with standard
+error `r fmt_sci(sd(rep_het_diff) / sqrt(n_rep), 2)`, `r num(abs(mean(rep_het_diff)) / (sd(rep_het_diff) / sqrt(n_rep)), 2)`
+standard errors from zero. A single draw per point therefore
+scatters by about `r num(max(sd(rep_lo["het", ]), sd(rep_hi["het", ])), 3)`, and
+the range of the six single draws (`r num(diff(range(d$het_fraction)))`) is of that
+order: the figure by itself cannot separate a flat line from a small trend, and
+the replicate means and the expectation of @sec-heterosis-flat are what carry the flatness.
+Over the same range, in the terms of @sec-subdivided with $\tilde f$ the
 group coancestry within a pool (self-coancestry included, `within_pool_f`),
-the within-subpopulation gene diversity $GD_{WS} = 1 - \tilde f = GD_{WI} + GD_{BI}$ of @eq-gd-partition changes by `r fmt(dWS, 4)`, $GD_{BS}$ by
-`r fmt(dBS, 4)` and $GD_T$ by `r fmt(dT, 4)`. The $GD_{BS}$ gain is
-`r fmt(-dBS / dT, 2)` times the $GD_T$ loss and the within-pool loss is
-`r fmt(-dWS / dBS, 2)` times the $GD_{BS}$ gain; the expectations under drift
+the within-subpopulation gene diversity $GD_{WS} = 1 - \tilde f = GD_{WI} + GD_{BI}$ of @eq-gd-partition changes by `r num(dWS)`, the between-pool component $GD_{BS}$ by
+`r num(dBS)` and the total $GD_T$ by `r num(dT)`.
+
+The $GD_{BS}$ gain is
+`r num(-dBS / dT, 2)` times the $GD_T$ loss and the within-pool loss is
+`r num(-dWS / dBS, 2)` times the $GD_{BS}$ gain; the expectations under drift
 in two equal pools are 1 and 2 (@sec-subdivided). Both ratios are single draws.
-Over `r n_rep` replicate grids (seeds 1 to `r n_rep`, the two ends of the grid
-only) they have mean `r fmt(mean(rep_ratio[1, ]), 3)` and
-`r fmt(mean(rep_ratio[2, ]), 3)` with standard deviation
-`r fmt(sd(rep_ratio[1, ]), 3)` and `r fmt(sd(rep_ratio[2, ]), 3)`, so the
-departure of this draw from 1 and 2 is within ordinary sampling variation. The `stopifnot()` in the code of @fig-divergence-het
-asserts the identity that ties the first trade to the flat line: with equal pool sizes the
+Over the `r n_rep` replicate grids they have mean `r num(mean(rep_ratio[1, ]), 3)` and
+`r num(mean(rep_ratio[2, ]), 3)` with standard deviation
+`r num(sd(rep_ratio[1, ]), 3)` and `r num(sd(rep_ratio[2, ]), 3)`, so the
+departure of this draw from 1 and 2 is within ordinary sampling variation.
+
+The `stopifnot()` in the code of @fig-divergence-het
+asserts the identity that ties the first trade to the flat line (deviation
+`r dev_txt(dev_grid)`, tolerance `r fmt_sci(tol_exact, 1)`): with equal pool sizes the
 heterozygous fraction is exactly $GD_T + GD_{BS}$, so a constant heterozygous
 fraction means that what $GD_{BS}$ gains, $GD_T$ loses.
 
-That is not an artefact of this grid. The heterozygous fraction of an A x B
-hybrid of inbred parents is exactly `1 - theta_AB`, and @sec-heterosis-flat
+That is not an artefact of this grid, under the assumptions of @sec-sim-assumptions. For
+the F1 of inbred parents $a$ and $b$ the heterozygous fraction is exactly
+$1 - f^{L}_{ab}$, hybrid by hybrid (asserted in the chunk of
+@tbl-ctx-check); its mean over the complete A x B factorial is
+$1 - \bar f^{L}_{AB}$, with $\bar f^{L}_{AB}$ (`between_pool_f`) the mean
+coancestry between a pool-A and a pool-B line (written $f_{AB}$ in
+@sec-subdivided and $\theta_{AB}$ in @sec-notation; @sec-heterosis identifies
+them on the complete factorial). @sec-heterosis-flat
 derives the expectations for pools of unbounded size: the shared term
 $2\bar p(1 - \bar p)$, which is $GD_T$ here, loses $F_{BN}\,p^{*}(1-p^{*})$
 and the divergence term, which is $GD_{BS}$, gains the same amount. Here
@@ -210,26 +353,50 @@ with $q^{*} = 1 - p^{*}$, and the loss of $GD_T$ and the gain of $GD_{BS}$
 are both $F_{BN}\,p^{*}q^{*}(1 - 1/n)$ in expectation. The factor $(1 - 1/n)$
 cancels in the ratios 1 and 2. With $n$ = `r book_cfg$n_pool_A` and the
 $F_{BN}$ range of the grid, the expected change is
-`r fmt(diff(range(fst_grid)) * het_exp / 2 * (1 - 1 / book_cfg$n_pool_A), 4)`,
-against `r fmt(diff(range(fst_grid)) * het_exp / 2, 4)` for unbounded pools. Neutral divergence relocates diversity; it
-does not create heterosis. @tbl-keystone in @sec-subdivided states that
-`GD_BS` is nonetheless to be preserved rather than minimised, and defers
-the argument to @sec-heterosis; @sec-heterosis-alignment is what has to be true of
-the divergence for it to be worth anything.
+`r num(diff(range(fst_grid)) * het_exp / 2 * (1 - 1 / book_cfg$n_pool_A))`,
+against `r num(diff(range(fst_grid)) * het_exp / 2)` for unbounded pools.
+@sec-heterosis-flat derives the same expectation and the same sample-frequency
+offset on a different grid (seed 5, $m$ = `r book_cfg$m`); the formulas agree,
+and the numbers here are a different draw of the generator.
 
-## From lines to hybrids
+What this chapter measures is the heterozygous fraction and its split into
+$GD_T$ and $GD_{BS}$. Its data carry no dominance (the traits of @sec-sim-traits are
+additive), so the heterozygous fraction is not heterosis here. It is the F1
+heterosis per locus only for flat dominance, $d_k = 1$ at every locus
+(@eq-het-value), and its identification with $GD_T + GD_{BS}$ needs in
+addition inbred parents, the complete A x B factorial and equal pool weights,
+the conditions of the $GD_{BS}$ row of @tbl-keystone. Under those conditions
+neutral divergence relocates diversity from $GD_T$ to $GD_{BS}$ and creates no
+expected heterosis. Outside them this chapter says nothing about heterosis. Whether $GD_{BS}$ is to be preserved is
+not a consequence of the flat line: @tbl-keystone in @sec-subdivided states it
+for those conditions and defers the argument to @sec-heterosis, and
+@sec-heterosis-alignment treats what has to be true of the divergence, namely
+its alignment with the dominance effects, for the divergence to be worth
+anything.
+
+## From lines to hybrids {#sec-sim-hybrids}
 
 Every A x B combination is formed. With `r book_cfg$n_pool_A` lines per pool
 that is `r book_cfg$n_pool_A * book_cfg$n_pool_B` candidates; at the production
-scale of 71 lines per pool it is `r 71^2`.
+scale of `r n_prod` lines per pool it is `r n_prod^2`. @tbl-hybrid-dims gives the
+size of the resulting dosage matrix `M` and @tbl-ped-head the first rows of the
+pedigree `ped`.
 
 ```{r}
+#| label: tbl-hybrid-dims
+#| tbl-cap: "Dimensions of the hybrid dosage matrix `M` (values 0/1/2) at the teaching scale: one row per A x B combination, one column per marker."
 cfg <- book_cfg
 a_ids <- seq_len(cfg$n_pool_A)
 b_ids <- cfg$n_pool_A + seq_len(cfg$n_pool_B)
 ped <- expand.grid(a = a_ids, b = b_ids)
 M   <- (L[ped$a, , drop = FALSE] + L[ped$b, , drop = FALSE]) / 2   # 0/1/2
-dim(M)
+data.frame(dimension = c("hybrids (rows of M)", "markers (columns of M)"),
+           value = dim(M))
+```
+
+```{r}
+#| label: tbl-ped-head
+#| tbl-cap: "First three rows of the pedigree `ped` of the complete A x B factorial: `a` is the row of `L` of the pool-A parent and `b` that of the pool-B parent (pool-B lines are numbered after pool A)."
 head(ped, 3)
 ```
 
@@ -238,17 +405,22 @@ in many candidate hybrids, selecting hybrids is really selecting *line usage* --
 and that observation, made precise in @sec-collapse, is what makes the whole
 problem tractable at production scale.
 
-## Predicted traits
+## Predicted traits {#sec-sim-traits}
 
 Marker effects are drawn correlated across traits, through a Cholesky factor of
 a fixed correlation matrix, and the predicted values are the centered marker
-matrix times those effects:
+matrix times those effects. In this chapter `R` (the target correlation of the
+marker effects), `B` (the matrix of marker effects) and `L` (the line genotype
+matrix) are names of code objects, not the $\mathbf R$, $\mathbf B$ and $L$ of
+@sec-notation, and $n_A$, $n_B$ count the lines of pool A and pool B, not the
+female and male lines of @sec-mating.
 
 ```{r}
 set.seed(cfg$seed + 99)
 R <- matrix(c(1, 0.3, -0.3,
               0.3, 1,  0.1,
              -0.3, 0.1, 1), 3, 3)
+stopifnot(nrow(R) == cfg$n_traits)       # R is written for three traits
 vr <- vanraden_G(M)
 B <- matrix(rnorm(cfg$m * cfg$n_traits), cfg$m) %*% chol(R)
 traits <- scale(vr$Z %*% B)
@@ -261,7 +433,7 @@ the target `R`.
 
 ```{r}
 #| label: tbl-trait-cor
-#| tbl-cap: "Target correlation `R` of the marker effects and realised correlation of the predicted traits over the hybrids, for each pair of traits; one draw of marker effects at the book scale."
+#| tbl-cap: "Target correlation `R` of the marker effects and realised correlation of the predicted traits over the hybrids, for each pair of traits; one draw of marker effects at the teaching scale."
 ij <- which(upper.tri(R), arr.ind = TRUE)
 fmt(data.frame(traits = paste(ij[, 1], "x", ij[, 2]),
                target_R = R[ij], realised = cor(traits)[ij]), 3)
@@ -270,7 +442,7 @@ fmt(data.frame(traits = paste(ij[, 1], "x", ij[, 2]),
 The Cholesky step gives each row of `B`, the effects of one marker on the
 `r cfg$n_traits` traits, covariance `R`. It does not make the realised trait
 correlations equal `R`: they depart from it by up to
-`r fmt(max(abs(cor(traits) - R)), 3)` in absolute value. The hybrid values are
+`r num(max(abs(cor(traits) - R)), 3)` in absolute value. The hybrid values are
 linear combinations of the columns of the centred matrix `Z`, whose rank is
 `r rank_Z` $= (n_A - 1) + (n_B - 1)$ for an additive A x B factorial, so each
 realised correlation rests on one draw of effects projected onto `r rank_Z`
@@ -282,14 +454,30 @@ was not measured here.
 ## What this simulation deliberately does not model
 
 These predicted values are constructed from *known* marker effects, so they
-carry no prediction error. Real genomic estimated breeding values (GEBVs) do. The book therefore treats `ctx$index`
-as given throughout, and the reader should read every gain figure as an upper
-bound on what a real programme would realise. The additive model also carries no
-dominance, so it cannot express specific combining ability -- see the caveats in
-@sec-case-study.
+carry no prediction error. Real genomic estimated breeding values (GEBVs) do.
+The book therefore treats `ctx$index` as given throughout.
+
+- *The optimum.* For a given candidate set and a given constraint on diversity,
+  no selection made on estimated values can have a higher mean true index than
+  the optimum computed on the known values, because the optimum maximises that
+  index over every feasible selection. This is a statement about the optimum.
+- *The heuristics.* The gains this book reports come from greedy,
+  differential-evolution and local-search selections, which at book scale are
+  not certified optima (@sec-bound; `ocs_bound()` gives a valid upper bound, and
+  `sel_exact()` does not converge there). A feasible selection is not a bound: a
+  selection made on estimates could exceed a heuristic's index on the known
+  values, so a gain in `ctx$index` does not bound the gain that a selection on
+  estimates could achieve.
+- *Scope.* That statement about the optimum concerns the index only: it does
+  not apply to the diversity metrics, which do not depend on the traits, nor to
+  anything outside the additive model.
+- *Additive only.* The additive model also carries no dominance, so it cannot
+  express specific combining ability (@sec-heterosis-gca-sca models it; the
+  caveats of @sec-case-study remain); the gap in prediction is closed in
+  @sec-genomic-prediction.
 :::
 
-## The two matrices, both built
+## The two matrices, both built {#sec-ctx-built}
 
 ```{r}
 X <- M / 2
@@ -299,51 +487,115 @@ ctx <- build_ctx(X = X, f = molecular_coancestry(X), G = vr$G, traits = traits,
                  fL = molecular_coancestry(L / 2), cfg = cfg)
 
 # the heterozygous fraction of hybrid (a, b) is 1 - fL[a, b] (inbred parents)
-stopifnot(abs(sum(ctx[["G"]])) < 1e-8,
+dev_G   <- abs(sum(ctx[["G"]])) / sum(abs(ctx[["G"]]))   # relative to sum |G|
+dev_f   <- rel_dev(ctx[["f"]], tcrossprod(cbind(X, 1 - X)) / ncol(X))
+dev_het <- rel_dev(rowMeans(ctx[["X"]] == 0.5),
+                   1 - ctx[["fL"]][cbind(ped$a, ped$b)])
+stopifnot(dev_G < tol_exact,
           min(ctx[["f"]]) >= 0, max(ctx[["f"]]) <= 1,
-          isTRUE(all.equal(ctx[["f"]],
-                           tcrossprod(cbind(X, 1 - X)) / ncol(X))),
-          isTRUE(all.equal(rowMeans(ctx[["X"]] == 0.5),
-                           1 - ctx[["fL"]][cbind(ped$a, ped$b)])))
+          dev_f < tol_exact, dev_het < tol_exact)
+
+# simulate_data() builds the same ctx, apart from the column names of traits
+ctx_sd <- simulate_data(book_cfg)
+same <- setdiff(names(ctx), "traits")
+stopifnot(identical(names(ctx_sd), names(ctx)),
+          all(vapply(same, function(k)
+            isTRUE(all.equal(ctx[[k]], ctx_sd[[k]], tolerance = tol_exact)),
+            logical(1))),
+          isTRUE(all.equal(unname(ctx[["traits"]]), unname(ctx_sd[["traits"]]),
+                           tolerance = tol_exact, check.attributes = FALSE)))
+```
+
+```{r}
+#| include: false
+cap_ctx <- sprintf("Size of the context `ctx` built in this chapter (N hybrids, m markers, number of lines) and the two properties checked on its matrices: the sum of the elements of VanRaden's G, printed in scientific notation because it is zero only up to rounding, and the range of the molecular coancestry f. The code asserts $|\\mathrm{sum}(G)| / \\sum |G|$ < %s.", fmt_sci(tol_exact, 1))
 ```
 
 ```{r}
 #| label: tbl-ctx-check
-#| tbl-cap: "Size of the context built above (N hybrids, m markers, number of lines) and the two properties checked on its matrices: the sum of the elements of VanRaden's G and the range of the molecular coancestry f. Values rounded to 4 decimals; the code asserts |sum(G)| < 1e-8."
-fmt(data.frame(
+#| tbl-cap: !expr cap_ctx
+knitr::kable(data.frame(
   quantity = c("N", "m", "n_lines", "sum(G)", "min(f)", "max(f)"),
-  value = c(ctx[["N"]], ctx[["m"]], ctx[["n_lines"]], sum(ctx[["G"]]),
-            min(ctx[["f"]]), max(ctx[["f"]]))))
+  value = c(sprintf("%d", c(ctx[["N"]], ctx[["m"]], ctx[["n_lines"]])),
+            fmt_sci(sum(ctx[["G"]]), 3),
+            sprintf("%.4f", c(min(ctx[["f"]]), max(ctx[["f"]]))))),
+  align = c("l", "r"))
 ```
 
-@tbl-ctx-check shows the result: `sum(G)` is zero to machine precision, as it must be for VanRaden's centred
-matrix [@vanraden2008], and `f` is inside $[0, 1]$: the two
-properties from @sec-coancestry, on this dataset.
+@tbl-ctx-check shows the result. `sum(G)` is zero up to floating-point
+rounding: it is `r fmt_sci(sum(ctx[["G"]]), 3)`, `r dev_txt(dev_G)` of
+$\sum |G|$, and not exactly 0. It is zero because `vanraden_G()` centres the markers
+on the sample frequencies of this very panel, `colMeans(M) / 2`, so that the
+columns of $\mathbf Z$ sum to zero and $\mathbf 1'\mathbf G\mathbf 1 = 0$
+(@eq-g-sum-zero); `G` here is the matrix of @eq-vanraden-g [@vanraden2008],
+and the property belongs to this centring, not to the matrix at other
+reference frequencies, where the sum need not vanish. `f` is inside $[0, 1]$,
+the other property of @sec-coancestry, on this dataset. Two identities are
+asserted with it (tolerance `r fmt_sci(tol_exact, 1)`): `f` equals
+`tcrossprod(cbind(X, 1 - X)) / m` to `r dev_txt(dev_f)`, and the heterozygous
+fraction of each hybrid equals `1 - fL[a, b]` to `r dev_txt(dev_het)`. The range
+of `f` is nonetheless narrow and far from 0: `f` is identity in state, unrelated individuals are not
+at 0 and its level is set by the marker panel (@sec-coancestry), so the
+assertion `min(f) >= 0` is the weak property and the informative one is the
+range printed in the table.
 
-The context also freezes two things that must never be recomputed per scenario:
+The context also stores three objects computed once, from the `r ctx[["N"]]`
+hybrids, at construction, and not to be recomputed per scenario (@tbl-ctx-stored):
 
 ```{r}
-str(ctx[c("p0", "maf_pop", "index")], max.level = 1)
+#| label: tbl-ctx-stored
+#| tbl-cap: "The three objects stored once in `ctx` at construction: number of values (`p0` and `maf_pop` one per marker, `index` one per hybrid) and their range."
+stored <- ctx[c("p0", "maf_pop", "index")]
+fmt(data.frame(object = names(stored),
+               n_values = vapply(stored, length, integer(1)),
+               min = vapply(stored, min, numeric(1)),
+               max = vapply(stored, max, numeric(1)),
+               row.names = NULL))
+# p0 is the mean of the two pools' sampled line frequencies (L is coded 0/2)
+dev_p0 <- rel_dev(ctx[["p0"]], (colMeans(L[a_ids, ]) + colMeans(L[b_ids, ])) / 4)
+stopifnot(dev_p0 < tol_exact)
 ```
 
-`p0` is the candidate-pool allele frequency vector. It is the **base** against
-which `F_hom` and `F_drift` are measured in @sec-genomic-era, and recomputing it
-per scenario would silently zero out the historical memory of erosion.
+`p0` is the allele frequency vector of the candidate set, `colMeans(X)` over the
+`r ctx[["N"]]` hybrids. It is the **base** against which `F_hom` and `F_drift`
+are measured in @sec-genomic-era, and recomputing it per scenario would
+silently zero out the historical memory of erosion. It is a sample quantity of
+this draw: with equal pools and the complete factorial it is the mean of the
+two pools' sampled line frequencies (asserted in the chunk of @tbl-ctx-stored, deviation `r dev_txt(dev_p0)`). It is therefore a different object from the
+ancestral frequency $p^{*}_k$ of @eq-balding-nichols, which is never observed,
+and from the pool frequencies $p_{Ak}$, $p_{Bk}$. `maf_pop` is the minor-allele
+frequency of `p0`, `pmin(p0, 1 - p0)`, and `index` is the multi-trait index of
+the hybrids, standardised once.
 
 ## The stage-1 contract in one call
 
-All of the above is `simulate_data()`, which builds the same `ctx` as this
-chapter. `stage1_simulate()` passes its `X`, `ped`, `traits` and `fL` to
+The construction of @sec-sim-lines to @sec-ctx-built is `simulate_data()`, which builds this chapter's `ctx` (the
+elements are equal, except that `simulate_data()` names the columns of
+`traits`; asserted after `ctx` is built). `stage1_simulate()` passes its `X`, `ped`, `traits` and `fL` to
 `stage1_build()`, the function real data enter through:
 
 ```{r}
-stage1_build
+cat(deparse(stage1_build), sep = "\n")
+```
+
+@tbl-st1-components lists what `stage1_simulate()` returns and @tbl-st1-hybrids
+the first rows of its `hybrids` table.
+
+```{r}
+#| label: tbl-st1-components
+#| tbl-cap: "Components of the object returned by `stage1_simulate()` at the teaching scale: class and dimensions of each (rows x columns for a matrix or data frame)."
+st1 <- stage1_simulate(book_cfg)
+data.frame(component = names(st1),
+           class = vapply(st1, function(x) class(x)[1], character(1)),
+           dimensions = vapply(st1, function(x) paste(dim(x), collapse = " x "),
+                               character(1)),
+           row.names = NULL)
 ```
 
 ```{r}
-st1 <- stage1_simulate(book_cfg)
-str(st1, max.level = 1)
-head(st1$hybrids, 3)
+#| label: tbl-st1-hybrids
+#| tbl-cap: "First three rows of `$hybrids` of the stage-1 object: hybrid id, the two parent lines (`line_A`, `line_B`; rows of `fL`) and the predicted traits, standardised."
+fmt(head(st1$hybrids, 3))
 ```
 
 For real data the same function is called with your own matrices:
@@ -409,43 +661,64 @@ fmt(data.frame(
   f12 = c(f_auto[1, 2], f_012[1, 2], f_true[1, 2])))
 ```
 
-## What the candidate pool looks like
+## What the candidate set looks like
 
 @fig-candidate-pool shows the two quantities every later chapter trades: the
 index of the candidates and the gene diversity of random subsets of them.
 
 ```{r}
+#| include: false
+n_sub <- 60                       # random-subset size, a typical n_sel
+n_subsets <- 400
+cap_cand <- sprintf("The candidate set at the teaching scale (%d + %d lines, %d A x B hybrids, %d markers). Left: histogram of the multi-trait selection index of the %d hybrids: the equally weighted sum of the standardised predicted traits (default `weights` of `build_ctx()`), re-standardised to mean 0 and s.d. 1. Right: histogram of the gene diversity of %d random subsets of %d hybrids, the baseline every later chapter measures against; dark vertical line: gene diversity of the whole candidate set.", book_cfg$n_pool_A, book_cfg$n_pool_B, ctx[["N"]], ctx[["m"]], ctx[["N"]], n_subsets, n_sub)
+alt_cand <- sprintf("Two histograms. Left: the multi-trait index of the %d candidate hybrids. Right: gene diversity of %d random %d-hybrid subsets, with a dark vertical line for the whole candidate set lying to the right of the bulk of the distribution", ctx[["N"]], n_subsets, n_sub)
+```
+
+```{r}
 #| label: fig-candidate-pool
-#| fig-cap: "The candidate pool at the book scale (25 + 25 lines, 625 A x B hybrids, 2000 markers). Left: histogram of the multi-trait selection index of the 625 hybrids: the equally weighted sum of the standardised predicted traits (default `weights` of `build_ctx()`), re-standardised to mean 0 and s.d. 1. Right: histogram of the gene diversity of 400 random subsets of 60 hybrids, the baseline every later chapter measures against; dark vertical line: gene diversity of the whole candidate pool."
-#| fig-alt: "Two histograms. Left: the multi-trait index of the 625 candidate hybrids. Right: gene diversity of 400 random 60-hybrid subsets, with a dark vertical line for the whole pool lying to the right of the bulk of the distribution"
+#| fig-cap: !expr cap_cand
+#| fig-alt: !expr alt_cand
 op <- par(mfrow = c(1, 2), mar = c(4.2, 4.2, 2.5, 1))
 hist(ctx$index, breaks = 40, col = "grey85", border = "white",
      main = "multi-trait index", xlab = "index (s.d. units)")
-n_sub <- 60                       # random-subset size, a typical n_sel
 set.seed(cfg$seed + 3)
-gd_random <- replicate(400, gene_diversity(sample.int(ctx$N, n_sub), ctx))
+gd_random <- replicate(n_subsets, gene_diversity(sample.int(ctx$N, n_sub), ctx))
 hist(gd_random, breaks = 30, col = "grey85", border = "white",
      main = paste("GD of random subsets of", n_sub), xlab = "gene diversity")
 abline(v = gene_diversity(seq_len(ctx$N), ctx), col = book_pal[["ink"]], lwd = 2)
 par(op)
 ```
 
-The dark vertical line is the gene diversity of the *whole* pool. It does not sit at the
+```{r}
+#| include: false
+gd_whole <- gene_diversity(seq_len(ctx$N), ctx)
+gd_mean  <- mean(gd_random)
+gd_se    <- sd(gd_random) / sqrt(length(gd_random))
+gd_loss  <- 100 * (gd_whole - gd_mean) / gd_whole
+gd_z     <- (gd_whole - gd_mean) / gd_se
+```
+
+The dark vertical line is the gene diversity of the *whole* candidate set. It does not sit at the
 centre of the distribution of random subsets of `r n_sub` -- it sits above it. That gap
 is pure sampling, it has nothing to do with selection, and mistaking it for a
 loss is the subject of @sec-baseline. @tbl-gd-baseline gives the size of the
-gap.
+gap, from one set of `r n_subsets` random subsets, with the Monte Carlo
+standard error of their mean: the gap is `r num(gd_z, 0)` standard errors, so it is
+not sampling noise of the subsets. @sec-baseline measures the same gap on the same `ctx` with its own subsets and
+derives its expectation, and the percentages differ only by the draw of the
+subsets.
 
 ```{r}
 #| label: tbl-gd-baseline
-#| tbl-cap: "Gene diversity of the whole candidate pool, mean gene diversity of the random subsets of @fig-candidate-pool, and the apparent loss: their difference as a percentage of the whole-pool value."
-stopifnot(gene_diversity(seq_len(ctx$N), ctx) > mean(gd_random))
-fmt(data.frame(
-  quantity = c("GD, whole pool", "GD, mean of random subsets",
-               "apparent loss (%)"),
-  value = c(gene_diversity(seq_len(ctx$N), ctx), mean(gd_random),
-            100 * (gene_diversity(seq_len(ctx$N), ctx) - mean(gd_random)) /
-              gene_diversity(seq_len(ctx$N), ctx))))
+#| tbl-cap: "Gene diversity of the whole candidate set, mean gene diversity of the random subsets of @fig-candidate-pool with the Monte Carlo standard error of that mean (s.d. of the subsets / square root of their number), the apparent loss (the difference as a percentage of the whole-set value) and the gap in standard errors. One set of subsets, the one of @fig-candidate-pool."
+stopifnot(gd_whole > gd_mean)
+knitr::kable(data.frame(
+  quantity = c("GD, whole candidate set", "GD, mean of random subsets",
+               "Monte Carlo s.e. of that mean", "apparent loss (%)",
+               "gap / s.e."),
+  value = c(sprintf("%.5f", c(gd_whole, gd_mean)), fmt_sci(gd_se, 2),
+            sprintf("%.3f", gd_loss), sprintf("%.0f", gd_z))),
+  align = c("l", "r"))
 ```
 
 <!-- reproduce-chapter -->

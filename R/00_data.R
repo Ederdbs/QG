@@ -60,8 +60,9 @@ simulate_lines <- function(cfg) {
 #' `sum_k [x_i x_j + (1 - x_i)(1 - x_j)] = 2 sum_k x_i x_j - sum x_i - sum x_j + m`.
 #'
 #' The matrix is never centered: `f` must stay in `[0, 1]`. This is the matrix
-#' every diversity metric in this package operates on. For trait prediction use
-#' [vanraden_G] instead.
+#' the coancestry-based diversity metrics (`theta_group()` and those built on
+#' it) operate on; the frequency-based metrics read `colMeans(X[idx, ])` and
+#' `p0` instead. For trait prediction use [vanraden_G] instead.
 #'
 #' @param X Marker matrix, individuals in rows, values in 0/0.5/1 giving
 #'   the frequency of the reference allele *within* the individual.

@@ -21,8 +21,9 @@ drawn from `j`. Computed with a single `tcrossprod` from the identity
 }
 \details{
 The matrix is never centered: `f` must stay in `[0, 1]`. This is the matrix
-every diversity metric in this package operates on. For trait prediction use
-[vanraden_G] instead.
+the coancestry-based diversity metrics (`theta_group()` and those built on
+it) operate on; the frequency-based metrics read `colMeans(X[idx, ])` and
+`p0` instead. For trait prediction use [vanraden_G] instead.
 }
 \examples{
 X <- matrix(c(0, 0.5, 1, 1, 0.5, 0), nrow = 2)
