@@ -8,29 +8,45 @@ source("_common.R")
 The preface states the optimisation problem. This chapter states what that
 problem is a part of. Its first half follows a hybrid programme through one
 cycle, names the four stages the rest of the book refers to, and marks where in
-that cycle diversity is lost. Its second half gives the population genetics the
+that cycle diversity can be lost. Its second half gives the population genetics the
 later chapters assume: allele frequency, Hardy-Weinberg proportions, gene
 diversity, identity by descent and by state, coancestry, the inbreeding
-coefficient and its namesakes, drift and effective size. Each is defined once,
+coefficient and its namesakes, drift and effective size. Each is defined here,
 with the identity that later chapters lean on checked numerically. Derivations
 stay in the chapters that use them; this one points to them.
 
-The programme described is the one whose assumptions @sec-era-programme declares
-as A1--A8. The examples below use four of them, restated here because they are
-used before that section is reached:
+@sec-era-programme declares assumptions A1--A8 for the numbers of that chapter.
+This chapter describes the kind of programme they refer to, and its examples use
+them, restated here because they are used before that section is reached:
 
-- two heterotic pools, A and B, maintained as closed breeding units, whose single
-  crosses are the product (A1);
+- the species is allogamous and the product an F1: two heterotic pools, A and B,
+  whose single crosses are the product (A1);
 - parent lines fully inbred, by doubled-haploid (DH) induction or by selfing to
   fixation (A2);
-- germplasm recycled only within its own pool (A3);
+- germplasm recycled only within its own pool, only information crossing the
+  pool boundary (A3);
+- cycles discrete, with constant pool sizes and no overlap of generations (A4);
 - markers neutral and biallelic, coded $0/0.5/1$ as the within-individual
-  frequency $x_{ik}$ of the reference allele, as in @eq-x-freq (A5).
+  frequency $x_{ik}$ of the reference allele, as in @eq-x-freq, and in linkage
+  equilibrium within pool because `simulate_lines()` draws each locus
+  independently (A5);
+- the frequency base frozen at the founding cycle (A6);
+- no dominance in any diversity metric (A7);
+- the teaching scale of `_common.R` (A8).
 
-The live examples run at the teaching scale of `_common.R`:
-`r book_cfg[["n_pool_A"]]` + `r book_cfg[["n_pool_B"]]` lines,
+Neutrality holds in the diversity examples of this chapter because nothing in
+them selects on a trait. It is not a property of the book's data in general. The
+combining-ability example of @sec-hp-cycle gives every marker a dominance
+deviation, so there the marker set is the set of quantitative trait loci; and the
+traits of `simulate_data()` have effects at every marker (@sec-simulating-crosses), so wherever the book selects
+on that index, the markers its metrics read are themselves under selection.
+
+The live examples on the book's simulated lines and hybrids run at the teaching
+scale: `r book_cfg[["n_pool_A"]]` + `r book_cfg[["n_pool_B"]]` lines,
 `r book_cfg[["m"]]` markers, every A $\times$ B single cross formed, pool frequencies drawn by
-the Balding-Nichols model of @sec-simulating-crosses.
+the Balding-Nichols model of @sec-simulating-crosses. The two Monte Carlo checks
+of @eq-hp-ibs-ibd and @eq-hp-drift do not use these data and state their own
+parameters.
 
 ```{r}
 #| label: hp-data
@@ -38,7 +54,9 @@ ctx  <- simulate_data(book_cfg)                 # hybrids: X, f; lines: fL
 GL   <- simulate_lines(book_cfg) / 2            # the same lines, coded 0/1
 pool <- ctx[["pool"]]
 fL   <- ctx[["fL"]]
-stopifnot(isTRUE(all.equal(fL, molecular_coancestry(GL))))
+# exact identities: the tolerance is the rounding of a sum over m markers
+tol_id <- 2 * ctx[["m"]] * .Machine$double.eps
+stopifnot(isTRUE(all.equal(fL, molecular_coancestry(GL), tolerance = tol_id)))
 # verification echo: the text reports these values; not a results table
 c(lines_A = sum(pool == "A"), lines_B = sum(pool == "B"),
   hybrids = ctx[["N"]], markers = ctx[["m"]])
@@ -51,17 +69,21 @@ lines, the heterotic pools or groups, and makes its product by crossing a line o
 one pool with a line of the other. Lines are not crossed within a pool to make a
 product; within a pool they are crossed only to make new lines. The pools are
 kept apart because the value of an A $\times$ B single cross depends on the
-complementarity of the two parents, and that complementarity depends on the two
-pools' allele frequencies differing (@sec-heterosis). How lines come to be
+complementarity of the two parents. Allele-frequency divergence between the
+pools adds to that value only where it falls on loci with dominance: under
+neutral divergence expected heterosis does not move (@sec-heterosis). How lines come to be
 assigned to a pool is itself an unsettled empirical question
 (@sec-plant-literature); this book takes the assignment as given.
 
 **Inbred parent lines.** The parents are homozygous lines. Selfing from a
-non-inbred plant ($F_0 = 0$) raises the inbreeding coefficient as
-$1 - F_t = (1/2)^t$, because each generation of selfing halves the probability
-that the two alleles at a locus are not identical by descent
-[@falconer1996, ch. 5]; after six generations
-$F_6 = `r fmt(1 - 0.5^6, 4)`$. A doubled haploid reaches $F = 1$ in one step: it
+non-inbred plant ($F^{(0)} = 0$) raises the inbreeding coefficient after $t$
+generations of selfing as $1 - F^{(t)} = (1/2)^t$, because each generation of
+selfing halves the probability that the two alleles at a locus are not identical
+by descent [@falconer1996, ch. 5]; after six generations
+$F^{(6)} = `r fmt(1 - 0.5^6, 4)`$. The superscript counts generations of the
+mating system under discussion, here selfings, not filial generations: the filial
+generation F$_{t+1}$ has inbreeding coefficient
+$F^{(t)}$. A doubled haploid reaches $F = 1$ in one step: it
 is a single gamete with its chromosome set doubled. Either route delivers a line
 with no heterozygous locus, and that fact carries much of the algebra of the
 book.
@@ -103,22 +125,23 @@ substitution evaluated at **pool B's** frequencies $p_{Bk}$, with $a_k$ and $d_k
 the additive effect and the dominance deviation at locus $k$ and
 $\delta u_{ik}$ line $i$'s centred 0/1 genotype. Without dominance
 ($d_k \equiv 0$) the GCA of a line is the same against every tester set; with
-dominance it moves with the testers' frequencies. The chunk below takes the
-dominance part alone, on the book data with a gamma-distributed $d_k$ (the
-draw @sec-heterosis uses; an illustrative assumption, not an estimate), and
-computes the GCA of the same `r sum(pool == "A")` pool-A lines against two
-disjoint halves of pool B.
+dominance it moves with the testers' frequencies. The chunk takes the
+dominance part alone, on the book data with every marker treated as a dominance
+locus and a gamma-distributed $d_k$ (the draw @sec-heterosis uses; an
+illustrative assumption, not an estimate), and computes the GCA of the same
+`r sum(pool == "A")` pool-A lines against two disjoint halves of pool B.
 
 ```{r}
 #| label: hp-gca-tester
-U <- GL[pool == "A", ]; V <- GL[pool == "B", ]
+U <- GL[pool == "A", , drop = FALSE]; V <- GL[pool == "B", , drop = FALSE]
 set.seed(4)
 d <- rgamma(ncol(GL), 2, 4)                      # dominance deviations, d_k > 0
 half <- seq_len(nrow(V)) <= nrow(V) / 2
-g1 <- heterosis_gca_sca(U, V[half, ],  d)[["gca_A"]]
-g2 <- heterosis_gca_sca(U, V[!half, ], d)[["gca_A"]]
+g1 <- heterosis_gca_sca(U, V[half, , drop = FALSE],  d)[["gca_A"]]
+g2 <- heterosis_gca_sca(U, V[!half, , drop = FALSE], d)[["gca_A"]]
 # GCA is the row effect of the complete factorial against those testers
-H1 <- outer(drop(U %*% d), drop(V[half, ] %*% d), "+") - 2 * U %*% (d * t(V[half, ]))
+V1 <- V[half, , drop = FALSE]
+H1 <- outer(drop(U %*% d), drop(V1 %*% d), "+") - 2 * U %*% (d * t(V1))
 gca_err <- max(abs(g1 - (rowMeans(H1) - mean(H1))))
 stopifnot(gca_err < 1e-10)
 gca_cor  <- cor(g1, g2)
@@ -129,7 +152,7 @@ c(correlation = gca_cor, top5_shared = top5_shr)
 
 Result. Against the first half of pool B (`r sum(half)` lines; the second has
 `r sum(!half)`) the GCA equals the row effect of the factorial to within
-`r signif(gca_err, 1)`; the correlation between the dominance parts of
+`r fmt_sci(gca_err)`; the correlation between the dominance parts of
 the GCA computed against the two halves is `r fmt(gca_cor, 3)`, and
 `r top5_shr` of the five best lines are the same. Interpretation. Under
 dominance, the same line, with the same genotype, has a different general
@@ -138,41 +161,67 @@ line against a tester pool, not of the line alone; with $d_k \equiv 0$ it would
 not depend on the testers. The size of the disagreement here belongs to the
 dominance part alone ($a_k \equiv 0$), one dominance draw, one seed and testers
 of `r sum(half)` and `r sum(!half)` lines, and is not a general estimate. The additive part
-$\sum_k a_k\,\delta u_{ik}$ is the same against both halves; with additive
-effects independent of the dominance deviations, adding it pulls the
-correlation towards 1, so the case shown is the one that maximises the
-disagreement.
+$\sum_k a_k\,\delta u_{ik}$ is the same against both halves. With additive
+effects independent of the dominance deviations, and the two dominance parts of
+similar variance (s.d. `r sprintf("%.2f", sd(g1))` and
+`r sprintf("%.2f", sd(g2))` here), it tends over draws of the $a_k$ to raise the
+correlation. On a single draw it can lower it, because on `r nrow(U)` lines the
+realised additive part is not orthogonal to the difference between the two
+dominance parts, so the correlation shown is not a lower bound for the case with
+additive effects.
 
 **The four stages.** @sec-stages divides a cycle of the programme into four
 stages and measures diversity at each. The names, listed in @tbl-hp-stages, are
-used throughout the book.
+used throughout the book. They are not the package's stage 1 and stage 2
+(@sec-simulating-crosses), which are steps of the data flow, nor the trial stages
+of @sec-sparse, which are steps of field testing.
 
 | Stage | What is selected | Where the book treats it |
-|---|---|---|
+|:--|:---------|:------------|
 | **S1** | conserving the heterotic groups (pool level) | @sec-subdivided, @sec-stages |
-| **S2** | choosing parents and crosses for DH induction | @sec-sizing, @sec-stages |
+| **S2** | choosing parents and crosses for DH induction | @sec-stages |
 | **S3** | selecting lines per se | @sec-stages |
-| **S4** | hybrid mining | @sec-collapse, @sec-ocs, @sec-combinatorial |
+| **S4** | hybrid mining | @sec-collapse, @sec-ocs, @sec-combinatorial, @sec-advanced, @sec-genomic-prediction |
 
 : The four stages of a cycle of a hybrid programme, what is selected at each, and the chapters of this book that treat it. {#tbl-hp-stages}
 
 The selection problem stated in the preface -- choose $n_{sel}$ of $N$ candidate
 hybrids under a diversity budget $\alpha_{\max}$ -- is S4. Testing in cross
-(@eq-hp-gca-sca) supplies the predicted values that S4 selects on; which crosses
-are grown and where is the subject of the Mating and testing design part.
+(@eq-hp-gca-sca) and genomic prediction (@sec-genomic-prediction) supply the
+predicted values that S4 selects on; which crosses are grown and where is the
+subject of the Mating and testing design part.
+
+The four stages do not exhaust the cycle. S3 comes before testing in cross: it
+reduces the DH lines to those that enter crosses, on what a line shows per se,
+and the value of a line that survives it is then read in cross (@eq-hp-gca-sca).
+Testing in cross, between S3 and S4, and recycling, after S4, are not stages.
 
 **Recycling.** The lines that prove themselves in cross are intercrossed
 **within their own pool** to start the next cycle, and new DH lines are derived
 from those within-pool crosses. Selection information crosses the pool boundary;
 germplasm does not. A DH derived from an A $\times$ B hybrid would carry both
-pools' alleles and erode the divergence the product depends on (assumption A3 of
-@sec-era-programme). This is reciprocal recurrent selection [@comstock1949],
-and `run_cycles()` in @sec-cycles implements it. @fig-hp-cycle draws one cycle.
+pools' alleles and erode their divergence, which pays in heterosis where it
+falls on loci with dominance (assumption A3 of @sec-era-programme;
+@sec-heterosis).
+
+On inbred lines this is the scheme @kadoumi2025 describe as tester-based, or
+modified, reciprocal recurrent selection: each group of inbreds is the source
+material for selection within it and provides testers for hybrid selection in
+the other. They trace it to @hull1945 and cite @comstock1949 for the heterotic
+structure it builds.
+
+@fig-hp-cycle draws one cycle. In the book's model of the step from S4 to the
+next cycle, the parents of the selected hybrids found the next pools, each in
+proportion to its use, so the choice made at S4 under $\alpha_{\max}$ acts on
+within-pool diversity in the next cycle. `run_cycles()` in @sec-cycles implements
+that loop in reduced form: recycling is driven by line usage in the selected
+hybrids (`line_weights()`, `next_pool()`), but there are no trials and no S3, and
+the index is known without error (its assumptions C7 and C8).
 
 ```{r}
 #| label: fig-hp-cycle
-#| fig-cap: "One cycle of a two-pool hybrid programme. Blue: pool A; amber: pool B; grey: the stages that act on A $\\times$ B crosses. S1--S4 are the stages of @sec-stages. Solid arrows carry lines forward within a cycle; dashed arrows return selected lines to their own pool for the next cycle, so only selection information crosses the pool boundary. Red triangles mark the steps at which within-pool diversity is lost by sampling or selection. A schematic, not a simulation output."
-#| fig-alt: "Flow diagram. Pool A and pool B each pass from inbred lines (S1) through within-pool crosses and DH derivation (S2) and per-se line selection (S3) into a shared box of A x B crosses in trials, then to hybrid mining (S4), which outputs the commercial F1. Dashed arrows from the trial box return to each pool separately. Red triangles sit above S2, S3, S4 and the two recycling arrows."
+#| fig-cap: "One cycle of a two-pool hybrid programme. Blue: pool A; amber: pool B; grey: the stages that act on A $\\times$ B crosses. S1--S4 are the stages of @sec-stages. Solid arrows carry lines forward within a cycle; dashed arrows leave S4 and return the parent lines of the selected hybrids to their own pool for the next cycle, so only selection information crosses the pool boundary. Red triangles mark the steps that sample or select, at which diversity can be lost: within a pool at S2, S3 and recycling; at S4 in the selected hybrid set and, through line usage, in the next cycle's pools. A schematic, not a simulation output."
+#| fig-alt: "Flow diagram. Pool A and pool B each pass from inbred lines (S1) through within-pool crosses and DH derivation (S2) and per-se line selection (S3) into a shared box of A x B crosses in trials, then to hybrid mining (S4), which outputs the commercial F1. Dashed arrows from the hybrid-mining box return to each pool separately. Red triangles sit above S2, S3, S4 and the two recycling arrows."
 #| fig-width: 6.5
 #| fig-height: 4.4
 op <- par(mar = c(0, 0, 0, 0)); plot.new(); plot.window(c(0, 100), c(0, 64))
@@ -187,24 +236,24 @@ for (g in c("A", "B")) {
   y  <- if (g == "A") 44 else 8
   cl <- book_pal[[g]]
   box_(1,  y, 17, 12, paste0("S1\npool ", g, "\ninbred lines"), cl)
-  box_(23, y, 19, 12, paste0("S2\ncrosses within ", g, "\n-> DH lines"), cl)
+  box_(23, y, 19, 12, paste0("S2\ncrosses within ", g, "\nto DH lines"), cl)
   box_(47, y, 15, 12, "S3\nlines\nper se", cl)
   arr(18, y + 6, 23, y + 6, col = cl); arr(42, y + 6, 47, y + 6, col = cl)
   arr(62, y + 6, 67, if (g == "A") 36 else 28, col = cl)
   loss(32.5, y + 13.8); loss(54.5, y + 13.8)
 }
-box_(67, 24, 13, 16, "A x B crosses\nin trials:\ntestcross or\nfactorial\n(GCA, SCA)",
+box_(67, 24, 13, 16, "A \u00d7 B crosses\nin trials:\ntestcross or\nfactorial\n(GCA, SCA)",
      book_pal[["mid"]])
 box_(85, 24, 14, 16, "S4\nhybrid\nmining:\nselect single\ncrosses", book_pal[["mid"]])
 arr(80, 32, 85, 32, col = book_pal[["mid"]]); loss(92, 41.8)
-arr(92, 24, 92, 22, col = book_pal[["ink"]])
-text(92, 20.5, "commercial F1", cex = 0.62, font = 2)
-# recycling, within pool only
+arr(90, 24, 90, 22, col = book_pal[["ink"]])
+text(90, 20.5, "commercial F1", cex = 0.62, font = 2)
+# recycling leaves S4, within pool only
 # dashed shafts; the heads are drawn solid, since arrows() dashes the head too
-segments(c(73.5, 73.5, 9.5), c(40, 61, 61), c(73.5, 9.5, 9.5), c(61, 61, 57.2),
+segments(c(98, 98, 9.5), c(40, 61, 61), c(98, 9.5, 9.5), c(61, 61, 57.2),
          lty = 2, lwd = 1.4, col = book_pal[["A"]])
 arr(9.5, 57.2, 9.5, 56, col = book_pal[["A"]])
-segments(c(73.5, 73.5, 9.5), c(24, 3, 3), c(73.5, 9.5, 9.5), c(3, 3, 6.8),
+segments(c(98, 98, 9.5), c(24, 3, 3), c(98, 9.5, 9.5), c(3, 3, 6.8),
          lty = 2, lwd = 1.4, col = book_pal[["B"]])
 arr(9.5, 6.8, 9.5, 8, col = book_pal[["B"]])
 text(41, 62.6, "recycle selected A lines within pool A (next cycle)", cex = 0.58,
@@ -215,79 +264,108 @@ loss(13, 58.5); loss(13, 5.5)
 par(op)
 ```
 
-**Where diversity is lost.** Every step marked in @fig-hp-cycle samples or
-selects a subset of $n_{sel}$ of the $N$ members of a pool. A subset never
-carries an allele its pool lacks, so the number of alleles can stay the same or
-fall, never rise. Gene diversity behaves differently. A subset drawn *at
+**Where diversity can be lost.** At every step marked in @fig-hp-cycle the set
+passed on is a part of the set received or descends from it, so without mutation
+the number of alleles can stay the same or fall, never rise. Gene diversity
+behaves differently. The worked case is S4, where the set received is the $N$
+candidate hybrids, not a heterotic pool, and the set passed on is a subset of
+$n_{sel}$ of them. A subset drawn *at
 random* has an expected group coancestry $\theta_S$ (the mean of all pairwise
 coancestries in the set, diagonal included; defined in @sec-hp-popgen) larger
-than the pool's by $(1/n_{sel} - 1/N)(\bar f_d - \bar f_o)$, with $\bar f_d$
-the pool's mean self-coancestry and $\bar f_o$ its mean coancestry between
-distinct members, so its expected gene diversity $GD_S = 1 - \theta_S$
-(@eq-hp-gd) is lower by the same amount (@sec-baseline). A
+than that of the candidate set by $(1/n_{sel} - 1/N)(\bar f_d - \bar f_o)$, with
+$\bar f_d$ the candidate set's mean self-coancestry and $\bar f_o$ its mean
+coancestry between distinct members, so its expected gene diversity
+$GD_S = 1 - \theta_S$ (@eq-hp-gd) is lower by the same amount (@sec-baseline). A
 subset *selected* on some criterion carries no such guarantee, and one selected
-for diversity can exceed its pool. The chunk below measures both on the book's
-hybrids, with the diversity-only greedy `sel_greedy(w = 0)` as the selected
-subset.
+for diversity can exceed the candidate set. The chunk measures both on the
+book's hybrids, with the diversity-only greedy `sel_greedy(w = 0)` as the
+selected subset.
 
 ```{r}
 #| label: hp-subset-gd
 n_sub   <- 20
-gd_pool <- gene_diversity(seq_len(ctx[["N"]]), ctx)
+gd_cand <- gene_diversity(seq_len(ctx[["N"]]), ctx)   # the candidate set
 fd <- mean(diag(ctx[["f"]])); fo <- mean(ctx[["f"]][upper.tri(ctx[["f"]])])
 set.seed(5)
 gd_rnd  <- replicate(200, gene_diversity(sample.int(ctx[["N"]], n_sub), ctx))
-gd_div  <- gene_diversity(sel_greedy(ctx, n_sub, w = 0), ctx)
-sub_gd  <- c(pool = gd_pool, random_mean = mean(gd_rnd),
+S_div   <- sel_greedy(ctx, n_sub, w = 0)
+gd_div  <- gene_diversity(S_div, ctx)
+sub_gd  <- c(candidates = gd_cand, random_mean = mean(gd_rnd),
              random_se = sd(gd_rnd) / sqrt(length(gd_rnd)),
-             random_expected = gd_pool - (1 / n_sub - 1 / ctx[["N"]]) * (fd - fo),
+             random_expected = gd_cand - (1 / n_sub - 1 / ctx[["N"]]) * (fd - fo),
              random_max = max(gd_rnd), diversity_greedy = gd_div)
 stopifnot(abs(sub_gd[["random_mean"]] - sub_gd[["random_expected"]]) <
             3 * sub_gd[["random_se"]],
-          sub_gd[["diversity_greedy"]] > sub_gd[["pool"]])
+          sub_gd[["diversity_greedy"]] > sub_gd[["candidates"]])
 # verification echo: the text reports these values; not a results table
 fmt(sub_gd, 4)
 ```
 
-Result. The `r ctx[["N"]]` hybrids have $GD$ = `r fmt(sub_gd[["pool"]], 4)`;
-`r length(gd_rnd)` random subsets of `r n_sub` average `r fmt(sub_gd[["random_mean"]], 4)`
-(s.e. `r fmt(sub_gd[["random_se"]], 4)`, expected
-`r fmt(sub_gd[["random_expected"]], 4)`), the largest of them
-`r fmt(sub_gd[["random_max"]], 4)`; the `r n_sub` hybrids chosen for diversity
-alone have `r fmt(sub_gd[["diversity_greedy"]], 4)`, above the pool.
-Interpretation. A loss of gene diversity at a step of @fig-hp-cycle is
+Result. The `r ctx[["N"]]` hybrids have $GD$ = `r sprintf("%.4f", sub_gd[["candidates"]])`;
+`r length(gd_rnd)` random subsets of `r n_sub` average `r sprintf("%.4f", sub_gd[["random_mean"]])`
+(s.e. `r sprintf("%.5f", sub_gd[["random_se"]])`, expected
+`r sprintf("%.4f", sub_gd[["random_expected"]])`), the largest of them
+`r sprintf("%.4f", sub_gd[["random_max"]])`; the `r n_sub` hybrids chosen for diversity
+alone have `r sprintf("%.4f", sub_gd[["diversity_greedy"]])`, above the full candidate set.
+Interpretation. At S4 a loss of gene diversity in the merged hybrid set is
 guaranteed only in expectation and only for sampling; selection can move a
 subset either way, and the comparison that isolates what selection did is
-against random subsets of the same size, not against the pool. That is why the
+against random subsets of the same size, not against the candidate set. That is why the
 diversity loss $\alpha = (GD_{\text{ref}} - GD_S)/GD_{\text{ref}}$, the quantity
 the budget $\alpha_{\max}$ bounds, is measured against $GD_{\text{ref}}$, the
-gene diversity of a random subset of the same size (@sec-baseline). The
-numbers belong to one pool pair, one subset size and one seed.
+mean gene diversity of random subsets of the same size (@sec-baseline). The
+subset algebra holds for any finite set, so also for the lines of one pool at S3,
+but not at S2, where each line is a new gamete; within-pool diversity is not
+measured in this chunk. The
+numbers belong to one pair of pools, one subset size and one seed.
 
 At S2 a few crosses are chosen among
 all within-pool pairs and each DH line is one gamete of its cross; at S3 and S4
 lines and hybrids are truncated on merit; at recycling the next cycle is founded
 by the few lines that won in cross. In the end-to-end simulation of
-@sec-stages, the largest share of the loss falls at S2, not at S4 where
-optimisation effort usually goes; that result is the simulation's, at its
-scale, and is reported there with its conditions. Between the pools the
-movement is the opposite: within-pool selection and drift push the two pools'
-frequencies apart, so between-pool divergence tends to grow while within-pool
-diversity falls (@sec-subdivided). Both trends are reported from genotyped
-germplasm: between Stiff Stalk and Non-Stiff Stalk lines over forty years of a
-private European dent maize programme, with within-group diversity declining
-[@kadoumi2025], and as increasing differentiation between breeding pools across
-the history of North American maize lines [@vanheerwaarden2012]; the second
-attributes little of the genome-wide pattern to selection. @sec-plant-literature
-places these results among the rest of the plant literature. A single pool-wide statistic sees the sum of two
-quantities moving in opposite directions, which is why the book partitions it.
+@sec-stages, whose ledger covers S2, S3 and S4 and not recycling, where the
+largest share of the loss falls depends on how the crosses are chosen at S2:
+under merit-only cross selection it falls at S2, and with a diversity term added
+S2 and S4 carry shares that its founder pools do not separate. That result is the
+simulation's, at its scale, read from a cached table, and is reported there with
+its conditions.
+
+Between the pools the movement under drift is the opposite. Under drift alone in
+two closed pools of equal weight, between-pool coancestry is unchanged in
+expectation while within-pool coancestry rises, so between-pool divergence rises
+while within-pool diversity falls (@sec-subdivided). That argument does not cover
+selection, and this chapter gives none for a selection target common to both
+pools, which is what `run_cycles()` applies. There the rise in divergence is a
+simulation result: the between-pool term of gene diversity ($GD_{BS}$, defined
+in @sec-hp-popgen) rises in every run of @sec-cycles, with drift and selection
+acting together, so neither is isolated.
+
+Genotyped germplasm gives a less simple picture. Over forty years of a private
+European dent maize programme, @kadoumi2025 report $F_{ST}$ between Stiff Stalk
+(SS) and Non-Stiff Stalk (NSS) lines rising from 0.178 to 0.223, while the mean
+between-group Hamming distance fell slightly, from 0.430 to 0.420 ($-2.33$%).
+Between inbred parents that distance is the heterozygosity of their hybrid on the
+markers used, the $H_o$ of @sec-hp-popgen, so the quantity nearest the product
+did not rise with $F_{ST}$. The within-group decline is concentrated in NSS
+($H_e$ from 0.371 to 0.279, with SS stable). The authors attribute the main
+germplasm-wide loss to the merging and homogenisation of the Iodent and Lancaster
+groups into NSS, so NSS was not a closed pool over that period, and say they can
+only speculate that selection caused the rise in divergence. @vanheerwaarden2012
+report increasing separation of breeding pools across the history of North
+American maize lines, and attribute little of the genome-wide pattern to
+selection. Neither study establishes drift in closed pools, alone or with
+selection, as the cause of the divergence it reports. @sec-plant-literature
+reads @kadoumi2025 within its corpus, which begins in 2017 and so excludes
+@vanheerwaarden2012. A single pool-wide statistic sees the sum of the within-pool
+and between-pool terms, which is why the book partitions it.
 
 ## The population genetics the book assumes {#sec-hp-popgen}
 
-Symbols follow @sec-notation. $p_k$ is the frequency of the reference allele at
+Shared symbols follow @sec-notation; those local to this chapter are defined
+where they appear. $p_k$ is the frequency of the reference allele at
 marker $k$ in a stated set of individuals, $q_k = 1 - p_k$; $p_{Ak}$, $p_{Bk}$
 are the frequencies among the lines of pool A and pool B, $\bar p_k$ a group
-mean, and $p_{0,k}$ the frozen base frequency of the founding candidate pool.
+mean, and $p_{0,k}$ the frozen base frequency of the founding candidate set.
 
 ### Allele frequency and Hardy-Weinberg proportions
 
@@ -308,7 +386,7 @@ gametes, not as a description of any set in it.
 
 The expected heterozygosity of a set is that Hardy-Weinberg reference, averaged
 over loci, and with $\theta_S$ the group coancestry of set $S$ (the mean of the
-coancestry submatrix, diagonal included; defined below) it is exactly gene
+coancestry submatrix, diagonal included; defined in @sec-hp-ibd) it is exactly gene
 diversity:
 
 $$
@@ -318,14 +396,20 @@ $$ {#eq-hp-gd}
 $m$ is the number of markers and $\bar p_k$ the frequency in $S$. $H_e$ is Nei's
 gene diversity [@nei1973] in its plug-in form, without the small-sample
 correction, on the base of the set's own frequencies; @sec-identity derives the
-identity. Observed heterozygosity $H_o$ is the fraction of heterozygous loci
+identity. For a set spanning the two pools, $GD_S$ is the total of the partition
+of @caballero2002 and is written $GD_T$:
+$GD_T = GD_{WI} + GD_{BI} + GD_{BS}$ (@eq-gd-partition), the three terms being
+diversity within individuals, between individuals within a pool, and between
+pools. For a set of hybrids the partition is taken over their parent lines, each
+weighted by its use, so with inbred parents $GD_{WI} = 0$. Observed heterozygosity
+$H_o$ is the fraction of heterozygous loci
 actually present, averaged over the individuals of the set. The two coincide in
 expectation only under Hardy-Weinberg proportions, and the hybrid programme
 violates them in both directions:
 
 ```{r}
 #| label: hp-heterozygosity
-pA <- colMeans(GL[pool == "A", ]); pB <- colMeans(GL[pool == "B", ])
+pA <- colMeans(GL[pool == "A", , drop = FALSE])
 all_h <- seq_len(ctx[["N"]])
 gp    <- gd_partition(all_h, ctx)
 het <- c(Ho_lines  = mean(GL == 0.5),
@@ -334,10 +418,16 @@ het <- c(Ho_lines  = mean(GL == 0.5),
          He_hybrid = he_nei(all_h, ctx),
          GD_hybrid = gene_diversity(all_h, ctx))
 stopifnot(het[["Ho_lines"]] == 0,   # coding guard: GL is 0/1 by construction (A2)
-          isTRUE(all.equal(het[["He_pool_A"]], 1 - mean(fL[pool == "A", pool == "A"]))),
-          isTRUE(all.equal(het[["GD_hybrid"]], het[["He_hybrid"]])),
-          isTRUE(all.equal(het[["He_hybrid"]], gp[["GD_T"]])),
-          isTRUE(all.equal(het[["Ho_hybrid"]], gp[["GD_T"]] + gp[["GD_BS"]])))
+          isTRUE(all.equal(het[["He_pool_A"]],
+                           1 - mean(fL[pool == "A", pool == "A", drop = FALSE]),
+                           tolerance = tol_id)),
+          isTRUE(all.equal(het[["GD_hybrid"]], het[["He_hybrid"]], tolerance = tol_id)),
+          isTRUE(all.equal(gene_diversity(S_div, ctx), he_nei(S_div, ctx),   # a proper subset
+                           tolerance = tol_id)),
+          isTRUE(all.equal(het[["He_hybrid"]], gp[["GD_T"]], tolerance = tol_id)),
+          isTRUE(all.equal(het[["Ho_hybrid"]], gp[["GD_T"]] + gp[["GD_BS"]],
+                           tolerance = tol_id)),
+          abs(gp[["GD_WI"]]) < tol_id)                # inbred parents
 # verification echo: the text reports these values; not a results table
 fmt(het, 4)
 ```
@@ -356,7 +446,7 @@ is the identity $H_o = GD_T + GD_{BS}$ derived in @sec-heterosis-identity, which
 holds for the complete factorial; the decomposition is exact, the magnitudes are
 those of one simulated pool pair.
 
-### Identity by descent, identity by state, coancestry
+### Identity by descent, identity by state, coancestry {#sec-hp-ibd}
 
 Two alleles are **identical by descent** (IBD) if both are copies of one allele
 in a defined base population; they are **identical in state** (IBS) if they are
@@ -364,37 +454,39 @@ the same allele, whatever their origin. IBD is defined only relative to a base:
 change the base and the probabilities change. Markers observe state, not
 descent.
 
-The **coancestry** $f_{ij}$ of individuals $i$ and $j$ is the probability that
+The **coancestry** of individuals $i$ and $j$ is the probability that
 an allele drawn at random from $i$ and one drawn at random from $j$, at the same
-locus, are IBD [@malecot1948]; the inbreeding coefficient of a progeny of
-$i \times j$ equals the coancestry of its parents [@falconer1996, ch. 5].
-Replacing IBD by IBS gives the molecular coancestry of @eq-f-molecular, the
-matrix $\mathbf{f}$ every diversity metric in the book is computed on
-[@caballero2002]. The two are related. Let the alleles that are not IBD be
-independent draws from the base frequencies $p_{0,k}$ (no mutation, neutral
-loci, the pedigree coancestry computed relative to that base), and write the
-pedigree coancestry as $A_{ij}/2$, half the pedigree relationship. Then two
+locus, are IBD [@malecot1948]. Computed from a pedigree it is $A_{ij}/2$, half
+the pedigree relationship, relative to the pedigree's base; the inbreeding
+coefficient of a progeny of $i \times j$ equals the coancestry of its parents
+[@falconer1996, ch. 5]. Replacing IBD by IBS gives the molecular coancestry
+$f_{ij}$ of @eq-f-molecular, whose matrix $\mathbf{f}$ the coancestry-based
+metrics of the book are computed on [@caballero2002]; frequency-based metrics
+such as $F_{drift}$ are not. The two are related. Let the alleles that are not IBD be
+independent draws from the frequencies $p_{b,k}$, $q_{b,k} = 1 - p_{b,k}$ of the
+pedigree's base (no mutation, neutral loci), which need not be the frozen
+$p_{0,k}$. Then two
 alleles are IBS either because they are IBD or, failing that, by chance, and in
 expectation over Mendelian sampling and loci
 
 $$
 \mathbb{E}[f_{ij}] \;=\; \frac{A_{ij}}{2} \;+\; \Big(1 - \frac{A_{ij}}{2}\Big)\,
-\frac{1}{m}\sum_{k=1}^{m}\big(p_{0,k}^2 + q_{0,k}^2\big),
+\frac{1}{m}\sum_{k=1}^{m}\big(p_{b,k}^2 + q_{b,k}^2\big),
 $$ {#eq-hp-ibs-ibd}
 
 the form @eding2001 use to estimate kinship from marker similarity. The chunk
 checks @eq-hp-ibs-ibd on full sibs ($A_{ij}/2 = 1/4$) and on unrelated
 individuals ($A_{ij} = 0$): each replicate draws two parents in Hardy-Weinberg
-proportions from a base with uniform $p_{0,k}$, breeds two full sibs from them,
+proportions from a base with uniform $p_{b,k}$, breeds two full sibs from them,
 and uses the two parents themselves as the unrelated pair, at unlinked loci.
 
 ```{r}
 #| label: hp-ibs-ibd
-m_ibs <- 2000; n_pair <- 200; p0_lim <- c(0.05, 0.95)
+m_ibs <- 2000; n_pair <- 200; pb_lim <- c(0.05, 0.95)
 set.seed(21)
-p0 <- runif(m_ibs, p0_lim[1], p0_lim[2])
-ibs_base <- mean(p0^2 + (1 - p0)^2)
-dip <- function() (rbinom(m_ibs, 1, p0) + rbinom(m_ibs, 1, p0)) / 2   # 0/0.5/1
+p_b <- runif(m_ibs, pb_lim[1], pb_lim[2])               # base frequencies p_{b,k}
+ibs_base <- mean(p_b^2 + (1 - p_b)^2)
+dip <- function() (rbinom(m_ibs, 1, p_b) + rbinom(m_ibs, 1, p_b)) / 2   # 0/0.5/1
 gam <- function(g) ifelse(g == 0.5, rbinom(m_ibs, 1, 0.5), g)        # one gamete
 f_fs <- f_un <- numeric(n_pair)
 for (r in seq_len(n_pair)) {
@@ -414,14 +506,14 @@ fmt(ibs, 4)
 ```
 
 Result. Over `r n_pair` replicates, `r m_ibs` loci and
-$p_{0,k} \sim U(`r p0_lim[1]`, `r p0_lim[2]`)$, the mean molecular coancestry of
+$p_{b,k} \sim U(`r pb_lim[1]`, `r pb_lim[2]`)$, the mean molecular coancestry of
 full sibs is
-`r fmt(ibs[["full_sib"]], 4)` (s.e. `r fmt(ibs[["full_sib_se"]], 4)`) against
+`r fmt(ibs[["full_sib"]], 4)` (s.e. `r sprintf("%.5f", ibs[["full_sib_se"]])`) against
 `r fmt(ibs[["full_sib_expected"]], 4)` from @eq-hp-ibs-ibd, and that of
 unrelated pairs `r fmt(ibs[["unrelated"]], 4)` against
 `r fmt(ibs[["unrelated_expected"]], 4)`. Interpretation. Rearranged, @eq-hp-ibs-ibd
 says that molecular coancestry is the floor
-$m^{-1}\sum_k (p_{0,k}^2 + q_{0,k}^2)$ set by the base frequencies plus the
+$m^{-1}\sum_k (p_{b,k}^2 + q_{b,k}^2)$ set by the base frequencies plus the
 pedigree coancestry $A_{ij}/2$ scaled by one minus that floor, not plus the
 pedigree coancestry itself. Full sibs are therefore expected to exceed unrelated
 pairs by one quarter of one minus the floor,
@@ -434,15 +526,16 @@ Carlo one, under unlinked loci and a known base, from one seed.
 
 The diagonal of $\mathbf{f}$ is the **self-coancestry** $s_i = f_{ii}$, the
 probability that two alleles drawn with replacement from $i$ are identical:
-$s_i = (1 + F_i)/2$, which is 1 for an inbred line and 0.5 for an individual
+$s_i = (1 + F_i)/2$ ($F_i$ the inbreeding coefficient of @sec-hp-inbreeding),
+which is 1 for an inbred line and 0.5 for an individual
 heterozygous at every marker (@sec-f-molecular). **Group coancestry** $\theta_S$
 is the mean of all $f_{ij}$ over pairs in $S$, the diagonal included
 [@cockerham1967]; including the diagonal is what makes @eq-hp-gd exact.
 
-### The inbreeding coefficient, and three quantities that share its letter
+### The inbreeding coefficient, and the quantities that share its letter {#sec-hp-inbreeding}
 
 The **inbreeding coefficient** $F_i$ of an individual is the probability that
-its two alleles at a locus are IBD, the definition of @malecot1948; @wright1922
+its two alleles at a locus are IBD; @wright1922
 introduced it as the correlation between uniting gametes. Its molecular
 counterpart in this book is the fraction of markers at which $i$ is homozygous.
 For a single cross the molecular $F_i$ is exactly the molecular coancestry of its
@@ -453,24 +546,39 @@ state exactly where their F1 is homozygous:
 #| label: hp-f-hybrid
 F_hyb <- rowMeans(ctx[["X"]] != 0.5)
 ped   <- ctx[["ped"]]
-stopifnot(isTRUE(all.equal(F_hyb, fL[cbind(ped[["a"]], ped[["b"]])])))
+lw    <- line_weights(S_div, ctx)
+w     <- (lw[["A"]] + lw[["B"]]) / 2                # usage of each line in S_div
+stopifnot(isTRUE(all.equal(F_hyb, fL[cbind(ped[["a"]], ped[["b"]])], tolerance = tol_id)),
+          # s_i = (1 + F_i) / 2
+          isTRUE(all.equal(diag(ctx[["f"]]), (1 + F_hyb) / 2, tolerance = tol_id)),
+          # theta_S as a quadratic form in line usage
+          isTRUE(all.equal(mean(ctx[["f"]][S_div, S_div, drop = FALSE]),
+                           drop(crossprod(w, fL %*% w)), tolerance = tol_id)))
 # verification echo: the text reports these values; not a results table
 c(max_abs_diff = max(abs(F_hyb - fL[cbind(ped[["a"]], ped[["b"]])])))
 ```
 
 With inbred parents, individual $F$ carries no management information: it is 1
 for every line by construction (A2 of @sec-era-programme), and for a hybrid it
-is a property of the pair of parents, already in $\mathbf{f}^L$. Three other
+is a property of the pair of parents, already in $\mathbf{f}^L$. Other
 quantities share the letter and are not the same thing:
 
-- $F_{drift}$ (@sec-genomic-era) is a property of a pool *through time*: the
-  standardised squared change of allele frequencies from the frozen base
+- $F_{drift}$ (@sec-genomic-era) is a property of a set *against the frozen
+  base*: the standardised squared change of allele frequencies from
   $p_{0,k}$, averaged over markers [@meuwissen2020]. It is never negative.
   $F_{hom}$, its homozygosity-lens companion, is the proportional loss of
-  heterozygosity against the same base and can be negative.
-- $F_{ST}$ is a property of a set of subpopulations *at one time*: in this book
-  $GD_{BS}/GD_T$, the between-pool share of gene diversity
-  (@sec-subdivided, after @wright1951 and @nei1973).
+  expected heterozygosity against the same base and can be negative. The book
+  computes both on the merged frequencies of a hybrid set, a notional pool, so
+  $F_{hom}$ reads the $H_e$ of that pool, not the heterozygosity $H_o$ of the
+  product, and applies them to trajectories across cycles and to single
+  selections alike.
+- $F_{ST}$ is a property of a set of subpopulations *at one time*: here, as in
+  @sec-subdivided, $GD_{BS}/GD_T$, the between-pool share of gene diversity
+  [@caballero2002, Eq. 8]. @sec-stages names that form $G_{ST}$, after @nei1973,
+  and also logs $(\theta_w - \theta_{AB})/(1 - \theta_{AB})$, with $\theta_w$ and
+  $\theta_{AB}$ the mean within-pool and between-pool coancestry, under the name
+  $F_{ST}$. The two are different quantities, the second near twice the first, and a value of one is never read
+  against the other.
 - $F_{BN}$, `fst` in the code, is the Balding-Nichols parameter with which the
   simulations draw the two pools' frequencies [@balding1995]. It is a setting of
   the simulation, not a statistic computed on it, and @sec-notation shows that
@@ -481,7 +589,8 @@ quantities share the letter and are not the same thing:
 In a finite population, the allele copies passed to the next generation are a
 sample of those present, so allele frequencies change by chance alone. This is
 **drift**. Let $n_{gam}$ be the number of allele copies sampled per generation,
-with no selection, mutation or migration. Then expected heterozygosity decays
+drawn independently from the current frequencies, with discrete generations (A4)
+and no selection, mutation or migration. Then expected heterozygosity decays
 geometrically,
 
 $$
@@ -490,50 +599,112 @@ $$
 \qquad N_e = \frac{1}{2\Delta F},
 $$ {#eq-hp-drift}
 
-with $H_t$ the expected heterozygosity at generation $t$, $\Delta F$ the
-per-generation rate of inbreeding, and $N_e$ the **effective size**: the number
+with $H_t$ the expected heterozygosity $m^{-1}\sum_k 2 p_k q_k$ of the set at
+generation $t$, on that generation's frequencies, $\Delta F$ the fraction of it
+lost per generation, and $N_e$ the **effective size**: the number
 of individuals of an idealised random-mating diploid population, which passes
 $n_{gam} = 2N_e$ copies, that would drift at the same rate
-[@falconer1996, ch. 3--4]. In a hybrid programme the sampling unit matters by a
-factor of two. A crossing block of $n$ plants intermated at random passes $2n$
-allele copies per locus ($N_e = n$); a pool re-derived as $n$ DH lines passes
-$n$, one per line ($N_e = n/2$), because a homozygous line contributes a single
-allele identity (@sec-era-step4). The chunk checks both against
-@eq-hp-drift, with every locus starting at $p = 0.5$ and each independent locus treated as a replicate.
+[@falconer1996, ch. 3--4]. In a random-mating population $\Delta F$ is the
+per-generation rate of inbreeding,
+$(\bar F^{(t)} - \bar F^{(t-1)})/(1 - \bar F^{(t-1)})$, with $\bar F^{(t)}$ the
+mean inbreeding coefficient after $t$ generations of random mating. In a pool of DH lines that ratio
+is $0/0$, because $F_i = 1$ for every line. There $\Delta F$ is a different
+object, the rate of rise of the pool's group coancestry $\theta_t$,
+$(\mathbb{E}[\theta_{t+1} \mid \theta_t] - \theta_t)/(1 - \theta_t)$, which by
+@eq-hp-gd is the same fraction of $H_t$.
+
+In a hybrid programme the sampling unit matters by a factor of two. A crossing
+block of $n$ plants, each offspring formed from two parents drawn at random from
+all $n$ with selfing allowed, passes $2n$ allele copies per locus ($N_e = n$);
+excluding selfing slows the decay slightly, so without selfing $N_e = n$ is an
+approximation. A pool re-derived as $n$ DH lines, each one gamete of a random
+pair of parents, passes $n$, one per line ($N_e = n/2$), because a homozygous
+line contributes a single allele identity (@sec-era-step4). The chunk
+simulates the three schemes on individuals, from founders with $p = 0.5$ at every
+unlinked locus: each generation one draw of parents serves all loci, and gametes
+are formed from the parents' two haplotypes. The copy counts $2n$ and $n$ are not
+supplied; they follow from who is crossed. Loci of one pedigree share its parents,
+so the pedigree is the replicate and standard errors are taken across pedigrees.
+Without selfing the two gametes of a plant come from distinct parents, so the
+copies are not independent draws and @eq-hp-drift does not apply; the expected
+value there comes from the coancestry recursion in the chunk.
 
 ```{r}
 #| label: hp-drift
-m_dr <- 20000; t_gen <- 10; n_plants <- 10
-drift_ratio <- function(n_gam) {               # H_t / H_0 per locus
-  p <- rep(0.5, m_dr)
-  for (t in seq_len(t_gen)) p <- rbinom(m_dr, n_gam, p) / n_gam
-  2 * p * (1 - p) / 0.5
+n_ped <- 1000; m_dr <- 200; t_gen <- 10; n_plants <- 10   # n_plants even: p = 0.5 exactly
+gamete <- function(h1, h2) {                   # one per row, loci unlinked
+  from_h2 <- runif(length(h1)) < 0.5
+  h1[from_h2] <- h2[from_h2]
+  h1
 }
-set.seed(11); r_cb <- drift_ratio(2 * n_plants)   # crossing block of 10 plants
-set.seed(12); r_dh <- drift_ratio(n_plants)       # pool re-derived as 10 DH lines
-dr <- rbind(crossing_block = c(simulated = mean(r_cb), se = sd(r_cb) / sqrt(m_dr),
-                               expected = (1 - 1 / (2 * n_plants))^t_gen),
-            DH_pool        = c(simulated = mean(r_dh), se = sd(r_dh) / sqrt(m_dr),
-                               expected = (1 - 1 / n_plants)^t_gen))
-stopifnot(all(abs(dr[, "simulated"] - dr[, "expected"]) < 3 * dr[, "se"]))
+retained <- function(scheme, n = n_plants) {   # H_t / H_0 of one pedigree
+  dh <- scheme == "DH_pool"
+  h1 <- matrix(if (dh) rep(0:1, length.out = n) else 0L, n, m_dr)
+  h2 <- if (dh) h1 else 1L - h1                # block founders: heterozygous throughout
+  for (t in seq_len(t_gen)) {
+    a <- sample.int(n, n, replace = TRUE)
+    b <- if (scheme == "block_selfing") sample.int(n, n, replace = TRUE)
+         else (a + sample.int(n - 1, n, replace = TRUE) - 1) %% n + 1   # any but a
+    if (dh) {                                  # a new line: one gamete of the F1 a x b
+      h1 <- h2 <- gamete(h1[a, , drop = FALSE], h1[b, , drop = FALSE])
+    } else {
+      g_a <- gamete(h1[a, , drop = FALSE], h2[a, , drop = FALSE])
+      h2  <- gamete(h1[b, , drop = FALSE], h2[b, , drop = FALSE])
+      h1  <- g_a
+    }
+  }
+  p <- colMeans(h1 + h2) / 2
+  mean(2 * p * (1 - p)) / 0.5
+}
+pedigrees <- function(scheme) {
+  vapply(seq_len(n_ped), function(r) retained(scheme), numeric(1))
+}
+# No selfing: on the scale 2 P(IBS) - 1 at p = 0.5, with c_t the coancestry of distinct
+# plants and within_t the correlation of the two alleles of a plant (it can be -1):
+# c_{t+1} = (1 - 1/n) c_t + (1 + within_t) / (2n), within_t = c_{t-1}, H_t / H_0 = 1 - c_{t+1}.
+# Heterozygous founders: within_0 = -1, c_0 = 0.
+c_t <- c(-1, 0)
+for (t in seq_len(t_gen + 1)) {
+  c_t <- c(c_t[2], (1 - 1 / n_plants) * c_t[2] + (1 + c_t[1]) / (2 * n_plants))
+}
+set.seed(11); r_self   <- pedigrees("block_selfing")
+set.seed(12); r_noself <- pedigrees("block_no_selfing")
+set.seed(13); r_dh     <- pedigrees("DH_pool")
+dr_row <- function(r, expected) {
+  c(simulated = mean(r), se = sd(r) / sqrt(n_ped), expected = expected)
+}
+dr <- rbind(block_selfing    = dr_row(r_self, (1 - 1 / (2 * n_plants))^t_gen),
+            block_no_selfing = dr_row(r_noself, 1 - c_t[2]),
+            DH_pool          = dr_row(r_dh, (1 - 1 / n_plants)^t_gen))
+stopifnot(all(abs(dr[, "simulated"] - dr[, "expected"]) < 3 * dr[, "se"]),
+          dr["block_no_selfing", "simulated"] > dr["block_selfing", "simulated"])
 # verification echo: the text reports these values; not a results table
-fmt(dr, 4)
+round(dr, 4)
 ```
 
-Result. Over `r format(m_dr, big.mark = ",")` loci, after `r t_gen` generations
-with `r n_plants` parents, the crossing block
-retains `r fmt(dr["crossing_block", "simulated"], 3)` of its heterozygosity
-(expected `r fmt(dr["crossing_block", "expected"], 3)`) and the DH pool
-`r fmt(dr["DH_pool", "simulated"], 3)` (expected
-`r fmt(dr["DH_pool", "expected"], 3)`), each within three standard errors.
+Result. Over `r format(n_ped, big.mark = ",")` pedigrees of `r m_dr` loci, after
+`r t_gen` generations, a crossing block of `r n_plants` plants retains
+`r sprintf("%.3f", dr["block_selfing", "simulated"])` of its heterozygosity
+(expected `r sprintf("%.3f", dr["block_selfing", "expected"])`), the same block
+without selfing `r sprintf("%.3f", dr["block_no_selfing", "simulated"])` (expected
+`r sprintf("%.3f", dr["block_no_selfing", "expected"])`), and a pool of
+`r n_plants` DH lines `r sprintf("%.3f", dr["DH_pool", "simulated"])` (expected
+`r sprintf("%.3f", dr["DH_pool", "expected"])`), each within three standard errors.
 Interpretation. Under neutrality the same number of parents drifts twice as fast
-when the next generation is a set of DH lines. Selection makes the realised rate
-larger, because selected parents contribute unequally; @sec-cycles measures that
-across cycles, and @sec-era-step4 shows how to read $\Delta F$ off a trajectory.
+when the next generation is a set of DH lines, and excluding selfing moves the
+block far less than that.
+Selection is outside @eq-hp-drift, and this chapter does not measure what it does
+to the rate. @sec-cycles fits rates across cycles, but every arm there is
+selected and its $F_{drift}$ is taken on merged hybrid frequencies, a different
+level from @eq-hp-drift, so those rates are not read against the values here;
+@sec-era-step4 shows how to read $\Delta F$ off a trajectory.
 $N_e$ is a size defined by a rate, $N_e = 1/(2\Delta F)$ in @eq-hp-drift, and
-so projects drift forward. The status number $N_s = 1/(2\theta_S)$ of @sec-ns has the
-dimension of a count of individuals but is a static description of one set, and
-does not project drift.
+so projects drift forward. The status number $N_s = 1/(2\theta_S)$ of @sec-ns is
+a static description of one set and does not project drift. On molecular
+$\mathbf{f}$ it is not a head count either: at biallelic loci
+$\theta_S = m^{-1}\sum_k(\bar p_k^2 + \bar q_k^2) \in [1/2, 1]$, so
+$N_s \in [1/2, 1]$ whatever the size of the set, a monotone decreasing rescaling
+of $\theta_S$.
 
 ## Why the animal-breeding setting does not transfer directly {#sec-hp-not-animal}
 
@@ -558,7 +729,7 @@ preface and each made precise elsewhere:
 
 @sec-plant-literature sets these differences against what the applied plant
 literature does, and @sec-era-transposition lists which assumptions of the
-animal-breeding results fail in a hybrid crop.
+simulation of @meuwissen2020 fail in a hybrid crop.
 
 ## A reading map {#sec-hp-reading-map}
 
@@ -566,7 +737,7 @@ animal-breeding results fail in a hybrid crop.
 chapters that answer it.
 
 | Question | Part | Where |
-|---|---|---|
+|:-----------|:-----|:---------|
 | How is diversity measured, and why on $\mathbf{f}$ and not $\mathbf{G}$? | Foundations | @sec-coancestry |
 | How does diversity split within and between pools? | Foundations | @sec-subdivided |
 | What does diversity buy in response to selection, and in heterosis? | Foundations | @sec-response, @sec-heterosis |
@@ -574,13 +745,13 @@ chapters that answer it.
 | Which metrics to compute, against which baseline, at which stage, and how is the index predicted? | Metrics and prediction | @sec-genomic-era, @sec-catalogue, @sec-choosing, @sec-stages, @sec-genomic-prediction |
 | How does the diversity budget enter an optimiser, and which optimiser? | Optimisation | @sec-ocs, @sec-combinatorial, @sec-advanced |
 | Which crosses to grow, and in which locations? | Mating and testing design | @sec-mating, @sec-sparse, @sec-joint |
-| What does the literature establish, what does a whole programme spend across cycles, and how does one run end to end? | Evidence and practice | @sec-plant-literature, @sec-programme, @sec-cycles, @sec-limits, @sec-case-study |
+| What does the literature establish, what does a whole programme spend across cycles (@sec-programme is an inbred-line scheme, outside A1; @sec-cycles the two-pool one), and how does one run end to end? | Evidence and practice | @sec-plant-literature, @sec-programme, @sec-cycles, @sec-limits, @sec-case-study |
 
 : Reading map: the questions the book answers, the part of the book in which each is answered, and the chapters that answer it, in reading order. {#tbl-hp-reading-map}
 
-The parts are ordered so that each is readable after the ones before it; forward
-pointers are marked as such. @sec-notation
-collects every symbol used above, with the function that computes it.
+The parts are ordered so that each is readable after the ones before it.
+@sec-notation collects the book's shared symbols and, where a function computes
+one, that function.
 
 <!-- reproduce-chapter -->
 

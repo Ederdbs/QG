@@ -13,10 +13,11 @@
 library(hybdiv)
 set.seed(2026)
 
-# The teaching scale. Every live example in the book runs at this size: small
-# enough that a full render takes minutes, large enough that none of the
-# identities hold by accident. The production scale is n_pool_A = n_pool_B = 71
-# and m = 25000; see the note in each chapter where the difference matters.
+# The teaching scale, the default of the live examples: small enough that a
+# full render takes minutes, large enough that none of the identities hold by
+# accident. Chapters that need another scale set it in their own chunks. The
+# production scale is n_pool_A = n_pool_B = 71 and m = 25000; see the note in
+# each chapter where the difference matters.
 book_cfg <- utils::modifyList(
   hybdiv::sim_config,
   list(n_pool_A = 25, n_pool_B = 25, m = 2000, seed = 1)
@@ -36,6 +37,17 @@ fmt <- function(x, digits = 4) {
     x
   } else round(x, digits)
 }
+
+# A value in scientific notation for inline prose, as a complete math span. A
+# numeric inline value that small or large leaves knitr as bare TeX,
+# `4\times 10^{-13}`, from which Pandoc drops `\times 10` (the book printed
+# 4^{-13}); a string passes through untouched. Not for use inside $...$.
+fmt_sci <- function(x, digits = 2) {
+  s <- sprintf("%.*e", digits - 1, x)
+  sprintf("$%s \\times 10^{%d}$", sub("e.*", "", s), as.integer(sub(".*e", "", s)))
+}
+stopifnot(identical(fmt_sci(c(3.7e-13, 9.96e-5)),
+                    c("$3.7 \\times 10^{-13}$", "$1.0 \\times 10^{-4}$")))
 
 # One palette for every live figure: the two heterotic pools get fixed colours
 # (A blue, B amber, a colour-blind-safe pair); red marks the constraint or the
@@ -496,12 +508,14 @@ fmt(t(sapply(sels, ne_lines_pool, ctx = ctx)), 2)
 #' @lopezcortegano2019, managing a simulated population subdivided into five
 #' subpopulations, maximise the weighted forms
 #' 
-#' $$H_T = D_G + \lambda H_S, \qquad A_T = D_A + \lambda A_S,$$ {#eq-catalogue-lambda}
+#' $$H_\lambda = D_G + \lambda H_S, \qquad A_\lambda = D_A + \lambda A_S,$$ {#eq-catalogue-lambda}
 #' 
 #' where $H_S$ and $A_S$ are the within-subpopulation components, $D_G$ and $D_A$
 #' the between-subpopulation components, and $\lambda \in [0, \infty)$ is a weight
-#' chosen by the manager. Reading the two subpopulations as the two heterotic
-#' pools is this book's analogy, not theirs. $\lambda = 0$ optimises only between-pool divergence -- protects
+#' chosen by the manager. The subscript $\lambda$ marks this as the **weighted
+#' objective**, distinct from Nei's unweighted total $H_T = H_S + D_G$ stated
+#' above: the two are equal only at $\lambda = 1$. Reading the two subpopulations
+#' as the two heterotic pools is this book's analogy, not theirs. $\lambda = 0$ optimises only between-pool divergence -- protects
 #' the divergence term of heterosis, ignores each pool's internal health. $\lambda \to \infty$ optimises
 #' only within-pool diversity -- protects each pool's future options, ignores the
 #' cross.
@@ -524,7 +538,7 @@ fmt(t(sapply(sels, ne_lines_pool, ctx = ctx)), 2)
 #' 
 #' The shared term of @eq-het-split is $H_{T,k}$, not $H_{S,k}$: it already contains
 #' one $D_{G,k}$. Summed over loci with $d_k \equiv 1$, expected heterosis is
-#' $2(D_G + H_S/2)$, twice the first form of @eq-catalogue-lambda with $\lambda = 1/2$
+#' $2(D_G + H_S/2)$, twice $H_\lambda$ of @eq-catalogue-lambda with $\lambda = 1/2$
 #' fixed by the algebra. With dominance deviations $d_k$ (@sec-heterosis),
 #' $\sum_k d_k(H_{S,k} + 2D_{G,k}) = 2\bar d_D\,(D_G + \lambda_d H_S)$, where
 #' 
@@ -532,10 +546,15 @@ fmt(t(sapply(sels, ne_lines_pool, ctx = ctx)), 2)
 #'   \bar d_H = \frac{\sum_k d_k H_{S,k}}{\sum_k H_{S,k}}, \qquad
 #'   \bar d_D = \frac{\sum_k d_k D_{G,k}}{\sum_k D_{G,k}}$$ {#eq-catalogue-lambda-d}
 #' 
-#' are the $H_S$-weighted and $D_G$-weighted means of $d$. $\lambda_d$ departs from
-#' $1/2$ only when dominance lines up differently with within-pool heterozygosity
-#' than with between-pool divergence, and a frequency-only partition cannot see that
-#' because $d$ does not appear in it. $\lambda_d$ is computed from a plan's own
+#' are the $H_S$-weighted and $D_G$-weighted means of $d$. Reading $\lambda_d$ as a
+#' maximisation weight, $\lambda_d \in [0, \infty)$, needs net directional dominance
+#' on the two weighted loci, $\bar d_D > 0$ and $\bar d_H \ge 0$: if $\bar d_D \le 0$
+#' the leading factor $2\bar d_D$ reverses the objective (maximising expected
+#' heterosis would then minimise the bracket, or leave $\lambda_d$ undefined at
+#' $\bar d_D = 0$), and $\bar d_H \ge 0$ is what keeps $\lambda_d$ non-negative.
+#' $\lambda_d$ departs from $1/2$ only when dominance lines up differently with
+#' within-pool heterozygosity than with between-pool divergence, and a
+#' frequency-only partition cannot see that because $d$ does not appear in it. $\lambda_d$ is computed from a plan's own
 #' frequencies, so it is a local weight rather than a constant of the population,
 #' and it is the right weight only for expected heterosis as the objective:
 #' @lopezcortegano2019 choose $\lambda$ for conservation, where no such derivation
@@ -611,7 +630,9 @@ c(predicted = predicted_bias, observed = observed_bias, mc_se = mc_se)
 #' 
 #' $$\alpha \;=\; \frac{GD_{\text{random}(n)} - GD_S}{GD_{\text{random}(n)}}.$$ {#eq-catalogue-alpha}
 #' 
-#' Here $GD_{\text{random}(n)}$ is the mean $GD$ of random subsets of size $n$.
+#' Here $GD_{\text{ref}}$ is the mean $GD$ of random subsets of size $n$; the
+#' $GD_{\text{random}(n)}$ of the equation, the printed `GD_reference` of the chunk
+#' below, and the code's `gd_ref` are the same quantity.
 #' $\alpha = 0$ means "as diverse as a random sample of the same size";
 #' $\alpha < 0$ means more diverse than chance. Resampling also delivers the
 #' standard deviation, and hence a z-score for any strategy.

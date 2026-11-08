@@ -17,10 +17,10 @@ an optimiser.
 
 ## The problem, stated once
 
-Given a pool of $N$ candidate F1 hybrids -- each a cross between one line from
+Given a set of $N$ candidate F1 hybrids -- each a cross between one line from
 heterotic group A and one from group B, each with a predicted multi-trait index
 -- choose $n_{sel}$ of them so that the mean index is as high as possible,
-subject to losing no more than a fraction $\alpha$ of the molecular gene
+subject to losing no more than a fraction $\alpha_{\max}$ of the molecular gene
 diversity that a *random* set of the same size would have carried.
 
 Three of those words carry the entire argument.
@@ -32,13 +32,13 @@ construction, so the sum of all its elements is exactly zero; every diversity
 quantity computed from it is meaningless. @sec-coancestry shows this happening.
 
 **Random.** The reference for "no loss" is the distribution of random subsets of
-size $n_{sel}$, not the full candidate pool. Comparing a selected set of 100
-against a pool of 2500 confounds a selection effect with a sampling effect, and
+size $n_{sel}$, not the full candidate set. Comparing a selected set of 100
+against a candidate set of 2500 confounds a selection effect with a sampling effect, and
 the sampling effect alone can look like a loss of half a percent.
 @sec-baseline separates them.
 
-**Subject to.** $\alpha$ is a *constraint*, not a term in a weighted sum. When
-you write $\alpha_{max} = 0.05$ you are saying "I accept losing five percent",
+**Subject to.** The loss $\alpha$ is held under a *constraint*, not priced as a
+term in a weighted sum. When you write $\alpha_{\max} = 0.05$ you are saying "I accept losing five percent",
 which is a statement a breeding committee can approve. A weighted sum says
 "diversity is worth $\lambda$ index units", which is a statement nobody can
 approve because nobody knows what $\lambda$ means. @sec-ocs makes the
@@ -49,7 +49,7 @@ specialises.
 
 Most treatments of diversity management come from animal breeding, where the
 population is randomly mating and the unit of selection is an individual. Plant
-hybrid breeding breaks both assumptions:
+hybrid breeding departs from that setting in three ways:
 
 - The parents are **inbred lines**, so their within-individual diversity is zero
   by construction, and the interesting heterozygosity lives in the F1 product,
@@ -76,15 +76,18 @@ Where a result is an exact algebraic identity, the deviation from a simulated
 oracle is printed next to it; where it is a Monte Carlo agreement, the residual
 is printed.
 
-The argument the parts assemble is a chain, and it is worth stating before the
-table that lists them:
+The argument of the book is a chain, worth stating before the table that lists
+the parts. It is given in logical order, not reading order, and not every chapter
+is a link in it:
 
-1. Diversity between the pools is what makes the hybrid worth selling, and
-   diversity within them is what the next cycle has to select on
+1. Diversity between the pools adds to the value of the hybrid only where it
+   falls on loci with dominance, and diversity within them is what the next cycle
+   has to select on
    (@sec-subdivided, @sec-heterosis).
-2. Those two are in tension: every plan that raises one lowers the other, and the
+2. Those two can move in opposite directions: under drift alone the first rises
+   while the second falls, an argument that does not cover selection. The
    partition derived in @sec-subdivided and reported in @sec-catalogue is what
-   makes the trade visible.
+   makes that visible.
 3. Within-pool diversity is worth protecting because it is the raw material of
    *response*: among A $\times$ B hybrids, genic variance is a sum over loci of
    the within-pool part of gene diversity, weighted by squared effect
@@ -94,8 +97,8 @@ table that lists them:
    are unrelated to which loci lose diversity. That restricting rather than
    pricing is the right form for such a constraint is a sixty-year-old theorem
    rather than a preference (@sec-response).
-4. So the loss of gene diversity, $\alpha$, is a
-   **budget**: the relative shortfall of the selected hybrids' $GD_T = 1 - \theta$, with
+4. So the loss of gene diversity, $\alpha$, is held under a
+   **budget** $\alpha_{\max}$: the loss is the relative shortfall of the selected hybrids' $GD_T = 1 - \theta$, with
    $\theta$ their group coancestry (@sec-coancestry), below that of a random
    selection of the same size (@sec-baseline), not a term traded off inside an objective (@sec-ocs).
    With inbred parents that total is the within-pool term plus the between-pool
@@ -103,7 +106,7 @@ table that lists them:
    item 3, which is why the pools are monitored separately (@sec-stages).
 5. How much diversity there is to spend depends on how the candidates were
    generated: a panel cannot be selected back up to variation it never sampled
-   (@sec-sizing), and a pool of near-copies cannot be rescued by any optimiser
+   (@sec-sizing), and a set of near-copies cannot be rescued by any optimiser
    (@sec-backcross). @sec-simulating-crosses and @sec-alphasimr build that panel
    two different ways, and everything downstream is blind to which --
    @sec-alphasimr from the primitives up, so the generative model is something a
@@ -120,18 +123,17 @@ table that lists them:
    predicted, which turns out to work only where the constraint holds
    (@sec-limits).
 
-The parts are ordered so that each is readable after the ones before it; forward
-pointers are marked as such:
+The parts are ordered so that each is readable after the ones before it:
 
 | Part | What it establishes |
 |---|---|
 | Introduction | The hybrid programme end to end, and the population genetics the rest of the book assumes |
 | Foundations | The coancestry kernel, the partition of diversity in a subdivided population, the equation that says what selection buys, and what divergence between the pools buys through heterosis |
-| Simulation | How the candidate pool is generated, and how large a segregating population has to be |
+| Simulation | How the candidates are generated, and how large a segregating population has to be |
 | Metrics and prediction | What can be measured, what it costs, which measurements are redundant, and how the index being selected on is predicted |
 | Optimisation | How the constraint enters an optimiser, and which optimiser to use |
 | Mating and testing design | Which few hundred of the 40,000 possible crosses to grow, what each design can estimate, and how to spread them over locations |
-| Evidence and practice | What the literature does and does not establish, what a whole programme spends across cycles, and a worked end-to-end run |
+| Evidence and practice | What the literature does and does not establish, what a whole programme spends across cycles (@sec-programme is an inbred-line scheme, @sec-cycles the two-pool one), and a worked end-to-end run |
 
 Readers new to hybrid breeding or to population genetics should start with
 @sec-hybrid-programme. Readers who only want the operational answer can read @sec-choosing (which
@@ -154,21 +156,58 @@ res <- stage2_select(st1$X, st1$f, st1$hybrids, n_sel = 100, fL = st1$fL)
 res$metrics
 ```
 
-Every live example in the book runs at a deliberately small scale -- 25 lines
-per pool and 2000 markers, giving 625 candidate hybrids -- so that a full render
-takes minutes. The scale is set once, in `_common.R`:
+The default scale of the live examples is deliberately small -- 25 lines per pool
+and 2000 markers, giving 625 candidate hybrids -- so that a full render takes
+minutes. It is set once, in `_common.R`; chapters that need another scale (for
+example @sec-stages, at 30 lines per pool and 3000 markers) set it in their own
+chunks:
 
 ```{r}
 str(book_cfg)
 ```
 
-Results that are expensive at any scale -- the differential-evolution sweeps,
-the cost benchmark, the population-sizing grid -- are precomputed and shipped in
-`book/data` and `book/figs`. `book/scripts/regenerate.R` regenerates all of
-them, and @sec-verification says exactly which figures and tables come from
-where.
+Results that are expensive to compute are precomputed and shipped in `book/data`
+and `book/figs`. They differ in where they came from, and not all of them can be
+remade from this repository (@sec-verification tabulates most of these files):
 
-A note on numbers: everything reported here is reproducible output from a
-simulated dataset, not a fixed constant. Change the simulation configuration or
-a random seed and the numbers move. The *relationships* between them -- which
-metric dominates which, which identity holds exactly -- do not.
+- **Written by `book/scripts/regenerate.R`:** the population-sizing grid
+  (`f2_*`), the genomic-prediction sweep (`genomic_prediction_*`), the
+  advanced-selection benchmark (`search_*`), the recurrent-selection trajectories
+  (`cycles_*`), the variance limits of @sec-limits (`limits_*`), the joint
+  allocation sweep (`joint_*`), and the two phenotypic core sweeps,
+  `mating_core_sweep.csv` and `sparse_core_sweep.csv`. `limits_linked.csv` starts
+  from MaCS (Markovian coalescent simulator) founders, so a re-run writes a new draw, not the cached numbers.
+- **Written by `inst/scripts/run_mabc.R`:** the backcross tables and figures
+  (`mabc_*`). Three of the tables and both figures are cached from the predecessor
+  of the current driver, and no full re-run has been compared with them
+  (@sec-bc-running).
+- **Cached from external studies, and not regenerable here:** the `mating_*`
+  tables and figures of @sec-mating and the `sparse_*` tables of @sec-sparse, apart
+  from the two core sweeps and the three literature tables listed separately here. The code
+  of those studies is not in this repository, so the headline results of both
+  chapters cannot be reproduced from it; only their phenotypic cores can be re-run.
+- **No writer in this repository:** `de_constraints.csv` and
+  `de_convergence.png` (the differential-evolution sweeps), `cost_per_eval.csv`
+  and `cost_scaling.png` (the cost benchmark; `regenerate.R` and
+  `inst/scripts/run_benchmark.R` write other cost tables, to `report/`),
+  `metric_redundancy.csv` and `metric_redundancy.png`,
+  `pipeline_loss_ledger.csv` and `pipeline_loss.png`, `fst_definitions.csv`,
+  `dist_vs_variance.csv`, `theta_identity_check.csv` and `metric_pitfalls.png`.
+- **Not simulation output, and not regenerated:** the literature screens
+  `bibliography_*.csv`, `plant_metric_usage.csv` derived from them,
+  `plant_lit_landscape.png`, `sparse_primary_studies.csv` and
+  `sparse_literature_parameters.csv`, compiled from the primary papers, and
+  `mating_core_findings.csv`, extracted from the published literature and read by
+  no chapter. The source record of that last file, which is not in this repository,
+  marks some papers as read in full text and leaves the rest to their abstracts;
+  the file itself carries no such marker.
+
+A note on numbers: a number from a simulation is not a fixed constant. Change the
+simulation configuration or a random seed and it moves. Nor does a seed pin every
+number: founders drawn through MaCS are not reproducible from `set.seed()`, and the
+results computed from them are marked where they appear (@sec-alphasimr,
+@sec-limits). An exact identity holds at any seed and configuration that satisfy
+its assumptions. An empirical relationship -- which metrics are redundant, how much
+index a constraint costs -- is measured at the settings its chapter states;
+@sec-choosing says how far its redundancy result transfers, and that it should be
+re-run on real genotypes before its recommendation is treated as final.
