@@ -1,4 +1,4 @@
-#' # A catalogue of metrics on `f` {#sec-catalogue}
+#' # A catalogue of diversity metrics {#sec-catalogue}
 #' 
 # 06-metric-catalogue -- standalone script of the chapter 06-metric-catalogue.qmd
 # Book: https://ederdbs.github.io/QG/06-metric-catalogue.html
@@ -69,22 +69,42 @@ book_fig  <- function(...) .book_get('figs', ...)
 ctx <- simulate_data(book_cfg)
 n_sel <- 60
 set.seed(41)
-idx <- sample.int(ctx$N, n_sel)
+idx <- sample.int(ctx[["N"]], n_sel)
 
 #' 
-#' Every metric in this chapter has the same signature, `f(idx, ctx) -> scalar`,
-#' and every one operates on the molecular coancestry matrix from
-#' @sec-coancestry. That uniformity is not tidiness: it is what makes metrics
-#' interchangeable inside an optimiser, and it is what lets @sec-choosing benchmark
-#' them against each other on equal terms.
+#' @sec-genomic-era separated two lenses on one selection, $F_{hom}$ and
+#' $F_{drift}$, and read both against a resampled null of random subsets before that
+#' null had been defined. This chapter is where the catalogue of metrics is defined
+#' once, where the baseline of that null is derived (@sec-baseline), and where every
+#' metric, those two lenses included, is read against it (@sec-catalogue-null). It also
+#' settles what "no loss" means, which turns out to be less obvious than it sounds.
 #' 
-#' The chapter also settles the question of what "no loss" means, which turns out
-#' to be less obvious than it sounds.
+#' Every metric in the catalogue has the same signature, `f(idx, ctx) -> scalar`.
+#' That uniformity is what makes metrics interchangeable inside an optimiser and what
+#' lets @sec-choosing benchmark them against each other on equal terms. It does not
+#' mean that they read the same object, and this chapter keeps four inputs apart
+#' (@sec-coancestry gives the convention):
+#' 
+#' - **the molecular coancestry matrix** `ctx[["f"]]`: `theta_group()`,
+#'   `gene_diversity()`, `status_number()`, `mean_offdiag()`, `ene()`, `ane()`,
+#'   `eff_dim()`, and the `GD_WI_hyb` column of `gd_partition()`;
+#' - **the marker frequencies of the selection**, `colMeans(ctx[["X"]][idx, ])`, with
+#'   the frozen base `ctx[["p0"]]` for the two lenses: `theta_from_freq()`,
+#'   `he_nei()`, `alleles_lost()`, $F_{hom}$ and $F_{drift}$;
+#' - **the pedigree**, `ctx[["ped"]]`, which says which lines parent each hybrid:
+#'   `ne_parents()`, `ne_lines_pool()`;
+#' - **the line coancestry** `ctx[["fL"]]` weighted by line usage, which is the
+#'   pedigree again: `theta_pools()` and `gd_partition()`.
+#' 
+#' Only the first group reads the hybrid-level matrix $\mathbf{f}$, and a centred
+#' matrix stored in its place would reach only that group (@sec-coancestry).
 #' 
 #' ## Group coancestry, and the off-diagonal problem
 #' 
 #' The group coancestry [@cockerham1967] of a set $S$ of $n$ individuals is the
-#' mean of **all** $n^2$ elements, diagonal included:
+#' mean of **all** $n^2$ elements, diagonal included. @caballero2002 [p. 290]
+#' average over all pairs of individuals and cite @cockerham1967 for it (Cockerham's
+#' own text was not checked here):
 #' 
 #' $$\theta_S \;=\; \frac{1}{n^2}\sum_{i \in S}\sum_{j \in S} f_{ij}
 #'             \;=\; \frac{1}{n^2}\,\mathbf{1}'\mathbf{f}_S\mathbf{1}.$$ {#eq-catalogue-theta}
@@ -117,7 +137,7 @@ sels <- list(random     = sel_random(ctx, n_sel),
              greedy_div = sel_greedy(ctx, n_sel, w = 0),
              truncation = sel_truncation(ctx, n_sel))
 # the scale stated in this chapter's table captions
-stopifnot(n_sel == 60, ctx$N == 625, ctx$n_lines == 50, ctx$m == 2000)
+stopifnot(n_sel == 60, ctx[["N"]] == 625, ctx$n_lines == 50, ctx$m == 2000)
 
 # @eq-catalogue-split on every selection
 stopifnot(all(vapply(sels, function(s) {
@@ -144,48 +164,58 @@ fmt(as.data.frame(cmp), 5)
 #' 
 #' This is the result that simplifies everything downstream. Write $x_{ik} \in \{0, 0.5, 1\}$
 #' for the marker value of individual $i$ at marker $k$, one of $m$ markers.
-#' Starting from @eq-catalogue-theta and swapping the order of summation, the double
-#' sum factors:
+#' Starting from @eq-catalogue-theta, insert $f_{ij} = m^{-1}\sum_k[x_{ik}x_{jk} +
+#' (1-x_{ik})(1-x_{jk})]$ (@eq-f-molecular) and swap the order of summation. Each
+#' marker contributes two double sums, and each factors:
 #' 
 #' $$\frac{1}{n^2}\sum_i\sum_j x_{ik}x_{jk}
-#'   = \Big(\frac{1}{n}\sum_i x_{ik}\Big)^2 = \bar p_k^2,$$
-#' 
-#' with $\bar p_k$ the **group's** allele frequency. Hence
-#' 
-#' $$\theta_S = \frac{1}{m}\sum_k \big(\bar p_k^2 + \bar q_k^2\big),
+#'   = \Big(\frac{1}{n}\sum_i x_{ik}\Big)^2 = \bar p_k^2,
 #'   \qquad
-#'   GD_S = 1 - \theta_S = \frac{1}{m}\sum_k 2\,\bar p_k \bar q_k \;\equiv\; H_e,$$ {#eq-catalogue-gd-he}
+#'   \frac{1}{n^2}\sum_i\sum_j (1-x_{ik})(1-x_{jk}) = (1 - \bar p_k)^2 = \bar q_k^2,$$
 #' 
-#' which is exactly Nei's gene diversity [@nei1973]. **Group coancestry and
+#' with $\bar p_k$ the **group's** allele frequency and $\bar q_k = 1 - \bar p_k$. Hence
+#' 
+#' $$\theta_S = \frac{1}{m}\sum_k \big(\bar p_k^2 + \bar q_k^2\big),$$ {#eq-catalogue-theta-freq}
+#' 
+#' and $GD_S = 1 - \theta_S = m^{-1}\sum_k 2\,\bar p_k \bar q_k \equiv H_e$, which is
+#' @eq-hp-gd: Nei's gene diversity [@nei1973] in its plug-in form, at the set's own
+#' frequencies and without the $2n/(2n-1)$ small-sample correction. **Group coancestry and
 #' expected heterozygosity are not two independent checks. They are one quantity
-#' written two ways.**
+#' written two ways.** @tbl-catalogue-identity gives both pairs for one random subset.
 #' 
 ## -----------------------------------------------------------------------------
+#| label: tbl-catalogue-identity
+#| tbl-cap: "The identity of @eq-catalogue-theta-freq on one random subset `idx` of $n$ = 60 hybrids (`set.seed(41)`) of the $N$ = 625 of the teaching scale (25 + 25 lines, 2000 markers, simulation seed 1). theta, via_submatrix: `theta_group()`, the mean of the $60 \\times 60$ submatrix of $\\mathbf{f}$; theta, via_frequency: `theta_from_freq()`, $m^{-1}\\sum_k(\\bar p_k^2 + \\bar q_k^2)$; difference: the first minus the second, in scientific notation; GD: `gene_diversity()`; He_Nei: `he_nei()`. Dimensionless, six decimals except the difference. The chunk asserts both equalities with `all.equal()`."
 stopifnot(isTRUE(all.equal(theta_group(idx, ctx), theta_from_freq(idx, ctx))),
           isTRUE(all.equal(gene_diversity(idx, ctx), he_nei(idx, ctx))))
-c(via_submatrix = theta_group(idx, ctx),
-  via_frequency = theta_from_freq(idx, ctx),
-  difference    = theta_group(idx, ctx) - theta_from_freq(idx, ctx))
-
-c(GD = gene_diversity(idx, ctx), He_Nei = he_nei(idx, ctx))
+d_theta <- theta_group(idx, ctx) - theta_from_freq(idx, ctx)
+data.frame(quantity = c("theta, via_submatrix", "theta, via_frequency",
+                        "difference", "GD", "He_Nei"),
+           value = c(sprintf("%.6f", c(theta_group(idx, ctx), theta_from_freq(idx, ctx))),
+                     sprintf("%.1e", d_theta),
+                     sprintf("%.6f", c(gene_diversity(idx, ctx), he_nei(idx, ctx)))))
 
 #' 
 #' The chunk asserts both equalities with `all.equal()` at its default relative
-#' tolerance, $1.5 \times 10^{-8}$; the printed difference is
-#' `r signif(theta_group(idx, ctx) - theta_from_freq(idx, ctx), 2)`.
+#' tolerance, $1.5 \times 10^{-8}$; the size of the printed difference is
+#' `r if (d_theta == 0) "exactly 0" else fmt_sci(abs(d_theta))`.
 #' This equality is the implementation's strongest sanity check.
 #' If it fails, `f` is centered, rescaled, or built on the wrong marker coding.
 #' 
 #' Three practical consequences:
 #' 
 #' 1. One fewer metric to justify to a technical committee.
-#' 2. "Losing 5 % of diversity" acquires an exact meaning: 5 % of the set's expected
-#'    heterozygosity.
+#' 2. "Losing 5 % of diversity" acquires an exact meaning: $GD_S$ is 5 % below the
+#'    expected heterozygosity of a random subset of the same size (@sec-baseline), not 5 %
+#'    of the set's own.
 #' 3. Two computation routes with the same answer and very different costs. The
 #'    matrix route is $O(n^2)$; the frequency route is $O(nm)$. For $n = 200$ and
 #'    $m = 25000$ that is forty thousand operations against five million.
+#'    @tbl-catalogue-timing times both at this chapter's scale.
 #' 
 ## -----------------------------------------------------------------------------
+#| label: tbl-catalogue-timing
+#| tbl-cap: "Time per call, in microseconds, of the two routes to $\\theta_S$ on `idx` ($n$ = 60 hybrids of the $N$ = 625 of the teaching scale, 2000 markers): `theta_group()` (matrix route) and `theta_from_freq()` (frequency route); ratio is frequency over matrix. One timing run at render, by `bench_us()` with repetitions multiplied by 4 until the total exceeds 0.4 s; not replicated, so with no measure of dispersion, and machine-dependent. Microseconds, two decimals."
 # adaptive repetitions: a fixed count is quantised by the clock (cf. bench_us()
 # in book/scripts/regenerate.R)
 bench_us <- function(f, target = 0.4) {
@@ -198,8 +228,8 @@ bench_us <- function(f, target = 0.4) {
 }
 us_matrix    <- bench_us(function() theta_group(idx, ctx))
 us_frequency <- bench_us(function() theta_from_freq(idx, ctx))
-c(us_matrix = us_matrix, us_frequency = us_frequency,
-  ratio = us_frequency / us_matrix)
+fmt(data.frame(quantity = c("us_matrix", "us_frequency", "ratio"),
+               value = c(us_matrix, us_frequency, us_frequency / us_matrix)), 2)
 
 #' 
 #' The matrix route is the one that belongs in an optimiser's inner loop.
@@ -214,20 +244,24 @@ c(us_matrix = us_matrix, us_frequency = us_frequency,
 #' $N_s$ reads as a head count only on coancestry measured against a base
 #' population, in which unrelated non-inbred individuals have coancestry 0 with each
 #' other and $1/2$ with themselves: a set of $n$ of them has $\theta_S = 1/(2n)$ and
-#' $N_s = n$. Molecular $\mathbf{f}$ has no base. By @eq-catalogue-gd-he,
+#' $N_s = n$. Molecular $\mathbf{f}$ is identity in state and is not measured against
+#' such a base: unrelated individuals sit at a floor set by the marker frequencies, not
+#' at 0 (@sec-coancestry, @eq-hp-ibs-ibd). By @eq-catalogue-theta-freq,
 #' $\theta_S = m^{-1}\sum_k(\bar p_k^2 + \bar q_k^2)$, and
 #' $\bar p_k^2 + \bar q_k^2 \ge 1/2$ at every biallelic locus, so on $\mathbf{f}$
 #' $\theta_S \in [1/2, 1]$ and $N_s \in [1/2, 1]$ for every set. Here $N_s$ is a
 #' monotone decreasing rescaling of $\theta_S$, not a number of individuals. The
-#' two edge cases are the two bounds:
+#' two edge cases are the two bounds (@tbl-catalogue-ns-edge):
 #' 
 ## -----------------------------------------------------------------------------
+#| label: tbl-catalogue-ns-edge
+#| tbl-cap: "The two bounds of $\\theta_S$ and $N_s$ (@eq-catalogue-ns) on five individuals, from `theta_group()` and `status_number()` applied to a synthetic $5 \\times 5$ matrix substituted for $\\mathbf{f}$ (no simulated data): all elements 1/2 (every group frequency 0.5, $\\theta_S$ at its lower bound) and all elements 1 (all individuals identical and homozygous, $\\theta_S$ at its upper bound). Dimensionless."
 fake <- ctx
-fake$f <- matrix(0.5, 5, 5)      # every group frequency 0.5: theta at its lower bound
-c(theta = theta_group(1:5, fake), Ns = status_number(1:5, fake))
-
-fake$f <- matrix(1, 5, 5)        # all identical and homozygous: theta at its upper bound
-c(theta = theta_group(1:5, fake), Ns = status_number(1:5, fake))
+fake[["f"]] <- matrix(0.5, 5, 5)      # every group frequency 0.5: theta at its lower bound
+lo <- c(theta = theta_group(1:5, fake), Ns = status_number(1:5, fake))
+fake[["f"]] <- matrix(1, 5, 5)        # all identical and homozygous: theta at its upper bound
+hi <- c(theta = theta_group(1:5, fake), Ns = status_number(1:5, fake))
+data.frame(case = c("all f = 0.5", "all f = 1"), rbind(lo, hi), row.names = NULL)
 
 #' 
 #' Five individuals give $N_s = 1$, not 5. The five selections of this chapter fall
@@ -237,10 +271,11 @@ c(theta = theta_group(1:5, fake), Ns = status_number(1:5, fake))
 #' ::: {.callout-warning}
 #' ## $N_s$ is a descriptor, not a drift projection
 #' 
-#' @toro2020 show that the **rate-based** effective size $N_e = 1/(2\Delta F)$
-#' loses meaning under molecular diversity management: optimisation increases
-#' diversity in early generations, producing a negative $\Delta F$ and therefore a
-#' negative $N_e$, with no long-term asymptote.
+#' @toro2020 report, in their abstract, that under optimal molecular management
+#' diversity increases in the early generations, so that the **rate-based** effective
+#' size $N_e = 1/(2\Delta F)$ (@eq-era-rate) takes negative values, and that in the
+#' long term it does not reach an asymptote and behaves unpredictably. Only the
+#' abstract was read for this chapter.
 #' 
 #' This does not invalidate $N_s$. $N_s$ is a monotonic reparametrisation of
 #' $\theta$ -- a *static descriptor of a set* -- while $N_e$ is a *rate between
@@ -251,11 +286,26 @@ c(theta = theta_group(1:5, fake), Ns = status_number(1:5, fake))
 #' :::
 #' 
 #' And, from @sec-genomic-era: $\theta$ tracks homozygosity, not drift. $GD$ and
-#' $N_s$ answer "how much heterozygosity does this selection preserve", which is
-#' the right question for next season's hybrid vigour. They do not certify that
-#' allele frequencies are moving as unmanaged drift would have moved them, which
-#' matters more across multiple recurrent cycles than for a single round of hybrid
-#' selection.
+#' $N_s$ describe the expected heterozygosity $H_e$ of the merged set at its own
+#' frequencies (@eq-hp-gd). That is not the heterozygosity the F1s carry. For the
+#' complete factorial of the selected lines at their usage weights the expected F1
+#' heterozygosity is
+#' $GD_T + GD_{BS}$ (@eq-het-theta-ab, @sec-hybrid-programme), and the heterozygosity of
+#' the pairs actually kept is $2\,GD_{WI\text{-}hyb}$, which a selection can move
+#' against $GD$. In @tbl-catalogue-gd-partition, from the random subset of this chapter
+#' to truncation, $GD$ goes from
+#' `r fmt(gene_diversity(sels[["random"]], ctx), 4)` to
+#' `r fmt(gene_diversity(sels[["truncation"]], ctx), 4)` while `GD_WI_hyb` goes from
+#' `r fmt(gd_partition(sels[["random"]], ctx)[["GD_WI_hyb"]], 4)` to
+#' `r fmt(gd_partition(sels[["truncation"]], ctx)[["GD_WI_hyb"]], 4)`; this is one
+#' founder draw and one random subset. @sec-genomic-era measures the sign of the
+#' truncation selection's realised F1 heterozygosity against a random-subset null on
+#' twenty founder draws and finds no consistent sign (@tbl-era-seeds-z). $GD$ is
+#' therefore not a measure of next season's hybrid vigour, which needs the F1s' own
+#' heterozygosity and dominance at the loci that matter (@sec-heterosis), not the
+#' coancestry among candidates. $GD$ and $N_s$ also do not certify that allele
+#' frequencies are moving as unmanaged drift would have moved them, which matters
+#' more across multiple recurrent cycles than for a single round of hybrid selection.
 #' 
 #' ## Effective number of parents
 #' 
@@ -266,10 +316,12 @@ c(theta = theta_group(1:5, fake), Ns = status_number(1:5, fake))
 #' $$N_{e,\text{par}} = \frac{1}{\sum_i p_i^2},$$ {#eq-catalogue-ne-par}
 #' 
 #' the reciprocal of Simpson's concentration index $\sum_i p_i^2$ [@simpson1949];
-#' in pedigree analysis the same form, over founder contributions, gives the founder
-#' equivalents of @lacy1989. It captures precisely what coancestry blurs: a set of
-#' 200 hybrids can have an acceptable $\theta$ while drawing on only 12 lines, if
-#' those 12 happen to be genetically distant from each other.
+#' the founder equivalents of @lacy1989 are attributed the same form over founder
+#' contributions (UNVERIFIED: the 1989 paper was not available, only the concept was
+#' confirmed from secondary sources). It captures what coancestry can blur: in a
+#' hypothetical set of 200 hybrids that draws on only 12 lines, $\theta$ can be
+#' acceptable if those 12 happen to be genetically distant from each other. The case
+#' is constructed, not computed here.
 #' @tbl-catalogue-ne-par gives it for the five selections. It is bounded above by
 #' the number of lines, `r ctx$n_lines`, a bound reached only if every line is used
 #' equally often.
@@ -284,16 +336,20 @@ fmt(data.frame(Ne_parents = sapply(sels, ne_parents, ctx = ctx)), 2)
 #' `r fmt(100 * (1 - ne_parents(sels[["truncation"]], ctx) / ne_parents(sels[["random"]], ctx)), 1)` %
 #' of the random set's value and raises $\theta$ by
 #' `r fmt(100 * (theta_group(sels[["truncation"]], ctx) / theta_group(sels[["random"]], ctx) - 1), 2)` %.
-#' On the z scale of @tbl-catalogue-z the order reverses, because $\theta$ varies
-#' far less among random subsets than $N_{e,\text{par}}$ does. The cost of
+#' On the z scale of @tbl-catalogue-z the order reverses on this founder draw,
+#' because $\theta$ varies far less among random subsets than $N_{e,\text{par}}$ does
+#' (@tbl-catalogue-seeds-z counts the draws, of twenty, on which it does). The cost of
 #' $N_{e,\text{par}}$ is a `tabulate` call, which makes it a natural candidate to enter the objective
 #' function alongside $\theta$ -- and in @sec-choosing it does.
 #' 
 #' ## Allelic richness {#sec-richness}
 #' 
 #' $\theta$ and $H_e$ are averages across markers and are dominated by
-#' intermediate-frequency alleles. A lost rare allele barely moves them, yet the
-#' loss is irreversible. So count markers that were polymorphic in the population
+#' intermediate-frequency alleles. A lost rare allele barely moves them, yet in a
+#' closed population, with no reintroduction from outside germplasm, the loss is
+#' irreversible. @lopezcortegano2019 (pp. 1-2) relate expected heterozygosity to the
+#' short-term response to selection and allelic diversity, which is more sensitive to
+#' bottlenecks, to the long-term one. So count markers that were polymorphic in the population
 #' and became rare or fixed in the selection, with MAF the minor allele frequency
 #' in the selection $(S)$ or in the whole population (pop):
 #' 
@@ -303,16 +359,36 @@ fmt(data.frame(Ne_parents = sapply(sels, ne_parents, ctx = ctx)), 2)
 #' @tbl-catalogue-alleles-lost counts $A_{\text{lost}}$ for the five selections.
 #' 
 ## -----------------------------------------------------------------------------
-#| label: tbl-catalogue-alleles-lost
-#| tbl-cap: "Markers lost, $A_{\\text{lost}}$ (@eq-catalogue-alleles-lost), from `alleles_lost()` with MAF threshold 0.05, out of 2000 markers. Five selections of $n$ = 60 from the $N$ = 625 hybrids of the teaching scale (25 + 25 lines, 2000 markers, simulation seed 1): random, a random subset (seed 42); trunc_cap, truncation on the index with each line used at most 4 times; greedy_w, greedy on index and coancestry with index weight $\\omega$ = 0.001 (argument `w` of `sel_greedy()`); greedy_div, greedy on coancestry alone ($\\omega$ = 0); truncation, the top 60 on the index. Count of markers."
-data.frame(alleles_lost = sapply(sels, alleles_lost, ctx = ctx))
+#| label: red-cache
+# cached external data (no producer in this repository): read, not regenerated
+red <- read.csv(book_data("metric_redundancy.csv"))
+rho_red <- sapply(c("alleles_lost_MAF", "Ne_parents", "eff_dim"), function(v)
+  cor(red[["theta"]], red[[v]], method = "spearman"))
 
 #' 
-#' Among the metrics of the redundancy analysis in @sec-choosing, it is the one
-#' **genuinely non-redundant** with $\theta$ -- a claim that chapter tests rather
-#' than asserts. That analysis does not include `F_drift` or `F_hom`, so it says
-#' nothing about them; in @tbl-catalogue-z, `F_drift` separates
-#' truncation from random subsets more strongly than any other metric.
+## -----------------------------------------------------------------------------
+#| label: tbl-catalogue-alleles-lost
+#| tbl-cap: "Markers lost, $A_{\\text{lost}}$ (@eq-catalogue-alleles-lost), from `alleles_lost()` with MAF threshold 0.05, out of 2000 markers. Five selections of $n$ = 60 from the $N$ = 625 hybrids of the teaching scale (25 + 25 lines, 2000 markers, simulation seed 1): random, a random subset (seed 42); trunc_cap, truncation on the index with each line used at most 4 times; greedy_w, greedy on index and coancestry with index weight $\\omega$ = 0.001 (argument `w` of `sel_greedy()`); greedy_div, greedy on coancestry alone ($\\omega$ = 0); truncation, the top 60 on the index. Count of markers."
+fmt(data.frame(alleles_lost = sapply(sels, alleles_lost, ctx = ctx)), 0)
+
+#' 
+#' The redundancy analysis of @sec-choosing does not single `alleles_lost` out as
+#' non-redundant with $\theta$. That analysis is **cached external data**:
+#' `metric_redundancy.csv` has no producer in this repository, is not regenerated by
+#' any script here, and nothing in this chapter reproduces it. Read from the file, the
+#' Spearman correlation with $\theta$ over its `r nrow(red)` selections is
+#' `r fmt(rho_red[["alleles_lost_MAF"]], 3)` for `alleles_lost_MAF`,
+#' `r fmt(rho_red[["Ne_parents"]], 3)` for `Ne_parents` and
+#' `r fmt(rho_red[["eff_dim"]], 3)` for `eff_dim`. @sec-choosing reports that the
+#' metrics keeping most rank variation after regressing on $\theta$ are allelic
+#' richness (the count of alleles retained) and $N_{e,\text{par}}$, not
+#' `alleles_lost`. On that analysis the rank correlation of `alleles_lost` with $\theta$ is
+#' `r fmt(rho_red[["alleles_lost_MAF"]], 3)` ($\rho^2 =$
+#' `r fmt(rho_red[["alleles_lost_MAF"]]^2, 2)`), strong but short of a monotone relation, so the case for tracking it rests on the argument above, that a lost rare
+#' allele barely moves $\theta$, and on the result of @lopezcortegano2019 reported in @sec-richness. It
+#' does not rest on the redundancy analysis. That analysis does not include `F_drift`
+#' or `F_hom`, so it says nothing about them; of the metrics in @tbl-catalogue-z,
+#' `F_drift` separates truncation from random subsets most strongly on this draw.
 #' 
 #' @lopezcortegano2019 compared, in a subdivided simulated population, strategies
 #' maximising *expected heterozygosity* ($H_T$, the same family as $GD$) against
@@ -320,11 +396,24 @@ data.frame(alleles_lost = sapply(sels, alleles_lost, ctx = ctx))
 #' more alleles **and** controlled molecular inbreeding better than maximising
 #' $H_T$, except when all the weight of the optimisation is placed on the
 #' within-subpopulation component, where maximising $H_T$ controlled molecular
-#' inbreeding best while still retaining fewer alleles. The mechanism connects directly to @sec-genomic-era:
-#' heterozygosity-maximising management pushes allele frequencies toward 0.5, which
-#' favours rare alleles in the short run but does not stop them drifting to loss
-#' once they are no longer the rarest; allele-count management defends every
-#' segregating allele directly.
+#' inbreeding best while still retaining fewer alleles. Their markers are
+#' multiallelic haplotypes of single-nucleotide polymorphisms (SNP), not the biallelic markers whose minor-allele-frequency
+#' threshold defines $A_{\text{lost}}$, so the result is read here as direction, not
+#' as a number to transfer.
+#' 
+#' The explanation the paper gives depends on the structure of the population. For a
+#' single undivided population it cites @fernandez2004, as reported there:
+#' maximising heterozygosity leads alleles toward intermediate frequencies, which
+#' reduces the chance that rare alleles are lost by drift, so that in undivided
+#' populations maximising $H_T$ can serve both heterozygosity and allele number; in
+#' that undivided case the allele-count method kept some rare alleles at low
+#' frequencies, where they were more likely to be lost eventually. For subdivided
+#' populations it reports instead that maximising global heterozygosity comes at the
+#' cost of more homozygosity in each subpopulation, at least in the short term, and of
+#' a substantial loss of alleles. This chapter offers no mechanism beyond that
+#' report: the step from "frequencies pushed toward 0.5" to a later loss of alleles
+#' under heterozygosity management in the subdivided case is not in the paper and is
+#' not tested here.
 #' 
 #' Their recommendation for structured conservation programmes was to make $A_T$,
 #' not $H_T$, the primary target. In this pipeline's terms: `alleles_lost` deserves
@@ -382,8 +471,11 @@ stopifnot(all(ane_gap >= 0))
 #' selections the self-distance-zero version is lower by
 #' `r fmt(min(ane_gap), 4)` to `r fmt(max(ane_gap), 4)`, and the ranking of the five selections is
 #' `r if (identical(rank(ane_pkg), rank(ane_odong))) "unchanged" else "changed"`.
-#' The package keeps its definition because the cached redundancy analysis of
-#' @sec-choosing and the case-study z-scores were computed with it.
+#' The package keeps its definition so that the z-scores of @tbl-catalogue-z, computed
+#' in this chapter, and the optimisation chapters that call `ane()` stay on one
+#' definition. The cached redundancy analysis of @sec-choosing is external data without
+#' a producer in this repository, so this chapter cannot say which definition of A-NE
+#' it used.
 #' 
 #' ## Effective dimensionality
 #' 
@@ -391,8 +483,9 @@ stopifnot(all(ane_gap >= 0))
 #' 
 #' $$D_{\text{eff}} = \frac{(\sum_i \gamma_i)^2}{\sum_i \gamma_i^2}$$ {#eq-catalogue-deff}
 #' 
-#' has the form of the participation ratio, a term introduced for the localisation
-#' of vibrational modes [@belldean1970] and applied here to eigenvalues. It counts
+#' has the form of the participation ratio, a term from the physics of localised
+#' vibrational modes (the attribution to @belldean1970 is UNVERIFIED: the paper could
+#' not be opened) applied here to eigenvalues. It counts
 #' how many independent directions of genetic variation remain: 1 if all
 #' variation lies on a single axis, $n - 1$ if spread evenly over the $n - 1$
 #' dimensions that double-centering leaves. @tbl-catalogue-deff gives it for the
@@ -409,6 +502,12 @@ lead_ratio <- sapply(sels, function(s)
     (length(s) * theta_group(s, ctx)))
 stopifnot(all(lead_ratio >= 1 - 1e-12))
 
+# the uncentered participation ratio of the random subset, against the package value
+D_pkg <- eff_dim(sels[["random"]], ctx)
+l_unc <- eigen(ctx[["f"]][sels[["random"]], sels[["random"]]],
+               symmetric = TRUE, only.values = TRUE)$values
+D_unc <- sum(l_unc)^2 / sum(l_unc^2)
+
 #' 
 #' The submatrix is **double-centered** before the eigendecomposition. On a raw
 #' all-positive `f` the leading eigenvalue is at least $n\theta$, because the
@@ -419,20 +518,36 @@ stopifnot(all(lead_ratio >= 1 - 1e-12))
 #' version of @eq-catalogue-deff would only re-measure $\theta$ under a more expensive name -- a mistake
 #' worth naming because it is easy to make and produces a plausible-looking number.
 #' 
+#' The two forms are easy to tell apart. On the random subset of this chapter the package's double-centered
+#' $D_{\text{eff}}$ is `r fmt(D_pkg, 2)` and the uncentered ratio is
+#' `r fmt(D_unc, 2)`, a factor of `r fmt(D_pkg / D_unc, 0)` apart. The `eff_dim` column of the cached redundancy analysis
+#' (@sec-choosing, external data, see above) has mean `r fmt(mean(red[["eff_dim"]]), 2)` and
+#' range `r fmt(min(red[["eff_dim"]]), 2)` to `r fmt(max(red[["eff_dim"]]), 2)`, which is
+#' of the order of the uncentered ratio and not of the package value. That cache was
+#' built at 12000 markers (@sec-choosing) and this chapter runs at 2000, so the comparison crosses
+#' scales, and without a producer script it cannot be confirmed which form the cache
+#' used. That the cached column is uncentered is therefore a reading of the numbers, not a
+#' verified fact, and settling it needs the producer script of that cache.
+#' 
 #' ## Decomposition by heterotic group
 #' 
-#' In hybrid maize the diversity **between** pools is the engine of heterosis and
-#' cannot be spent; the diversity **within** each pool is the fuel for future
-#' progress. @sec-heterosis derives the first half of that sentence -- `GD_BS`
-#' weighted by dominance deviations *is* the divergence half of expected heterosis --
-#' and qualifies it: divergence is worth having where it lands on the dominance loci,
-#' and worth nothing where it does not. @sec-cycles demonstrates the second half.
-#' Following @caballero2002, compute molecular coancestry between lines
+#' The diversity **between** the two heterotic pools and the diversity **within** each
+#' are different resources. With inbred parents, the complete factorial and flat
+#' dominance ($d_k \equiv 1$), the divergence term of expected heterosis is `GD_BS`
+#' itself (@sec-heterosis); with $d_k$ varying across loci it is the $d$-weighted
+#' version, which `GD_BS` does not fix, so divergence is worth having where it lands on
+#' the dominance loci and worth nothing where it does not. The diversity within each
+#' pool is the fuel for future progress, which @sec-cycles demonstrates. The simulated
+#' index of this chapter has no dominance term, so `GD_BS` below is a component of a
+#' partition and not a heterosis measure. Following @caballero2002, compute molecular coancestry between lines
 #' and weight it by each line's usage among the selected hybrids:
 #' 
 #' $$\theta_A = \mathbf{w}_A' \mathbf{f}^{L} \mathbf{w}_A, \qquad
 #'   \theta_B = \mathbf{w}_B' \mathbf{f}^{L} \mathbf{w}_B, \qquad
-#'   \theta_{AB} = \mathbf{w}_A' \mathbf{f}^{L} \mathbf{w}_B.$$ {#eq-catalogue-theta-pools}
+#'   \theta_{AB} = \mathbf{w}_A' \mathbf{f}^{L} \mathbf{w}_B,$$ {#eq-catalogue-theta-pools}
+#' 
+#' with $\mathbf{w}_A$ and $\mathbf{w}_B$ the usage weights of the pool-A and pool-B
+#' lines, each rescaled to sum to 1 within its pool (`line_weights()`, @sec-notation).
 #' 
 #' @tbl-catalogue-theta-pools gives the three for the five selections.
 #' 
@@ -455,7 +570,7 @@ fmt(gdp, 4)
 #' 
 #' Two things to read in @tbl-catalogue-gd-partition. `GD_WI` is zero to machine precision (largest absolute
 #' value across the five selections
-#' `r signif(max(abs(gdp[, "GD_WI"])), 2)`, asserted below $10^{-12}$):
+#' `r fmt_sci(max(abs(gdp[, "GD_WI"])))`, asserted below $10^{-12}$):
 #' the parent lines are
 #' inbred, so there is no within-individual diversity at line level -- the algebra
 #' of @sec-subdivided predicted this, and it is why `GD_WI_hyb`, the heterozygosity
@@ -464,21 +579,103 @@ fmt(gdp, 4)
 #' `r fmt(gd_partition(sels[["random"]], ctx)[["GD_BS"]], 4)` for the random set to
 #' `r fmt(gd_partition(sels[["truncation"]], ctx)[["GD_BS"]], 4)`.
 #' 
-#' The rise is measured; its cause is not isolated here. The simulated index is
-#' additive in the hybrid genotype, a linear combination of marker effects with no
-#' dominance term (@sec-simulating-crosses), so no pair of lines is complementary
-#' beyond the sum of its two parents' values, and complementarity between lines
-#' cannot be the cause. The rise is consistent with concentration on few lines:
-#' truncation's effective number of lines (`ne_lines_pool()`) is
+#' @tbl-catalogue-gdbs-conc compares the three sources. The rise is measured, and the index of this simulation is additive in the two
+#' parents (the chunk below asserts that a regression of the index on the parent lines
+#' has $R^2 = 1$, @sec-simulating-crosses), with no dominance term, so no pair of lines
+#' is complementary beyond the sum of its parents' values and complementarity between
+#' lines cannot be the cause. @sec-era-step6 gives the algebra for the same effect on
+#' the same kind of selection: with $\tilde f = (\theta_A + \theta_B)/2$ and
+#' $\bar f = (\theta_A + 2\theta_{AB} + \theta_B)/4$,
+#' $GD_{BS} = \tilde f - \bar f$ (@caballero2002), and concentrating usage inside one
+#' pool raises $\tilde f$ about twice as fast as $\bar f$ at fixed $\mathbf{f}^L$, so
+#' $GD_{BS}$ rises without any change in the lines. Truncation's effective number of
+#' lines (`ne_lines_pool()`) is
 #' `r fmt(ne_lines_pool(sels[["truncation"]], ctx)[["Ne_lines_A"]], 1)` in pool A and
 #' `r fmt(ne_lines_pool(sels[["truncation"]], ctx)[["Ne_lines_B"]], 1)` in pool B,
 #' against `r fmt(ne_lines_pool(sels[["random"]], ctx)[["Ne_lines_A"]], 1)` and
-#' `r fmt(ne_lines_pool(sels[["random"]], ctx)[["Ne_lines_B"]], 1)` for the random
-#' set, and usage-weighted pool frequencies built on fewer lines carry more
-#' sampling variance, which enters $y_k^2$, the squared between-pool frequency
-#' difference $p_{Ak} - p_{Bk}$ of @eq-het-split, and hence `GD_BS`. A plan with the same
-#' line concentration but lines drawn at random, the comparison that would separate
-#' this mechanism from selection on the index, is not evaluated in this chapter.
+#' `r fmt(ne_lines_pool(sels[["random"]], ctx)[["Ne_lines_B"]], 1)` for the random set.
+#' 
+## -----------------------------------------------------------------------------
+#| label: tbl-catalogue-gdbs-conc
+#| tbl-cap: "Mean $GD_{BS}$ (`gd_partition()`) of subsets of $n$ = 60 hybrids over 300 draws (seed 5), for three sources: random, a random subset of the 625 hybrids; concentration, 60 hybrids drawn at random from the A $\\times$ B crosses of $k_A$ random pool-A lines and $k_B$ random pool-B lines, with no selection on the index and $k_A$, $k_B$ the effective numbers of lines of the truncation selection (`ne_lines_pool()`) rounded up (values in the text); truncation, the top 60 on the index, a single selection and so with no s.e. s_e: s.d. over the 300 draws divided by $\\sqrt{300}$. Teaching scale (25 + 25 lines, 2000 markers, simulation seed 1). Dimensionless, five decimals."
+# the index is additive in the two parents: no pair-specific term
+fit_add <- lm(ctx[["index"]] ~ factor(ctx[["ped"]]$a) + factor(ctx[["ped"]]$b))
+stopifnot(summary(fit_add)$r.squared > 1 - 1e-10)
+
+# concentration alone: n_sel hybrids from the complete factorial of kA random lines
+# of pool A and kB of pool B, with kA, kB the effective numbers of lines of the
+# truncation selection rounded up (equal usage, so slightly LESS concentrated than
+# truncation); no selection on the index
+ne_tr <- ne_lines_pool(sels[["truncation"]], ctx)
+kA <- ceiling(ne_tr[["Ne_lines_A"]]); kB <- ceiling(ne_tr[["Ne_lines_B"]])
+stopifnot(kA * kB >= n_sel)
+lines_A <- sort(unique(ctx[["ped"]]$a)); lines_B <- sort(unique(ctx[["ped"]]$b))
+gdbs <- function(s) gd_partition(s, ctx)[["GD_BS"]]
+R_conc <- 300
+set.seed(5)
+gdbs_random <- replicate(R_conc, gdbs(sample.int(ctx[["N"]], n_sel)))
+set.seed(5)
+gdbs_conc <- replicate(R_conc, {
+  cand <- which(ctx[["ped"]]$a %in% sample(lines_A, kA) &
+                ctx[["ped"]]$b %in% sample(lines_B, kB))
+  gdbs(cand[sample.int(length(cand), n_sel)])
+})
+gdbs_trunc <- gdbs(sels[["truncation"]])
+conc_share <- (mean(gdbs_conc) - mean(gdbs_random)) / (gdbs_trunc - mean(gdbs_random))
+fmt(data.frame(GD_BS = c(random = mean(gdbs_random), concentration = mean(gdbs_conc),
+                         truncation = gdbs_trunc),
+               s_e = c(sd(gdbs_random), sd(gdbs_conc), NA) / sqrt(R_conc)), 5)
+
+#' 
+#' The share depends on how many lines the comparison arm uses, so it was recomputed
+#' under two other matching rules (chunk `gdbs-matching`, same seed and 300 draws):
+#' the numbers of distinct lines in the truncation selection, and a rule roughly midway
+#' between the two (the integer part of the mean of the two pairs of counts).
+#' 
+## -----------------------------------------------------------------------------
+#| label: gdbs-matching
+#| output: false
+# same draw as above for each rule; only (kA, kB) changes
+dist_AB <- c(length(unique(ctx[["ped"]]$a[sels[["truncation"]]])),
+             length(unique(ctx[["ped"]]$b[sels[["truncation"]]])))
+mid_AB  <- floor((c(kA, kB) + dist_AB) / 2)
+share_k <- function(k) {
+  stopifnot(prod(k) >= n_sel)
+  set.seed(5)
+  g <- replicate(R_conc, {
+    cand <- which(ctx[["ped"]]$a %in% sample(lines_A, k[1]) &
+                  ctx[["ped"]]$b %in% sample(lines_B, k[2]))
+    gdbs(cand[sample.int(length(cand), n_sel)])
+  })
+  (mean(g) - mean(gdbs_random)) / (gdbs_trunc - mean(gdbs_random))
+}
+share_dist <- share_k(dist_AB); share_mid <- share_k(mid_AB)
+stopifnot(isTRUE(all.equal(share_k(c(kA, kB)), conc_share)))  # same rule, same number
+
+#' 
+#' Result. The mean `GD_BS` of `r R_conc` random subsets of 60 hybrids is
+#' `r fmt(mean(gdbs_random), 4)`; of `r R_conc` subsets of 60 hybrids drawn from
+#' `r kA` random pool-A lines crossed with `r kB` random pool-B lines, with no
+#' selection on the index, it is `r fmt(mean(gdbs_conc), 4)` (standard error of the mean
+#' `r fmt_sci(sd(gdbs_conc) / sqrt(R_conc))`); the truncation selection has
+#' `r fmt(gdbs_trunc, 4)`. Line concentration alone therefore reproduces
+#' `r fmt(100 * conc_share, 0)` % of the rise from the random mean to truncation under
+#' the rule $k_A \times k_B$ = `r kA` $\times$ `r kB`; with `r mid_AB[1]` $\times$
+#' `r mid_AB[2]` lines the share is `r fmt(100 * share_mid, 0)` %, and with the
+#' `r dist_AB[1]` $\times$ `r dist_AB[2]` distinct lines of the truncation selection
+#' it is `r fmt(100 * share_dist, 0)` %.
+#' Interpretation. The share is not a property of the selection alone: it falls as the
+#' control arm uses more lines. Equal usage over the distinct lines of the truncation
+#' selection is far less concentrated than the truncation's own usage (effective numbers
+#' of lines `r fmt(ne_tr[["Ne_lines_A"]], 1)` and `r fmt(ne_tr[["Ne_lines_B"]], 1)`),
+#' so that rule is a less matched control, and the `r fmt(100 * share_dist, 0)` % is read
+#' as the result of that mismatch, not as a counter-result; which of the three rules is the right control was not settled here. Under the matched
+#' rule most of the rise is the usage-concentration effect of the algebra
+#' of @sec-era-step6, and none of it needs a heterosis reading. What is not isolated is the
+#' remainder, which could be selection on the index favouring lines that are also more
+#' divergent, or the unequal usage of truncation against the equal usage here; this is
+#' one founder draw and one subset size, and the comparison was not run at another
+#' scale.
 #' 
 #' ::: {.callout-note}
 #' ## Global $\theta$ does not say which pool was eroded
@@ -503,7 +700,9 @@ fmt(t(sapply(sels, ne_lines_pool, ctx = ctx)), 2)
 #' $\theta_A$, $\theta_B$ and $\theta_{AB}$ as computed here are **diagnostic**:
 #' reported, not fed back into the objective. The subdivided-population literature
 #' offers a ready-made way to promote them into a tunable target. Total gene
-#' diversity partitions as $H_T = H_S + D_G$ [@nei1973], and
+#' diversity partitions as $H_T = H_S + D_G$ [@nei1973] ($D_G$ is the symbol of
+#' @lopezcortegano2019 for the between-subpopulation component, which they take from
+#' Nei; Nei's own symbol was not checked, only his abstract was read), and
 #' @caballerorodriguezramilo2010 give the allelic analogue $A_T = A_S + D_A$.
 #' @lopezcortegano2019, managing a simulated population subdivided into five
 #' subpopulations, maximise the weighted forms
@@ -513,8 +712,7 @@ fmt(t(sapply(sels, ne_lines_pool, ctx = ctx)), 2)
 #' where $H_S$ and $A_S$ are the within-subpopulation components, $D_G$ and $D_A$
 #' the between-subpopulation components, and $\lambda \in [0, \infty)$ is a weight
 #' chosen by the manager. The subscript $\lambda$ marks this as the **weighted
-#' objective**, distinct from Nei's unweighted total $H_T = H_S + D_G$ stated
-#' above: the two are equal only at $\lambda = 1$. Reading the two subpopulations
+#' objective**, distinct from Nei's unweighted total $H_T = H_S + D_G$: the two are equal only at $\lambda = 1$. Reading the two subpopulations
 #' as the two heterotic pools is this book's analogy, not theirs. $\lambda = 0$ optimises only between-pool divergence -- protects
 #' the divergence term of heterosis, ignores each pool's internal health. $\lambda \to \infty$ optimises
 #' only within-pool diversity -- protects each pool's future options, ignores the
@@ -528,19 +726,22 @@ fmt(t(sapply(sels, ne_lines_pool, ctx = ctx)), 2)
 #' weighting to the analyst.
 #' 
 #' $\lambda$ need not stay a matter of taste when the objective is expected
-#' heterosis. Take two pools with equal weight, which the A $\times$ B structure
-#' imposes, and per locus $H_{S,k} = p_{Ak}q_{Ak} + p_{Bk}q_{Bk}$,
+#' heterosis. Take inbred parents, two pools with equal weight, which the A $\times$ B
+#' complete factorial imposes, and per locus $H_{S,k} = p_{Ak}q_{Ak} + p_{Bk}q_{Bk}$,
 #' $H_{T,k} = 2\bar p_k(1 - \bar p_k)$ and $D_{G,k} = H_{T,k} - H_{S,k} = y_k^2/2$,
-#' with $\bar p_k$ and $y_k$ as in @eq-het-split. The expected heterozygosity of the
-#' A $\times$ B crosses at locus $k$ is then
+#' with $\bar p_k$ and $y_k$ as in @eq-het-split. Averaged over loci,
+#' $H_S = m^{-1}\sum_k H_{S,k}$ and $D_G = m^{-1}\sum_k D_{G,k}$, as in the partition of
+#' @sec-subdivided. By @eq-het-split the expected heterozygosity of the A $\times$ B
+#' crosses at locus $k$ is $H_{T,k} + D_{G,k}$, and since $H_{T,k} = H_{S,k} + D_{G,k}$
+#' it is also
 #' 
 #' $$p_{Ak} + p_{Bk} - 2p_{Ak}p_{Bk} \;=\; H_{T,k} + D_{G,k} \;=\; H_{S,k} + 2D_{G,k}.$$ {#eq-catalogue-het-hs-dg}
 #' 
 #' The shared term of @eq-het-split is $H_{T,k}$, not $H_{S,k}$: it already contains
-#' one $D_{G,k}$. Summed over loci with $d_k \equiv 1$, expected heterosis is
-#' $2(D_G + H_S/2)$, twice $H_\lambda$ of @eq-catalogue-lambda with $\lambda = 1/2$
-#' fixed by the algebra. With dominance deviations $d_k$ (@sec-heterosis),
-#' $\sum_k d_k(H_{S,k} + 2D_{G,k}) = 2\bar d_D\,(D_G + \lambda_d H_S)$, where
+#' one $D_{G,k}$. With $d_k \equiv 1$ the expected heterosis, averaged over loci, is
+#' $H_S + 2D_G = 2(D_G + H_S/2)$, twice $H_\lambda$ of @eq-catalogue-lambda with
+#' $\lambda = 1/2$ fixed by the algebra. With dominance effects $d_k$ (@sec-heterosis),
+#' $m^{-1}\sum_k d_k(H_{S,k} + 2D_{G,k}) = 2\bar d_D\,(D_G + \lambda_d H_S)$, where
 #' 
 #' $$\lambda_d = \frac{\bar d_H}{2\,\bar d_D}, \qquad
 #'   \bar d_H = \frac{\sum_k d_k H_{S,k}}{\sum_k H_{S,k}}, \qquad
@@ -557,24 +758,91 @@ fmt(t(sapply(sels, ne_lines_pool, ctx = ctx)), 2)
 #' frequency-only partition cannot see that because $d$ does not appear in it. $\lambda_d$ is computed from a plan's own
 #' frequencies, so it is a local weight rather than a constant of the population,
 #' and it is the right weight only for expected heterosis as the objective:
-#' @lopezcortegano2019 choose $\lambda$ for conservation, where no such derivation
-#' applies. In the partition of @sec-subdivided, $H_T = GD_T$, $D_G = GD_{BS}$ and
-#' $H_S = GD_T - GD_{BS}$; @eq-catalogue-het-hs-dg is then
-#' $1 - \theta_{AB} = GD_T + GD_{BS}$, @eq-het-theta-ab, which the chunk asserts on
-#' the five selections (@tbl-catalogue-het-identity):
+#' @lopezcortegano2019 run $\lambda = 1$ mainly and also $\lambda = 0$, $0.5$ and
+#' $1000$ (p. 3); they take $0.5$ from Bennewitz and Meuwissen (2006), as a value
+#' suggested to maximise the total genetic variance of a hypothetical quantitative
+#' trait (as reported there; that paper was not read here). The weight $1/2$ is also the
+#' $\lambda_d$ of flat dominance, in the same form $D_G + \lambda H_S$, but the two
+#' arguments differ (the variance of a quantitative trait there, the expected
+#' heterozygosity of the F1 here) and whether they are related is not examined.
+#' In the partition of @sec-subdivided, $H_T = GD_T$, $D_G = GD_{BS}$ and
+#' $H_S = GD_T - GD_{BS} = GD_{WI} + GD_{BI} = GD_{WS}$; @eq-catalogue-het-hs-dg is then
+#' $1 - \theta_{AB} = GD_T + GD_{BS}$, @eq-het-theta-ab, which @sec-heterosis checks on
+#' the full factorial and which the chunk below asserts on the five selections
+#' (@tbl-catalogue-het-identity), together with the per-locus algebra on random
+#' frequencies. $1 - \theta_{AB}$ is the expected heterozygosity of the complete factorial of
+#' the selected lines at their usage weights. It is not the heterozygosity of the pairs
+#' actually kept, $2\,GD_{WI\text{-}hyb}$ (the `F1_het` of @tbl-era-hom-two-levels-het),
+#' which the table gives in its last column.
 #' 
 ## -----------------------------------------------------------------------------
 #| label: tbl-catalogue-het-identity
-#| tbl-cap: "@eq-catalogue-het-hs-dg checked: hybrid_het, $1 - \\theta_{AB}$ from `theta_pools()`; HS_plus_2DG, $H_S + 2D_G = (GD_T - GD_{BS}) + 2\\,GD_{BS}$ from `gd_partition()`. Five selections of $n$ = 60 from the $N$ = 625 hybrids of the teaching scale (25 + 25 lines, 2000 markers, simulation seed 1): random, a random subset (seed 42); trunc_cap, truncation on the index with each line used at most 4 times; greedy_w, greedy on index and coancestry with index weight $\\omega$ = 0.001 (argument `w` of `sel_greedy()`); greedy_div, greedy on coancestry alone ($\\omega$ = 0); truncation, the top 60 on the index. The chunk asserts the two columns equal with `all.equal()`. Dimensionless, six decimals."
+#| tbl-cap: "@eq-catalogue-het-hs-dg at the level of the lines: one_minus_theta_AB, $1 - \\theta_{AB}$ from `theta_pools()`, the expected heterozygosity of the complete factorial of the selected lines at their usage weights; HS_plus_2DG, $H_S + 2D_G = (GD_T - GD_{BS}) + 2\\,GD_{BS}$ from `gd_partition()`; F1_realised, $2\\,GD_{WI\\text{-}hyb}$ from `gd_partition()`, the heterozygosity of the 60 pairs actually kept (not asserted equal to the other two). Five selections of $n$ = 60 from the $N$ = 625 hybrids of the teaching scale (25 + 25 lines, 2000 markers, simulation seed 1): random, a random subset (seed 42); trunc_cap, truncation on the index with each line used at most 4 times; greedy_w, greedy on index and coancestry with index weight $\\omega$ = 0.001 (argument `w` of `sel_greedy()`); greedy_div, greedy on coancestry alone ($\\omega$ = 0); truncation, the top 60 on the index. The chunk asserts the first two columns equal with `all.equal()`, and the per-locus form of @eq-catalogue-het-hs-dg on 10000 random pairs of pool frequencies (seed 3). Dimensionless, six decimals."
 
 het_check <- t(sapply(sels, function(s) {
   tp <- theta_pools(s, ctx); gp <- gd_partition(s, ctx)
-  c(hybrid_het = 1 - tp[["theta_AB"]],
-    HS_plus_2DG = (gp[["GD_T"]] - gp[["GD_BS"]]) + 2 * gp[["GD_BS"]])
+  c(one_minus_theta_AB = 1 - tp[["theta_AB"]],
+    HS_plus_2DG = (gp[["GD_T"]] - gp[["GD_BS"]]) + 2 * gp[["GD_BS"]],
+    F1_realised = 2 * gp[["GD_WI_hyb"]])
 }))
-stopifnot(isTRUE(all.equal(het_check[, "hybrid_het"], het_check[, "HS_plus_2DG"])))
+stopifnot(isTRUE(all.equal(het_check[, "one_minus_theta_AB"], het_check[, "HS_plus_2DG"])))
+
+# the per-locus algebra of @eq-catalogue-het-hs-dg, on random pool frequencies
+set.seed(3)
+pA <- runif(1e4); pB <- runif(1e4)
+HS <- pA * (1 - pA) + pB * (1 - pB)
+DG <- (pA - pB)^2 / 2
+HT <- 2 * ((pA + pB) / 2) * (1 - (pA + pB) / 2)
+stopifnot(isTRUE(all.equal(HT, HS + DG)),
+          isTRUE(all.equal(pA + pB - 2 * pA * pB, HT + DG)),
+          isTRUE(all.equal(pA + pB - 2 * pA * pB, HS + 2 * DG)))
 fmt(het_check, 6)
 
+#' 
+#' The first two columns agree by construction of the partition, so they check
+#' @eq-het-theta-ab on these selections and not an independent measurement. The pairs
+#' actually kept differ from the factorial of their lines by up to
+#' `r fmt(max(abs(het_check[, "one_minus_theta_AB"] - het_check[, "F1_realised"])), 4)`
+#' in heterozygosity across the five selections.
+#' 
+#' @eq-catalogue-lambda-d is an identity, not a definition, so the chunk below asserts
+#' it (@tbl-catalogue-lambda-d). The pool frequencies are those of the selected lines at their usage weights
+#' (`line_weights()`, `simulate_lines()`), and the dominance effects $d_k$ are drawn
+#' from a gamma law, so they vary across loci; with $d_k \equiv 1$,
+#' $\lambda_d = 1/2$ exactly. The identity also equals the closed form
+#' `heterosis_expected()` divided by $m$.
+#' 
+## -----------------------------------------------------------------------------
+#| label: tbl-catalogue-lambda-d
+#| tbl-cap: "$\\lambda_d$ (@eq-catalogue-lambda-d) and the check of the identity behind it, for the five selections of $n$ = 60 from the $N$ = 625 hybrids of the teaching scale (25 + 25 lines, 2000 markers, simulation seed 1; selections as in @tbl-catalogue-offdiag), with pool frequencies from the line usage of each selection (`line_weights()`). lambda_d_flat: flat dominance, $d_k \\equiv 1$; lambda_d_gamma: $d_k$ drawn from a gamma law (shape 2, rate 4, seed 8); relative_error: $|\\mathrm{lhs} - \\mathrm{rhs}|/\\mathrm{lhs}$ of the identity stated with @eq-catalogue-lambda-d, with gamma $d_k$, rounded to four decimals and so printed as 0 (its size is given in the text). The chunk asserts the identity to a relative tolerance of $10^{-12}$ and its equality with `heterosis_expected()`/$m$. Dimensionless."
+Lh <- simulate_lines(book_cfg) / 2           # lines, 0/1; same draw as ctx
+lambda_d_check <- function(s, d) {
+  w <- line_weights(s, ctx)
+  pA_ <- drop(w$A %*% Lh); pB_ <- drop(w$B %*% Lh)
+  HS_ <- pA_ * (1 - pA_) + pB_ * (1 - pB_); DG_ <- (pA_ - pB_)^2 / 2
+  dH <- sum(d * HS_) / sum(HS_); dD <- sum(d * DG_) / sum(DG_)
+  lam <- dH / (2 * dD)
+  lhs <- mean(d * (HS_ + 2 * DG_))
+  rhs <- 2 * dD * (mean(DG_) + lam * mean(HS_))
+  stopifnot(dD > 0, dH >= 0,                 # the conditions stated above
+            isTRUE(all.equal(lhs, rhs, tolerance = 1e-12)),
+            isTRUE(all.equal(lhs, heterosis_expected(pA_, pB_, d) / length(d),
+                             tolerance = 1e-12)))
+  c(lambda_d = lam, relative_error = abs(lhs - rhs) / lhs)
+}
+set.seed(8)
+d_k <- stats::rgamma(ctx[["m"]], shape = 2, rate = 4)
+lam_flat <- t(sapply(sels, lambda_d_check, d = rep(1, ctx[["m"]])))
+stopifnot(all(abs(lam_flat[, "lambda_d"] - 1/2) < 1e-12))
+lam_var <- t(sapply(sels, lambda_d_check, d = d_k))
+fmt(cbind(lambda_d_flat = lam_flat[, "lambda_d"], lambda_d_gamma = lam_var[, "lambda_d"],
+          relative_error = lam_var[, "relative_error"]), 4)
+
+#' 
+#' With flat $d$ the five selections give $\lambda_d = 1/2$ (asserted to 1e-12); with
+#' the gamma $d_k$ (seed 8) $\lambda_d$ ranges from `r fmt(min(lam_var[, "lambda_d"]), 3)` to
+#' `r fmt(max(lam_var[, "lambda_d"]), 3)`, and the identity holds to a relative error of at
+#' most `r fmt_sci(max(lam_var[, "relative_error"]))` (one draw of $d_k$).
 #' 
 #' ## The correct baseline {#sec-baseline}
 #' 
@@ -587,28 +855,34 @@ fmt(het_check, 6)
 #' $$\mathbb{E}[\theta_S] - \theta_N
 #'   = \left(\frac{1}{n} - \frac{1}{N}\right)\left(\bar f_d - \bar f_o\right) > 0,$$ {#eq-catalogue-bias}
 #' 
-#' where the expectation is over random subsets $S$ of size $n$ drawn without
+#' where $\theta_N$ is @eq-catalogue-theta with $S$ the whole population of $N$
+#' candidates, the expectation is over random subsets $S$ of size $n$ drawn without
 #' replacement, and $\bar f_d$, $\bar f_o$ are the population's diagonal and
 #' off-diagonal means; the inequality holds since $\bar f_d > \bar f_o$ whenever
 #' individuals are not clones. For a given, non-random $S$ the means of @eq-catalogue-split are
 #' the set's own and the difference can take either sign: the max-diversity greedy
 #' of this chapter has $\theta_S =$
 #' `r fmt(theta_group(sels[["greedy_div"]], ctx), 5)` against
-#' $\theta_N =$ `r fmt(theta_group(seq_len(ctx$N), ctx), 5)`. A **random**
+#' $\theta_N =$ `r fmt(theta_group(seq_len(ctx[["N"]]), ctx), 5)`. A **random**
 #' sample already looks less diverse than the population it came from, with no
-#' selection whatsoever. The bias is pure sampling and grows as the sample shrinks.
+#' selection whatsoever. The bias is pure sampling and grows as the sample shrinks. @tbl-catalogue-bias
+#' compares the prediction with the mean of 400 random subsets.
 #' 
 ## -----------------------------------------------------------------------------
-fd <- mean(diag(ctx$f)); fo <- mean(ctx$f[upper.tri(ctx$f)])
-predicted_bias <- (1 / n_sel - 1 / ctx$N) * (fd - fo)
+#| label: tbl-catalogue-bias
+#| tbl-cap: "The bias of @eq-catalogue-bias for $n$ = 60 of the $N$ = 625 hybrids of the teaching scale (25 + 25 lines, 2000 markers, simulation seed 1). predicted: $(1/n - 1/N)(\\bar f_d - \\bar f_o)$; observed: mean $\\theta_S$ over 400 random subsets (`set.seed(11)`) minus $\\theta_N$; mc_se: s.d. of the 400 values divided by $\\sqrt{400}$. The chunk asserts $|\\text{observed} - \\text{predicted}| < 4$ mc_se. Dimensionless, four significant digits."
+fd <- mean(diag(ctx[["f"]])); fo <- mean(ctx[["f"]][upper.tri(ctx[["f"]])])
+predicted_bias <- (1 / n_sel - 1 / ctx[["N"]]) * (fd - fo)
 
 set.seed(11)
-th <- replicate(400, theta_group(sample.int(ctx$N, n_sel), ctx))
-observed_bias <- mean(th) - theta_group(seq_len(ctx$N), ctx)
+th <- replicate(400, theta_group(sample.int(ctx[["N"]], n_sel), ctx))
+observed_bias <- mean(th) - theta_group(seq_len(ctx[["N"]]), ctx)
 mc_se <- sd(th) / sqrt(length(th))
 stopifnot(abs(observed_bias - predicted_bias) < 4 * mc_se)
 
-c(predicted = predicted_bias, observed = observed_bias, mc_se = mc_se)
+data.frame(quantity = c("predicted", "observed", "mc_se"),
+           value = formatC(c(predicted_bias, observed_bias, mc_se),
+                           digits = 4, format = "g"))
 
 #' 
 #' @eq-catalogue-bias is exact in expectation. The observed residual is
@@ -628,33 +902,46 @@ c(predicted = predicted_bias, observed = observed_bias, mc_se = mc_se)
 #' The "0 % loss" reference is the **distribution of random subsets of the same
 #' size**:
 #' 
-#' $$\alpha \;=\; \frac{GD_{\text{random}(n)} - GD_S}{GD_{\text{random}(n)}}.$$ {#eq-catalogue-alpha}
+#' $$\alpha \;=\; \frac{GD_{\text{ref}} - GD_S}{GD_{\text{ref}}}.$$ {#eq-catalogue-alpha}
 #' 
-#' Here $GD_{\text{ref}}$ is the mean $GD$ of random subsets of size $n$; the
-#' $GD_{\text{random}(n)}$ of the equation, the printed `GD_reference` of the chunk
-#' below, and the code's `gd_ref` are the same quantity.
+#' Here $GD_{\text{ref}}$ (`gd_ref` in the code) is the mean $GD$ of random subsets of
+#' size $n$.
 #' $\alpha = 0$ means "as diverse as a random sample of the same size";
 #' $\alpha < 0$ means more diverse than chance. Resampling also delivers the
-#' standard deviation, and hence a z-score for any strategy.
+#' standard deviation, and hence a z-score for any strategy. @tbl-catalogue-gd-baseline
+#' gives the baseline of this chapter's pool.
 #' 
 ## -----------------------------------------------------------------------------
-null <- null_distribution(ctx, n_sel, B = 400, B_full = 1000)
-c(GD_population = gene_diversity(seq_len(ctx$N), ctx),
-  GD_reference  = null$gd_ref,
-  sd            = null$gd_sd,
-  apparent_loss_if_wrong_baseline =
-    (gene_diversity(seq_len(ctx$N), ctx) - null$gd_ref) /
-     gene_diversity(seq_len(ctx$N), ctx))
+#| label: tbl-catalogue-gd-baseline
+#| tbl-cap: "The baseline $GD_{\\text{ref}}$ of this chapter's pool, from `null_distribution()` with `B` = 2000 random subsets of $n$ = 60 (seed 7) of the $N$ = 625 hybrids of the teaching scale (25 + 25 lines, 2000 markers, simulation seed 1). GD_population: $GD$ of all 625 hybrids; GD_ref: mean $GD$ of the subsets; sd: their s.d.; gap_se: sd divided by $\\sqrt{2000}$, the Monte Carlo standard error of GD_ref; apparent_loss_percent_if_wrong_baseline: $100(\\text{GD\\_population} - \\text{GD\\_ref})/\\text{GD\\_population}$, in percent. Dimensionless except the last row, in percent; five significant digits."
+# B = 2000 cheap and B_full = 1000 full draws, seed 7: the null of @sec-genomic-era
+null <- null_distribution(ctx, n_sel, B = 2000, B_full = 1000)
+# the null and the caps stated in the captions of this chapter
+stopifnot(book_cfg$seed == 1, book_cfg$n_pool_A == 25, book_cfg$n_pool_B == 25,
+          nrow(null$cheap) == 2000, nrow(null$full) == 1000,
+          max_line_use(sels[["trunc_cap"]], ctx) == 4)
+gd_pop <- gene_diversity(seq_len(ctx[["N"]]), ctx)
+gdb <- c(GD_population = gd_pop,
+         GD_ref        = null$gd_ref,
+         sd            = null$gd_sd,
+         gap_se        = null$gd_sd / sqrt(nrow(null$cheap)),
+         apparent_loss_percent_if_wrong_baseline = 100 * (gd_pop - null$gd_ref) / gd_pop)
+data.frame(quantity = names(gdb), value = formatC(gdb, digits = 5, format = "g"),
+           row.names = NULL)
 
 #' 
-#' That last number is what a programme would report as a diversity loss if it
-#' compared against the full pool. It is entirely a sampling artefact.
+#' The last row of @tbl-catalogue-gd-baseline is what a programme would report as a diversity loss, in percent, if it
+#' compared against the full pool. It is entirely a sampling artefact, and it is the
+#' quantity that @tbl-gd-baseline of @sec-simulating-crosses measures on its own subsets,
+#' whose percentage differs from this one by the draw of the subsets. `gap_se` is the
+#' Monte Carlo standard error of $GD_{\text{ref}}$, the s.d. of the subsets divided by the square
+#' root of their number.
 #' @tbl-catalogue-alpha gives $\alpha$ for the five selections against the
 #' correct reference.
 #' 
 ## -----------------------------------------------------------------------------
 #| label: tbl-catalogue-alpha
-#| tbl-cap: "Diversity loss $\\alpha$ (@eq-catalogue-alpha), from `alpha_loss()`, against $GD_{\\text{random}(n)}$ estimated by `null_distribution()` as the mean $GD$ of 400 random subsets of $n$ = 60 (seed 7). Five selections of $n$ = 60 from the $N$ = 625 hybrids of the teaching scale (25 + 25 lines, 2000 markers, simulation seed 1): random, a random subset (seed 42); trunc_cap, truncation on the index with each line used at most 4 times; greedy_w, greedy on index and coancestry with index weight $\\omega$ = 0.001 (argument `w` of `sel_greedy()`); greedy_div, greedy on coancestry alone ($\\omega$ = 0); truncation, the top 60 on the index. Negative values are more diverse than the random reference. Proportion, five decimals."
+#| tbl-cap: "Diversity loss $\\alpha$ (@eq-catalogue-alpha), from `alpha_loss()`, against $GD_{\\text{ref}}$ estimated by `null_distribution()` as the mean $GD$ of 2000 random subsets of $n$ = 60 (`B` = 2000, seed 7). Five selections of $n$ = 60 from the $N$ = 625 hybrids of the teaching scale (25 + 25 lines, 2000 markers, simulation seed 1): random, a random subset (seed 42); trunc_cap, truncation on the index with each line used at most 4 times; greedy_w, greedy on index and coancestry with index weight $\\omega$ = 0.001 (argument `w` of `sel_greedy()`); greedy_div, greedy on coancestry alone ($\\omega$ = 0); truncation, the top 60 on the index. Negative values are more diverse than the random reference. Proportion, five decimals."
 fmt(data.frame(alpha = sapply(sels, alpha_loss, ctx = ctx, gd_ref = null$gd_ref)), 5)
 
 #' 
@@ -671,18 +958,21 @@ fmt(data.frame(alpha = sapply(sels, alpha_loss, ctx = ctx, gd_ref = null$gd_ref)
 #' constraint restricts nothing and you have bought a false sense of control.
 #' 
 ## -----------------------------------------------------------------------------
+#| label: attainable-alpha
+#| output: false
+# values used inline in the next paragraph
 attainable <- alpha_loss(sel_truncation(ctx, n_sel), ctx, null$gd_ref)
-c(alpha_truncation     = attainable,
-  intended_limit       = 0.05,
-  constraint_is_active = attainable > 0.05)
 
 #' 
 #' At this book's teaching scale (25 + 25 lines, 2000 markers, $n =$ `r n_sel`)
 #' truncation reaches $\alpha =$ `r fmt(100 * attainable, 2)` %, so a 5 % limit
 #' would `r if (attainable < 0.05) "be inoperative" else "bind"`. The value at the
-#' production scale of `sim_config` is not computed in this chapter, and this one
-#' does not transfer to it. The correct procedure is to trace the $\alpha$-versus-gain
-#' frontier and choose its knee, which is @sec-combinatorial.
+#' package's production scale (71 + 71 lines, 25000 markers, as in A8 of
+#' @sec-era-programme) and at the `sim_config` default (50 + 50 lines, 5000 markers) is
+#' not computed in this chapter, and this one does not transfer to either. The correct
+#' procedure is to trace the $\alpha$-versus-gain frontier and choose its knee:
+#' @sec-ocs shows the frontier of the greedy over the merit weight and
+#' @sec-combinatorial gives the recipe.
 #' 
 #' ## Every metric against the null {#sec-catalogue-null}
 #' 
@@ -691,9 +981,11 @@ c(alpha_truncation     = attainable,
 #' 
 ## -----------------------------------------------------------------------------
 #| label: tbl-catalogue-z
-#| tbl-cap: "z-score of each metric for each selection against the random-subset null of `null_distribution()`: (value $-$ mean over 1000 random subsets of the same size) / s.d. over those subsets (`B_full` = 1000, seed 7), from `discriminatory_power()`. Five selections of $n$ = 60 from the $N$ = 625 hybrids of the teaching scale (25 + 25 lines, 2000 markers, simulation seed 1): random, a random subset (seed 42); trunc_cap, truncation on the index with each line used at most 4 times; greedy_w, greedy on index and coancestry with index weight $\\omega$ = 0.001 (argument `w` of `sel_greedy()`); greedy_div, greedy on coancestry alone ($\\omega$ = 0); truncation, the top 60 on the index. GD: gene diversity (@eq-catalogue-gd-he); Ns: status number (@eq-catalogue-ns); Ne_parents: @eq-catalogue-ne-par; F_hom, F_drift: the homozygosity and drift lenses of @sec-genomic-era; alleles_lost: @eq-catalogue-alleles-lost; ENE, ANE: @eq-catalogue-ene-ane. One decimal; Monte Carlo error of the s.d. not shown."
+#| tbl-cap: "z-score of each metric for each selection against the random-subset null of `null_distribution()`: (value $-$ mean over 1000 random subsets of the same size) / s.d. over those subsets, from `discriminatory_power()` with `null_distribution(ctx, 60, B = 2000, B_full = 1000, seed = 7)`, the null of @tbl-era-signature-z; the 1000 full draws depend on `B` because the cheap draws consume the random stream first. Five selections of $n$ = 60 from the $N$ = 625 hybrids of the teaching scale (25 + 25 lines, 2000 markers, simulation seed 1): random, a random subset (seed 42); trunc_cap, truncation on the index with each line used at most 4 times; greedy_w, greedy on index and coancestry with index weight $\\omega$ = 0.001 (argument `w` of `sel_greedy()`); greedy_div, greedy on coancestry alone ($\\omega$ = 0); truncation, the top 60 on the index. GD: gene diversity (@eq-hp-gd); Ns: status number (@eq-catalogue-ns); Ne_parents: @eq-catalogue-ne-par; F_hom, F_drift: the homozygosity and drift lenses of @sec-genomic-era; alleles_lost: @eq-catalogue-alleles-lost; ENE, ANE: @eq-catalogue-ene-ane. One decimal; the text gives the Monte Carlo error of the truncation z on GD and F_drift and the relative error that applies to each z."
 tab <- evaluate(sels, ctx, null$gd_ref)
 zt <- discriminatory_power(tab, null)
+# relative s.e. of a sample s.d. from B_full draws, normal approximation
+rel_se_sd <- 1 / sqrt(2 * (nrow(null[["full"]]) - 1))
 fmt(as.data.frame(zt[
   , c("GD", "Ns", "Ne_parents", "F_hom", "F_drift", "alleles_lost", "ENE", "ANE")]), 1)
 
@@ -702,11 +994,60 @@ fmt(as.data.frame(zt[
 #' `r fmt(zt["truncation", "F_drift"], 1)` on `F_drift` against
 #' `r fmt(zt["truncation", "GD"], 1)` on `GD`: the lens the constraint does not pin
 #' (@sec-genomic-era) separates it from random subsets more strongly than the lens
-#' it does. The capped truncation shows the other pattern: $z =$
-#' `r fmt(zt["trunc_cap", "GD"], 1)` on `GD`, close to the random subsets, while
-#' `ANE` is at `r fmt(zt["trunc_cap", "ANE"], 1)` and `alleles_lost` at
-#' `r fmt(zt["trunc_cap", "alleles_lost"], 1)`. A constraint on `GD` alone would not
-#' flag it. Every $z$ in the table divides by a standard deviation estimated from
-#' `r nrow(null[["full"]])` random subsets (`B_full`), so each carries a Monte Carlo
-#' error that this chapter does not report. That observation is what @sec-choosing turns into a
+#' it does, on this founder draw. The capped truncation shows another pattern: $z =$
+#' `r fmt(zt["trunc_cap", "GD"], 1)` on `GD`, while `ANE` is at
+#' `r fmt(zt["trunc_cap", "ANE"], 1)` and `alleles_lost` at
+#' `r fmt(zt["trunc_cap", "alleles_lost"], 1)`.
+#' 
+#' Each $z$ divides by a standard deviation estimated from
+#' `r nrow(null[["full"]])` random subsets (`B_full`). If the null distribution is
+#' close to normal, which this chapter did not check, the relative standard error of
+#' that standard deviation is $1/\sqrt{2(B_{full} - 1)}$ =
+#' `r fmt(100 * rel_se_sd, 1)` %, so a $z$ of
+#' `r fmt(zt["truncation", "GD"], 1)` carries a standard error of about
+#' `r fmt(abs(zt["truncation", "GD"]) * rel_se_sd, 1)` and a $z$ of
+#' `r fmt(zt["truncation", "F_drift"], 1)` one of about
+#' `r fmt(abs(zt["truncation", "F_drift"]) * rel_se_sd, 1)`, before the
+#' error of the null mean, which adds $1/\sqrt{B_{full}}$ =
+#' `r fmt(1 / sqrt(nrow(null[["full"]])), 2)` in $z$ units. @tbl-era-signature-z of
+#' @sec-genomic-era is computed with the same null call, and its truncation row is the
+#' same selection.
+#' 
+## -----------------------------------------------------------------------------
+#| label: tbl-catalogue-seeds-z
+#| tbl-cap: "Twenty founder draws (data seeds 1 to 20; `simulate_data()` with the book configuration and `seed` replaced), $n$ = 60 of $N$ = 625 hybrids, 25 + 25 lines, 2000 markers. Each z is against its own random-subset null (`null_distribution()`, `B` = 200, `B_full` = 300, seed 7), in null standard deviations: GD_cap, ANE_cap and lost_cap, the capped truncation (`sel_truncation_cap()`, each line used at most 4 times) on `GD`, `ANE` and `alleles_lost`; GD_trunc, Ne_trunc and Fdrift_trunc, the truncation on the index (`sel_truncation()`) on `GD`, `Ne_parents` and `F_drift`. Rows: smallest, median and largest z over the 20 draws. The null here is smaller than the 2000 + 1000 draws of @tbl-catalogue-z."
+seed_z <- t(vapply(1:20, function(sd_) {
+  cx <- simulate_data(utils::modifyList(book_cfg, list(seed = sd_)))
+  nlf <- null_distribution(cx, n_sel, B = 200, B_full = 300, seed = 7)[["full"]]
+  zz <- function(i, v) (metrics_full(i, cx)[[v]] - mean(nlf[, v])) / sd(nlf[, v])
+  tc <- sel_truncation_cap(cx, n_sel); tr <- sel_truncation(cx, n_sel)
+  c(GD_cap = zz(tc, "GD"), ANE_cap = zz(tc, "ANE"), lost_cap = zz(tc, "alleles_lost"),
+    GD_trunc = zz(tr, "GD"), Ne_trunc = zz(tr, "Ne_parents"),
+    Fdrift_trunc = zz(tr, "F_drift"))
+}, numeric(6)))
+fmt(rbind(min = apply(seed_z, 2, min), median = apply(seed_z, 2, stats::median),
+          max = apply(seed_z, 2, max)), 2)
+
+#' 
+#' Result. Over the twenty draws the $z$ of the capped truncation on `GD` ranges from
+#' `r fmt(min(seed_z[, "GD_cap"]), 2)` to `r fmt(max(seed_z[, "GD_cap"]), 2)`
+#' (median `r fmt(median(seed_z[, "GD_cap"]), 2)`) and exceeds 2 in absolute value on
+#' `r sum(abs(seed_z[, "GD_cap"]) > 2)` of 20; its $z$ on `ANE` ranges from
+#' `r fmt(min(seed_z[, "ANE_cap"]), 1)` to `r fmt(max(seed_z[, "ANE_cap"]), 1)` and
+#' exceeds 2 on `r sum(seed_z[, "ANE_cap"] > 2)` of 20. For the truncation on the
+#' index, $|z|$ of `F_drift` exceeds $|z|$ of `GD` on
+#' `r sum(abs(seed_z[, "Fdrift_trunc"]) > abs(seed_z[, "GD_trunc"]))` of 20 draws and
+#' $|z|$ of `Ne_parents` is below $|z|$ of `GD` on
+#' `r sum(abs(seed_z[, "Ne_trunc"]) < abs(seed_z[, "GD_trunc"]))` of 20.
+#' 
+#' Interpretation. The capped truncation is far from the random subsets on `ANE` on
+#' every draw, and on `GD` its distance is small relative to that, but $|z|$ exceeds 2 on
+#' `r sum(abs(seed_z[, "GD_cap"]) > 2)` of 20 draws. That a constraint on `GD` alone
+#' would not flag it holds on the draw of @tbl-catalogue-z, where $z =$
+#' `r fmt(zt["trunc_cap", "GD"], 1)`, and on `r sum(abs(seed_z[, "GD_cap"]) <= 2)` of 20
+#' draws at $|z| \le 2$; it fails on the rest. The robust statement is the contrast in
+#' magnitude between `GD` and `ANE`. What limits it is the unit of replication, the
+#' founder draw (20 here), the one subset size (60), the one scale (25 + 25 lines, 2000
+#' markers) and the smaller null (300 full draws, so each $z$ here is noisier than one
+#' of @tbl-catalogue-z). That contrast between lenses is what @sec-choosing turns into a
 #' recommendation.

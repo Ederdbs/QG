@@ -83,7 +83,7 @@ knitr::kable(data.frame(
   Meaning = c("candidate hybrids in the pool",
               "hybrids selected",
               "parent lines",
-              "markers",
+              "markers; written $N_{SNP}$ in @meuwissen2020 and in the joint-allocation table below",
               "within-individual reference-allele frequency of individual i at marker k, in 0/0.5/1",
               "hybrid marker matrix, N x m",
               "hybrid dosage matrix, N x m, 0/1/2; $\\mathbf{X} = \\mathbf{M}^H/2$",
@@ -270,7 +270,7 @@ knitr::kable(data.frame(
              "$\\sigma^2_{GCA_A}$, $\\sigma^2_{GCA_B}$", "$F^\\star_k$", "$\\rho_k$",
              "$H_T$, $H_S$, $D_G$", "$A_T$, $A_S$, $D_A$",
              "$\\lambda_d$, $\\bar d_H$, $\\bar d_D$"),
-  Meaning = c("dominance deviation at locus $k$",
+  Meaning = c("dominance effect at locus $k$",
               "additive effect at locus $k$; enters the GCA, not the SCA (@sec-mating-estimation)",
               "centred 0/1 genotype of pool-A line $i$ / pool-B line $j$ at locus $k$: $u_{ik} - p_{Ak}$, $v_{jk} - p_{Bk}$",
               "mid-parent heterosis of hybrid $i$; $\\sum_k d_k$ over its heterozygous loci",
@@ -320,16 +320,21 @@ knitr::kable(data.frame(
 ## -----------------------------------------------------------------------------
 #| echo: false
 knitr::kable(data.frame(
-  Symbol = c("$F_{hom}$", "$F_{drift}$", "$F_{IBD}$", "$F_{ROH}$", "$\\text{cov}$", "$\\kappa$"),
-  Lens = c("homozygosity", "drift", "identity by descent", "hybrid", "-", "-"),
+  Symbol = c("$F_{hom}$", "$F_{drift}$", "$F_{IBD}$", "$F_{ROH}$", "$\\text{cov}$", "$\\kappa$",
+             "$\\tilde p_A$, $\\tilde p_B$, $\\bar p$", "$G_{ST}$", "$\\varepsilon$"),
+  Lens = c("homozygosity", "drift", "identity by descent", "hybrid", "-", "-", "-", "-", "-"),
   Definition = c("$1 - \\overline{H_t/H_0}$; **can be negative**",
                  "$\\overline{\\delta p^2 / [p_0(1-p_0)]}$; never negative",
                  "segments inherited from a defined base",
                  "genome fraction in runs of homozygosity",
                  "$2\\,\\text{cov}(\\delta p/s,\\,(p_0 - \\tfrac12)/s) = F_{hom} - F_{drift}$",
-                 "panel statistic $\\overline{(p_0 - \\tfrac12)^2/[p_0(1-p_0)]}$ (@sec-genomic-era); not the aggregate genotype $W$"),
+                 "panel statistic $\\overline{(p_0 - \\tfrac12)^2/[p_0(1-p_0)]}$ (@sec-genomic-era); not the aggregate genotype $W$",
+                 "pool-A and pool-B reference-allele frequencies weighted by the line usage a selection induces, and their merged mean $\\bar p = (\\tilde p_A + \\tilde p_B)/2$ (inbred parents, A2 of @sec-genomic-era); the frequency `colMeans(X[idx, ])` returns",
+                 "between-pool share of gene diversity [@nei1973], $GD_{BS}/GD_T$; the $F_{ST}$ of @sec-genomic-era is this quantity",
+                 "ridge added to the diagonal of a relationship matrix before inversion (0.01 in @meuwissen2020); not the tolerance `eps` of `freq_metrics()`"),
   `Function` = c("`freq_metrics()`", "`freq_metrics()`", "requires pedigree + linkage",
-                 "not implemented", "`freq_metrics()$cov_diag`", "-"),
+                 "not implemented", "`freq_metrics()$cov_diag`", "-",
+                 "`freq_metrics()`", "`gd_partition()`, `s1_monitor()`", "-"),
   check.names = FALSE))
 
 #' 
@@ -340,7 +345,7 @@ knitr::kable(data.frame(
 knitr::kable(data.frame(
   Symbol = c("$u_i$", "$\\alpha$", "$\\alpha_{\\max}$", "$\\mathbf{c}$",
              "$\\mathbf{w}$", "$k_a$", "$\\lambda$", "$\\sigma^2_{DH}$", "UC",
-             "$GD_{\\text{random}(n)}$", "$\\omega$"),
+             "$GD_{\\text{ref}}$", "$\\omega$"),
   Meaning = c("multi-trait index of hybrid i",
               "$(GD_{\\text{ref}} - GD_S)/GD_{\\text{ref}}$; negative means more diverse than chance",
               "the diversity budget -- a policy decision",
@@ -350,7 +355,7 @@ knitr::kable(data.frame(
               "weight on the coancestry penalty in continuous OCS -- **not** the within/between weight of the heterosis table",
               "progeny variance of a DH family",
               "usefulness criterion, $\\mu + i h \\sigma$",
-              "mean $GD$ of random subsets of size $n$, the reference of $\\alpha$; the same quantity as $GD_{\\text{ref}}$ (@eq-catalogue-alpha)",
+              "mean $GD$ of random subsets of size $n$, the reference of $\\alpha$ (@eq-catalogue-alpha); `gd_ref` in the code",
               "index weight of the greedy score $\\omega\\,u_i - \\theta$ (written $w$ in @sec-combinatorial); not the line-usage weights $\\mathbf{w}$"),
   `Function` = c("`ctx$index`", "`alpha_loss()`", "argument to `stage2_select()`",
                  "`ocs_quadprog()`", "`line_weights()`, `line_usage_freq()`",
@@ -403,15 +408,15 @@ knitr::kable(data.frame(
 ## -----------------------------------------------------------------------------
 #| echo: false
 knitr::kable(data.frame(
-  Symbol = c("$N$", "$n$", "$p$", "$H$", "$H_t$", "$D$", "$N_{eq}$",
+  Symbol = c("$N$", "$n$", "$p$", "$H$", "$h_t$", "$D$", "$N_{eq}$",
              "$L$ (Morgans)", "$A_t$", "$d$", "$r$", "$g$", "$z_i$", "$w_i$",
              "$\\beta$", "$N_{90}$", "$k$", "$P$", "$N_{95}(k)$",
-             "$h_{res}$", "$n_{loc}$"),
+             "$h_{res}$", "$n_{loc}$", "$n_{rep}$"),
   Meaning = c("F2 plants, equal to the number of F4 lines under SSD",
-              "selfed F1 plants",
+              "F1 plants",
               "frequency of P1 ancestry at a marker in the panel",
-              "panel heterozygosity; 0.125 in an F4",
-              "heterozygosity of the parent whose meiosis produces generation t + 1",
+              "panel heterozygosity, the observed heterozygosity $H_o$ of @sec-hp-popgen averaged over plants and loci; 0.125 in an F4",
+              "heterozygosity of the parent whose meiosis produces generation t + 1 (not the $H_t$ of @eq-hp-drift)",
               "diversity retained, $\\overline{2p(1-p)}/0.5$; $\\mathrm{E}[D] = 1 - (1-H)/N$ without distortion (@eq-sizing-div)",
               "$(1-H)/(1-D)$ -- a communication device, **not** a Wright Ne",
               "total map length",
@@ -427,14 +432,16 @@ knitr::kable(data.frame(
               "probability that at least one F4 line is P2P2 at all k loci",
               "plants giving $P \\geq 0.95$ without distortion (@eq-sizing-n95)",
               "fraction of loci still heterozygous in each parent",
-              "independent loci polymorphic between the parents"),
+              "independent loci polymorphic between the parents",
+              "replicate populations simulated per $N$ and scheme (the `n_rep` column of the cached grid)"),
   `Function` = c("`run_scheme(n_F2 =)`", "`f1_sizing(n_F1 =)`", "`panel_freq()`",
                  "`panel_het()`", "-", "`diversity_retained()`", "`n_equivalent()`",
                  "`map$total_cM / 100`", "`expected_junctions()`",
                  "`build_map(spacing_cM =)`", "`build_map()`", "-", "-",
                  "`bulk_weights()`", "`f2_opt$beta_bulk`", "-",
                  "`multilocus_recovery(k =)`", "`multilocus_recovery()`", "-",
-                 "`f1_sizing(h_res =)`", "`f1_sizing(n_loci_eff =)`"),
+                 "`f1_sizing(h_res =)`", "`f1_sizing(n_loci_eff =)`",
+                 "`n_rep` (cached grid)"),
   check.names = FALSE))
 
 #' 
@@ -451,7 +458,7 @@ knitr::kable(data.frame(
 #| echo: false
 knitr::kable(data.frame(
   Symbol = c("$k$", "$s$", "$D$", "$\\text{IBD}_E$", "$d$", "$r$", "$L$",
-             "$P_{\\text{same}}$", "$q$", "$n$", "$N$", "$P$", "$\\nu$"),
+             "$P_{\\text{same}}$", "$q$", "$n$", "$N$", "$n_{\\text{keep}}$", "$P$", "$\\nu$"),
   Meaning = c("target genes introgressed from one donor, coupling phase, unlinked to each other",
               "fraction of the genome donor and elite share by descent",
               "donor dosage of a plant; $(1/2)^{t+1}$ in expectation after t backcrosses without selection",
@@ -463,12 +470,13 @@ knitr::kable(data.frame(
               "per-plant probability of the wanted genotype at all k targets",
               "plants genotyped in one generation or step",
               "plants per backcross generation in a uniform schedule",
+              "number of homozygotes (BC3F2 plants or DH lines) required at the fixation stage (3)",
               "probability required of a sizing criterion (0.95)",
               "shape of the gamma renewal model of crossover interference; not modelled"),
   `Function` = c("`target_indices(k =)`", "`make_shared_ibd(s =)`, `run_bc_program(s =)`",
                  "`expected_donor()`", "`expected_ibd()`", "`build_map(spacing_cM =)`",
                  "`haldane_r()`", "-", "`p_same_segment()`", "`sizing_table()`",
-                 "`n_for_count()`", "`run_bc_program(n_sched =)`", "`n_for_count(P =)`", "-"),
+                 "`n_for_count()`", "`run_bc_program(n_sched =)`", "`sizing_table(n_keep =)`", "`n_for_count(P =)`", "-"),
   check.names = FALSE))
 
 #' 
@@ -575,7 +583,7 @@ knitr::kable(data.frame(
               "frequency of the allele coded 1 at locus $k$ among pool-A / pool-B lines; their mean is $\\bar p_k$ of the heterosis table. In @sec-simulating-crosses, the Balding-Nichols draws of @eq-balding-nichols",
               "ancestral frequency of the allele coded 1 at locus $k$, drawn uniform on $[0.05, 0.95]$; the expectation of $p_{Ak}$ and of $p_{Bk}$ under @eq-balding-nichols (@sec-simulating-crosses)",
               "0/1 allele carried at locus $k$ by the pool-A / pool-B parent of a hybrid; the $u_{ik}$, $v_{jk}$ of @sec-heterosis-gca-sca without the line index",
-              "dominance deviation at locus k",
+              "dominance effect at locus k",
               "inbreeding depression, $2F\\sum d_k p_k q_k$; a **constant** with fully inbred parents",
               "aggregate genotype (breeding objective), $\\mathbf{a}'\\mathbf{g}$",
               "vector of the traits' genetic values, one entry per trait (not over individuals); its predictor. Distinct from the GCA $g^A_i$, $g^B_j$",
@@ -613,12 +621,12 @@ knitr::kable(data.frame(
   Meaning = c("0/1/2 dosage of individual $i$ at QTL $k$, an entry of $\\mathbf{M}^H$ -- **not** the 0/0.5/1 entry of $\\mathbf{X}$",
               "genetic value of individual $i$ under AlphaSimR's `TraitAD` (the $G(\\mathbf{x})$ above on the 0/1/2 dosage); of the F1 between inbred lines $i$ and $j$ -- **not** the Caballero-Toro $G_i$",
               "intercept of that genetic value",
-              "dominance degree $d_k / |a_k|$, drawn from $N(\\texttt{meanDD}, \\texttt{varDD})$",
+              "dominance degree $d_k / \\lvert a_k \\rvert$, drawn from $N(\\texttt{meanDD}, \\texttt{varDD})$",
               "population mean under Hardy-Weinberg proportions; mean of selfed generation $F_t$",
               "mean of $H_{ij}$ over the A x B factorial: the $\\mu$ of the heterosis table, renamed because $\\mu_0$ is the intercept there",
               "average effect of a gene substitution, $a_k + d_k(q_k - p_k)$; the same at pool-B frequencies, $a_k + d_k(1 - 2p_{Bk})$ -- **not** the diversity-loss budget $\\alpha$ nor the Caballero-Toro $\\alpha_i$",
               "testcross estimate of the GCA $g^A_i$",
-              "testers, locations, and the first-order accuracy of $\\hat g^A_i$: the $k$, $r$, $\\rho$ of the mating-design table, $k$ renamed because it indexes QTL there",
+              "testers, locations, and the first-order accuracy of $\\hat g^A_i$: the $k$, $r$, $\\rho$ of the mating-design table, $k$ renamed because it indexes QTL there; in the breeder's-equation subsection $r$ is instead the accuracy against the breeding value, which is the $r$ of @eq-response-breeders only if $d = 0$",
               "sample variance of $g^A_i$ over the candidates, and the SCA and error terms of $\\rho(t, r)$",
               "candidate pool-A lines; pool-B lines the testers are drawn from"),
   check.names = FALSE))
@@ -665,7 +673,7 @@ knitr::kable(data.frame(
 #' 
 #' **Mid-parent heterosis.** The F1's value minus the mean of its two parents. With
 #' inbred parents the additive contributions cancel exactly, leaving only the
-#' dominance deviations at the F1's heterozygous loci.
+#' dominance effects at the F1's heterozygous loci.
 #' 
 #' **General and specific combining ability (GCA, SCA).** The two halves of a
 #' hybrid's value that a two-way layout separates: what a line contributes to every
