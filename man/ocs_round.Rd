@@ -49,9 +49,10 @@ second -- is that of Waldmann (2025).
 best-index one that respects `alpha_max`. The exchange rate is an internal
 detail; the budget is the interface, as everywhere else in this package.
 
-Its distinguishing feature is the certificate. `bound` is the Lagrangian
-bound of [ocs_bound], so `gap` is a genuine upper bound on what any method
-could still gain at this budget. Note that the relaxation carries no
+Its distinguishing feature is the bound. `bound` is the Lagrangian
+bound of [ocs_bound], so `gap` is the distance to an upper bound on what any
+method could still gain at this budget, valid when the bound's `converged`
+flag is `TRUE` (a stalling criterion, not a proof of convergence). Note that the relaxation carries no
 per-line cap, so with `max_use` set the bound stays valid but goes loose: it
 bounds a problem strictly easier than the one solved.
 }

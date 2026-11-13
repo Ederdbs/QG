@@ -16,12 +16,17 @@
 #' @export
 sel_random <- function(ctx, n_sel) sample.int(ctx$N, n_sel)
 
-# Ceiling on gain, floor on diversity.
+# Ceiling on gain: the maximum-index plan. Its diversity loss (alpha_trunc) is
+# the loss at the unconstrained optimum, not a floor on diversity: a budget at or
+# above it is slack, and other subsets can lose more.
 
 #' Truncation selection on the index
 #'
-#' The ceiling on gain and the floor on diversity: take the top `n_sel` hybrids
-#' by index and ignore relatedness entirely.
+#' The ceiling on gain: take the top `n_sel` hybrids by index and ignore
+#' relatedness entirely. It is the plan of maximum index; its diversity loss
+#' is the loss at that unconstrained optimum, so a budget `alpha_max` at or
+#' above it is slack. It is not the largest loss over all subsets, hence not a
+#' floor on diversity.
 #'
 #' @inheritParams sel_random
 #' @return An integer vector of selected row indices.
@@ -58,8 +63,8 @@ sel_truncation_cap <- function(ctx, n_sel, cap = ceiling(2 * n_sel / ctx$n_lines
 
 # Greedy with incremental updates: adding j changes the submatrix total by
 # 2*s_j + f_jj, where s_j = sum of f[i,j] over the already-chosen. O(N) per step.
-# Score = w*index - theta.  w = 0 -> pure diversity (ceiling on diversity,
-# ~0 gain). w > 0 -> discrete OCS heuristic. w -> Inf converges to truncation.
+# Score = w*index - theta.  w = 0 -> pure diversity (the most diverse plan the
+# greedy builds, ~0 gain; no certificate that it is the most diverse subset). w > 0 -> discrete OCS heuristic. w -> Inf converges to truncation.
 
 #' Greedy selection with incremental coancestry updates
 #'
@@ -68,11 +73,18 @@ sel_truncation_cap <- function(ctx, n_sel, cap = ceiling(2 * n_sel / ctx$n_lines
 #' rather than `O(n^2)`.
 #'
 #' The score is `w * index - theta`. With `w = 0` this is pure diversity (the
-#' ceiling on diversity, near-zero gain); `w > 0` makes it a discrete
+#' most diverse plan the greedy builds, near-zero gain; no certificate that it
+#' is the most diverse subset); `w > 0` makes it a discrete
 #' optimal-contribution heuristic; `w -> Inf` converges to [sel_truncation].
 #'
-#' Greedy solutions are also what warm-starts [sel_de]; without them the
-#' differential evolution does not beat greedy at any affordable budget.
+#' Greedy solutions are also what warm-starts [sel_de]. In the book's 20-seed
+#' comparison at book scale, the default warm start was worth +0.139 index
+#' units over a cold start (a measured location effect, mechanism not
+#' identified); at that budget (NP 120, itermax 250, 30,000 evaluations) the DE
+#' still finished below the best feasible greedy plan. That is a statement about
+#' the budget, not about the DE: at 120,000 evaluations (NP 120, itermax 1000)
+#' it finished above that plan in 10 of 10 seeds, and at the default 600,000 in
+#' 10 of 10.
 #'
 #' @inheritParams sel_random
 #' @param w Weight on the index relative to coancestry.
@@ -117,18 +129,27 @@ sel_greedy <- function(ctx, n_sel, w = 0, max_use = NULL) {
 
 # --- Differential evolution -----------------------------------------------------
 
-# Encoding: n_sel continuous values in [1, N], not an N-key vector -- 5000
-# dimensions is infeasible for DE. Duplicates are repaired deterministically
-# (a noisy fitness would keep the DE from converging).
+# Encoding: n_sel continuous values in [1, N], not an N-key vector. A cached
+# external run (3 seeds, 60,000 evaluations, NP unrecorded; under 2
+# generations at NP = 10 x dimension for 3,600 keys) had the N-key arm far
+# behind; that is a budget-limited result, not a proof that an N-dimensional
+# encoding cannot work. Duplicates are repaired deterministically (a noisy
+# fitness would keep the DE from converging).
+# decode_rank() (the N-key decoder, R/04) takes no max_use, so for
+# encoding = "hybrid" a penalty and a repair of the per-line cap coincide;
+# this is an inference from the code, not a tested explanation.
 # ponytail: the repair fills in the lowest free indices, which introduces a
 # slight bias; switch to "nearest free" if the DE stalls.
 
 #' Decode a continuous DE parameter vector into hybrid indices
 #'
 #' The encoding is `n_sel` continuous values in `[1, N]`, not an `N`-key
-#' vector: an `N`-dimensional 0/1 encoding is infeasible for differential
-#' evolution at this scale. Duplicates are repaired deterministically, because
-#' a noisy fitness would stop the DE converging.
+#' vector. The one comparison recorded (cached, external: 3 seeds, 60,000
+#' evaluations, population size unrecorded, under two generations at 10 x
+#' dimension for an N-key arm) found the N-key arm far behind; that is a
+#' result at a small budget, not a proof that an `N`-dimensional encoding is
+#' infeasible. Duplicates are repaired deterministically, because a noisy
+#' fitness would stop the DE converging.
 #'
 #' @param par Numeric vector of length `n_sel`, values in `[1, N]`.
 #' @param N Number of candidates.
@@ -144,25 +165,35 @@ decode <- function(par, N, n_sel) {
 }
 
 # Constraint, not a weighted sum: alpha = relative loss of gene diversity
-# against the random reference. A violation becomes a proportional penalty, so
-# "alpha_max = 0.05" still means "I accept losing 5%".
+# against the random reference. A violation is charged as `penalty` times the
+# absolute excess of alpha over alpha_max (alpha units, not a ratio), so
+# "alpha_max = 0.05" still means "I accept losing 5%" and an overshoot is
+# priced, not refused.
 
 #' Build the constrained fitness function for differential evolution
 #'
-#' `alpha` is a **constraint**, not a weighted-sum term: a violation becomes a
-#' proportional penalty, so `alpha_max = 0.05` still means "I accept losing 5
-#' percent" rather than "diversity is worth this much index".
+#' `alpha` is a **constraint**, not a weighted-sum term: a violation is charged
+#' `penalty` times the absolute excess of `alpha` over `alpha_max` (in alpha
+#' units; the fitness is the mean index minus that charge), so
+#' `alpha_max = 0.05` still means "I accept losing 5 percent" rather than
+#' "diversity is worth this much index". An overshoot is priced, not refused.
 #'
 #' @param ctx Evaluation context, see [build_ctx].
 #' @param n_sel Number of hybrids to select.
 #' @param alpha_max Maximum acceptable relative loss of gene diversity.
 #' @param gd_ref Reference gene diversity from [null_distribution].
-#' @param penalty Penalty multiplier on the constraint violation.
+#' @param penalty Multiplier on the absolute constraint violation (alpha
+#'   excess, plus the `max_use` excess below), in index units per unit of
+#'   violation. Default 1000. Note the contrast with [make_fitness_fast],
+#'   whose penalty (default 5) multiplies a violation already divided by its
+#'   limit (proportional, dimensionless): 0.001 of alpha excess costs 1 index
+#'   unit here, and 5 * 0.001 / alpha_max there.
 #' @param max_use Maximum times any line may be used, or `NULL` for no cap.
 #'   The default is `NULL`, which reproduces the behaviour this function had
 #'   before the cap existed. Set it to make the per-line usage restriction --
-#'   a partition matroid -- active on the production route; the violation
-#'   enters proportionally, as the diversity budget does.
+#'   a partition matroid -- active on the production route; the violation is
+#'   the number of line uses above `max_use`, summed over lines and divided by
+#'   `2 * n_sel`, added to the alpha excess and charged at the same `penalty`.
 #' @return A function of the DE parameter vector returning a value to minimise.
 #' @export
 make_fitness <- function(ctx, n_sel, alpha_max, gd_ref, penalty = 1000,
@@ -190,9 +221,26 @@ make_fitness <- function(ctx, n_sel, alpha_max, gd_ref, penalty = 1000,
 #' Runs `DEoptim` on the continuous encoding of [decode], with the fitness from
 #' [make_fitness].
 #'
-#' The population **must** be seeded with greedy solutions. Without that warm
-#' start, 4.5e5 evaluations are not enough to beat greedy on roughly 100
-#' integer dimensions.
+#' The population is seeded with greedy solutions by default (`seeds = NULL`
+#' never means a cold start). The earlier note that a cold start with 4.5e5
+#' evaluations does not beat greedy on roughly 100 integer dimensions is a
+#' historical figure: no run of it is recorded in this repository and it is not
+#' reproduced here. What the book measured instead (book scale, 20 seeds, about
+#' 30,000 evaluations): the default warm start finished +0.139 index units above
+#' a cold start, and below the best feasible greedy plan. The second half
+#' reverses with the budget: at the 1% budget, 10 seeds, the mean index was
+#' 1.334 at 30,000 evaluations (NP 120, itermax 250; 0 of 10 above the best
+#' feasible fine-grid greedy, 1.4226), 1.438 at 120,000 (NP 120, itermax 1000;
+#' 10 of 10 above) and 1.481 at the default 600,000 (NP 300, itermax 2000;
+#' 10 of 10 above). The cold-versus-warm effect was measured at 30,000
+#' evaluations only.
+#'
+#' The default seed grid is hard-coded (`w` = 0, 0.25, 0.5, 1, 2, 4, 8, 16),
+#' all but `w = 0` above the weight at which the greedy crosses over from
+#' diversity to index, so it holds few distinct plans (at book scale, the
+#' truncation plan seven times and the `w = 0` plan once). The best feasible
+#' greedy plan at the given budget is not generally among them; pass it in
+#' `seeds` to start from it.
 #'
 #' @inheritParams make_fitness
 #' @param NP Population size.
@@ -209,8 +257,9 @@ sel_de <- function(ctx, n_sel, alpha_max, gd_ref, NP = 300, itermax = 2000,
                    seeds = NULL, trace = FALSE, max_use = NULL) {
   fit <- make_fitness(ctx, n_sel, alpha_max, gd_ref, max_use = max_use)
   # Warm start with heuristic solutions: the DE starts from something already
-  # feasible. Without this it finishes BELOW a plain greedy at any affordable
-  # budget, so NULL means "build the sweep", never "start cold".
+  # feasible. Without this it finishes below a plain greedy at small budgets
+  # (about 30,000 evaluations; it passes the best greedy plan by 120,000, see
+  # the sel_de roxygen), so NULL means "build the sweep", never "start cold".
   if (is.null(seeds))
     seeds <- lapply(c(0, 0.25, 0.5, 1, 2, 4, 8, 16), function(w)
       sel_greedy(ctx, n_sel, w = w, max_use = max_use))
@@ -225,11 +274,13 @@ sel_de <- function(ctx, n_sel, alpha_max, gd_ref, NP = 300, itermax = 2000,
   decode(res$optim$bestmem, ctx$N, n_sel)
 }
 
-# --- Continuous OCS relaxation (upper bound) -------------------------------------
+# --- Continuous OCS relaxation (penalised objective) -----------------------------
 
 # max c'u - lambda*c'f c  s.t.  sum(c)=1, 0 <= c <= 1/n_sel.
-# The cap c_i <= 1/n_sel is what makes this a valid upper bound for the equal-
-# weight 0/1 problem. A large gap against the DE means the DE hasn't converged.
+# The cap c_i <= 1/n_sel makes every equal-weight 0/1 plan feasible here, so the
+# value V(lambda) is >= the penalised value of any discrete plan. It is NOT an
+# upper bound on the index at equal diversity (it maximises the penalised
+# objective); the valid bound is ocs_bound() (Lagrangian, R/12_search.R).
 
 #' Project onto the capped simplex
 #'
@@ -249,20 +300,26 @@ project_capped_simplex <- function(v, cap) {
   pmin(pmax(v - (lo + hi) / 2, 0), cap)
 }
 
-# Too few iters yields an "upper bound" SMALLER than the discrete optimum --
-# useless. 4000 is the minimum that converges in testing; re-check whenever
-# the dataset changes.
+# Too few iters leaves V(lambda) too small (below a discrete plan's penalised
+# value), which is not a relaxation of anything. 4000 is a default, not a
+# threshold: convergence is a tolerance on V (relative change on doubling, as
+# ocs_bound() does), and the count that meets it grows with N.
 
 #' Continuous optimal-contribution relaxation
 #'
 #' Maximises `c'u - lambda c'f c` subject to `sum(c) = 1` and
-#' `0 <= c <= 1 / n_sel`. The cap is what makes this a valid **upper bound**
-#' for the equal-weight 0/1 problem: a large gap against [sel_de] means the DE
-#' has not converged.
+#' `0 <= c <= 1 / n_sel`. The cap makes every equal-weight 0/1 plan feasible,
+#' so the maximum `V(lambda)` is at least the penalised value
+#' `mean index - lambda * theta` of any discrete plan. This is a relaxation of
+#' the **penalised** problem, not a bound on the index at a given diversity: a
+#' plan that spends a diversity budget is less diverse than a relaxation point
+#' inside it and can have a higher index. The valid upper bound at a budget is
+#' [ocs_bound] (Lagrangian, `V(lambda) + lambda * theta_max`).
 #'
-#' Too few iterations yield an "upper bound" smaller than the discrete optimum,
-#' which is useless. The default is the minimum that converged in testing;
-#' re-check it whenever the dataset changes.
+#' Too few iterations leave `V(lambda)` below a discrete plan's penalised value,
+#' which is the signature of non-convergence. The default `iters` is not a
+#' threshold: judge convergence by the relative change of `V` when `iters`
+#' doubles (the tolerance [ocs_bound] uses), and re-check it as `N` grows.
 #'
 #' @param ctx Evaluation context, see [build_ctx].
 #' @param n_sel Number of hybrids, which sets the contribution cap.

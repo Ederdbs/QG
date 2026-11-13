@@ -15,8 +15,11 @@ sel_truncation(ctx, n_sel)
 An integer vector of selected row indices.
 }
 \description{
-The ceiling on gain and the floor on diversity: take the top `n_sel` hybrids
-by index and ignore relatedness entirely.
+The ceiling on gain: take the top `n_sel` hybrids by index and ignore
+relatedness entirely. It is the plan of maximum index; its diversity loss
+is the loss at that unconstrained optimum, so a budget `alpha_max` at or
+above it is slack. It is not the largest loss over all subsets, hence not a
+floor on diversity.
 }
 \seealso{
 Other selection strategies:

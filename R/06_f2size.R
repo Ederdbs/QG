@@ -582,11 +582,19 @@ multilocus_recovery <- function(pop, map, k, n_draw = 300) {
 #' `2 * h_res * n_loci_eff * 2 (1/2)^n`.
 #'
 #' This counts parental alleles lost, not loci made monomorphic. Under the
-#' biallelic model the allele lost from a heterozygous parent is often still
-#' carried by the other parent, so the expected number of loci that become
-#' monomorphic is about half of it, `2 * h_res * n_loci_eff * (1/2)^n`. The two
-#' coincide only when neither allele of the heterozygous parent occurs in the
-#' other parent (multiallelic loci). Column names are kept for the callers.
+#' biallelic model, with parents that differ where both are homozygous, a locus
+#' heterozygous in one parent only (probability `2 h_res (1 - h_res)`) becomes
+#' monomorphic if all `n` F1 plants receive the same allele, `(1/2)^n`; the
+#' other parent's allele stays in the F2. A locus heterozygous in both
+#' parents (probability `h_res^2`) becomes monomorphic if all F1 plants are
+#' `AA` or all are `aa`, `2 (1/4)^n`. The expected number of loci made
+#' monomorphic is therefore
+#' `n_loci_eff * (2 h_res (1 - h_res) (1/2)^n + h_res^2 2 (1/4)^n)`
+#' (the formula of the population-sizing chapter, checked there against an
+#' enumeration of the parental genotype classes), which is not "half of" the
+#' alleles lost: it carries the `(1 - h_res)` factor and the both-heterozygous
+#' term. At the defaults it is 0.928 at `n = 9` against 0.977 for the
+#' half-of-alleles-lost approximation. Column names are kept for the callers.
 #'
 #' @param n_F1 Numbers of F1 plants to evaluate.
 #' @param h_res Fraction of loci still segregating in each parent.

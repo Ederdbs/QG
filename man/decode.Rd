@@ -18,7 +18,10 @@ An integer vector of `n_sel` unique indices.
 }
 \description{
 The encoding is `n_sel` continuous values in `[1, N]`, not an `N`-key
-vector: an `N`-dimensional 0/1 encoding is infeasible for differential
-evolution at this scale. Duplicates are repaired deterministically, because
-a noisy fitness would stop the DE converging.
+vector. The one comparison recorded (cached, external: 3 seeds, 60,000
+evaluations, population size unrecorded, under two generations at 10 x
+dimension for an N-key arm) found the N-key arm far behind; that is a
+result at a small budget, not a proof that an `N`-dimensional encoding is
+infeasible. Duplicates are repaired deterministically, because a noisy
+fitness would stop the DE converging.
 }

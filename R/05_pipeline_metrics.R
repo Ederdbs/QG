@@ -199,9 +199,10 @@ dh_cross_coancestry <- function(fL, i, j, k, l) mean(fL[c(i, j), c(k, l)])
 #' Group coancestry of a planned doubled-haploid pool
 #'
 #' From the crossing plan alone:
-#' `theta_pool = w' fL w + (1 / D) (1 - mean_c[(1 + f_c) / 2])`,
-#' where `w` is the parent-usage weight vector and `f_c` the coancestry of the
-#' two parents of cross `c`. The second term is the self-coancestry correction;
+#' `theta_pool = w' fL w + (1 / D) (1 - sum_c (n_c / D) (1 + f_c) / 2)`,
+#' where `w` is the parent-usage weight vector, `n_c` the lines of cross `c`,
+#' `D = sum(n_c)` and `f_c` the coancestry of the two parents of cross `c`
+#' (the mean is weighted by `n_c / D`, equal weights only when `n_c` is constant). The second term is the self-coancestry correction;
 #' dropping it biases `theta` downward by `O(1 / D)`.
 #'
 #' The consequence is that the diversity of the DH pool is a quadratic form in
@@ -226,7 +227,7 @@ dh_pool_theta <- function(crosses, n_per, fL, self_term = TRUE) {
   th <- as.numeric(crossprod(w, fL %*% w))
   if (self_term) {
     f_c <- fL[cbind(crosses[, 1], crosses[, 2])]
-    th <- th + (1 - mean((1 + f_c) / 2)) / D
+    th <- th + (1 - sum(n_per / D * (1 + f_c) / 2)) / D
   }
   th
 }
@@ -359,40 +360,67 @@ loss_vs_resampling <- function(idx, fL, B = 200, seed = 1) {
 #' unreachable at small set sizes. `theta` falls monotonically as the set grows,
 #' so the constraint is only meaningful **at** the target size.
 #'
-#' This takes the top `n_sel` by merit, then while `theta` exceeds the ceiling
-#' swaps out the selected line with the highest mean coancestry to the rest and
-#' swaps in the unselected line that most reduces `theta`, breaking ties on
-#' merit. Each swap is `O(n_sel)`.
+#' This takes the top `n_sel` by merit and, while `theta` exceeds the ceiling,
+#' applies a swap that **strictly lowers `theta`**. Every swap `(out, in)` is
+#' scored exactly (`Q' = Q - 2 r_out + f_oo + 2 (c_in - f_in,out) + f_ii`, with
+#' `Q = sum(fL[S, S])`, `r` and `c` the row sums to the set), and among the
+#' theta-reducing swaps the one with the best score is taken, the score being
+#' the gain in `theta` (scaled to its maximum over swaps) plus `merit_weight`
+#' times the merit change in standardised units. Because `theta` falls at every
+#' accepted swap, the loop cannot cycle; it stops when the ceiling is met or no
+#' single swap lowers `theta` (a local minimum). Each swap costs
+#' `O(n_sel * L)`.
+#'
+#' If the ceiling is not met when the loop stops (or after `max_swap` swaps) a
+#' warning is issued; the result carries attributes `theta` (final), `met`
+#' (logical) and `n_swap`.
 #'
 #' @param merit Numeric vector of line merit.
 #' @param fL Line coancestry matrix.
 #' @param n_sel Number of lines to select.
 #' @param theta_max Coancestry ceiling, see [theta_ceiling].
 #' @param max_swap Maximum repair swaps.
-#' @param merit_weight Weight on merit when breaking ties in the swap.
-#' @return A sorted integer vector of selected line indices.
+#' @param merit_weight Weight on merit (standardised units) against the scaled
+#'   `theta` gain when choosing among theta-reducing swaps.
+#' @return A sorted integer vector of selected line indices, with attributes
+#'   `theta`, `met`, `n_swap`.
 #' @export
 select_lines_constrained <- function(merit, fL, n_sel, theta_max = Inf,
                                      max_swap = 5000, merit_weight = 0.25) {
   L <- length(merit)
-  stopifnot(n_sel <= L)
+  stopifnot(n_sel <= L, nrow(fL) == L)
   chosen <- order(merit, decreasing = TRUE)[seq_len(n_sel)]
-  if (!is.finite(theta_max)) return(chosen)
   mz <- (merit - mean(merit)) / (stats::sd(merit) + 1e-12)
-  for (s in seq_len(max_swap)) {
-    sub <- fL[chosen, chosen, drop = FALSE]
-    if (mean(sub) <= theta_max) break
-    contrib <- rowMeans(sub)                       # mean coancestry to the set
-    drop_i  <- which.max(contrib - merit_weight * mz[chosen])
-    out     <- chosen[drop_i]; keep <- chosen[-drop_i]
+  n_swap <- 0L
+  repeat {
+    Q <- sum(fL[chosen, chosen, drop = FALSE])
+    theta <- Q / n_sel^2
+    if (theta <= theta_max || n_swap >= max_swap || n_sel == L) break
     pool_out <- setdiff(seq_len(L), chosen)
-    if (!length(pool_out)) break
-    gain <- colMeans(fL[keep, pool_out, drop = FALSE]) - merit_weight * mz[pool_out]
-    add  <- pool_out[which.min(gain)]
-    if (add == out) break
-    chosen <- c(keep, add)
+    r <- rowSums(fL[chosen, chosen, drop = FALSE])                    # r_out
+    cc <- colSums(fL[chosen, pool_out, drop = FALSE])                 # c_in
+    # Q'[i, j] for dropping chosen[i], adding pool_out[j]
+    Q2 <- outer(-2 * r + diag(fL)[chosen], 2 * cc + diag(fL)[pool_out], "+") -
+      2 * fL[chosen, pool_out, drop = FALSE] + Q
+    gain <- theta - Q2 / n_sel^2
+    ok <- gain > 1e-12
+    if (!any(ok)) break
+    score <- gain / max(gain) +
+      merit_weight * outer(-mz[chosen], mz[pool_out], "+")
+    score[!ok] <- -Inf
+    ij <- arrayInd(which.max(score), dim(score))
+    chosen[ij[1L]] <- pool_out[ij[2L]]
+    n_swap <- n_swap + 1L
   }
-  sort(chosen)
+  met <- theta <= theta_max
+  if (!met) warning("select_lines_constrained(): ceiling ", format(theta_max),
+                    " not met (theta = ", format(theta), " after ", n_swap,
+                    " swaps)", call. = FALSE)
+  chosen <- sort(chosen)
+  attr(chosen, "theta") <- theta
+  attr(chosen, "met") <- met
+  attr(chosen, "n_swap") <- n_swap
+  chosen
 }
 
 #' Calibrate a coancestry ceiling against a resampling baseline
@@ -419,8 +447,11 @@ theta_ceiling <- function(fL, n_sel, alpha = 0.005, B = 200, seed = 1) {
 #' Hybrid group coancestry from the line-usage vector
 #'
 #' `theta_hyb = (u' fL u) / (2n)^2` with `u` the count of selected hybrids using
-#' each line. The hybrid-by-hybrid matrix is never needed: cost drops from
-#' `O(n^2)` with an `N x N` matrix to `O(L^2)` with no hybrid matrix at all.
+#' each line. The hybrid-by-hybrid matrix is never needed: the cost is `O(L^2)`
+#' in the number of lines, with no hybrid matrix, against `O(n^2)` for the
+#' `n x n` submatrix route. That is an asymptotic statement only: at small `n`
+#' (e.g. `N = 2500`, `n = 50`) the line route measured slower, and it pays off
+#' only for large `n` (see the cost comparison in the book's catalogue chapter).
 #'
 #' @param u Integer line-usage count vector, see [line_usage].
 #' @param fL Line coancestry matrix.

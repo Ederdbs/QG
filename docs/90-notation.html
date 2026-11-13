@@ -442,7 +442,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./06-metric-catalogue.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">A catalogue of metrics on <code>f</code></span></span></a>
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">A catalogue of diversity metrics</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -698,7 +698,7 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td style="text-align: left;"><span class="math inline">\(m\)</span></td>
-<td style="text-align: left;">markers</td>
+<td style="text-align: left;">markers; written <span class="math inline">\(N_{SNP}\)</span> in <span class="citation" data-cites="meuwissen2020">Meuwissen et al. (<a href="99-references.html#ref-meuwissen2020" role="doc-biblioref">2020</a>)</span> and in the joint-allocation table below</td>
 <td style="text-align: left;"><code>ctx$m</code></td>
 </tr>
 <tr class="odd">
@@ -1073,7 +1073,7 @@ window.Quarto = {
 <tbody>
 <tr class="odd">
 <td style="text-align: left;"><span class="math inline">\(d_k\)</span></td>
-<td style="text-align: left;">dominance deviation at locus <span class="math inline">\(k\)</span></td>
+<td style="text-align: left;">dominance effect at locus <span class="math inline">\(k\)</span></td>
 <td style="text-align: left;">argument to <code>heterosis_value()</code></td>
 </tr>
 <tr class="even">
@@ -1218,10 +1218,10 @@ window.Quarto = {
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
-<col style="width: 7%">
 <col style="width: 11%">
-<col style="width: 64%">
-<col style="width: 16%">
+<col style="width: 6%">
+<col style="width: 72%">
+<col style="width: 9%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1268,6 +1268,24 @@ window.Quarto = {
 <td style="text-align: left;">panel statistic <span class="math inline">\(\overline{(p_0 - \tfrac12)^2/[p_0(1-p_0)]}\)</span> (<a href="05-genomic-era.html" class="quarto-xref"><span>Chapter 10</span></a>); not the aggregate genotype <span class="math inline">\(W\)</span></td>
 <td style="text-align: left;">-</td>
 </tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\tilde p_A\)</span>, <span class="math inline">\(\tilde p_B\)</span>, <span class="math inline">\(\bar p\)</span></td>
+<td style="text-align: left;">-</td>
+<td style="text-align: left;">pool-A and pool-B reference-allele frequencies weighted by the line usage a selection induces, and their merged mean <span class="math inline">\(\bar p = (\tilde p_A + \tilde p_B)/2\)</span> (inbred parents, A2 of <a href="05-genomic-era.html" class="quarto-xref"><span>Chapter 10</span></a>); the frequency <code>colMeans(X[idx, ])</code> returns</td>
+<td style="text-align: left;"><code>freq_metrics()</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(G_{ST}\)</span></td>
+<td style="text-align: left;">-</td>
+<td style="text-align: left;">between-pool share of gene diversity <span class="citation" data-cites="nei1973">(<a href="99-references.html#ref-nei1973" role="doc-biblioref">Nei 1973</a>)</span>, <span class="math inline">\(GD_{BS}/GD_T\)</span>; the <span class="math inline">\(F_{ST}\)</span> of <a href="05-genomic-era.html" class="quarto-xref"><span>Chapter 10</span></a> is this quantity</td>
+<td style="text-align: left;"><code>gd_partition()</code>, <code>s1_monitor()</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\varepsilon\)</span></td>
+<td style="text-align: left;">-</td>
+<td style="text-align: left;">ridge added to the diagonal of a relationship matrix before inversion (0.01 in <span class="citation" data-cites="meuwissen2020">Meuwissen et al. (<a href="99-references.html#ref-meuwissen2020" role="doc-biblioref">2020</a>)</span>); not the tolerance <code>eps</code> of <code>freq_metrics()</code></td>
+<td style="text-align: left;">-</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -1279,9 +1297,9 @@ window.Quarto = {
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
-<col style="width: 12%">
-<col style="width: 68%">
-<col style="width: 19%">
+<col style="width: 9%">
+<col style="width: 70%">
+<col style="width: 20%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1337,8 +1355,8 @@ window.Quarto = {
 <td style="text-align: left;"><code>usefulness_criterion()</code></td>
 </tr>
 <tr class="even">
-<td style="text-align: left;"><span class="math inline">\(GD_{\text{random}(n)}\)</span></td>
-<td style="text-align: left;">mean <span class="math inline">\(GD\)</span> of random subsets of size <span class="math inline">\(n\)</span>, the reference of <span class="math inline">\(\alpha\)</span>; the same quantity as <span class="math inline">\(GD_{\text{ref}}\)</span> (<a href="06-metric-catalogue.html#eq-catalogue-alpha" class="quarto-xref">Equation&nbsp;<span>11.14</span></a>)</td>
+<td style="text-align: left;"><span class="math inline">\(GD_{\text{ref}}\)</span></td>
+<td style="text-align: left;">mean <span class="math inline">\(GD\)</span> of random subsets of size <span class="math inline">\(n\)</span>, the reference of <span class="math inline">\(\alpha\)</span> (<a href="06-metric-catalogue.html#eq-catalogue-alpha" class="quarto-xref">Equation&nbsp;<span>11.14</span></a>); <code>gd_ref</code> in the code</td>
 <td style="text-align: left;"><code>null_distribution()$gd_ref</code></td>
 </tr>
 <tr class="odd">
@@ -1436,9 +1454,9 @@ window.Quarto = {
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
-<col style="width: 9%">
-<col style="width: 73%">
-<col style="width: 17%">
+<col style="width: 8%">
+<col style="width: 74%">
+<col style="width: 16%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1455,7 +1473,7 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td style="text-align: left;"><span class="math inline">\(n\)</span></td>
-<td style="text-align: left;">selfed F1 plants</td>
+<td style="text-align: left;">F1 plants</td>
 <td style="text-align: left;"><code>f1_sizing(n_F1 =)</code></td>
 </tr>
 <tr class="odd">
@@ -1465,12 +1483,12 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td style="text-align: left;"><span class="math inline">\(H\)</span></td>
-<td style="text-align: left;">panel heterozygosity; 0.125 in an F4</td>
+<td style="text-align: left;">panel heterozygosity, the observed heterozygosity <span class="math inline">\(H_o\)</span> of <a href="00-hybrid-programme.html#sec-hp-popgen" class="quarto-xref"><span>Section 1.2</span></a> averaged over plants and loci; 0.125 in an F4</td>
 <td style="text-align: left;"><code>panel_het()</code></td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;"><span class="math inline">\(H_t\)</span></td>
-<td style="text-align: left;">heterozygosity of the parent whose meiosis produces generation t + 1</td>
+<td style="text-align: left;"><span class="math inline">\(h_t\)</span></td>
+<td style="text-align: left;">heterozygosity of the parent whose meiosis produces generation t + 1 (not the <span class="math inline">\(H_t\)</span> of <a href="00-hybrid-programme.html#eq-hp-drift" class="quarto-xref">Equation&nbsp;<span>1.4</span></a>)</td>
 <td style="text-align: left;">-</td>
 </tr>
 <tr class="even">
@@ -1553,6 +1571,11 @@ window.Quarto = {
 <td style="text-align: left;">independent loci polymorphic between the parents</td>
 <td style="text-align: left;"><code>f1_sizing(n_loci_eff =)</code></td>
 </tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(n_{rep}\)</span></td>
+<td style="text-align: left;">replicate populations simulated per <span class="math inline">\(N\)</span> and scheme (the <code>n_rep</code> column of the cached grid)</td>
+<td style="text-align: left;"><code>n_rep</code> (cached grid)</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -1633,11 +1656,16 @@ window.Quarto = {
 <td style="text-align: left;"><code>run_bc_program(n_sched =)</code></td>
 </tr>
 <tr class="even">
+<td style="text-align: left;"><span class="math inline">\(n_{\text{keep}}\)</span></td>
+<td style="text-align: left;">number of homozygotes (BC3F2 plants or DH lines) required at the fixation stage (3)</td>
+<td style="text-align: left;"><code>sizing_table(n_keep =)</code></td>
+</tr>
+<tr class="odd">
 <td style="text-align: left;"><span class="math inline">\(P\)</span></td>
 <td style="text-align: left;">probability required of a sizing criterion (0.95)</td>
 <td style="text-align: left;"><code>n_for_count(P =)</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><span class="math inline">\(\nu\)</span></td>
 <td style="text-align: left;">shape of the gamma renewal model of crossover interference; not modelled</td>
 <td style="text-align: left;">-</td>
@@ -1934,7 +1962,7 @@ window.Quarto = {
 </tr>
 <tr class="odd">
 <td style="text-align: left;"><span class="math inline">\(d_k\)</span></td>
-<td style="text-align: left;">dominance deviation at locus k</td>
+<td style="text-align: left;">dominance effect at locus k</td>
 <td style="text-align: left;"><code>d</code></td>
 </tr>
 <tr class="even">
@@ -2005,8 +2033,8 @@ window.Quarto = {
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
-<col style="width: 12%">
-<col style="width: 87%">
+<col style="width: 8%">
+<col style="width: 91%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -2029,7 +2057,7 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td style="text-align: left;"><span class="math inline">\(\delta_k\)</span></td>
-<td style="text-align: left;">dominance degree <span class="math inline">\(d_k / &amp;#124;a_k&amp;#124;\)</span>, drawn from <span class="math inline">\(N(\texttt{meanDD}, \texttt{varDD})\)</span></td>
+<td style="text-align: left;">dominance degree <span class="math inline">\(d_k / \lvert a_k \rvert\)</span>, drawn from <span class="math inline">\(N(\texttt{meanDD}, \texttt{varDD})\)</span></td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;"><span class="math inline">\(M_{HW}\)</span>, <span class="math inline">\(M_{F_t}\)</span></td>
@@ -2049,7 +2077,7 @@ window.Quarto = {
 </tr>
 <tr class="odd">
 <td style="text-align: left;"><span class="math inline">\(t\)</span>, <span class="math inline">\(r\)</span>, <span class="math inline">\(\rho(t, r)\)</span></td>
-<td style="text-align: left;">testers, locations, and the first-order accuracy of <span class="math inline">\(\hat g^A_i\)</span>: the <span class="math inline">\(k\)</span>, <span class="math inline">\(r\)</span>, <span class="math inline">\(\rho\)</span> of the mating-design table, <span class="math inline">\(k\)</span> renamed because it indexes QTL there</td>
+<td style="text-align: left;">testers, locations, and the first-order accuracy of <span class="math inline">\(\hat g^A_i\)</span>: the <span class="math inline">\(k\)</span>, <span class="math inline">\(r\)</span>, <span class="math inline">\(\rho\)</span> of the mating-design table, <span class="math inline">\(k\)</span> renamed because it indexes QTL there; in the breeder’s-equation subsection <span class="math inline">\(r\)</span> is instead the accuracy against the breeding value, which is the <span class="math inline">\(r\)</span> of <a href="02b-response.html#eq-response-breeders" class="quarto-xref">Equation&nbsp;<span>4.1</span></a> only if <span class="math inline">\(d = 0\)</span></td>
 </tr>
 <tr class="even">
 <td style="text-align: left;"><span class="math inline">\(v_g\)</span>, <span class="math inline">\(v_s\)</span>, <span class="math inline">\(v_e\)</span></td>
@@ -2079,7 +2107,7 @@ window.Quarto = {
 <p><strong>Balding-Nichols model.</strong> A Beta distribution with mean <span class="math inline">\(p\)</span> and variance <span class="math inline">\(F_{BN}\,p(1-p)\)</span>, used to draw pool-specific allele frequencies from an ancestral frequency <span class="math inline">\(p\)</span>. <span class="math inline">\(F_{BN}\)</span> (<code>fst</code>) is the expected divergence of each pool from the ancestral population; it is not the <span class="math inline">\(F_{ST}\)</span> statistic of <a href="02-subdivided.html" class="quarto-xref"><span>Chapter 3</span></a> computed on the pools (see the partition above).</p>
 <p><strong>Group coancestry.</strong> The probability that two alleles sampled at random from a whole set are identical in state, including the case of sampling the same individual twice.</p>
 <p><strong>Heterotic group / pool.</strong> A set of lines maintained as a breeding unit, crossed to lines of a complementary group to produce hybrids. Divergence between groups is where heterosis comes from – but only the divergence that coincides with dominance. Divergence produced by drift alone generates none, because it is paid for exactly out of the within-pool term. See <a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 5</span></a>.</p>
-<p><strong>Mid-parent heterosis.</strong> The F1’s value minus the mean of its two parents. With inbred parents the additive contributions cancel exactly, leaving only the dominance deviations at the F1’s heterozygous loci.</p>
+<p><strong>Mid-parent heterosis.</strong> The F1’s value minus the mean of its two parents. With inbred parents the additive contributions cancel exactly, leaving only the dominance effects at the F1’s heterozygous loci.</p>
 <p><strong>General and specific combining ability (GCA, SCA).</strong> The two halves of a hybrid’s value that a two-way layout separates: what a line contributes to every cross it enters, and what depends on which two lines met. For heterosis both are exact functions of <span class="math inline">\(d\)</span> and the pool frequencies, with GCA weighted by the <em>opposite</em> pool’s frequencies – so combining ability is a property of a line against a tester pool, never of the line alone. See <a href="05b-heterosis-dominance.html#sec-heterosis-gca-sca" class="quarto-xref"><span>Section 5.11</span></a>.</p>
 <p><strong>Reciprocal recurrent selection.</strong> Selecting on performance <em>in cross</em> and recycling the winners within their own pool. Selection information crosses the pool boundary; germplasm does not. See <a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 23</span></a>.</p>
 <p><strong>Identity by state (IBS) vs by descent (IBD).</strong> IBS is what markers observe: two alleles are the same allele. IBD adds the requirement of common ancestry from a defined base. The gap between them is where <a href="05-genomic-era.html" class="quarto-xref"><span>Chapter 10</span></a>’s whole argument lives.</p>
@@ -2098,6 +2126,9 @@ window.Quarto = {
 <div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
 <div id="ref-caballero2002" class="csl-entry" role="listitem">
 Caballero, A., and M. A. Toro. 2002. <span>“Analysis of Genetic Diversity for the Management of Conserved Subdivided Populations.”</span> <em>Conservation Genetics</em> 3 (3): 289–99. <a href="https://doi.org/10.1023/A:1019956205473">https://doi.org/10.1023/A:1019956205473</a>.
+</div>
+<div id="ref-meuwissen2020" class="csl-entry" role="listitem">
+Meuwissen, T. H. E., A. K. Sonesson, G. Gebregiwergis, and J. A. Woolliams. 2020. <span>“Management of Genetic Diversity in the Era of Genomics.”</span> <em>Frontiers in Genetics</em> 11: 880. <a href="https://doi.org/10.3389/fgene.2020.00880">https://doi.org/10.3389/fgene.2020.00880</a>.
 </div>
 <div id="ref-nei1973" class="csl-entry" role="listitem">
 Nei, M. 1973. <span>“Analysis of Gene Diversity in Subdivided Populations.”</span> <em>Proceedings of the National Academy of Sciences</em> 70 (12): 3321–23. <a href="https://doi.org/10.1073/pnas.70.12.3321">https://doi.org/10.1073/pnas.70.12.3321</a>.

@@ -18,6 +18,9 @@ An integer vector of selected hybrid indices.
 }
 \description{
 The classical encoding, one gene per hybrid, so the search dimension is `N`.
+It takes no `max_use`: with `encoding = "hybrid"` in [make_fitness_fast] a
+per-line cap can therefore only enter as a penalty, so penalty and repair
+coincide (an inference from the code, not a tested explanation).
 }
 \seealso{
 [decode_lines], the recommended encoding.

@@ -20,6 +20,8 @@
 #   mating       the phenotypic core of the mating-design sweep (Ch 4e)
 #   sparse       the phenotypic core of the sparse-testing study (Ch 4f)
 #   joint        crosses x locations at a fixed plot budget (Ch 4g)
+#   ocs_panel    how the truncation alpha moves with the marker panel, over 20
+#                founder draws (Ch 9)
 #
 # Not regenerated here, because they are not this project's output:
 #   bibliography_animal.csv, bibliography_plant.csv  (literature screens)
@@ -58,7 +60,7 @@ dir.create(fig_dir,  showWarnings = FALSE, recursive = TRUE)
 dir.create(out_dir,  showWarnings = FALSE, recursive = TRUE)
 
 targets <- commandArgs(trailingOnly = TRUE)
-if (!length(targets)) targets <- c("f2size", "benchmark", "identity", "genpred", "search", "cycles", "limits", "mating", "sparse", "joint")
+if (!length(targets)) targets <- c("f2size", "benchmark", "identity", "genpred", "search", "cycles", "limits", "mating", "sparse", "joint", "ocs_panel")
 want <- function(x) x %in% targets
 
 # --- f2size: the population-sizing grid ---------------------------------------
@@ -887,4 +889,51 @@ if (want("joint")) {
   write.csv(do.call(rbind, opt_log), file.path(data_dir, "joint_optimiser.csv"),
             row.names = FALSE)
   message("joint: done")
+}
+
+# --- ocs_panel: the marker panel against the budget ceiling (Chapter 9) -------
+# For each of 20 founder draws (simulation seed 1..20, teaching scale), rebuild
+# f, the random-subset null and the truncation alpha under five panels (MAF
+# filters, ascertainment in pool A) and under 6 random thinnings to each of
+# 250, 500 and 1000 markers. The index (`ctx$traits`) is NOT rebuilt: only f
+# follows the panel. The thinned subsets are drawn BEFORE any null_distribution()
+# call, which reseeds. About 5 minutes.
+if (want("ocs_panel")) {
+  message("ocs_panel: 20 founder draws x 23 panels")
+  n_sel <- 60
+  cfg0 <- utils::modifyList(hybdiv::sim_config,
+                            list(n_pool_A = 25, n_pool_B = 25, m = 2000))
+  ceiling_for <- function(ctx, keep, B) {
+    Xs <- ctx$X[, keep, drop = FALSE]
+    ck <- build_ctx(X = Xs, f = molecular_coancestry(Xs), G = NULL,
+                    traits = ctx$traits, ped = ctx$ped, n_lines = ctx$n_lines,
+                    pool = ctx$pool, fL = NULL, cfg = ctx$cfg)
+    nl <- null_distribution(ck, n_sel, B = B, B_full = 1)
+    c(gd_ref = nl$gd_ref,
+      alpha_trunc = alpha_loss(sel_truncation(ck, n_sel), ck, nl$gd_ref))
+  }
+  res <- do.call(rbind, lapply(1:20, function(s) {
+    cfg <- utils::modifyList(cfg0, list(seed = s))
+    ctx <- simulate_data(cfg)
+    maf <- pmin(ctx$p0, 1 - ctx$p0)
+    polyA <- colMeans(simulate_lines(cfg)[seq_len(cfg$n_pool_A), ] / 2)
+    set.seed(100 + s)
+    thin <- lapply(c(250, 500, 1000),
+                   function(mm) lapply(1:6, function(i) sort(sample.int(ctx$m, mm))))
+    row <- function(label, keep, draw, B) {
+      v <- ceiling_for(ctx, keep, B)
+      data.frame(seed = s, panel = label, draw = draw, markers = length(keep),
+                 gd_ref = v[["gd_ref"]], alpha_trunc = v[["alpha_trunc"]])
+    }
+    panels <- c(lapply(c(0, 0.01, 0.05, 0.10), function(t)
+                  row(sprintf("MAF >= %.2f", t), which(maf >= t), 1L, 250)),
+                list(row("ascertained in pool A", which(polyA > 0 & polyA < 1), 1L, 250)),
+                unlist(lapply(thin, function(sl) lapply(seq_along(sl), function(i)
+                  row(sprintf("thinned to %d", length(sl[[i]])), sl[[i]], i, 200))),
+                  recursive = FALSE))
+    message("  seed ", s)
+    do.call(rbind, panels)
+  }))
+  write.csv(res, file.path(data_dir, "ocs_panel_sweep.csv"), row.names = FALSE)
+  message("ocs_panel: done")
 }

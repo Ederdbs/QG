@@ -34,20 +34,27 @@ gives a valid bound -- every `lambda` gives one -- only a looser one.}
 costs `O(N^2)` per gradient step and the line route `O(N L)`, so pass
 `TRUE` there even when the hybrid matrix happens to be in memory.}
 
-\item{tol}{Relative change below which the doubling stops.}
+\item{tol}{Relative change below which the doubling stops: the criterion is
+`|V_new - V_old| <= tol * |V_old|` on the minimum over `lambdas`, when the
+iteration count doubles.}
 
 \item{max_doublings}{Give up after this many doublings, with a warning.}
 }
 \value{
 The bound, carrying `lambda`, `relaxation`, `iters` and `converged`
-  as attributes.
+  as attributes. `converged` is a stalling criterion (the minimum moved by
+  less than `tol`, relative, when the iteration count doubled), not a
+  certificate that the relaxation is solved: a slowly creeping value can
+  pass it, and `FALSE` means the value may sit below the true bound.
 }
 \description{
 The Lagrangian bound, and the reason it is worth its own function: the
 construction the book used before -- the best relaxation point whose own
 `alpha` happens to fall inside the budget -- is **not** an upper bound. The
 relaxation at a given `lambda` maximises a penalised objective, not the
-index, so a discrete plan at the same diversity can and does beat it.
+index. A discrete plan that spends the budget is less diverse than a
+relaxation point strictly inside it, so it can and does beat that point
+(at exactly equal diversity it cannot, by weak duality).
 }
 \details{
 The correct statement is a one-line consequence of feasibility. Any

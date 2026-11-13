@@ -35,7 +35,8 @@ make_fitness_fast(
 
 \item{index}{The index to maximise.}
 
-\item{penalty}{Penalty multiplier on the total constraint violation.}
+\item{penalty}{Penalty multiplier on the total proportional violation
+(default 5, in index units; [make_fitness] uses 1000 on an absolute one).}
 
 \item{encoding}{`"lines"` (recommended, dimension `L`) or `"hybrid"`
 (dimension `N`).}
@@ -46,6 +47,12 @@ A function of the DE parameter vector returning a value to minimise.
 \description{
 The drop-in replacement for [make_fitness] at production scale. Uses only
 `ctx$fL` and `ctx$parents` in the inner loop: no `N x N` matrix is ever
-formed or indexed. Handles several simultaneous restrictions, each entering
-as a proportional penalty.
+formed or indexed. Handles several simultaneous restrictions, each term
+dimensionless and charged at the common `penalty`: the relative loss of gene
+diversity above `alpha_max`, divided by `alpha_max`; `Ne` shortfall divided
+by `ne_par_min`; pool-balance excess divided by `pool_tol`; and the `max_use`
+term, which is NOT divided by a limit: it is the line uses above `max_use`,
+summed over lines, divided by the total line uses. `alpha_max = 0` divides
+by zero here (unlike `sel_local_search()`, whose normaliser is floored at
+1e-6). [make_fitness] instead charges an absolute excess (default 1000).
 }

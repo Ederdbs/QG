@@ -16,6 +16,9 @@ A scalar.
 }
 \description{
 `theta_hyb = (u' fL u) / (2n)^2` with `u` the count of selected hybrids using
-each line. The hybrid-by-hybrid matrix is never needed: cost drops from
-`O(n^2)` with an `N x N` matrix to `O(L^2)` with no hybrid matrix at all.
+each line. The hybrid-by-hybrid matrix is never needed: the cost is `O(L^2)`
+in the number of lines, with no hybrid matrix, against `O(n^2)` for the
+`n x n` submatrix route. That is an asymptotic statement only: at small `n`
+(e.g. `N = 2500`, `n = 50`) the line route measured slower, and it pays off
+only for large `n` (see the cost comparison in the book's catalogue chapter).
 }
