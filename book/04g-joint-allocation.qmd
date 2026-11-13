@@ -76,7 +76,8 @@ The results this chapter defends:
    will be selected.
 2. **Allocation strategy is a second-order decision.** With the plan and the
    locations per cross fixed, a placement that keeps as much of both pools as
-   possible in each location raises parent coverage substantially; its accuracy
+   possible in each location (the `coverage` rule here, `parentage` in @sec-sparse)
+   raises parent coverage substantially; its accuracy
    gain over random placement of the same plan,
    `r sprintf("%+.3f", pooled("coverage - random")$diff)` correlation points on the
    point estimate, is not detected.
@@ -128,7 +129,8 @@ $n_c = n_F n_M$. At $r = 1$, which is the stage-1 norm, fixing $B$ ties the two
 together: halving the crosses doubles the locations each one can see. The
 nearest earlier look at this trade is result 6 of @sec-sparse-results, which at
 equal plots compared testing every candidate at few locations against a
-smaller factorial at more, and found the first better. There the excluded
+smaller factorial at more, and found the first better in the point estimates, with
+four replicates and no step resolved after multiplicity correction. There the excluded
 candidates are a smaller factorial, so their parents leave the data, and a
 second stage with selection follows. Here every line stays in the data, the
 unmade crosses are predicted from it, and the comparison is of stage-1
@@ -243,8 +245,9 @@ What is new is only the incidence. A crossing plan $P \subset \{1..n_F\} \times
 whose row is zero when $(i, j) \notin P$ and sums to $k$ otherwise. The R/17
 functions take such an $M$ directly; unmade crosses are predicted through
 $\mathbf A_f$, $\mathbf A_m$ and the GCA they share with made crosses -- the
-CV1 prediction of @sec-sparse-validation (T2 of @sec-mating-genomic when both
-parents are in made crosses), produced by the plan rather than by a mask.
+CV1 prediction of @sec-sparse-validation (never-planted hybrids; T2 of
+@sec-mating-genomic when both parents are in made crosses, T1 or T0 otherwise, as in the
+callout of @sec-sparse-what), produced by the plan rather than by a mask.
 
 ```{r}
 #| label: joint-incidence
@@ -1015,7 +1018,8 @@ cell_z <- with(jc[jc$contrast == "coverage - random" & jc$metric == "acc_all", ]
 
 With the plan and $k$ fixed, the strategies are close (@fig-joint-budget). The
 paired contrasts (@tbl-joint-strategy) resolve what the cell means cannot.
-Coverage does what it is built to do: in the factorial plans the share of
+Coverage (the `parentage` allocation of @sec-sparse under another name) does what it is
+built to do: in the factorial plans the share of
 females present per location rises from `r r3(cov_r)` under random placement
 to `r r3(cov_c)`. Paired against random placement of the same plan, the
 accuracy difference over all hybrids, averaged over the `r pc_all$cells` cells, is
@@ -1056,8 +1060,9 @@ knitr::kable(fmt(st, 4), row.names = FALSE,
 
 The pooled contrast is not detected and one family of three passes two
 standard errors. We read this as consistent with the finding of @sec-sparse
-that structured layouts matter little except at extreme sparsity, not as a
-replication of it, and as sitting with the
+that a structured layout's advantage over random allocation is small and not resolved
+after multiplicity correction (the larger difference at $k \le 2$ there is an
+exploratory subset), not as a replication of it, and as sitting with the
 mixed record of incomplete-block allocation (@montesinoslopez2022ibd and
 @montesinoslopez2024 better than random, @montesinoslopez2023 close). When every
 line appears in several crosses spread over eight locations, random placement
@@ -1209,8 +1214,9 @@ over eight locations, locations always shared parents.
    all-hybrid objective only.
 4. **Treat one location per cross with caution.** It was best with known
    components; REML has little to work with at one plot per cross
-   (@sec-sparse-results, result 5), so two locations per cross is the safer
-   floor.
+   (@sec-sparse-results, result 5: REML converged in under half of the cached fits at
+   one location per hybrid, and the cause is not tested there), so two locations per
+   cross is the safer floor.
 5. **Place crosses with the coverage rule** (`joint_alloc(strategy =
    "coverage")`): it costs nothing and raises parent coverage, though its
    accuracy gain was not detected (result 2, @sec-joint-strategy). With known subgroups, read the
@@ -1289,8 +1295,9 @@ SCA share.
 - @sec-mating chose the crosses with the field fixed and @sec-sparse the field
   with the crosses fixed; under one budget the crossing plan is the larger
   lever.
-- The coverage rule is result 4 of @sec-sparse-results -- parent coverage, not
-  shared hybrids, carries connectivity -- turned into an allocation rule.
+- The coverage rule is the hypothesis of result 4 of @sec-sparse-results -- that
+  parent coverage, not shared hybrids, connects a sparse trial, which the data there do
+  not decide -- turned into an allocation rule and tested here.
 - In plans where a line could go uncrossed, distinct crosses would also keep
   more lines in the data, the diversity argument of @sec-mating-connects: a
   line never crossed is one the next cycle will in practice not use

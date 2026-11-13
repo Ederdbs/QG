@@ -229,8 +229,10 @@ freq_metrics <- function(idx, ctx, maf = 0.05, rare_lo = 0.01, eps = 1e-6) {
     # agree only when mean(y) == 0; test-lenses.R asserts this identity.
     cov_diag = 2 * mean(x * y),
     cor_dp_p0 = if (stats::sd(y) > 0) stats::cor(x, y) else NA_real_,
-    # Allelic richness: rare pool markers still segregating. More sensitive to
-    # bottlenecks than He (Caballero & Toro 2002, sec. 11).
+    # rare_retained: share of the pool's rare markers (maf_pop in [rare_lo, maf))
+    # still segregating in the selection (minor allele frequency > 0). A marker
+    # share, not the count of the 2m alleles carried (A_ret, book ch. 06). More
+    # sensitive to bottlenecks than He (Caballero & Toro 2002, sec. 11).
     rare_retained = if (any(rare)) mean(pmin(p[rare], 1 - p[rare]) > 0) else NA_real_)
 }
 

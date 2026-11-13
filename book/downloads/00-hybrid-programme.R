@@ -165,7 +165,7 @@ c(lines_A = sum(pool == "A"), lines_B = sum(pool == "B"),
 #' candidates of both pools (@sec-mating-sparse). The cross means are read through
 #' the partition into general and specific combining ability defined by
 #' @sprague1942, written as a linear model for a factorial between two sets of
-#' lines (the North Carolina Design II of @comstock1948; the notation $g$, $s$ is
+#' lines (the North Carolina Design II, attributed to @comstock1948 -- an attribution not verified for this book; the notation $g$, $s$ is
 #' that of @griffing1956),
 #' 
 #' $$
@@ -271,8 +271,9 @@ c(correlation = gca_cor, top5_shared = top5_shr)
 #' On inbred lines this is the scheme @kadoumi2025 describe as tester-based, or
 #' modified, reciprocal recurrent selection: each group of inbreds is the source
 #' material for selection within it and provides testers for hybrid selection in
-#' the other. They trace it to @hull1945 and cite @comstock1949 for the heterotic
-#' structure it builds.
+#' the other. They trace it to @hull1945 and cite @comstock1949 for the scheme
+#' (that paper is cited here for its title and existence only; what it states
+#' was not checked for this book).
 #' 
 #' @fig-hp-cycle draws one cycle. In the book's model of the step from S4 to the
 #' next cycle, the parents of the selected hybrids found the next pools, each in
@@ -389,8 +390,8 @@ fmt(sub_gd, 4)
 #' by the few lines that won in cross. In the end-to-end simulation of
 #' @sec-stages, whose ledger covers S2, S3 and S4 and not recycling, where the
 #' largest share of the loss falls depends on how the crosses are chosen at S2:
-#' under merit-only cross selection it falls at S2, and with a diversity term added
-#' S2 and S4 carry shares that its founder pools do not separate. That result is the
+#' under cross selection on the usefulness criterion alone it falls at S2, and with a
+#' diversity term added the three stages carry similar shares. That result is the
 #' simulation's, at its scale, read from a cached table, and is reported there with
 #' its conditions.
 #' 
@@ -639,10 +640,10 @@ c(max_abs_diff = max(abs(F_hyb - fL[cbind(ped[["a"]], ped[["b"]])])))
 #'   selections alike.
 #' - $F_{ST}$ is a property of a set of subpopulations *at one time*: here, as in
 #'   @sec-subdivided, $GD_{BS}/GD_T$, the between-pool share of gene diversity
-#'   [@caballero2002, Eq. 8]. @sec-stages names that form $G_{ST}$, after @nei1973,
-#'   and also logs $(\theta_w - \theta_{AB})/(1 - \theta_{AB})$, with $\theta_w$ and
-#'   $\theta_{AB}$ the mean within-pool and between-pool coancestry, under the name
-#'   $F_{ST}$. The two are different quantities, the second near twice the first, and a value of one is never read
+#'   [@caballero2002, Eq. 8]. @sec-stages writes that form $F_{ST}$ (Nei's $G_{ST}$, @nei1973)
+#'   and separates from it $(\theta_w - \theta_{AB})/(1 - \theta_{AB})$, with $\theta_w$ and
+#'   $\theta_{AB}$ the mean within-pool and between-pool coancestry, written
+#'   $F^{\text{btw}}_{ST}$. The two are different quantities, the second near twice the first, and a value of one is never read
 #'   against the other.
 #' - $F_{BN}$, `fst` in the code, is the Balding-Nichols parameter with which the
 #'   simulations draw the two pools' frequencies [@balding1995]. It is a setting of

@@ -101,7 +101,8 @@ stage2_select <- function(X, f, hybrids, n_sel,
     "inoperative alphas (above the %.2f%% ceiling): %s -- the constraint doesn't restrict anything in these scenarios",
     100 * alpha_max, paste0(round(100 * alphas[inop], 2), "%", collapse = ", ")))
 
-  # 3. Warm start. Without this the DE ends up BELOW a plain greedy.
+  # 3. Warm start. Without it the DE ends up below a plain greedy at small
+  # budgets (about 30,000 evaluations; see the sel_de roxygen).
   say("[3/4] warm start (greedy) and DE per scenario...\n")
   ws <- c(0, 1e-4, 2e-4, 3e-4, 5e-4, 1e-3, 3e-3)
   seeds <- c(lapply(ws, function(w) sel_greedy(ctx, n_sel, w = w, max_use = max_use)),

@@ -29,11 +29,18 @@ rather than `O(n^2)`.
 }
 \details{
 The score is `w * index - theta`. With `w = 0` this is pure diversity (the
-ceiling on diversity, near-zero gain); `w > 0` makes it a discrete
+most diverse plan the greedy builds, near-zero gain; no certificate that it
+is the most diverse subset); `w > 0` makes it a discrete
 optimal-contribution heuristic; `w -> Inf` converges to [sel_truncation].
 
-Greedy solutions are also what warm-starts [sel_de]; without them the
-differential evolution does not beat greedy at any affordable budget.
+Greedy solutions are also what warm-starts [sel_de]. In the book's 20-seed
+comparison at book scale, the default warm start was worth +0.139 index
+units over a cold start (a measured location effect, mechanism not
+identified); at that budget (NP 120, itermax 250, 30,000 evaluations) the DE
+still finished below the best feasible greedy plan. That is a statement about
+the budget, not about the DE: at 120,000 evaluations (NP 120, itermax 1000)
+it finished above that plan in 10 of 10 seeds, and at the default 600,000 in
+10 of 10.
 }
 \seealso{
 Other selection strategies:

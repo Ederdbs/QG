@@ -1837,7 +1837,7 @@ fmt(data.frame(value = c(
 #' (@eq-f-stats), and it equals `s1_monitor()`'s `Gst_Nei` to machine precision, and
 #' also the ratio of marker means $\overline{\Delta p^2/4}\,/\,\overline{\bar p\bar q}$
 #' (asserted in the chunk of @tbl-era-s1-identity). `Fst_Wright`, in the code's name, is the
-#' between-referenced statistic $(\theta_w - \theta_B)/(1 - \theta_B)$ of
+#' between-referenced statistic $(\theta_w - \theta_{AB})/(1 - \theta_{AB})$ ($\theta_w$ the census-weighted within-pool and $\theta_{AB}$ the between-pool coancestry; `theta_decompose()` calls the latter `theta_B`, which in `theta_pools()` is within pool B) of
 #' `R/05_pipeline_metrics.R`; @sec-subdivided records that the book cites no external
 #' source for it, and the label "Wright" is the code's, not a claim about a paper.
 #' It is `r fmt(s1$Fst_Wright / s1$Gst_Nei, 2)` times larger than `Gst_Nei` on the
@@ -1852,8 +1852,9 @@ fmt(data.frame(value = c(
 #' **Call.** `theta_pools()`, `gd_partition()`, `ne_lines_pool()`,
 #' `max_line_use()`, `ne_parents()` on the selection; `s1_monitor()` on the line
 #' matrix of each cycle.
-#' **Check.** $\theta_A$ and $\theta_B$ separately; $GD_{BS}$ held in a band, not
-#' maximised; the number of distinct lines used per pool.
+#' **Check.** $\theta_A$ and $\theta_B$ separately; $F_{ST}$ held in a band, not
+#' maximised (@sec-stages Trap 3; here $GD_{BS}/GD_T$, definition named in the report), with $GD_{BS}$ and $GD_T$
+#' reported beside it, since $F_{ST}$ can move through $GD_T$ alone (Warning sign below); the number of distinct lines used per pool.
 #' **Warning sign.** $F_{ST}$ rising while $GD_T$ falls -- by the
 #' algebra of this step the signature of a one-pool collapse, as in the `truncation`
 #' row of @tbl-era-pools (one selection on one draw; how often this holds across
@@ -2224,7 +2225,7 @@ knitr::kable(data.frame(
 #' | Is there a panel of loci **not used in management**, for audit? | @sec-era-step5 |
 #' | Are $\theta_A$ and $\theta_B$ reported separately, never only $F_{ST}$? | @sec-era-step6 |
 #' | Is the number of parent lines used per pool biologically plausible? | @sec-era-step6 |
-#' | Is $GD_{BS}$ held in a band rather than maximised? | @sec-era-step6 |
+#' | Is $F_{ST}$ (here $GD_{BS}/GD_T$) held in a band rather than maximised, with $GD_{BS}$ and $GD_T$ reported beside it? | @sec-era-step6 |
 #' | Is the matrix's rank checked before any inversion, and the added ridge $\varepsilon$ documented? | @sec-era-step7 |
 #' | Is true genetic variance (or the best estimate of it) being tracked? | @sec-response |
 #' | Where possible, is an IBD alternative compared in parallel? | @sec-era-transposition |

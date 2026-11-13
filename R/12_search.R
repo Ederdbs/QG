@@ -21,9 +21,11 @@
 # --- Internal helpers ---------------------------------------------------------
 
 # Objective shared by every search in this file: mean index minus a
-# proportional penalty on the diversity budget, matching make_fitness_fast().
-# alpha_max = 0 is a legitimate request, so the normaliser is floored rather
-# than the threshold.
+# penalty on the diversity excess divided by alpha_max (proportional to the
+# budget), the same form as make_fitness_fast(); unlike it, the normaliser is
+# floored at 1e-6 because alpha_max = 0 is a legitimate request, and the floor
+# applies to the normaliser, not the threshold. No other restriction is
+# penalised here: the per-line cap is a hard feasibility test on the move.
 ls_objective <- function(n_sel, alpha_max, gd_ref, penalty) {
   scale_a <- max(alpha_max, 1e-6)
   function(isum, theta) {
@@ -111,8 +113,13 @@ ls_chain <- function(st, sel, in_set, isum, ctx, n_sel, max_use, obj, temps,
 #'
 #' The search this package's own primitives were written for.
 #' [theta_state]/[theta_swap] maintain group coancestry in `O(L)` per move, so
-#' a swap costs about 5 microseconds at production scale against 85 for the
-#' `f`-submatrix route -- and no `N x N` matrix is formed at all.
+#' a swap updates theta in 4-5 microseconds at production scale (N = 10000,
+#' `book/data/cost_per_eval.csv`: 5.0 us for `theta_swap()` against 84.9 us for
+#' recomputing theta from the `f` submatrix at n = 200). Those figures are the
+#' theta update alone, not a whole objective evaluation: the fitness of
+#' [make_fitness_fast] that [sel_de_fast] calls costs 132-169 us at the same N
+#' (`book/data/search_scaling.csv`, hybrid and line encodings). One machine, one
+#' run. No `N x N` matrix is formed at all.
 #'
 #' Three modes, one driver, differing only in the temperature schedule:
 #' `"hill"` accepts improving moves only, `"anneal"` runs one geometrically
@@ -122,8 +129,18 @@ ls_chain <- function(st, sel, in_set, isum, ctx, n_sel, max_use, obj, temps,
 #' cleverer but by combining many simple local searches.
 #'
 #' The per-line cap is a **partition matroid** and is enforced as a hard
-#' feasibility test on each move. The diversity budget is a proportional
-#' penalty, matching [make_fitness_fast].
+#' feasibility test on each move. The diversity budget is a penalty on the
+#' excess of alpha over `alpha_max` divided by `alpha_max` (proportional, as
+#' in [make_fitness_fast]; the normaliser is floored at 1e-6 so that
+#' `alpha_max = 0` is allowed), charged at `penalty` (default 5).
+#'
+#' Restrictions: only `alpha_max` (penalty) and `max_use` (hard test) are
+#' handled. There is no `ne_par_min` argument, so an N_e,par floor is not
+#' tested by the swap. That is an implementation gap, not a structural limit:
+#' [theta_state] carries the line-count vector, from which
+#' `N_e,par = (2n)^2 / sum(cnt^2)` costs no more than the `O(L)` of the swap
+#' itself. A pool-balance restriction is vacuous here: every hybrid is one
+#' pool-A by one pool-B cross, so the share of line uses in pool A is exactly 0.5 for any selection.
 #'
 #' @param ctx Context augmented by [fast_ctx].
 #' @param n_sel Number of hybrids to select.
@@ -247,9 +264,21 @@ sel_local_search <- function(ctx, n_sel, alpha_max, gd_ref,
 #' Drives `DEoptim` on [decode_lines] and [make_fitness_fast], the pair the
 #' package has exported since the line route was written but never had a driver
 #' for. The search dimension is `L` rather than `N` -- 200 instead of 10000 at
-#' production scale -- and no `N x N` matrix is formed. At an equal
-#' 60,000-evaluation budget under four simultaneous restrictions this reaches
-#' index 1.988 against 0.351 for the hybrid encoding of [sel_de].
+#' production scale -- and no `N x N` matrix is formed. In one recorded
+#' run (3 seeds, equal 60,000-evaluation budget, NP not recorded, both arms
+#' cold-started; the decoder satisfies the per-line cap by construction, which
+#' confounds the encoding) it reached index 1.988 against 0.351 for the N-key
+#' hybrid encoding; that comparison is not against `sel_de()` with its greedy warm
+#' start, which scores higher (uncapped) in the book's search benchmark.
+#'
+#' `ne_par_min` and `pool_tol` are accepted and enter the fitness as penalties
+#' only; neither is enforced. `pool_tol` cannot bind: the share of line uses in
+#' pool A is exactly 0.5 for any set of A x B crosses, so its penalty is always
+#' zero. `ne_par_min` can bind but is not guaranteed met: in the book's chapter
+#' 10b run (NP 100, itermax 300, `max_use` 5, floors 20, 25 and 30) all three
+#' floors returned the same plan, with N_e,par 25.7, violating the floor of 30.
+#' Check [fast_ne_parents] on the result; do not read acceptance of the argument as
+#' satisfaction of the floor.
 #'
 #' Warm start seeds sweep a line-diversity direction: `p` proportional to the
 #' negated mean coancestry of each line, at increasing strength. At strength
@@ -294,7 +323,9 @@ sel_de_fast <- function(ctx, n_sel, gd_ref, alpha_max, ne_par_min = NULL,
 #' construction the book used before -- the best relaxation point whose own
 #' `alpha` happens to fall inside the budget -- is **not** an upper bound. The
 #' relaxation at a given `lambda` maximises a penalised objective, not the
-#' index, so a discrete plan at the same diversity can and does beat it.
+#' index. A discrete plan that spends the budget is less diverse than a
+#' relaxation point strictly inside it, so it can and does beat that point
+#' (at exactly equal diversity it cannot, by weak duality).
 #'
 #' The correct statement is a one-line consequence of feasibility. Any
 #' selection `S` of size `n` has an equal-weight contribution vector that is
@@ -318,10 +349,15 @@ sel_de_fast <- function(ctx, n_sel, gd_ref, alpha_max, ne_par_min = NULL,
 #' @param lines Passed to [ocs_relaxation]. At production scale the dense route
 #'   costs `O(N^2)` per gradient step and the line route `O(N L)`, so pass
 #'   `TRUE` there even when the hybrid matrix happens to be in memory.
-#' @param tol Relative change below which the doubling stops.
+#' @param tol Relative change below which the doubling stops: the criterion is
+#'   `|V_new - V_old| <= tol * |V_old|` on the minimum over `lambdas`, when the
+#'   iteration count doubles.
 #' @param max_doublings Give up after this many doublings, with a warning.
 #' @return The bound, carrying `lambda`, `relaxation`, `iters` and `converged`
-#'   as attributes.
+#'   as attributes. `converged` is a stalling criterion (the minimum moved by
+#'   less than `tol`, relative, when the iteration count doubled), not a
+#'   certificate that the relaxation is solved: a slowly creeping value can
+#'   pass it, and `FALSE` means the value may sit below the true bound.
 #' @seealso [ocs_relaxation], [ocs_round], [sel_exact]
 #' @export
 ocs_bound <- function(ctx, n_sel, alpha_max, gd_ref,
@@ -370,9 +406,10 @@ ocs_bound <- function(ctx, n_sel, alpha_max, gd_ref,
 #' best-index one that respects `alpha_max`. The exchange rate is an internal
 #' detail; the budget is the interface, as everywhere else in this package.
 #'
-#' Its distinguishing feature is the certificate. `bound` is the Lagrangian
-#' bound of [ocs_bound], so `gap` is a genuine upper bound on what any method
-#' could still gain at this budget. Note that the relaxation carries no
+#' Its distinguishing feature is the bound. `bound` is the Lagrangian
+#' bound of [ocs_bound], so `gap` is the distance to an upper bound on what any
+#' method could still gain at this budget, valid when the bound's `converged`
+#' flag is `TRUE` (a stalling criterion, not a proof of convergence). Note that the relaxation carries no
 #' per-line cap, so with `max_use` set the bound stays valid but goes loose: it
 #' bounds a problem strictly easier than the one solved.
 #'

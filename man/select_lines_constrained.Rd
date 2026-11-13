@@ -24,10 +24,12 @@ select_lines_constrained(
 
 \item{max_swap}{Maximum repair swaps.}
 
-\item{merit_weight}{Weight on merit when breaking ties in the swap.}
+\item{merit_weight}{Weight on merit (standardised units) against the scaled
+`theta` gain when choosing among theta-reducing swaps.}
 }
 \value{
-A sorted integer vector of selected line indices.
+A sorted integer vector of selected line indices, with attributes
+  `theta`, `met`, `n_swap`.
 }
 \description{
 A purely incremental greedy ("add while theta stays below the ceiling")
@@ -38,8 +40,18 @@ unreachable at small set sizes. `theta` falls monotonically as the set grows,
 so the constraint is only meaningful **at** the target size.
 }
 \details{
-This takes the top `n_sel` by merit, then while `theta` exceeds the ceiling
-swaps out the selected line with the highest mean coancestry to the rest and
-swaps in the unselected line that most reduces `theta`, breaking ties on
-merit. Each swap is `O(n_sel)`.
+This takes the top `n_sel` by merit and, while `theta` exceeds the ceiling,
+applies a swap that **strictly lowers `theta`**. Every swap `(out, in)` is
+scored exactly (`Q' = Q - 2 r_out + f_oo + 2 (c_in - f_in,out) + f_ii`, with
+`Q = sum(fL[S, S])`, `r` and `c` the row sums to the set), and among the
+theta-reducing swaps the one with the best score is taken, the score being
+the gain in `theta` (scaled to its maximum over swaps) plus `merit_weight`
+times the merit change in standardised units. Because `theta` falls at every
+accepted swap, the loop cannot cycle; it stops when the ceiling is met or no
+single swap lowers `theta` (a local minimum). Each swap costs
+`O(n_sel * L)`.
+
+If the ceiling is not met when the loop stops (or after `max_swap` swaps) a
+warning is issued; the result carries attributes `theta` (final), `met`
+(logical) and `n_swap`.
 }

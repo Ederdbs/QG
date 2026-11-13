@@ -846,11 +846,12 @@ grid()
 #' gains: **twice** what $GD_{BS}$ gains, the accounting of @sec-keystone. Both
 #' statements are expectations over the draw of the pools, under the conditions above,
 #' and the chapter does not measure $GD_{WS}$ along the sweep.
-#' This is the mechanism behind @sec-stages Trap 3, in the Metrics and prediction
-#' part. That section states the symptom
-#' -- "$F_{ST}$ keeps rising as pools drift apart at loci that are *already*
-#' divergent, which buys no additional heterosis" -- and points here for the reason.
-#' @tbl-het-sweep and @fig-heterosis-sweep are that reason.
+#' This is the reason behind @sec-stages Trap 3, in the Metrics and prediction
+#' part. That section states that, in a neutral sweep, the frequency-side divergence
+#' statistic `mean_sq_delta_p` equals $2\,F_{ST}\,GD_T$ (equal pool sizes) and so does not decouple from
+#' $F_{ST}$, that what does decouple from it is expected heterosis, and that
+#' $F_{ST}$ should be held in a band and not at a maximum; it points here for the
+#' expected heterosis. @tbl-het-sweep and @fig-heterosis-sweep are that evidence.
 #' 
 #' ## What actually buys heterosis {#sec-heterosis-alignment}
 #' 
@@ -1033,7 +1034,7 @@ kv(c(half_mean_sq = mean(sw$mean_sq_delta_p) / 2,
 #' **What these symbols denote.** $\mu$, $g^A_i$, $g^B_j$ and $s_{ij}$ are used here
 #' for the decomposition of the mid-parent heterosis $H_{ij}$ (@eq-het-value), not of
 #' the cross mean $\bar y_{ij}$ of @eq-hp-gca-sca (the model for a factorial between
-#' two sets of lines, the North Carolina Design II of @comstock1948, as in
+#' two sets of lines, the North Carolina Design II, attributed to @comstock1948 (an attribution not verified for this book), as in
 #' @sec-hybrid-programme). For the cross mean, with additive
 #' effects $a_k$ and no epistasis, the GCA of pool-A line $i$ is
 #' $\sum_k [a_k + d_k(1 - 2p_{Bk})]\,\delta u_{ik}$ (@sec-mating-estimation). The

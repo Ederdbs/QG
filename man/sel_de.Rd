@@ -39,8 +39,9 @@ do it in production.}
 \item{max_use}{Maximum times any line may be used, or `NULL` for no cap.
 The default is `NULL`, which reproduces the behaviour this function had
 before the cap existed. Set it to make the per-line usage restriction --
-a partition matroid -- active on the production route; the violation
-enters proportionally, as the diversity budget does.}
+a partition matroid -- active on the production route; the violation is
+the number of line uses above `max_use`, summed over lines and divided by
+`2 * n_sel`, added to the alpha excess and charged at the same `penalty`.}
 }
 \value{
 An integer vector of selected hybrid indices.
@@ -50,9 +51,26 @@ Runs `DEoptim` on the continuous encoding of [decode], with the fitness from
 [make_fitness].
 }
 \details{
-The population **must** be seeded with greedy solutions. Without that warm
-start, 4.5e5 evaluations are not enough to beat greedy on roughly 100
-integer dimensions.
+The population is seeded with greedy solutions by default (`seeds = NULL`
+never means a cold start). The earlier note that a cold start with 4.5e5
+evaluations does not beat greedy on roughly 100 integer dimensions is a
+historical figure: no run of it is recorded in this repository and it is not
+reproduced here. What the book measured instead (book scale, 20 seeds, about
+30,000 evaluations): the default warm start finished +0.139 index units above
+a cold start, and below the best feasible greedy plan. The second half
+reverses with the budget: at the 1% budget, 10 seeds, the mean index was
+1.334 at 30,000 evaluations (NP 120, itermax 250; 0 of 10 above the best
+feasible fine-grid greedy, 1.4226), 1.438 at 120,000 (NP 120, itermax 1000;
+10 of 10 above) and 1.481 at the default 600,000 (NP 300, itermax 2000;
+10 of 10 above). The cold-versus-warm effect was measured at 30,000
+evaluations only.
+
+The default seed grid is hard-coded (`w` = 0, 0.25, 0.5, 1, 2, 4, 8, 16),
+all but `w = 0` above the weight at which the greedy crosses over from
+diversity to index, so it holds few distinct plans (at book scale, the
+truncation plan seven times and the `w = 0` plan once). The best feasible
+greedy plan at the given budget is not generally among them; pass it in
+`seeds` to start from it.
 }
 \seealso{
 Other selection strategies:
