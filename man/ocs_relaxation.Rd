@@ -25,12 +25,17 @@ A matrix with one row per lambda.
 }
 \description{
 Maximises `c'u - lambda c'f c` subject to `sum(c) = 1` and
-`0 <= c <= 1 / n_sel`. The cap is what makes this a valid **upper bound**
-for the equal-weight 0/1 problem: a large gap against [sel_de] means the DE
-has not converged.
+`0 <= c <= 1 / n_sel`. The cap makes every equal-weight 0/1 plan feasible,
+so the maximum `V(lambda)` is at least the penalised value
+`mean index - lambda * theta` of any discrete plan. This is a relaxation of
+the **penalised** problem, not a bound on the index at a given diversity: a
+plan that spends a diversity budget is less diverse than a relaxation point
+inside it and can have a higher index. The valid upper bound at a budget is
+[ocs_bound] (Lagrangian, `V(lambda) + lambda * theta_max`).
 }
 \details{
-Too few iterations yield an "upper bound" smaller than the discrete optimum,
-which is useless. The default is the minimum that converged in testing;
-re-check it whenever the dataset changes.
+Too few iterations leave `V(lambda)` below a discrete plan's penalised value,
+which is the signature of non-convergence. The default `iters` is not a
+threshold: judge convergence by the relative change of `V` when `iters`
+doubles (the tolerance [ocs_bound] uses), and re-check it as `N` grows.
 }

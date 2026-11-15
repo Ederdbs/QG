@@ -309,6 +309,9 @@ fast_theta_pools <- function(idx, ctx) {
 #' Decode a random-key vector into hybrid indices
 #'
 #' The classical encoding, one gene per hybrid, so the search dimension is `N`.
+#' It takes no `max_use`: with `encoding = "hybrid"` in [make_fitness_fast] a
+#' per-line cap can therefore only enter as a penalty, so penalty and repair
+#' coincide (an inference from the code, not a tested explanation).
 #'
 #' @param p Numeric parameter vector of length `ctx$N`.
 #' @param ctx Context augmented by [fast_ctx].
@@ -325,10 +328,12 @@ decode_rank <- function(p, ctx, n_sel) order(p)[seq_len(n_sel)]
 #' parents, and hybrids are taken greedily subject to the per-line usage cap --
 #' so the cap is satisfied by construction rather than by penalty.
 #'
-#' This reparameterisation, not the constraint handler, is what decides whether
-#' the differential evolution works: at an equal 60,000-evaluation budget under
-#' four simultaneous restrictions it reached index 1.988 against 0.351 for
-#' [decode_rank].
+#' In one cached comparison (3 seeds, equal 60,000-evaluation budget, NP not
+#' recorded, both arms cold-started) it reached index 1.988 against 0.351 for
+#' the N-key encoding [decode_rank]. That run confounds the encoding with the
+#' decoder, which satisfies the per-line cap by construction, so it does not
+#' isolate the encoding; and it is not a comparison with `sel_de()` and its
+#' greedy warm start.
 #'
 #' @param p Numeric parameter vector of length `ctx$n_lines`.
 #' @param ctx Context augmented by [fast_ctx].
@@ -363,8 +368,14 @@ decode_lines <- function(p, ctx, n_sel, max_use = NULL, w_div = 3) {
 #'
 #' The drop-in replacement for [make_fitness] at production scale. Uses only
 #' `ctx$fL` and `ctx$parents` in the inner loop: no `N x N` matrix is ever
-#' formed or indexed. Handles several simultaneous restrictions, each entering
-#' as a proportional penalty.
+#' formed or indexed. Handles several simultaneous restrictions, each term
+#' dimensionless and charged at the common `penalty`: the relative loss of gene
+#' diversity above `alpha_max`, divided by `alpha_max`; `Ne` shortfall divided
+#' by `ne_par_min`; pool-balance excess divided by `pool_tol`; and the `max_use`
+#' term, which is NOT divided by a limit: it is the line uses above `max_use`,
+#' summed over lines, divided by the total line uses. `alpha_max = 0` divides
+#' by zero here (unlike `sel_local_search()`, whose normaliser is floored at
+#' 1e-6). [make_fitness] instead charges an absolute excess (default 1000).
 #'
 #' @param ctx Context augmented by [fast_ctx].
 #' @param n_sel Number of hybrids to select.
@@ -375,7 +386,8 @@ decode_lines <- function(p, ctx, n_sel, max_use = NULL, w_div = 3) {
 #' @param pool_tol Tolerance on the deviation of pool balance from 0.5, or
 #'   `NULL`.
 #' @param index The index to maximise.
-#' @param penalty Penalty multiplier on the total constraint violation.
+#' @param penalty Penalty multiplier on the total proportional violation
+#'   (default 5, in index units; [make_fitness] uses 1000 on an absolute one).
 #' @param encoding `"lines"` (recommended, dimension `L`) or `"hybrid"`
 #'   (dimension `N`).
 #' @return A function of the DE parameter vector returning a value to minimise.

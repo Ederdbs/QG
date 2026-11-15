@@ -4,238 +4,858 @@
 #| include: false
 source("_common.R")
 traj <- read.csv(book_data("cycles_trajectory.csv"))
+cr   <- read.csv(book_data("cycles_crossover.csv"), colClasses = c(budget = "character"))
 vr   <- read.csv(book_data("limits_variance.csv"))
 lk   <- read.csv(book_data("limits_linked.csv"))
+cx   <- function(b, f) f(cr$crossover[cr$budget == b])
+fx   <- function(x, d = 2) formatC(x, format = "f", digits = d)   # fixed decimals, keeps trailing zeros
+stopifnot(all(table(traj$budget, traj$seed) == 16))     # 3 budgets x 5 draws x cycles 0-15
 ```
 
-@sec-cycles ran the programme forward and found the crossover: a constrained
-programme trails an unconstrained one for about eight cycles and leads
-thereafter. That is a measurement. This chapter asks the two questions a
-measurement leaves open -- could it have been *predicted*, and is the quantity
-being managed the quantity that actually matters.
+@sec-cycles ran the programme forward and found a crossover: the
+$\alpha_{\max} = 0.02$ programme trails an unconstrained one for
+`r fmt(cx("0.020", mean), 1)` cycles on average (five founder draws, crossovers
+from `r cx("0.020", min)` to `r cx("0.020", max)`) and leads thereafter; the
+$\alpha_{\max} = 0.005$ programme crosses at a mean of
+`r fmt(cx("0.005", mean), 1)` (`r cx("0.005", min)` to `r cx("0.005", max)`).
+That is a simulation result under the assumptions of @sec-cycles, not a
+measurement on a breeding programme. This chapter asks the two questions it
+leaves open: could the cumulative gain have been *forecast* from the rate of
+inbreeding, and is the quantity the constraint manages the only quantity that
+limits the response?
 
-The answers are yes-with-a-condition, and no-not-entirely.
+On these simulations the answers are, in short: a forecast built on Robertson's
+result, with a rate-based $N_e$ fitted on the same 15 cycles it is compared with,
+reaches the observed five-draw mean 15-cycle gain for the tightest budget
+($\alpha_{\max} = 0.005$) and not for the other two arms; along the way it is
+low over the first cycles at that budget (@tbl-limits-cum): the end-point
+agreement coincides with a low first-cycle response and a response that decays
+faster than $\Delta F$, and is not a match of the trajectory. For a single founder
+draw the forecast is wrong by tens of per cent even at the end point. As for the second question, the constraint
+does not act on the covariance between loci that selection builds, which no
+one-locus diversity metric can see, and that covariance lowers the realised
+variance below the genic variance in these runs; whether it lowers the
+*response* was not computed here.
+
+## What this chapter reads, and what it assumes
+
+Three cached files, which differ in what a reader can regenerate:
+
+- `cycles_trajectory.csv` and `cycles_crossover.csv`: three budgets
+  (unconstrained, $\alpha_{\max} = 0.02$, $0.005$) $\times$ five founder draws
+  (seeds 1 to 5) $\times$ cycles 0 to 15, produced by `run_cycles()` through
+  `book/scripts/regenerate.R cycles`. Reproducible from this repository; the same
+  file @sec-cycles reads.
+- `limits_variance.csv`: three regimes (`random`, `unconstrained`,
+  $\alpha_{\max} = 0.02$) $\times$ eight seeds $\times$ cycles 0 to 12, produced by
+  `regenerate.R limits`. Reproducible from this repository: a chunk below re-runs
+  seed 1 in two arms and asserts the match.
+- `limits_linked.csv`: an AlphaSimR arm, four replicates $\times$ two arms
+  $\times$ cycles 0 to 8, produced by `regenerate.R limits`. **Treated as not
+  reproducible from this repository**: its founders come from `runMacs2()` (a
+  coalescent run by MaCS), they were not saved, and whether a re-run under the same
+  seed returns them was not measured (callout in the linked-arm section). It is a
+  cached result of one run of the producer.
+
+The unlinked arm is `run_cycles()` at the reduced scale of
+`book_cfg`: 25 + 25 inbred lines, $m = 2000$ biallelic markers coded 0/0.5/1 on the
+hybrids, 300 QTL with known $N(0,1)$ effects, $F_{ST} = 0.15$ between pools, the
+complete $25 \times 25$ factorial of 625 hybrids as the candidate set, and 60
+hybrids selected per cycle. The selector is `sel_greedy_budget()` (truncation when
+unconstrained), the budget $\alpha_{\max}$ is applied per cycle against the
+random-subset reference of that cycle, cycles are discrete, lines are recycled
+within pool as doubled haploids, and loci are unlinked. The selection index is the
+true genetic value, known without error and additive: the `h2` that
+`run_cycles()` passes to `simulate_pools()` only perturbs a noisy index the loop
+does not use. Nothing in this chapter varies $F_{ST}$, $N$, $n_{sel}$ or the
+number of markers, so none of its conclusions is verified at another scale. The
+index is expressed in standard deviations of the cycle-0 hybrid index. The linked
+arm is described where it is used.
+
+Three things this index leaves out matter to what the chapter can claim, and
+other chapters treat them: the crossing plan (the complete factorial is
+assumed; @sec-mating, @sec-sparse and @sec-joint treat which crosses and which
+locations), estimated rather than known marker effects (@sec-genomic-prediction),
+and the choice of selector (@sec-advanced).
 
 ## Robertson's limit
 
-@sec-response wrote down the response to one cycle of selection. Robertson
-[-@robertson1960] wrote down the sum of all of them. Selection fixes alleles; a
-finite population fixes some of the favourable ones in the wrong direction; and
-the total advance before everything is fixed is approximately
+@sec-response wrote down the response to one round of selection.
+Robertson [-@robertson1960] summed the responses over generations in a
+population of constant effective size $N_e$. Selection fixes alleles; a
+finite population fixes some of the favourable ones in the wrong direction. For
+additive genes and low values of $N_e i$ (with $i$ the selection intensity) his
+summary states the total advance as $2 N_e$ times the gain of the first generation
+(for a quantitative trait he credits this to Dempster, 1955), says it
+approaches $4 N_e$ times that gain for larger values of $N_e s$ ($s$ the
+selective advantage of a gene), and bounds the half-life of the process by $1.4 N_e$
+generations (@robertson1960, summary items 3 and 4, p. 234; text p. 237 and
+p. 241). In the symbols of this chapter:
 
-$$R_{\text{total}} \;\approx\; 2 N_e R_1$$
+$$R_{\text{total}} \;\approx\; 2 N_e R_1, \qquad t_{1/2} \;\le\; 1.4\, N_e
+$$ {#eq-limits-robertson}
 
-with a half-life of about $1.4 N_e$ generations. The result is the theoretical
-ancestor of every optimal-contribution scheme in this book: it is *why* $N_e$ is
-the thing to manage, and it says exactly what a unit of $N_e$ is worth in units
-of cumulative gain.
+with $R_{\text{total}}$ the total advance (index units), $R_1$ the gain of the first
+generation (index units), $N_e > 0$ the effective size, and $t_{1/2}$ the half-life
+in generations. The first relation is an equality only for low $N_e i$; the second
+is an upper bound, so "about $1.4 N_e$" is not what the source says. Reading
+this as the reason $N_e$ is the thing to manage, or as the ancestor of the
+optimal-contribution schemes of this book, is this book's interpretation: the
+paper does not discuss optimal contributions.
 
-Both inputs are already in @sec-cycles' trajectory. $R_1$ is the first cycle's
-response, and $N_e$ comes from the rate of inbreeding, exactly as @sec-cycles
-computed it:
+The form tested below is the chapter's own use of the result, not a transcription
+of an equation of the paper. If the response of each generation is the previous
+one multiplied by $(1 - \Delta F)$, with $\Delta F = 1 / (2 N_e)$, the cumulative
+gain after $t$ generations is
+
+$$G_t \;=\; R_1 \sum_{j=0}^{t-1} (1 - \Delta F)^j
+\;=\; 2 N_e R_1 \left[ 1 - \left(1 - \frac{1}{2 N_e}\right)^{t} \right]
+$$ {#eq-limits-cumul}
+
+which tends to $2 N_e R_1$ as $t \to \infty$. Here a generation is a *cycle*:
+cycles are discrete and non-overlapping (@sec-genomic-era, assumption A4).
+
+### What is fitted, and what it is not
+
+$R_1$ is the mean index of the 60 hybrids selected in cycle 1 minus that of cycle 0.
+It is neither the genetic selection differential of @sec-response nor the change of the
+population mean that Robertson's $R_1$ refers to; it is the change of the mean
+of the selected set between two successive cycles. $G_t$ is the same difference
+between cycle $t$ and cycle 0, and $G_{15}$ the observed 15-cycle gain.
+
+$N_e$ is *rate-based*: $N_e = 1 / (2 \Delta F)$ with
+$\Delta F = 1 - e^{\text{slope}}$, the slope of the regression of
+$\log(1 - F_{drift})$ on cycle over cycles 1 to 15 of the five-draw mean series
+(@sec-era-step4; cycle 0 is the displacement of the selection from the base before
+any recycling, not a generation of drift). This is a quantity that the book
+declines to report for managed populations (@sec-choosing-recommendation,
+@sec-case-study): $F_{drift}$ of a managed arm is computed on the merged
+frequencies of the 60 selected hybrids against the frozen base $p_0$, a level
+different from the drift equation of @eq-hp-drift, and a saturating series makes
+the slope an average over a curve. The contradiction is not resolved here. $N_e$ is
+used below as the fitted parameter of @eq-limits-cumul, and what the comparison
+tests is whether a geometric decay of the response at the fitted rate of
+$F_{drift}$ describes the observed gain, not Robertson's theorem for a population
+of effective size $N_e$. For the same estimator applied to a neutral arm (equal usage, no
+selection), see @sec-cycles; this chapter does not recompute it.
 
 ```{r}
-rob <- do.call(rbind, lapply(unique(traj$budget), function(b) {
-  d  <- aggregate(cbind(index, F_drift) ~ cycle, traj[traj$budget == b, ], mean)
-  f  <- lm(log(1 - F_drift) ~ cycle, d[-1, ])
-  Ne <- 1 / (-2 * coef(f)[["cycle"]])
+#| label: rob-fit
+# Fit of one series (cycle, index, F_drift); t_end = last cycle used in the fit
+rob_fit <- function(d, t_end = 15) {
+  d  <- d[order(d$cycle), ]
+  f  <- lm(log(1 - F_drift) ~ cycle, d[d$cycle %in% 1:t_end, ])
+  dF <- 1 - exp(coef(f)[["cycle"]]); Ne <- 1 / (2 * dF)
   R1 <- d$index[2] - d$index[1]
-  data.frame(budget = b, R2 = summary(f)$r.squared, Ne = Ne, R1 = R1,
-             limit = 2 * Ne * R1, half_life = 1.4 * Ne,
-             observed_15 = d$index[16] - d$index[1],
-             predicted_15 = 2 * Ne * R1 * (1 - (1 - 1 / (2 * Ne))^15))
-}))
-fmt(rob, 3)
+  c(R2 = summary(f)$r.squared, dF = dF, Ne = Ne, R1 = R1,
+    G15_obs = d$index[d$cycle == 15] - d$index[1],
+    G15_pred = 2 * Ne * R1 * (1 - (1 - 1 / (2 * Ne))^15))
+}
+bud   <- c("unconstrained", "0.020", "0.005")
+smean <- function(b, seeds = 1:5)         # mean series over founder draws
+  aggregate(cbind(index, F_drift) ~ cycle,
+            do.call(rbind, lapply(seeds, function(s)
+              traj[traj$budget == b & traj$seed == s, ])), mean)
+rob <- data.frame(budget = bud, t(sapply(bud, function(b) rob_fit(smean(b)))),
+                  row.names = NULL)
+rob$ratio <- rob$G15_pred / rob$G15_obs
+rb  <- function(col, b) rob[[col]][rob$budget == b]
+
+# identity: the geometric sum equals the closed form of @eq-limits-cumul
+Ne0 <- rob$Ne[1]; dF0 <- 1 / (2 * Ne0)
+stopifnot(isTRUE(all.equal(sum((1 - dF0)^(0:14)),
+                           2 * Ne0 * (1 - (1 - 1 / (2 * Ne0))^15))))
 ```
 
-Read the last two columns against each other, and then read both against the
-first.
+```{r}
+#| label: tbl-limits-rob
+#| tbl-cap: "Fit of the geometric form of Robertson's cumulative gain (@eq-limits-cumul) to the five-draw mean trajectory of each budget (`cycles_trajectory.csv`, cycles 0 to 15, 25 + 25 lines, 60 of 625 hybrids selected per cycle). R2: coefficient of determination of the regression of log(1 - F_drift) on cycle, cycles 1 to 15; dF = 1 - exp(slope); Ne = 1/(2 dF), rate-based and fitted; R1: gain from cycle 0 to cycle 1; G15_obs, G15_pred: observed and predicted gain from cycle 0 to cycle 15 (index units, standard deviations of the cycle-0 hybrid index); ratio = G15_pred / G15_obs. The prediction uses the same 15 cycles it is compared with (in sample)."
+knitr::kable(fmt(rob, 3), row.names = FALSE)
+```
 
-## The $R^2$ column decides whether the theory applies
+Result (@tbl-limits-rob). For the tightest budget the predicted 15-cycle gain is
+`r fmt(rb("G15_pred", "0.005"), 2)` against an observed
+`r fmt(rb("G15_obs", "0.005"), 2)`, a ratio of `r fmt(rb("ratio", "0.005"), 3)`. For
+the unconstrained programme it is `r fmt(rb("G15_pred", "unconstrained"), 2)` against
+`r fmt(rb("G15_obs", "unconstrained"), 2)`, a ratio of
+`r fmt(rb("ratio", "unconstrained"), 2)`: the prediction is about
+twice the observation. For $\alpha_{\max} = 0.02$ it is
+`r fmt(rb("G15_pred", "0.020"), 2)` against `r fmt(rb("G15_obs", "0.020"), 2)`
+(ratio `r fmt(rb("ratio", "0.020"), 2)`). The $R^2$ values are
+`r fmt(rb("R2", "0.005"), 3)`, `r fmt(rb("R2", "unconstrained"), 3)` and
+`r fmt(rb("R2", "0.020"), 3)` for the budgets $0.005$, unconstrained and $0.02$ in
+that order.
 
-For the tightest budget the prediction is
-`r fmt(rob$predicted_15[rob$budget == "0.005"], 2)` and the observation is
-`r fmt(rob$observed_15[rob$budget == "0.005"], 2)`. Robertson's theory, published
-in 1960 and derived for a single locus under idealised drift, predicts fifteen
-cycles of a genomic hybrid programme to better than one percent.
+### The agreement at $\alpha_{\max} = 0.005$ is a mean over five draws
 
-For the unconstrained programme it predicts
-`r fmt(rob$predicted_15[rob$budget == "unconstrained"], 2)` against an observed
-`r fmt(rob$observed_15[rob$budget == "unconstrained"], 2)` -- too high by about
-half.
+A ratio of the five-draw means hides the spread between founder draws. The
+same fit applied to each draw's own trajectory, and a bootstrap over the five draws
+(2000 resamples of the draws with replacement, the series averaged and refitted in
+each, `set.seed(1)` before each budget):
 
-The theory did not fail arbitrarily, and @sec-cycles already said why. Robertson
-assumes a *constant* rate of inbreeding, and the regression of $\log(1-F)$ on
-cycle is where that assumption is testable. Its $R^2$ is
-`r fmt(rob$R2[rob$budget == "0.005"], 3)` for the tightest budget and
-`r fmt(rob$R2[rob$budget == "unconstrained"], 3)` for the unconstrained run,
-whose drift decelerates because there is progressively less left to lose. That
-low $R^2$ is not a nuisance. It is the theory declining to apply, in advance,
-and in a column you can read before you trust the number.
+```{r}
+#| label: rob-seed
+per <- do.call(rbind, lapply(bud, function(b) do.call(rbind, lapply(1:5, function(s)
+  data.frame(budget = b, seed = s,
+             t(rob_fit(traj[traj$budget == b & traj$seed == s, ])))))))
+per$ratio <- per$G15_pred / per$G15_obs
+boot <- t(sapply(bud, function(b) {
+  set.seed(1)
+  r <- replicate(2000, { x <- rob_fit(smean(b, sample(1:5, 5, replace = TRUE)))
+                         x[["G15_pred"]] / x[["G15_obs"]] })
+  quantile(r, c(0.05, 0.95))
+}))
+spread <- data.frame(
+  budget = bud,
+  ratio_of_means = rob$ratio,
+  draw_min = tapply(per$ratio, per$budget, min)[bud],
+  draw_max = tapply(per$ratio, per$budget, max)[bud],
+  draw_sd  = tapply(per$ratio, per$budget, sd)[bud],
+  boot_5   = boot[, 1], boot_95 = boot[, 2],
+  n_R2_ge_099 = tapply(per$R2 >= 0.99, per$budget, sum)[bud],
+  row.names = NULL)
+n_hi  <- sum(per$R2 >= 0.99)                               # runs with R2 >= 0.99
+n_hi_off <- sum(per$R2 >= 0.99 & abs(per$ratio - 1) > 0.2) # ... still off by > 20 %
+n_995 <- sum(per$R2 >= 0.995)
+n_995_off <- sum(per$R2 >= 0.995 & abs(per$ratio - 1) > 0.2)
+sp <- function(col, b) spread[[col]][spread$budget == b]
+```
+
+```{r}
+#| label: tbl-limits-spread
+#| tbl-cap: "Predicted over observed 15-cycle gain: the ratio of the five-draw means (as in @tbl-limits-rob), the minimum, maximum and standard deviation of the five per-draw ratios, the 5th and 95th percentiles of the ratio over 2000 bootstrap resamples of the five founder draws, and the number of the five per-draw fits with R2 of at least 0.99."
+knitr::kable(fmt(spread, 2), row.names = FALSE)
+```
+
+Result (@tbl-limits-spread). For $\alpha_{\max} = 0.005$ the ratio of the means is
+`r fmt(sp("ratio_of_means", "0.005"), 3)`, the per-draw ratios run from
+`r fmt(sp("draw_min", "0.005"), 2)` to `r fmt(sp("draw_max", "0.005"), 2)` and the
+bootstrap 90 % interval of the ratio of the means is
+`r fmt(sp("boot_5", "0.005"), 2)` to `r fmt(sp("boot_95", "0.005"), 2)`. For the
+unconstrained programme the per-draw ratios run from
+`r fmt(sp("draw_min", "unconstrained"), 2)` to `r fmt(sp("draw_max", "unconstrained"), 2)`,
+for $\alpha_{\max} = 0.02$ from `r fmt(sp("draw_min", "0.020"), 2)` to
+`r fmt(sp("draw_max", "0.020"), 2)`.
+
+Interpretation, and what limits it. The agreement at the tightest budget is an
+agreement of a five-draw mean, within a bootstrap interval that five draws do not
+narrow; a single founder draw is predicted with errors of up to
+`r fmt(100 * max(abs(per$ratio[per$budget == "0.005"] - 1)), 0)` % at that budget.
+$R_1$ is one difference between two cycles, and per draw it ranges from
+`r fmt(min(per$R1[per$budget == "0.005"]), 2)` to
+`r fmt(max(per$R1[per$budget == "0.005"]), 2)` at $\alpha_{\max} = 0.005$; a
+forecast proportional to it inherits that spread. The comparison is in sample ($N_e$ and $G_{15}$ come
+from the same 15 cycles), the unit of replication is the founder draw ($n = 5$),
+and the three budgets share the same five draws, so the three rows of
+@tbl-limits-rob are not independent.
+
+### The $R^2$ of the $\log(1-F)$ fit does not tell which forecasts fail
+
+Robertson's formula needs a constant $\Delta F$, and the regression of
+$\log(1 - F_{drift})$ on cycle is where that is testable; the unconstrained
+programme has the lowest $R^2$ and the worst ratio (a possible reason, not tested
+here, is that its drift decelerates because there is progressively less left to
+lose). But $\alpha_{\max} = 0.02$ has an
+$R^2$ of `r fmt(rb("R2", "0.020"), 3)` and is still over-predicted by
+`r fmt(100 * (rb("ratio", "0.020") - 1), 0)` %. Two further checks, both on the
+chapter's own runs:
+
+```{r}
+#| label: rob-short
+# N_e fitted on cycles 1-5 only (R_1 is still that of cycle 1)
+short <- data.frame(budget = bud,
+                    t(sapply(bud, function(b) rob_fit(smean(b), t_end = 5))),
+                    row.names = NULL)
+short$ratio <- short$G15_pred / short$G15_obs
+# Per-cycle response R_t observed, against what geometric decay at dF would give
+Rt <- sapply(bud, function(b) diff(smean(b)$index))        # 15 x 3: R_1 ... R_15
+rt <- data.frame(budget = bud, R_1 = Rt[1, ], R_15 = Rt[15, ],
+                 R_15_geometric = Rt[1, ] * (1 - rob$dF)^14, row.names = NULL)
+sh  <- function(col, b) short[[col]][short$budget == b]
+rtv <- function(col, b) rt[[col]][rt$budget == b]
+```
+
+```{r}
+#| label: tbl-limits-rt
+#| tbl-cap: "Per-cycle gain of the five-draw mean trajectory: R_1 (cycle 0 to 1), R_15 (cycle 14 to 15), and the value R_1 (1 - dF)^14 that a response decaying at the fitted rate dF of @tbl-limits-rob would give at cycle 15 (index units)."
+knitr::kable(fmt(rt, 2), row.names = FALSE)
+```
+
+Result. Fitting $N_e$ on cycles 1 to 5 only and keeping the observed $R_1$, the
+ratio is `r fmt(sh("ratio", "0.020"), 2)` for $\alpha_{\max} = 0.02$ (fit $R^2$
+`r fmt(sh("R2", "0.020"), 4)`), `r fmt(sh("ratio", "0.005"), 2)` for
+$\alpha_{\max} = 0.005$ and `r fmt(sh("ratio", "unconstrained"), 2)` for the
+unconstrained programme: the miss at $\alpha_{\max} = 0.02$ survives a fit with an
+$R^2$ close to one. Over the 15 (budget, draw) fits, `r n_hi` have
+$R^2 \ge 0.99$ and `r n_hi_off` of those are off by more than 20 %
+(with the threshold of 0.995 that @sec-era-step4 calibrated at its own scale,
+`r n_995` fits pass, of which `r n_995_off` is off by more than 20 %).
+@tbl-limits-rt shows where the miss sits: at $\alpha_{\max} = 0.02$ the per-cycle
+gain falls from `r fmt(rtv("R_1", "0.020"), 2)` to `r fmt(rtv("R_15", "0.020"), 2)`,
+where decay at $\Delta F$ would leave `r fmt(rtv("R_15_geometric", "0.020"), 2)`; in the
+unconstrained programme it falls to `r fmt(rtv("R_15", "unconstrained"), 2)`, against
+`r fmt(rtv("R_15_geometric", "unconstrained"), 2)`.
+
+Interpretation, and what limits it. The $\log(1 - F)$ regression tests the
+constancy of $\Delta F$; @eq-limits-cumul also requires the response to decay at
+that same rate, which the regression cannot see. In these runs the observed $R_{15}$
+is below the value of decay at $\Delta F$ in all three arms (@tbl-limits-rt). One hypothesis, not tested
+here, is that the genic variance is being used up faster than allele frequencies
+drift (the unconstrained arm's genic variance falls from
+`r fmt(mean(vr$var_genic[vr$regime == "unconstrained" & vr$cycle == 0]), 2)` at cycle 0
+to `r fmt(mean(vr$var_genic[vr$regime == "unconstrained" & vr$cycle == 12]), 2)` at
+cycle 12, below). Whatever the mechanism, $R^2$ is not a screen that
+separates good from bad forecasts here: @sec-era-step4 reads $R^2 < 0.995$ as a
+non-constant rate at its own scale (for the same threshold applied to the arms of
+@sec-cycles, see that chapter), and this chapter finds a high $R^2$ with a poor forecast. The $R^2$ is
+worth reporting as a diagnostic of the constancy of $\Delta F$, and it validates
+nothing more.
+
+### Along the trajectory, not only at cycle 15
+
+@tbl-limits-rob compares one number per budget, $G_{15}$. The same fit
+implies a predicted cumulative gain at every cycle, which can be set against the
+five-draw mean:
+
+```{r}
+#| label: rob-cum
+# predicted / observed cumulative gain at each cycle t = 1..15, same fit as tbl-limits-rob
+cum <- sapply(bud, function(b) {
+  d <- smean(b); i <- which(bud == b); tt <- 1:15
+  2 * rob$Ne[i] * rob$R1[i] * (1 - (1 - rob$dF[i])^tt) / (d$index[tt + 1] - d$index[1])
+})
+rownames(cum) <- NULL
+stopifnot(isTRUE(all.equal(unname(cum[15, ]), rob$ratio)),     # same as @tbl-limits-rob
+          all(rt$R_15 < rt$R_15_geometric),                      # decay faster than dF, 3 arms
+          all(cum[2:14, "0.005"] < 1), all(cum[2:15, 1:2] > 1))
+cyc_show <- c(1, 2, 3, 4, 5, 8, 12, 15)
+cumt <- data.frame(cycle = cyc_show, cum[cyc_show, ], check.names = FALSE)
+c5 <- cum[, "0.005"]
+```
+
+```{r}
+#| label: tbl-limits-cum
+#| tbl-cap: "Predicted over observed cumulative gain, G_t(pred) / G_t(obs), at selected cycles t of the five-draw mean trajectory, by budget; prediction from the fit of @tbl-limits-rob (N_e from cycles 1 to 15, observed R_1), so in sample. At t = 1 the ratio is 1 by construction."
+knitr::kable(fmt(cumt, 2), row.names = FALSE)
+```
+
+Result (@tbl-limits-cum). At $\alpha_{\max} = 0.005$ the predicted cumulative gain
+is `r fx(min(c5[2:5]), 2)` to `r fx(max(c5[2:5]), 2)` of the observed over
+cycles 2 to 5, `r fx(min(c5[6:14]), 2)` to `r fx(max(c5[6:14]), 2)` over cycles 6
+to 14, and `r fx(c5[15], 2)` at cycle 15; it is not above 1 at any cycle before 15.
+The observed per-cycle gain (@tbl-limits-rt) starts at
+`r fx(Rt[1, "0.005"], 2)` in cycle 1, below `r fx(Rt[2, "0.005"], 2)` in cycle 2 and
+`r fx(Rt[3, "0.005"], 2)` in cycle 3, whereas the form of @eq-limits-cumul has its
+largest response at cycle 1; the observed $R_{15}$ is `r fx(rtv("R_15", "0.005"), 2)`
+against `r fx(rtv("R_15_geometric", "0.005"), 2)` under decay at $\Delta F$. At
+$\alpha_{\max} = 0.02$ and for the unconstrained programme the ratio is above 1
+from cycle 2 on (asserted in the chunk), and in all three arms the
+observed $R_{15}$ is below its geometric value (also asserted).
+
+Interpretation, and what limits it. At $\alpha_{\max} = 0.005$ the 15-cycle
+agreement is not an agreement of the trajectory: the forecast is low while the first
+cycles accumulate and reaches the observation at the end, and the two features of
+the series just listed, a first response below the following ones and a response
+that decays faster than $\Delta F$, are consistent with one error offsetting the
+other at cycle 15. That offsetting is an inference from three numbers, not a
+decomposition. It rests on the five-draw mean and is in sample; the per-draw
+trajectories were not examined cycle by cycle.
+
+### The asymptote is not tested
+
+Robertson's limit is the asymptote of @eq-limits-cumul, and the horizon of
+15 cycles does not reach it for two of the three arms.
+
+```{r}
+#| label: rob-limit
+lim <- data.frame(budget = bud, limit_implied = 2 * rob$Ne * rob$R1,
+                  half_life_bound = 1.4 * rob$Ne, G15_obs = rob$G15_obs,
+                  last_cycle_gain = rt$R_15, row.names = NULL)
+lim$G15_over_limit <- lim$G15_obs / lim$limit_implied
+lm_ <- function(col, b) lim[[col]][lim$budget == b]
+```
+
+Result. The implied limit $2 N_e R_1$ is `r fmt(lm_("limit_implied", "unconstrained"), 1)`
+for the unconstrained programme, whose observed 15-cycle gain is
+`r fmt(lm_("G15_obs", "unconstrained"), 2)` and whose last-cycle gain is
+`r fmt(lm_("last_cycle_gain", "unconstrained"), 2)`: the series has plateaued at
+`r fmt(100 * lm_("G15_over_limit", "unconstrained"), 0)` % of the implied limit, so the
+limit is over-predicted by a factor of
+`r fmt(1 / lm_("G15_over_limit", "unconstrained"), 1)`. For $\alpha_{\max} = 0.02$ and
+$0.005$ the observed gains are
+`r fmt(100 * lm_("G15_over_limit", "0.020"), 0)` % and
+`r fmt(100 * lm_("G15_over_limit", "0.005"), 0)` % of the implied limit, and the bound
+$1.4 N_e$ on the half-life is `r fmt(lm_("half_life_bound", "0.020"), 1)` and
+`r fmt(lm_("half_life_bound", "0.005"), 1)` cycles, beyond the 15 observed.
+Interpretation. Where the limit could be reached it was not; where it could not,
+it was not tested. @tbl-limits-rob tests a short-horizon forecast built on the
+geometric form, and says nothing about the total advance or the half-life.
+
+### Is $N_e i$ low?
+
+Robertson's $2 N_e$ is for low $N_e i$ and approaches $4 N_e$ otherwise. A rough
+per-locus indicator for this simulation: with the selection intensity $i$ of
+truncating 60 of 625 and the substitution effect $\beta_k/2$ of a line allele on
+the hybrid index (hybrids are coded 0/0.5/1), $N_e\, i\, (\beta_k/2)/\sigma_P$,
+with $\sigma_P$ the standard deviation of the cycle-0 hybrid index (seed 1) and
+$N_e$ the mean of the fitted values of @tbl-limits-rob:
+
+```{r}
+#| label: limits-ni
+sim1  <- simulate_pools(n_A = 25, n_B = 25, m = 2000, seed = 1)
+i_int <- dnorm(qnorm(1 - 60 / 625)) / (60 / 625)       # normal-theory intensity
+sg    <- sd(as.vector(sim1[["X"]] %*% sim1[["beta"]]))
+a_k   <- abs(sim1[["beta"]][sim1[["beta"]] != 0]) / 2
+Nis   <- mean(rob$Ne) * i_int * a_k / sg
+```
+
+Result. $i =$ `r fmt(i_int, 2)`; over the `r length(a_k)` QTL the indicator has median
+`r fmt(median(Nis), 2)` and ranges from `r fmt(min(Nis), 3)` to `r fmt(max(Nis), 1)`.
+Interpretation, and what limits it. The indicator is not small for most loci, so they
+are not clearly in the low-$N_e i$ regime for which $2 N_e R_1$ is derived; the passages
+of @robertson1960 used here give no numerical threshold between "low" and
+"larger", and the mapping of the indicator to his $s$ is approximate. The condition
+is therefore unchecked, and the agreement of the 15-cycle end point at
+$\alpha_{\max} = 0.005$ is a property of this simulation, not evidence that the
+theorem applies to it.
 
 ::: {.callout-important}
-## Do not quote a Robertson limit without its $R^2$
+## A projection from a fitted $N_e$ is not validated by its $R^2$
 
-$N_e$ here is a *fitted* quantity, and @sec-cycles showed the fit is meaningless
-for a saturating series -- its fitted $\Delta F$ comes out lowest for the run
-that is actually losing diversity fastest, which is backwards. Feeding that
-$N_e$ into $2 N_e R_1$ propagates the error into a number that looks like a
-long-term plan.
-
-Report the $R^2$ next to every limit, and treat a limit computed from a fit
-below about 0.99 as an illustration rather than a projection.
+$N_e$ here is a rate fitted on a managed trajectory (see above), and it is
+fed into a cumulative-gain formula. Report with any such projection the
+per-draw spread, the per-cycle gain next to the rate of inbreeding, and the
+$R^2$ of the $\log(1 - F)$ fit as a diagnostic of the constancy of $\Delta F$
+only: an $R^2$ of `r fmt(rb("R2", "0.020"), 3)` accompanied a forecast
+`r fmt(100 * (rb("ratio", "0.020") - 1), 0)` % too high.
 :::
 
-That yields an argument for the constraint that this book did not previously
-have. @sec-cycles justified $\alpha$ by where the trajectories cross. The table
-above adds: the constrained programme is the one whose future can be *computed*.
-An unconstrained programme is not merely worse after cycle 8, it is
-unforecastable, because the theory that would forecast it needs a constant
-$\Delta F$ that it does not have.
+What the forecast does and does not show for the constraint, then. It does not
+show that a constrained programme is forecastable: for $\alpha_{\max} = 0.005$
+the five-draw mean 15-cycle gain is reached within the spread of five draws, in
+sample and not along the trajectory (@tbl-limits-cum); for $\alpha_{\max} = 0.02$
+it is not reached, and the unconstrained programme, whose $\Delta F$ is not
+constant, is not forecast by this form. @sec-cycles reports where the trajectories
+cross; this chapter does not use that crossing to choose a budget, and adds no
+argument for the constraint from forecastability.
 
 ## What the metrics cannot see
 
-Now the second question. Every diversity metric in this book -- $\theta$, $GD$,
-$N_s$, allelic richness, `F_hom`, `F_drift` -- is a function of allele
-frequencies **one locus at a time**. @sec-response showed that additive variance
-is not:
+Now the second question. The one-locus diversity metrics of this book --
+$\theta$, $GD$, $N_s$, allelic richness, $F_{hom}$ and $F_{drift}$ -- are
+functions of allele frequencies **one locus at a time**; `eff_dim()` is the exception
+among the catalogue's metrics (a multilocus quantity that weights loci by nothing, not by
+effect; @sec-response). Additive variance is not a one-locus quantity: the realised
+variance differs from the genic variance by the covariance term of
+@eq-response-ld. Directional selection drives that term negative (Bulmer
+[-@bulmer1971]: negative gametic-phase disequilibrium among trait loci, which lowers
+the additive variance below its genic value), without moving a single allele
+frequency. The primary text of Bulmer was not read for this book and what is
+attributed to it is reported, not checked (@sec-response); his result is for an
+infinitesimal number of loci, and the simulations below have finitely many.
 
-$$\operatorname{Var}(\mathbf{X}\boldsymbol\beta) \;=\; V_{\text{genic}}
-\;+\; 2\sum_{k<l}\beta_k\beta_l\operatorname{Cov}(x_k, x_l)$$
-
-Directional selection drives that covariance term negative (Bulmer
-[-@bulmer1971]): it couples loci with like effects in repulsion, hiding genic
-variance from the next generation without moving a single allele frequency. No
-metric in the catalogue can detect it.
-
-@sec-cycles assumed the effect away, in assumption **C1**: *loci are unlinked, so
-no linkage disequilibrium builds up and there is no Bulmer effect on the genic
-side.* That is worth testing rather than assuming, because Bulmer's 1971
-treatment covers unlinked loci explicitly -- free recombination halves the
-disequilibrium each generation, but selection regenerates it every generation,
-and the equilibrium is not zero.
+@sec-cycles lists as its assumption C1 that loci are unlinked. Whether that
+excludes a selection-built covariance term is worth testing rather than assuming.
+Recombination between unlinked loci reduces disequilibrium by half per round of
+meiosis (a standard result, not checked here against Bulmer's text), and selection
+recreates it each cycle; what the balance is here is a measurement.
 
 ### The experiment
 
 The gap $\operatorname{Var}(\mathbf{X}\boldsymbol\beta) - V_{\text{genic}}$ is
-**not** on its own a measure of the Bulmer effect. A finite founder base leaves
-disequilibrium in the very first cycle, and two divergent pools add more. So the
-comparison is against a control: an arm identical in every respect -- same
-founders, same seeds, same recycling, same population sizes -- in which the
-hybrids are chosen at random instead of on the index.
+**not** on its own a measure of the Bulmer effect. A finite founder base leaves a
+non-zero gap in the very first cycle. Over the complete factorial the covariance
+among loci is that of the founder lines of each pool, $[\operatorname{Cov}_A + \operatorname{Cov}_B]/4$
+up to the $n - 1$ divisor, with expectation zero and no between-pool term
+(@sec-response); two divergent pools do not add to it. So the comparison is against a
+control: an arm with the same founders and the same seed in which the hybrids are
+chosen at random instead of on the index. After cycle 0 the arms differ in the
+selection and in the random draws of recycling (the random selector consumes
+the random stream), so the control is valid in expectation, not draw for draw.
+The gap is reported in two units: on the index scale, and relative to the genic
+variance, $(\operatorname{Var}(\mathbf{X}\boldsymbol\beta) - V_{\text{genic}}) / V_{\text{genic}}$.
 
 ```{r}
-gapc <- aggregate(gap ~ regime + cycle, vr, mean)
-w <- reshape(gapc, idvar = "cycle", timevar = "regime", direction = "wide")
-names(w) <- sub("gap.", "", names(w))
-w$selection_effect <- w$unconstrained - w$random
-fmt(head(w[, c("cycle", "random", "unconstrained", "constrained",
-               "selection_effect")], 7), 4)
-```
-
-Cycle 0 is identical across all three arms, to the digit. Nothing has been
-selected yet, so the control is doing its job.
-
-From cycle 1 the arms separate. Paired within seed and cycle:
-
-```{r}
-p  <- reshape(aggregate(gap ~ regime + seed + cycle, vr, mean),
+#| label: var-tab
+vr$rel <- vr$gap / vr$var_genic              # gap in units of genic variance
+cm <- function(v) tapply(vr[[v]], list(vr$cycle, vr$regime), mean)  # cycle x regime
+w  <- reshape(vr[, c("regime", "seed", "cycle", "rel", "gap")],
               idvar = c("seed", "cycle"), timevar = "regime", direction = "wide")
-p  <- p[p$cycle > 0, ]
-dd <- p$gap.unconstrained - p$gap.random
-c(mean_effect = mean(dd), se = sd(dd) / sqrt(length(dd)),
-  t = mean(dd) / (sd(dd) / sqrt(length(dd))), n_pairs = length(dd))
+w$rel_unc <- w$rel.unconstrained - w$rel.random
+w$rel_con <- w$rel.constrained  - w$rel.random
+w$abs_unc <- w$gap.unconstrained - w$gap.random
+w$abs_con <- w$gap.constrained  - w$gap.random
+gt <- data.frame(cycle = 0:12,
+                 gap_random = cm("gap")[, "random"],
+                 gap_unconstrained = cm("gap")[, "unconstrained"],
+                 gap_constrained = cm("gap")[, "constrained"],
+                 Vgenic_random = cm("var_genic")[, "random"],
+                 Vgenic_unconstrained = cm("var_genic")[, "unconstrained"],
+                 rel_effect_unconstrained = tapply(w$rel_unc, w$cycle, mean),
+                 rel_effect_constrained = tapply(w$rel_con, w$cycle, mean),
+                 row.names = NULL)
+# cycle 0: nothing has been selected yet, so the three arms are identical
+c0 <- vr[vr$cycle == 0, ]
+stopifnot(all(tapply(c0$gap, c0$seed, function(x) diff(range(x))) == 0))
 ```
+
+```{r}
+#| label: tbl-limits-gap
+#| tbl-cap: "Gap between realised and genic variance of the 625 candidate hybrids, mean over eight seeds (`limits_variance.csv`; index scale: standard deviations of the cycle-0 hybrid index, squared). gap_*: Var(X beta) - V_genic by regime (random selection; unconstrained truncation; alpha_max = 0.02); Vgenic_*: genic variance; rel_effect_*: selected minus random arm, in units of genic variance, averaged over seeds after taking the ratio within each seed and cycle."
+knitr::kable(fmt(gt, 3), row.names = FALSE)
+```
+
+Cycle 0 is identical across the three arms in all eight seeds (the chunk asserts
+it): nothing has been selected yet, so the control starts where the selected arms
+start.
+
+```{r}
+#| label: var-test
+seed_test <- function(ps) {                   # ps: mean effect per seed
+  t <- t.test(ps)
+  c(mean = mean(ps), se = sd(ps) / sqrt(length(ps)), t = unname(t$statistic),
+    df = unname(t$parameter), n_neg = sum(ps < 0), n_seeds = length(ps))
+}
+per_seed <- function(x, col, cyc) tapply(x[[col]][x$cycle %in% cyc], x$seed[x$cycle %in% cyc], mean)
+early_late <- function(x, col) per_seed(x, col, 1:4) - per_seed(x, col, 9:12)
+vt <- rbind(
+  `unconstrained - random, index scale, cycles 1-12` = seed_test(per_seed(w, "abs_unc", 1:12)),
+  `constrained - random, index scale, cycles 1-12`   = seed_test(per_seed(w, "abs_con", 1:12)),
+  `unconstrained - random, relative, cycles 1-8`     = seed_test(per_seed(w, "rel_unc", 1:8)),
+  `constrained - random, relative, cycles 1-8`       = seed_test(per_seed(w, "rel_con", 1:8)),
+  `unconstrained - random, index scale, early (1-4) minus late (9-12)` = seed_test(early_late(w, "abs_unc")),
+  `unconstrained - random, relative, cycles 6-8`     = seed_test(per_seed(w, "rel_unc", 6:8)),
+  `constrained - random, relative, cycles 6-8`       = seed_test(per_seed(w, "rel_con", 6:8)))
+vt_row <- function(i, col) vt[i, col]
+# ratio var_g / var_genic, averaged over cycles within each seed, then over seeds
+vr$ratio <- vr$var_g / vr$var_genic
+ps_ratio <- function(r, cyc) { x <- vr[vr$regime == r & vr$cycle %in% cyc, ]
+                               tapply(x$ratio, x$seed, mean) }
+reg3 <- c("unconstrained", "constrained", "random")
+rr <- data.frame(regime = reg3, t(sapply(reg3, function(r) {
+  a <- ps_ratio(r, 5); b <- ps_ratio(r, 1:8)
+  c(cycle5 = mean(a), cycle5_se = sd(a) / sqrt(length(a)),
+    cycles1_8 = mean(b), cycles1_8_se = sd(b) / sqrt(length(b)))
+})), row.names = NULL)
+r5 <- setNames(rr$cycle5, rr$regime); r5se <- setNames(rr$cycle5_se, rr$regime)
+r18 <- setNames(rr$cycles1_8, rr$regime); r18se <- setNames(rr$cycles1_8_se, rr$regime)
+# paired (same founders) constrained - random at cycle 5, and the random arm against 1
+d5 <- t.test(ps_ratio("constrained", 5) - ps_ratio("random", 5))
+# slope of the relative effect on cycle, per seed (the linked arm reuses slope_by below)
+slope_by <- function(x, col) sapply(split(x, x$seed), function(z) coef(lm(z[[col]] ~ z$cycle))[[2]])
+wr <- w[w$cycle %in% 1:8, ]
+sl_ul <- seed_test(slope_by(wr, "rel_unc"))
+sl_ua <- seed_test(slope_by(wr, "abs_unc"))
+sl_ci <- sl_ul[["mean"]] + c(-1, 1) * qt(0.975, sl_ul[["df"]]) * sl_ul[["se"]]
+```
+
+```{r}
+#| label: tbl-limits-test
+#| tbl-cap: "Selected minus random arm, tested with the founder draw (seed) as the unit of replication: the effect is averaged over the listed cycles within each seed, and the eight values (for the early-minus-late row, the eight within-seed early-minus-late differences) are tested against zero (one-sample t, df = seeds - 1). n_neg: seeds with a negative mean effect. The early-minus-late split (cycles 1-4 against 9-12) was defined after the eight seeds had been seen and is exploratory; the cycles 6-8 rows are also post hoc (a late window, added to check whether the effect persists). A negative effect means selection lowered the variance below its genic value more than random selection did."
+knitr::kable(fmt(vt, 3), row.names = TRUE)
+```
+
+Result (@tbl-limits-gap, @tbl-limits-test). Over cycles 1 to 12 the unconstrained
+arm's mean effect on the index scale is `r fmt(vt_row(1, "mean"), 3)` with
+seed-level $t =$ `r fmt(vt_row(1, "t"), 2)` on `r vt_row(1, "df")` degrees of
+freedom (`r vt_row(1, "n_neg")` of `r vt_row(1, "n_seeds")` seeds negative); the
+$\alpha_{\max} = 0.02$ arm gives `r fmt(vt_row(2, "mean"), 3)`,
+$t =$ `r fmt(vt_row(2, "t"), 2)` (`r vt_row(2, "n_neg")` of `r vt_row(2, "n_seeds")`).
+On the index scale the effect is larger early than late: early minus late
+`r fmt(vt_row(5, "mean"), 3)`, seed-level $t =$ `r fmt(vt_row(5, "t"), 2)` on
+`r vt_row(5, "df")` degrees of freedom, which does not reach the two-sided 5 % critical
+value of `r fmt(qt(0.975, vt_row(5, "df")), 2)`. In units of
+genic variance the effect over cycles 1 to 8 is `r fmt(vt_row(3, "mean"), 2)`
+(unconstrained) and `r fmt(vt_row(4, "mean"), 2)` ($\alpha_{\max} = 0.02$), negative in
+`r vt_row(3, "n_neg")` and `r vt_row(4, "n_neg")` of the eight seeds. Over the late
+window of cycles 6 to 8 it is `r fx(vt_row(6, "mean"), 2)` (unconstrained;
+$t =$ `r fx(vt_row(6, "t"), 2)`, `r vt_row(6, "n_neg")` of 8 seeds negative) and
+`r fx(vt_row(7, "mean"), 2)` ($\alpha_{\max} = 0.02$; $t =$ `r fx(vt_row(7, "t"), 2)`,
+`r vt_row(7, "n_neg")` of 8). The seed-level slope of the relative effect on cycle
+(cycles 1 to 8) is `r fx(sl_ul[["mean"]], 3)` per cycle, $t =$ `r fx(sl_ul[["t"]], 2)`,
+with a 95 % interval of `r fx(sl_ci[1], 3)` to `r fx(sl_ci[2], 3)` per cycle.
+The genic variance itself falls
+from `r fx(gt$Vgenic_unconstrained[1], 2)` to
+`r fx(gt$Vgenic_unconstrained[6], 2)` (cycle 5) and
+`r fx(gt$Vgenic_unconstrained[13], 2)` (cycle 12) in the unconstrained arm, against
+`r fx(gt$Vgenic_random[6], 2)` and `r fx(gt$Vgenic_random[13], 2)` in the random arm.
+
+The size of the loss, as the ratio of realised to genic variance
+$V_g / V_{\text{genic}}$ of the 625 candidates, is in @tbl-limits-ratio: the ratio is
+averaged over the listed cycles within each seed, and the mean and standard error are
+taken over the eight seeds. Cycle 5 was fixed as an illustration, without a criterion
+for choosing it over cycles 4 or 6, so the window of cycles 1 to 8, the one over which
+the relative effect is tested above, is given next to it.
+
+```{r}
+#| label: tbl-limits-ratio
+#| tbl-cap: "Ratio of realised to genic variance of the 625 candidate hybrids by regime (limits_variance.csv): per-seed ratio, averaged over cycle 5 (cycle5) or over cycles 1 to 8 (cycles1_8) within each seed; mean over eight seeds and its standard error (se = sd / sqrt(8)). A value of 1 is no covariance term; the random regime has the same founders and no selection."
+knitr::kable(fmt(rr, 3), row.names = FALSE)
+```
+
+Result (@tbl-limits-ratio). At cycle 5 the mean ratio is
+`r fx(r5[["unconstrained"]], 2)` (s.e. `r fx(r5se[["unconstrained"]], 2)`) for the
+unconstrained programme, `r fx(r5[["constrained"]], 2)`
+(`r fx(r5se[["constrained"]], 2)`) for $\alpha_{\max} = 0.02$ and
+`r fx(r5[["random"]], 2)` (`r fx(r5se[["random"]], 2)`) for random selection: the
+realised variance is `r fx(100 * (1 - r5[["unconstrained"]]), 0)` %,
+`r fx(100 * (1 - r5[["constrained"]]), 0)` % and `r fx(100 * (1 - r5[["random"]]), 0)` %
+below the genic variance, the last being
+`r fx((1 - r5[["random"]]) / r5se[["random"]], 1)` standard errors from zero. Paired by
+founder draw, the constrained minus random ratio at cycle 5 is `r fx(d5[["estimate"]], 2)`
+($t =$ `r fx(unname(d5[["statistic"]]), 2)`, `r unname(d5[["parameter"]])` df). Over cycles
+1 to 8 the ratios are `r fx(r18[["unconstrained"]], 2)` (`r fx(r18se[["unconstrained"]], 2)`),
+`r fx(r18[["constrained"]], 2)` (`r fx(r18se[["constrained"]], 2)`) and
+`r fx(r18[["random"]], 2)` (`r fx(r18se[["random"]], 2)`).
+
+Interpretation, and what limits it. Selection builds negative disequilibrium among
+unlinked loci in this simulation: the effect is negative in `r vt_row(1, "n_neg")` of
+`r vt_row(1, "n_seeds")` seeds on the index scale and in `r vt_row(3, "n_neg")` of
+`r vt_row(3, "n_seeds")` relative to genic variance. The seed-level tests carry the
+*existence* of the effect; the percentages of @tbl-limits-ratio carry its *size*, at
+eight seeds. What eight seeds do not resolve: the `r fx(100 * (1 - r5[["random"]]), 0)` % of the random
+arm at cycle 5 is within about one standard error of zero, and over cycles 1 to 8 the random arm shows
+no loss (`r fx(r18[["random"]], 2)`, s.e. `r fx(r18se[["random"]], 2)`), so the
+size of the loss in the control is not distinguished from none; the paired contrast of
+the constrained arm with the random arm at cycle 5 is not distinguished from zero
+either, so the difference between the percentages of those two arms at that cycle is not
+established
+(the constrained-minus-random effect over cycles 1 to 8 of @tbl-limits-test, which
+averages eight cycles, is). The shrinking of the absolute gap in later cycles is
+consistent with the genic variance being used up, since the covariance term scales
+with the variance that remains (a reading, not tested separately).
+
+On persistence: no trend of the relative effect is detected over cycles 1 to 8, but
+the slope has a 95 % interval that includes values at which the effect would reach
+zero near cycle `r fx(4.5 - vt_row(3, "mean") / sl_ci[2], 1)` (from its mean at the middle
+of the window, cycle 4.5), so "no trend detected" is not evidence of no decay. What
+supports persistence is the late-window effect above (cycles 6 to 8), which is
+negative in the seeds counted above, and is itself post hoc. Late cycles of the relative measure
+beyond cycle 8 are ill-conditioned (the unconstrained genic variance is near zero by
+cycle 12) and are not interpreted. The early (1-4) against late (9-12) split on the
+index scale is exploratory (entered after the eight seeds had been seen); the twenty
+draws below were drawn after it was defined. These are eight seeds
+at one scale (625 candidates, 300 QTL, $F_{ST} = 0.15$); how the size of the
+effect moves with $h^2$, $N$, $n_{sel}$ or the number of loci was not measured.
+
+A replication on twenty founder draws the chapter had not used, run live (seeds 101
+to 120; the random and unconstrained arms only; `run_cycles()` seeds each draw
+through its `seed` argument), together with a check that the cached file is
+reproducible from this repository:
+
+```{r}
+#| label: var-rep
+sel_rand <- function(ctx, n_sel, alpha_max, gd_ref, max_use) sel_random(ctx, n_sel)
+run_arm <- function(s, random) {
+  o <- run_cycles(n_cycles = 12, alpha_max = Inf, n_sel = 60, B_null = 200, seed = s,
+                  selector = if (random) sel_rand else NULL)
+  o$gap <- o$var_g - o$var_genic; o$regime <- if (random) "random" else "unconstrained"
+  o$seed <- s; o
+}
+# the cached file is reproduced: seed 1, both arms
+chk <- sapply(c(FALSE, TRUE), function(rnd) {
+  x <- run_arm(1, rnd)
+  ref <- vr[vr$regime == x$regime[1] & vr$seed == 1, ]
+  max(abs(x$gap - ref$gap))
+})
+stopifnot(all(chk < 1e-8))
+rep_dat <- do.call(rbind, lapply(101:120, function(s) rbind(run_arm(s, FALSE), run_arm(s, TRUE))))
+rw <- reshape(rep_dat[, c("regime", "seed", "cycle", "gap")],
+              idvar = c("seed", "cycle"), timevar = "regime", direction = "wide")
+rw$d <- rw$gap.unconstrained - rw$gap.random
+rw <- rw[rw$cycle > 0, ]
+rep_test <- rbind(`cycles 1-12` = seed_test(per_seed(rw, "d", 1:12)),
+                  `early (1-4) minus late (9-12)` = seed_test(early_late(rw, "d")))
+```
+
+```{r}
+#| label: tbl-limits-rep
+#| tbl-cap: "Replication of the unconstrained-minus-random contrast on the index scale over twenty founder draws not used elsewhere in the chapter (seeds 101 to 120), same producer code and the same tests as @tbl-limits-test. The cached file's seed 1 is reproduced by the live code in both arms to the tolerance asserted in the chunk."
+knitr::kable(fmt(rep_test, 3), row.names = TRUE)
+```
+
+Result (@tbl-limits-rep). The seed-level mean over cycles 1 to 12 is
+`r fmt(rep_test[1, "mean"], 3)`, $t =$ `r fmt(rep_test[1, "t"], 2)` on
+`r rep_test[1, "df"]` degrees of freedom, negative in `r rep_test[1, "n_neg"]` of
+`r rep_test[1, "n_seeds"]` draws; early minus late is `r fmt(rep_test[2, "mean"], 3)`
+($t =$ `r fmt(rep_test[2, "t"], 2)`). The cached file's seed 1 is reproduced by the live
+code to within `r fmt_sci(max(chk), 2)` in the gap. Interpretation. The sign of the effect
+and its larger size early on the index scale hold on twenty further draws, which the
+eight-seed analysis did not include; the constrained arm was not re-run (its greedy
+sweep is slow).
 
 ::: {.callout-warning}
-## Assumption C1 of @sec-cycles is too strong, and is restated here
+## Unlinked loci do not remove the covariance term
 
-Selection builds negative disequilibrium among **unlinked** loci, at
-$t = `r fmt(mean(dd) / (sd(dd) / sqrt(length(dd))), 2)`$ over
-`r length(dd)` paired observations. Unlinked loci do not prevent the Bulmer
-effect; they make it decay fast.
-
-What C1 should say is that with free recombination the disequilibrium is halved
-every generation, so it reaches a low equilibrium and does not accumulate across
-cycles the way frequency change does. That is what makes @sec-cycles' *frequency*
-trajectories trustworthy, and it is the correct reason -- not the absence of the
-effect.
+The measurement above shows that, with free recombination between loci, selection
+still builds a negative covariance term that the genic variance does not contain
+(@tbl-limits-test). Assumption C1 of @sec-cycles, that loci are unlinked, therefore
+cannot be read as the absence of that term. Its replacement is a statement about the
+size of the term, measured above at eight seeds. Whether the term decays to a
+negligible equilibrium at longer horizons is not shown either way: no decay is
+detected over cycles 1 to 8, and the data cannot exclude one (the slope interval
+above).
 :::
-
-The effect is largest in the early cycles and decays toward zero late, which is
-the expected shape: it is proportional to the genic variance still available to
-be hidden, and by cycle 12 there is much less of it.
 
 ### With real linkage
 
 The same question with real meiosis behind it. @sec-alphasimr's reciprocal
 recurrent selection runs on a coalescent founder history with a genetic map, and
 AlphaSimR reports `varA` (which carries the disequilibrium) and `genicVarA`
-(which does not), so this arm needs no variance code of its own.
+(which, for an additive trait, is the Hardy-Weinberg expectation with the average
+effect). This arm differs from the unlinked arm in more than linkage:
 
 ```{r}
-lk$rel <- ((lk$varA_A - lk$genicVarA_A) + (lk$varA_B - lk$genicVarA_B)) /
-          (lk$genicVarA_A + lk$genicVarA_B)
-pl  <- reshape(lk[, c("regime", "seed", "cycle", "rel")],
-               idvar = c("seed", "cycle"), timevar = "regime", direction = "wide")
-pl  <- pl[pl$cycle > 0, ]
-ddl <- pl$rel.selected - pl$rel.random
-c(mean_effect = mean(ddl), se = sd(ddl) / sqrt(length(ddl)),
-  t = mean(ddl) / (sd(ddl) / sqrt(length(ddl))), n_pairs = length(ddl))
+#| label: lk-cfg
+lk_cfg <- modifyList(rrs_config, list(n_cycles = 8))
 ```
 
-Same sign, larger in magnitude, and measured with fewer replicates so the
-evidence is weaker. Linkage does what linkage should: it slows the decay, so the
-disequilibrium selection creates persists longer than it does under free
-recombination.
+- genic variance: AlphaSimR's `genicVarA` is $\sum_k 2 p_k q_k \alpha_k^2$, not the
+  package's `genic_var()` of the matrix at hand; they coincide only for an additive
+  trait in Hardy-Weinberg proportions (@sec-alphasimr);
+- selection target and candidates: elite doubled-haploid lines per pool,
+  chosen on a testcross phenotype with $h^2 =$ `r lk_cfg$h2` and dominance
+  (mean dominance degree `r lk_cfg$mean_dd`), `r lk_cfg$n_sel` lines retained per pool
+  from `r lk_cfg$n_dh` doubled haploids per parent, against the hybrid index of 60 of
+  625 hybrids known without error;
+- size: `r lk_cfg$n_pool_A` + `r lk_cfg$n_pool_B` founders, `r lk_cfg$n_chr`
+  chromosomes of `r lk_cfg$seg_sites` segregating sites, all QTL, against 25 + 25
+  lines and 2000 markers;
+- cycles and replication: `r lk_cfg$n_cycles` cycles and four replicates, against
+  12 cycles and eight seeds.
+
+```{r}
+#| label: lk-test
+lk$rel <- ((lk$varA_A - lk$genicVarA_A) + (lk$varA_B - lk$genicVarA_B)) /
+          (lk$genicVarA_A + lk$genicVarA_B)
+pl <- reshape(lk[, c("regime", "seed", "cycle", "rel")],
+              idvar = c("seed", "cycle"), timevar = "regime", direction = "wide")
+# both arms branch off one founder object per replicate, and replicates draw their own
+c0l <- pl[pl$cycle == 0, ]
+stopifnot(isTRUE(all.equal(c0l$rel.selected, c0l$rel.random)),
+          length(unique(round(c0l$rel.selected, 10))) == nrow(c0l))
+pl   <- pl[pl$cycle > 0, ]
+pl$d <- pl$rel.selected - pl$rel.random
+lt <- data.frame(cycle = 1:8,
+                 selected = tapply(pl$rel.selected, pl$cycle, mean),
+                 random = tapply(pl$rel.random, pl$cycle, mean),
+                 effect = tapply(pl$d, pl$cycle, mean),
+                 se = tapply(pl$d, pl$cycle, sd) / sqrt(length(unique(pl$seed))),
+                 row.names = NULL)
+lk_ps <- tapply(pl$d, pl$seed, mean)
+lk_t  <- seed_test(lk_ps)
+# trend per replicate (slope of the effect on cycle; slope_by is defined in var-test)
+sl_lk <- seed_test(slope_by(pl, "d"))
+```
+
+```{r}
+#| label: tbl-limits-linked
+#| tbl-cap: "Linked arm (`limits_linked.csv`, AlphaSimR, four replicates with independent founder draws): gap (varA - genicVarA) / genicVarA summed over the two pools, mean over replicates, for the selected arm, the random-elite control and their difference (effect); se: standard error of the effect over the four replicates."
+knitr::kable(fmt(lt, 3), row.names = FALSE)
+```
+
+Cycle 0 is identical between the two arms of each replicate and different across
+the four replicates (the chunk asserts both).
+
+Result (@tbl-limits-linked). The effect averaged over cycles 1 to 8 is
+`r fmt(lk_t[["mean"]], 3)` (per-replicate values
+`r paste(fmt(lk_ps, 2), collapse = ", ")`), replicate-level $t =$ `r fmt(lk_t[["t"]], 2)` on
+`r lk_t[["df"]]` degrees of freedom, negative in `r lk_t[["n_neg"]]` of
+`r lk_t[["n_seeds"]]` replicates. The per-cycle mean runs from `r fmt(lt$effect[1], 2)` at
+cycle 1 to `r fmt(lt$effect[8], 2)` at cycle 8, with a standard error over replicates
+of `r fmt(min(lt$se), 2)` to `r fmt(max(lt$se), 2)`.
+
+```{r}
+#| label: tbl-limits-units
+#| tbl-cap: "The selected-minus-random effect of the two arms over the same cycles (1 to 8), on the index scale (unlinked arm only) and relative to genic variance (both arms). slope: per-seed (per-replicate) regression slope of the effect on cycle, averaged; t and df over seeds (replicates). The two arms differ in the definition of genic variance, the selection target, the candidate set, the size and the replication (see text)."
+units <- data.frame(
+  arm = c("unlinked, index scale", "unlinked, relative to genic variance",
+          "linked, relative to genic variance"),
+  mean_effect = c(mean(per_seed(w, "abs_unc", 1:8)),
+                  mean(per_seed(w, "rel_unc", 1:8)), lk_t[["mean"]]),
+  slope_per_cycle = c(sl_ua[["mean"]], sl_ul[["mean"]], sl_lk[["mean"]]),
+  slope_t = c(sl_ua[["t"]], sl_ul[["t"]], sl_lk[["t"]]),
+  slope_df = c(sl_ua[["df"]], sl_ul[["df"]], sl_lk[["df"]]))
+knitr::kable(fmt(units, 3), row.names = FALSE)
+```
+
+Result (@tbl-limits-units). In the unit shared by the two arms the unlinked effect over
+cycles 1 to 8 is `r fmt(units$mean_effect[2], 2)` and the linked effect
+`r fmt(units$mean_effect[3], 2)`; the unlinked slope is
+`r fmt(units$slope_per_cycle[2], 3)` per cycle ($t =$ `r fmt(units$slope_t[2], 2)`,
+`r units$slope_df[2]` df) and the linked slope `r fmt(units$slope_per_cycle[3], 3)`
+($t =$ `r fmt(units$slope_t[3], 2)`, `r units$slope_df[3]` df).
+
+Interpretation, and what limits it. The sign is the same in both arms. The two
+effects are of similar size, with standard errors of `r fmt(lk_t[["se"]], 2)` (linked, four
+replicates) and `r fmt(sd(per_seed(w, "rel_unc", 1:8)) / sqrt(8), 2)` (unlinked, eight seeds), so
+a difference between them is not resolved, and no slope in either arm is distinguished from
+zero: the chapter does not show that linkage makes the
+effect larger or longer-lived, nor the opposite. The per-cycle means of the linked arm
+are noisy (@tbl-limits-linked), and the two arms differ in everything listed above, so a
+difference between them would not be attributable to linkage alone.
 
 ::: {.callout-note}
-## A reproducibility trap in the linked arm
+## The founders of the linked arm were not saved
 
-`alphasimr_founder_pools()` is **not** reproducible from `cfg$seed`.
-`AlphaSimR::runMacs2()` hands the coalescent to MaCS, which seeds itself outside
-R's RNG, so two calls with the same configuration return different founder
-haplotypes. Everything downstream of the founders is seeded normally.
-
-The consequence for an experiment like this one is severe: founding the pools
-separately for each arm would have compared two different base populations and
-charged the difference to selection. `book/scripts/regenerate.R` founds once per
-replicate and branches both arms off that single result, which is why cycle 0 of
-the table above matches exactly.
+`alphasimr_founder_pools()` draws the founder haplotypes with `runMacs2()`, which
+hands the coalescent to MaCS. Each replicate here sets its own seed (1 to 4)
+immediately before its founder draw, and both arms of a replicate branch off that one
+founder object, which is why cycle 0 is common to the two arms (asserted above); four
+replicates under four seeds gave four different cycle-0 states. The founders were not
+saved. Whether a second call of `runMacs2()` under the same seed returns the same
+founders was not measured in this chapter; @sec-alphasimr compares one pair of
+`runMacs()` calls per render and does not call `runMacs2()`. So `limits_linked.csv` is
+treated as a cached result, not as reproducible from this repository, and a re-run of
+`regenerate.R limits` is not known to reproduce it. One observation, not a rate: in the
+previous committed version of that file, cycle-0 `varA_A` of the replicates run under
+`set.seed(1)` was 0.4902 (replicate 1) and 0.5504 (replicates 2 to 4, equal to one
+another), against 1.2076 for replicate 1 under `set.seed(1)` in the present file; the
+code path of the earlier run is not documented here, so this is not evidence about
+whether `runMacs2()` is deterministic. The unlinked file is regenerated by the same
+call; the chunk above reproduces its seed 1.
 :::
 
 ## The two costs of selection
 
-The chapter's result stated once.
+Result. In the unlinked arm the realised variance is, as a mean over eight seeds
+and cycles 1 to 8, `r fx(100 * (1 - r18[["unconstrained"]]), 0)` % below the genic
+variance for the unconstrained programme (s.e. `r fx(100 * r18se[["unconstrained"]], 0)`
+points) and `r fx(100 * (1 - r18[["constrained"]]), 0)` % for $\alpha_{\max} = 0.02$
+(`r fx(100 * r18se[["constrained"]], 0)`), against `r fx(100 * (1 - r18[["random"]]), 0)` %
+for random selection (`r fx(100 * r18se[["random"]], 0)`); no trend of the relative
+effect is detected over those cycles, with the interval of the slope given above.
+In the same simulation allele-frequency change is permanent: these runs have no
+mutation, migration or germplasm injection (`inject` is not used), and a fixed allele
+stays fixed.
 
-Selection pays for gain twice. It builds negative covariance between loci, which
-is a real loss of usable variance, and **recombination repays it** -- halved
-every generation under free recombination, more slowly under linkage. And it
-changes allele frequencies, moving them toward fixation, and **nothing repays
-that** short of mutation or migration.
-
-The first cost is invisible to every metric in this book and is largely
-self-correcting. The second is what every metric in this book measures, and is
-permanent.
-
-That is the justification for constraining the second and ignoring the first,
-and it is a stronger statement than "the constraint is what we can compute". It
-is worth being explicit that this ordering is a *consequence* of the two decay
-rates, not an assumption: if the disequilibrium did not decay -- tight linkage,
-few chromosomes, short cycle times -- the ranking would change, and a constraint
-written on allele frequencies would be managing the smaller of the two bills.
+Interpretation, and what limits it. Selection pays for gain in two currencies. It
+builds negative covariance between loci, a loss of usable variance that is charged
+every cycle while selection continues and that recombination reduces (here, at a
+measured balance that is not small); and it changes allele frequencies toward
+fixation, which only mutation or migration repays. The constraint of this book
+manages the second and does not see the first. Whether that is the right choice
+needs the two bills in a common unit (for example, response per cycle), and the
+chapter does not compute that: its two measurements are the unit-free ratio of the
+first and the short-horizon forecast of the second (@tbl-limits-rob). The ordering of
+the two bills is therefore not established here, and neither is whether the variance
+deficit lowers the *response*: no response was computed from it. The size of the
+covariance term may change with the genome (linkage, number of chromosomes, cycle
+time); that is a hypothesis with no source and no measurement in this chapter, and the
+four-replicate linked arm does not resolve it.
 
 ## Where this connects
 
-@sec-response supplies the variance decomposition and the breeder's equation
-this chapter runs forward. @sec-cycles supplies the trajectories, and has one
-assumption restated as a result of the test above. @sec-alphasimr supplies the
-linked arm, which is the only place in the book where a genetic map, rather than
-an assumption about one, decides how fast disequilibrium decays.
-
-@sec-case-study's checklist gains one line from this chapter: report the $R^2$ of
-the $\log(1-F)$ regression next to any projection built on $N_e$, and treat a
-projection from a poor fit as an illustration.
+@sec-response supplies the variance decomposition (@eq-response-ld) and the
+breeder's equation this chapter runs forward. @sec-cycles supplies the trajectories
+and the assumption C1 tested above. @sec-alphasimr supplies the linked arm and the
+rules for founding pools that it follows. Three things are assumed that other
+chapters treat: the crossing plan behind the 625 hybrids (@sec-mating, @sec-sparse,
+@sec-joint), the estimation of marker effects (@sec-genomic-prediction), and the
+selector (@sec-advanced). Two points of this chapter belong with the across-cycles
+items of @sec-case-study: a projection from a fitted rate is not validated by the
+$R^2$ of the $\log(1 - F)$ regression, and the covariance term is outside every
+one-locus metric.
 
 <!-- reproduce-chapter -->
 

@@ -15,19 +15,27 @@ make_fitness(ctx, n_sel, alpha_max, gd_ref, penalty = 1000, max_use = NULL)
 
 \item{gd_ref}{Reference gene diversity from [null_distribution].}
 
-\item{penalty}{Penalty multiplier on the constraint violation.}
+\item{penalty}{Multiplier on the absolute constraint violation (alpha
+excess, plus the `max_use` excess below), in index units per unit of
+violation. Default 1000. Note the contrast with [make_fitness_fast],
+whose penalty (default 5) multiplies a violation already divided by its
+limit (proportional, dimensionless): 0.001 of alpha excess costs 1 index
+unit here, and 5 * 0.001 / alpha_max there.}
 
 \item{max_use}{Maximum times any line may be used, or `NULL` for no cap.
 The default is `NULL`, which reproduces the behaviour this function had
 before the cap existed. Set it to make the per-line usage restriction --
-a partition matroid -- active on the production route; the violation
-enters proportionally, as the diversity budget does.}
+a partition matroid -- active on the production route; the violation is
+the number of line uses above `max_use`, summed over lines and divided by
+`2 * n_sel`, added to the alpha excess and charged at the same `penalty`.}
 }
 \value{
 A function of the DE parameter vector returning a value to minimise.
 }
 \description{
-`alpha` is a **constraint**, not a weighted-sum term: a violation becomes a
-proportional penalty, so `alpha_max = 0.05` still means "I accept losing 5
-percent" rather than "diversity is worth this much index".
+`alpha` is a **constraint**, not a weighted-sum term: a violation is charged
+`penalty` times the absolute excess of `alpha` over `alpha_max` (in alpha
+units; the fitness is the mean index minus that charge), so
+`alpha_max = 0.05` still means "I accept losing 5 percent" rather than
+"diversity is worth this much index". An overshoot is priced, not refused.
 }

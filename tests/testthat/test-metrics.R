@@ -97,3 +97,10 @@ test_that("popcount32 matches a naive bit count", {
   naive <- vapply(x, function(z) sum(bitwAnd(bitwShiftR(z, 0:30), 1L)), integer(1))
   expect_identical(as.integer(popcount32(x)), naive)
 })
+
+test_that("cost_per_eval times adaptively: no metric reports 0, same shape each call", {
+  cp1 <- cost_per_eval(ctx, n_sel = 20, reps = 5, target = 0.02)
+  expect_identical(cp1$metric, c("theta_group", "theta_from_freq", "ne_parents",
+                                 "alleles_lost", "ENE", "ANE", "eff_dim", "Gst"))
+  expect_true(all(is.finite(cp1$us_per_eval) & cp1$us_per_eval > 0))
+})

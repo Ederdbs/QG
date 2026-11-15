@@ -50,11 +50,23 @@ An integer vector of selected hybrid indices.
 Drives `DEoptim` on [decode_lines] and [make_fitness_fast], the pair the
 package has exported since the line route was written but never had a driver
 for. The search dimension is `L` rather than `N` -- 200 instead of 10000 at
-production scale -- and no `N x N` matrix is formed. At an equal
-60,000-evaluation budget under four simultaneous restrictions this reaches
-index 1.988 against 0.351 for the hybrid encoding of [sel_de].
+production scale -- and no `N x N` matrix is formed. In one recorded
+run (3 seeds, equal 60,000-evaluation budget, NP not recorded, both arms
+cold-started; the decoder satisfies the per-line cap by construction, which
+confounds the encoding) it reached index 1.988 against 0.351 for the N-key
+hybrid encoding; that comparison is not against `sel_de()` with its greedy warm
+start, which scores higher (uncapped) in the book's search benchmark.
 }
 \details{
+`ne_par_min` and `pool_tol` are accepted and enter the fitness as penalties
+only; neither is enforced. `pool_tol` cannot bind: the share of line uses in
+pool A is exactly 0.5 for any set of A x B crosses, so its penalty is always
+zero. `ne_par_min` can bind but is not guaranteed met: in the book's chapter
+10b run (NP 100, itermax 300, `max_use` 5, floors 20, 25 and 30) all three
+floors returned the same plan, with N_e,par 25.7, violating the floor of 30.
+Check [fast_ne_parents] on the result; do not read acceptance of the argument as
+satisfaction of the floor.
+
 Warm start seeds sweep a line-diversity direction: `p` proportional to the
 negated mean coancestry of each line, at increasing strength. At strength
 zero the decode is capped truncation, which is the same starting point

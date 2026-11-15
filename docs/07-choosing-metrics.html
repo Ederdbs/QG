@@ -61,7 +61,26 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
@@ -458,7 +477,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./06-metric-catalogue.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">A catalogue of metrics on <code>f</code></span></span></a>
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">A catalogue of diversity metrics</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -634,26 +653,27 @@ window.Quarto = {
   <li><a href="#sec-collapse" id="toc-sec-collapse" class="nav-link active" data-scroll-target="#sec-collapse"><span class="header-section-number">12.1</span> Finding 1: the hybrid coancestry matrix is never needed</a>
   <ul class="collapse">
   <li><a href="#derivation" id="toc-derivation" class="nav-link" data-scroll-target="#derivation"><span class="header-section-number">12.1.1</span> Derivation</a></li>
-  <li><a href="#four-consequences" id="toc-four-consequences" class="nav-link" data-scroll-target="#four-consequences"><span class="header-section-number">12.1.2</span> Four consequences</a></li>
+  <li><a href="#consequences-and-where-they-stop" id="toc-consequences-and-where-they-stop" class="nav-link" data-scroll-target="#consequences-and-where-they-stop"><span class="header-section-number">12.1.2</span> Consequences, and where they stop</a></li>
   <li><a href="#verification" id="toc-verification" class="nav-link" data-scroll-target="#verification"><span class="header-section-number">12.1.3</span> Verification</a></li>
   </ul></li>
-  <li><a href="#finding-2-what-each-metric-costs" id="toc-finding-2-what-each-metric-costs" class="nav-link" data-scroll-target="#finding-2-what-each-metric-costs"><span class="header-section-number">12.2</span> Finding 2: what each metric costs</a></li>
-  <li><a href="#finding-3-the-metric-space-is-nearly-one-dimensional" id="toc-finding-3-the-metric-space-is-nearly-one-dimensional" class="nav-link" data-scroll-target="#finding-3-the-metric-space-is-nearly-one-dimensional"><span class="header-section-number">12.3</span> Finding 3: the metric space is nearly one-dimensional</a>
+  <li><a href="#sec-choosing-cost" id="toc-sec-choosing-cost" class="nav-link" data-scroll-target="#sec-choosing-cost"><span class="header-section-number">12.2</span> Finding 2: what each metric costs</a></li>
+  <li><a href="#sec-choosing-redundancy" id="toc-sec-choosing-redundancy" class="nav-link" data-scroll-target="#sec-choosing-redundancy"><span class="header-section-number">12.3</span> Finding 3: within one lens, the metric space is nearly one-dimensional</a>
   <ul class="collapse">
-  <li><a href="#reproducing-the-argument-at-book-scale" id="toc-reproducing-the-argument-at-book-scale" class="nav-link" data-scroll-target="#reproducing-the-argument-at-book-scale"><span class="header-section-number">12.3.1</span> Reproducing the argument at book scale</a></li>
+  <li><a href="#reproducing-the-argument-at-the-teaching-scale" id="toc-reproducing-the-argument-at-the-teaching-scale" class="nav-link" data-scroll-target="#reproducing-the-argument-at-the-teaching-scale"><span class="header-section-number">12.3.1</span> Reproducing the argument at the teaching scale</a></li>
   </ul></li>
-  <li><a href="#finding-4-the-encoding-not-the-constraint-handler-decides-whether-de-works" id="toc-finding-4-the-encoding-not-the-constraint-handler-decides-whether-de-works" class="nav-link" data-scroll-target="#finding-4-the-encoding-not-the-constraint-handler-decides-whether-de-works"><span class="header-section-number">12.4</span> Finding 4: the encoding, not the constraint handler, decides whether DE works</a></li>
-  <li><a href="#finding-5-the-index-is-not-the-truth-and-its-error-is-not-white" id="toc-finding-5-the-index-is-not-the-truth-and-its-error-is-not-white" class="nav-link" data-scroll-target="#finding-5-the-index-is-not-the-truth-and-its-error-is-not-white"><span class="header-section-number">12.5</span> Finding 5: the index is not the truth, and its error is not white</a>
+  <li><a href="#sec-choosing-search" id="toc-sec-choosing-search" class="nav-link" data-scroll-target="#sec-choosing-search"><span class="header-section-number">12.4</span> Finding 4: searching on line weights, a preview of <span>Chapter 16</span></a></li>
+  <li><a href="#sec-choosing-error" id="toc-sec-choosing-error" class="nav-link" data-scroll-target="#sec-choosing-error"><span class="header-section-number">12.5</span> Finding 5: the index is not the truth, and its error is not white</a>
   <ul class="collapse">
-  <li><a href="#the-correlation-structure-matters-more-than-the-amount" id="toc-the-correlation-structure-matters-more-than-the-amount" class="nav-link" data-scroll-target="#the-correlation-structure-matters-more-than-the-amount"><span class="header-section-number">12.5.1</span> The correlation structure matters more than the amount</a></li>
+  <li><a href="#the-correlation-structure-of-the-error-matters" id="toc-the-correlation-structure-of-the-error-matters" class="nav-link" data-scroll-target="#the-correlation-structure-of-the-error-matters"><span class="header-section-number">12.5.1</span> The correlation structure of the error matters</a></li>
   <li><a href="#what-this-does-to-the-recommendation" id="toc-what-this-does-to-the-recommendation" class="nav-link" data-scroll-target="#what-this-does-to-the-recommendation"><span class="header-section-number">12.5.2</span> What this does to the recommendation</a></li>
   </ul></li>
-  <li><a href="#the-recommendation-stated" id="toc-the-recommendation-stated" class="nav-link" data-scroll-target="#the-recommendation-stated"><span class="header-section-number">12.6</span> The recommendation, stated</a>
+  <li><a href="#sec-choosing-recommendation" id="toc-sec-choosing-recommendation" class="nav-link" data-scroll-target="#sec-choosing-recommendation"><span class="header-section-number">12.6</span> The recommendation, stated</a>
   <ul class="collapse">
   <li><a href="#inside-the-optimiser" id="toc-inside-the-optimiser" class="nav-link" data-scroll-target="#inside-the-optimiser"><span class="header-section-number">12.6.1</span> Inside the optimiser</a></li>
   <li><a href="#at-validation-on-the-returned-plan-only" id="toc-at-validation-on-the-returned-plan-only" class="nav-link" data-scroll-target="#at-validation-on-the-returned-plan-only"><span class="header-section-number">12.6.2</span> At validation, on the returned plan only</a></li>
-  <li><a href="#not-recommended" id="toc-not-recommended" class="nav-link" data-scroll-target="#not-recommended"><span class="header-section-number">12.6.3</span> Not recommended</a></li>
-  <li><a href="#caveats" id="toc-caveats" class="nav-link" data-scroll-target="#caveats"><span class="header-section-number">12.6.4</span> Caveats</a></li>
+  <li><a href="#sec-choosing-ane" id="toc-sec-choosing-ane" class="nav-link" data-scroll-target="#sec-choosing-ane"><span class="header-section-number">12.6.3</span> What the GD/ANE contrast of <span>Chapter 11</span> means for this recommendation</a></li>
+  <li><a href="#not-recommended" id="toc-not-recommended" class="nav-link" data-scroll-target="#not-recommended"><span class="header-section-number">12.6.4</span> Not recommended</a></li>
+  <li><a href="#caveats" id="toc-caveats" class="nav-link" data-scroll-target="#caveats"><span class="header-section-number">12.6.5</span> Caveats</a></li>
   </ul></li>
   <li><a href="#drop-in-code" id="toc-drop-in-code" class="nav-link" data-scroll-target="#drop-in-code"><span class="header-section-number">12.7</span> Drop-in code</a></li>
   <li><a href="#reproduce-this-chapter" id="toc-reproduce-this-chapter" class="nav-link" data-scroll-target="#reproduce-this-chapter">Reproduce this chapter</a></li>
@@ -684,16 +704,21 @@ window.Quarto = {
 
 
 <p><a href="06-metric-catalogue.html" class="quarto-xref"><span>Chapter 11</span></a> built a catalogue. This chapter asks which of it to keep, and answers with two questions the catalogue could not: <strong>what does each metric cost per evaluation</strong>, and <strong>how much of what it reports is already in <span class="math inline">\(\theta\)</span></strong>.</p>
-<p>The recommendation is <strong>two</strong> metrics inside the optimiser and <strong>three</strong> at validation.</p>
+<p>The recommendation (<a href="#tbl-choosing-recommendation" class="quarto-xref">Table&nbsp;<span>12.1</span></a>) is <strong>two</strong> metrics inside the optimiser (differential evolution, DE) and <strong>three</strong> at validation, plus one monitoring item that lies outside the analysis behind the other five (the table’s last row and Finding 3).</p>
 <div class="cell" data-layout-align="center">
+<div id="tbl-choosing-recommendation" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-choosing-recommendation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;12.1: The recommendation, inside the homozygosity lens. Cost per evaluation at L = 300 lines, N = 22,500 hybrids, m = 10,000 markers, n = 1,000 selected (cached; provenance in the paragraph headed ‘Provenance of what is cached’). Metrics not listed are redundant with theta in the cached analysis of Finding 3, too expensive for an inner loop, or both; E-NE and A-NE (the nearest-entry distances of <a href="06-metric-catalogue.html#eq-catalogue-ene-ane" class="quarto-xref">Equation&nbsp;<span>11.8</span></a>) are not redundant and are discussed under ‘Not recommended’. F_drift and F_hom are not part of that analysis.
+</figcaption>
+<div aria-describedby="tbl-choosing-recommendation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<table class="caption-top table table-sm table-striped small">
-<caption>The recommendation. Everything else is redundant with theta, too expensive for an inner loop, or both.</caption>
+<table class="cell caption-top table table-sm table-striped small">
 <colgroup>
-<col style="width: 10%">
-<col style="width: 58%">
-<col style="width: 13%">
-<col style="width: 18%">
+<col style="width: 7%">
+<col style="width: 41%">
+<col style="width: 9%">
+<col style="width: 42%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -708,19 +733,19 @@ window.Quarto = {
 <td style="text-align: left;"><strong>Constraint</strong></td>
 <td style="text-align: left;">Group coancestry theta of the selected set, as proportional loss of gene diversity against a same-size resampling baseline</td>
 <td style="text-align: left;">inside DE, every evaluation</td>
-<td style="text-align: left;"><strong>5 us</strong> (incremental) / 106 us (full)</td>
+<td style="text-align: left;"><strong>5 us</strong> (incremental swap) / 106 us (full line route)</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;"><strong>Second constraint</strong></td>
 <td style="text-align: left;">Effective number of parent lines</td>
 <td style="text-align: left;">inside DE, every evaluation</td>
-<td style="text-align: left;"><strong>7 us</strong>, shares the state vector</td>
+<td style="text-align: left;"><strong>7 us</strong>, not ordered against the swap (<a href="#sec-choosing-cost" class="quarto-xref"><span>Section 12.2</span></a>); computed from the same count vector inside <code>make_fitness_fast()</code></td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Validation</td>
 <td style="text-align: left;">Marker alleles retained (allelic richness)</td>
 <td style="text-align: left;">on the returned plan only</td>
-<td style="text-align: left;">0.9 ms</td>
+<td style="text-align: left;">0.9 ms (bitset)</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Validation</td>
@@ -730,43 +755,60 @@ window.Quarto = {
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Validation</td>
-<td style="text-align: left;">Status number Ns = 1/(2 theta)</td>
+<td style="text-align: left;">Status number Ns = 1/(2 theta), a rescaling of theta</td>
 <td style="text-align: left;">free, algebraic</td>
 <td style="text-align: left;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Monitoring</td>
+<td style="text-align: left;">F_drift and F_hom against the random-subset null (item 6 of <a href="#sec-choosing-recommendation" class="quarto-xref"><span>Section 12.6</span></a>)</td>
+<td style="text-align: left;">on the returned plan only</td>
+<td style="text-align: left;">not timed here (post hoc, O(nm))</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-<p>Three findings drive this, and each is derived and verified below rather than asserted.</p>
+</figure>
+</div>
+</div>
+<p>Five findings drive this. Finding 1 is an algebraic identity, derived in <a href="#sec-collapse" class="quarto-xref"><span>Section 12.1</span></a> and checked numerically live. Findings 2, 3 and 4 rest on <strong>cached external results</strong> (declared in the paragraph headed ‘Provenance of what is cached’ of <a href="#sec-choosing" class="quarto-xref"><span>Chapter 12</span></a>), which this repository does not regenerate. Finding 5 is a live simulation.</p>
+<p><strong>Provenance of what is cached.</strong> <code>cost_per_eval.csv</code> and <code>cost_scaling.png</code>, <code>theta_identity_check.csv</code>, <code>metric_redundancy.csv</code> and <code>metric_redundancy.png</code>, <code>de_constraints.csv</code> and <code>de_convergence.png</code> come from runs whose code is not in this repository (the provenance list of the book’s front page says so). No script here regenerates them; the scripts that write other cost and identity tables write to <code>report/</code> and different schemas. What this chapter does with them is arithmetic on the stored values; the numbers are not reproducible from this repository. The hardware, R version and timer of the cost benchmark are not recorded. What the files themselves record: the cost table, <span class="math inline">\(L\)</span>, <span class="math inline">\(N\)</span>, <span class="math inline">\(m\)</span> and <span class="math inline">\(n\)</span> in its columns; the identity table, <span class="math inline">\(L\)</span>, <span class="math inline">\(N\)</span>, <span class="math inline">\(m\)</span>, <span class="math inline">\(F_{BN}\)</span>, seed and <span class="math inline">\(n\)</span>; the redundancy table, 621 rows and no setting at all (not <span class="math inline">\(N\)</span>, <span class="math inline">\(L\)</span>, <span class="math inline">\(m\)</span>, <span class="math inline">\(n\)</span> or <span class="math inline">\(F_{BN}\)</span>, the Balding-Nichols divergence of <a href="90-notation.html" class="quarto-xref"><span>Appendix A</span></a>); the DE table, <code>dim</code>, <code>seed</code> and the outcomes, not <span class="math inline">\(n\)</span>, <code>NP</code> or the iteration count.</p>
 <section id="sec-collapse" class="level2" data-number="12.1">
 <h2 data-number="12.1" class="anchored" data-anchor-id="sec-collapse"><span class="header-section-number">12.1</span> Finding 1: the hybrid coancestry matrix is never needed</h2>
 <section id="derivation" class="level3" data-number="12.1.1">
 <h3 data-number="12.1.1" class="anchored" data-anchor-id="derivation"><span class="header-section-number">12.1.1</span> Derivation</h3>
-<p>Let lines <span class="math inline">\(a, b, \dots\)</span> be homozygous, with <span class="math inline">\(\mathbf{f}^L\)</span> their molecular coancestry matrix. The hybrid <span class="math inline">\((ab)\)</span> carries one genome from each parent. Molecular coancestry is the probability that two alleles, one drawn at random from each individual, are identical in state. Drawing at random from hybrid <span class="math inline">\((ab)\)</span> selects parental genome <span class="math inline">\(a\)</span> or <span class="math inline">\(b\)</span> with probability <span class="math inline">\(\tfrac12\)</span> each, and likewise for <span class="math inline">\((cd)\)</span>, so</p>
-<p><span class="math display">\[f_{(ab),(cd)} \;=\; \tfrac14\left(f^L_{ac} + f^L_{ad} + f^L_{bc} + f^L_{bd}\right).\]</span></p>
-<p>Now let a selection of <span class="math inline">\(n\)</span> hybrids use line <span class="math inline">\(a\)</span> exactly <span class="math inline">\(k_a\)</span> times across all its parental slots, <span class="math inline">\(\sum_a k_a = 2n\)</span>, and write <span class="math inline">\(w_a = k_a/(2n)\)</span>. Group coancestry of the selected hybrids is the mean of <span class="math inline">\(f\)</span> over all ordered pairs; substituting the identity above and collecting terms by line gives</p>
-<p><span class="math display">\[\theta_S \;=\; \mathbf{w}^{\top}\, \mathbf{f}^L \,\mathbf{w},\]</span></p>
-<p>with the selection allele frequencies following the same collapse, <span class="math inline">\(\bar{\mathbf{p}} = \mathbf{w}^{\top}\mathbf{G}^L\)</span>.</p>
+<p><strong>Assumptions.</strong> (i) Every parent is a homozygous (inbred or doubled-haploid) line, as in A2 of <a href="05-genomic-era.html#sec-era-programme" class="quarto-xref"><span>Section 10.1</span></a>, so a hybrid carries exactly one genome from each of its two parents. (ii) Each hybrid is one cross <span class="math inline">\(A_a \times B_b\)</span> between a pool-A and a pool-B line, and the <span class="math inline">\(n\)</span> selected hybrids are distinct crosses. (iii) <span class="math inline">\(\mathbf{f}^L\)</span> is the <span class="math inline">\(L \times L\)</span> molecular coancestry matrix of the lines (<a href="01-coancestry.html#eq-f-molecular" class="quarto-xref">Equation&nbsp;<span>2.5</span></a>): entry <span class="math inline">\(f^L_{ac} \in [0, 1]\)</span> is the probability that an allele drawn at random from line <span class="math inline">\(a\)</span> and one from line <span class="math inline">\(c\)</span> are identical in state, with no base population. (iv) Group coancestry <span class="math inline">\(\theta_S\)</span> is the mean of <span class="math inline">\(f\)</span> over all <span class="math inline">\(n^2\)</span> ordered pairs of the selection, diagonal included (<a href="06-metric-catalogue.html#eq-catalogue-theta" class="quarto-xref">Equation&nbsp;<span>11.1</span></a>; <span class="citation" data-cites="caballero2002">Caballero and Toro (<a href="99-references.html#ref-caballero2002" role="doc-biblioref">2002</a>)</span>). (v) <span class="math inline">\(\mathbf{G}^L\)</span> is the <span class="math inline">\(L \times m\)</span> line genotype matrix coded 0/1 (<a href="90-notation.html" class="quarto-xref"><span>Appendix A</span></a>); hybrid markers are coded 0/0.5/1.</p>
+<p>Drawing an allele at random from hybrid <span class="math inline">\((ab)\)</span> draws it from parent <span class="math inline">\(a\)</span> or <span class="math inline">\(b\)</span> with probability <span class="math inline">\(\tfrac12\)</span> each, and likewise for <span class="math inline">\((cd)\)</span>, so</p>
+<p><span id="eq-collapse-f"><span class="math display">\[f_{(ab),(cd)} \;=\; \tfrac14\left(f^L_{ac} + f^L_{ad} + f^L_{bc} + f^L_{bd}\right). \tag{12.1}\]</span></span></p>
+<p>Let the selection use line <span class="math inline">\(a\)</span> exactly <span class="math inline">\(k_a\)</span> times across its parental slots. Then <span class="math inline">\(\sum_a k_a = 2n\)</span>, and because each hybrid has one parent in each pool <span class="math inline">\(\sum_{a \in A} k_a = \sum_{b \in B} k_b = n\)</span>. Put <span class="math inline">\(w_a = k_a/(2n)\)</span>, so that <span class="math inline">\(\sum_a w_a = 1\)</span> and each pool’s weights sum to <span class="math inline">\(\tfrac12\)</span>. Averaging <a href="#eq-collapse-f" class="quarto-xref">Equation&nbsp;<span>12.1</span></a> over the <span class="math inline">\(n^2\)</span> ordered pairs, each term <span class="math inline">\(f^L_{ac}\)</span> appears as many times as <span class="math inline">\(k_a k_c\)</span> counts the pairs of slots <span class="math inline">\((a, c)\)</span>, so</p>
+<p><span id="eq-collapse-theta"><span class="math display">\[\theta_S \;=\; \frac{1}{4n^2}\sum_{a,c} k_a k_c f^L_{ac}
+  \;=\; \mathbf{w}^{\top}\, \mathbf{f}^L \,\mathbf{w}, \tag{12.2}\]</span></span></p>
+<p>and the selection allele frequencies collapse the same way, <span class="math inline">\(\bar{\mathbf{p}} = \mathbf{w}^{\top}\mathbf{G}^L\)</span> (a hybrid’s marker row is the mean of its two parents’ rows, <span class="math inline">\(\mathbf{X} = \tfrac12\mathbf{B}\mathbf{G}^L\)</span> in the notation of <a href="90-notation.html" class="quarto-xref"><span>Appendix A</span></a>, and averaging over the <span class="math inline">\(n\)</span> hybrids gives <span class="math inline">\(\mathbf{w}^\top\mathbf{G}^L\)</span>). The two displayed equations are the chapter’s own derivation under (i)-(iv); the quadratic form in line usage is the identity <a href="00-hybrid-programme.html" class="quarto-xref"><span>Chapter 1</span></a> asserts numerically.</p>
 </section>
-<section id="four-consequences" class="level3" data-number="12.1.2">
-<h3 data-number="12.1.2" class="anchored" data-anchor-id="four-consequences"><span class="header-section-number">12.1.2</span> Four consequences</h3>
-<p><strong>The <span class="math inline">\(N \times N\)</span> hybrid matrix is never required.</strong> Memory drops from <span class="math inline">\(O(N^2)\)</span> to <span class="math inline">\(O(L^2)\)</span>. At <span class="math inline">\(L = 300\)</span> lines and <span class="math inline">\(N = 22{,}500\)</span> hybrids that matrix would occupy 3.77 GB; in the benchmark below it was deliberately never formed, and every metric that needs it simply has no timing entry at that scale.</p>
-<p><strong>The vector <span class="math inline">\(\mathbf{w}\)</span> is a sufficient statistic.</strong> Group coancestry, gene diversity, status number, effective number of parents, selection allele frequencies and the heterotic-pool decomposition are all functions of <span class="math inline">\(\mathbf{w}\)</span> alone. One <span class="math inline">\(O(L)\)</span> tabulation per evaluation serves all of them.</p>
-<p><strong>Swapping one hybrid is a rank-2 update.</strong> Exchanging hybrid <span class="math inline">\(h\)</span> for <span class="math inline">\(h'\)</span> changes at most four entries of <span class="math inline">\(\mathbf{w}\)</span>, so <span class="math inline">\(\theta\)</span> updates in <span class="math inline">\(O(L)\)</span> rather than <span class="math inline">\(O(L^2)\)</span>.</p>
-<p><strong>The discrete hybrid problem is exactly optimal-contribution selection on lines</strong>, restricted to the lattice <span class="math inline">\(w_a \in \{0, 1/(2n), 2/(2n), \dots\}\)</span>. That connects it directly to the OCS literature of <a href="09-optimal-contributions.html" class="quarto-xref"><span>Chapter 15</span></a>, with the caveat that the lattice restriction makes it combinatorial rather than the continuous quadratic programme OCS usually solves.</p>
+<section id="consequences-and-where-they-stop" class="level3" data-number="12.1.2">
+<h3 data-number="12.1.2" class="anchored" data-anchor-id="consequences-and-where-they-stop"><span class="header-section-number">12.1.2</span> Consequences, and where they stop</h3>
+<p><strong>The <span class="math inline">\(N \times N\)</span> hybrid matrix is not needed for the quantities that are functions of <span class="math inline">\(\mathbf{w}\)</span> alone (those listed under ‘<span class="math inline">\(\mathbf{w}\)</span> is a sufficient statistic’ in <a href="#sec-collapse" class="quarto-xref"><span>Section 12.1</span></a>).</strong> Memory drops from <span class="math inline">\(O(N^2)\)</span> to <span class="math inline">\(O(L^2)\)</span>. At <span class="math inline">\(L = 300\)</span> lines and <span class="math inline">\(N = 22{,}500\)</span> hybrids that matrix would occupy 3.77 GiB (<span class="math inline">\(22{,}500^2 \times 8\)</span> bytes <span class="math inline">\(/\,2^{30}\)</span>); in the benchmark below it was deliberately never formed, and every metric that needs it simply has no timing entry at that scale.</p>
+<p><strong><span class="math inline">\(\mathbf{w}\)</span> is a sufficient statistic for the diversity quantities, and only for them.</strong> Group coancestry, gene diversity (<span class="math inline">\(GD = 1 - \theta_S\)</span>), status number, effective number of parents, selection allele frequencies and the heterotic-pool decomposition by usage weights (<a href="06-metric-catalogue.html#eq-catalogue-theta-pools" class="quarto-xref">Equation&nbsp;<span>11.10</span></a>) are functions of <span class="math inline">\(\mathbf{w}\)</span> alone. One <span class="math inline">\(O(L)\)</span> tabulation per evaluation serves all of them. Quantities that depend on <em>which</em> <span class="math inline">\(A\)</span> line is paired with <em>which</em> <span class="math inline">\(B\)</span> line are not functions of <span class="math inline">\(\mathbf{w}\)</span>: the hybrid-level <span class="math inline">\(GD_{WI\text{-}hyb}\)</span> and the realised F1 heterozygosity of <a href="06-metric-catalogue.html" class="quarto-xref"><span>Chapter 11</span></a>. Nor is the mean index, unless it is additive in the parents (<span class="math inline">\(u_i = u^L_a + u^L_b\)</span>, the index of <a href="03-simulating-crosses.html" class="quarto-xref"><span>Chapter 6</span></a>); under dominance (<a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 5</span></a>) it is not.</p>
+<p><strong>Swapping one hybrid changes at most four entries of <span class="math inline">\(\mathbf{w}\)</span>.</strong> Exchanging hybrid <span class="math inline">\(h\)</span> for <span class="math inline">\(h'\)</span> removes two parental slots and adds two, and each changed entry is a rank-1 update of <span class="math inline">\(\mathbf{f}^L\mathbf{k}\)</span> (<code>theta_swap()</code> performs four rank-1 column updates), so <span class="math inline">\(\theta\)</span> updates in <span class="math inline">\(O(L)\)</span> rather than <span class="math inline">\(O(L^2)\)</span>.</p>
+<p><strong>The diversity side of the discrete hybrid problem is optimal-contribution selection on lines under three further restrictions.</strong> The weights are integers <span class="math inline">\(k_a/(2n)\)</span> (a lattice), each pool’s weights sum to <span class="math inline">\(\tfrac12\)</span> (the margins), and <span class="math inline">\(\mathbf{k}\)</span> must be realisable as the line degrees of <span class="math inline">\(n\)</span> distinct <span class="math inline">\(A \times B\)</span> pairs. This connects the problem to the literature on optimal-contribution selection (OCS, <a href="09-optimal-contributions.html" class="quarto-xref"><span>Chapter 15</span></a>), but only as far as those three restrictions allow: continuous OCS drops all three, and the lattice makes the discrete problem combinatorial rather than the quadratic programme OCS usually solves. The equivalence is for the diversity objective and for an index additive in the parents; it is not stated beyond them.</p>
 </section>
 <section id="verification" class="level3" data-number="12.1.3">
 <h3 data-number="12.1.3" class="anchored" data-anchor-id="verification"><span class="header-section-number">12.1.3</span> Verification</h3>
-<p>Every identity was checked against literal transcriptions of the reference implementations across <span class="math inline">\(F_{ST} \in \{0.05, 0.15, 0.35\}\)</span>, two seeds and <span class="math inline">\(n \in \{20, 100\}\)</span>, thirty replicate selections each.</p>
+<p>A <strong>cached</strong> sweep (<code>theta_identity_check.csv</code>, no producer in this repository) compares each fast route with a slower route of the package. It has 12 rows (<a href="#tbl-choosing-identity" class="quarto-xref">Table&nbsp;<span>12.2</span></a>): <span class="math inline">\(F_{BN} \in \{0.05, 0.15, 0.35\}\)</span>, seeds 1, 2, <span class="math inline">\(n \in \{20, 100\}\)</span>, at <span class="math inline">\(L = 50\)</span>, <span class="math inline">\(N = 625\)</span> and <span class="math inline">\(m = 1500\)</span>. Each entry is a maximum absolute deviation over replicate selections (thirty per row, as the sweep was described; the file does not record the count). The comparison targets are the package’s own slower routes (<code>theta_group()</code>, <code>theta_from_freq()</code>, <code>he_nei()</code>, <code>ne_parents()</code>); only the pool decomposition and the bitset richness are checked against the literal <code>ref_*</code> oracles. Two of the ten columns (<code>max_pairwise_f</code>, <code>max_alleles_lost</code>) have no producer anywhere in the repository; the <code>identity</code> target of <code>regenerate.R</code> writes the other eight, to <code>report/</code>.</p>
 <div class="cell" data-layout-align="center">
+<div id="tbl-choosing-identity" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-choosing-identity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;12.2: Worst absolute deviation of each fast route from its comparison route, cached external data. All below the asserted tolerance of 1e-12; the largest is the effective number of parents, a sum of about 50 count ratios.
+</figcaption>
+<div aria-describedby="tbl-choosing-identity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<table class="caption-top table table-sm table-striped small">
-<caption>Agreement with reference implementations: machine precision throughout.</caption>
+<table class="cell caption-top table table-sm table-striped small">
 <colgroup>
-<col style="width: 26%">
-<col style="width: 53%">
-<col style="width: 19%">
+<col style="width: 23%">
+<col style="width: 59%">
+<col style="width: 17%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -808,7 +850,7 @@ window.Quarto = {
 </tr>
 <tr class="odd">
 <td style="text-align: left;">max_alleles_lost</td>
-<td style="text-align: left;">allele loss at MAF threshold</td>
+<td style="text-align: left;">allele loss at a minor allele frequency (MAF) threshold</td>
 <td style="text-align: left;">0 (exact)</td>
 </tr>
 <tr class="even">
@@ -830,33 +872,107 @@ window.Quarto = {
 </table>
 </div>
 </div>
-<p>The same identity, live, on the book’s own data:</p>
+</figure>
+</div>
+</div>
+<p>The same identity, live, on the book’s own data (<a href="#tbl-choosing-live-identity" class="quarto-xref">Table&nbsp;<span>12.3</span></a>):</p>
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>ctx  <span class="ot">&lt;-</span> <span class="fu">fast_ctx</span>(<span class="fu">simulate_data</span>(book_cfg))</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">51</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>idx  <span class="ot">&lt;-</span> <span class="fu">sample.int</span>(ctx<span class="sc">$</span>N, <span class="dv">60</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">via_hybrid_matrix =</span> <span class="fu">theta_group</span>(idx, ctx),</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">via_line_route    =</span> <span class="fu">fast_theta</span>(idx, ctx),</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">difference        =</span> <span class="fu">theta_group</span>(idx, ctx) <span class="sc">-</span> <span class="fu">fast_theta</span>(idx, ctx))</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; via_hybrid_matrix    via_line_route        difference </span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         0.6745897         0.6745897         0.0000000</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>via_matrix <span class="ot">&lt;-</span> <span class="fu">theta_group</span>(idx, ctx)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>via_line   <span class="ot">&lt;-</span> <span class="fu">fast_theta</span>(idx, ctx)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">abs</span>(via_matrix <span class="sc">-</span> via_line) <span class="sc">&lt;</span> <span class="fl">1e-12</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(<span class="at">Route =</span> <span class="fu">c</span>(<span class="st">"hybrid matrix"</span>, <span class="st">"line route"</span>, <span class="st">"difference"</span>),</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>           <span class="at">theta =</span> <span class="fu">c</span>(<span class="fu">sprintf</span>(<span class="st">"%.6f"</span>, via_matrix), <span class="fu">sprintf</span>(<span class="st">"%.6f"</span>, via_line),</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">sprintf</span>(<span class="st">"%.1e"</span>, via_matrix <span class="sc">-</span> via_line)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
+<div id="tbl-choosing-live-identity" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-choosing-live-identity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;12.3: Group coancestry theta of one random selection of n = 60 of the N = 625 hybrids of the teaching scale (seed 51), by the hybrid-matrix route (theta_group()) and by the line route (fast_theta()); the identity is asserted to 1e-12 in the chunk. Dimensionless, a mean of coancestries in [0, 1]; the difference is in scientific notation.
+</figcaption>
+<div aria-describedby="tbl-choosing-live-identity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="cell caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Route</th>
+<th style="text-align: left;">theta</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">hybrid matrix</td>
+<td style="text-align: left;">0.674590</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">line route</td>
+<td style="text-align: left;">0.674590</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">difference</td>
+<td style="text-align: left;">0.0e+00</td>
+</tr>
+</tbody>
+</table>
 </div>
-<p>And the incremental swap, which is what makes a local search affordable:</p>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>And the incremental swap, which is what makes a local search affordable (<a href="#tbl-choosing-live-swap" class="quarto-xref">Table&nbsp;<span>12.4</span></a>):</p>
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>st  <span class="ot">&lt;-</span> <span class="fu">theta_state</span>(idx, ctx)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>out <span class="ot">&lt;-</span> idx[<span class="dv">1</span>]; inn <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(<span class="fu">seq_len</span>(ctx<span class="sc">$</span>N), idx)[<span class="dv">1</span>]</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>st2 <span class="ot">&lt;-</span> <span class="fu">theta_swap</span>(st, out, inn, ctx)</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">after_swap_incremental =</span> st2<span class="sc">$</span>theta,</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">after_swap_recomputed  =</span> <span class="fu">theta_group</span>(<span class="fu">c</span>(idx[<span class="sc">-</span><span class="dv">1</span>], inn), ctx),</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">difference             =</span> st2<span class="sc">$</span>theta <span class="sc">-</span> <span class="fu">theta_group</span>(<span class="fu">c</span>(idx[<span class="sc">-</span><span class="dv">1</span>], inn), ctx))</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; after_swap_incremental  after_swap_recomputed             difference </span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           6.747225e-01           6.747225e-01           2.220446e-16</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>recomputed <span class="ot">&lt;-</span> <span class="fu">theta_group</span>(<span class="fu">c</span>(idx[<span class="sc">-</span><span class="dv">1</span>], inn), ctx)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">abs</span>(st2<span class="sc">$</span>theta <span class="sc">-</span> recomputed) <span class="sc">&lt;</span> <span class="fl">1e-12</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(<span class="at">Route =</span> <span class="fu">c</span>(<span class="st">"incremental swap"</span>, <span class="st">"full recomputation"</span>, <span class="st">"difference"</span>),</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>           <span class="at">theta =</span> <span class="fu">c</span>(<span class="fu">sprintf</span>(<span class="st">"%.6f"</span>, st2<span class="sc">$</span>theta), <span class="fu">sprintf</span>(<span class="st">"%.6f"</span>, recomputed),</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">sprintf</span>(<span class="st">"%.1e"</span>, st2<span class="sc">$</span>theta <span class="sc">-</span> recomputed)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
+<div id="tbl-choosing-live-swap" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-choosing-live-swap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;12.4: Group coancestry theta after exchanging the first selected hybrid of the selection of <a href="#tbl-choosing-live-identity" class="quarto-xref">Table&nbsp;<span>12.3</span></a> for the first unselected one, by the incremental update (theta_swap()) and by recomputation (theta_group()); asserted equal to 1e-12 in the chunk. Dimensionless; the difference is in scientific notation.
+</figcaption>
+<div aria-describedby="tbl-choosing-live-swap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="cell caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Route</th>
+<th style="text-align: left;">theta</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">incremental swap</td>
+<td style="text-align: left;">0.674723</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">full recomputation</td>
+<td style="text-align: left;">0.674723</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">difference</td>
+<td style="text-align: left;">2.2e-16</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</figure>
+</div>
 </div>
 <div class="callout callout-style-simple callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -869,28 +985,38 @@ window.Quarto = {
 </div>
 <div class="callout-body-container callout-body">
 <p>R’s <code>$</code> performs <strong>partial matching</strong> on lists, so <code>ctx$f</code> silently returns <code>ctx$fL</code> when the hybrid matrix is absent – a wrong answer with no error. Every accessor in the package uses <code>ctx[["f"]]</code>. Any pipeline carrying both matrices in one list is exposed to this.</p>
-<p>R integers are signed 32-bit, so <code>bitwShiftL(1L, 31L)</code> is <code>NA</code> and the usual multiply-based popcount overflows. The bitset in <code>pack_lines()</code> packs 31 bits per word, and <code>popcount32()</code> counts them with a branch-free SWAR routine.</p>
+<p>R integers are signed 32-bit, so <code>bitwShiftL(1L, 31L)</code> is <code>NA</code> and the usual multiply-based popcount overflows. The bitset in <code>pack_lines()</code> packs 31 bits per word, and <code>popcount32()</code> counts them with a branch-free SWAR (SIMD within a register) routine.</p>
 </div>
 </div>
 </section>
 </section>
-<section id="finding-2-what-each-metric-costs" class="level2" data-number="12.2">
-<h2 data-number="12.2" class="anchored" data-anchor-id="finding-2-what-each-metric-costs"><span class="header-section-number">12.2</span> Finding 2: what each metric costs</h2>
+<section id="sec-choosing-cost" class="level2" data-number="12.2">
+<h2 data-number="12.2" class="anchored" data-anchor-id="sec-choosing-cost"><span class="header-section-number">12.2</span> Finding 2: what each metric costs</h2>
+<p><a href="#fig-choosing-cost-scaling" class="quarto-xref">Figure&nbsp;<span>12.1</span></a> shows how the cost of each route scales and <a href="#tbl-choosing-cost" class="quarto-xref">Table&nbsp;<span>12.5</span></a> gives its values at the benchmark scale.</p>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="figs/cost_scaling.png" class="img-fluid figure-img" alt="Cost per fitness evaluation" width="672"></p>
-<figcaption>Cost per fitness evaluation. Panel A: scaling in the number of candidate hybrids. Panel B: hours to complete one million evaluations at production scale.</figcaption>
+<div id="fig-choosing-cost-scaling" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Two panels. A: microseconds per evaluation on a log scale against the number of candidate hybrids, for n = 200 and n = 1000 selected, one line per route; the genotype-scan routes and the hybrid-matrix distances sit highest, the line-usage routes lowest. B: hours for one million evaluations at the benchmark scale, from 14.2 hours for the genotype-scan theta down to 0.001 hours for the incremental swap." data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-choosing-cost-scaling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figs/cost_scaling.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Two panels. A: microseconds per evaluation on a log scale against the number of candidate hybrids, for n = 200 and n = 1000 selected, one line per route; the genotype-scan routes and the hybrid-matrix distances sit highest, the line-usage routes lowest. B: hours for one million evaluations at the benchmark scale, from 14.2 hours for the genotype-scan theta down to 0.001 hours for the incremental swap." width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-choosing-cost-scaling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;12.1: Cost per fitness evaluation, cached external figure (no producer in this repository). Panel A: scaling in the number of candidate hybrids. Panel B: hours to complete one million evaluations at the benchmark scale (L = 300, N = 22,500, m = 10,000, n = 1,000), which the cached figure’s own titles call ‘production scale’.
+</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p>At <span class="math inline">\(L = 300\)</span> lines, <span class="math inline">\(N = 22{,}500\)</span> hybrids, <span class="math inline">\(m = 10{,}000\)</span> markers and <span class="math inline">\(n = 1{,}000\)</span> selected:</p>
+<p>Throughout this chapter the <strong>benchmark scale</strong> is <span class="math inline">\(L = 300\)</span> lines, <span class="math inline">\(N = 22{,}500\)</span> hybrids, <span class="math inline">\(m = 10{,}000\)</span> markers and <span class="math inline">\(n = 1{,}000\)</span> selected. It is not the 71 + 71 lines and 25,000 markers of the programme of <a href="05-genomic-era.html#sec-era-programme" class="quarto-xref"><span>Section 10.1</span></a>, nor the <strong>teaching scale</strong> (25 + 25 lines, 2,000 markers) that the live chunks run. Timings are one machine’s, undeclared.</p>
 <div class="cell" data-layout-align="center">
+<div id="tbl-choosing-cost" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-choosing-cost-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;12.5: Median cost per evaluation at the benchmark scale, cached external data. E-NE, A-NE and effective dimensionality are absent because they require the hybrid matrix, which was never formed. The cached timer resolves about 1 us, so differences of one or two microseconds between the cheapest routes are not an ordering.
+</figcaption>
+<div aria-describedby="tbl-choosing-cost-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<table class="caption-top table table-sm table-striped small">
-<caption>Median cost per evaluation at production scale. E-NE, A-NE and effective dimensionality are absent because they require the hybrid matrix, which was never formed.</caption>
+<table class="cell caption-top table table-sm table-striped small">
 <thead>
 <tr class="header">
 <th style="text-align: left;">metric</th>
@@ -953,21 +1079,31 @@ window.Quarto = {
 </table>
 </div>
 </div>
-<p>Three thresholds matter:</p>
+</figure>
+</div>
+</div>
+<p>Four readings of that table, each from the cached values:</p>
 <ul>
 <li><strong>The genotype-scan route is disqualified.</strong> Computing <span class="math inline">\(\theta\)</span> from selection allele frequencies costs 14.2 hours per million evaluations. The line route costs 106 us – a <strong>482x reduction</strong> for an algebraically identical number.</li>
-<li><strong>The incremental swap is effectively free</strong> at 5 us, or 1.4 seconds per million evaluations. <span class="math inline">\(N_{e,\text{par}}\)</span> at 7 us shares the same state vector and is free in practice once <span class="math inline">\(\theta\)</span> has been computed.</li>
-<li><strong>Allelic richness cannot go inside the loop, and need not.</strong> The bitset implementation is 5.7x faster than the floating-point version, but still 178x the cost of the line-route <span class="math inline">\(\theta\)</span>. It belongs at validation.</li>
+<li><strong>The incremental swap is effectively free</strong> at 5 us, which is about 5 seconds per million evaluations (the cached timings are multiples of about 1 us, so one significant figure is all they carry). <span class="math inline">\(N_{e,\text{par}}\)</span> at 7 us is of the same order. At <span class="math inline">\(n = 200\)</span> the same file gives 7 us for the swap and 5 us for <span class="math inline">\(N_{e,\text{par}}\)</span>, so the two are not ordered. Inside <code>make_fitness_fast()</code> the count vector is tabulated once and serves both; <code>fast_ne_parents()</code> called alone tabulates it again.</li>
+<li><strong>Allelic richness cannot go inside the loop, and need not.</strong> The bitset implementation is 5.7x faster than the floating-point version (5.1 ms), at 892 us. That is 8.4x the cost of the line-route <span class="math inline">\(\theta\)</span> and 178x that of the incremental swap, the evaluation a local search actually pays. It belongs at validation because adding it would make every evaluation several times dearer than the line route alone, not because it is infeasible.</li>
+<li><strong>The line route is cheaper than the matrix route only when <span class="math inline">\(n\)</span> is large.</strong> <a href="06-metric-catalogue.html" class="quarto-xref"><span>Chapter 11</span></a> priced the matrix route and this chapter’s collapse was expected to make it cheaper still. The cached values say so for large <span class="math inline">\(n\)</span> and not for small: at <span class="math inline">\(N = 2{,}500\)</span>, <span class="math inline">\(n = 50\)</span> the matrix route takes 6.9 us and the line route 10.0 us (the line route is slower); at <span class="math inline">\(N = 10{,}000\)</span>, <span class="math inline">\(n = 1{,}000\)</span> they take 4313 us and 52 us. At <span class="math inline">\(N = 22{,}500\)</span> only the line route exists.</li>
 </ul>
-<p>The same ordering is visible at the book’s scale, where every route is affordable and so the comparison is about ratios, not feasibility:</p>
+<p>At the teaching scale every route is affordable, so the comparison there is about ratios, not feasibility. The live table below (<a href="#tbl-choosing-live-cost" class="quarto-xref">Table&nbsp;<span>12.6</span></a>) times the package’s own functions with <code>cost_per_eval()</code>: a seeded selection, and repetitions multiplied by 4 until the timed block lasts 0.2 s, so a few-microsecond call is not quantised by the clock. It has no line-route, swap or bitset row (those functions are not in <code>cost_per_eval()</code>), and its values are wall-clock times of this machine at this render, not the cached production values. It shows that every listed route is cheap at this scale.</p>
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">cost_per_eval</span>(ctx, <span class="at">n_sel =</span> <span class="dv">60</span>, <span class="at">reps =</span> <span class="dv">40</span>), <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
+<div id="tbl-choosing-live-cost" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-choosing-live-cost-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;12.6: Wall-clock time per call, in microseconds, of the package’s metric functions on one seeded selection of n = 60 of the N = 625 hybrids of the teaching scale (25 + 25 lines, 2,000 markers), from cost_per_eval(): repetitions are multiplied by 4 until the timed block lasts 0.2 s. One run at render, not replicated, machine-dependent; one decimal.
+</figcaption>
+<div aria-describedby="tbl-choosing-live-cost-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
 <div class="kable-table">
-<table class="caption-top table table-sm table-striped small">
+<table class="cell caption-top table table-sm table-striped small">
 <thead>
 <tr class="header">
 <th style="text-align: left;">metric</th>
@@ -977,109 +1113,240 @@ window.Quarto = {
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">theta_group</td>
-<td style="text-align: right;">25</td>
+<td style="text-align: right;">10.1</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">theta_from_freq</td>
-<td style="text-align: right;">200</td>
+<td style="text-align: right;">204.3</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">ne_parents</td>
-<td style="text-align: right;">0</td>
+<td style="text-align: right;">3.9</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">alleles_lost</td>
-<td style="text-align: right;">150</td>
+<td style="text-align: right;">209.0</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">ENE</td>
-<td style="text-align: right;">50</td>
+<td style="text-align: right;">75.1</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">ANE</td>
-<td style="text-align: right;">475</td>
+<td style="text-align: right;">618.7</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">eff_dim</td>
-<td style="text-align: right;">100</td>
+<td style="text-align: right;">145.7</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Gst</td>
-<td style="text-align: right;">1550</td>
+<td style="text-align: right;">2050.0</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
 </div>
+</figure>
+</div>
+</div>
 </section>
-<section id="finding-3-the-metric-space-is-nearly-one-dimensional" class="level2" data-number="12.3">
-<h2 data-number="12.3" class="anchored" data-anchor-id="finding-3-the-metric-space-is-nearly-one-dimensional"><span class="header-section-number">12.3</span> Finding 3: the metric space is nearly one-dimensional</h2>
-<p>621 selections were generated across four strategy families – random, truncation at varying intensity, greedy construction over a grid of diversity weights, and restricted line pools – and all 17 metrics computed on each.</p>
+<section id="sec-choosing-redundancy" class="level2" data-number="12.3">
+<h2 data-number="12.3" class="anchored" data-anchor-id="sec-choosing-redundancy"><span class="header-section-number">12.3</span> Finding 3: within one lens, the metric space is nearly one-dimensional</h2>
+<p><strong>Assumptions and scope of this analysis.</strong> It reads <code>metric_redundancy.csv</code> (<a href="#fig-choosing-redundancy" class="quarto-xref">Figure&nbsp;<span>12.2</span></a>), a <strong>cached external result</strong> with no producer here and no recorded setting (the number of lines, hybrids, markers, <span class="math inline">\(n\)</span> and <span class="math inline">\(F_{BN}\)</span> are not in the file; the previous version of this chapter gave <span class="math inline">\(F_{BN} = 0.15\)</span> and 12,000 markers, and I cannot check either against the file). Every row has alleles retained plus alleles fixed equal to 12,000, so I read 12,000 as <span class="math inline">\(2m\)</span> alleles of <span class="math inline">\(m = 6{,}000\)</span> biallelic markers, an inference. For the same reason the column <code>alleles_retained</code> is identified with <a href="06-metric-catalogue.html#eq-catalogue-alleles-retained" class="quarto-xref">Equation&nbsp;<span>11.7</span></a> by inference: it is consistent with it (values within <span class="math inline">\([m, 2m]\)</span> for that <span class="math inline">\(m\)</span>), but the producer is not available to confirm the definition or the set of lines it was computed on. Three things bound what it can say.</p>
+<ol type="1">
+<li><strong>One lens.</strong> All columns are homozygosity-lens quantities, functions of <span class="math inline">\(\mathbf{f}\)</span>, the pedigree or the line usage. <span class="math inline">\(F_{drift}\)</span> and <span class="math inline">\(F_{hom}\)</span>
+<ol class="example" type="1">
+<li>are not among them, so “redundant with <span class="math inline">\(\theta\)</span>” means redundant <em>inside that lens</em>, and nothing is said about the drift lens.</li>
+</ol></li>
+<li><strong>A mix of strategies.</strong> The 621 selections are 300 random, 120 truncation, 113 restricted-line-pool, 88 greedy (the greedy ones are 11 index weights <code>w</code> from 0 to 1, eight selections each). Rank correlations, retained fractions and principal-component analysis (PCA) shares are properties of this mix, not of any one strategy: <span class="math inline">\(\rho(\theta, N_{e,\text{par}})\)</span> is -0.6 within the random selections and -0.95 within truncation, against -0.925 over all of them.</li>
+<li><strong>The <code>eff_dim</code> column is not the package’s <code>eff_dim()</code>.</strong> Its mean is 1.486 (range 1.438 to 1.506), of the order of the <em>uncentred</em> participation ratio of <a href="06-metric-catalogue.html" class="quarto-xref"><span>Chapter 11</span></a> (1.47 on that chapter’s subset) and nowhere near the double-centred value the package computes (26.19 there). The file does not say which form it holds; I read it as the uncentred ratio. An uncentred ratio re-measures <span class="math inline">\(\theta\)</span> by construction (Rayleigh bound, <a href="06-metric-catalogue.html" class="quarto-xref"><span>Chapter 11</span></a>), so the redundancy of <code>eff_dim</code> below is a statement about that form and is not evidence about the package’s <code>eff_dim()</code>, which is the one timed in Finding 2. The same file does not record which definition of A-NE it used (<a href="06-metric-catalogue.html" class="quarto-xref"><span>Chapter 11</span></a> keeps a nonzero self-distance).</li>
+</ol>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="figs/metric_redundancy.png" class="img-fluid figure-img" alt="Metric redundancy" width="768"></p>
-<figcaption>Metric redundancy. A: Spearman correlations. B: PCA of rank-transformed metrics. C: the discriminating case, inside a narrow coancestry band.</figcaption>
+<div id="fig-choosing-redundancy" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Three panels. A: a heat map of Spearman correlations among 17 metrics, almost all strongly positive or negative with group coancestry. B: a principal-component plot in which the first axis carries most of the rank variance and the second axis separates the between-pool coancestry and allele counts. C: a scatter, inside a narrow band of group coancestry, of marker alleles retained against the effective number of parent lines, rising together over several tens of alleles." data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-choosing-redundancy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figs/metric_redundancy.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Three panels. A: a heat map of Spearman correlations among 17 metrics, almost all strongly positive or negative with group coancestry. B: a principal-component plot in which the first axis carries most of the rank variance and the second axis separates the between-pool coancestry and allele counts. C: a scatter, inside a narrow band of group coancestry, of marker alleles retained against the effective number of parent lines, rising together over several tens of alleles." width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-choosing-redundancy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;12.2: Metric redundancy, cached external figure (no producer in this repository). A: Spearman correlations across the 621 selections. B: PCA of rank-transformed metrics. C: the discriminating case, inside a narrow coancestry band. The panel B title in the cached figure (‘allelic richness the one real second axis’) is withdrawn by the text of <a href="#sec-choosing-redundancy" class="quarto-xref"><span>Section 12.3</span></a>: several metrics keep as much rank variation as allelic richness.
+</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p><strong>PC1 absorbs 88% of the rank variance; PC2 adds 7%.</strong> Rank correlations with <span class="math inline">\(\theta\)</span> are <span class="math inline">\(|\rho| \ge 0.93\)</span> for status number, <span class="math inline">\(H_e\)</span>, effective dimensionality, <span class="math inline">\(N_{e,\text{par}}\)</span> and MAF-threshold allele loss. Reporting these alongside <span class="math inline">\(\theta\)</span> adds cost and length, not information.</p>
-<p>But the marginal correlation is the wrong test. The question is whether a metric varies <strong>at fixed <span class="math inline">\(\theta\)</span></strong> – because <span class="math inline">\(\theta\)</span> is the constraint, and any metric that is a deterministic function of it cannot discriminate among plans the optimiser treats as equivalent. Two analyses agree:</p>
+<p><strong>PC1 absorbs 87.6% of the rank variance of the 16 diversity columns, PC2 6.6%.</strong> (The 17th column of the file, <code>mean_index</code>, is the objective and is left out. The 16 include four exact rescalings of <span class="math inline">\(\theta\)</span>: gene diversity, Nei’s <span class="math inline">\(H_e\)</span>, <code>loss_pct</code> and status number all have <span class="math inline">\(|\rho| = 1\)</span>. Without those four copies the shares are 85.4% and 7.5%.) Rank correlations with <span class="math inline">\(\theta\)</span> over the whole mix are 0.967 for <code>eff_dim</code> (uncentred form, item 3 of the scope paragraph above), 0.932 for allele loss at a minor allele frequency (MAF) threshold and 0.925 for <span class="math inline">\(N_{e,\text{par}}\)</span>.</p>
+<p>But the marginal correlation is the wrong test. The question is whether a metric varies <strong>at fixed <span class="math inline">\(\theta\)</span></strong> – because <span class="math inline">\(\theta\)</span> is the constraint, and any metric that is a deterministic function of it cannot discriminate among plans the optimiser treats as equivalent. The residual test: regress the ranks of each metric on the rank of <span class="math inline">\(\theta\)</span> and its square, and report the standard deviation of the residual as a fraction of the standard deviation of the ranks (<a href="#tbl-redundancy-residual" class="quarto-xref">Table&nbsp;<span>12.7</span></a>; a fraction of 0.52 corresponds to <span class="math inline">\(R^2 \approx 0.73\)</span>).</p>
+<div class="cell" data-layout-align="center">
+<div id="tbl-redundancy-residual" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-redundancy-residual-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;12.7: Residual rank standard deviation after a quadratic regression of the metric’s ranks on the ranks of theta, as a fraction of the standard deviation of its ranks; Spearman correlation with theta; 621 selections of the cached redundancy analysis (strategy mix as stated in the scope paragraph of <a href="#sec-choosing-redundancy" class="quarto-xref"><span>Section 12.3</span></a>). Alleles fixed is 12,000 minus alleles retained and is omitted. The fraction is dimensionless, it is zero for an exact monotone function of theta, and it also counts ties and sampling noise in integer-valued metrics.
+</figcaption>
+<div aria-describedby="tbl-redundancy-residual-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="cell caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">metric</th>
+<th style="text-align: right;">residual fraction</th>
+<th style="text-align: right;">Spearman rho</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">theta_between</td>
+<td style="text-align: right;">0.653</td>
+<td style="text-align: right;">0.758</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">A_NE</td>
+<td style="text-align: right;">0.556</td>
+<td style="text-align: right;">0.820</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">E_NE</td>
+<td style="text-align: right;">0.523</td>
+<td style="text-align: right;">-0.837</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">alleles_retained</td>
+<td style="text-align: right;">0.521</td>
+<td style="text-align: right;">-0.845</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">n_lines_used</td>
+<td style="text-align: right;">0.503</td>
+<td style="text-align: right;">-0.860</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">theta_within_B</td>
+<td style="text-align: right;">0.391</td>
+<td style="text-align: right;">0.917</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">theta_within_A</td>
+<td style="text-align: right;">0.373</td>
+<td style="text-align: right;">0.922</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Ne_parents</td>
+<td style="text-align: right;">0.364</td>
+<td style="text-align: right;">-0.925</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">alleles_lost_MAF</td>
+<td style="text-align: right;">0.352</td>
+<td style="text-align: right;">0.932</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">eff_dim</td>
+<td style="text-align: right;">0.250</td>
+<td style="text-align: right;">-0.967</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
 <ul>
-<li>After regressing each metric’s ranks on <span class="math inline">\(\theta\)</span> (quadratic), <strong>allelic richness retains 52% of its rank standard deviation</strong> and <span class="math inline">\(N_{e,\text{par}}\)</span> retains 36%. Effective dimensionality retains 25% – close to a restatement of <span class="math inline">\(\theta\)</span>.</li>
-<li>Inside a band <span class="math inline">\(\theta \in [0.666, 0.670]\)</span> containing 399 selections, <strong>alleles retained still spans 171 markers</strong> (11,680 to 11,851 of 12,000) and <span class="math inline">\(N_{e,\text{par}}\)</span> spans <strong>30.1 to 55.8</strong>.</li>
+<li>9 of the 10 metrics in the table keep at least 0.35 of their rank standard deviation after <span class="math inline">\(\theta\)</span>: between-pool coancestry <code>theta_between</code> (0.65), <strong>A-NE</strong> (0.56), <strong>E-NE</strong> (0.52), <strong>alleles retained</strong> (0.52), the number of lines used (0.5), and then the two within-pool coancestries (0.37, 0.39), <span class="math inline">\(N_{e,\text{par}}\)</span> (0.36) and MAF-threshold allele loss (0.35). Allelic richness is therefore <strong>one of several</strong> metrics that vary at fixed <span class="math inline">\(\theta\)</span>, not the only one, and <span class="math inline">\(N_{e,\text{par}}\)</span> and MAF allele loss retain about the same amount. The uncentred <code>eff_dim</code> retains 0.25.</li>
+<li>Inside the band <span class="math inline">\(|\theta - \text{median}(\theta)| &lt; 0.002\)</span> (that is <span class="math inline">\(\theta \in [0.6661, 0.6701]\)</span>), which holds 399 selections of which 293 are random, <strong>alleles retained spans 171 alleles</strong> (11680 to 11851 of 12,000) and <span class="math inline">\(N_{e,\text{par}}\)</span> spans <strong>30.1 to 55.8</strong>.</li>
 </ul>
-<p>Plans the constraint cannot distinguish differ materially in how much allelic variation they carry forward. That is the empirical justification for the two-metric recommendation.</p>
-<section id="reproducing-the-argument-at-book-scale" class="level3" data-number="12.3.1">
-<h3 data-number="12.3.1" class="anchored" data-anchor-id="reproducing-the-argument-at-book-scale"><span class="header-section-number">12.3.1</span> Reproducing the argument at book scale</h3>
+<p>Plans the constraint cannot distinguish differ in how many alleles they carry forward and in how concentrated their parentage is. That is the empirical case for tracking something beside <span class="math inline">\(\theta\)</span>. It does not choose among the metrics that keep variation: the residual fraction measures departure from a smooth function of <span class="math inline">\(\theta\)</span> in this sample, not relevance to a breeding objective, so it is a necessary condition for a validation metric and not a sufficient one. Within the random selections alone, <span class="math inline">\(\rho(\theta, \text{alleles retained})\)</span> is -0.35, so a good part of the correlation over the whole mix comes from the strategies differing from one another.</p>
+<section id="reproducing-the-argument-at-the-teaching-scale" class="level3" data-number="12.3.1">
+<h3 data-number="12.3.1" class="anchored" data-anchor-id="reproducing-the-argument-at-the-teaching-scale"><span class="header-section-number">12.3.1</span> Reproducing the argument at the teaching scale</h3>
+<p>The chunk below (<a href="#fig-ne-par-at-fixed-theta" class="quarto-xref">Figure&nbsp;<span>12.3</span></a>) does the Ne_par half of the argument live, at the teaching scale and with the same band rule. It does not compute allelic richness.</p>
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">77</span>)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>grid <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">4</span>, <span class="at">length.out =</span> <span class="dv">30</span>), <span class="cf">function</span>(w) {</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  s <span class="ot">&lt;-</span> <span class="fu">sel_greedy</span>(ctx, <span class="dv">60</span>, <span class="at">w =</span> w)</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">w =</span> w, <span class="at">theta =</span> <span class="fu">theta_group</span>(s, ctx), <span class="at">Ne_par =</span> <span class="fu">ne_parents</span>(s, ctx),</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>             <span class="at">lost =</span> <span class="fu">alleles_lost</span>(s, ctx))</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>}))</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>rnd <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">60</span>, <span class="cf">function</span>(i) {</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  s <span class="ot">&lt;-</span> <span class="fu">sample.int</span>(ctx<span class="sc">$</span>N, <span class="dv">60</span>)</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">w =</span> <span class="cn">NA</span>, <span class="at">theta =</span> <span class="fu">theta_group</span>(s, ctx), <span class="at">Ne_par =</span> <span class="fu">ne_parents</span>(s, ctx),</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>             <span class="at">lost =</span> <span class="fu">alleles_lost</span>(s, ctx))</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>}))</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>all <span class="ot">&lt;-</span> <span class="fu">rbind</span>(grid, rnd)</span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(all<span class="sc">$</span>theta, all<span class="sc">$</span>Ne_par, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(all<span class="sc">$</span>w), <span class="st">"grey60"</span>, <span class="st">"#b2182b"</span>),</span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="fu">expression</span>(theta), <span class="at">ylab =</span> <span class="fu">expression</span>(N[e]<span class="sc">~</span><span class="st">"parents"</span>))</span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topright"</span>, <span class="fu">c</span>(<span class="st">"greedy sweep"</span>, <span class="st">"random"</span>), <span class="at">pch =</span> <span class="dv">19</span>,</span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"#b2182b"</span>, <span class="st">"grey60"</span>), <span class="at">bty =</span> <span class="st">"n"</span>)</span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="fu">grid</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"># index weights on a log grid: the greedy score w * u - theta switches from pure</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co"># diversity to near-truncation between w = 1e-5 and w = 1e-2 at this scale (a</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># linear grid on 0 to 4 returns only two distinct selections)</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>gsel <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">10</span><span class="sc">^</span><span class="fu">seq</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="sc">-</span><span class="dv">2</span>, <span class="at">length.out =</span> <span class="dv">29</span>)), <span class="cf">function</span>(w) <span class="fu">sort</span>(<span class="fu">sel_greedy</span>(ctx, <span class="dv">60</span>, <span class="at">w =</span> w)))</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>gw   <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">10</span><span class="sc">^</span><span class="fu">seq</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="sc">-</span><span class="dv">2</span>, <span class="at">length.out =</span> <span class="dv">29</span>))</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>keep <span class="ot">&lt;-</span> <span class="sc">!</span><span class="fu">duplicated</span>(gsel)    <span class="co"># different weights can return the same selection</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>n_distinct_greedy <span class="ot">&lt;-</span> <span class="fu">sum</span>(keep)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>grid <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">which</span>(keep), <span class="cf">function</span>(i)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">w =</span> gw[i], <span class="at">theta =</span> <span class="fu">theta_group</span>(gsel[[i]], ctx), <span class="at">Ne_par =</span> <span class="fu">ne_parents</span>(gsel[[i]], ctx))))</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>rnd <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">60</span>, <span class="cf">function</span>(i) {</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  s <span class="ot">&lt;-</span> <span class="fu">sample.int</span>(ctx<span class="sc">$</span>N, <span class="dv">60</span>)</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">w =</span> <span class="cn">NA</span>, <span class="at">theta =</span> <span class="fu">theta_group</span>(s, ctx), <span class="at">Ne_par =</span> <span class="fu">ne_parents</span>(s, ctx))</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>}))</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>pts <span class="ot">&lt;-</span> <span class="fu">rbind</span>(grid, rnd)</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(pts<span class="sc">$</span>theta, pts<span class="sc">$</span>Ne_par, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(pts<span class="sc">$</span>w), book_pal[[<span class="st">"mid"</span>]], book_pal[[<span class="st">"loss"</span>]]),</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="fu">expression</span>(theta), <span class="at">ylab =</span> <span class="fu">expression</span>(N[e]<span class="sc">~</span><span class="st">"parents"</span>))</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topright"</span>, <span class="fu">c</span>(<span class="st">"greedy sweep"</span>, <span class="st">"random"</span>), <span class="at">pch =</span> <span class="dv">19</span>,</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="fu">c</span>(book_pal[[<span class="st">"loss"</span>]], book_pal[[<span class="st">"mid"</span>]]), <span class="at">bty =</span> <span class="st">"n"</span>)</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="fu">grid</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="07-choosing-metrics_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" alt="At fixed theta, the effective number of parents still varies by a factor of two" width="1050"></p>
-<figcaption>At fixed theta, the effective number of parents still varies by a factor of two. The constraint cannot see the difference; the second metric can.</figcaption>
+<div id="fig-ne-par-at-fixed-theta" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Scatter of the effective number of parent lines against group coancestry theta. Random selections form a cloud; greedy selections run from low theta and high effective number of parents to high theta and low effective number of parents. Where the two overlap in theta, the greedy selections have the smaller effective number of parents." data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ne-par-at-fixed-theta-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="07-choosing-metrics_files/figure-html/fig-ne-par-at-fixed-theta-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Scatter of the effective number of parent lines against group coancestry theta. Random selections form a cloud; greedy selections run from low theta and high effective number of parents to high theta and low effective number of parents. Where the two overlap in theta, the greedy selections have the smaller effective number of parents." width="1050">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ne-par-at-fixed-theta-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;12.3: Effective number of parent lines against theta for the distinct greedy selections returned by an index-weight grid of 30 values (w = 0 and 1e-5 to 1e-2, log spaced; red; the number of distinct selections is in the text) and 60 random selections (grey), teaching scale, seed 77. Selections of similar theta differ in N_e,par; the range inside the band is computed in the chunk <code>ne-par-band</code>.
+</figcaption>
 </figure>
 </div>
 </div>
 </div>
+<p>Here <code>w</code> is the <em>index</em> weight of the greedy score <span class="math inline">\(w\,u_i - \theta\)</span> (the <span class="math inline">\(\omega\)</span> of <a href="90-notation.html" class="quarto-xref"><span>Appendix A</span></a>, written <code>w</code> in <a href="10-combinatorial-selection.html" class="quarto-xref"><span>Chapter 16</span></a>), not the line-usage vector <span class="math inline">\(\mathbf{w}\)</span> of Finding 1: <code>w = 0</code> is pure diversity and larger values weigh the index more.</p>
+<p><a href="#tbl-choosing-ne-band" class="quarto-xref">Table&nbsp;<span>12.8</span></a> gives the band.</p>
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>band <span class="ot">&lt;-</span> all[<span class="fu">abs</span>(all<span class="sc">$</span>theta <span class="sc">-</span> <span class="fu">median</span>(all<span class="sc">$</span>theta)) <span class="sc">&lt;</span> <span class="fl">0.0015</span>, ]</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">n_in_band =</span> <span class="fu">nrow</span>(band),</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>band <span class="ot">&lt;-</span> pts[<span class="fu">abs</span>(pts<span class="sc">$</span>theta <span class="sc">-</span> <span class="fu">median</span>(pts<span class="sc">$</span>theta)) <span class="sc">&lt;</span> <span class="fl">0.002</span>, ]</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">data.frame</span>(<span class="at">n_in_band =</span> <span class="fu">nrow</span>(band),</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">theta_span =</span> <span class="fu">diff</span>(<span class="fu">range</span>(band<span class="sc">$</span>theta)),</span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">Ne_par_min =</span> <span class="fu">min</span>(band<span class="sc">$</span>Ne_par), <span class="at">Ne_par_max =</span> <span class="fu">max</span>(band<span class="sc">$</span>Ne_par),</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">alleles_lost_span =</span> <span class="fu">diff</span>(<span class="fu">range</span>(band<span class="sc">$</span>lost)))</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         n_in_band        theta_span        Ne_par_min        Ne_par_max </span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      55.000000000       0.002502847      31.578947368      41.860465116 </span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; alleles_lost_span </span></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      31.000000000</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">Ne_par_ratio =</span> <span class="fu">max</span>(band<span class="sc">$</span>Ne_par) <span class="sc">/</span> <span class="fu">min</span>(band<span class="sc">$</span>Ne_par)), <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
+<div id="tbl-choosing-ne-band" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-choosing-ne-band-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;12.8: Selections of <a href="#fig-ne-par-at-fixed-theta" class="quarto-xref">Figure&nbsp;<span>12.3</span></a> (distinct greedy and random together) inside the band |theta - median(theta)| &lt; 0.002: their number, the span of theta (dimensionless), the smallest and largest effective number of parent lines N_e,par (a count of lines) and the ratio of the two. One seed (77), teaching scale.
+</figcaption>
+<div aria-describedby="tbl-choosing-ne-band-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="cell caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;">n_in_band</th>
+<th style="text-align: right;">theta_span</th>
+<th style="text-align: right;">Ne_par_min</th>
+<th style="text-align: right;">Ne_par_max</th>
+<th style="text-align: right;">Ne_par_ratio</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">62</td>
+<td style="text-align: right;">0.0032</td>
+<td style="text-align: right;">22.9299</td>
+<td style="text-align: right;">41.8605</td>
+<td style="text-align: right;">1.8256</td>
+</tr>
+</tbody>
+</table>
 </div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>The 30 index weights return 28 distinct greedy selections (the rest repeat another weight’s selection and are counted once). At the teaching scale, among the 62 distinct selections in the band (greedy and random together), <span class="math inline">\(N_{e,\text{par}}\)</span> varies by a factor of 1.83, against 1.85 in the cached analysis. The two factors are not comparable: the selections of the two analyses come from different strategy mixes, different sizes and different numbers of selections. One seed, one scale: the factor is not an estimate.</p>
 <div class="callout callout-style-simple callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1090,28 +1357,47 @@ window.Quarto = {
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>These numbers come from a two-pool simulation at <span class="math inline">\(F_{ST} = 0.15\)</span>. The qualitative conclusion – near one-dimensionality, with allelic richness as the exception – is robust in direction, but the exact residual fractions shift with pool divergence and marker density. Re-running the redundancy analysis on real genotypes is a half-hour job and worth doing before treating the recommendation as final.</p>
+<p>These numbers come from one simulation of two pools, setting undeclared in the file, and the residual fractions are properties of the strategy mix above. The direction of the conclusion – several metrics vary at fixed <span class="math inline">\(\theta\)</span>, allelic richness among them – is what the file supports; the exact fractions will shift with pool divergence <span class="math inline">\(F_{BN}\)</span>, marker density and the mix of strategies. Re-running the redundancy analysis on real genotypes, with the package’s own <code>eff_dim()</code>, is a half-hour job and worth doing before treating the recommendation as final.</p>
 </div>
 </div>
 </section>
 </section>
-<section id="finding-4-the-encoding-not-the-constraint-handler-decides-whether-de-works" class="level2" data-number="12.4">
-<h2 data-number="12.4" class="anchored" data-anchor-id="finding-4-the-encoding-not-the-constraint-handler-decides-whether-de-works"><span class="header-section-number">12.4</span> Finding 4: the encoding, not the constraint handler, decides whether DE works</h2>
-<p>The optimiser was run under four simultaneous restrictions: diversity loss <span class="math inline">\(\le 0.5\%\)</span>, <span class="math inline">\(N_{e,\text{par}} \ge 50\)</span>, at most 6 uses per line, and heterotic-pool balance within 5%. Budget fixed at 60,000 evaluations for every configuration, three seeds each.</p>
+<section id="sec-choosing-search" class="level2" data-number="12.4">
+<h2 data-number="12.4" class="anchored" data-anchor-id="sec-choosing-search"><span class="header-section-number">12.4</span> Finding 4: searching on line weights, a preview of <a href="10-combinatorial-selection.html" class="quarto-xref"><span>Chapter 16</span></a></h2>
+<p>This finding uses differential evolution (DE), a penalty or a repair step for violated restrictions, the per-line usage cap <code>max_use</code> (the largest number of times one line may be a parent) and a decoder that turns a weight vector into a selection. They are introduced in <a href="10-combinatorial-selection.html" class="quarto-xref"><span>Chapter 16</span></a> and <a href="10b-advanced-selection.html" class="quarto-xref"><span>Chapter 17</span></a>, which come later; read this finding as a preview and take the full treatment, with its qualifiers, from there.</p>
+<p><strong>What was run (cached, external).</strong> <code>de_constraints.csv</code> (<a href="#fig-choosing-de-convergence" class="quarto-xref">Figure&nbsp;<span>12.4</span></a>, <a href="#tbl-choosing-de" class="quarto-xref">Table&nbsp;<span>12.9</span></a>) holds differential evolution runs through <code>make_fitness_fast()</code> with no producer in this repository. Its <code>dim</code> column is 3600 and 120: one random key per hybrid (<span class="math inline">\(N = 3{,}600\)</span> hybrids, from <span class="math inline">\(L = 120\)</span> lines as <a href="10-combinatorial-selection.html" class="quarto-xref"><span>Chapter 16</span></a> states) or one weight per line. Four simultaneous restrictions, defined in <a href="10-combinatorial-selection.html#sec-combinatorial-restrictions" class="quarto-xref"><span>Section 16.3.2</span></a>: diversity loss <span class="math inline">\(\le 0.5\%\)</span>, <span class="math inline">\(N_{e,\text{par}} \ge 50\)</span>, at most 6 uses per line, and heterotic-pool balance within 5%. Budget 60,000 evaluations per run, three seeds per configuration. <strong>Not recorded:</strong> the number selected <span class="math inline">\(n\)</span>, the DE population size <code>NP</code>, the iteration count. <strong>Neither arm is <code>sel_de()</code></strong>, and neither is warm-started: in the cached convergence figure both begin from random keys or weights (the line-weight curves start at about <span class="math inline">\(-1\)</span> and the hybrid-key curves at about 0.27 on the penalised index).</p>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="figs/de_convergence.png" class="img-fluid figure-img" alt="Differential evolution under four simultaneous restrictions at equal evaluation budget" width="672"></p>
-<figcaption>Differential evolution under four simultaneous restrictions at equal evaluation budget.</figcaption>
+<div id="fig-choosing-de-convergence" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Two panels. A: best penalised index against fitness evaluations; three line-weight runs climb from about minus one to about two, while hybrid-key runs stay near 0.3. B: four small panels of the achieved index, diversity loss, effective parents and maximum uses per line for the three configurations." data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-choosing-de-convergence-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figs/de_convergence.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Two panels. A: best penalised index against fitness evaluations; three line-weight runs climb from about minus one to about two, while hybrid-key runs stay near 0.3. B: four small panels of the achieved index, diversity loss, effective parents and maximum uses per line for the three configurations." width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-choosing-de-convergence-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;12.4: Differential evolution under four simultaneous restrictions at an equal budget of 60,000 evaluations, cached external figure. The panel titles in the cached figure say that only the line encoding pushes the constraints to their limits; <a href="#tbl-choosing-de" class="quarto-xref">Table&nbsp;<span>12.9</span></a> and the text of <a href="#sec-choosing-search" class="quarto-xref"><span>Section 12.4</span></a> show that this is not so for the cap on uses per line.
+</figcaption>
 </figure>
 </div>
 </div>
 </div>
 <div class="cell" data-layout-align="center">
+<div id="tbl-choosing-de" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-choosing-de-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;12.9: Mean over 3 seeds, cached external data. Limits: loss 0.5%, Ne parents 50, max uses 6, pool imbalance 5%. All configurations returned feasible plans.
+</figcaption>
+<div aria-describedby="tbl-choosing-de-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<table class="caption-top table table-sm table-striped small">
-<caption>Mean over 3 seeds. All configurations returned feasible plans.</caption>
+<table class="cell caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 28%">
+<col style="width: 7%">
+<col style="width: 8%">
+<col style="width: 14%">
+<col style="width: 11%">
+<col style="width: 19%">
+<col style="width: 10%">
+</colgroup>
 <thead>
 <tr class="header">
 <th style="text-align: left;">encoding</th>
@@ -1119,6 +1405,7 @@ window.Quarto = {
 <th style="text-align: right;">loss %</th>
 <th style="text-align: right;">Ne parents</th>
 <th style="text-align: right;">max uses</th>
+<th style="text-align: right;">pool imbalance</th>
 <th style="text-align: right;">seconds</th>
 </tr>
 </thead>
@@ -1129,6 +1416,7 @@ window.Quarto = {
 <td style="text-align: right;">0.060</td>
 <td style="text-align: right;">76.634</td>
 <td style="text-align: right;">5.667</td>
+<td style="text-align: right;">0</td>
 <td style="text-align: right;">6.550</td>
 </tr>
 <tr class="even">
@@ -1137,6 +1425,7 @@ window.Quarto = {
 <td style="text-align: right;">0.060</td>
 <td style="text-align: right;">76.634</td>
 <td style="text-align: right;">5.667</td>
+<td style="text-align: right;">0</td>
 <td style="text-align: right;">9.621</td>
 </tr>
 <tr class="odd">
@@ -1145,24 +1434,24 @@ window.Quarto = {
 <td style="text-align: right;">0.448</td>
 <td style="text-align: right;">50.084</td>
 <td style="text-align: right;">6.000</td>
+<td style="text-align: right;">0</td>
 <td style="text-align: right;">12.126</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-<p><strong>The encoding decides the outcome; the constraint handler does not.</strong> One random key per hybrid gives DE a 3,600-dimensional problem and it reaches index 0.351. One weight per <em>line</em> – dimension 120, available only because of the collapse – reaches <strong>1.988 at the same budget</strong>, a 5.7x improvement. Penalty and repair handlers produced numerically identical solutions in the hybrid encoding, because at that dimension DE never approaches the constraint boundary where the handlers differ.</p>
-<p><strong>Only the line encoding makes the constraints bind.</strong> It finishes with <span class="math inline">\(N_{e,\text{par}} = 50.08\)</span> against a floor of 50, max uses exactly 6 against a cap of 6, and loss 0.448% against a 0.5% ceiling. The hybrid encoding leaves every constraint slack – not because it found a better trade-off, but because it never searched far enough from random to reach the boundary.</p>
-<blockquote class="blockquote">
-<p>A slack constraint at the end of a run is a diagnostic of a failed search, not of a conservative plan.</p>
-</blockquote>
-<p>For calibration: unconstrained truncation reaches index 2.337 but violates everything (loss 1.62%, <span class="math inline">\(N_{e,\text{par}} = 33.2\)</span>, one line used 17 times). The line encoding recovers <strong>85% of the truncation index while satisfying all four restrictions.</strong></p>
-<p>A note on tuning. <code>DEoptim</code> warns that <code>NP</code> should be at least ten times the parameter count; at dimension 3,600 that is 36,000 population members, which is infeasible. At dimension 120 the recommendation is 1,200 and entirely reachable. The reparameterisation does not merely speed the search up – it moves the problem into the regime where DE’s own tuning guidance can be followed.</p>
+</figure>
+</div>
+</div>
+<p><strong>Result.</strong> At the same evaluation budget the search with one key per hybrid reaches a mean index of 0.351 (seed range 0.343 to 0.358) and the search with one weight per line 1.988 (1.956 to 2.017); the difference is 1.64 index units, and the seed ranges do not overlap. (A ratio of the two is not quoted: the index has no natural zero here, and the hybrid arm starts above the line arm on the penalised scale.) In the hybrid arm <span class="math inline">\(N_{e,\text{par}}\)</span> is 75.8 to 77.2 against a floor of 50 and loss is 0.05 to 0.07% against a ceiling of 0.5%: both slack. The maximum number of uses is 5, 6, 6 against a cap of 6, so the cap is reached in 2 of the 3 seeds. In the line arm <span class="math inline">\(N_{e,\text{par}}\)</span> is 50 to 50.25, the maximum number of uses is 6 in every seed, and loss is 0.42 to 0.5%. Pool imbalance is 0 in all 9 rows: that restriction is slack in every configuration, so the “four simultaneous restrictions” bind on two of four at most (the line arm’s <span class="math inline">\(N_{e,\text{par}}\)</span> and uses per line). Penalty and repair returned numerically identical plans in the hybrid arm for all three seeds; no line-weight arm with a penalty was run.</p>
+<p><strong>Interpretation, and what limits it.</strong> Feasible plans with index 1.99 exist for this problem (the line-arm plans), so the hybrid-arm plans at 0.35 with slack constraints are not constrained optima: a slack constraint at the end of a run is here the sign of an unconverged search, not of a conservative plan. This follows from the table; it is not a general rule. Three limits apply. (a) The comparison is between two encodings through the same fitness, not between two constraint handlers: the handlers were compared only in the hybrid arm, where they returned the same plans, and I do not know why (one reading is that the hybrid search stayed far from the boundary; it was not tested). The line decoder satisfies the cap by construction (<a href="10-combinatorial-selection.html" class="quarto-xref"><span>Chapter 16</span></a>), so “uses per line = 6” in the line arm is not evidence that the search found the boundary. (b) Neither arm is <code>sel_de()</code>, and the benchmark of <a href="10b-advanced-selection.html" class="quarto-xref"><span>Chapter 17</span></a> (<code>search_benchmark.csv</code>, regenerated in this repository; <span class="math inline">\(N = 625\)</span>, <span class="math inline">\(L = 50\)</span>, <span class="math inline">\(n = 60\)</span>, cap 5 uses per line at its book scale; <span class="math inline">\(N = 10{,}000\)</span>, <span class="math inline">\(L = 200\)</span>, <span class="math inline">\(n = 200\)</span>, cap 4 at its production scale; Finding 4’s cap is 6) does not settle which of the two is ahead in this finding’s setting. It has 3 seeds per method and scale. On its <em>uncapped</em> rows <code>sel_de()</code> (<code>de_hybrid</code>) has a mean index of 1.36 (sd 0.018) against 1.059 (sd 0.015) for line-encoded DE (<code>de_lines</code>) at the book scale, a difference of 0.3 with standard error 0.013; at the production scale 1.446 (sd 0.018) against 1.336 (sd 0.067), a difference of 0.11 with standard error 0.04, which three seeds do not resolve. On its <em>capped</em> rows, the setting of this finding (a cap on uses per line, a decoder that satisfies it by construction), the means are 1.1097 (<code>de_hybrid_cap</code>) against 1.1056 (<code>de_lines_cap</code>) at the book scale, a difference of 0.0041, and 1.1223 against 1.1223 at the production scale, a difference of 0, with a seed standard deviation of 0 in every capped cell; why the seeds agree exactly was not examined. At the book scale the gap is therefore the same in every seed and no standard error exists to judge it by; at the production scale the two arms are equal. The cached benchmark therefore supports “<code>sel_de()</code> ahead of line-encoded DE” only without a cap, and resolved only at the book scale; with a cap it shows an unjudged gap of 0.0041 at the book scale and none at the production scale. The result above is a verdict on the <span class="math inline">\(N\)</span>-dimensional key encoding, not on <code>sel_de()</code>. (c) Three seeds, one setup, no interval. The search effort also differs in kind: with <code>NP</code> at least ten times the number of parameters, the guidance of the <code>DEoptim.control</code> help page (the package is described by <span class="citation" data-cites="mullen2011">Mullen et al. (<a href="99-references.html#ref-mullen2011" role="doc-biblioref">2011</a>)</span>), 3,600 parameters call for 36,000 population members, so 60,000 evaluations are fewer than two generations; at 120 parameters 1,200 members give about 50 generations. The <code>NP</code> of the cached run was not recorded, so I cannot say that either arm followed that guidance. An earlier version of this finding quoted an unconstrained truncation index, a diversity loss, an effective number of parents and a count of uses for a comparison point, and a percentage of that index recovered; none is in any file or script of this repository, the selection size of that run is unknown, and an unconstrained plan is not the fair comparator for a capped search. They are withdrawn.</p>
 </section>
-<section id="finding-5-the-index-is-not-the-truth-and-its-error-is-not-white" class="level2" data-number="12.5">
-<h2 data-number="12.5" class="anchored" data-anchor-id="finding-5-the-index-is-not-the-truth-and-its-error-is-not-white"><span class="header-section-number">12.5</span> Finding 5: the index is not the truth, and its error is not white</h2>
+<section id="sec-choosing-error" class="level2" data-number="12.5">
+<h2 data-number="12.5" class="anchored" data-anchor-id="sec-choosing-error"><span class="header-section-number">12.5</span> Finding 5: the index is not the truth, and its error is not white</h2>
 <p>Findings 1 to 4 are about the diversity side of the objective. This one is about the other side, and it is the larger uncertainty of the two.</p>
-<p>Everywhere in this book <code>ctx$index</code> is built from <em>known</em> marker effects (<a href="03-simulating-crosses.html" class="quarto-xref"><span>Chapter 6</span></a>), so every result so far assumes the breeding values are predicted without error. Real ones are not, and the error is not white noise: predictions for close relatives are wrong in the same direction, because they lean on the same training records and share the same haplotypes. The book already has a matrix of exactly that structure – the molecular coancestry <span class="math inline">\(\mathbf{f}\)</span> – so the error can be simulated without inventing anything. (<a href="08b-genomic-prediction.html" class="quarto-xref"><span>Chapter 14</span></a> fits an actual GBLUP model later and finds the same structure in its real residuals, at a comparable accuracy, without injecting anything.)</p>
+<p>Everywhere in this book <code>ctx$index</code> is built from <em>known</em> marker effects (<a href="03-simulating-crosses.html" class="quarto-xref"><span>Chapter 6</span></a>), so every result so far assumes the breeding values are predicted without error. Real ones are not, and the error is not white noise: predictions for close relatives are wrong in the same direction, because they lean on the same training records and share the same haplotypes. The book already has a matrix of exactly that structure – the molecular coancestry <span class="math inline">\(\mathbf{f}\)</span> – so the error can be simulated without inventing anything. (<a href="08b-genomic-prediction.html" class="quarto-xref"><span>Chapter 14</span></a> fits an actual genomic BLUP (GBLUP) model later and reports, in one simulation, a positive correlation of the products of its prediction errors with <span class="math inline">\(\mathbf f\)</span> against a permutation reference (not a formal test, and not compared with this generator). Its realised accuracies are against one trait, not the three-trait index used here, so the comparison is of orders of magnitude only: CV2 has a mean of about 0.9, at the lower edge of the 0.9 to 1 values explored here (<a href="08b-genomic-prediction.html#tbl-genpred-cv" class="quarto-xref">Table&nbsp;<span>14.3</span></a>), and CV1 between 0.5 and 0.7.)</p>
+<p><strong>Assumptions.</strong> Teaching scale (25 + 25 lines, 2,000 markers, <span class="math inline">\(N = 625\)</span> hybrids), <span class="math inline">\(n = 60\)</span> selected, index <span class="math inline">\(u_i\)</span> the true additive index of the simulation. The prediction is <span class="math inline">\(\hat u = \text{scale}(r\,u + \sqrt{1 - r^2}\,e)\)</span> with <span class="math inline">\(e\)</span> a standardised error vector, either <span class="math inline">\(\mathbf{T}\mathbf{z}\)</span> with <span class="math inline">\(\mathbf{T}\mathbf{T}^\top = \mathbf{f} + 10^{-8}\mathbf{I}\)</span>, <span class="math inline">\(\mathbf{T}\)</span> the lower-triangular Cholesky factor (error correlated with relatedness) or <span class="math inline">\(\mathbf{z}\)</span> (independent), <span class="math inline">\(\mathbf{z} \sim N(0, \mathbf{I})\)</span>; both kinds are run and every table says which it uses (<code>kind</code>, default <code>"correlated"</code> in <code>predicted()</code>). The <span class="math inline">\(r\)</span> is a <strong>nominal</strong> accuracy: <span class="math inline">\(e\)</span> is not orthogonalised against <span class="math inline">\(u\)</span>, so the realised correlation of <span class="math inline">\(\hat u\)</span> with <span class="math inline">\(u\)</span> differs from <span class="math inline">\(r\)</span> in every seed (its mean and spread by kind are reported below). Unit of replication: the seed of <span class="math inline">\(\mathbf{z}\)</span>, twenty seeds for the accuracy table and sixty for the comparison of the two kinds of error, each set inside <code>predicted()</code>. The diversity loss <span class="math inline">\(\alpha\)</span> is measured against <code>gd_ref</code> of a resampling null with <span class="math inline">\(B = 400\)</span> (<code>null_distribution()</code>, its own seed 7).</p>
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Show code</summary>
@@ -1170,9 +1459,9 @@ window.Quarto = {
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>null  <span class="ot">&lt;-</span> <span class="fu">null_distribution</span>(ctx, n_sel, <span class="at">B =</span> <span class="dv">400</span>, <span class="at">B_full =</span> <span class="dv">60</span>)</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>gd    <span class="ot">&lt;-</span> null<span class="sc">$</span>gd_ref</span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>u     <span class="ot">&lt;-</span> ctx<span class="sc">$</span>index</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>Lc    <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">chol</span>(ctx<span class="sc">$</span>f <span class="sc">+</span> <span class="fu">diag</span>(<span class="fl">1e-8</span>, ctx<span class="sc">$</span>N)))</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>Lc    <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">chol</span>(ctx[[<span class="st">"f"</span>]] <span class="sc">+</span> <span class="fu">diag</span>(<span class="fl">1e-8</span>, ctx<span class="sc">$</span>N)))</span>
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co"># A predicted index at accuracy r. `kind` decides whether the error is</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co"># A predicted index at nominal accuracy r. `kind` decides whether the error is</span></span>
 <span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co"># correlated with relatedness or independent between hybrids.</span></span>
 <span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>predicted <span class="ot">&lt;-</span> <span class="cf">function</span>(r, seed, <span class="at">kind =</span> <span class="st">"correlated"</span>) {</span>
 <span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(seed)</span>
@@ -1183,7 +1472,7 @@ window.Quarto = {
 <span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<p>Select on the prediction, then score the plan on the truth:</p>
+<p>Select on the prediction, then score the plan on the truth, over twenty seeds per accuracy and per kind of error (<a href="#tbl-choosing-accuracy" class="quarto-xref">Table&nbsp;<span>12.10</span></a> reports both kinds; the two coincide at <span class="math inline">\(r = 1\)</span>, where the prediction is the truth):</p>
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Show code</summary>
@@ -1192,136 +1481,384 @@ window.Quarto = {
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  sel <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">truncation =</span> <span class="fu">sel_truncation</span>(ch, n_sel),</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">greedy     =</span> <span class="fu">sel_greedy</span>(ch, n_sel, <span class="at">w =</span> <span class="fl">3e-4</span>))</span>
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">names</span>(sel), <span class="cf">function</span>(nm) <span class="fu">data.frame</span>(</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> nm, <span class="at">r =</span> r,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> nm, <span class="at">kind =</span> kind, <span class="at">r =</span> r, <span class="at">r_real =</span> <span class="fu">cor</span>(ch<span class="sc">$</span>index, u),</span>
 <span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">reported =</span> <span class="fu">mean</span>(ch<span class="sc">$</span>index[sel[[nm]]]),</span>
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">realised =</span> <span class="fu">mean</span>(u[sel[[nm]]]),</span>
 <span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha    =</span> <span class="fu">alpha_loss</span>(sel[[nm]], ctx, gd))))</span>
 <span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>acc <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">0.9</span>, <span class="fl">0.7</span>, <span class="fl">0.5</span>), run))</span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(acc, <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>kinds <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"correlated"</span>, <span class="st">"independent"</span>)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>acc_all <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(kinds, <span class="cf">function</span>(k)</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">0.9</span>, <span class="fl">0.7</span>, <span class="fl">0.5</span>), <span class="cf">function</span>(r)</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>, <span class="cf">function</span>(s) <span class="fu">cbind</span>(<span class="at">seed =</span> s, <span class="fu">run</span>(r, s, k))))))))</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>se <span class="ot">&lt;-</span> <span class="cf">function</span>(x) <span class="fu">sd</span>(x) <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">length</span>(x))</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>acc    <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(<span class="fu">cbind</span>(r_real, reported, realised, alpha) <span class="sc">~</span> method <span class="sc">+</span> kind <span class="sc">+</span> r, acc_all, mean)</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>acc_se <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(<span class="fu">cbind</span>(reported, realised, alpha) <span class="sc">~</span> method <span class="sc">+</span> kind <span class="sc">+</span> r, acc_all, se)</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>acc<span class="sc">$</span><span class="st">`</span><span class="at">s.e. realised</span><span class="st">`</span> <span class="ot">&lt;-</span> acc_se<span class="sc">$</span>realised</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>acc<span class="sc">$</span><span class="st">`</span><span class="at">s.e. alpha</span><span class="st">`</span>    <span class="ot">&lt;-</span> acc_se<span class="sc">$</span>alpha</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(acc[<span class="fu">order</span>(acc<span class="sc">$</span>method, acc<span class="sc">$</span>kind, <span class="sc">-</span>acc<span class="sc">$</span>r), ], <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
+<div id="tbl-choosing-accuracy" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-choosing-accuracy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;12.10: Truncation and greedy (index weight w = 3e-4) selecting n = 60 of the N = 625 hybrids of the teaching scale on a predicted index of nominal accuracy r, scored on the true index; mean over 20 seeds per method, kind of error and r, with the standard error over seeds (s.e.) for realised and alpha only (reported and r_real carry none). r_real: realised correlation of the prediction with the true index. reported: mean predicted index of the plan (the prediction is scaled to unit s.d.). realised: mean true index of the plan. alpha: proportional loss of gene diversity against gd_ref (B = 400), a dimensionless fraction. At r = 1 the prediction is the truth, so the two kinds of error coincide and the s.e. is zero.
+</figcaption>
+<div aria-describedby="tbl-choosing-accuracy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
 <div class="kable-table">
-<table class="caption-top table table-sm table-striped small">
+<table class="cell caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 3%">
+<col style="width: 12%">
+<col style="width: 13%">
+<col style="width: 4%">
+<col style="width: 7%">
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 9%">
+<col style="width: 15%">
+<col style="width: 12%">
+</colgroup>
 <thead>
 <tr class="header">
+<th style="text-align: left;"></th>
 <th style="text-align: left;">method</th>
+<th style="text-align: left;">kind</th>
 <th style="text-align: right;">r</th>
+<th style="text-align: right;">r_real</th>
 <th style="text-align: right;">reported</th>
 <th style="text-align: right;">realised</th>
 <th style="text-align: right;">alpha</th>
+<th style="text-align: right;">s.e. realised</th>
+<th style="text-align: right;">s.e. alpha</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">truncation</td>
-<td style="text-align: right;">1.0</td>
-<td style="text-align: right;">1.9919</td>
-<td style="text-align: right;">1.9919</td>
-<td style="text-align: right;">0.0412</td>
-</tr>
-<tr class="even">
+<td style="text-align: left;">13</td>
 <td style="text-align: left;">greedy</td>
+<td style="text-align: left;">correlated</td>
 <td style="text-align: right;">1.0</td>
+<td style="text-align: right;">1.0000</td>
 <td style="text-align: right;">1.5893</td>
 <td style="text-align: right;">1.5893</td>
 <td style="text-align: right;">0.0133</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">truncation</td>
-<td style="text-align: right;">0.9</td>
-<td style="text-align: right;">1.9247</td>
-<td style="text-align: right;">1.9003</td>
-<td style="text-align: right;">0.0406</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.0000</td>
 </tr>
 <tr class="even">
+<td style="text-align: left;">9</td>
 <td style="text-align: left;">greedy</td>
+<td style="text-align: left;">correlated</td>
 <td style="text-align: right;">0.9</td>
-<td style="text-align: right;">1.4745</td>
-<td style="text-align: right;">1.3965</td>
+<td style="text-align: right;">0.8950</td>
+<td style="text-align: right;">1.5061</td>
+<td style="text-align: right;">1.4203</td>
+<td style="text-align: right;">0.0114</td>
+<td style="text-align: right;">0.0080</td>
+<td style="text-align: right;">0.0004</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">5</td>
+<td style="text-align: left;">greedy</td>
+<td style="text-align: left;">correlated</td>
+<td style="text-align: right;">0.7</td>
+<td style="text-align: right;">0.6721</td>
+<td style="text-align: right;">1.4175</td>
+<td style="text-align: right;">1.0843</td>
+<td style="text-align: right;">0.0102</td>
+<td style="text-align: right;">0.0241</td>
+<td style="text-align: right;">0.0004</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">greedy</td>
+<td style="text-align: left;">correlated</td>
+<td style="text-align: right;">0.5</td>
+<td style="text-align: right;">0.4488</td>
+<td style="text-align: right;">1.3532</td>
+<td style="text-align: right;">0.7141</td>
 <td style="text-align: right;">0.0092</td>
+<td style="text-align: right;">0.0329</td>
+<td style="text-align: right;">0.0005</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">truncation</td>
-<td style="text-align: right;">0.7</td>
-<td style="text-align: right;">1.7529</td>
-<td style="text-align: right;">1.5950</td>
-<td style="text-align: right;">0.0356</td>
+<td style="text-align: left;">15</td>
+<td style="text-align: left;">greedy</td>
+<td style="text-align: left;">independent</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">1.0000</td>
+<td style="text-align: right;">1.5893</td>
+<td style="text-align: right;">1.5893</td>
+<td style="text-align: right;">0.0133</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.0000</td>
 </tr>
 <tr class="even">
+<td style="text-align: left;">11</td>
 <td style="text-align: left;">greedy</td>
-<td style="text-align: right;">0.7</td>
-<td style="text-align: right;">1.3851</td>
-<td style="text-align: right;">1.1464</td>
-<td style="text-align: right;">0.0088</td>
+<td style="text-align: left;">independent</td>
+<td style="text-align: right;">0.9</td>
+<td style="text-align: right;">0.8998</td>
+<td style="text-align: right;">1.5676</td>
+<td style="text-align: right;">1.2235</td>
+<td style="text-align: right;">0.0022</td>
+<td style="text-align: right;">0.0106</td>
+<td style="text-align: right;">0.0002</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">truncation</td>
-<td style="text-align: right;">0.5</td>
-<td style="text-align: right;">1.6223</td>
-<td style="text-align: right;">1.1751</td>
-<td style="text-align: right;">0.0301</td>
+<td style="text-align: left;">7</td>
+<td style="text-align: left;">greedy</td>
+<td style="text-align: left;">independent</td>
+<td style="text-align: right;">0.7</td>
+<td style="text-align: right;">0.6988</td>
+<td style="text-align: right;">1.6035</td>
+<td style="text-align: right;">0.8924</td>
+<td style="text-align: right;">-0.0035</td>
+<td style="text-align: right;">0.0117</td>
+<td style="text-align: right;">0.0002</td>
 </tr>
 <tr class="even">
+<td style="text-align: left;">3</td>
 <td style="text-align: left;">greedy</td>
+<td style="text-align: left;">independent</td>
 <td style="text-align: right;">0.5</td>
-<td style="text-align: right;">1.2591</td>
-<td style="text-align: right;">0.7965</td>
-<td style="text-align: right;">0.0056</td>
+<td style="text-align: right;">0.4979</td>
+<td style="text-align: right;">1.6171</td>
+<td style="text-align: right;">0.6255</td>
+<td style="text-align: right;">-0.0066</td>
+<td style="text-align: right;">0.0185</td>
+<td style="text-align: right;">0.0003</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">14</td>
+<td style="text-align: left;">truncation</td>
+<td style="text-align: left;">correlated</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">1.0000</td>
+<td style="text-align: right;">1.9919</td>
+<td style="text-align: right;">1.9919</td>
+<td style="text-align: right;">0.0412</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">truncation</td>
+<td style="text-align: left;">correlated</td>
+<td style="text-align: right;">0.9</td>
+<td style="text-align: right;">0.8950</td>
+<td style="text-align: right;">1.9268</td>
+<td style="text-align: right;">1.8292</td>
+<td style="text-align: right;">0.0416</td>
+<td style="text-align: right;">0.0146</td>
+<td style="text-align: right;">0.0012</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">6</td>
+<td style="text-align: left;">truncation</td>
+<td style="text-align: left;">correlated</td>
+<td style="text-align: right;">0.7</td>
+<td style="text-align: right;">0.6721</td>
+<td style="text-align: right;">1.8244</td>
+<td style="text-align: right;">1.4145</td>
+<td style="text-align: right;">0.0396</td>
+<td style="text-align: right;">0.0408</td>
+<td style="text-align: right;">0.0010</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2</td>
+<td style="text-align: left;">truncation</td>
+<td style="text-align: left;">correlated</td>
+<td style="text-align: right;">0.5</td>
+<td style="text-align: right;">0.4488</td>
+<td style="text-align: right;">1.7734</td>
+<td style="text-align: right;">0.9163</td>
+<td style="text-align: right;">0.0379</td>
+<td style="text-align: right;">0.0546</td>
+<td style="text-align: right;">0.0011</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">16</td>
+<td style="text-align: left;">truncation</td>
+<td style="text-align: left;">independent</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">1.0000</td>
+<td style="text-align: right;">1.9919</td>
+<td style="text-align: right;">1.9919</td>
+<td style="text-align: right;">0.0412</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">12</td>
+<td style="text-align: left;">truncation</td>
+<td style="text-align: left;">independent</td>
+<td style="text-align: right;">0.9</td>
+<td style="text-align: right;">0.8998</td>
+<td style="text-align: right;">1.9262</td>
+<td style="text-align: right;">1.8444</td>
+<td style="text-align: right;">0.0338</td>
+<td style="text-align: right;">0.0053</td>
+<td style="text-align: right;">0.0005</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">8</td>
+<td style="text-align: left;">truncation</td>
+<td style="text-align: left;">independent</td>
+<td style="text-align: right;">0.7</td>
+<td style="text-align: right;">0.6988</td>
+<td style="text-align: right;">1.8398</td>
+<td style="text-align: right;">1.4381</td>
+<td style="text-align: right;">0.0183</td>
+<td style="text-align: right;">0.0183</td>
+<td style="text-align: right;">0.0007</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">4</td>
+<td style="text-align: left;">truncation</td>
+<td style="text-align: left;">independent</td>
+<td style="text-align: right;">0.5</td>
+<td style="text-align: right;">0.4979</td>
+<td style="text-align: right;">1.7957</td>
+<td style="text-align: right;">1.0044</td>
+<td style="text-align: right;">0.0075</td>
+<td style="text-align: right;">0.0233</td>
+<td style="text-align: right;">0.0007</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
 </div>
-<p>Two things move. The gap between <code>reported</code> and <code>realised</code> opens up – at <span class="math inline">\(r = 0.5\)</span> truncation reports an index of 1.62 and delivers 1.18. Selection on a noisy value selects partly on the noise, so the plan’s own scorecard is biased upward. Nothing in the pipeline can detect this; it is invisible without the truth.</p>
-<p>And <span class="math inline">\(\alpha\)</span> <em>falls</em> as accuracy drops. That is not the constraint working better. Noisy selection is closer to random selection, and random selection is what <span class="math inline">\(\bar H_{\text{ref}}\)</span> is defined against – so the plan drifts toward the baseline from which loss is measured.</p>
-<section id="the-correlation-structure-matters-more-than-the-amount" class="level3" data-number="12.5.1">
-<h3 data-number="12.5.1" class="anchored" data-anchor-id="the-correlation-structure-matters-more-than-the-amount"><span class="header-section-number">12.5.1</span> The correlation structure matters more than the amount</h3>
-<p>Hold accuracy fixed at <span class="math inline">\(r = 0.6\)</span> and change only whether the error is correlated with relatedness, over twenty draws:</p>
+</figure>
+</div>
+</div>
+<p>(Mean over twenty seeds, with the standard error over seeds. At <span class="math inline">\(r = 1\)</span> the prediction is the truth and does not depend on the seed, so its standard error is zero.)</p>
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>cmp <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">c</span>(<span class="st">"correlated"</span>, <span class="st">"independent"</span>), <span class="cf">function</span>(k)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>, <span class="cf">function</span>(s) {</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    ch <span class="ot">&lt;-</span> ctx; ch<span class="sc">$</span>index <span class="ot">&lt;-</span> <span class="fu">predicted</span>(<span class="fl">0.6</span>, s, k)</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    tr <span class="ot">&lt;-</span> <span class="fu">sel_truncation</span>(ch, n_sel)</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">data.frame</span>(<span class="at">kind =</span> k, <span class="at">realised =</span> <span class="fu">mean</span>(u[tr]),</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">alpha =</span> <span class="fu">alpha_loss</span>(tr, ctx, gd), <span class="at">max_line =</span> <span class="fu">max_line_use</span>(tr, ctx))</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  }))))</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">aggregate</span>(<span class="fu">cbind</span>(realised, alpha, max_line) <span class="sc">~</span> kind, cmp, mean), <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># in how many seeds is alpha non-decreasing in r, i.e. falls as accuracy falls?</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>mono <span class="ot">&lt;-</span> <span class="fu">sapply</span>(kinds, <span class="cf">function</span>(k) <span class="fu">vapply</span>(<span class="fu">c</span>(<span class="st">"truncation"</span>, <span class="st">"greedy"</span>), <span class="cf">function</span>(m)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sum</span>(<span class="fu">vapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>, <span class="cf">function</span>(s) {</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    a <span class="ot">&lt;-</span> acc_all[acc_all<span class="sc">$</span>method <span class="sc">==</span> m <span class="sc">&amp;</span> acc_all<span class="sc">$</span>kind <span class="sc">==</span> k <span class="sc">&amp;</span> acc_all<span class="sc">$</span>seed <span class="sc">==</span> s, ]</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">is.unsorted</span>(a<span class="sc">$</span>alpha[<span class="fu">order</span>(a<span class="sc">$</span>r)])</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  }, <span class="fu">logical</span>(<span class="dv">1</span>))), <span class="fu">numeric</span>(<span class="dv">1</span>)))</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>mono</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co"># paired contrast r = 1 vs r = 0.5 within seed, truncation: difference of alpha</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co"># (r = 1 minus r = 0.5), its mean, standard error and the ratio of the two</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>pc <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">sapply</span>(kinds, <span class="cf">function</span>(k) {</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  a <span class="ot">&lt;-</span> acc_all[acc_all<span class="sc">$</span>method <span class="sc">==</span> <span class="st">"truncation"</span> <span class="sc">&amp;</span> acc_all<span class="sc">$</span>kind <span class="sc">==</span> k, ]</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  d <span class="ot">&lt;-</span> a<span class="sc">$</span>alpha[a<span class="sc">$</span>r <span class="sc">==</span> <span class="dv">1</span>][<span class="fu">match</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>, a<span class="sc">$</span>seed[a<span class="sc">$</span>r <span class="sc">==</span> <span class="dv">1</span>])] <span class="sc">-</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>       a<span class="sc">$</span>alpha[a<span class="sc">$</span>r <span class="sc">==</span> <span class="fl">0.5</span>][<span class="fu">match</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>, a<span class="sc">$</span>seed[a<span class="sc">$</span>r <span class="sc">==</span> <span class="fl">0.5</span>])]</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="at">mean =</span> <span class="fu">mean</span>(d), <span class="at">se =</span> <span class="fu">se</span>(d), <span class="at">ratio =</span> <span class="fu">mean</span>(d) <span class="sc">/</span> <span class="fu">se</span>(d), <span class="at">n_positive =</span> <span class="fu">sum</span>(d <span class="sc">&gt;</span> <span class="dv">0</span>))</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>}))</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>pc</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>acc_get <span class="ot">&lt;-</span> <span class="cf">function</span>(k, r, v) acc[[v]][acc<span class="sc">$</span>method <span class="sc">==</span> <span class="st">"truncation"</span> <span class="sc">&amp;</span> acc<span class="sc">$</span>kind <span class="sc">==</span> k <span class="sc">&amp;</span> acc<span class="sc">$</span>r <span class="sc">==</span> r]</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>acc_gr  <span class="ot">&lt;-</span> <span class="cf">function</span>(k, r, v) acc[[v]][acc<span class="sc">$</span>method <span class="sc">==</span> <span class="st">"greedy"</span> <span class="sc">&amp;</span> acc<span class="sc">$</span>kind <span class="sc">==</span> k <span class="sc">&amp;</span> acc<span class="sc">$</span>r <span class="sc">==</span> r]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
+</div>
+<p>Two things are read from this. First, the gap between <code>reported</code> and <code>realised</code> opens up: at nominal <span class="math inline">\(r = 0.5\)</span> and correlated error truncation reports an index of 1.77 and delivers 0.92 (seed mean; realised accuracy 0.45; with independent error 1.8, 1 and 0.5). Selection on a noisy value selects partly on the noise, so the plan’s own scorecard is biased upward; nothing in the pipeline can detect this without the truth.</p>
+<p>Second, the behaviour of <span class="math inline">\(\alpha\)</span> with accuracy depends on the kind of error, and the sentence “<span class="math inline">\(\alpha\)</span> moves little with accuracy” holds for <strong>correlated error only</strong>. For truncation under correlated error <span class="math inline">\(\alpha\)</span> is 4.12, 4.16, 3.96 and 3.79% at <span class="math inline">\(r = 1, 0.9, 0.7, 0.5\)</span>; under independent error it is 4.12, 3.38, 1.83 and 0.75%. The paired difference <span class="math inline">\(\alpha(r = 1) - \alpha(r = 0.5)\)</span> within seed, truncation, has mean 0.33 percentage points under correlated error (standard error 0.11, about 2.9 standard errors, positive in 16 of 20 seeds) and 3.38 under independent error (standard error 0.07, about 47 standard errors, positive in 20 of 20). The yardstick for the difference is its standard error, not the seed-to-seed standard deviation of a single <span class="math inline">\(\alpha\)</span>. Under correlated error the decline is small, 8% of the loss at <span class="math inline">\(r = 1\)</span>, but it is not indistinguishable from zero at this number of seeds; the paired contrast has not been tested at other accuracies. The count of seeds in which <span class="math inline">\(\alpha\)</span> is non-decreasing in <span class="math inline">\(r\)</span> is 4 of 20 for truncation and 10 of 20 for greedy under correlated error, and 20 and 20 under independent error. One reading of the independent-error fall is that noisy selection is closer to random selection, which <span class="math inline">\(GD_{\text{ref}}\)</span> is defined against; that mechanism was not tested here. Greedy (index weight <span class="math inline">\(3 \times 10^{-4}\)</span>) behaves differently under independent error: <span class="math inline">\(\alpha\)</span> falls from 1.33% at <span class="math inline">\(r = 1\)</span> to -0.66% at <span class="math inline">\(r = 0.5\)</span> (standard error over seeds 0.03), and this value is negative, that is, the plan is more diverse than the random-subset baseline <span class="math inline">\(GD_{\text{ref}}\)</span> (sign convention of <a href="90-notation.html" class="quarto-xref"><span>Appendix A</span></a>). The fall is monotone in <span class="math inline">\(r\)</span> in 20 of 20 seeds, whereas under correlated error <span class="math inline">\(\alpha\)</span> stays positive (0.92% at <span class="math inline">\(r = 0.5\)</span>). The reading offered for truncation, noisy selection being closer to random selection, cannot account for a value below random. A reading consistent with the data, not tested here (for example by varying the index weight), is that greedy penalises <span class="math inline">\(\theta\)</span> directly, so that when the error carries no information on relatedness the index term no longer pulls the plan toward related hybrids and the penalty dominates. Selection at the teaching scale on <span class="math inline">\(n = 60\)</span> of <span class="math inline">\(N = 625\)</span> is the only scale measured, and the diversity loss of a plan on a noisy index therefore cannot be inferred from the accuracy alone: it depends on how the error is distributed over relatives.</p>
+<section id="the-correlation-structure-of-the-error-matters" class="level3" data-number="12.5.1">
+<h3 data-number="12.5.1" class="anchored" data-anchor-id="the-correlation-structure-of-the-error-matters"><span class="header-section-number">12.5.1</span> The correlation structure of the error matters</h3>
+<p>Hold the nominal accuracy at <span class="math inline">\(r = 0.6\)</span> and change only whether the error is correlated with relatedness, over sixty seeds, comparing the two kinds <em>within</em> each seed (<a href="#tbl-choosing-kinds" class="quarto-xref">Table&nbsp;<span>12.11</span></a>; sixty rather than twenty because the realised-gain difference below was unstable over blocks of twenty):</p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>cmp <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">c</span>(<span class="st">"correlated"</span>, <span class="st">"independent"</span>), <span class="cf">function</span>(k)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">60</span>, <span class="cf">function</span>(s) {</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    ch <span class="ot">&lt;-</span> ctx; ch<span class="sc">$</span>index <span class="ot">&lt;-</span> <span class="fu">predicted</span>(<span class="fl">0.6</span>, s, k)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    tr <span class="ot">&lt;-</span> <span class="fu">sel_truncation</span>(ch, n_sel)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">data.frame</span>(<span class="at">kind =</span> k, <span class="at">seed =</span> s, <span class="at">r_real =</span> <span class="fu">cor</span>(ch<span class="sc">$</span>index, u), <span class="at">realised =</span> <span class="fu">mean</span>(u[tr]),</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">alpha =</span> <span class="fu">alpha_loss</span>(tr, ctx, gd), <span class="at">max_line =</span> <span class="fu">max_line_use</span>(tr, ctx))</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  }))))</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>wide <span class="ot">&lt;-</span> <span class="fu">reshape</span>(cmp, <span class="at">idvar =</span> <span class="st">"seed"</span>, <span class="at">timevar =</span> <span class="st">"kind"</span>, <span class="at">direction =</span> <span class="st">"wide"</span>)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>paired <span class="ot">&lt;-</span> <span class="cf">function</span>(v) {</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  d <span class="ot">&lt;-</span> wide[[<span class="fu">paste0</span>(v, <span class="st">".correlated"</span>)]] <span class="sc">-</span> wide[[<span class="fu">paste0</span>(v, <span class="st">".independent"</span>)]]</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="at">mean_correlated   =</span> <span class="fu">mean</span>(wide[[<span class="fu">paste0</span>(v, <span class="st">".correlated"</span>)]]),</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_independent  =</span> <span class="fu">mean</span>(wide[[<span class="fu">paste0</span>(v, <span class="st">".independent"</span>)]]),</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">paired_difference =</span> <span class="fu">mean</span>(d), <span class="at">se =</span> <span class="fu">se</span>(d), <span class="at">n_positive =</span> <span class="fu">sum</span>(d <span class="sc">&gt;</span> <span class="dv">0</span>))</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(<span class="fu">t</span>(<span class="fu">sapply</span>(<span class="fu">c</span>(<span class="st">"r_real"</span>, <span class="st">"alpha"</span>, <span class="st">"max_line"</span>, <span class="st">"realised"</span>), paired)), <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div id="tbl-choosing-kinds" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-choosing-kinds-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;12.11: Truncation of n = 60 of the N = 625 hybrids of the teaching scale on a prediction of nominal accuracy r = 0.6, error correlated with relatedness against independent error, compared within seed over 60 seeds. r_real: correlation of the prediction with the true index. alpha: proportional loss of gene diversity against gd_ref (B = 400), a dimensionless fraction. max_line: largest number of times one line is a parent of the plan, a count. realised: mean true index of the plan. paired_difference: correlated minus independent, with its standard error se over the 60 paired seeds; n_positive: seeds in which the difference is positive.
+</figcaption>
+<div aria-describedby="tbl-choosing-kinds-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
 <div class="kable-table">
-<table class="caption-top table table-sm table-striped small">
+<table class="cell caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 11%">
+<col style="width: 20%">
+<col style="width: 21%">
+<col style="width: 23%">
+<col style="width: 8%">
+<col style="width: 14%">
+</colgroup>
 <thead>
 <tr class="header">
-<th style="text-align: left;">kind</th>
-<th style="text-align: right;">realised</th>
-<th style="text-align: right;">alpha</th>
-<th style="text-align: right;">max_line</th>
+<th style="text-align: left;"></th>
+<th style="text-align: right;">mean_correlated</th>
+<th style="text-align: right;">mean_independent</th>
+<th style="text-align: right;">paired_difference</th>
+<th style="text-align: right;">se</th>
+<th style="text-align: right;">n_positive</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">correlated</td>
-<td style="text-align: right;">1.1508</td>
-<td style="text-align: right;">0.0391</td>
-<td style="text-align: right;">18.15</td>
+<td style="text-align: left;">r_real</td>
+<td style="text-align: right;">0.5854</td>
+<td style="text-align: right;">0.5964</td>
+<td style="text-align: right;">-0.0110</td>
+<td style="text-align: right;">0.0088</td>
+<td style="text-align: right;">25</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">independent</td>
-<td style="text-align: right;">1.2253</td>
-<td style="text-align: right;">0.0121</td>
-<td style="text-align: right;">12.60</td>
+<td style="text-align: left;">alpha</td>
+<td style="text-align: right;">0.0367</td>
+<td style="text-align: right;">0.0122</td>
+<td style="text-align: right;">0.0245</td>
+<td style="text-align: right;">0.0008</td>
+<td style="text-align: right;">60</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">max_line</td>
+<td style="text-align: right;">17.3333</td>
+<td style="text-align: right;">12.9833</td>
+<td style="text-align: right;">4.3500</td>
+<td style="text-align: right;">0.4123</td>
+<td style="text-align: right;">52</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">realised</td>
+<td style="text-align: right;">1.2099</td>
+<td style="text-align: right;">1.2337</td>
+<td style="text-align: right;">-0.0238</td>
+<td style="text-align: right;">0.0284</td>
+<td style="text-align: right;">27</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
 </div>
-<p>Same accuracy, same method, same number selected. Correlated error costs roughly 3.2 times the diversity of independent error, and leans 1.4 times as hard on its favourite line.</p>
-<p>The mechanism is direct. Independent error scatters the mistakes, which accidentally diversifies the plan. Error correlated with relatedness makes whole families look good together, so the plan takes families – and a family is exactly what the diversity constraint exists to stop it taking.</p>
+</figure>
+</div>
+</div>
+<p>(Columns: mean under each kind of error, the mean paired difference correlated minus independent, its standard error over the 60 paired seeds, and the number of seeds in which the difference is positive.) The same paired difference of the realised index is computed by block of twenty seeds and quoted below:</p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>dr <span class="ot">&lt;-</span> wide<span class="sc">$</span>realised.correlated <span class="sc">-</span> wide<span class="sc">$</span>realised.independent</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>blk <span class="ot">&lt;-</span> <span class="fu">tapply</span>(dr, (wide<span class="sc">$</span>seed <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">%/%</span> <span class="dv">20</span> <span class="sc">+</span> <span class="dv">1</span>, mean)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Same nominal accuracy, same method, same number selected. The mean realised accuracy does not differ reliably between the kinds of error: 0.59 under correlated error against 0.6 under independent error, a paired difference of -0.011 with standard error 0.0088 (positive in 25 of 60 seeds). What differs is the spread: the standard deviation over seeds is 0.069 (range 0.43 to 0.74) under correlated error and 0.017 (range 0.56 to 0.63) under independent error, so “same accuracy” holds on average and nominally, not seed by seed. Under correlated error truncation loses 3.67% of gene diversity against 1.22% under independent error, a ratio of means of 3; the paired difference is positive in 60 of 60 seeds. The most-used line is used 1.3 times as often (positive in 52 of 60). The realised index does <strong>not</strong> differ reliably between the kinds of error: the paired difference is -0.024 with standard error 0.028; its mean by block of twenty seeds (seeds 1-20, 21-40, 41-60) is -0.074, 0.002, 0.001. The direction of the diversity result is robust over seeds; the realised-gain difference is not a result.</p>
+<p>One reading of the diversity result is direct. Independent error scatters the mistakes, which accidentally diversifies the plan. Error correlated with relatedness makes whole families look good together, so the plan takes families, which is what the diversity constraint exists to stop it taking. The simulation shows the outcome, not the families: that the families are the mechanism was not tested (for example by counting selected hybrids per full-sib family).</p>
 <div class="callout callout-style-simple callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1332,8 +1869,8 @@ window.Quarto = {
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Truncation on a perfect index loses 4.12% of gene diversity and earns every bit of the index it reports. Under correlated error at <span class="math inline">\(r = 0.6\)</span> it still loses 3.91% – nearly the same price – while delivering 1.15 instead of 1.99.</p>
-<p>You pay the full diversity cost of aggressive selection and collect a fraction of the gain. That is the case to design against, and it is the ordinary case in a real programme.</p>
+<p>Truncation on a perfect index loses 4.12% of gene diversity (with <span class="math inline">\(B = 400\)</span> here; the baseline of <a href="06-metric-catalogue.html#sec-baseline" class="quarto-xref"><span>Section 11.9</span></a>, <span class="math inline">\(B = 2000\)</span>, gives 4.129%) and delivers every bit of the index it reports. Under error correlated with relatedness at nominal <span class="math inline">\(r = 0.6\)</span> (sixty seeds) it loses 3.67%, nearly the same price, and delivers 1.21 of the 1.99 a perfect index delivers. Independent error at the same nominal accuracy delivers a similar 1.23 for a diversity price of 1.22%.</p>
+<p>So the diversity price of aggressive selection can stay close to its full amount while the gain falls well short of it, and the correlated kind of error keeps the price. These seeds do not separate the two kinds of error on realised gain; the design implication is to report <span class="math inline">\(\alpha\)</span> against the plan actually planted and treat a reported index as an upper bound.</p>
 </div>
 </div>
 </section>
@@ -1342,58 +1879,68 @@ window.Quarto = {
 <p>Nothing, for the metric set. Findings 1 to 3 are statements about <span class="math inline">\(\mathbf{f}\)</span> and hold whatever the index is. But it changes what the numbers in <a href="12-case-study.html" class="quarto-xref"><span>Chapter 25</span></a> mean, and it reorders the priorities: the choice between two diversity metrics is worth a fraction of a percent of index, and prediction accuracy is worth tens of percent. Report <span class="math inline">\(\alpha\)</span> against the plan you actually planted, validate accuracy before tuning the constraint, and treat a reported index as an upper bound.</p>
 </section>
 </section>
-<section id="the-recommendation-stated" class="level2" data-number="12.6">
-<h2 data-number="12.6" class="anchored" data-anchor-id="the-recommendation-stated"><span class="header-section-number">12.6</span> The recommendation, stated</h2>
+<section id="sec-choosing-recommendation" class="level2" data-number="12.6">
+<h2 data-number="12.6" class="anchored" data-anchor-id="sec-choosing-recommendation"><span class="header-section-number">12.6</span> The recommendation, stated</h2>
+<p>The recommendation holds inside the homozygosity lens, for inbred parents and an index additive in the parents (the assumptions of Finding 1), and on the cached redundancy analysis, whose setting is not recorded (Finding 3).</p>
 <section id="inside-the-optimiser" class="level3" data-number="12.6.1">
 <h3 data-number="12.6.1" class="anchored" data-anchor-id="inside-the-optimiser"><span class="header-section-number">12.6.1</span> Inside the optimiser</h3>
 <p>Use two metrics, both functions of the line-usage vector <span class="math inline">\(\mathbf{w}\)</span>:</p>
 <ol type="1">
-<li><strong>Proportional loss of gene diversity</strong>, <span class="math inline">\((\bar H_{\text{ref}} - H_S)/\bar H_{\text{ref}}\)</span> with <span class="math inline">\(H_S = 1 - \mathbf{w}^\top \mathbf{f}^L \mathbf{w}\)</span> and <span class="math inline">\(\bar H_{\text{ref}}\)</span> the mean over same-size random subsets. Compute it by the line route, never by scanning genotypes.</li>
-<li><strong>Effective number of parent lines</strong>, <span class="math inline">\(N_{e,\text{par}} = (\sum k_a)^2 / \sum k_a^2\)</span>. It costs 7 us, shares the state vector, and blocks concentration onto a few lines – a failure mode <span class="math inline">\(\theta\)</span> tolerates.</li>
+<li><strong>Proportional loss of gene diversity</strong>, <span class="math inline">\(\alpha = (GD_{\text{ref}} - GD_S)/GD_{\text{ref}}\)</span> with <span class="math inline">\(GD_S = 1 - \mathbf{w}^\top \mathbf{f}^L \mathbf{w}\)</span> (<a href="#eq-collapse-theta" class="quarto-xref">Equation&nbsp;<span>12.2</span></a>) and <span class="math inline">\(GD_{\text{ref}}\)</span> the mean over same-size random subsets (<a href="06-metric-catalogue.html#eq-catalogue-alpha" class="quarto-xref">Equation&nbsp;<span>11.15</span></a>). Compute it by the line route, never by scanning genotypes.</li>
+<li><strong>Effective number of parent lines</strong>, <span class="math inline">\(N_{e,\text{par}} = (\sum_a k_a)^2 / \sum_a k_a^2\)</span>. It costs 7 us at the benchmark scale, is tabulated from the same count vector as <span class="math inline">\(\theta\)</span> inside <code>make_fitness_fast()</code>, and blocks concentration onto a few lines, a failure mode <span class="math inline">\(\theta\)</span> tolerates: in the cached analysis <span class="math inline">\(N_{e,\text{par}}\)</span> spans 30.1 to 55.8 inside one narrow <span class="math inline">\(\theta\)</span> band.</li>
 </ol>
-<p>Reparameterise the search on <strong>line weights</strong>, and enforce the per-line usage cap in the decoder rather than by penalty.</p>
+<p>Represent the plan by line usage, so that every evaluation is the line route. If the search is differential evolution on line weights, enforce the per-line usage cap in the decoder rather than by penalty (it is then satisfied by construction). Which search to run, line-encoded DE, <code>sel_de()</code> or a local search, is <a href="10-combinatorial-selection.html" class="quarto-xref"><span>Chapter 16</span></a>’s question: Finding 4 beat a key-per-hybrid encoding in one setup, and the benchmark of <a href="10b-advanced-selection.html" class="quarto-xref"><span>Chapter 17</span></a> has <code>sel_de()</code> ahead of line-encoded DE only without a cap and at one of two scales (3 seeds); under a cap it is 0.0041 above it at the book scale and equal to it at the production scale (limit (b) of <a href="#sec-choosing-search" class="quarto-xref"><span>Section 12.4</span></a>).</p>
 </section>
 <section id="at-validation-on-the-returned-plan-only" class="level3" data-number="12.6.2">
 <h3 data-number="12.6.2" class="anchored" data-anchor-id="at-validation-on-the-returned-plan-only"><span class="header-section-number">12.6.2</span> At validation, on the returned plan only</h3>
 <ol start="3" type="1">
-<li><strong>Marker alleles retained</strong>, via the bitset route. The one metric carrying information <span class="math inline">\(\theta\)</span> does not.</li>
-<li><strong>Within/between heterotic-pool decomposition</strong>, to confirm the plan has not preserved diversity by degrading pool separation.</li>
-<li><strong>Status number</strong> <span class="math inline">\(N_s = 1/(2\theta)\)</span>, free from <span class="math inline">\(\theta\)</span>, as the reportable descriptor. Do not report a rate-based <span class="math inline">\(N_e\)</span> under active management.</li>
+<li><strong>Marker alleles retained</strong>, via the bitset route (0.9 ms, once per plan). It is <span class="math inline">\(A_{\text{ret}}\)</span> of <a href="06-metric-catalogue.html#eq-catalogue-alleles-retained" class="quarto-xref">Equation&nbsp;<span>11.7</span></a>, not the MAF-threshold count <span class="math inline">\(A_{\text{lost}}\)</span> of <a href="06-metric-catalogue.html#sec-richness" class="quarto-xref"><span>Section 11.5</span></a>. The equation is defined on a set of inbred lines; applied to a plan of hybrids (<code>alleles_retained_fast(idx, ctx)</code> takes hybrid indices), the set <span class="math inline">\(S_L\)</span> is the lines used as parents of the plan, which under A2 gives the same count as the equation on the <span class="math inline">\(\{0, 0.5, 1\}\)</span> hybrid matrix (not computed in a chunk here). It is one of several metrics that keep rank variation at fixed <span class="math inline">\(\theta\)</span> (Finding 3), not the only one. It is chosen because it counts the alleles a plan carries forward, which is what the rare-allele argument of <a href="06-metric-catalogue.html#sec-richness" class="quarto-xref"><span>Section 11.5</span></a> is about, and because it is cheap enough to run once.</li>
+<li><strong>Within/between heterotic-pool decomposition</strong>, to confirm the plan has not preserved diversity by degrading pool separation (the decomposition of <span class="citation" data-cites="caballero2002">Caballero and Toro (<a href="99-references.html#ref-caballero2002" role="doc-biblioref">2002</a>)</span>). Between-pool coancestry keeps the largest residual fraction of any metric in Finding 3 (0.65), which is the reason to look at it.</li>
+<li><strong>Status number</strong> <span class="math inline">\(N_s = 1/(2\theta)\)</span>, free from <span class="math inline">\(\theta\)</span>. It adds no information: it is a monotone rescaling of <span class="math inline">\(\theta\)</span> and, on molecular <span class="math inline">\(\mathbf{f}\)</span>, lies in <span class="math inline">\([1/2, 1]\)</span> and is not a head count (<a href="06-metric-catalogue.html#sec-ns" class="quarto-xref"><span>Section 11.3</span></a>). Do not report a rate-based <span class="math inline">\(N_e\)</span> under active management.</li>
+<li><strong>Monitoring, outside the analysis above: <span class="math inline">\(F_{drift}\)</span> and <span class="math inline">\(F_{hom}\)</span></strong> against the random-subset null (1, <a href="06-metric-catalogue.html" class="quarto-xref"><span>Chapter 11</span></a>). The constraint pins the homozygosity lens and not the drift lens, and the redundancy analysis contains no drift column, so nothing in this chapter says these two are redundant with <span class="math inline">\(\theta\)</span>.</li>
 </ol>
 </section>
-<section id="not-recommended" class="level3" data-number="12.6.3">
-<h3 data-number="12.6.3" class="anchored" data-anchor-id="not-recommended"><span class="header-section-number">12.6.3</span> Not recommended</h3>
-<p>Nei’s <span class="math inline">\(H_e\)</span> as a separate metric (it <em>is</em> <span class="math inline">\(1 - \theta\)</span>); effective dimensionality (<span class="math inline">\(|\rho| = 0.97\)</span> with <span class="math inline">\(\theta\)</span>, and needs the hybrid matrix); MAF-threshold allele loss (<span class="math inline">\(|\rho| = 0.93\)</span>, and 1.47 hours per million evaluations); Core Hunter’s E-NE and A-NE (both require the <span class="math inline">\(O(N^2)\)</span> matrix and are unavailable at production scale – they are designed for core-collection assembly, a different problem).</p>
+<section id="sec-choosing-ane" class="level3" data-number="12.6.3">
+<h3 data-number="12.6.3" class="anchored" data-anchor-id="sec-choosing-ane"><span class="header-section-number">12.6.3</span> What the GD/ANE contrast of <a href="06-metric-catalogue.html" class="quarto-xref"><span>Chapter 11</span></a> means for this recommendation</h3>
+<p><a href="06-metric-catalogue.html" class="quarto-xref"><span>Chapter 11</span></a> reads capped truncation against the random-subset null and finds <span class="math inline">\(GD\)</span> close to the null and A-NE far from it; across twenty founder draws the contrast in magnitude is the robust part, and a constraint on <span class="math inline">\(GD\)</span> alone fails to flag capped truncation on some draws and not on others (<a href="06-metric-catalogue.html#tbl-catalogue-z" class="quarto-xref">Table&nbsp;<span>11.18</span></a>, <a href="06-metric-catalogue.html#tbl-catalogue-seeds-z" class="quarto-xref">Table&nbsp;<span>11.19</span></a>). Finding 3 agrees from the other side: A-NE (0.56) and E-NE (0.52) keep as much rank variation at fixed <span class="math inline">\(\theta\)</span> as allelic richness does. A-NE measures representativeness of the candidate set, so a plan can satisfy the constraint on <span class="math inline">\(\theta\)</span> and <span class="math inline">\(N_{e,\text{par}}\)</span> while sitting in one region of genetic space, which is what the A-NE reading detects. They are therefore <strong>not</strong> redundant, and the caption of <a href="#tbl-choosing-recommendation" class="quarto-xref">Table&nbsp;<span>12.1</span></a> does not say they are.</p>
+<p>The reason they stay out of the optimiser is cost and form, not redundancy. <code>ane()</code> reads the <span class="math inline">\(N \times N\)</span> hybrid matrix <code>ctx[["f"]]</code>, which was never formed at the benchmark scale (3.77 GiB), and A-NE takes a minimum over <span class="math inline">\(n\)</span> selected hybrids for each of the <span class="math inline">\(N\)</span> candidates, an <span class="math inline">\(O(Nn)\)</span> pass per evaluation by the formula of <a href="06-metric-catalogue.html" class="quarto-xref"><span>Chapter 11</span></a> (not timed here). At validation the cost is paid once, so A-NE is a reasonable additional item on the returned plan, computed from the <span class="math inline">\(N \times n\)</span> block of <span class="math inline">\(\mathbf{f}\)</span> that <a href="#eq-collapse-f" class="quarto-xref">Equation&nbsp;<span>12.1</span></a> lets one assemble from <span class="math inline">\(\mathbf{f}^L\)</span> without forming the full matrix. That assembly is an inference from the identity; the package does not implement or time it. <a href="09-optimal-contributions.html" class="quarto-xref"><span>Chapter 15</span></a> states the optimisation problem whose returned plan these would validate; it computes none of the three.</p>
 </section>
-<section id="caveats" class="level3" data-number="12.6.4">
-<h3 data-number="12.6.4" class="anchored" data-anchor-id="caveats"><span class="header-section-number">12.6.4</span> Caveats</h3>
-<p>The choice of <span class="math inline">\(\mathbf{f}^L\)</span> remains open in the literature. Post-2018 work is consistent that molecular or IBD-flavoured coancestry beats a VanRaden-style drift matrix for diversity management, but reports no consensus on a single preferred formulation, and matrix choice demonstrably changes allele-frequency trajectories (<a href="11-plant-literature.html" class="quarto-xref"><span>Chapter 21</span></a>). The collapse derived here is a property of the F1 structure and holds for <strong>any</strong> symmetric line-level <span class="math inline">\(\mathbf{f}^L\)</span> – so if the matrix choice changes, every cost and identity result in this chapter survives unchanged.</p>
-<p>Managing on molecular coancestry controls homozygosity, not drift; these diverge, and a plan optimal on one is not optimal on the other (<a href="05-genomic-era.html" class="quarto-xref"><span>Chapter 10</span></a>). Predicted <span class="math inline">\(\Delta f\)</span> is biased downward, with the bias growing as the candidate pool shrinks – report realised <span class="math inline">\(\theta\)</span> on the chosen plan rather than a predicted rate.</p>
+<section id="not-recommended" class="level3" data-number="12.6.4">
+<h3 data-number="12.6.4" class="anchored" data-anchor-id="not-recommended"><span class="header-section-number">12.6.4</span> Not recommended</h3>
+<ul>
+<li>Nei’s <span class="math inline">\(H_e\)</span> as a separate metric: it <em>is</em> <span class="math inline">\(1 - \theta\)</span> when computed on the group’s own frequencies without the <span class="math inline">\(2n/(2n-1)\)</span> correction (<a href="06-metric-catalogue.html" class="quarto-xref"><span>Chapter 11</span></a>; <span class="citation" data-cites="nei1973">Nei (<a href="99-references.html#ref-nei1973" role="doc-biblioref">1973</a>)</span>).</li>
+<li>Effective dimensionality: it needs the hybrid matrix; the cached column is the uncentred form, which re-measures <span class="math inline">\(\theta\)</span> (<span class="math inline">\(|\rho| = 0.967\)</span> over the whole mix) by construction; and the package’s double-centred form was not part of the redundancy analysis, so nothing here says it is redundant.</li>
+<li>MAF-threshold allele loss, <span class="math inline">\(A_{\text{lost}}\)</span> (<a href="06-metric-catalogue.html#eq-catalogue-alleles-lost" class="quarto-xref">Equation&nbsp;<span>11.6</span></a>): 5297 us per evaluation, 1.47 hours per million, against 892 us for the bitset richness. By the residual criterion it is not redundant (0.35, the same as <span class="math inline">\(N_{e,\text{par}}\)</span>); it stays out on cost, and because allelic richness already stands for allele retention at validation. Whether the two carry the same information was not examined.</li>
+<li>Core Hunter’s E-NE and A-NE as <em>optimiser</em> metrics (definitions in <span class="citation" data-cites="debeukelaer2018">De Beukelaer et al. (<a href="99-references.html#ref-debeukelaer2018" role="doc-biblioref">2018</a>)</span>, after <span class="citation" data-cites="odong2013">Odong et al. (<a href="99-references.html#ref-odong2013" role="doc-biblioref">2013</a>)</span>, which are distance measures for core-subset selection): they need the hybrid-level distances, as stated for <code>ane()</code> in <a href="#sec-choosing-ane" class="quarto-xref"><span>Section 12.6.3</span></a>.</li>
+</ul>
+</section>
+<section id="caveats" class="level3" data-number="12.6.5">
+<h3 data-number="12.6.5" class="anchored" data-anchor-id="caveats"><span class="header-section-number">12.6.5</span> Caveats</h3>
+<p>The choice of <span class="math inline">\(\mathbf{f}^L\)</span> remains open. <a href="11-plant-literature.html" class="quarto-xref"><span>Chapter 21</span></a> (later) collects post-2018 studies that report matrix choice changing allele-frequency trajectories and reports no consensus on a single preferred formulation; this chapter does not rely on a ranking of matrices. The collapse of Finding 1 is algebra for any symmetric line-level <span class="math inline">\(\mathbf{f}^L\)</span> <strong>given</strong> that the hybrid-level matrix is defined by <a href="#eq-collapse-f" class="quarto-xref">Equation&nbsp;<span>12.1</span></a>, so the cost and identity results survive a change of <span class="math inline">\(\mathbf{f}^L\)</span>. Whether <a href="#eq-collapse-f" class="quarto-xref">Equation&nbsp;<span>12.1</span></a> is the right hybrid-level matrix for a given choice, for a centred VanRaden matrix for example, is not established here.</p>
+<p>Managing on molecular coancestry controls homozygosity, not drift; these diverge, and a plan optimal on one is not optimal on the other (1). A <em>predicted</em> rate of coancestry in the next generation is a further matter: <span class="citation" data-cites="gomezromano2016">Gómez-Romano et al. (<a href="99-references.html#ref-gomezromano2016" role="doc-biblioref">2016</a>)</span>, as reported in <a href="09-optimal-contributions.html" class="quarto-xref"><span>Chapter 15</span></a>, find it biased downward relative to the realised value, by roughly a factor of two in their simulations with small candidate sets, and 1 shows that the sign of the bias of a drift constraint is a property of the matrix. Report realised <span class="math inline">\(\theta\)</span> on the chosen plan rather than a predicted rate.</p>
 </section>
 </section>
 <section id="drop-in-code" class="level2" data-number="12.7">
 <h2 data-number="12.7" class="anchored" data-anchor-id="drop-in-code"><span class="header-section-number">12.7</span> Drop-in code</h2>
+<p>The code below is not run when the book is built. It uses <code>sel_de_fast()</code>, the line-encoded DE of the package, which builds a warm start (a sweep of diversity-directed line weights) and never starts cold; a direct call to <code>DEoptim::DEoptim()</code> without an <code>initialpop</code> would start cold, which <a href="10-combinatorial-selection.html" class="quarto-xref"><span>Chapter 16</span></a> reports finishing below plain greedy at the package’s simulation scale. It carries all four restrictions of Finding 4, and <code>NP</code> is ten times the number of lines, the guidance of the <code>DEoptim.control</code> help page for the length of the parameter vector.</p>
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>ctx <span class="ot">&lt;-</span> <span class="fu">fast_ctx</span>(ctx, <span class="at">GL =</span> line_genotypes, <span class="at">pack =</span> <span class="cn">TRUE</span>)   <span class="co"># no N x N matrix needed</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>gd_ref <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">replicate</span>(<span class="dv">500</span>, <span class="fu">fast_gene_div</span>(<span class="fu">sample.int</span>(ctx<span class="sc">$</span>N, n_sel), ctx)))</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">make_fitness_fast</span>(ctx, n_sel, gd_ref, <span class="at">alpha_max =</span> <span class="fl">0.005</span>,</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>                         <span class="at">ne_par_min =</span> <span class="dv">50</span>, <span class="at">max_use =</span> <span class="dv">6</span>, <span class="at">penalty =</span> <span class="dv">5</span>,</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>                         <span class="at">encoding =</span> <span class="st">"lines"</span>)</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> DEoptim<span class="sc">::</span><span class="fu">DEoptim</span>(fit,</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>                        <span class="at">lower =</span> <span class="fu">rep</span>(<span class="dv">0</span>, ctx<span class="sc">$</span>n_lines), <span class="at">upper =</span> <span class="fu">rep</span>(<span class="dv">1</span>, ctx<span class="sc">$</span>n_lines),</span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>                        <span class="at">control =</span> DEoptim<span class="sc">::</span><span class="fu">DEoptim.control</span>(<span class="at">NP =</span> <span class="dv">200</span>, <span class="at">itermax =</span> <span class="dv">300</span>))</span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>idx <span class="ot">&lt;-</span> <span class="fu">decode_lines</span>(res<span class="sc">$</span>optim<span class="sc">$</span>bestmem, ctx, n_sel, <span class="at">max_use =</span> <span class="dv">6</span>)</span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">theta      =</span> <span class="fu">fast_theta</span>(idx, ctx),</span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">loss_pct   =</span> <span class="dv">100</span> <span class="sc">*</span> (gd_ref <span class="sc">-</span> <span class="fu">fast_gene_div</span>(idx, ctx)) <span class="sc">/</span> gd_ref,</span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">Ne_parents =</span> <span class="fu">fast_ne_parents</span>(idx, ctx),</span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">alleles    =</span> <span class="fu">alleles_retained_fast</span>(idx, ctx),</span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fast_theta_pools</span>(idx, ctx))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>ctx <span class="ot">&lt;-</span> <span class="fu">fast_ctx</span>(ctx, <span class="at">GL =</span> line_genotypes, <span class="at">pack =</span> <span class="cn">TRUE</span>)   <span class="co"># no N x N matrix needed</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>gd_ref <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">replicate</span>(<span class="dv">500</span>, <span class="fu">fast_gene_div</span>(<span class="fu">sample.int</span>(ctx<span class="sc">$</span>N, n_sel), ctx)))</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>idx <span class="ot">&lt;-</span> <span class="fu">sel_de_fast</span>(ctx, n_sel, gd_ref, <span class="at">alpha_max =</span> <span class="fl">0.005</span>,</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>                   <span class="at">ne_par_min =</span> <span class="dv">50</span>, <span class="at">max_use =</span> <span class="dv">6</span>, <span class="at">pool_tol =</span> <span class="fl">0.05</span>,</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>                   <span class="at">NP =</span> <span class="dv">10</span> <span class="sc">*</span> ctx<span class="sc">$</span>n_lines, <span class="at">itermax =</span> <span class="dv">300</span>)</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">theta      =</span> <span class="fu">fast_theta</span>(idx, ctx),</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">loss_pct   =</span> <span class="dv">100</span> <span class="sc">*</span> (gd_ref <span class="sc">-</span> <span class="fu">fast_gene_div</span>(idx, ctx)) <span class="sc">/</span> gd_ref,</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">Ne_parents =</span> <span class="fu">fast_ne_parents</span>(idx, ctx),</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">alleles    =</span> <span class="fu">alleles_retained_fast</span>(idx, ctx),</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fast_theta_pools</span>(idx, ctx))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <!-- reproduce-chapter -->
@@ -1403,6 +1950,26 @@ window.Quarto = {
 <p>All the code of this chapter, in order and with the explanation kept as comments, is one script: <a href="https://ederdbs.github.io/QG/downloads/07-choosing-metrics.R" download="07-choosing-metrics.R"><strong>07-choosing-metrics.R</strong></a>. Download it, install <code>hybdiv</code>, and run it top to bottom in an empty directory; cached results are fetched on first use.</p>
 
 
+<div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
+<div id="ref-caballero2002" class="csl-entry" role="listitem">
+Caballero, A., and M. A. Toro. 2002. <span>“Analysis of Genetic Diversity for the Management of Conserved Subdivided Populations.”</span> <em>Conservation Genetics</em> 3 (3): 289–99. <a href="https://doi.org/10.1023/A:1019956205473">https://doi.org/10.1023/A:1019956205473</a>.
+</div>
+<div id="ref-debeukelaer2018" class="csl-entry" role="listitem">
+De Beukelaer, H., G. F. Davenport, and V. Fack. 2018. <span>“Core <span>H</span>unter 3: Flexible Core Subset Selection.”</span> <em>BMC Bioinformatics</em> 19 (1): 203. <a href="https://doi.org/10.1186/s12859-018-2209-z">https://doi.org/10.1186/s12859-018-2209-z</a>.
+</div>
+<div id="ref-gomezromano2016" class="csl-entry" role="listitem">
+Gómez-Romano, F., B. Villanueva, J. Fernández, J. A. Woolliams, and R. Pong-Wong. 2016. <span>“The Use of Genomic Coancestry Matrices in the Optimisation of Contributions to Maintain Genetic Diversity at Specific Regions of the Genome.”</span> <em>Genetics Selection Evolution</em> 48: 2. <a href="https://doi.org/10.1186/s12711-015-0172-y">https://doi.org/10.1186/s12711-015-0172-y</a>.
+</div>
+<div id="ref-mullen2011" class="csl-entry" role="listitem">
+Mullen, K. M., D. Ardia, D. L. Gil, D. Windover, and J. Cline. 2011. <span>“<span>DEoptim</span>: An <span>R</span> Package for Global Optimization by Differential Evolution.”</span> <em>Journal of Statistical Software</em> 40 (6): 1–26. <a href="https://doi.org/10.18637/jss.v040.i06">https://doi.org/10.18637/jss.v040.i06</a>.
+</div>
+<div id="ref-nei1973" class="csl-entry" role="listitem">
+Nei, M. 1973. <span>“Analysis of Gene Diversity in Subdivided Populations.”</span> <em>Proceedings of the National Academy of Sciences</em> 70 (12): 3321–23. <a href="https://doi.org/10.1073/pnas.70.12.3321">https://doi.org/10.1073/pnas.70.12.3321</a>.
+</div>
+<div id="ref-odong2013" class="csl-entry" role="listitem">
+Odong, T. L., J. Jansen, F. A. van Eeuwijk, and T. J. L. van Hintum. 2013. <span>“Quality of Core Collections for Effective Utilisation of Genetic Resources Review, Discussion and Interpretation.”</span> <em>Theoretical and Applied Genetics</em> 126 (2): 289–305. <a href="https://doi.org/10.1007/s00122-012-1971-y">https://doi.org/10.1007/s00122-012-1971-y</a>.
+</div>
+</div>
 </section>
 
 </main> <!-- /main -->
@@ -1826,8 +2393,8 @@ window.Quarto = {
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./06-metric-catalogue.html" class="pagination-link" aria-label="A catalogue of metrics on `f`">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">A catalogue of metrics on <code>f</code></span></span>
+      <a href="./06-metric-catalogue.html" class="pagination-link" aria-label="A catalogue of diversity metrics">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">A catalogue of diversity metrics</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">

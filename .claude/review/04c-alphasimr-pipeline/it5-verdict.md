@@ -1,0 +1,31 @@
+VERDICT: REJECTED
+
+PREVIOUS IDS (render re-check RC-1..RC-5)
+- RC-1 -- OPEN -- the new paragraph (book/04c-alphasimr-pipeline.qmd:247-258) states as fact what the callout, in the same box, says is not established; see 04c-D1.
+- RC-2 -- CLOSED -- sentence at qmd:1758-1763 uses only inline R (cov_t_crit defined at :1634, t_bonf_sweep at :1640, both before use, rendered with fmt(.,2)); no hard-coded 2.2/2.09/3.01. Present text carries no render-specific value as fixed. (Frozen html.json/typ.json still hold the pre-edit text; the sentence will appear only after the re-render in progress.)
+- RC-3 -- CLOSED -- "with R's stream identical after both calls (asserted in the chunk)" (:227-229) is true in both branches: stopifnot(identical(rs_qa, rs_qb), identical(rs_ma, rs_mb), ...) at :176-177 aborts the render otherwise, and the phrase makes no claim about haplotypes; the haplotype branch is the inline if() on identical(ma@geno, mb@geno). The word "unchanged by the difference" is gone.
+- RC-4 -- CLOSED as covered by RC-1's paragraph only to the extent RC-1 closes; since RC-1 is open, the stage-2 sign is named there under the same defect (04c-D1). The conditional passage at :2192 is unchanged and unobjectionable.
+- RC-5 -- CLOSED for source -- 90-notation.qmd:561 now `\lvert a_k \rvert`. pandoc 3 (installed, not quarto) converts `$d_k / \lvert a_k \rvert$` to Typst without warning (output `$d_k\/\|a_k\|$`) and to HTML as `\(d_k / \lvert a_k \rvert\)`. The row is in an R-built table, so the HTML row renders. The Typst warning itself is confirmed gone only by the render in progress.
+
+DISQUALIFYING FAILURES
+- 04c-D1 [criteria 3, 4, 5, 6] book/04c-alphasimr-pipeline.qmd:247-258, last paragraph of the callout "Founders from MaCS" -- The paragraph says that the HTML and the PDF "are produced by separate executions of the chapter, each drawing its own `runMacs2()` founders, so every number that depends on the founders (...) differs somewhat between the two formats, and so does a re-execution of either", and "What was measured is that the two formats were produced by different draws".
+  (a) The first half is true of how the book is rendered (separate html.json / typ.json executions, checked: 04:55 vs 04:57). The second is not. "Differs" is asserted as universal and unconditional over a list of quantities, including "the sign of the stage-2 attainable-alpha ceiling", but it holds only if the two MaCS draws returned different haplotypes. That is the very property the callout (:230-232) and Step 8 (:1480-1482, :1769) say is "not established" for runMacs2, "this chapter did not test that". The same box therefore both denies and asserts it. The pair of executions is a count of one, and a pair of executions that happened to coincide would make the sentence false, which is the typing-in-as-fixed of a render-specific fact the paragraph was meant to avoid.
+  (b) "What was measured" is not measured in the text: the chapter never compares HTML with PDF. The only comparison is the external audit render-recheck.md, one pair, not cited and not reproducible from the chapter. "Different draws" is inferred from differing numbers (and differing numbers could also come from other non-seeded sources); it is presented as a result (criterion 4).
+  (c) "and so does a re-execution of either" is an extrapolation from that single pair to every future execution, beyond what 04c measured (one runMacs pair per render; runMacs2 not measured as a rate).
+  The limitation itself (the two published formats can disagree) is worth stating; the text states it as established, with an unsupported "measured", and contradicts the callout's own "Not established".
+  Consequence: criterion 5 (the box says both "nothing established for runMacs2" and "the two formats differ because their founders differ"), criterion 3/4 (inference stated as measurement), criterion 6 (limit circumscribed beyond the evidence).
+
+NON-DISQUALIFYING OBSERVATIONS
+- 04c-M1 book/04c-alphasimr-pipeline.qmd:1760-1763 -- "no verdict above depends on which side it falls" sits beside inline text and counts ("beyond ... at split = X", "k are beyond the unadjusted point") that do depend on it; the sentence needs its scope (inferences vs the render's own verdict words). "is not stable across executions" rests on one observed pair (split 10: |t| 2.23 in the HTML, within 1.65 in the PDF, from render-recheck.md) not stated in the chapter.
+- 04c-M2 book/04c-alphasimr-pipeline.qmd:205-207 -- the mechanism "runMacs() draws one seed per chromosome from R's stream (sample.int())" is typed as fact with no source; the assertion in the chunk only shows that the stream is identical after both calls, not how many draws are made. Not decisive here.
+
+WHAT WAS VERIFIED
+- Callout paragraph vs how the book renders: ls of book/_freeze/04c-alphasimr-pipeline/execute-results shows html.json (04:55:19) and typ.json (04:57:43), separate executions; CLAUDE.md states the same (separate freeze entries per format).
+- Frozen outputs (pre-edit) differ between formats: html.json "2 of the 7 ... (3 beyond the unadjusted point)", cov "beyond ... at split = 10"; typ.json "(2 beyond ...)", "within ... at every split". This is the measured basis for 04c-D1; it is one pair.
+- Cov sentence: grep shows cov_t_crit (:1634) and t_bonf_sweep (:1640) computed in the chunk before the paragraph; the sentence at :1761-1762 uses only `r fmt(...)`.
+- Callout phrase "identical after both calls (asserted in the chunk)": read chunk :163-198; stopifnot at :176-177 includes identical(rs_ma, rs_mb); no assertion on ma vs mb (comment :179-180); phrase independent of haplotype outcome.
+- 90 row: sed 90-notation.qmd:561 `\\lvert a_k \\rvert` in the R-built Meaning vector; git diff shows it is the only change of that kind; pandoc -t typst and -t html on the cell text convert without warning.
+
+NOT VERIFIED
+- That the Typst warning "Could not convert TeX math" is gone, and that the new callout paragraph and cov sentence appear in the rendered HTML/PDF: the render is in progress and the frozen results and docs/ still hold the pre-edit text; I did not run quarto and did not execute the 04c code (needs AlphaSimR/MaCS and founders that are not reproducible).
+- Whether the HTML and PDF of the new render again differ in the founder-dependent numbers (the claim in 04c-D1 depends on it).

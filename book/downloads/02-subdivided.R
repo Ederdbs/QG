@@ -1050,8 +1050,11 @@ stopifnot(all(abs(ne_obs["z", ]) < 3))
 #'   effective number of alleles being, by definition, the inverse of mean
 #'   coancestry; [@toro2005, §2]) is valid
 #'   asymptotically but does **not** protect rare alleles in the short term. This
-#'   is why allelic richness survives the redundancy analysis in @sec-choosing as
-#'   the one genuinely independent axis.
+#'   is why allelic richness is carried into the recommendation of @sec-choosing as
+#'   a validation metric: in the cached redundancy analysis it keeps more than half of
+#'   its rank variation at fixed group coancestry, as do E-NE, A-NE and
+#'   between-pool coancestry, so it is one axis independent of $\theta$ and not the
+#'   only one.
 #' - Weighting between-group variation more heavily is arbitrary. A more defensible
 #'   fix is to optimise $\mathbf{c}$ with per-accession minimum constraints, as
 #'   @toro2005 [§3e, Table 5] do for five Iberian pig strains.

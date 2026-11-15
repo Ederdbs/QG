@@ -486,9 +486,11 @@ fmt(c(`PYT, phenotypic`   = loss("gd_pyt_ps"), `PYT, genomic`   = loss("gd_pyt_g
 #' the hybrid scheme instead; the two chapters are the same toolkit pointed at the
 #' two kinds of programme. @sec-response is where the breeder's equation says why a
 #' shorter generation interval raises gain per year. @sec-genomic-prediction is
-#' where the accuracy this chapter assumes is actually measured, and
-#' @sec-genomic-era is where marker-versus-QTL, the reason that accuracy is finite,
-#' is taken seriously.
+#' where an accuracy of the kind this chapter assumes is measured, on a trait generated
+#' from the markers the models see; there it is finite because of training size, noise
+#' and the rank bound, not because of a marker-versus-QTL gap. This book does not
+#' measure that gap, and @sec-genomic-era (assumption A5) states its collapse as a
+#' limit.
 #' 
 #' The diversity result belongs to the book's spine. @sec-cycles shows the same
 #' tension -- faster response, faster erosion -- with the package's own simulator

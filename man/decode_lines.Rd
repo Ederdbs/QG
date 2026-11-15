@@ -27,8 +27,10 @@ parents, and hybrids are taken greedily subject to the per-line usage cap --
 so the cap is satisfied by construction rather than by penalty.
 }
 \details{
-This reparameterisation, not the constraint handler, is what decides whether
-the differential evolution works: at an equal 60,000-evaluation budget under
-four simultaneous restrictions it reached index 1.988 against 0.351 for
-[decode_rank].
+In one cached comparison (3 seeds, equal 60,000-evaluation budget, NP not
+recorded, both arms cold-started) it reached index 1.988 against 0.351 for
+the N-key encoding [decode_rank]. That run confounds the encoding with the
+decoder, which satisfies the per-line cap by construction, so it does not
+isolate the encoding; and it is not a comparison with `sel_de()` and its
+greedy warm start.
 }

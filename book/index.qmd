@@ -114,8 +114,9 @@ is a link in it:
    item 3, which is why the pools are monitored separately (@sec-stages).
 5. How much diversity there is to spend depends on how the candidates were
    generated: a panel cannot be selected back up to variation it never sampled
-   (@sec-sizing), and a set of near-copies cannot be rescued by any optimiser
-   (@sec-backcross). @sec-simulating-crosses and @sec-alphasimr build that panel
+   (@sec-sizing), and a set of near-copies carries a small fraction of the gene
+   diversity of unrelated lines (@sec-backcross measures that ratio for BC3
+   conversions; it does not run or bound an optimiser). @sec-simulating-crosses and @sec-alphasimr build that panel
    two different ways, and everything downstream is blind to which --
    @sec-alphasimr from the primitives up, so the generative model is something a
    reader can rebuild rather than accept. Before any of it, the crossing plan decides which
@@ -128,7 +129,8 @@ is a link in it:
    @sec-programme pointing the same AlphaSimR primitives at an inbred-line
    programme, where the diversity cost of running faster is measured directly)
    -- and then
-   predicted, which turns out to work only where the constraint holds
+   forecast with Robertson's formula, whose 15-cycle gain agrees with the five-draw
+   mean at the tightest budget only, in sample and not along the trajectory
    (@sec-limits).
 
 The parts are ordered so that each is readable after the ones before it:
@@ -202,8 +204,8 @@ remade from this repository (@sec-verification tabulates most of these files):
   `pipeline_loss_ledger.csv` and `pipeline_loss.png`, `fst_definitions.csv`,
   `dist_vs_variance.csv`, `theta_identity_check.csv` and `metric_pitfalls.png`.
 - **Not simulation output, and not regenerated:** the literature screens
-  `bibliography_*.csv`, `plant_metric_usage.csv` derived from them,
-  `plant_lit_landscape.png`, `sparse_primary_studies.csv` and
+  `bibliography_*.csv`, `plant_metric_usage.csv` (an external classification, not derivable from them),
+  `sparse_primary_studies.csv` and
   `sparse_literature_parameters.csv`, compiled from the primary papers, and
   `mating_core_findings.csv`, extracted from the published literature and read by
   no chapter. The source record of that last file, which is not in this repository,

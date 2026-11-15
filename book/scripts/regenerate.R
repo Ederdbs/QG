@@ -20,10 +20,12 @@
 #   mating       the phenotypic core of the mating-design sweep (Ch 4e)
 #   sparse       the phenotypic core of the sparse-testing study (Ch 4f)
 #   joint        crosses x locations at a fixed plot budget (Ch 4g)
+#   ocs_panel    how the truncation alpha moves with the marker panel, over 20
+#                founder draws (Ch 9)
 #
 # Not regenerated here, because they are not this project's output:
 #   bibliography_animal.csv, bibliography_plant.csv  (literature screens)
-#   plant_metric_usage.csv                           (derived from those)
+#   plant_metric_usage.csv                           (external classification; not derivable from those)
 #   mating_scenarios_summary.csv, mating_optimizer_frontier.csv,
 #   mating_validation.csv, figs/mating_*.png
 #                         (the external `sparsex` study: AlphaSimR founders,
@@ -58,7 +60,7 @@ dir.create(fig_dir,  showWarnings = FALSE, recursive = TRUE)
 dir.create(out_dir,  showWarnings = FALSE, recursive = TRUE)
 
 targets <- commandArgs(trailingOnly = TRUE)
-if (!length(targets)) targets <- c("f2size", "benchmark", "identity", "genpred", "search", "cycles", "limits", "mating", "sparse", "joint")
+if (!length(targets)) targets <- c("f2size", "benchmark", "identity", "genpred", "search", "cycles", "limits", "mating", "sparse", "joint", "ocs_panel")
 want <- function(x) x %in% targets
 
 # --- f2size: the population-sizing grid ---------------------------------------
@@ -478,8 +480,10 @@ if (want("cycles")) {
     }))))
   write.csv(inj, file.path(data_dir, "cycles_injection.csv"), row.names = FALSE)
 
-  # Confirm the trend is not an artefact of the cheap selector: one budget,
-  # one seed, re-run with the differential evolution of Chapter 10.
+  # The same trajectory with differential evolution as the selector: both
+  # budgets, seed 1, 12 cycles. One seed and a stream that shifts with the
+  # selector, so this does not confirm or refute the greedy trend (Chapter 11b
+  # measures what it can and cannot show).
   de_sel <- function(ctx, n_sel, alpha_max, gd_ref, max_use)
     suppressWarnings(sel_de(ctx, n_sel, alpha_max, gd_ref, NP = 300,
                             itermax = 1000, max_use = max_use))
@@ -513,7 +517,7 @@ if (want("cycles")) {
   png(file.path(fig_dir, "cycles_diversity.png"), width = 1050, height = 680, res = 150)
   op <- par(mfrow = c(1, 2), mar = c(4, 4, 2, 1))
   plot(range(ag$cycle), range(ag$GD), type = "n", xlab = "cycle",
-       ylab = "gene diversity of the selection", main = "Within")
+       ylab = "gene diversity of the selection", main = "Total, GD_T")
   for (b in names(cols)) {
     d <- ag[ag$budget == b, ]; lines(d$cycle, d$GD, col = cols[[b]], lwd = 2)
   }
@@ -584,7 +588,9 @@ if (want("limits")) {
 
   # The gap between realised and genic variance is NOT the Bulmer effect on its
   # own. A finite founder base leaves disequilibrium in the very first cycle,
-  # before anything is selected, and two divergent pools add more. Only the
+  # before anything is selected: over the complete factorial it is the sampling
+  # covariance among loci of the founder lines of each pool, (gap_A + gap_B) / 4
+  # up to the n - 1 divisor (02b); no between-pool term enters. Only the
   # difference between a selected arm and an otherwise identical unselected one
   # isolates what selection did, which is why every regime below is run against
   # the same seeds and the random arm exists at all.
@@ -617,14 +623,21 @@ if (want("limits")) {
     # arm needs no variance code of its own.
     lk_cfg <- modifyList(rrs_config, list(n_cycles = 8))
     # The founders are generated ONCE per replicate and both arms branch off
-    # that same result. alphasimr_founder_pools() is not reproducible from
-    # cfg$seed -- runMacs2 seeds MaCS outside R's RNG -- so calling it once per
-    # arm would have compared two different base populations and charged the
-    # difference to selection. set.seed() before each chain then gives both arms
-    # the same downstream stream, leaving the choice of elite lines as the only
-    # difference between them.
+    # that same result, so cycle 0 is common to the two arms of a replicate.
+    # Each replicate draws its founders under its OWN seed, set immediately
+    # before the draw: alphasimr_founder_pools() calls set.seed(cfg$seed), and
+    # a constant cfg$seed made replicates 2-4 of the first version of this file
+    # share founders (cycle 0 identical), so n_pairs counted pseudo-replicates.
+    # Whether two calls to runMacs2() under one seed return the same founders
+    # was not measured (04c compares one runMacs() pair per render and does not
+    # call runMacs2()); under set.seed(1) the previous committed file gave
+    # cycle-0 varA_A 0.4902 / 0.5504 and this one 1.2076 (an observation, not a
+    # rate). The founders are not saved, so the committed file is treated as
+    # cached and not as reproducible from this repository. After the founders
+    # the two arms differ in the elite-line pick (sample() in the random arm),
+    # so their streams diverge from the first cycle.
     linked <- do.call(rbind, lapply(1:4, function(s) {
-      fp <- alphasimr_founder_pools(lk_cfg)
+      fp <- alphasimr_founder_pools(modifyList(lk_cfg, list(seed = s)))
       do.call(rbind, lapply(c(FALSE, TRUE), function(rnd) {
         set.seed(1000 + s)
         pA <- fp$pop_A; pB <- fp$pop_B; SP <- fp$SP
@@ -786,8 +799,6 @@ if (want("sparse")) {
   message("sparse: done")
 }
 
-message("regenerate: complete")
-
 # --- joint: which crosses, at which locations (Ch 4g) --------------------------
 if (want("joint")) {
   message("joint: crossing plan x location allocation at 160 plots (paired)")
@@ -888,3 +899,52 @@ if (want("joint")) {
             row.names = FALSE)
   message("joint: done")
 }
+
+# --- ocs_panel: the marker panel against the budget ceiling (Chapter 9) -------
+# For each of 20 founder draws (simulation seed 1..20, teaching scale), rebuild
+# f, the random-subset null and the truncation alpha under five panels (MAF
+# filters, ascertainment in pool A) and under 6 random thinnings to each of
+# 250, 500 and 1000 markers. The index (`ctx$traits`) is NOT rebuilt: only f
+# follows the panel. The thinned subsets are drawn BEFORE any null_distribution()
+# call, which reseeds. About 5 minutes.
+if (want("ocs_panel")) {
+  message("ocs_panel: 20 founder draws x 23 panels")
+  n_sel <- 60
+  cfg0 <- utils::modifyList(hybdiv::sim_config,
+                            list(n_pool_A = 25, n_pool_B = 25, m = 2000))
+  ceiling_for <- function(ctx, keep, B) {
+    Xs <- ctx$X[, keep, drop = FALSE]
+    ck <- build_ctx(X = Xs, f = molecular_coancestry(Xs), G = NULL,
+                    traits = ctx$traits, ped = ctx$ped, n_lines = ctx$n_lines,
+                    pool = ctx$pool, fL = NULL, cfg = ctx$cfg)
+    nl <- null_distribution(ck, n_sel, B = B, B_full = 1)
+    c(gd_ref = nl$gd_ref,
+      alpha_trunc = alpha_loss(sel_truncation(ck, n_sel), ck, nl$gd_ref))
+  }
+  res <- do.call(rbind, lapply(1:20, function(s) {
+    cfg <- utils::modifyList(cfg0, list(seed = s))
+    ctx <- simulate_data(cfg)
+    maf <- pmin(ctx$p0, 1 - ctx$p0)
+    polyA <- colMeans(simulate_lines(cfg)[seq_len(cfg$n_pool_A), ] / 2)
+    set.seed(100 + s)
+    thin <- lapply(c(250, 500, 1000),
+                   function(mm) lapply(1:6, function(i) sort(sample.int(ctx$m, mm))))
+    row <- function(label, keep, draw, B) {
+      v <- ceiling_for(ctx, keep, B)
+      data.frame(seed = s, panel = label, draw = draw, markers = length(keep),
+                 gd_ref = v[["gd_ref"]], alpha_trunc = v[["alpha_trunc"]])
+    }
+    panels <- c(lapply(c(0, 0.01, 0.05, 0.10), function(t)
+                  row(sprintf("MAF >= %.2f", t), which(maf >= t), 1L, 250)),
+                list(row("ascertained in pool A", which(polyA > 0 & polyA < 1), 1L, 250)),
+                unlist(lapply(thin, function(sl) lapply(seq_along(sl), function(i)
+                  row(sprintf("thinned to %d", length(sl[[i]])), sl[[i]], i, 200))),
+                  recursive = FALSE))
+    message("  seed ", s)
+    do.call(rbind, panels)
+  }))
+  write.csv(res, file.path(data_dir, "ocs_panel_sweep.csv"), row.names = FALSE)
+  message("ocs_panel: done")
+}
+
+message("regenerate: complete")

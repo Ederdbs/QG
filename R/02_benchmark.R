@@ -70,18 +70,31 @@ discriminatory_power <- function(tab, null) {
 #'
 #' @param ctx Evaluation context, see [build_ctx].
 #' @param n_sel Number of hybrids selected.
-#' @param reps Repetitions per metric.
+#' @param reps Initial repetitions per metric. They are multiplied by 4 until the
+#'   timed block lasts at least `target` seconds, so a few-microsecond call is not
+#'   quantised by the clock (a fixed count of fast calls reports multiples of the
+#'   timer resolution, including exactly 0).
+#' @param target Minimum duration, in seconds, of the timed block.
+#' @param seed Seed of the random selection that is timed (`set.seed(seed)`).
 #' @return A data frame with columns `metric` and `us_per_eval`.
 #' @export
-cost_per_eval <- function(ctx, n_sel, reps = 30) {
+cost_per_eval <- function(ctx, n_sel, reps = 30, target = 0.2, seed = 1) {
   fns <- list(theta_group = theta_group, theta_from_freq = theta_from_freq,
               ne_parents = ne_parents, alleles_lost = alleles_lost,
               ENE = ene, ANE = ane, eff_dim = eff_dim, Gst = gst)
+  set.seed(seed)
   idx <- sample.int(ctx$N, n_sel)
+  time_us <- function(f) {
+    r <- as.integer(reps)
+    repeat {
+      t <- system.time(for (i in seq_len(r)) f(idx, ctx))[["elapsed"]]
+      if (t >= target || r > 1e7) return(1e6 * t / r)
+      r <- r * 4L
+    }
+  }
   data.frame(
     metric = names(fns),
-    us_per_eval = round(sapply(fns, function(f)
-      1e6 * system.time(for (i in seq_len(reps)) f(idx, ctx))[["elapsed"]] / reps), 1),
+    us_per_eval = round(vapply(fns, time_us, numeric(1)), 1),
     row.names = NULL
   )
 }

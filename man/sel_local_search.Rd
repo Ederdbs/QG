@@ -62,8 +62,13 @@ An integer vector of selected hybrid indices, carrying attributes
 \description{
 The search this package's own primitives were written for.
 [theta_state]/[theta_swap] maintain group coancestry in `O(L)` per move, so
-a swap costs about 5 microseconds at production scale against 85 for the
-`f`-submatrix route -- and no `N x N` matrix is formed at all.
+a swap updates theta in 4-5 microseconds at production scale (N = 10000,
+`book/data/cost_per_eval.csv`: 5.0 us for `theta_swap()` against 84.9 us for
+recomputing theta from the `f` submatrix at n = 200). Those figures are the
+theta update alone, not a whole objective evaluation: the fitness of
+[make_fitness_fast] that [sel_de_fast] calls costs 132-169 us at the same N
+(`book/data/search_scaling.csv`, hybrid and line encodings). One machine, one
+run. No `N x N` matrix is formed at all.
 }
 \details{
 Three modes, one driver, differing only in the temperature schedule:
@@ -74,8 +79,18 @@ parallel tempering to win on this class of problem not by being individually
 cleverer but by combining many simple local searches.
 
 The per-line cap is a **partition matroid** and is enforced as a hard
-feasibility test on each move. The diversity budget is a proportional
-penalty, matching [make_fitness_fast].
+feasibility test on each move. The diversity budget is a penalty on the
+excess of alpha over `alpha_max` divided by `alpha_max` (proportional, as
+in [make_fitness_fast]; the normaliser is floored at 1e-6 so that
+`alpha_max = 0` is allowed), charged at `penalty` (default 5).
+
+Restrictions: only `alpha_max` (penalty) and `max_use` (hard test) are
+handled. There is no `ne_par_min` argument, so an N_e,par floor is not
+tested by the swap. That is an implementation gap, not a structural limit:
+[theta_state] carries the line-count vector, from which
+`N_e,par = (2n)^2 / sum(cnt^2)` costs no more than the `O(L)` of the swap
+itself. A pool-balance restriction is vacuous here: every hybrid is one
+pool-A by one pool-B cross, so the share of line uses in pool A is exactly 0.5 for any selection.
 }
 \examples{
 cfg <- modifyList(sim_config, list(n_pool_A = 8, n_pool_B = 8, m = 200))

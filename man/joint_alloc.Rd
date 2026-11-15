@@ -50,10 +50,19 @@ zero rows where no seed exists.
 * `"random"` -- each cross in `k` locations drawn independently.
 * `"coverage"` -- crosses are placed one at a time, in random order, in the
   `k` locations where their female and male are still absent, ties broken by
-  the lightest load; no location may exceed `ceiling(n * k / nLoc)` plots.
-  It puts as much of both pools as possible in every location, which is what
-  carries connectivity once a relationship matrix is in the model (Chapter
-  4f, finding 4).
+  the lightest load. A location at `ceiling(n * k / nLoc)` plots is
+  penalised, not excluded: when fewer than `k` locations are below that cap
+  the cross still takes `k` locations, so a load can exceed it by one plot.
+  Not a hard cap: seeds 1..100 exceeded it in 20 of 100 draws at circulant
+  c = 2, k = 4 and 2 of 100 at c = 4, k = 2 (20 x 20, 8 locations), by one
+  plot at most. It puts as much of both pools as possible in every
+  location, the property Chapter 4f (finding 4, a hypothesis there, not a
+  result) suggests matters once a relationship matrix is in the model. It
+  is a parent-presence rule with no concurrence term, not the
+  `"parentage"` allocation of [sparse_alloc]: on the complete 20 x 20
+  factorial, 8 locations, k = 2 the two differ in 20 of 20 seeds
+  (`frac_disconn` 0 for coverage, 0.286 for `"parentage"`), though both put
+  both pools in every location.
 * `"optimised"` -- an exchange search from `start` (default: a fresh
   `"coverage"` allocation) that
   accepts a move of one cross from one location to another (paired with a

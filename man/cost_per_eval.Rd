@@ -4,14 +4,21 @@
 \alias{cost_per_eval}
 \title{Cost per metric evaluation}
 \usage{
-cost_per_eval(ctx, n_sel, reps = 30)
+cost_per_eval(ctx, n_sel, reps = 30, target = 0.2, seed = 1)
 }
 \arguments{
 \item{ctx}{Evaluation context, see [build_ctx].}
 
 \item{n_sel}{Number of hybrids selected.}
 
-\item{reps}{Repetitions per metric.}
+\item{reps}{Initial repetitions per metric. They are multiplied by 4 until the
+timed block lasts at least `target` seconds, so a few-microsecond call is not
+quantised by the clock (a fixed count of fast calls reports multiples of the
+timer resolution, including exactly 0).}
+
+\item{target}{Minimum duration, in seconds, of the timed block.}
+
+\item{seed}{Seed of the random selection that is timed (`set.seed(seed)`).}
 }
 \value{
 A data frame with columns `metric` and `us_per_eval`.

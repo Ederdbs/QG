@@ -213,20 +213,27 @@ data.frame(
 #' Independence across loci enters the dispersion of the replicates, not the
 #' expectations, which are sums over loci.
 #' 
+#' In the labels A1--A8 (listed in @sec-hybrid-programme; @sec-backcross maps all
+#' eight for its own operation) the generator meets A1, A2, A5, A7 and A8, and the
+#' frozen base of A6 is the `p0` it stores once in `ctx`; A3 and A4 do not arise,
+#' because one generation of lines is drawn once, with no recycling and no cycles.
+#' 
 #' - *Biallelic, neutral, unlinked markers.* The pools diverge by drift alone from
 #'   one ancestral frequency vector (no selection, mutation or migration after the
 #'   split), and the loci are independent of one another: $p^{*}_k$, $p_{Ak}$,
 #'   $p_{Bk}$ and every genotype are drawn independently across $k$. There is no
 #'   genetic map and no recombination, so no linkage disequilibrium arises beyond
-#'   sampling noise. @sec-alphasimr relaxes this (linkage, outbred founders,
-#'   directional dominance and several generations of selection).
+#'   sampling noise. @sec-sizing (one cross, F1 to F4) and @sec-backcross (one
+#'   conversion) are where a map and recombination first appear, in the
+#'   simulators of the package; @sec-alphasimr relaxes this too, adding outbred
+#'   founders, directional dominance and several generations of selection.
 #' - *Unrelated lines, inbred by fiat.* Given $p_{Ak}$, the lines of pool A are
 #'   independent draws of $2 \times \text{Bernoulli}(p_{Ak})$ at each locus, and
 #'   likewise for pool B: there is no pedigree and no shared descent among lines of
 #'   a pool beyond what the pool frequency carries. Each line is drawn directly
 #'   at fixation (0 or 2 at every marker); the generator does not model the
 #'   doubled-haploid or selfing path that produces inbred lines in a programme
-#'   (@sec-hp-cycle).
+#'   (@sec-hp-cycle); @sec-sizing models the selfing path, F1 to F4, for one cross.
 #' - *Equal pool sizes and the complete A x B factorial.* $n_A = n_B$ in the
 #'   configuration, and every A x B combination is formed once, with equal weight
 #'   (@sec-sim-hybrids). This is an assumption, not a property of hybrid programmes:
@@ -406,9 +413,8 @@ fmt(data.frame(
 #' coancestry between a pool-A and a pool-B line (written $f_{AB}$ in
 #' @sec-subdivided and $\theta_{AB}$ in @sec-notation; @sec-heterosis identifies
 #' them on the complete factorial). @sec-heterosis-flat
-#' derives the expectations for pools of unbounded size: the shared term
-#' $2\bar p(1 - \bar p)$, which is $GD_T$ here, loses $F_{BN}\,p^{*}(1-p^{*})$
-#' and the divergence term, which is $GD_{BS}$, gains the same amount. Here
+#' derives, for pools of unbounded size (@eq-het-bn-halves), that the shared term $2\bar p(1 - \bar p)$ (here $GD_T$)
+#' loses and the divergence term (here $GD_{BS}$) gains $F_{BN}\,p^{*}(1-p^{*})$. Here
 #' $GD_T$ and $GD_{BS}$ are computed from the sample frequencies of $n$ lines per
 #' pool, which add binomial variance $p_{Ak}(1 - p_{Ak})/n$ to each pool frequency;
 #' then $E[GD_{BS}] = F_{BN}\,p^{*}q^{*} + (1 - F_{BN})\,p^{*}q^{*}/n$ per marker,
@@ -418,9 +424,10 @@ fmt(data.frame(
 #' $F_{BN}$ range of the grid, the expected change is
 #' `r num(diff(range(fst_grid)) * het_exp / 2 * (1 - 1 / book_cfg$n_pool_A))`,
 #' against `r num(diff(range(fst_grid)) * het_exp / 2)` for unbounded pools.
-#' @sec-heterosis-flat derives the same expectation and the same sample-frequency
-#' offset on a different grid (seed 5, $m$ = `r book_cfg$m`); the formulas agree,
-#' and the numbers here are a different draw of the generator.
+#' @sec-heterosis-flat derives the same sample-frequency offset on a different grid
+#' (seed 5, $m$ = `r book_cfg$m`) as $E[2p^{*}q^{*}](1 - F_{BN})(1/n_A + 1/n_B)/4$,
+#' which at $n_A = n_B = n$ is the $(1 - F_{BN})\,p^{*}q^{*}/n$ above; the formulas
+#' agree, and the numbers here are a different draw of the generator.
 #' 
 #' What this chapter measures is the heterozygous fraction and its split into
 #' $GD_T$ and $GD_{BS}$. Its data carry no dominance (the traits of @sec-sim-traits are
@@ -475,8 +482,8 @@ head(ped, 3)
 #' matrix times those effects. In this chapter `R` (the target correlation of the
 #' marker effects), `B` (the matrix of marker effects) and `L` (the line genotype
 #' matrix) are names of code objects, not the $\mathbf R$, $\mathbf B$ and $L$ of
-#' @sec-notation, and $n_A$, $n_B$ count the lines of pool A and pool B, not the
-#' female and male lines of @sec-mating.
+#' @sec-notation, and $n_A$, $n_B$ count the lines of pool A and pool B, as they do in @sec-mating
+#' (where the pool-A line is also the female).
 #' 
 ## -----------------------------------------------------------------------------
 set.seed(cfg$seed + 99)
@@ -525,9 +532,9 @@ fmt(data.frame(traits = paste(ij[, 1], "x", ij[, 2]),
 #'   the optimum computed on the known values, because the optimum maximises that
 #'   index over every feasible selection. This is a statement about the optimum.
 #' - *The heuristics.* The gains this book reports come from greedy,
-#'   differential-evolution and local-search selections, which at book scale are
+#'   differential-evolution and local-search selections, which at the teaching scale are
 #'   not certified optima (@sec-bound; `ocs_bound()` gives a valid upper bound, and
-#'   `sel_exact()` does not converge there). A feasible selection is not a bound: a
+#'   `sel_exact()` does not converge there, @sec-oa). A feasible selection is not a bound: a
 #'   selection made on estimates could exceed a heuristic's index on the known
 #'   values, so a gain in `ctx$index` does not bound the gain that a selection on
 #'   estimates could achieve.
@@ -581,7 +588,7 @@ knitr::kable(data.frame(
   quantity = c("N", "m", "n_lines", "sum(G)", "min(f)", "max(f)"),
   value = c(sprintf("%d", c(ctx[["N"]], ctx[["m"]], ctx[["n_lines"]])),
             fmt_sci(sum(ctx[["G"]]), 3),
-            sprintf("%.4f", c(min(ctx[["f"]]), max(ctx[["f"]]))))),
+            format(round(c(min(ctx[["f"]]), max(ctx[["f"]])), 4), nsmall = 4))),
   align = c("l", "r"))
 
 #' 

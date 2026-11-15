@@ -1,0 +1,61 @@
+# 06-metric-catalogue -- iteration 2 verdict (head of department)
+
+Text: book/06-metric-catalogue.qmd (938 lines), 90-notation row (GD_ref), it1 verdict and response (quant-writer and quant-Rwrite sections). Paper read directly: Lopez-Cortegano et al. 2019 (pdftotext, reference/papers). Chapter purled and run end to end with the worktree package loaded (pkgload::load_all): every stopifnot passes, 30 s, no error.
+
+VERDICT: APPROVED
+
+## PREVIOUS IDS
+- 06-D1 -- CLOSED -- 217-237: GD / N_s are the expected H_e of the merged set (@eq-hp-gd); expected F1 heterozygosity of the complete factorial is GD_T + GD_BS, the pairs kept 2 GD_WI_hyb; "not a measure of next season's hybrid vigour". Recomputed: 2*GD_WI_hyb = mean(X[truncation,] == 0.5) = 0.3645667 exactly; chapter's own numbers GD 0.3259 -> 0.3124 while GD_WI_hyb 0.1814 -> 0.1823 (random subset seed 42 -> truncation), presented as one draw and one subset, with 05's twenty draws (no consistent sign, 05:397) cited.
+- 06-D2 -- CLOSED -- 12-37 names four inputs (f; marker frequencies and p0; pedigree; fL by usage). Against R/01_metrics.R: gene_diversity/status_number/theta_group/ene/ane/eff_dim/mean_offdiag read ctx[["f"]]; gd_partition()'s GD_WI_hyb is 1 - mean(diag(f)[idx]), its other columns read fL and line_weights; theta_from_freq/he_nei/alleles_lost read X; ne_parents/ne_lines_pool the pedigree. The account is correct. No residual "every one operates on f".
+- 06-D3 -- CLOSED -- 327-346 now reports the paper: Fernandez et al. (2004) mechanism for the undivided population "as reported there"; subdivided: more homozygosity per subpopulation in the short term and a substantial loss of alleles (lc.txt pp. 2, 7-8, matches); "no longer the rarest" and "defends every segregating allele directly" removed; the step from frequencies toward 0.5 to later loss in the subdivided case is declared not in the paper and not tested; multiallelic-haplotype vs biallelic MAF count limit stated. The empirical lines (A_T retains more alleles and controls molecular inbreeding better, except lambda = 1000) match p. 7-8.
+- 06-D4 -- CLOSED -- 648-657: lambda = 1 mainly, also 0, 0.5, 1000 (paper p. 3, matches), 0.5 from Bennewitz & Meuwissen (2006) as a value suggested to maximise total genetic variance of a hypothetical quantitative trait, "as reported there; not read here" (matches the paper's sentence); coincidence with lambda_d = 1/2 stated with the arguments said to differ and the relation not examined.
+- 06-D5 -- CLOSED -- "the one genuinely non-redundant" removed. Spearman(theta, .) from the csv recomputed: alleles_lost_MAF 0.932, Ne_parents -0.925, eff_dim -0.967 (chunk red-cache, same values). 07:199-209 names allelic richness (52 %) and N_e,par (36 %) as the metrics keeping rank variation; 06 says so without typed numbers. The csv has no F_drift/F_hom column, so "does not include F_drift or F_hom" is true. "Most strongly" scoped to the table's metrics and to the draw.
+- 06-D6 -- CLOSED -- the false provenance sentence is gone; the redundancy csv is labelled cached external data with no producer in the repository (grep of R/, inst/, book/scripts: no producer). eff_dim: csv mean 1.486 (range 1.438-1.506), package eff_dim on the random subset 26.19, uncentered ratio 1.47 (all recomputed). The text says the cached column is "of the order of the uncentered ratio", crosses scales (12000 vs 2000 markers; 07 gives 12,000), and that "uncentered" is "a reading of the numbers, not a verified fact", needing the producer. The hedge is honest and not relied on for any later claim. The eff_dim finding itself is a 07 matter (owed to 07, not to this chapter).
+- 06-D7 -- CLOSED -- tbl-catalogue-seeds-z, run by me (20 founder draws, B = 200, B_full = 300, seed 7): trunc_cap GD z min -4.16, median -2.08, max -0.35; |z| > 2 on 12/20, <= 2 on 8/20; ANE z 14.00-18.84, > 2 on 20/20; |z F_drift| > |z GD| for truncation 20/20; |z Ne_parents| < |z GD| 18/20. All inline counts equal the printed values. Unit of replication is the founder draw; the smaller null is declared (each z noisier); the conclusion is re-scoped to "holds on this draw and on 8 of 20; robust statement is the GD/ANE contrast", with the limits (one n, one scale, 20 draws) named.
+- 06-D8 -- CLOSED -- null_distribution(ctx, 60, B = 2000, B_full = 1000, seed 7): GD z -17.06, F_hom 9.41, F_drift 35.08, gd_ref 0.3258629, alpha(truncation) 4.129 % (0.04128766): equal to 05's tbl-era-signature-z. Relative s.e. of an s.d. 1/sqrt(2(B_full - 1)) = 2.2 %, z -17.1 +- 0.4, 35.1 +- 0.8, normality "not checked": stated. Asserts nrow(null$cheap) == 2000, nrow(null$full) == 1000 pass.
+- 06-M1 -- CLOSED -- conditions (inbred, complete factorial, flat d for GD_BS itself; varying d the d-weighted version) and "no dominance in the data, GD_BS is a partition component" stated (462-471).
+- 06-M2 -- CLOSED -- see M20 below for the remaining observation; additivity asserted (R^2 = 1), 05's algebra cited (@sec-era-step6, label exists), concentration comparison run: GD_BS random 0.03580, concentration 0.04920 (s.e. 6.9e-5), truncation 0.05241, share 0.806 (reproduced, seed 5, 300 draws, kA, kB = 5, 12). Isolated vs not isolated stated.
+- 06-M3 -- CLOSED -- 177-181 "identity in state; floor set by marker frequencies, not 0"; theta in [1/2, 1], N_s in [1/2, 1] unchanged and correct.
+- 06-M4 -- CLOSED -- 142-144 "5 % below a random subset of the same size".
+- 06-M5 -- CLOSED -- one_minus_theta_AB, HS_plus_2DG, F1_realised; condition stated; max |1 - theta_AB - F1_realised| = 0.0043 (greedy_div 0.366392 vs 0.370675), as printed; per-locus algebra asserted on 10^4 pairs (seed 3), passes.
+- 06-M6 -- CLOSED -- percent printed (0.680 %), gap_se 1.7e-5, pointer to @tbl-gd-baseline (label exists in 03).
+- 06-M7 -- CLOSED -- GD_ref only; 90-notation diff read: the row symbol is GD_ref, `gd_ref` in the code; no GD_random left in 06.
+- 06-M8 -- CLOSED -- derivation shows both x x and (1-x)(1-x) terms; result cited as @eq-hp-gd.
+- 06-M9 -- CLOSED (in 06) -- "dominance effects"; 04e, 08b, 12 residue is not this chapter's.
+- 06-M10 -- CLOSED -- per-locus means defined; checked by hand and by the chunk: H_T - H_S = (pA - pB)^2/2 = D_G; pA + pB - 2 pA pB = H_S + 2 D_G.
+- 06-M11 -- CLOSED -- chunk lambda-d-check asserts the identity (tolerance 1e-12) and equality with heterosis_expected()/m, lambda_d == 1/2 at flat d, dD > 0, dH >= 0, for the five selections; I also verified colMeans(X[s,]) = (pA + pB)/2 to 2.2e-16 for the pools the chunk builds from simulate_lines(book_cfg)/2 (same draw as ctx). Relative error <= 3.8e-15; lambda_d 0.5046-0.5124 under gamma(2, 4) d (seed 8), as the inline text says.
+- 06-M12 -- CLOSED -- closed-population condition for "irreversible"; Lopez-Cortegano pp. 1-2 supports the short-term / long-term reading.
+- 06-M13 -- CLOSED -- D_G attributed to Lopez-Cortegano, Nei's own symbol declared unchecked.
+- 06-M14 -- CLOSED -- fmt_sci() in use; "exactly 0" branch.
+- 06-M15 -- CLOSED -- grep for ctx$f, fake$f, ctx$N, ctx$X, ctx$index, ctx$ped in the qmd: empty.
+- 06-M16 -- CLOSED -- caption scale and B under stopifnot (n_sel, N, n_lines, m, seed, pool sizes, nrow of null, line cap 4), all pass. The repeated five-selection caption block (C18, contested) rests on quant-editor.md:31, a form rule owned by quant-editor; not a content failure.
+- 06-M17 -- CLOSED -- opening states why 06 follows 05; both production scales named and not computed; frontier pointers; `constraint_is_active` prints FALSE.
+- 06-M18 -- CLOSED -- "of the metrics in @tbl-catalogue-z ... on this draw".
+- 06-M19 (C13) -- CLOSED for 06 -- a 10b finding (10b:1245 "@sec-catalogue's rule applies" that 06 does not state); stays owed to 10b.
+- 06-B3..B8 -- CLOSED as non-decisive -- UNVERIFIED attributions are marked UNVERIFIED in the text (Bell & Dean, Lacy, Cockerham, Toro abstract-only, Nei abstract-only).
+
+## DISQUALIFYING FAILURES
+None.
+
+## NON-DISQUALIFYING OBSERVATIONS
+- 06-M20 qmd:507-565 (chunk gdbs-concentration and the Result / Interpretation paragraph) -- the "81 %" share depends on the rule that matches the comparison arm to truncation, and the text reports only that rule (kA, kB = effective numbers of lines rounded up, 5 and 12; the rule is justified by the usage-concentration algebra and declared as slightly less concentrated than truncation). I re-ran seed 5, 300 draws: with the distinct lines of truncation (10 and 23) the share is 0.27, with 7 x 17 it is 0.49. The first is a less-matched control (equal usage over 10 x 23 lines is far less concentrated than truncation's usage, Ne 4.5 and 11.8), so I do not read it as a counter-result; but the author looked at it (it1-response: "looked at and not used") and the chapter says nothing, while "Most of the rise" is stated flatly. One draw, one subset size and the unisolated remainder are declared.
+- 06-M21 qmd:~311-312 -- "alleles_lost is close to a monotone function of theta" on Spearman 0.932 (rho^2 = 0.87); it restates 07's "|rho| >= 0.93 ... adds cost and length, not information", and the number is printed beside it. Loose, not false.
+- 06-M22 qmd:~331-335, 648-651 -- Fernandez et al. (2004) and Bennewitz & Meuwissen (2006) are cited in plain text (second-hand, "as reported there", flagged not read) with no references.bib entry. The source is named and the attribution matches the paper; bibliographic form is quant-refcheck's.
+- 06-M23 qmd tbl-catalogue-z caption -- "the Monte Carlo error of each z is given in the text": the text gives it for two z (truncation GD and F_drift) plus the general relative error (2.2 %), which applies to each. Slight over-statement of the caption.
+- Accumulation: these are one observation of substance (M20) and three of wording or form; I do not count them as three failures.
+
+## WHAT WAS VERIFIED
+- Chapter end to end: knitr::purl + source with pkgload::load_all of the worktree (scratchpad/run06.R): DONE, 30.4 s, all stopifnot pass (scale, eq-catalogue-split on five selections, theta_group vs theta_from_freq, A-NE gap >= 0, Rayleigh bound, GD_WI = 0, het identity and per-locus algebra, lambda_d chunk, bias within 4 s.e., null sizes, line cap).
+- tbl-catalogue-z (B = 2000, B_full = 1000, seed 7): truncation GD -17.06, Ns -16.7, Ne_parents -12.18, F_hom 9.41, F_drift 35.08, alleles_lost 14.93, ENE -1.8, ANE 9.26; trunc_cap GD -1.36, ANE 16.41; gd_ref 0.3258629; alpha(trunc) 0.04128766.
+- Bias identity E[theta_S] - theta_N = (1/n - 1/N)(f_d - f_o): by hand (sampling without replacement) and by the chunk, predicted 2.222e-3, observed 2.277e-3, mc_se 4.1e-5.
+- Redundancy numbers: rho 0.932 / -0.925 / -0.967; csv eff_dim mean 1.486, 1.438-1.506; package eff_dim 26.19; uncentered ratio 1.472.
+- tbl-catalogue-seeds-z: full 20 x 6 matrix printed; counts 12, 20, 20, 18 as stated.
+- Concentration chunk: 0.0358 / 0.0492 / 0.0524, share 0.806; sensitivity (scratchpad/chk.R) 0.27 (10 x 23), 0.49 (7 x 17). GD_WI_hyb s.d. among 500 random subsets 0.00059; truncation minus their mean 0.0014.
+- Lopez-Cortegano 2019 (lc.txt lines 76-140, 176-200, 340-385): Fernandez (2004) undivided mechanism; subdivided "increase of homozygosity ... short term, and a substantial loss of alleles"; lambda 1 / 0 / 1000 / 0.5 with Bennewitz & Meuwissen; H_T = D_G + lambda H_S; five subpopulations; haplotype markers.
+- Cross-references resolved by grep: sec-era-step6, tbl-era-seeds-z, tbl-era-signature-z, tbl-era-hom-two-levels-het, sec-era-programme, tbl-gd-baseline, eq-het-theta-ab, eq-hp-gd, eq-het-split, eq-f-molecular, eq-hp-ibs-ibd, eq-era-rate, sec-collapse, sec-ocs, sec-combinatorial, sec-cycles, sec-choosing, sec-heterosis.
+
+## NOT VERIFIED
+- Bennewitz & Meuwissen (2006), Fernandez et al. (2004) (read only as reported by Lopez-Cortegano), Cockerham 1967, Lacy 1989, Bell & Dean 1970, Nei 1973 and Toro et al. 2020 beyond the abstract: marked in the text as unverified or second-hand; none decides a number or an identity of the chapter.
+- The form (centred or not) of the eff_dim column in the cached csv: needs its producer; the chapter states it as a reading, not a fact. Finding owed to 07.
+- Normality of the null behind the 2.2 % relative s.e.: stated in the text as not checked.
+- No quant-refcheck it2 report was supplied; the decisive attributions (Lopez-Cortegano) were checked by me against the paper.

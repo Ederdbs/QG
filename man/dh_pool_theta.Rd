@@ -20,9 +20,10 @@ A scalar.
 }
 \description{
 From the crossing plan alone:
-`theta_pool = w' fL w + (1 / D) (1 - mean_c[(1 + f_c) / 2])`,
-where `w` is the parent-usage weight vector and `f_c` the coancestry of the
-two parents of cross `c`. The second term is the self-coancestry correction;
+`theta_pool = w' fL w + (1 / D) (1 - sum_c (n_c / D) (1 + f_c) / 2)`,
+where `w` is the parent-usage weight vector, `n_c` the lines of cross `c`,
+`D = sum(n_c)` and `f_c` the coancestry of the two parents of cross `c`
+(the mean is weighted by `n_c / D`, equal weights only when `n_c` is constant). The second term is the self-coancestry correction;
 dropping it biases `theta` downward by `O(1 / D)`.
 }
 \details{

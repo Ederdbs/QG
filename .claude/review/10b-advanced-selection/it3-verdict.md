@@ -1,0 +1,45 @@
+# 10b-advanced-selection -- verdict, iteration 3
+
+Chapter: `book/10b-advanced-selection.qmd` (1847 lines). Worktree `/Users/ederdbs/Documents/SB_quanti_gen-review-04-06`.
+Read: it2-verdict.md, it2-response.md, the whole of the changed text, and a line diff of the chapter against the it2 copy that was knitted (1811 lines): the changes are
+confined to lines 497-501, 782, 1008-1015, 1358-1361, 1577-1579, the chunk `capped-tie` and the paragraph under it, the strategy row of "Which method to use", protocol step 3, the closing summary and the epigraph.
+No iteration-3 refcheck or continuity report was supplied. CLAUDE.md design decisions are not relitigated.
+No knit: the only chunks that changed are `capped-tie` and the strategy-row `sprintf` (new arguments `bsec(...)`, `max(cb)`), all inline and dependent only on the CSV; I re-executed
+that logic (below). The other changed `r` expressions in the closing summary (`scal`, `bs`, `dp`) are the same objects already used earlier in the chapter, in the version that knitted clean in it2.
+
+VERDICT: APPROVED
+
+PREVIOUS IDS (re-review only)
+- 10b-D5 -- CLOSED -- the chunk `capped-tie` now asserts seed s.d. < 1e-12 in every capped book-scale row (production: == 0) and the order greedy_cap > de_hybrid_cap = tempering_cap > de_lines_cap = ocs_round_cap; I reproduced all of it from `search_benchmark.csv`. The paragraph, the strategy row and protocol step 3 now say the same thing: production tie (spread 0.0002), book scale a 6.6-thousandth span with `greedy_cap` highest (2.5 over the capped hybrid DE and tempering, 6.6 over `ocs_round_cap` and `de_lines_cap`), no seed dispersion, one dataset per scale; "none is shown to do worse" and "indistinguishable at the two scales" are gone; "same plan" became "same index" and production-only. The wording of the production "tie" is a residual non-disqualifying point (10b-M18).
+- 10b-D13 -- CLOSED -- the ranking "one change matters more than the rest put together" and "the difficulty was in the state, not in the optimiser" are removed. The closing paragraph now separates measured cost (swap 4.2 us against 132-169 us fitness at N = 10,000, 0.3 MiB matrix, 200-variable programme: CSV `search_scaling.csv` row N = 10000: us_swap 4.19, us_hybrid 132.19, us_lines 168.75) from what was not measured (share of any index difference due to the state; local search vs `sel_de()` is whole-algorithm; the closest encoding comparison still differs in seeding and decoder, +0.30 s.e. 0.009, +0.11 s.e. 0.032 unresolved). The bound and oracle carry their scope. The epigraph is no longer causal; see 10b-M17 for its residual scoping.
+- 10b-M12 -- CLOSED -- the duplicated clause is gone with the rewritten paragraph.
+- 10b-M13 -- CLOSED -- the paraphrase now uses the paper's modality ("could make", "may consider", "likely settle for"); I re-read the Ahadi text (scratch extraction of the Nature PDF, two-column): "massive datasets could make obtaining optimal solutions unrealistic", "may consider modifying our approach ... by employing decomposition techniques ... and likely settle for sub-optimal (but good quality) feasible solutions". "Same kind, not a measurement of this one" is right.
+- 10b-M14 -- CLOSED -- "consistent with @eq-ocs-weak", "one point against one plan", "does not show that a point at the budget bounds every plan"; the `stopifnot(index >= plan)` comment says "@eq-ocs-weak at equal diversity", which is what it asserts.
+- 10b-M15 -- CLOSED -- the budget-splitting is now a "candidate cause ... not tested (no run at a larger budget, and `n_chains` and the ladder were not varied)", the claim is scoped to this implementation at default settings; consistent with the callout at 682-685 and 460.
+- 10b-M16 -- CLOSED -- "ranked by cost and memory" removed; the strategy row gives `ocs_round_cap` 0.214 s against `greedy_cap` 0.329 s (CSV, three seeds each: 0.212-0.215 and 0.317-0.335), both needing the N x N matrix. The timing of `ocs_round_cap` excludes the bound because `regenerate.R` passes `bound = bnd` outside the timed block (regenerate.R:327); the chapter states exactly that at 1424-1426. Both routes are sweeps (19-value omega grid; 10 lambda values), so the comparison is like for like in kind.
+
+DISQUALIFYING FAILURES
+None.
+
+NON-DISQUALIFYING OBSERVATIONS
+(Two; below the three-failure rejection threshold. Neither rests on a wrong number.)
+- 10b-M17 10b:1842-1845 (epigraph) -- "this chapter measured it between two DE implementations, where the line-encoded one did not reach the higher index" drops the scope the paragraph above it gives: resolved only for the uncapped book scale (+0.30, s.e. 0.009); production unresolved by three seeds (+0.11, s.e. 0.032; t 3.4 on 2 df); capped +0.004 (s.e. 0, which the chapter itself says "does not mean the difference is known") and 0; and the comparison "still differs in the seeding and the decoder", so "measured it" is a stronger verb than the body supports. Also "it decides what an evaluation ... cost": at N = 10,000 the line-encoded fitness (169 us) costs more than the hybrid one (132 us); only the move (4.2 us) is cheaper. True as "changes", not as "reduces"; the body says it correctly.
+- 10b-M18 10b:1604-1611, 1620-1621 -- production "tie". All five capped production rows have seed s.d. 0, so the 0.0002 by which `greedy_cap` leads is a deterministic difference on this dataset, exactly the reading the same paragraph gives to the 0.0025 differences at book scale ("not seed noise; differences between routes"). "A tie, with no dispersion that could rank greedy_cap ahead" therefore does not follow from dispersion (there is none); it rests on an equivalence margin the text never states (0.0002 is "tie", 0.0025 is "not"). The number is printed to four places and the strategy row gives it inline, so the reader can judge; the claim is "not distinguished", not "equal".
+
+WHAT WAS VERIFIED
+- Capped rows, `book/data/search_benchmark.csv` (my script `scratchpad/s.R`, evaluating the chunk logic verbatim with the chapter's `bv`/`bmean`/`bsec`): seed s.d. = 0 in all five capped rows at both scales; book means greedy_cap 1.11220, de_hybrid_cap = tempering_cap 1.10972, de_lines_cap = ocs_round_cap 1.10559; production greedy_cap 1.122523 against 1.122328 for the other four (spread 0.000195); all four `stopifnot` of `capped-tie` pass; span 6.617 thousandths, greedy minus tempering 2.479, greedy minus ocs_round 6.617.
+- Strategy-row numbers -- production `secs`: ocs_round_cap 0.2137, greedy_cap 0.3290, tempering_cap 0.4663; book greedy_cap 0.008, tempering_cap 0.2857; the `sprintf` has four `%s` and four arguments in the order used.
+- Chapter vs it2 copy -- `diff` of the knitted it2 copy and the current file; every changed hunk is listed in the preamble and each was read; no other line moved.
+- Other sentences that rank or tie capped routes (grep "capped", "tie", "indistinguish", "same plan", "none is shown"): 77-78, 589, 1572 (captions/provenance: s.d. 0 by construction, production), 1577-1579 (production, "same index"), 1658 ("to within 0.0002", production, capped case), 782 ("same mean index at the production scale", dp[4] = 0), 1741-1752, 1788-1791: all consistent with the CSV. No remaining "ranked by", "indistinguishable", "none is shown to do worse", "matters more", "in the state, not in the optimiser".
+- Tempering and local search -- 460, 496-499 and 682-685 agree: budget split across replicas is design (460, 684), its effect on the shortfall is a hypothesis (498).
+- Ahadi quotation -- see M13 above (scratch extraction of the Nature PDF).
+- Cost facts in the closing paragraph -- `search_scaling.csv` N = 10000: us_swap 4.194, us_hybrid 132.19, us_lines 168.75, f_GB 0.745; 8 x 200^2 / 2^20 = 0.31 MiB.
+- Cross-chapter -- no other chapter quotes the capped-route tie or the removed "state, not optimiser" ranking (grep over `book/*.qmd`); 07:961 and 10:906 refer to `sel_de()` ahead of line-encoded DE, which the chapter still states.
+
+NOT VERIFIED
+- Fisher, Nemhauser, Wolsey 1978; Minoux 1978; Duran and Grossmann 1986 -- full texts unreachable; background statements only, no number or finding of the chapter depends on them (as in it2). Non-decisive.
+- Yadav et al. 2025 AUC values and "comparably in final fitness" -- abstract read in it2, full text read by refcheck at it1; inside a callout that disclaims deciding anything. Non-decisive.
+- `regenerate.R search` / `search_exact` not re-run (15 min and more); the cached CSV is treated as the chapter's own regenerable result, one machine. The run-to-run reproducibility of the capped book-scale values was not re-measured.
+- A full knit of the final text was not run (see preamble); the writer's scratch knit of the same text is reported clean, and I re-executed the changed chunk logic by hand.
+- Cross-chapter, owed since it1 and unrelated to this iteration: 07:1049-1077 and 10:874, 10:1548-1565 still recommend `sel_de_fast()` with `pool_tol` and an N_e,par floor. Not a 10b failure; the Optimisation part says two things until those are edited.
+- `docs/` and `book/_freeze/` are stale until the render batch (process, not a content failure).
