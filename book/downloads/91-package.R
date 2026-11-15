@@ -102,7 +102,8 @@ knitr::kable(data.frame(
            "`R/09_reference.R`",
            "`R/10_stage1.R`", "`R/11_stage2.R`", "`R/12_search.R`",
            "`R/13_dominance.R`", "`R/14_cycles.R`", "`R/15_response.R`",
-           "`R/16_mating_design.R`", "`R/17_sparse_testing.R`"),
+           "`R/16_mating_design.R`", "`R/17_sparse_testing.R`",
+           "`R/18_joint_allocation.R`"),
   Role = c("simulation, the two matrices, the `ctx` builder",
            "the diversity metrics, all `f(idx, ctx) -> scalar`",
            "null distribution, discriminatory power, cost, plots",
@@ -120,14 +121,15 @@ knitr::kable(data.frame(
            "recurrent selection across cycles",
            "genic variance, and the Smith-Hazel and restricted indices",
            "mating designs: generators, connectivity, LS/BLUP GCA, seed cost",
-           "sparse testing: allocation, connectivity, MME BLUP/PEV"),
+           "sparse testing: allocation, connectivity, MME BLUP/PEV",
+           "joint allocation: crosses x locations, PEV before planting, cross and location connectivity"),
   Chapter = c("@sec-simulating-crosses", "@sec-catalogue", "@sec-catalogue",
               "@sec-combinatorial", "@sec-choosing", "@sec-stages",
               "@sec-sizing", "@sec-subdivided", "@sec-backcross",
               "@sec-verification",
               "@sec-simulating-crosses", "@sec-case-study", "@sec-advanced",
               "@sec-heterosis", "@sec-cycles", "@sec-response",
-              "@sec-mating", "@sec-sparse"),
+              "@sec-mating", "@sec-sparse", "@sec-joint"),
   check.names = FALSE))
 
 #' 
@@ -341,6 +343,17 @@ idx(
   c("`sparse_simulate()`", "true values and plot phenotypes for an allocation"),
   c("`sparse_blup()`", "mixed-model BLUP and PEV with known components"),
   c("`ref_sparse_blup()`", "the literal GLS oracle of `sparse_blup()`")
+)
+
+#' 
+#' ### Joint allocation
+#' 
+## -----------------------------------------------------------------------------
+#| echo: false
+idx(
+  c("`joint_alloc()`", "crossing plan x locations: random, coverage or PEV-optimised (exchange search)"),
+  c("`joint_pev()`", "mean GCA prediction-error variance of an allocation, before planting"),
+  c("`joint_connectivity()`", "`sparse_connectivity()` plus `n_comp_cross` and `n_comp_loc`")
 )
 
 #' 

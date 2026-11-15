@@ -624,14 +624,16 @@ window.Quarto = {
   <li><a href="#heterosis-and-cycles" id="toc-heterosis-and-cycles" class="nav-link" data-scroll-target="#heterosis-and-cycles"><span class="header-section-number">A.1.5</span> Heterosis and cycles</a></li>
   <li><a href="#inbreeding-the-three-lenses" id="toc-inbreeding-the-three-lenses" class="nav-link" data-scroll-target="#inbreeding-the-three-lenses"><span class="header-section-number">A.1.6</span> Inbreeding, the three lenses</a></li>
   <li><a href="#selection-and-optimisation" id="toc-selection-and-optimisation" class="nav-link" data-scroll-target="#selection-and-optimisation"><span class="header-section-number">A.1.7</span> Selection and optimisation</a></li>
-  <li><a href="#genomic-prediction" id="toc-genomic-prediction" class="nav-link" data-scroll-target="#genomic-prediction"><span class="header-section-number">A.1.8</span> Genomic prediction</a></li>
-  <li><a href="#population-sizing" id="toc-population-sizing" class="nav-link" data-scroll-target="#population-sizing"><span class="header-section-number">A.1.9</span> Population sizing</a></li>
-  <li><a href="#backcrossing" id="toc-backcrossing" class="nav-link" data-scroll-target="#backcrossing"><span class="header-section-number">A.1.10</span> Backcrossing</a></li>
-  <li><a href="#mating-design" id="toc-mating-design" class="nav-link" data-scroll-target="#mating-design"><span class="header-section-number">A.1.11</span> Mating design</a></li>
-  <li><a href="#sparse-testing" id="toc-sparse-testing" class="nav-link" data-scroll-target="#sparse-testing"><span class="header-section-number">A.1.12</span> Sparse testing</a></li>
-  <li><a href="#joint-allocation" id="toc-joint-allocation" class="nav-link" data-scroll-target="#joint-allocation"><span class="header-section-number">A.1.13</span> Joint allocation</a></li>
-  <li><a href="#response-to-selection" id="toc-response-to-selection" class="nav-link" data-scroll-target="#response-to-selection"><span class="header-section-number">A.1.14</span> Response to selection</a></li>
-  <li><a href="#alphasimr-pipeline" id="toc-alphasimr-pipeline" class="nav-link" data-scroll-target="#alphasimr-pipeline"><span class="header-section-number">A.1.15</span> AlphaSimR pipeline</a></li>
+  <li><a href="#advanced-selection-sec-advanced" id="toc-advanced-selection-sec-advanced" class="nav-link" data-scroll-target="#advanced-selection-sec-advanced"><span class="header-section-number">A.1.8</span> Advanced selection (<span>Chapter 17</span>)</a></li>
+  <li><a href="#pipeline-stages-sec-stages" id="toc-pipeline-stages-sec-stages" class="nav-link" data-scroll-target="#pipeline-stages-sec-stages"><span class="header-section-number">A.1.9</span> Pipeline stages (<span>Chapter 13</span>)</a></li>
+  <li><a href="#genomic-prediction" id="toc-genomic-prediction" class="nav-link" data-scroll-target="#genomic-prediction"><span class="header-section-number">A.1.10</span> Genomic prediction</a></li>
+  <li><a href="#population-sizing" id="toc-population-sizing" class="nav-link" data-scroll-target="#population-sizing"><span class="header-section-number">A.1.11</span> Population sizing</a></li>
+  <li><a href="#backcrossing" id="toc-backcrossing" class="nav-link" data-scroll-target="#backcrossing"><span class="header-section-number">A.1.12</span> Backcrossing</a></li>
+  <li><a href="#mating-design" id="toc-mating-design" class="nav-link" data-scroll-target="#mating-design"><span class="header-section-number">A.1.13</span> Mating design</a></li>
+  <li><a href="#sparse-testing" id="toc-sparse-testing" class="nav-link" data-scroll-target="#sparse-testing"><span class="header-section-number">A.1.14</span> Sparse testing</a></li>
+  <li><a href="#joint-allocation" id="toc-joint-allocation" class="nav-link" data-scroll-target="#joint-allocation"><span class="header-section-number">A.1.15</span> Joint allocation</a></li>
+  <li><a href="#response-to-selection" id="toc-response-to-selection" class="nav-link" data-scroll-target="#response-to-selection"><span class="header-section-number">A.1.16</span> Response to selection</a></li>
+  <li><a href="#alphasimr-pipeline" id="toc-alphasimr-pipeline" class="nav-link" data-scroll-target="#alphasimr-pipeline"><span class="header-section-number">A.1.17</span> AlphaSimR pipeline</a></li>
   </ul></li>
   <li><a href="#conventions" id="toc-conventions" class="nav-link" data-scroll-target="#conventions"><span class="header-section-number">A.2</span> Conventions</a></li>
   <li><a href="#terms" id="toc-terms" class="nav-link" data-scroll-target="#terms"><span class="header-section-number">A.3</span> Terms</a></li>
@@ -669,9 +671,9 @@ window.Quarto = {
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
-<col style="width: 13%">
-<col style="width: 62%">
-<col style="width: 23%">
+<col style="width: 15%">
+<col style="width: 64%">
+<col style="width: 19%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -697,41 +699,46 @@ window.Quarto = {
 <td style="text-align: left;"><code>ctx$n_lines</code></td>
 </tr>
 <tr class="even">
+<td style="text-align: left;"><span class="math inline">\(L_A\)</span>, <span class="math inline">\(L_B\)</span></td>
+<td style="text-align: left;">parent lines of pool A and of pool B, <span class="math inline">\(L = L_A + L_B\)</span>; <span class="math inline">\(N = L_A L_B\)</span> for the full factorial of crosses</td>
+<td style="text-align: left;"><code>sum(ctx$pool == "A")</code>, <code>sum(ctx$pool == "B")</code></td>
+</tr>
+<tr class="odd">
 <td style="text-align: left;"><span class="math inline">\(m\)</span></td>
 <td style="text-align: left;">markers; written <span class="math inline">\(N_{SNP}\)</span> in <span class="citation" data-cites="meuwissen2020">Meuwissen et al. (<a href="99-references.html#ref-meuwissen2020" role="doc-biblioref">2020</a>)</span> and in the joint-allocation table below</td>
 <td style="text-align: left;"><code>ctx$m</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><span class="math inline">\(x_{ik}\)</span></td>
 <td style="text-align: left;">within-individual reference-allele frequency of individual i at marker k, in 0/0.5/1</td>
 <td style="text-align: left;"><code>ctx$X[i, k]</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><span class="math inline">\(\mathbf{X}\)</span></td>
 <td style="text-align: left;">hybrid marker matrix, N x m</td>
 <td style="text-align: left;"><code>ctx$X</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><span class="math inline">\(\mathbf{M}^H\)</span></td>
 <td style="text-align: left;">hybrid dosage matrix, N x m, 0/1/2; <span class="math inline">\(\mathbf{X} = \mathbf{M}^H/2\)</span></td>
 <td style="text-align: left;">-</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><span class="math inline">\(\mathbf{M}^L\)</span></td>
 <td style="text-align: left;">line genotype matrix, L x m, reference-allele dosage coded 0/2</td>
 <td style="text-align: left;"><code>simulate_lines()</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><span class="math inline">\(\mathbf{G}^L\)</span></td>
 <td style="text-align: left;">line genotype matrix, L x m, coded 0/1; <span class="math inline">\(\mathbf{G}^L = \mathbf{M}^L/2\)</span></td>
 <td style="text-align: left;"><code>ctx$GL</code>, <code>simulate_pools()$GL</code></td>
 </tr>
-<tr class="even">
-<td style="text-align: left;"><span class="math inline">\(p_k\)</span>, <span class="math inline">\(\bar p_k\)</span></td>
-<td style="text-align: left;">allele frequency; the bar denotes a group mean</td>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(p_k\)</span>, <span class="math inline">\(\bar p_k\)</span>, <span class="math inline">\(\bar{\mathbf{p}}\)</span></td>
+<td style="text-align: left;">allele frequency; the bar denotes a group mean; <span class="math inline">\(\bar{\mathbf{p}}\)</span> is the vector over markers, <span class="math inline">\(\mathbf{w}^\top\mathbf{G}^L\)</span> for a selection (<a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 12</span></a>)</td>
 <td style="text-align: left;">-</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><span class="math inline">\(p_{0,k}\)</span></td>
 <td style="text-align: left;"><strong>frozen</strong> candidate-pool allele frequency: the base</td>
 <td style="text-align: left;"><code>ctx$p0</code></td>
@@ -746,9 +753,9 @@ window.Quarto = {
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
-<col style="width: 5%">
-<col style="width: 39%">
-<col style="width: 55%">
+<col style="width: 3%">
+<col style="width: 34%">
+<col style="width: 62%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -786,7 +793,7 @@ window.Quarto = {
 <tr class="even">
 <td style="text-align: left;"><span class="math inline">\(\mathbf{Z}\)</span></td>
 <td style="text-align: left;">centered dosage <span class="math inline">\(\mathbf{M}^H - \mathbf{1}\,2\mathbf{p}'\)</span>, N x m</td>
-<td style="text-align: left;">builds <span class="math inline">\(\mathbf{G}\)</span>; also the marker design matrix of <span class="math inline">\(\mathbf{u} = \mathbf{Z}\boldsymbol\beta\)</span> (genomic prediction); not the subgroup indicator <span class="math inline">\(\mathbf{Z}\)</span> of joint allocation</td>
+<td style="text-align: left;">builds <span class="math inline">\(\mathbf{G}\)</span>; also the marker design matrix of <span class="math inline">\(\mathbf{u} = \mathbf{Z}\boldsymbol\beta\)</span> (genomic prediction); not the subgroup indicator <span class="math inline">\(\mathbf{Z}\)</span> of joint allocation; the Bayesian fits of genomic prediction are passed the uncentred <span class="math inline">\(\mathbf{M}^H\)</span> (<code>M</code>), which differs from it by the constant <span class="math inline">\(\mathbf{1}\,2\mathbf{p}'\boldsymbol\beta\)</span> absorbed by the intercept</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;"><span class="math inline">\(\mathbf{Z}_h\)</span></td>
@@ -803,6 +810,16 @@ window.Quarto = {
 <td style="text-align: left;">parent-usage incidence, N x L: a 1 in the two columns of each hybrid’s parents; <span class="math inline">\(\mathbf{X} = \tfrac12\mathbf{B}\mathbf{G}^L\)</span></td>
 <td style="text-align: left;">rank bounds that of <span class="math inline">\(\mathbf{f}\)</span> (<a href="05-genomic-era.html#eq-era-rank" class="quarto-xref">Equation&nbsp;<span>10.5</span></a>); not the field budget <span class="math inline">\(B\)</span></td>
 </tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\mathbf{G}^*\)</span></td>
+<td style="text-align: left;">ridge blend <span class="math inline">\(w_G\mathbf{G} + (1-w_G)\mathbf{I}\)</span>, <span class="math inline">\(w_G = 0.95\)</span> (<code>w</code> in the code of <a href="08b-genomic-prediction.html" class="quarto-xref"><span>Chapter 14</span></a>; not the index weight <span class="math inline">\(w\)</span>), used wherever the mixed model equations need an inverse of <span class="math inline">\(\mathbf{G}\)</span></td>
+<td style="text-align: left;">makes the equations solvable: <span class="math inline">\(\mathrm{rank}(\mathbf{G}) \le L - 2\)</span> (<a href="08b-genomic-prediction.html#sec-g-singular" class="quarto-xref"><span>Section 14.3.2</span></a>)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\mathbf{W}\)</span></td>
+<td style="text-align: left;">training-record incidence matrix of the mixed model equations, <span class="math inline">\(n_t \times N\)</span> (genomic prediction); not the line-usage weights <span class="math inline">\(\mathbf{w}\)</span></td>
+<td style="text-align: left;">the symbol <span class="math inline">\(\mathbf{Z}\)</span> stays the centred marker matrix there</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -814,9 +831,9 @@ window.Quarto = {
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
-<col style="width: 11%">
-<col style="width: 75%">
-<col style="width: 13%">
+<col style="width: 6%">
+<col style="width: 83%">
+<col style="width: 10%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -898,12 +915,12 @@ window.Quarto = {
 </tr>
 <tr class="odd">
 <td style="text-align: left;"><span class="math inline">\(\eta_{ij}\)</span></td>
-<td style="text-align: left;">distance <span class="math inline">\(1 - f_{ij}\)</span> used by E-NE and A-NE (<a href="06-metric-catalogue.html#eq-catalogue-ene-ane" class="quarto-xref">Equation&nbsp;<span>11.7</span></a>); not <span class="math inline">\(D_{ij}\)</span>, <span class="math inline">\(\bar d_{ij}\)</span> or <span class="math inline">\(\mathrm{MRD}_{ij}\)</span></td>
+<td style="text-align: left;">distance <span class="math inline">\(1 - f_{ij}\)</span> used by E-NE and A-NE (<a href="06-metric-catalogue.html#eq-catalogue-ene-ane" class="quarto-xref">Equation&nbsp;<span>11.8</span></a>); not <span class="math inline">\(D_{ij}\)</span>, <span class="math inline">\(\bar d_{ij}\)</span> or <span class="math inline">\(\mathrm{MRD}_{ij}\)</span></td>
 <td style="text-align: left;">-</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">E-NE, A-NE</td>
-<td style="text-align: left;">entry-to-nearest-entry and accession-to-nearest-entry distances (<a href="06-metric-catalogue.html#eq-catalogue-ene-ane" class="quarto-xref">Equation&nbsp;<span>11.7</span></a>)</td>
+<td style="text-align: left;">entry-to-nearest-entry and accession-to-nearest-entry distances (<a href="06-metric-catalogue.html#eq-catalogue-ene-ane" class="quarto-xref">Equation&nbsp;<span>11.8</span></a>)</td>
 <td style="text-align: left;"><code>ene()</code>, <code>ane()</code></td>
 </tr>
 <tr class="odd">
@@ -912,8 +929,13 @@ window.Quarto = {
 <td style="text-align: left;"><code>alleles_lost()</code></td>
 </tr>
 <tr class="even">
+<td style="text-align: left;"><span class="math inline">\(A_{\text{ret}}\)</span></td>
+<td style="text-align: left;">marker alleles retained, “allelic richness” in 07 and 08 (the cached columns <code>alleles_retained</code> of 07 and <code>alleles</code> of 08 are identified with this definition by inference only; 08 records no set for <code>alleles</code>): the number, out of <span class="math inline">\(2m\)</span>, of marker alleles carried by at least one line of the set; <span class="math inline">\(m \le A_{\text{ret}} \le 2m\)</span>; not <span class="math inline">\(A_{\text{lost}}\)</span> (<a href="06-metric-catalogue.html#eq-catalogue-alleles-retained" class="quarto-xref">Equation&nbsp;<span>11.7</span></a>)</td>
+<td style="text-align: left;"><code>alleles_retained()</code>, <code>alleles_retained_fast()</code></td>
+</tr>
+<tr class="odd">
 <td style="text-align: left;"><span class="math inline">\(D_{\text{eff}}\)</span>, <span class="math inline">\(\gamma_i\)</span></td>
-<td style="text-align: left;">participation ratio <span class="math inline">\((\sum_i\gamma_i)^2/\sum_i\gamma_i^2\)</span> over the eigenvalues <span class="math inline">\(\gamma_i\)</span> of the double-centered <span class="math inline">\(\mathbf{f}_S\)</span> (<a href="06-metric-catalogue.html#eq-catalogue-deff" class="quarto-xref">Equation&nbsp;<span>11.8</span></a>)</td>
+<td style="text-align: left;">participation ratio <span class="math inline">\((\sum_i\gamma_i)^2/\sum_i\gamma_i^2\)</span> over the eigenvalues <span class="math inline">\(\gamma_i\)</span> of the double-centered <span class="math inline">\(\mathbf{f}_S\)</span> (<a href="06-metric-catalogue.html#eq-catalogue-deff" class="quarto-xref">Equation&nbsp;<span>11.9</span></a>)</td>
 <td style="text-align: left;"><code>eff_dim()</code></td>
 </tr>
 </tbody>
@@ -977,7 +999,7 @@ window.Quarto = {
 </div>
 </div>
 <p>with <span class="math inline">\(GD_T = GD_{WI} + GD_{BI} + GD_{BS}\)</span> and <span class="math inline">\(F_{ST} = GD_{BS}/GD_T\)</span>.</p>
-<p>That <span class="math inline">\(F_{ST}\)</span> is a statistic computed on a set of genotypes. The Balding-Nichols parameter of the simulations, <code>fst</code> in the code and written <span class="math inline">\(F_{BN}\)</span> here, is a different quantity: it is the variance of a pool’s allele frequency around the ancestral one, in units of <span class="math inline">\(p(1-p)\)</span> (see Terms). <a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 5</span></a>, <a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 12</span></a>, <a href="08-pipeline-stages.html" class="quarto-xref"><span>Chapter 13</span></a>, <a href="11-plant-literature.html" class="quarto-xref"><span>Chapter 21</span></a>, <a href="12-case-study.html" class="quarto-xref"><span>Chapter 25</span></a> and <a href="92-verification.html" class="quarto-xref"><span>Appendix C</span></a> write that parameter as <span class="math inline">\(F_{ST}\)</span> wherever it is a simulation setting or a Balding-Nichols expectation; read it there as <span class="math inline">\(F_{BN}\)</span>. With two pools of unbounded size the expected <span class="math inline">\(GD_{BS}\)</span> per locus is <span class="math inline">\(F_{BN}\,p(1-p)\)</span> and the expected <span class="math inline">\(GD_T\)</span> is <span class="math inline">\((2 - F_{BN})\,p(1-p)\)</span>, so the statistic estimates approximately <span class="math inline">\(F_{BN}/(2 - F_{BN})\)</span> (a ratio of expectations), not <span class="math inline">\(F_{BN}\)</span>: at <span class="math inline">\(F_{BN}\)</span> = 0.15 that is 0.081, against 0.081 computed from simulated frequencies. On finite pools the statistic is larger again, because <span class="math inline">\(\tilde f\)</span> includes each line’s self-coancestry: on the 25 + 25 lines that <code>simulate_pools()</code> draws at <code>fst</code> = 0.15 (seed 1), the <span class="math inline">\(F_{ST}\)</span> of <a href="02-subdivided.html" class="quarto-xref"><span>Chapter 3</span></a> is 0.102, and 0.084 once the diagonal is dropped from both <span class="math inline">\(\tilde f\)</span> and <span class="math inline">\(\bar f\)</span>.</p>
+<p>That <span class="math inline">\(F_{ST}\)</span> is a statistic computed on a set of genotypes. The Balding-Nichols parameter of the simulations, <code>fst</code> in the code and written <span class="math inline">\(F_{BN}\)</span> here, is a different quantity: it is the variance of a pool’s allele frequency around the ancestral one, in units of <span class="math inline">\(p(1-p)\)</span> (see Terms). <a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 5</span></a>, <a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 12</span></a>, <a href="11-plant-literature.html" class="quarto-xref"><span>Chapter 21</span></a>, <a href="12-case-study.html" class="quarto-xref"><span>Chapter 25</span></a> and <a href="92-verification.html" class="quarto-xref"><span>Appendix C</span></a> write that parameter as <span class="math inline">\(F_{ST}\)</span> wherever it is a simulation setting or a Balding-Nichols expectation; read it there as <span class="math inline">\(F_{BN}\)</span>. With two pools of unbounded size the expected <span class="math inline">\(GD_{BS}\)</span> per locus is <span class="math inline">\(F_{BN}\,p(1-p)\)</span> and the expected <span class="math inline">\(GD_T\)</span> is <span class="math inline">\((2 - F_{BN})\,p(1-p)\)</span>, so the statistic estimates approximately <span class="math inline">\(F_{BN}/(2 - F_{BN})\)</span> (a ratio of expectations), not <span class="math inline">\(F_{BN}\)</span>: at <span class="math inline">\(F_{BN}\)</span> = 0.15 that is 0.081, against 0.081 computed from simulated frequencies. On finite pools the statistic is larger again, because <span class="math inline">\(\tilde f\)</span> includes each line’s self-coancestry: on the 25 + 25 lines that <code>simulate_pools()</code> draws at <code>fst</code> = 0.15 (seed 1), the <span class="math inline">\(F_{ST}\)</span> of <a href="02-subdivided.html" class="quarto-xref"><span>Chapter 3</span></a> is 0.102, and 0.084 once the diagonal is dropped from both <span class="math inline">\(\tilde f\)</span> and <span class="math inline">\(\bar f\)</span>.</p>
 </section>
 <section id="subdivided-population" class="level3" data-number="A.1.4">
 <h3 data-number="A.1.4" class="anchored" data-anchor-id="subdivided-population"><span class="header-section-number">A.1.4</span> Subdivided population</h3>
@@ -1198,12 +1220,12 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td style="text-align: left;"><span class="math inline">\(A_T\)</span>, <span class="math inline">\(A_S\)</span>, <span class="math inline">\(D_A\)</span></td>
-<td style="text-align: left;">the allelic-diversity analogue, <span class="math inline">\(A_T = A_S + D_A\)</span> (<a href="06-metric-catalogue.html#eq-catalogue-lambda" class="quarto-xref">Equation&nbsp;<span>11.10</span></a>)</td>
+<td style="text-align: left;">the allelic-diversity analogue, <span class="math inline">\(A_T = A_S + D_A\)</span> (<a href="06-metric-catalogue.html#eq-catalogue-lambda" class="quarto-xref">Equation&nbsp;<span>11.11</span></a>)</td>
 <td style="text-align: left;">-</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;"><span class="math inline">\(\lambda_d\)</span>, <span class="math inline">\(\bar d_H\)</span>, <span class="math inline">\(\bar d_D\)</span></td>
-<td style="text-align: left;">the <span class="math inline">\(\lambda\)</span> fixed by expected heterosis, <span class="math inline">\(\bar d_H/(2\bar d_D)\)</span>, with <span class="math inline">\(\bar d_H\)</span>, <span class="math inline">\(\bar d_D\)</span> the <span class="math inline">\(H_S\)</span>- and <span class="math inline">\(D_G\)</span>-weighted means of <span class="math inline">\(d_k\)</span> (<a href="06-metric-catalogue.html#eq-catalogue-lambda-d" class="quarto-xref">Equation&nbsp;<span>11.12</span></a>)</td>
+<td style="text-align: left;">the <span class="math inline">\(\lambda\)</span> fixed by expected heterosis, <span class="math inline">\(\bar d_H/(2\bar d_D)\)</span>, with <span class="math inline">\(\bar d_H\)</span>, <span class="math inline">\(\bar d_D\)</span> the <span class="math inline">\(H_S\)</span>- and <span class="math inline">\(D_G\)</span>-weighted means of <span class="math inline">\(d_k\)</span> (<a href="06-metric-catalogue.html#eq-catalogue-lambda-d" class="quarto-xref">Equation&nbsp;<span>11.13</span></a>)</td>
 <td style="text-align: left;">-</td>
 </tr>
 </tbody>
@@ -1218,10 +1240,10 @@ window.Quarto = {
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
-<col style="width: 11%">
-<col style="width: 6%">
-<col style="width: 72%">
-<col style="width: 9%">
+<col style="width: 8%">
+<col style="width: 4%">
+<col style="width: 80%">
+<col style="width: 7%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1277,7 +1299,7 @@ window.Quarto = {
 <tr class="even">
 <td style="text-align: left;"><span class="math inline">\(G_{ST}\)</span></td>
 <td style="text-align: left;">-</td>
-<td style="text-align: left;">between-pool share of gene diversity <span class="citation" data-cites="nei1973">(<a href="99-references.html#ref-nei1973" role="doc-biblioref">Nei 1973</a>)</span>, <span class="math inline">\(GD_{BS}/GD_T\)</span>; the <span class="math inline">\(F_{ST}\)</span> of <a href="05-genomic-era.html" class="quarto-xref"><span>Chapter 10</span></a> is this quantity</td>
+<td style="text-align: left;">Nei’s <span class="citation" data-cites="nei1973">(<a href="99-references.html#ref-nei1973" role="doc-biblioref">Nei 1973</a>)</span> name for the between-pool share of gene diversity, <span class="math inline">\(GD_{BS}/GD_T\)</span>: the same quantity as the <span class="math inline">\(F_{ST}\)</span> above and of <a href="05-genomic-era.html" class="quarto-xref"><span>Chapter 10</span></a>, not a second one (code column <code>Gst_Nei</code>). The between-referenced statistic <span class="math inline">\((\theta_w - \theta_{AB})/(1 - \theta_{AB})\)</span>, code column <code>Fst_Wright</code>, is a different quantity, written <span class="math inline">\(F^{\text{btw}}_{ST}\)</span> in <a href="08-pipeline-stages.html" class="quarto-xref"><span>Chapter 13</span></a></td>
 <td style="text-align: left;"><code>gd_partition()</code>, <code>s1_monitor()</code></td>
 </tr>
 <tr class="odd">
@@ -1297,9 +1319,9 @@ window.Quarto = {
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
+<col style="width: 7%">
+<col style="width: 82%">
 <col style="width: 9%">
-<col style="width: 70%">
-<col style="width: 20%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1335,8 +1357,8 @@ window.Quarto = {
 <td style="text-align: left;"><code>line_weights()</code>, <code>line_usage_freq()</code></td>
 </tr>
 <tr class="even">
-<td style="text-align: left;"><span class="math inline">\(k_a\)</span></td>
-<td style="text-align: left;">times line a is used as a parent</td>
+<td style="text-align: left;"><span class="math inline">\(k_a\)</span>, <span class="math inline">\(\mathbf{k}\)</span></td>
+<td style="text-align: left;">times line a is used as a parent; <span class="math inline">\(\mathbf{k}\)</span> is the vector over lines, <span class="math inline">\(\sum_a k_a = 2n\)</span></td>
 <td style="text-align: left;"><code>line_counts()</code></td>
 </tr>
 <tr class="odd">
@@ -1356,28 +1378,199 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td style="text-align: left;"><span class="math inline">\(GD_{\text{ref}}\)</span></td>
-<td style="text-align: left;">mean <span class="math inline">\(GD\)</span> of random subsets of size <span class="math inline">\(n\)</span>, the reference of <span class="math inline">\(\alpha\)</span> (<a href="06-metric-catalogue.html#eq-catalogue-alpha" class="quarto-xref">Equation&nbsp;<span>11.14</span></a>); <code>gd_ref</code> in the code</td>
+<td style="text-align: left;">mean <span class="math inline">\(GD\)</span> of random subsets of size <span class="math inline">\(n\)</span>, the reference of <span class="math inline">\(\alpha\)</span> (<a href="06-metric-catalogue.html#eq-catalogue-alpha" class="quarto-xref">Equation&nbsp;<span>11.15</span></a>); <code>gd_ref</code> in the code</td>
 <td style="text-align: left;"><code>null_distribution()$gd_ref</code></td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;"><span class="math inline">\(\omega\)</span></td>
-<td style="text-align: left;">index weight of the greedy score <span class="math inline">\(\omega\,u_i - \theta\)</span> (written <span class="math inline">\(w\)</span> in <a href="10-combinatorial-selection.html" class="quarto-xref"><span>Chapter 16</span></a>); not the line-usage weights <span class="math inline">\(\mathbf{w}\)</span></td>
+<td style="text-align: left;">index weight of the greedy score <span class="math inline">\(\omega\,u_i - \theta\)</span>; not the line-usage weights <span class="math inline">\(\mathbf{w}\)</span></td>
 <td style="text-align: left;">argument <code>w</code> of <code>sel_greedy()</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(e\)</span>, <span class="math inline">\(\mathbf{z}\)</span>, <span class="math inline">\(\mathbf{T}\)</span></td>
+<td style="text-align: left;">simulated prediction error of <a href="07-choosing-metrics.html#sec-choosing-error" class="quarto-xref"><span>Section 12.5</span></a>: <span class="math inline">\(\hat u = \mathrm{scale}(r\,u + \sqrt{1 - r^2}\,e)\)</span>, with <span class="math inline">\(e\)</span> the standardised <span class="math inline">\(\mathbf{T}\mathbf{z}\)</span> (correlated with relatedness) or <span class="math inline">\(\mathbf{z}\)</span> (independent), <span class="math inline">\(\mathbf{z} \sim N(0, \mathbf{I})\)</span> and <span class="math inline">\(\mathbf{T}\mathbf{T}^\top = \mathbf{f} + 10^{-8}\mathbf{I}\)</span>, lower-triangular</td>
+<td style="text-align: left;"><code>predicted()</code>, local to the chapter</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\alpha_{\text{trunc}}\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(\alpha\)</span> of the truncation plan: the loss at which the budget stops binding, a ceiling for <span class="math inline">\(\alpha_{\max}\)</span> (<a href="09-optimal-contributions.html" class="quarto-xref"><span>Chapter 15</span></a>, <a href="06-metric-catalogue.html#sec-baseline" class="quarto-xref"><span>Section 11.9</span></a>)</td>
+<td style="text-align: left;"><code>alpha_loss()</code> of <code>sel_truncation()</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\theta_{\max}\)</span></td>
+<td style="text-align: left;">the budget on <span class="math inline">\(\theta_S\)</span> equivalent to <span class="math inline">\(\alpha_{\max}\)</span>, <span class="math inline">\(1 - GD_{\text{ref}}(1 - \alpha_{\max})\)</span> (<a href="09-optimal-contributions.html#eq-ocs-theta-max" class="quarto-xref">Equation&nbsp;<span>15.3</span></a>)</td>
+<td style="text-align: left;">chapter code</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(V(\lambda)\)</span></td>
+<td style="text-align: left;">value of the continuous relaxation at penalty <span class="math inline">\(\lambda\)</span>, <span class="math inline">\(\max_{\mathbf{c}}\,\mathbf{c}'\mathbf{u} - \lambda\,\mathbf{c}'\mathbf{f}\mathbf{c}\)</span> (<a href="09-optimal-contributions.html#eq-ocs-V" class="quarto-xref">Equation&nbsp;<span>15.5</span></a>)</td>
+<td style="text-align: left;"><code>ocs_relaxation()</code>, <code>ocs_bound()</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\bar u_S\)</span></td>
+<td style="text-align: left;">mean index of a selected set <span class="math inline">\(S\)</span> of <span class="math inline">\(n\)</span> hybrids, <span class="math inline">\(\frac1n\sum_{i \in S} u_i\)</span> (<a href="09-optimal-contributions.html#eq-ocs-problem" class="quarto-xref">Equation&nbsp;<span>15.2</span></a>)</td>
+<td style="text-align: left;"><code>mean_index()</code></td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
 </section>
-<section id="genomic-prediction" class="level3" data-number="A.1.8">
-<h3 data-number="A.1.8" class="anchored" data-anchor-id="genomic-prediction"><span class="header-section-number">A.1.8</span> Genomic prediction</h3>
+<section id="advanced-selection-sec-advanced" class="level3" data-number="A.1.8">
+<h3 data-number="A.1.8" class="anchored" data-anchor-id="advanced-selection-sec-advanced"><span class="header-section-number">A.1.8</span> Advanced selection (<a href="10b-advanced-selection.html" class="quarto-xref"><span>Chapter 17</span></a>)</h3>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
+<col style="width: 7%">
+<col style="width: 73%">
 <col style="width: 18%">
-<col style="width: 41%">
-<col style="width: 40%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Symbol</th>
+<th style="text-align: left;">Meaning</th>
+<th style="text-align: left;">In the code</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\mathbf{x}\)</span></td>
+<td style="text-align: left;">0/1 selection indicator over the <span class="math inline">\(N\)</span> candidates (<a href="10b-advanced-selection.html#eq-advanced-oa-cut" class="quarto-xref">Equation&nbsp;<span>17.3</span></a>); <strong>not</strong> a marker row <span class="math inline">\(\mathbf{x}\)</span> or the marker value <span class="math inline">\(x_{ik}\)</span></td>
+<td style="text-align: left;">-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(b\)</span></td>
+<td style="text-align: left;">the diversity budget <span class="math inline">\(n^2\theta_{\max}\)</span> in submatrix-sum units (<a href="10b-advanced-selection.html#eq-advanced-oa-cut" class="quarto-xref">Equation&nbsp;<span>17.3</span></a>); <strong>not</strong> the index-coefficient vector <span class="math inline">\(\mathbf{b}\)</span> of response to selection</td>
+<td style="text-align: left;"><code>budget_xfx</code> in the <code>exact-budget</code> chunk of <a href="10b-advanced-selection.html#sec-oa" class="quarto-xref"><span>Section 17.6</span></a></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(s\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(2n\)</span>, the number of parent slots, the normaliser of <span class="math inline">\(\theta\)</span> in the swap update; <strong>not</strong> the self-coancestry <span class="math inline">\(s_i\)</span></td>
+<td style="text-align: left;">-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(k_{\max}\)</span></td>
+<td style="text-align: left;">the per-line cap on uses, <code>max_use</code> in the code: <span class="math inline">\(k_a \le k_{\max}\)</span></td>
+<td style="text-align: left;"><code>max_use</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(p\)</span></td>
+<td style="text-align: left;">the number of matroids intersected in the <span class="math inline">\(1/(p+1)\)</span> guarantee; <strong>not</strong> an allele frequency <span class="math inline">\(p_k\)</span></td>
+<td style="text-align: left;">-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\beta\)</span></td>
+<td style="text-align: left;">the free scale of <span class="math inline">\(\log\det(\mathbf{I} + \beta\mathbf{f}_S)\)</span> in the determinantal-point-process argument; <strong>not</strong> the marker effects <span class="math inline">\(\boldsymbol\beta\)</span> or the seed-contribution <span class="math inline">\(\beta\)</span> of population sizing</td>
+<td style="text-align: left;">-</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\mathbf{f}_S\)</span></td>
+<td style="text-align: left;">the <span class="math inline">\(n \times n\)</span> submatrix of <span class="math inline">\(\mathbf{f}\)</span> on the selected set <span class="math inline">\(S\)</span></td>
+<td style="text-align: left;"><code>ctx[["f"]][idx, idx]</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\mathrm{tr}(\cdot)\)</span></td>
+<td style="text-align: left;">trace; <span class="math inline">\(\mathrm{tr}(\mathbf{f}_S) = \sum_{i \in S} f_{ii}\)</span> (<a href="10b-advanced-selection.html#eq-advanced-maxsum" class="quarto-xref">Equation&nbsp;<span>17.1</span></a>)</td>
+<td style="text-align: left;">-</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\psi_{ij}\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(f_{ii} + f_{jj} - 2f_{ij}\)</span>, the squared Euclidean distance between the stacked vectors of <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>; <strong>not</strong> the distance <span class="math inline">\(1 - f_{ij}\)</span> (<span class="math inline">\(\eta_{ij}\)</span> above) nor <span class="math inline">\(D_{ij}\)</span>, <span class="math inline">\(\bar d_{ij}\)</span></td>
+<td style="text-align: left;">-</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="pipeline-stages-sec-stages" class="level3" data-number="A.1.9">
+<h3 data-number="A.1.9" class="anchored" data-anchor-id="pipeline-stages-sec-stages"><span class="header-section-number">A.1.9</span> Pipeline stages (<a href="08-pipeline-stages.html" class="quarto-xref"><span>Chapter 13</span></a>)</h3>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 8%">
+<col style="width: 76%">
+<col style="width: 15%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Symbol</th>
+<th style="text-align: left;">Meaning</th>
+<th style="text-align: left;">Function</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\varpi_p\)</span></td>
+<td style="text-align: left;">census weight of pool <span class="math inline">\(p\)</span>, <span class="math inline">\(n_p/L\)</span> (lines of pool <span class="math inline">\(p\)</span> over all lines); not the line-usage weights <span class="math inline">\(\mathbf{w}\)</span></td>
+<td style="text-align: left;"><code>theta_decompose()</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\theta_{pq}\)</span></td>
+<td style="text-align: left;">mean of <span class="math inline">\(f_{ij}\)</span> over <span class="math inline">\(i\)</span> in pool <span class="math inline">\(p\)</span> and <span class="math inline">\(j\)</span> in pool <span class="math inline">\(q\)</span>; <span class="math inline">\(\theta_{AB}\)</span> for the two pools</td>
+<td style="text-align: left;"><code>theta_decompose()[["theta"]]</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\theta_T\)</span></td>
+<td style="text-align: left;">coancestry of the whole set, <span class="math inline">\(\sum_p\sum_q \varpi_p\varpi_q\theta_{pq}\)</span>; the <span class="math inline">\(\bar f\)</span> of the partition above</td>
+<td style="text-align: left;"><code>theta_decompose()</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\theta_w\)</span></td>
+<td style="text-align: left;">census-weighted mean coancestry within pools, <span class="math inline">\(\sum_p \varpi_p\theta_{pp}\)</span>; the <span class="math inline">\(\tilde f\)</span> of the partition above; <span class="math inline">\(GD_{WS} = 1 - \theta_w\)</span></td>
+<td style="text-align: left;"><code>theta_decompose()</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(F^{\text{btw}}_{ST}\)</span></td>
+<td style="text-align: left;"><span class="math inline">\((\theta_w - \theta_{AB})/(1 - \theta_{AB})\)</span>, the between-referenced statistic; <strong>not</strong> <span class="math inline">\(F_{ST} = GD_{BS}/GD_T\)</span> (<a href="08-pipeline-stages.html" class="quarto-xref"><span>Chapter 13</span></a> Trap 2)</td>
+<td style="text-align: left;"><code>theta_decompose()</code>, column <code>Fst_Wright</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(C\)</span>, <span class="math inline">\(n_c\)</span>, <span class="math inline">\(f_c\)</span></td>
+<td style="text-align: left;">number of crosses of a DH pool, DH lines per cross, and <span class="math inline">\(f^L\)</span> of the parents of cross <span class="math inline">\(c\)</span>; <span class="math inline">\(C\)</span> is not the matrix <span class="math inline">\(\mathbf{C}\)</span> of the response table and <span class="math inline">\(n_c\)</span> is not the field budget of the mating-design table</td>
+<td style="text-align: left;"><code>dh_pool_theta()</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(n_{DH}\)</span></td>
+<td style="text-align: left;">total number of DH lines, <span class="math inline">\(\sum_c n_c\)</span>; not <span class="math inline">\(D_{ij}\)</span>, <span class="math inline">\(\mathbf{D}\)</span>, <span class="math inline">\(D_G\)</span> or <span class="math inline">\(D_A\)</span></td>
+<td style="text-align: left;"><code>dh_pool_theta()</code>, argument <code>n_per</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\bar F_{cc'}\)</span></td>
+<td style="text-align: left;">mean of <span class="math inline">\(\mathbf{f}^L\)</span> over the four parent pairs of crosses <span class="math inline">\(c\)</span> and <span class="math inline">\(c'\)</span>, the expected coancestry of a DH line of <span class="math inline">\(c\)</span> with one of <span class="math inline">\(c'\)</span></td>
+<td style="text-align: left;"><code>dh_pool_theta()</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(a\)</span>, <span class="math inline">\(b\)</span></td>
+<td style="text-align: left;">the two parent lines of a cross, where <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> index lines elsewhere</td>
+<td style="text-align: left;"><code>sigma_dh_crosses()</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(i\)</span>, <span class="math inline">\(h\)</span>, <span class="math inline">\(q\)</span></td>
+<td style="text-align: left;">in the usefulness criterion: selection intensity (the <span class="math inline">\(i\)</span> of the response table), accuracy of the criterion (not the heterozygous fraction <span class="math inline">\(h_i\)</span>) and selected fraction (not <span class="math inline">\(q = 1 - p\)</span>)</td>
+<td style="text-align: left;"><code>usefulness_criterion()</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\mu_{ab}\)</span>, <span class="math inline">\(UC_{ab}\)</span></td>
+<td style="text-align: left;">mean of the DH family of the cross <span class="math inline">\(a \times b\)</span> and its usefulness criterion <span class="math inline">\(\mu_{ab} + i\,h\,\sigma_{DH(a,b)}\)</span></td>
+<td style="text-align: left;"><code>usefulness_criterion()</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="genomic-prediction" class="level3" data-number="A.1.10">
+<h3 data-number="A.1.10" class="anchored" data-anchor-id="genomic-prediction"><span class="header-section-number">A.1.10</span> Genomic prediction</h3>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 8%">
+<col style="width: 44%">
+<col style="width: 46%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1414,7 +1607,7 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td style="text-align: left;"><span class="math inline">\(r\)</span></td>
-<td style="text-align: left;">accuracy: <span class="math inline">\(\mathrm{cor}(\hat u, g)\)</span>, needs the truth</td>
+<td style="text-align: left;">accuracy: <span class="math inline">\(\mathrm{cor}(\hat u, g)\)</span>, needs the truth; in <a href="07-choosing-metrics.html#sec-choosing-error" class="quarto-xref"><span>Section 12.5</span></a> a <strong>nominal</strong> accuracy, the weight of <span class="math inline">\(u\)</span> in the simulated prediction, not its realised correlation</td>
 <td style="text-align: left;">meaningless without its CV scheme (<a href="08b-genomic-prediction.html#sec-hybrid-cv" class="quarto-xref"><span>Section 14.4</span></a>)</td>
 </tr>
 <tr class="odd">
@@ -1442,14 +1635,39 @@ window.Quarto = {
 <td style="text-align: left;">effective number of independent chromosome segments</td>
 <td style="text-align: left;">unlinked markers here, so <span class="math inline">\(M_e\)</span> is the marker count</td>
 </tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\sigma^2_\beta\)</span></td>
+<td style="text-align: left;">variance of one marker effect under the ridge prior, <span class="math inline">\(\beta_k \sim N(0, \sigma^2_\beta)\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(\sigma^2_u = 2\sum_k p_k(1-p_k)\,\sigma^2_\beta\)</span> (<a href="08b-genomic-prediction.html#eq-genpred-var-g" class="quarto-xref">Equation&nbsp;<span>14.1</span></a>)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\sigma^2_k\)</span></td>
+<td style="text-align: left;">variance of the effect of marker <span class="math inline">\(k\)</span> under BayesA, <span class="math inline">\(\sigma^2_k \sim \chi^{-2}(\nu, S)\)</span></td>
+<td style="text-align: left;">BayesB: the same, given <span class="math inline">\(\beta_k \ne 0\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\lambda_\beta\)</span></td>
+<td style="text-align: left;">ridge penalty of the marker form, <span class="math inline">\(\sigma^2_e/\sigma^2_\beta\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(\lambda_\beta = \lambda \cdot 2\sum_k p_k(1-p_k)\)</span>, <span class="math inline">\(\lambda\)</span> of the GBLUP form (<a href="08b-genomic-prediction.html#eq-genpred-identity" class="quarto-xref">Equation&nbsp;<span>14.5</span></a>)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\mu\)</span>, <span class="math inline">\(\hat\mu\)</span></td>
+<td style="text-align: left;">fixed intercept; its generalised-least-squares estimate</td>
+<td style="text-align: left;">the <code>mu</code> of <code>gblup()</code>; <strong>not</strong> the grand mean <span class="math inline">\(\mu\)</span> of <span class="math inline">\(H_{ij}\)</span> (heterosis table), the population mean <span class="math inline">\(\mu\)</span> of the usefulness criterion (selection table) or <span class="math inline">\(\mu_{ab}\)</span> (DH-family mean)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\mathbf{V}\)</span></td>
+<td style="text-align: left;">covariance of the training phenotypes about the intercept, <span class="math inline">\(\mathbf{G}^*_{tt} + \mathbf{I}\lambda\)</span> in units of <span class="math inline">\(\sigma^2_u\)</span></td>
+<td style="text-align: left;">defined in the prose where the kernel form of <a href="08b-genomic-prediction.html" class="quarto-xref"><span>Chapter 14</span></a> is checked, and <code>V</code> in that chunk</td>
+</tr>
 </tbody>
 </table>
 </div>
 </div>
-<p><strong>CV0, CV1, CV2</strong> name what the training set had already seen of a candidate hybrid’s <em>parents</em>: neither, one, or both. In a factorial between two pools these are three different questions, and only CV2 is easy – see <a href="08b-genomic-prediction.html#sec-hybrid-cv" class="quarto-xref"><span>Section 14.4</span></a>.</p>
+<p><strong>CV0, CV1, CV2</strong> name what the training set had already seen of a candidate hybrid’s <em>parents</em>: neither, one, or both. In a factorial between two pools these are three different questions, and only CV2 is easy – see <a href="08b-genomic-prediction.html#sec-hybrid-cv" class="quarto-xref"><span>Section 14.4</span></a>. They are the T0, T1, T2 of <a href="04e-mating-design.html#sec-mating-genomic" class="quarto-xref"><span>Section 18.6</span></a> (the names of <span class="citation" data-cites="technow2014">Technow et al. (<a href="99-references.html#ref-technow2014" role="doc-biblioref">2014</a>)</span>). The same labels name genotype-by-environment cells in the sparse-testing table below, a different meaning (<a href="04f-sparse-testing.html#sec-sparse-validation" class="quarto-xref"><span>Section 19.4</span></a>).</p>
 </section>
-<section id="population-sizing" class="level3" data-number="A.1.9">
-<h3 data-number="A.1.9" class="anchored" data-anchor-id="population-sizing"><span class="header-section-number">A.1.9</span> Population sizing</h3>
+<section id="population-sizing" class="level3" data-number="A.1.11">
+<h3 data-number="A.1.11" class="anchored" data-anchor-id="population-sizing"><span class="header-section-number">A.1.11</span> Population sizing</h3>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -1582,8 +1800,8 @@ window.Quarto = {
 </div>
 <p>These symbols are local to <a href="04-population-sizing.html" class="quarto-xref"><span>Chapter 7</span></a>. There <span class="math inline">\(N\)</span> and <span class="math inline">\(n\)</span> count F2 and F1 plants, not candidate and selected hybrids; <span class="math inline">\(L\)</span> is a map length in Morgans, not a number of parent lines; <span class="math inline">\(k\)</span> counts loci, not a marker index or testers; <span class="math inline">\(\beta\)</span> is a scalar selection intensity, not the marker-effect vector <span class="math inline">\(\boldsymbol\beta\)</span>; <span class="math inline">\(p\)</span> is P1-ancestry frequency within one cross, not a reference-allele frequency on the frozen base <span class="math inline">\(p_0\)</span>.</p>
 </section>
-<section id="backcrossing" class="level3" data-number="A.1.10">
-<h3 data-number="A.1.10" class="anchored" data-anchor-id="backcrossing"><span class="header-section-number">A.1.10</span> Backcrossing</h3>
+<section id="backcrossing" class="level3" data-number="A.1.12">
+<h3 data-number="A.1.12" class="anchored" data-anchor-id="backcrossing"><span class="header-section-number">A.1.12</span> Backcrossing</h3>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -1676,15 +1894,15 @@ window.Quarto = {
 </div>
 <p>These symbols are local to <a href="04b-backcross-introgression.html" class="quarto-xref"><span>Chapter 8</span></a>. <span class="math inline">\(s\)</span> carries no subscript there and is not the self-coancestry <span class="math inline">\(s_i\)</span> or the specific combining ability <span class="math inline">\(s_{ij}\)</span>; <span class="math inline">\(D\)</span> is donor dosage, not the diversity retained <span class="math inline">\(D\)</span> of <a href="04-population-sizing.html" class="quarto-xref"><span>Chapter 7</span></a>; <span class="math inline">\(N\)</span> and <span class="math inline">\(n\)</span> count plants, not candidate and selected hybrids; <span class="math inline">\(L\)</span> is an interval between two targets, not the total map length of <a href="04-population-sizing.html" class="quarto-xref"><span>Chapter 7</span></a>; <span class="math inline">\(\nu\)</span> is a gamma shape, not the degrees of freedom of the <span class="math inline">\(\chi^{-2}\)</span> prior in the genomic-prediction block; <span class="math inline">\(k\)</span> counts target genes as it counts loci in <a href="04-population-sizing.html" class="quarto-xref"><span>Chapter 7</span></a>.</p>
 </section>
-<section id="mating-design" class="level3" data-number="A.1.11">
-<h3 data-number="A.1.11" class="anchored" data-anchor-id="mating-design"><span class="header-section-number">A.1.11</span> Mating design</h3>
+<section id="mating-design" class="level3" data-number="A.1.13">
+<h3 data-number="A.1.13" class="anchored" data-anchor-id="mating-design"><span class="header-section-number">A.1.13</span> Mating design</h3>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
-<col style="width: 12%">
-<col style="width: 69%">
-<col style="width: 17%">
+<col style="width: 16%">
+<col style="width: 74%">
+<col style="width: 8%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1696,7 +1914,7 @@ window.Quarto = {
 <tbody>
 <tr class="odd">
 <td style="text-align: left;"><span class="math inline">\(g^A_i\)</span>, <span class="math inline">\(g^B_j\)</span></td>
-<td style="text-align: left;">general combining ability of a pool-A / pool-B line</td>
+<td style="text-align: left;">general combining ability of a pool-A / pool-B line: the whole GCA of the cross mean here, the dominance part alone (the GCA for heterosis) in the heterosis table</td>
 <td style="text-align: left;"><code>fit_gca()$gA</code>, <code>$gB</code></td>
 </tr>
 <tr class="even">
@@ -1705,26 +1923,51 @@ window.Quarto = {
 <td style="text-align: left;"><code>simulate_factorial()$S</code></td>
 </tr>
 <tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\mu\)</span>, <span class="math inline">\(\bar y_{ij}\)</span></td>
+<td style="text-align: left;">mean of the reference set of crosses, and the mean of cross <span class="math inline">\(i \times j\)</span> over its plots (<a href="00-hybrid-programme.html#eq-hp-gca-sca" class="quarto-xref">Equation&nbsp;<span>1.1</span></a>); not the <span class="math inline">\(\mu\)</span> of the other tables</td>
+<td style="text-align: left;">-</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\sigma^2_{gA}\)</span>, <span class="math inline">\(\sigma^2_{gB}\)</span>, <span class="math inline">\(\sigma^2_g\)</span></td>
+<td style="text-align: left;">variance of the GCA over the candidate lines of pool A, of pool B, and their mean <span class="math inline">\((\sigma^2_{gA} + \sigma^2_{gB})/2\)</span>, the one used in the closed forms</td>
+<td style="text-align: left;"><code>vc$A</code>, <code>vc$B</code>, <code>s2g</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\sigma^2_s\)</span></td>
+<td style="text-align: left;">variance of the SCA; the <span class="math inline">\(\sigma^2_{SCA}\)</span> of <a href="04f-sparse-testing.html" class="quarto-xref"><span>Chapter 19</span></a> is the same quantity, the one of the heterosis table is a closed form for the heterosis part under narrower assumptions</td>
+<td style="text-align: left;"><code>vc$S</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\sigma^2_e\)</span></td>
+<td style="text-align: left;">plot-error variance, so that <span class="math inline">\(\mathrm{Var}(\bar e_{ij}) = \sigma^2_e/r_{ij}\)</span></td>
+<td style="text-align: left;"><code>s2e</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(n_A\)</span>, <span class="math inline">\(n_B\)</span>, <span class="math inline">\(n_A'\)</span>, <span class="math inline">\(n_B'\)</span></td>
+<td style="text-align: left;">candidate lines per pool (the pool-A line is the female and the pool-B line the male in <a href="04f-sparse-testing.html" class="quarto-xref"><span>Chapter 19</span></a> and <a href="04g-joint-allocation.html" class="quarto-xref"><span>Chapter 20</span></a>), and those that receive at least one cross</td>
+<td style="text-align: left;"><code>nA</code>, <code>nB</code></td>
+</tr>
+<tr class="even">
 <td style="text-align: left;"><span class="math inline">\(k\)</span></td>
 <td style="text-align: left;">testers per pool</td>
 <td style="text-align: left;"><code>design_tester(k =)</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><span class="math inline">\(c\)</span></td>
-<td style="text-align: left;">crosses per line in a sparse factorial</td>
+<td style="text-align: left;">crosses per line in a sparse factorial; <span class="math inline">\(c = k\)</span> for a tester design; not the contribution vector <span class="math inline">\(\mathbf c\)</span> of the selection table</td>
 <td style="text-align: left;"><code>design_circulant(c =)</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;"><span class="math inline">\(r\)</span></td>
 <td style="text-align: left;">plots per cross</td>
 <td style="text-align: left;"><code>design_reps()</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><span class="math inline">\(\rho\)</span></td>
-<td style="text-align: left;">least-squares GCA accuracy, <span class="math inline">\(\sqrt{\sigma^2_g / (\sigma^2_g + \sigma^2_s/c + \sigma^2_e/(c r))}\)</span></td>
+<td style="text-align: left;">least-squares GCA accuracy of a <span class="math inline">\(k\)</span>-tester design, <span class="math inline">\(\sqrt{\sigma^2_g / (\sigma^2_g + \sigma^2_s/k + \sigma^2_e/(k r))}\)</span>; evaluated at <span class="math inline">\(c\)</span> for a sparse factorial it is optimistic (<a href="04e-mating-design.html#tbl-mating-formula-sparse" class="quarto-xref">Table&nbsp;<span>18.2</span></a>)</td>
 <td style="text-align: left;"><code>gca_accuracy_theory()</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;">T0 / T1 / T2</td>
 <td style="text-align: left;">untested hybrids with neither / one / both parents in the training set</td>
 <td style="text-align: left;">-</td>
@@ -1735,15 +1978,15 @@ window.Quarto = {
 </div>
 <p><span class="math inline">\(r\)</span> here is plots per cross; in the genomic-prediction table above and the response table below it is the accuracy of a selection criterion. <a href="04e-mating-design.html" class="quarto-xref"><span>Chapter 18</span></a> keeps <span class="math inline">\(\rho\)</span> for accuracy to avoid the clash.</p>
 </section>
-<section id="sparse-testing" class="level3" data-number="A.1.12">
-<h3 data-number="A.1.12" class="anchored" data-anchor-id="sparse-testing"><span class="header-section-number">A.1.12</span> Sparse testing</h3>
+<section id="sparse-testing" class="level3" data-number="A.1.14">
+<h3 data-number="A.1.14" class="anchored" data-anchor-id="sparse-testing"><span class="header-section-number">A.1.14</span> Sparse testing</h3>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
 <col style="width: 16%">
-<col style="width: 68%">
-<col style="width: 15%">
+<col style="width: 74%">
+<col style="width: 9%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1765,17 +2008,17 @@ window.Quarto = {
 </tr>
 <tr class="odd">
 <td style="text-align: left;"><span class="math inline">\(p\)</span></td>
-<td style="text-align: left;">share of hybrid x location cells observed, <span class="math inline">\(k / L\)</span></td>
+<td style="text-align: left;">share of hybrid x location cells observed, <span class="math inline">\(k / L\)</span> (the realised share, <code>p_real</code>, in the cached grid)</td>
 <td style="text-align: left;"><code>p_real</code></td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">CV1 / CV2 / CV0 / CV00</td>
-<td style="text-align: left;">new genotype / missing cell of a tested genotype / new environment / both new</td>
+<td style="text-align: left;">new genotype / missing cell of a tested genotype / new environment / both new; a different meaning from the CV labels of the genomic-prediction table (see above)</td>
 <td style="text-align: left;"><code>acc_cv1</code>, <code>acc_cv2</code></td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">PEV</td>
-<td style="text-align: left;">prediction error variance of a hybrid’s target value</td>
+<td style="text-align: left;">prediction error variance of a hybrid’s target value; its mean over hybrids enters the reliability <span class="math inline">\(1 - \overline{\mathrm{PEV}}/\sigma^2_G\)</span></td>
 <td style="text-align: left;"><code>sparse_blup()$pev</code></td>
 </tr>
 <tr class="even">
@@ -1788,14 +2031,34 @@ window.Quarto = {
 <td style="text-align: left;">residual of the analysis model, <span class="math inline">\(\sigma^2_{SCA \times L} + \sigma^2_e\)</span> under one plot per cell</td>
 <td style="text-align: left;"><code>sparse_vc()$s2res</code></td>
 </tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\mathrm{GCA}^f_i\)</span>, <span class="math inline">\(\mathrm{GCA}^m_j\)</span>, <span class="math inline">\(\mathrm{SCA}_{ij}\)</span></td>
+<td style="text-align: left;">effects of a female (pool-A) line, a male (pool-B) line and their cross: the <span class="math inline">\(g^A_i\)</span>, <span class="math inline">\(g^B_j\)</span>, <span class="math inline">\(s_{ij}\)</span> of the mating table and the <span class="math inline">\(g^f_i\)</span>, <span class="math inline">\(g^m_j\)</span> of the joint-allocation table</td>
+<td style="text-align: left;">-</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\sigma^2_f\)</span>, <span class="math inline">\(\sigma^2_m\)</span>, <span class="math inline">\(\sigma^2_s\)</span></td>
+<td style="text-align: left;">GCA variances of the female and male lines and the SCA variance: <span class="math inline">\(\sigma^2_{gA}\)</span>, <span class="math inline">\(\sigma^2_{gB}\)</span> and <span class="math inline">\(\sigma^2_s\)</span> of the mating table, so that <span class="math inline">\(\sigma^2_g = (\sigma^2_f + \sigma^2_m)/2\)</span>; <span class="math inline">\(\sigma^2_{SCA}\)</span> is a synonym of <span class="math inline">\(\sigma^2_s\)</span></td>
+<td style="text-align: left;"><code>sparse_vc()$s2f</code>, <code>$s2m</code>, <code>$s2s</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\sigma^2_G\)</span></td>
+<td style="text-align: left;">genetic variance of a hybrid’s value in the target population of environments, <span class="math inline">\(\sigma^2_f + \sigma^2_m + \sigma^2_s\)</span> (2.25 in <code>sparse_vc()</code>); not the <span class="math inline">\(\sigma^2_g\)</span> of the mating table, and in the reliability it plays the role of the <span class="math inline">\(\sigma^2_u\)</span> of the genomic-prediction table</td>
+<td style="text-align: left;"><code>sparse_vc()$Vg</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\sigma^2_{GE}\)</span></td>
+<td style="text-align: left;">variance of the interaction with location, <span class="math inline">\(\sigma^2_{f\ell} + \sigma^2_{m\ell} + \sigma^2_{s\ell}\)</span> (1.125 in <code>sparse_vc()</code>); plot <span class="math inline">\(h^2 = \sigma^2_G/(\sigma^2_G + \sigma^2_{GE} + \sigma^2_e)\)</span></td>
+<td style="text-align: left;"><code>sparse_vc()$VgxE</code></td>
+</tr>
 </tbody>
 </table>
 </div>
 </div>
 <p>Here <span class="math inline">\(k\)</span> counts locations per hybrid; in <a href="04e-mating-design.html" class="quarto-xref"><span>Chapter 18</span></a> it counts testers per pool.</p>
 </section>
-<section id="joint-allocation" class="level3" data-number="A.1.13">
-<h3 data-number="A.1.13" class="anchored" data-anchor-id="joint-allocation"><span class="header-section-number">A.1.13</span> Joint allocation</h3>
+<section id="joint-allocation" class="level3" data-number="A.1.15">
+<h3 data-number="A.1.15" class="anchored" data-anchor-id="joint-allocation"><span class="header-section-number">A.1.15</span> Joint allocation</h3>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -1882,8 +2145,8 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="response-to-selection" class="level3" data-number="A.1.14">
-<h3 data-number="A.1.14" class="anchored" data-anchor-id="response-to-selection"><span class="header-section-number">A.1.14</span> Response to selection</h3>
+<section id="response-to-selection" class="level3" data-number="A.1.16">
+<h3 data-number="A.1.16" class="anchored" data-anchor-id="response-to-selection"><span class="header-section-number">A.1.16</span> Response to selection</h3>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -2027,8 +2290,8 @@ window.Quarto = {
 <p><span class="math inline">\(R = i\,r\,\sigma_A\)</span> is the infinite-population, bivariate-normal result. In a structured hybrid population at the teaching scale, <a href="02b-response.html" class="quarto-xref"><span>Chapter 4</span></a> finds the replicated mean gap between predicted and realised response within two standard errors of zero; a single seed can over- or underpredict.</p>
 <p><span class="math inline">\(H\)</span> in <a href="02b-response.html" class="quarto-xref"><span>Chapter 4</span></a> is the heterosis value <span class="math inline">\(H_i\)</span> of the heterosis table above, not the aggregate genotype, which is <span class="math inline">\(W\)</span>.</p>
 </section>
-<section id="alphasimr-pipeline" class="level3" data-number="A.1.15">
-<h3 data-number="A.1.15" class="anchored" data-anchor-id="alphasimr-pipeline"><span class="header-section-number">A.1.15</span> AlphaSimR pipeline</h3>
+<section id="alphasimr-pipeline" class="level3" data-number="A.1.17">
+<h3 data-number="A.1.17" class="anchored" data-anchor-id="alphasimr-pipeline"><span class="header-section-number">A.1.17</span> AlphaSimR pipeline</h3>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -2132,6 +2395,9 @@ Meuwissen, T. H. E., A. K. Sonesson, G. Gebregiwergis, and J. A. Woolliams. 2020
 </div>
 <div id="ref-nei1973" class="csl-entry" role="listitem">
 Nei, M. 1973. <span>“Analysis of Gene Diversity in Subdivided Populations.”</span> <em>Proceedings of the National Academy of Sciences</em> 70 (12): 3321–23. <a href="https://doi.org/10.1073/pnas.70.12.3321">https://doi.org/10.1073/pnas.70.12.3321</a>.
+</div>
+<div id="ref-technow2014" class="csl-entry" role="listitem">
+Technow, F., T. A. Schrag, W. Schipprack, E. Bauer, H. Simianer, and A. E. Melchinger. 2014. <span>“Genome Properties and Prospects of Genomic Prediction of Hybrid Performance in a Breeding Program of Maize.”</span> <em>Genetics</em> 197 (4): 1343–55. <a href="https://doi.org/10.1534/genetics.114.165860">https://doi.org/10.1534/genetics.114.165860</a>.
 </div>
 </div>
 </section>

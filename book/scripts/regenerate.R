@@ -25,7 +25,7 @@
 #
 # Not regenerated here, because they are not this project's output:
 #   bibliography_animal.csv, bibliography_plant.csv  (literature screens)
-#   plant_metric_usage.csv                           (derived from those)
+#   plant_metric_usage.csv                           (external classification; not derivable from those)
 #   mating_scenarios_summary.csv, mating_optimizer_frontier.csv,
 #   mating_validation.csv, figs/mating_*.png
 #                         (the external `sparsex` study: AlphaSimR founders,
@@ -480,8 +480,10 @@ if (want("cycles")) {
     }))))
   write.csv(inj, file.path(data_dir, "cycles_injection.csv"), row.names = FALSE)
 
-  # Confirm the trend is not an artefact of the cheap selector: one budget,
-  # one seed, re-run with the differential evolution of Chapter 10.
+  # The same trajectory with differential evolution as the selector: both
+  # budgets, seed 1, 12 cycles. One seed and a stream that shifts with the
+  # selector, so this does not confirm or refute the greedy trend (Chapter 11b
+  # measures what it can and cannot show).
   de_sel <- function(ctx, n_sel, alpha_max, gd_ref, max_use)
     suppressWarnings(sel_de(ctx, n_sel, alpha_max, gd_ref, NP = 300,
                             itermax = 1000, max_use = max_use))
@@ -515,7 +517,7 @@ if (want("cycles")) {
   png(file.path(fig_dir, "cycles_diversity.png"), width = 1050, height = 680, res = 150)
   op <- par(mfrow = c(1, 2), mar = c(4, 4, 2, 1))
   plot(range(ag$cycle), range(ag$GD), type = "n", xlab = "cycle",
-       ylab = "gene diversity of the selection", main = "Within")
+       ylab = "gene diversity of the selection", main = "Total, GD_T")
   for (b in names(cols)) {
     d <- ag[ag$budget == b, ]; lines(d$cycle, d$GD, col = cols[[b]], lwd = 2)
   }
@@ -586,7 +588,9 @@ if (want("limits")) {
 
   # The gap between realised and genic variance is NOT the Bulmer effect on its
   # own. A finite founder base leaves disequilibrium in the very first cycle,
-  # before anything is selected, and two divergent pools add more. Only the
+  # before anything is selected: over the complete factorial it is the sampling
+  # covariance among loci of the founder lines of each pool, (gap_A + gap_B) / 4
+  # up to the n - 1 divisor (02b); no between-pool term enters. Only the
   # difference between a selected arm and an otherwise identical unselected one
   # isolates what selection did, which is why every regime below is run against
   # the same seeds and the random arm exists at all.
@@ -619,14 +623,21 @@ if (want("limits")) {
     # arm needs no variance code of its own.
     lk_cfg <- modifyList(rrs_config, list(n_cycles = 8))
     # The founders are generated ONCE per replicate and both arms branch off
-    # that same result. alphasimr_founder_pools() is not reproducible from
-    # cfg$seed -- runMacs2 seeds MaCS outside R's RNG -- so calling it once per
-    # arm would have compared two different base populations and charged the
-    # difference to selection. set.seed() before each chain then gives both arms
-    # the same downstream stream, leaving the choice of elite lines as the only
-    # difference between them.
+    # that same result, so cycle 0 is common to the two arms of a replicate.
+    # Each replicate draws its founders under its OWN seed, set immediately
+    # before the draw: alphasimr_founder_pools() calls set.seed(cfg$seed), and
+    # a constant cfg$seed made replicates 2-4 of the first version of this file
+    # share founders (cycle 0 identical), so n_pairs counted pseudo-replicates.
+    # Whether two calls to runMacs2() under one seed return the same founders
+    # was not measured (04c compares one runMacs() pair per render and does not
+    # call runMacs2()); under set.seed(1) the previous committed file gave
+    # cycle-0 varA_A 0.4902 / 0.5504 and this one 1.2076 (an observation, not a
+    # rate). The founders are not saved, so the committed file is treated as
+    # cached and not as reproducible from this repository. After the founders
+    # the two arms differ in the elite-line pick (sample() in the random arm),
+    # so their streams diverge from the first cycle.
     linked <- do.call(rbind, lapply(1:4, function(s) {
-      fp <- alphasimr_founder_pools(lk_cfg)
+      fp <- alphasimr_founder_pools(modifyList(lk_cfg, list(seed = s)))
       do.call(rbind, lapply(c(FALSE, TRUE), function(rnd) {
         set.seed(1000 + s)
         pA <- fp$pop_A; pB <- fp$pop_B; SP <- fp$SP
@@ -788,8 +799,6 @@ if (want("sparse")) {
   message("sparse: done")
 }
 
-message("regenerate: complete")
-
 # --- joint: which crosses, at which locations (Ch 4g) --------------------------
 if (want("joint")) {
   message("joint: crossing plan x location allocation at 160 plots (paired)")
@@ -937,3 +946,5 @@ if (want("ocs_panel")) {
   write.csv(res, file.path(data_dir, "ocs_panel_sweep.csv"), row.names = FALSE)
   message("ocs_panel: done")
 }
+
+message("regenerate: complete")

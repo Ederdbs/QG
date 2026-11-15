@@ -73,3 +73,49 @@ test_that("optimised from an explicit start never ends above it", {
   expect_lte(joint_pev(Mo, 10, 10, vc, A, A), joint_pev(M0, 10, 10, vc, A, A))
   expect_true(all(rowSums(Mo) == rowSums(M0)))
 })
+
+# Slow literal oracle: union-find over the definitions, independent of
+# design_components() / plan_clean().
+ref_components <- function(n, edges) {
+  par <- seq_len(n)
+  find <- function(i) { while (par[i] != i) i <- par[i]; i }
+  for (e in seq_len(nrow(edges))) {
+    a <- find(edges[e, 1]); b <- find(edges[e, 2])
+    if (a != b) par[a] <- b
+  }
+  used <- unique(as.vector(edges))
+  length(unique(vapply(used, find, numeric(1))))
+}
+
+test_that("joint_connectivity agrees with a union-find oracle on random allocations", {
+  nF <- 8; nM <- 8; nLoc <- 5
+  for (s in 1:150) {
+    set.seed(s)
+    M <- matrix(0L, nF * nM, nLoc)
+    for (x in which(runif(nF * nM) < runif(1, 0.1, 0.6))) M[x, sample.int(nLoc, sample(1:2, 1))] <- 1L
+    if (s %% 5 == 0) M[, sample.int(nLoc, 1)] <- 0L   # a location with no plot
+    if (sum(M) == 0) next
+    cn <- joint_connectivity(M, nF, nM)
+    cells <- which(M == 1L, arr.ind = TRUE)
+    f <- (cells[, 1] - 1L) %/% nM + 1L; m <- (cells[, 1] - 1L) %% nM + 1L
+    # (i) female x male graph of planted crosses (pooled over locations)
+    pl <- unique(cells[, 1]); fp <- (pl - 1L) %/% nM + 1L; mp <- (pl - 1L) %% nM + 1L
+    expect_equal(cn$n_comp_cross, ref_components(nF + nM, cbind(fp, nF + mp)))
+    # (ii) locations joined through shared parents: location - parent edges
+    # (every parent in an edge touches a location, so components = location components)
+    expect_equal(cn$n_comp_loc, ref_components(nLoc + nF + nM, rbind(
+      cbind(cells[, 2], nLoc + f), cbind(cells[, 2], nLoc + nF + m))))
+  }
+})
+
+test_that("coverage load excess over ceiling(n k / nLoc) is at most one plot", {
+  # Documents the guarantee: the cap is a penalty, not a constraint, so a
+  # location can reach cap + 1 (circulant c = 2, k = 4 does so in ~20% of draws).
+  p <- design_circulant(20, 20, c = 2)
+  cap <- ceiling(nrow(p) * 4 / 8)
+  excess <- vapply(1:40, function(s) {
+    set.seed(s)
+    max(colSums(joint_alloc(p, 20, 20, 8, 4, "coverage"))) - cap
+  }, numeric(1))
+  expect_lte(max(excess), 1)
+})

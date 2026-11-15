@@ -7,8 +7,11 @@ library(AlphaSimR)
 ```
 
 The seventh consequence for the pipeline drawn in @sec-plant-literature is to
-report the diversity cost per cycle explicitly whenever cycles are shortened. This chapter measures that
-cost in a whole programme.
+report the diversity cost per cycle explicitly whenever cycles are shortened.
+This chapter measures that cost in a whole programme, but as a **stock**: the
+change in gene diversity after 15 years, for arms whose cycle lengths in years
+it also states. It does not report a rate per cycle, because the cycles of the
+programme overlap (@sec-programme-assumptions).
 
 @sec-alphasimr, built back in the Simulation part, assembled AlphaSimR's
 primitives into a *hybrid* scheme: two
@@ -18,90 +21,205 @@ assembles the same primitives into the other kind of programme -- an
 and where the organising problem is not which cross to sell but how many
 genotypes to carry through how many stages of field testing.
 
-The scheme is the wheat programme of @gaynor2017, reduced in scale. It is worth
-building because it is the shape most public and many commercial line-breeding
-programmes actually have, and because it exposes something the hybrid chapter
+The scheme is the staged wheat programme of @gaynor2017, as reduced for the
+AlphaSimR course vignette (@gorjanc2022, week 5 C) and reduced further here
+(the configuration, and how it differs from both, is stated in @sec-programme-scheme). It is a
+stylised inbred-line programme, not a survey of programmes in use. It is worth
+building because it exposes something the hybrid chapter
 cannot: **the trade between the number of genotypes tested and the precision
 with which each is measured.** A breeder has a fixed number of plots. Spending
-them on more entries at one location or fewer entries at eight locations is the
-same budget spent two ways, and the staged trial is the standard compromise.
+them on more entries scored once or fewer entries scored with eight replicates
+(the course calls replicates "locations"; they are not locations here, see
+@sec-programme-reps) is the same budget spent two ways, and the staged trial is
+the standard compromise.
+This chapter sets that trade up but does not measure it: it never varies the
+number of entries against the replication at a fixed number of plots. The
+Mating and testing design part measures allocation of plots between crosses and
+locations, for hybrids, in @sec-mating, @sec-sparse and @sec-joint; none of
+those chapters is a measurement on this inbred-line programme.
 
-Then the chapter does what the course this scheme comes from does not: it puts
-the book's diversity machinery over the result, and asks what the faster
-programme spends to be faster.
+Then the chapter does what the course vignette does not (it reports the genetic
+mean and variance only): it puts the book's diversity machinery over the result,
+and asks what the faster programme spends to be faster.
 
-## The scheme
+## The scheme {#sec-programme-scheme}
+
+The configuration. It is the author's own reduction, not the course's and not
+Gaynor et al.'s. Gaynor et al. (Table 1 and the Methods, pp. 2375-2377) start
+from 50 founders and run 100 crosses a year, 100 doubled-haploid (DH) lines per
+cross, 10,000 headrows, 500 lines in the preliminary trial, 50 in the advanced
+trial and 10 in the elite trial. The course vignette reduces that to 30
+founders on 21 chromosomes, 30 crosses, 50 DH lines per cross (1500 headrows),
+at most 10 lines per cross into the preliminary trial and 300, 25 and 5 entries
+in the three trials, with 50 causal sites (quantitative trait loci, QTL) per chromosome. The values below
+(`sch`) reduce it again; @fig-programme-stages draws the stages.
 
 ```{r}
+#| label: programme-config
+sch <- list(
+  n_founders = 40, n_chr = 10, n_qtl = 60,   # founder genomes
+  n_neutral = 0,                             # neutral sites per chromosome (0 = every site is a QTL)
+  n_crosses  = 20, n_dh = 20, fam_max = 5,   # crossing and DH production
+  n_pyt = 60, n_ayt = 12, n_eyt = 4,         # entries per yield trial
+  rep_hdrw = 1/4, rep_pyt = 1, rep_ayt = 4, rep_eyt = 8,   # replicates per stage
+  var_e = 0.4, gs_boost = 3, n_burn = 7, n_years = 15,
+  gs_from = 6                                # first year a genomic arm switches on
+)
+n_hdrw <- sch$n_crosses * sch$n_dh           # every DH line is scored in the headrows
+fx <- function(x, d = 2) sprintf("%.*f", d, x)   # fixed decimals for inline numbers
+n_probe <- 48                                # seeds of the neutral-locus probe
+```
+
+```{r}
+#| label: fig-programme-stages
 #| echo: false
-#| fig-width: 9.5
+#| fig-width: 8
 #| fig-height: 3.6
-#| fig-cap: "The staged inbred-line programme. Entries fall by roughly an order of magnitude at each stage while replication -- the number of locations each entry is scored in -- rises. Parents for the next cycle are recycled from the late trials (solid) or, under genomic selection, from the preliminary trial as well (dashed)."
-#| fig-alt: "The staged inbred-line programme"
+#| fig-cap: "The staged inbred-line programme at the scale of `sch`. Entries fall at every stage while replication -- the number of replicates (`reps`) each entry is scored with -- rises. Parents for the next cycle are recycled from the late trials (solid) or, in the arms with lever 2 and in the phenotype-only control of @sec-programme-levers, from the preliminary trial as well (dashed). DH: doubled haploid; PYT, AYT, EYT: preliminary, advanced and elite yield trial."
+#| fig-alt: "Flow diagram from left to right: parents, F1 (20 crosses), doubled-haploid lines (400), headrows (400 entries, 0.25 replicate), preliminary yield trial (60, 1), advanced (12, 4), elite (4, 8) and the variety. A long arrow above the stages reads entries fall, replication rises. A solid red arrow returns from the elite trial to the parents, recycling parents from the elite and advanced trials; a dashed blue arrow returns from the preliminary trial, the extra source of parents in lever 2 and in the control."
 op <- par(mar = c(0, 0, 0, 0)); plot.new(); plot.window(c(0, 100), c(0, 40))
-box_ <- function(x, y, w, h, lab, fill, cex = 0.66) {
-  rect(x, y, x + w, y + h, col = fill, border = "grey40")
-  text(x + w / 2, y + h / 2, lab, cex = cex)
+bw <- 10.4; pitch <- 12.6; x0 <- 0.7        # box width, pitch and left edge (plot units)
+box_ <- function(i, lab, fill, cex = 0.8) {
+  x <- x0 + pitch * (i - 1)
+  rect(x, 16, x + bw, 27, col = fill, border = "grey40")
+  text(x + bw / 2, 21.5, lab, cex = cex)
 }
-arr <- function(x0, y0, x1, y1, lty = 1, col = "grey30")
-  arrows(x0, y0, x1, y1, length = 0.06, col = col, lty = lty, lwd = 1.5)
+arr <- function(x0, y0, x1, y1, lty = 1, col = "grey30", head = TRUE)
+  arrows(x0, y0, x1, y1, length = if (head) 0.08 else 0, col = col, lty = lty, lwd = 1.5)
+ctr <- function(i) x0 + pitch * (i - 1) + bw / 2      # centre of box i
 
-stages <- list(c(1, "Parents", "#d1e5f0"), c(14.5, "F1\n20 crosses", "#d1e5f0"),
-               c(28, "DH\n400 lines", "#f7f7f7"), c(41.5, "Headrows\n400, 1/4 rep", "#f7f7f7"),
-               c(55, "PYT\n60, 1 loc", "#fddbc7"), c(68.5, "AYT\n12, 4 loc", "#fddbc7"),
-               c(82, "EYT\n4, 8 loc", "#fddbc7"))
-for (s in stages) box_(as.numeric(s[1]), 16, 12, 11, s[2], s[3])
-box_(93, 16, 6, 11, "Variety", "#b8e0b8")
-for (x in c(13, 26.5, 40, 53.5, 67, 80.5, 92.5)) arr(x, 21.5, x + 1.4, 21.5)
+stages <- list(list("Parents", "#d1e5f0"),
+               list(paste0("F1\n", sch$n_crosses, " crosses"), "#d1e5f0"),
+               list(paste0("DH\n", n_hdrw, " lines"), "#f7f7f7"),
+               list(paste0("Headrows\n", n_hdrw, "\n", sch$rep_hdrw, " rep"), "#f7f7f7"),
+               list(paste0("PYT\n", sch$n_pyt, "\n", sch$rep_pyt, " rep"), "#fddbc7"),
+               list(paste0("AYT\n", sch$n_ayt, "\n", sch$rep_ayt, " rep"), "#fddbc7"),
+               list(paste0("EYT\n", sch$n_eyt, "\n", sch$rep_eyt, " rep"), "#fddbc7"),
+               list("Variety", "#b8e0b8"))
+for (i in seq_along(stages)) box_(i, stages[[i]][[1]], stages[[i]][[2]])
+for (i in 1:7) arr(x0 + pitch * (i - 1) + bw, 21.5, x0 + pitch * i, 21.5)  # box i -> box i + 1
 
-arr(88, 16, 88, 6, lty = 1, col = "#b2182b"); arr(88, 6, 8, 6, lty = 1, col = "#b2182b")
-arr(7, 6, 7, 16, lty = 1, col = "#b2182b")
-arr(61, 16, 61, 10.5, lty = 2, col = "#1f5f8b")
-arr(61, 10.5, 9, 10.5, lty = 2, col = "#1f5f8b")
-text(46, 4, "recycle parents from EYT + AYT (phenotypic selection)",
-     cex = 0.6, col = "#b2182b")
-text(36, 12.4, "genomic selection also recycles from PYT -- one year sooner",
-     cex = 0.6, col = "#1f5f8b")
-text(50, 31, "entries fall, replication rises", cex = 0.72, col = "grey25")
-arr(30, 29, 78, 29, col = "grey55")
+red <- "#b2182b"; blue <- "#1f5f8b"
+# solid: parents from the EYT (and the AYT), joined on one return line, up into Parents
+arr(ctr(7), 16, ctr(7), 6, col = red, head = FALSE)
+arr(ctr(6), 16, ctr(6), 6, col = red, head = FALSE)
+arr(ctr(7), 6, ctr(1) - 1.8, 6, col = red, head = FALSE)
+arr(ctr(1) - 1.8, 6, ctr(1) - 1.8, 16, col = red)
+# dashed: parents from the PYT, a year sooner, up into Parents
+arr(ctr(5), 16, ctr(5), 10.5, lty = 2, col = blue, head = FALSE)
+arr(ctr(5), 10.5, ctr(1) + 1.8, 10.5, lty = 2, col = blue, head = FALSE)
+arr(ctr(1) + 1.8, 10.5, ctr(1) + 1.8, 16, lty = 2, col = blue)
+text(ctr(1) + 1.8, 3.2, "recycle parents from EYT + AYT (phenotypic selection)",
+     cex = 0.75, col = red, adj = c(0, 0.5))
+text(ctr(5) - 2, 12.9, "lever 2 and control: parents also from the PYT, a year sooner",
+     cex = 0.75, col = blue, adj = c(1, 0.5))
+text(50, 32, "entries fall, replication rises", cex = 0.85, col = "grey25")
+arr(30, 29.5, 78, 29.5, col = "grey55")
 par(op)
 ```
 
-Seven stages, and the logic connecting them is a single idea: **at every step,
-entries fall and replication rises.** Four hundred doubled-haploid lines are
-scored once, cheaply, in unreplicated headrows; sixty survive into a preliminary
-yield trial at one location; twelve into an advanced trial at four; four into an
-elite trial at eight. Selection accuracy at the last stage is high because the
-error variance has been divided by eight locations -- not because the trait
-became more heritable.
-
-That is what `reps` does in `setPheno()`, and it is the argument @sec-alphasimr's
-Step 2 flagged as the plant idiom. The configuration:
-
-```{r}
-sch <- list(
-  n_founders = 40, n_chr = 10, n_qtl = 60,   # founder genomes
-  n_crosses  = 20, n_dh = 20, fam_max = 5,   # crossing and DH production
-  n_pyt = 60, n_ayt = 12, n_eyt = 4,         # entries per yield trial
-  rep_hdrw = 1/4, rep_pyt = 1, rep_ayt = 4, rep_eyt = 8,   # locations per stage
-  var_e = 0.4, gs_boost = 3, n_burn = 7, n_years = 15
-)
-```
+Seven stages (@fig-programme-stages), and the logic connecting them is a single
+idea: **at every step, entries fall and replication rises.**
+`r n_hdrw` doubled-haploid lines
+are scored once, cheaply, in unreplicated headrows; `r sch$n_pyt` survive into a
+preliminary yield trial (PYT) with `r sch$rep_pyt` replicate; `r sch$n_ayt` into an
+advanced trial (AYT) with `r sch$rep_ayt`; `r sch$n_eyt` into an
+elite trial (EYT) with `r sch$rep_eyt`. The number of entries falls by factors of
+`r fx(n_hdrw / sch$n_pyt, 1)`, `r fx(sch$n_pyt / sch$n_ayt, 1)` and
+`r fx(sch$n_ayt / sch$n_eyt, 1)` over the three steps, not by a constant factor.
 
 `rep_hdrw = 1/4` is the course's device for a stage *less* precise than a single
 plot: headrows are scored visually on a short row, which carries less
-information than one replicated plot, so the error variance is multiplied by
+information than one replicated plot, so the plot-error variance is multiplied by
 four. `fam_max` caps how many DH lines any one cross may contribute to the
 preliminary trial -- `selectWithinFam()` from @sec-alphasimr's Step 6, holding
 the genetic base open against a truncation that would otherwise take the whole
 trial from the two best crosses.
 
+### What `reps` does, and what it does not {#sec-programme-reps}
+
+`reps` in `setPheno()` is the argument @sec-alphasimr's Step 2 flagged as the
+plant idiom, and the course calls its values "locations". It divides the
+**plot-error variance** `varE` by the number of replicates and nothing else. The
+genotype-by-environment (GxE) term enters a phenotype differently. In AlphaSimR
+2.1.0 the trait of `addTraitAG(varGxE = )` gives each entry a deviate
+$g_i$ of variance `varGxE`, and a `setPheno()` call multiplies every $g_i$ by
+**one** standard-normal draw $z$ made for that call and shared by all entries of
+the call; `reps` does not average it. The chunk checks that structure by its
+consequence, in two parts. With `varE = 0`, the departures of the phenotypes
+from the genetic values over four calls (two with `reps = 1`, two with
+`reps = 8`) are one vector scaled four times, so the matrix has rank one: one
+shared deviate per call. That check is blind to a rescaling of each call, so it
+cannot say whether `reps` divides the GxE term; the second part measures it
+directly, as the mean squared departure over 2000 calls at `reps = 1` and at
+`reps = 8`, which would fall eight-fold at `reps = 8` if `reps` averaged GxE.
+The chunk then measures the accuracy of
+an entry mean (@tbl-programme-accuracy), $r = \text{cor}(\text{genetic value}, \text{phenotype})$ over the
+40 founders, as the number of replicates grows, with and without the GxE term.
+
+```{r}
+#| label: tbl-programme-accuracy
+#| tbl-cap: "Accuracy of an entry mean, cor(genetic value, phenotype) over the 40 founder lines of seed 7 (`quickHaplo()`, 10 x 60 QTL, `var` = 0.1, `varE` = 0.4), by number of replicates `reps`, with the GxE variance of the chapter (`varGxE` = 0.2) and with none. Mean and standard deviation over 300 `setPheno()` calls per cell, seed 11 before each cell; the 0.25 row is the headrows, 1 the PYT, 3 the surrogate genomic value `gs_boost`, 4 the AYT, 8 the EYT. Dimensionless, three decimals."
+set.seed(7)
+fg_acc <- quickHaplo(nInd = 40, nChr = 10, segSites = 60, inbred = TRUE)
+mk <- function(vg) {
+  SP <- SimParam$new(fg_acc)
+  SP$addTraitAG(nQtlPerChr = 60, mean = 4, var = 0.1, varGxE = vg)
+  list(SP = SP, pop = newPop(fg_acc, simParam = SP))
+}
+# GxE enters as g_i * z, one z per call: varE = 0 leaves a rank-one residual matrix
+m <- mk(0.2)
+res <- sapply(c(1, 1, 8, 8), function(r)
+  setPheno(m$pop, varE = 0, reps = r, onlyPheno = TRUE, simParam = m$SP)[, 1] -
+    gv(m$pop)[, 1])
+sv <- svd(res)[["d"]]
+stopifnot(sv[2] < 1e-8 * sv[1])
+set.seed(5)
+msq <- sapply(c(1, 8), function(r) mean(replicate(2000,
+  (setPheno(m$pop, varE = 0, reps = r, onlyPheno = TRUE, simParam = m$SP)[, 1] -
+     gv(m$pop)[, 1])^2)))
+stopifnot(msq[2] / msq[1] > 0.5)          # eight-fold division would give 0.125
+acc <- function(vg, r, seed = 11) {
+  m <- mk(vg); set.seed(seed)
+  a <- replicate(300, cor(gv(m$pop)[, 1],
+                          setPheno(m$pop, varE = sch$var_e, reps = r,
+                                   onlyPheno = TRUE, simParam = m$SP)[, 1]))
+  c(mean(a), stats::sd(a))
+}
+reps_grid <- c(0.25, 1, 3, 4, 8)
+tab_acc <- t(sapply(reps_grid, function(r) c(acc(0.2, r), acc(0, r))))
+dimnames(tab_acc) <- list(reps = reps_grid,
+  c("GxE mean", "GxE sd", "no GxE mean", "no GxE sd"))
+varG_found <- stats::var(gv(m$pop)[, 1])
+fmt(tab_acc, 3)
+```
+
+The mean squared departure of the phenotype from the genetic value, with
+`varE = 0`, is `r fx(msq[1], 3)` at `reps = 1` and `r fx(msq[2], 3)` at
+`reps = 8`, against `varGxE` = 0.2: `reps` does not divide the GxE term (it
+would give `r fx(msq[1] / 8, 3)` at 8 if it did). The founders' additive variance is `r fx(varG_found, 3)` (`var = 0.1`), so the
+GxE variance of 0.2 is about twice it. Eight replicates raise the accuracy of an
+entry mean from `r fx(tab_acc["1", 1], 2)` to `r fx(tab_acc["8", 1], 2)` with the
+GxE term, against `r fx(tab_acc["1", 3], 2)` to `r fx(tab_acc["8", 3], 2)` without it, and the
+standard deviation across calls stays at `r fx(tab_acc["8", 2], 2)` where the
+GxE term is present against `r fx(tab_acc["8", 4], 2)` where it is not.
+Selection accuracy at the last stage is higher
+because the plot-error variance has been divided by eight, not because the trait
+became more heritable; but it is bounded by a GxE term that replication does not
+reduce and that changes from call to call. What the chapter exposes is therefore the trade
+between entries and plot-error precision under one shared, random environmental
+shift per `setPheno()` call, and not between entries and independent
+locations. The printed `acc_pyt` of the runs below is
+`cor(gv, phenotype)` of the PYT at one replicate (the row `1` of
+@tbl-programme-accuracy, one call per year), whichever arm is run.
+
 ## Why a breeding programme needs a burn-in
 
 The loop below advances every stage by one year, simultaneously. That only means
 something if all seven stages are already *occupied*, by cohorts of different
-ages: this year's elite trial entered the programme six years ago, this year's
-headrows entered last year. Starting the loop from an empty programme would
+ages: this year's elite trial was crossed five years before this year's crossing
+block (the cohort in the DH stage was crossed one year before it, the headrows
+two, the PYT three, the AYT four, the EYT five). Starting the loop from an empty programme would
 compare a year-1 elite trial that does not exist against a year-1 headrow that
 does.
 
@@ -120,61 +238,106 @@ for (year in 1:7) {
 ```
 
 Read it as a triangle rather than a loop. On the first pass every stage runs, so
-every stage holds a cohort. On the second pass the elite trial is skipped, so
-the cohort sitting in it is a year older than the one behind it. By the seventh
-pass only the crossing block still runs. What comes out is a programme in which
-each stage holds a cohort of the right age relative to its neighbours -- a
+every stage holds a cohort. On the third pass the elite trial is skipped (it runs
+on the first two only), so the cohort sitting in it is older than the one behind
+it; the advanced trial is skipped from the fourth pass, the preliminary trial
+from the fifth, the headrows from the sixth and the DH production from the
+seventh. By the seventh pass only the crossing block still runs. What comes out
+is a programme in which each stage holds a cohort of the right age relative to
+its neighbours -- a
 *steady state*, which is the only state in which a per-year genetic gain is a
-meaningful number.
+meaningful number. (The function below writes the thresholds as offsets of
+`n_burn`, which gives the same thresholds, 7 down to 3, at `n_burn = 7`.)
 
 ## One programme, fifteen years
 
 The whole scheme is one function. It is written out rather than packaged
 because the loop is the thing being taught, and because a reader adapting it to
-their own programme will edit the loop, not call it.
+their own programme will edit the loop, not call it. Its argument `arm` selects
+one of five programmes, all sharing the burn-in and the stage sizes of `sch`:
+
+- `"ps"`, the **phenotypic** programme: selection on phenotype throughout;
+  parents are all `n_eyt + n_ayt` lines of the EYT and the AYT, so there is no
+  truncation at the parents' step.
+- `"l1"`, **lever 1 alone**: from year `gs_from`, the PYT-to-AYT step uses a
+  surrogate genomic value; parents as in `"ps"`.
+- `"l2"`, **lever 2 alone**: from year `gs_from`, parents are the best
+  `n_eyt + n_ayt` of the `n_eyt + n_ayt + n_pyt` lines of EYT, AYT and PYT by
+  the surrogate genomic value (raw phenotype for the EYT and AYT lines, the
+  surrogate for the PYT lines); the PYT-to-AYT step is phenotypic.
+- `"gs"`, **both levers**.
+- `"ctl"`, a **control** for lever 2: parents are the best `n_eyt + n_ayt` of
+  the same `n_eyt + n_ayt + n_pyt` lines, truncated by plain phenotype, with no
+  surrogate anywhere.
+
+The surrogate genomic value is a phenotype of the same line simulated at
+`gs_boost` times the PYT replication, in a separate `setPheno()` call; its
+accuracy is the row `3` of @tbl-programme-accuracy (`r fx(tab_acc["3", 1], 2)`
+with GxE, `r fx(tab_acc["3", 3], 2)` without), and it is a phenotypic
+correlation, not a prediction accuracy fitted from markers. In `"l2"` and
+`"ctl"` the candidates come from different cohorts and different `setPheno()`
+calls, so the selection criterion compares lines measured with unequal
+precision and under different GxE deviates; this is part of what the arms do,
+and the control inherits it.
 
 ```{r}
-gd_of <- function(pop, SP)
-  1 - mean(molecular_coancestry(pullSegSiteGeno(pop, simParam = SP) / 2))
+#| label: programme-function
+gd_of <- function(pop, SP, loci = c("qtl", "neutral")) {
+  loci <- match.arg(loci)
+  g <- pullSegSiteGeno(pop, simParam = SP)
+  is_q <- colnames(g) %in% colnames(pullQtlGeno(pop, simParam = SP))
+  1 - mean(molecular_coancestry(
+    g[, if (loci == "qtl") is_q else !is_q, drop = FALSE] / 2))
+}
 
-run_programme <- function(cfg, seed, genomic = FALSE, gs_from = 1) {
+run_programme <- function(cfg, seed, arm = c("ps", "l1", "l2", "gs", "ctl")) {
+  arm <- match.arg(arm)
+  lever1 <- arm %in% c("l1", "gs")   # surrogate genomic value for PYT -> AYT
+  lever2 <- arm %in% c("l2", "gs")   # parents from c(EYT, AYT, PYT)
+  stopifnot(cfg$n_burn >= 7)
+  # founders: re-drawn per arm from the same seed (quickHaplo() is deterministic)
   set.seed(seed)
   fg <- quickHaplo(nInd = cfg$n_founders, nChr = cfg$n_chr,
-                   segSites = cfg$n_qtl, inbred = TRUE)
+                   segSites = cfg$n_qtl + cfg$n_neutral, inbred = TRUE)
   SP <- SimParam$new(fg)
   SP$addTraitAG(nQtlPerChr = cfg$n_qtl, mean = 4, var = 0.1, varGxE = 0.2)
   ph <- function(p, r) setPheno(p, varE = cfg$var_e, reps = r, simParam = SP)
 
   # --- burn-in: fill every stage with a cohort of the right age ---
   Parents <- newPop(fg, simParam = SP)
-  for (year in 1:cfg$n_burn) {
+  gd_founders <- gd_of(Parents, SP)
+  nb <- cfg$n_burn
+  for (year in 1:nb) {
     F1 <- randCross(Parents, cfg$n_crosses, simParam = SP)
-    if (year < 7) DH   <- makeDH(F1, cfg$n_dh, simParam = SP)
-    if (year < 6) HDRW <- ph(DH, cfg$rep_hdrw)
-    if (year < 5) {
+    if (year < nb)     DH   <- makeDH(F1, cfg$n_dh, simParam = SP)
+    if (year < nb - 1) HDRW <- ph(DH, cfg$rep_hdrw)
+    if (year < nb - 2) {
       PYT <- selectWithinFam(HDRW, nInd = cfg$fam_max, use = "pheno", simParam = SP)
       PYT <- ph(selectInd(PYT, nInd = cfg$n_pyt, use = "pheno", simParam = SP),
                 cfg$rep_pyt)
     }
-    if (year < 4)
+    if (year < nb - 3)
       AYT <- ph(selectInd(PYT, nInd = cfg$n_ayt, use = "pheno", simParam = SP),
                 cfg$rep_ayt)
-    if (year < 3)
+    if (year < nb - 4)
       EYT <- ph(selectInd(AYT, nInd = cfg$n_eyt, use = "pheno", simParam = SP),
                 cfg$rep_eyt)
   }
 
   # --- advancing years, last stage first so each reads the previous cohort ---
   out <- data.frame(year = 1:cfg$n_years, meanG = NA_real_, varG = NA_real_,
-                    acc_pyt = NA_real_, gd_pyt = NA_real_, gd_parents = NA_real_)
+                    acc_pyt = NA_real_, gd_pyt = NA_real_, gd_parents = NA_real_,
+                    gd_pyt_neutral = NA_real_, par_eyt = NA_integer_,
+                    par_ayt = NA_integer_, par_pyt = NA_integer_)
   for (year in 1:cfg$n_years) {
-    gs <- genomic && year >= gs_from
+    on <- year >= cfg$gs_from          # the switch of the arm is on from this year
 
-    Variety <- selectInd(EYT, nInd = 1, use = "pheno", simParam = SP)
+    # (the released variety, the best EYT entry, is not tracked: the chapter
+    #  measures the pipeline, not the released line)
     EYT <- ph(selectInd(AYT, nInd = cfg$n_eyt, use = "pheno", simParam = SP),
               cfg$rep_eyt)
 
-    if (gs) {            # lever 1: a more accurate criterion at the PYT stage
+    if (lever1 && on) {  # lever 1: a more accurate criterion at the PYT stage
       PYT@ebv <- setPheno(PYT, varE = cfg$var_e,
                           reps = cfg$rep_pyt * cfg$gs_boost,
                           onlyPheno = TRUE, simParam = SP)
@@ -191,13 +354,16 @@ run_programme <- function(cfg, seed, genomic = FALSE, gs_from = 1) {
     HDRW <- ph(DH, cfg$rep_hdrw)
     DH   <- makeDH(F1, cfg$n_dh, simParam = SP)
 
-    if (gs) {            # lever 2: recycle parents a year earlier, from the PYT
+    if (lever2 && on) {  # lever 2: recycle parents a year earlier, from the PYT
       PYT@ebv <- setPheno(PYT, varE = cfg$var_e,
                           reps = cfg$rep_pyt * cfg$gs_boost,
                           onlyPheno = TRUE, simParam = SP)
       EYT@ebv <- pheno(EYT); AYT@ebv <- pheno(AYT)
       Parents <- selectInd(c(EYT, AYT, PYT), nInd = cfg$n_eyt + cfg$n_ayt,
                            use = "ebv", simParam = SP)
+    } else if (arm == "ctl" && on) {   # control: the same wider set, plain phenotype
+      Parents <- selectInd(c(EYT, AYT, PYT), nInd = cfg$n_eyt + cfg$n_ayt,
+                           use = "pheno", simParam = SP)
     } else {
       Parents <- c(EYT, AYT)
     }
@@ -208,7 +374,12 @@ run_programme <- function(cfg, seed, genomic = FALSE, gs_from = 1) {
     out$acc_pyt[year]    <- stats::cor(PYT@gv[, 1], PYT@pheno[, 1])
     out$gd_pyt[year]     <- gd_of(PYT, SP)
     out$gd_parents[year] <- gd_of(Parents, SP)
+    if (cfg$n_neutral > 0) out$gd_pyt_neutral[year] <- gd_of(PYT, SP, "neutral")
+    out$par_eyt[year] <- sum(Parents@id %in% EYT@id)
+    out$par_ayt[year] <- sum(Parents@id %in% AYT@id)
+    out$par_pyt[year] <- sum(Parents@id %in% PYT@id)
   }
+  out$gd_founders <- gd_founders
   out
 }
 ```
@@ -227,16 +398,23 @@ phenotype and the last with enough entries for a variance to mean anything --
 `meanG` on four elite lines is noise. This is the course's choice and it is the
 right one.
 
+The phenotypic arm on seed 1 is the first run (@tbl-programme-seed1-ps).
+
 ```{r}
-ps <- run_programme(sch, seed = 1, genomic = FALSE)
-fmt(ps[c(1, 5, 10, 15), ])
+#| label: tbl-programme-seed1-ps
+#| tbl-cap: "The phenotypic arm (`ps`) on seed 1, teaching scale of `sch`, years 1, 5, 10 and 15 of 15. Genetic mean and variance: mean and variance of the genetic value of the preliminary yield trial (PYT); accuracy r: correlation of genetic value and phenotype in the PYT; GD of PYT and of parents: gene diversity (GD = 1 - theta, QTL loci) of the PYT and of the parent set. One run, no replication; genetic values in trait units, gene diversity dimensionless, four decimals."
+ps1 <- run_programme(sch, seed = 1, arm = "ps")
+cols1 <- c("year", "meanG", "varG", "acc_pyt", "gd_pyt", "gd_parents")
+names1 <- c("Year", "Genetic mean (trait units)", "Genetic variance (trait units squared)",
+            "Accuracy r (PYT)", "GD of PYT", "GD of parents")
+knitr::kable(fmt(ps1[c(1, 5, 10, 15), cols1]), col.names = names1, row.names = FALSE)
 ```
 
 Genetic mean rises, genetic variance falls, and gene diversity of the
 preliminary trial falls with it. Nothing here is surprising; what matters is
 that all three are now being measured on the same run.
 
-::: {.callout-note}
+::: {.callout-important}
 ## These numbers are reproducible
 
 The founders come from `quickHaplo()`, which is seeded by `set.seed()`, so
@@ -245,62 +423,193 @@ The founders come from `quickHaplo()`, which is seeded by `set.seed()`, so
 That is what makes the paired comparison below legitimate: the phenotypic and
 genomic arms are run from the *same* seed, so they share founders, and every
 difference between them is attributable to the scheme.
+
+This is a documented exception to rule 1 of @sec-alphasimr's Step 1 (found the
+founders once and branch every arm off that object): each arm here re-draws its
+founders from the same seed. It is safe only because `quickHaplo()` is plain R
+sampling; the design chunk below asserts, for every seed, that years 1 to 5
+(burn-in and the years before the arms differ) are identical across the five
+arms, which they could not be if the founders differed.
 :::
 
-## Genomic selection: two levers, not one
+## Genomic selection: two levers, separated {#sec-programme-levers}
 
-Genomic selection is usually described as buying accuracy. It buys two things,
-and the second is normally the larger (@gaynor2017; @meuwissen2001):
+Genomic selection is usually described as buying accuracy. In a staged
+programme it can buy two things, and the arms above have a switch for each:
 
-1. **Accuracy earlier in the cycle.** A prediction is available on a line that
-   has been genotyped but barely phenotyped, so the advance from preliminary to
-   advanced trial can be made on better information than one location's yield.
-2. **A shorter generation interval.** Parents can be recycled from the
-   preliminary trial instead of waiting for the elite trial -- and the breeder's
-   equation of @sec-response is a rate *per unit time*, so cutting years off the
-   cycle raises gain per year even at unchanged accuracy per selection.
+1. **Accuracy earlier in the cycle (lever 1).** A prediction is available on a
+   line that has been genotyped but barely phenotyped, so the advance from
+   preliminary to advanced trial can be made on better information than one
+   replicate of yield.
+2. **A shorter generation interval (lever 2).** Parents can be recycled from the
+   preliminary trial instead of waiting for the elite trial. Define the cycle
+   length $T$ of a parent as the years from the crossing that produced its
+   cohort to the crossing that uses it. By the loop above a cross in year $t$
+   gives DH lines in year $t+1$, headrows in $t+2$, the PYT in $t+3$, the AYT in
+   $t+4$ and the EYT in $t+5$, and the parents are chosen in the year their
+   cohort is in the trial: $T = 3$, $4$, $5$ years for a parent taken from the
+   PYT, the AYT and the EYT.
+
+The breeder's equation of @sec-response, $R = i\,r\,\sigma_A$
+(@eq-response-breeders), is the response to **one round** of selection: $i$ the
+intensity, $r$ the accuracy and $\sigma_A$ the additive standard deviation. A
+response per year is that response divided by the years $T$ a round takes. That
+division is the chapter's own bookkeeping, not an equation of @sec-response, and
+it assumes discrete rounds of a common length (assumption A4 of
+@sec-genomic-era), which this overlapping programme, with parents of three
+different lengths, only approximates. It is used below to read a direction, not
+to predict a number.
+
+Two statements in the literature are about these levers, and neither transfers
+as a ratio. @gaynor2017 report, in their simulations, that a genomic programme
+that changes accuracy only gained 1.21 (95 % confidence interval, CI, 1.18-1.25) to 1.39 times the
+gain of the conventional programme, and the two-part programmes, which also
+shorten the cycle, 2.36 to 2.47 times (p. 2379; the ranges span their
+genotype-by-year variance settings, 0 and 10); they write that in the
+two-part programmes "the shortening of breeding cycle time was the major driver
+of increased genetic gain" (p. 2381). Their genomic programmes are
+cost-matched (fewer DH lines per cross to pay for genotyping, Table 1),
+whereas the genomic arms here are free. And
+@meuwissen2001 state in their abstract that marker-based selection could
+substantially increase the rate of genetic gain, especially if combined with
+reproductive techniques that shorten the generation interval (the full text was
+not consulted for this chapter). That the second lever is the larger is thus
+reported for one simulated design; what follows measures it for this one.
 
 This chapter mimics the prediction rather than fitting one: `ebv` is filled with
 a phenotype simulated at `gs_boost` times the replication, which is a stand-in
 for a genomic prediction of the corresponding accuracy. @sec-genomic-prediction
 is where the book actually fits prediction models and measures what accuracy is
 attainable; the honest statement here is that this chapter *assumes* an accuracy
-and studies its consequences, rather than earning it.
+(`gs_boost = 3`, the row `3` of @tbl-programme-accuracy) and studies its
+consequences, rather than earning it.
+
+The same seed with both levers on (@tbl-programme-seed1-gs):
 
 ```{r}
-gs <- run_programme(sch, seed = 1, genomic = TRUE, gs_from = 6)
-fmt(gs[c(1, 5, 10, 15), ])
+#| label: tbl-programme-seed1-gs
+#| tbl-cap: "The both-levers arm (`gs`) on seed 1, same columns, years and scale as @tbl-programme-seed1-ps. One run, no replication."
+gs1 <- run_programme(sch, seed = 1, arm = "gs")
+knitr::kable(fmt(gs1[c(1, 5, 10, 15), cols1]), col.names = names1, row.names = FALSE)
 ```
 
-Years 1 to 5 are identical to the phenotypic arm, digit for digit, because
-genomic selection only switches on in year 6. That is a matched control in the
-sense @sec-limits uses the term: the two arms share a history, so the comparison
-is paired rather than between two independent runs.
+Years 1 to 5 are identical to the phenotypic arm, digit for digit (asserted for
+every seed in @sec-programme-comparison), because the genomic switches only turn on in
+year `r sch$gs_from`. The arms share a history, so the comparison is paired
+rather than between independent runs; it is a pairing of two arms from one
+history, not the random-selection control of @sec-limits, which is a different
+design.
 
-## The comparison, replicated
+## The comparison, replicated {#sec-programme-comparison}
 
-One run of one seed is an anecdote. Both arms are cheap enough to replicate.
+One run of one seed is an anecdote. Five arms are cheap enough to replicate.
+The design runs all five arms on 120 seeds (600 programme runs, several minutes
+to execute); the seeds are read in five batches of 24, because 24 seeds is a size a single
+experiment of this kind can easily have and the batches show how far such an
+experiment moves.
 
 ```{r}
-seeds <- 1:24
-reps <- do.call(rbind, lapply(seeds, function(s) {
-  a <- run_programme(sch, s, genomic = FALSE)
-  b <- run_programme(sch, s, genomic = TRUE, gs_from = 6)
-  rate <- function(d) stats::coef(stats::lm(meanG ~ year,
-                                            data = d[d$year >= 6, ]))[2]
-  data.frame(seed = s,
-             gain_ps = rate(a),      gain_gs = rate(b),
-             gd_ps   = a$gd_pyt[nrow(a)], gd_gs = b$gd_pyt[nrow(b)],
-             end_ps  = a$meanG[nrow(a)],  end_gs = b$meanG[nrow(b)])
-}))
+#| label: programme-design
+arms <- c(ps = "phenotypic", l1 = "lever 1 alone", l2 = "lever 2 alone",
+          gs = "both levers", ctl = "control (phenotype-only truncation)")
+seeds   <- 1:120
+n_batch <- 24
+batch   <- rep(seq_len(length(seeds) / n_batch), each = n_batch)
+stopifnot(length(seeds) == 120, n_batch == 24, n_probe == 48)  # constants typed in captions
+runs <- lapply(setNames(names(arms), names(arms)), function(a)
+  lapply(seeds, function(s) run_programme(sch, s, a)))
 
-paired <- function(x, y) {
-  d <- y - x
-  c(mean_difference = mean(d), t = mean(d) / (stats::sd(d) / sqrt(length(d))))
+# The pairing rests on identical history: years 1-5 equal across arms, every seed
+for (a in names(arms)[-1]) for (i in seq_along(seeds))
+  stopifnot(identical(runs[[a]][[i]][1:5, ], runs[["ps"]][[i]][1:5, ]))
+stopifnot(identical(ps1, runs[["ps"]][[1]]), identical(gs1, runs[["gs"]][[1]]))
+
+last <- sch$n_years
+rate <- function(d)                       # slope of PYT genetic mean on year
+  unname(stats::coef(stats::lm(meanG ~ year,
+                               data = d[d$year >= sch$gs_from, ]))[2])
+per_seed <- function(f) sapply(runs, function(r) vapply(r, f, numeric(1)))
+S <- list(
+  gain   = per_seed(rate),
+  gd_pyt = per_seed(function(d) d[["gd_pyt"]][last]),
+  gd_par = per_seed(function(d) d[["gd_parents"]][last]),
+  par_eyt = per_seed(function(d) mean(d[["par_eyt"]][d$year >= sch$gs_from])),
+  par_ayt = per_seed(function(d) mean(d[["par_ayt"]][d$year >= sch$gs_from])),
+  par_pyt = per_seed(function(d) mean(d[["par_pyt"]][d$year >= sch$gs_from])))
+# cycle length T (years) of the parents: 5, 4, 3 for EYT, AYT, PYT (see above)
+S[["Tcyc"]] <- (5 * S[["par_eyt"]] + 4 * S[["par_ayt"]] + 3 * S[["par_pyt"]]) /
+  (sch$n_eyt + sch$n_ayt)
+
+se <- function(x) stats::sd(x) / sqrt(length(x))
+contrast <- function(v, a, b, i = seq_along(seeds)) {
+  d <- (S[[v]][, b] - S[[v]][, a])[i]
+  c(diff = mean(d), se = se(d), t = mean(d) / se(d))
 }
-fmt(rbind(`gain per year`      = paired(reps$gain_ps, reps$gain_gs),
-          `gene diversity, yr 15` = paired(reps$gd_ps, reps$gd_gs),
-          `genetic mean, yr 15`   = paired(reps$end_ps, reps$end_gs)))
+pairs <- list(c("ps", "l1"), c("ps", "l2"), c("ps", "gs"), c("ps", "ctl"),
+              c("l1", "gs"), c("l2", "gs"), c("l2", "ctl"))
+cx <- do.call(rbind, lapply(pairs, function(p) {
+  g <- contrast("gain", p[1], p[2]); d <- contrast("gd_pyt", p[1], p[2])
+  q <- contrast("gd_par", p[1], p[2])
+  data.frame(gain_d = g[["diff"]], gain_se = g[["se"]], gain_t = g[["t"]],
+             gdp_d = d[["diff"]], gdp_se = d[["se"]], gdp_t = d[["t"]],
+             gdq_d = q[["diff"]], gdq_se = q[["se"]], gdq_t = q[["t"]])
+}))
+rownames(cx) <- vapply(pairs, function(p) paste(p[2], "-", p[1]), "")
+K <- function(r, c, d = 4) fx(cx[r, c], d)     # inline accessor
+t_crit_pooled <- stats::qt(0.975, length(seeds) - 1)
+t_crit_batch  <- stats::qt(0.975, n_batch - 1)
+
+# the same comparison, both levers against phenotypic, batch by batch
+bt <- do.call(rbind, lapply(unique(batch), function(b) {
+  i <- batch == b
+  g <- contrast("gain", "ps", "gs", i); d <- contrast("gd_pyt", "ps", "gs", i)
+  q <- contrast("gd_par", "ps", "gs", i)
+  data.frame(batch = as.character(b), seeds = paste(range(seeds[i]), collapse = "-"),
+             gain_ratio = mean(S[["gain"]][i, "gs"]) / mean(S[["gain"]][i, "ps"]),
+             gain_t = g[["t"]], gdp_d = d[["diff"]], gdp_t = d[["t"]],
+             gdq_d = q[["diff"]], gdq_t = q[["t"]])
+}))
+pooled <- data.frame(batch = "pooled", seeds = paste(range(seeds), collapse = "-"),
+  gain_ratio = mean(S[["gain"]][, "gs"]) / mean(S[["gain"]][, "ps"]),
+  gain_t = cx["gs - ps", "gain_t"], gdp_d = cx["gs - ps", "gdp_d"],
+  gdp_t = cx["gs - ps", "gdp_t"], gdq_d = cx["gs - ps", "gdq_d"],
+  gdq_t = cx["gs - ps", "gdq_t"])
+```
+
+@tbl-programme-arms gives each arm's level, with the standard error over the
+`r length(seeds)` seeds; @tbl-programme-contrasts gives the paired differences between arms,
+the mean over seeds of (second arm minus first arm), their standard errors, and
+$t$ = mean/s.e. on `r length(seeds) - 1` degrees of freedom (critical value
+`r fx(t_crit_pooled, 2)` at the 5 % level, two-sided, for one comparison; seven
+comparisons are shown and none is corrected). The rate of gain is the slope of
+the genetic mean of the PYT on year over years `r sch$gs_from` to
+`r sch$n_years`; because a parent chosen in year `r sch$gs_from` reaches the PYT
+three or more years later, that window includes years in which the arms have not
+yet diverged, so it is an average over a transient, not a steady-state rate. @fig-programme-arms
+shows the genetic mean and the gene diversity of the PYT year by year.
+
+```{r}
+#| label: tbl-programme-arms
+#| tbl-cap: "The five arms over 120 paired seeds (seeds 1-120, teaching scale of `sch`), genomic switches on from year 6. gain: slope of the PYT genetic mean on year, years 6-15; GD_PYT and GD_par: gene diversity (GD = 1 - theta, theta the mean of the molecular coancestry matrix f over the set, at the 600 QTL loci) of the PYT and of the parent set in year 15; mean (standard error over seeds). EYT/AYT/PYT: mean number of the 16 parents from each stage, years 6-15; T: mean cycle length of the parents in years, from 5, 4 and 3 years for EYT, AYT and PYT parents. Gain in genetic-mean units per year; GD dimensionless. GD_PYT and GD_par are levels with the diagonal of f (n = 60 and 16 lines, weight 1/n, @eq-programme-gdoff): compare arms within a column, not the two columns."
+ms <- function(v, a, d = 4) sprintf(paste0("%.", d, "f (%.", d, "f)"), mean(S[[v]][, a]), se(S[[v]][, a]))
+tab_arms <- data.frame(
+  arm = unname(arms),
+  gain = vapply(names(arms), function(a) ms("gain", a), ""),
+  GD_PYT = vapply(names(arms), function(a) ms("gd_pyt", a), ""),
+  GD_par = vapply(names(arms), function(a) ms("gd_par", a), ""),
+  `EYT/AYT/PYT` = vapply(names(arms), function(a)
+    paste(fx(colMeans(S[["par_eyt"]])[[a]], 1), fx(colMeans(S[["par_ayt"]])[[a]], 1),
+          fx(colMeans(S[["par_pyt"]])[[a]], 1), sep = " / "), ""),
+  T = vapply(names(arms), function(a) fx(mean(S[["Tcyc"]][, a]), 2), ""),
+  check.names = FALSE, row.names = NULL)
+tab_arms
+```
+
+```{r}
+#| label: tbl-programme-contrasts
+#| tbl-cap: "Paired differences between arms over 120 seeds: 'b - a' is the mean over seeds of arm b minus arm a (rows named as b - a), with its standard error and t on 119 degrees of freedom. gain: slope of the PYT genetic mean on year, years 6-15; GD_PYT and GD_par: gene diversity (QTL loci) of the PYT and of the parent set in year 15. Seven comparisons, uncorrected. Same units as @tbl-programme-arms."
+fmt(setNames(cx, c("gain diff", "s.e.", "t", "GD_PYT diff", "s.e.", "t",
+                   "GD_par diff", "s.e.", "t")), 4)
 ```
 
 ```{r}
@@ -308,131 +617,501 @@ fmt(rbind(`gain per year`      = paired(reps$gain_ps, reps$gain_gs),
 #| echo: false
 #| fig-width: 9
 #| fig-height: 4.2
-#| fig-cap: "Twenty-four paired runs, genomic selection switched on in year 6. Left: genetic mean of the preliminary yield trial. Right: gene diversity of the same population. The faster programme is also the one spending diversity faster."
-#| fig-alt: "Twenty-four paired runs, genomic selection switched on in year 6. Left: genetic mean of the preliminary yield trial"
-traj <- lapply(seeds, function(s)
-  list(ps = run_programme(sch, s, FALSE), gs = run_programme(sch, s, TRUE, gs_from = 6)))
-avg <- function(arm, col) rowMeans(sapply(traj, function(t) t[[arm]][[col]]))
+#| fig-cap: "Mean over 120 paired seeds of the genetic mean (left) and the gene diversity at the QTL loci (right) of the preliminary yield trial, for the phenotypic arm and the four arms of @tbl-programme-arms, genomic switches on in year 6 (dotted line). Bands: plus and minus one standard error of the mean over seeds, drawn for the phenotypic and the both-levers arms only. Teaching scale of `sch`; the arms share founders and years 1-5 in each seed."
+#| fig-alt: "Two panels over fifteen years for five arms, identical until the dotted line at year 6. Left, genetic mean of the preliminary yield trial: the both-levers and lever-2 arms end highest, near 5.15, the control and lever 1 alone next, the phenotypic arm lowest, near 4.86. Right, gene diversity of the preliminary yield trial falls from 0.47 to between 0.34 and 0.37 in all arms; the phenotypic arm ends highest, the both-levers, lever-2 and control arms lowest. Shaded bands show one standard error for the phenotypic and both-levers arms."
+avg <- function(arm, col) rowMeans(sapply(runs[[arm]], function(d) d[[col]]))
+avg_se <- function(arm, col) apply(sapply(runs[[arm]], function(d) d[[col]]), 1, se)
 yr <- seq_len(sch$n_years)
-cols <- c(ps = "#1b1b1b", gs = "#7b3294")
+cols <- c(ps = "#1b1b1b", l1 = "#e08214", l2 = "#1b7837", gs = "#7b3294", ctl = "grey55")
+ltys <- c(ps = 1, l1 = 2, l2 = 4, gs = 2, ctl = 3)
 op <- par(mfrow = c(1, 2), mar = c(4.2, 4.3, 2.2, 0.8))
 for (v in c("meanG", "gd_pyt")) {
-  a <- avg("ps", v); b <- avg("gs", v)
-  plot(yr, a, type = "l", lwd = 2.4, col = cols["ps"], ylim = range(a, b),
-       xlab = "Year", ylab = if (v == "meanG") "Genetic mean (PYT)" else "Gene diversity (PYT)",
+  m <- sapply(names(arms), avg, col = v)
+  b <- sapply(c("ps", "gs"), function(a) avg_se(a, v))
+  plot(yr, m[, "ps"], type = "n", ylim = range(m, m[, c("ps", "gs")] + b, m[, c("ps", "gs")] - b),
+       xlab = "Year", ylab = if (v == "meanG") "Genetic mean of the PYT (trait units)" else "Gene diversity GD of the PYT (1 - theta)",
        main = if (v == "meanG") "Response" else "Diversity")
-  lines(yr, b, lwd = 2.4, lty = 2, col = cols["gs"])
-  abline(v = 6, col = "grey70", lty = 3)
-  legend(if (v == "meanG") "topleft" else "topright",
-         c("phenotypic", "genomic (from yr 6)"), col = cols, lwd = 2.4,
-         lty = c(1, 2), bty = "n", cex = 0.78)
+  for (a in c("ps", "gs"))
+    polygon(c(yr, rev(yr)), c(m[, a] - b[, a], rev(m[, a] + b[, a])),
+            col = adjustcolor(cols[[a]], 0.18), border = NA)
+  for (a in names(arms)) lines(yr, m[, a], lwd = 2, lty = ltys[[a]], col = cols[[a]])
+  abline(v = sch$gs_from, col = "grey70", lty = 3)
+  legend(if (v == "meanG") "topleft" else "bottomleft",
+         unname(arms), col = cols, lwd = 2, lty = ltys, bty = "n", cex = 0.7)
 }
 par(op)
 ```
 
-Genomic selection raises the rate of gain by roughly half, and the paired
-`t`-statistic leaves no doubt about the sign. That is the result @gaynor2017
-reports and the reason two-part strategies were adopted.
+```{r}
+#| label: programme-ratio-boot
+# bootstrap over seeds (the unit of replication): ratios of mean gain against ps,
+# and their excess over the ratio of mean cycle lengths, one resample for both
+set.seed(1)
+bres <- replicate(4000, {
+  i <- sample.int(length(seeds), replace = TRUE)
+  g <- colMeans(S[["gain"]][i, ]); Tc <- colMeans(S[["Tcyc"]][i, ])
+  c(gs = g[["gs"]] / g[["ps"]], l2 = g[["l2"]] / g[["ps"]], ctl = g[["ctl"]] / g[["ps"]],
+    gap_l2 = g[["l2"]] / g[["ps"]] - Tc[["ps"]] / Tc[["l2"]],
+    gap_ctl = g[["ctl"]] / g[["ps"]] - Tc[["ps"]] / Tc[["ctl"]])
+})
+bci <- apply(bres, 1, stats::quantile, c(0.025, 0.975), names = FALSE)
+colnames(bci) <- rownames(bres)
+g_all <- colMeans(S[["gain"]]); Tc_all <- colMeans(S[["Tcyc"]])
+gap <- c(l2 = g_all[["l2"]] / g_all[["ps"]] - Tc_all[["ps"]] / Tc_all[["l2"]],
+         ctl = g_all[["ctl"]] / g_all[["ps"]] - Tc_all[["ps"]] / Tc_all[["ctl"]])
+ci <- function(v, d = 2) paste(fx(bci[, v], d), collapse = " to ")
+# the two statements the text makes about the intervals
+stopifnot(bci[1, "gap_l2"] > 0, bci[1, "gap_ctl"] < 0, bci[2, "gap_ctl"] > 0)
+```
 
-The second row is the one this book exists for. **Gene diversity in the
-preliminary trial is significantly lower under genomic selection at year 15**,
-and it is lower for a reason that is structural rather than incidental:
-recycling parents from the preliminary trial means recycling them a year before
-the trial data could have distinguished full sibs, so the parents chosen are
-more closely related than the ones the phenotypic arm would have chosen. A
-shorter generation interval is a higher rate of coancestry accumulation per unit
-time, not merely per cycle.
+**Gain.** The phenotypic arm gains `r ms("gain", "ps")` per year (mean and
+s.e.). Relative to it, lever 1 alone adds `r K("l1 - ps", "gain_d")`
+(t = `r K("l1 - ps", "gain_t", 1)`), lever 2 alone `r K("l2 - ps", "gain_d")`
+(t = `r K("l2 - ps", "gain_t", 1)`) and both levers `r K("gs - ps", "gain_d")`
+(t = `r K("gs - ps", "gain_t", 1)`); the ratio of the mean rates, both levers
+over phenotypic, is
+`r fx(mean(S[["gain"]][, "gs"]) / mean(S[["gain"]][, "ps"]), 2)` (95 % bootstrap
+interval over seeds, `r ci("gs")`). The two single
+effects add to `r fx(cx["l1 - ps", "gain_d"] + cx["l2 - ps", "gain_d"], 4)`, more
+than the joint `r K("gs - ps", "gain_d")`, and adding lever 1 to lever 2 gives
+`r K("gs - l2", "gain_d")` (t = `r K("gs - l2", "gain_t", 1)`). In this
+simulation, therefore, lever 2 contributes the larger part of the gain and
+lever 1 adds little once lever 2 is on. That is one configuration, with an
+assumed surrogate accuracy; it does not show that the second lever is
+normally the larger. Nor is it a statement about lever 1 in general: the PYT
+genetic mean that measures the gain is a lagged readout of a selection made
+one stage later, so lever 1 shows in it only through the parents.
 
-## The diversity ledger
+
+
+The control recycles parents from the same wider set, but by plain phenotype. It
+gains `r K("ctl - ps", "gain_d")` per year over the phenotypic arm
+(t = `r K("ctl - ps", "gain_t", 1)`), which is
+`r fx(100 * cx["ctl - ps", "gain_d"] / cx["l2 - ps", "gain_d"], 0)` % of lever 2's
+gain, and differs from lever 2 alone by `r K("ctl - l2", "gain_d")`
+(t = `r K("ctl - l2", "gain_t", 1)`). The mean cycle lengths $T$ of
+@tbl-programme-arms are `r fx(mean(S[["Tcyc"]][, "ps"]), 2)` years for the
+phenotypic arm, `r fx(mean(S[["Tcyc"]][, "l2"]), 2)` for lever 2 alone and
+`r fx(mean(S[["Tcyc"]][, "ctl"]), 2)` for the control. If $i\,r\,\sigma_A$ per round were unchanged, the gain per year would scale as $1/T$,
+by the ratio `r fx(mean(S[["Tcyc"]][, "ps"]) / mean(S[["Tcyc"]][, "l2"]), 2)` for
+lever 2 alone and `r fx(mean(S[["Tcyc"]][, "ps"]) / mean(S[["Tcyc"]][, "ctl"]), 2)` for the
+control; the observed ratios of mean gains are
+`r fx(mean(S[["gain"]][, "l2"]) / mean(S[["gain"]][, "ps"]), 2)` (95 % bootstrap
+interval over seeds, `r ci("l2")`) and
+`r fx(mean(S[["gain"]][, "ctl"]) / mean(S[["gain"]][, "ps"]), 2)`
+(`r ci("ctl")`). Lever 2's ratio exceeds the ratio of cycle lengths by
+`r fx(gap[["l2"]], 2)` (95 % interval, one resample of seeds for gains and cycle
+lengths, `r ci("gap_l2")`), an interval that excludes zero; the control's exceeds it
+by `r fx(gap[["ctl"]], 3)` (`r ci("gap_ctl", 3)`), an interval that includes zero. The
+control's ratio is therefore of the size of the shortening of the cycle, within this
+resolution; lever 2's is larger. This is
+consistent with the surrogate genomic value in the parent choice adding to the
+accuracy $r$ or the intensity $i$ beyond what the shorter cycle gives, but
+neither $i$ nor $r$ is measured per round here, the rates are averages over a
+transient, and $T$ is a mean of three parent sources; it is a reading, not a
+decomposition. The premise itself is a reference point, not a description of
+either arm: lever 2 and the control also change the intensity at the parent
+step, which takes the best `r sch$n_eyt + sch$n_ayt` of
+`r sch$n_eyt + sch$n_ayt + sch$n_pyt` lines instead of all
+`r sch$n_eyt + sch$n_ayt`.
+
+**Diversity at year 15.** Gene diversity of the PYT is `r ms("gd_pyt", "ps")`
+in the phenotypic arm and `r ms("gd_pyt", "gs")` with both levers (mean and s.e.
+over seeds). The paired difference is `r K("gs - ps", "gdp_d")`
+(s.e. `r K("gs - ps", "gdp_se")`, t = `r K("gs - ps", "gdp_t", 1)`), and the
+genomic arm is lower in
+`r fx(100 * mean(S[["gd_pyt"]][, "gs"] < S[["gd_pyt"]][, "ps"]), 0)` % of the
+seeds. Read in batches of 24 seeds (@tbl-programme-batches), the same difference
+has $t$ between `r fx(min(bt[["gdp_t"]]), 1)` and `r fx(max(bt[["gdp_t"]]), 1)`,
+and reaches the 5 % critical value (`r fx(t_crit_batch, 2)` on
+`r n_batch - 1` degrees of freedom) in
+`r sum(abs(bt[["gdp_t"]]) > t_crit_batch)` of `r nrow(bt)` batches; the gain
+difference has $t$ between `r fx(min(bt[["gain_t"]]), 1)` and
+`r fx(max(bt[["gain_t"]]), 1)` in every batch. The pooled sign of the diversity
+difference is therefore supported, and a 24-seed experiment is not enough to
+resolve it reliably: a single batch can show it as significant or not. The parent
+set (the population that actually transmits) has a pooled difference of
+`r K("gs - ps", "gdq_d")` (t = `r K("gs - ps", "gdq_t", 1)`), beyond the batch
+critical value in `r sum(abs(bt[["gdq_t"]]) > t_crit_batch)` of `r nrow(bt)`
+batches.
+
+```{r}
+#| label: tbl-programme-batches
+#| tbl-cap: "The both-levers arm against the phenotypic arm, in five batches of 24 paired seeds (and pooled, 120 seeds): ratio of the mean gain per year; t of the paired difference in gain; paired difference and t of gene diversity in year 15 for the PYT (GD_PYT) and the parent set (GD_par). t on 23 degrees of freedom per batch (5 % critical value 2.07), 119 pooled. Differences are both-levers minus phenotypic."
+tab_batch <- rbind(bt, pooled)
+names(tab_batch) <- c("batch", "seeds", "gain ratio", "gain t", "GD_PYT diff",
+                      "GD_PYT t", "GD_par diff", "GD_par t")
+fmt(tab_batch, 3)
+```
+
+**Which lever carries the loss.** Lever 1 alone changes the PYT gene diversity
+at year 15 by `r K("l1 - ps", "gdp_d")` (t = `r K("l1 - ps", "gdp_t", 1)`) and
+that of the parent set by `r K("l1 - ps", "gdq_d")`
+(t = `r K("l1 - ps", "gdq_t", 1)`). Lever 2 alone changes them by
+`r K("l2 - ps", "gdp_d")` (t = `r K("l2 - ps", "gdp_t", 1)`) and
+`r K("l2 - ps", "gdq_d")` (t = `r K("l2 - ps", "gdq_t", 1)`). The control, with no
+genomic information at all, changes them by `r K("ctl - ps", "gdp_d")`
+(t = `r K("ctl - ps", "gdp_t", 1)`) and `r K("ctl - ps", "gdq_d")`
+(t = `r K("ctl - ps", "gdq_t", 1)`); against lever 2 alone the control differs by
+`r K("ctl - l2", "gdp_d")` in the PYT (t = `r K("ctl - l2", "gdp_t", 1)`) and by
+`r K("ctl - l2", "gdq_d")` in the parent set (t = `r K("ctl - l2", "gdq_t", 1)`).
+The year-15 loss of PYT diversity that goes with lever 2 is thus reproduced,
+within the resolution of `r length(seeds)` seeds (the standard error of the
+control-minus-lever-2 difference in the PYT is `r K("ctl - l2", "gdp_se")`), by
+truncating the same wider candidate set on plain phenotype. It does not need a
+genomic value. What it goes
+with is a different parent step: the phenotypic arm takes all
+`r sch$n_eyt + sch$n_ayt` lines of the EYT and the AYT as parents, with no
+truncation, whereas the lever-2 arms and the control take the best
+`r sch$n_eyt + sch$n_ayt` of `r sch$n_eyt + sch$n_ayt + sch$n_pyt`, and
+`r fx(mean(S[["par_pyt"]][, "l2"]), 1)` of them (lever 2) or
+`r fx(mean(S[["par_pyt"]][, "ctl"]), 1)` (control) come from the PYT. Lever 1 alone, whose parents are chosen as in the phenotypic arm,
+lowers the diversity of the parent set but its effect on the PYT is not
+resolved at this number of seeds; that is a statement about resolution, not
+about absence.
+
+What was not measured is why. A natural hypothesis is that parents truncated from
+a wider set, and taken from a preliminary trial in which full sibs have not yet
+been separated by later trials, are more closely related to each other, and that a shorter interval
+accumulates coancestry faster per unit of time. This chapter does not test
+it: it records the gene diversity of the parent set, not the coancestry among the
+chosen parents, nor their family structure. @gaynor2017 give a different
+mechanism for the loss of genetic *variance* under genomic selection: the Bulmer
+effect of the increased selection accuracy in early stages, with effective
+population size, selection intensity, accuracy and the number of cycles per year
+as the factors of later changes (p. 2383). They name optimal contribution
+selection, with introgression, as an established remedy for the decline of
+genetic variance (p. 2382). That concerns variance, not molecular gene
+diversity, and supports the direction, not this mechanism.
+
+## The diversity ledger {#sec-programme-ledger}
 
 The measurement above used gene diversity of the preliminary trial. The parent
 set is the population that actually transmits, and it is the one an optimal
-contribution scheme would act on:
+contribution scheme would act on. @tbl-programme-ledger gives both for the two
+extreme arms, averaged over the `r length(seeds)` seeds.
 
 ```{r}
+#| label: tbl-programme-ledger
+#| tbl-cap: "Gene diversity GD = 1 - theta (QTL loci) of the PYT (60 lines) and of the parent set (16 lines) in years 1, 5, 10 and 15, mean (standard error over seeds) of 120 paired seeds, phenotypic (ps) and both-levers (gs) arms. Dimensionless. The levels include the diagonal of the coancestry matrix (f_ii = 1 for DH lines), whose weight 1/n differs between the PYT and parent columns, so they are not on one scale: compare arms and years within a column, not the two sets; the diagonal-free comparison is @tbl-programme-loss."
+yrs <- c(1, 5, 10, 15)
+lg <- function(a, v) sprintf("%.4f (%.4f)", avg(a, v)[yrs], avg_se(a, v)[yrs])
 ledger <- data.frame(
-  year       = yr,
-  gd_pyt_ps  = avg("ps", "gd_pyt"),  gd_pyt_gs  = avg("gs", "gd_pyt"),
-  gd_par_ps  = avg("ps", "gd_parents"), gd_par_gs = avg("gs", "gd_parents"))
-fmt(ledger[c(1, 5, 10, 15), ])
+  year       = yrs,
+  gd_pyt_ps  = lg("ps", "gd_pyt"),  gd_pyt_gs  = lg("gs", "gd_pyt"),
+  gd_par_ps  = lg("ps", "gd_parents"), gd_par_gs = lg("gs", "gd_parents"))
+gd_found <- mean(vapply(runs[["ps"]], function(d) d[["gd_founders"]][1], numeric(1)))
+# lines are DH (f_ii = 1), so theta = 1/n + (1 - 1/n) theta_off and GD = (1 - 1/n) GD_off,
+# with GD_off = 1 - mean(f_ij, i != j): the gene diversity between distinct lines
+gd_off <- function(gd, n) gd * n / (n - 1)
+set.seed(1)
+gchk <- matrix(rbinom(60 * 200, 1, 0.5), 60)          # 60 homozygous lines, 200 loci
+fchk <- molecular_coancestry(gchk)
+stopifnot(isTRUE(all.equal(gd_off(1 - mean(fchk), 60),
+                           mean(1 - fchk[row(fchk) != col(fchk)]))))
+n_of <- c(gd_pyt = sch$n_pyt, gd_parents = sch$n_eyt + sch$n_ayt)
+off_found <- mean(vapply(runs[["ps"]], function(d)
+  gd_off(d[["gd_founders"]][1], sch$n_founders), numeric(1)))
+off_pyt1 <- mean(vapply(runs[["ps"]], function(d) gd_off(d[["gd_pyt"]][1], n_of[["gd_pyt"]]), numeric(1)))
+off_par1 <- mean(vapply(runs[["ps"]], function(d) gd_off(d[["gd_parents"]][1], n_of[["gd_parents"]]), numeric(1)))
+knitr::kable(ledger, row.names = FALSE,
+             col.names = c("Year", "GD of PYT, ps", "GD of PYT, gs",
+                           "GD of parents, ps", "GD of parents, gs"))
 ```
+
+The base of these numbers is not the founders. The `r sch$n_founders` founder
+lines have gene diversity `r fx(gd_found, 4)` (mean over seeds); by year 1, after the
+`r sch$n_burn`-year burn-in, the PYT is at `r fx(avg("ps", "gd_pyt")[1], 4)` and the
+parent set at `r fx(avg("ps", "gd_parents")[1], 4)`.
+
+::: {.callout-warning}
+## Gene diversity with the diagonal is not comparable across set sizes
+
+These three levels are not on one scale: for fully homozygous lines the diagonal of $f$ is 1, so that
+
+$$
+\theta = \frac{1}{n} + \Bigl(1 - \frac{1}{n}\Bigr)\theta_{\text{off}},
+\qquad
+GD = \Bigl(1 - \frac{1}{n}\Bigr)GD_{\text{off}},
+$$ {#eq-programme-gdoff}
+
+where $\theta_{\text{off}}$ is the mean of
+$f_{ij}$ over pairs of distinct lines and $GD_{\text{off}} = 1 - \theta_{\text{off}}$
+is the gene diversity between distinct lines (@eq-programme-gdoff is checked in the chunk
+above on a random matrix of homozygous lines). $GD_{\text{off}}$ does not carry the
+weight $1/n$, which differs among $n$ = `r sch$n_founders` (founders),
+`r sch$n_pyt` (PYT) and `r sch$n_eyt + sch$n_ayt` (parents). On that scale the
+founders are at `r fx(off_found, 4)`, the year-1 PYT at `r fx(off_pyt1, 4)` and the
+year-1 parent set at `r fx(off_par1, 4)`. A part of the diversity of the founders
+has therefore gone before the first row of the table, by
+`r fx(off_found - off_par1, 3)` for the parents on the $GD_{\text{off}}$ scale, not
+by the `r fx(gd_found - avg("ps", "gd_parents")[1], 3)` that the levels above
+suggest, `r fx((gd_found - avg("ps", "gd_parents")[1]) - (off_found - off_par1), 3)`
+of which is the difference in diagonal weight between $n$ = `r sch$n_founders` and
+$n$ = `r sch$n_eyt + sch$n_ayt`.
+:::
+
+The loss is reported against both bases
+(@tbl-programme-loss), per seed, with the standard error over seeds.
 
 ```{r}
-loss <- function(v) (ledger[[v]][1] - ledger[[v]][nrow(ledger)]) / ledger[[v]][1]
-fmt(c(`PYT, phenotypic`   = loss("gd_pyt_ps"), `PYT, genomic`   = loss("gd_pyt_gs"),
-      `parents, phenotypic` = loss("gd_par_ps"), `parents, genomic` = loss("gd_par_gs")))
+#| label: tbl-programme-loss
+#| tbl-cap: "Relative loss of gene diversity, 1 - GD_15 / GD_base, at year 15 for the PYT and the parent set, against the same population's year-1 value ('year 1') and against the founders ('founders', computed on GD_off, the gene diversity between distinct lines, so that sets of 60, 16 and 40 lines are on one scale); mean (standard error) over 120 paired seeds, five arms. Computed per seed. Proportions, three decimals. This is a 15-year change against the programme's own start, not the alpha of @sec-baseline (see @sec-programme-ledger)."
+loss <- function(a, v, base, off = TRUE) vapply(runs[[a]], function(d) {
+  num <- d[[v]][last]
+  den <- if (base == "year 1") d[[v]][1] else d[["gd_founders"]][1]
+  if (off) {                                   # drop the diagonal of f before dividing
+    num <- gd_off(num, n_of[[v]])
+    den <- gd_off(den, if (base == "year 1") n_of[[v]] else sch$n_founders)
+  }
+  1 - num / den
+}, numeric(1))
+# against year 1 the numerator and denominator have the same n: the factor cancels
+stopifnot(isTRUE(all.equal(loss("gs", "gd_parents", "year 1"),
+                           loss("gs", "gd_parents", "year 1", off = FALSE))))
+ml <- function(a, v, base) { l <- loss(a, v, base); sprintf("%.3f (%.3f)", mean(l), se(l)) }
+tab_loss <- data.frame(
+  arm = unname(arms),
+  `PYT, year 1`      = vapply(names(arms), ml, "", v = "gd_pyt", base = "year 1"),
+  `PYT, founders`    = vapply(names(arms), ml, "", v = "gd_pyt", base = "founders"),
+  `parents, year 1`  = vapply(names(arms), ml, "", v = "gd_parents", base = "year 1"),
+  `parents, founders` = vapply(names(arms), ml, "", v = "gd_parents", base = "founders"),
+  check.names = FALSE, row.names = NULL)
+tab_loss
 ```
 
-Those four numbers are exactly the quantity this book calls `alpha`: the
-proportional loss of gene diversity, here measured against the programme's own
-starting point rather than against a random-selection baseline of the same size
-(@sec-baseline is where that distinction is made, and it matters -- a
-same-size random baseline would attribute part of this loss to drift rather
-than to selection).
+These numbers are **not** the quantity the book calls $\alpha$. The $\alpha$ of
+@eq-catalogue-alpha (@sec-baseline) is $(GD_{\text{ref}} - GD_S)/GD_{\text{ref}}$,
+with $GD_{\text{ref}}$ the mean gene diversity of random subsets of the same size as
+the selected set, so that $\alpha = 0$ is a random sample and $\alpha < 0$ is possible. The
+quantity in @tbl-programme-loss is the cumulative relative change over fifteen
+years of one population against its own earlier value (year 1, or the founders):
+there is no reference distribution of random subsets, it includes whatever drift
+and burn-in do to a set of that size, and it can be compared with an $\alpha$
+budget of @sec-ocs or @sec-combinatorial only as a different kind of number. I call
+it the *relative loss against year 1* (or against the founders). Against year 1 the
+numerator and the denominator are gene diversities of sets of the same size, so the
+factor $(1 - 1/n)$ of the diagonal (@eq-programme-gdoff) cancels exactly and the ranking and the levels of
+those columns do not depend on it. Against the founders they are sets of different
+size ($n$ = `r sch$n_pyt` or `r sch$n_eyt + sch$n_ayt` over `r sch$n_founders`), and
+the columns of @tbl-programme-loss are therefore computed on $GD_{\text{off}}$.
+Left on the $GD$ with the diagonal, the loss of the phenotypic arm against the founders
+would have been `r fx(mean(loss("ps", "gd_pyt", "founders", off = FALSE)), 3)` (PYT) and
+`r fx(mean(loss("ps", "gd_parents", "founders", off = FALSE)), 3)` (parents) instead of
+`r fx(mean(loss("ps", "gd_pyt", "founders")), 3)` and
+`r fx(mean(loss("ps", "gd_parents", "founders")), 3)`, and that of the both-levers arm
+`r fx(mean(loss("gs", "gd_parents", "founders", off = FALSE)), 3)` instead of
+`r fx(mean(loss("gs", "gd_parents", "founders")), 3)` for the parents: the difference is
+a sample-size artefact, not loss.
+
+```{r}
+#| label: programme-diag
+# lines are DH: f_ii = 1, and every segregating site is a QTL in the main design
+set.seed(1)
+fg1 <- quickHaplo(nInd = sch$n_founders, nChr = sch$n_chr, segSites = sch$n_qtl,
+                  inbred = TRUE)
+SP1 <- SimParam$new(fg1)
+SP1$addTraitAG(nQtlPerChr = sch$n_qtl, mean = 4, var = 0.1, varGxE = 0.2)
+dh1 <- makeDH(randCross(newPop(fg1, simParam = SP1), sch$n_crosses, simParam = SP1),
+              sch$n_dh, simParam = SP1)
+g1 <- pullSegSiteGeno(dh1, simParam = SP1)
+pop1 <- newPop(fg1, simParam = SP1)      # the founders: also homozygous (inbred = TRUE)
+stopifnot(ncol(g1) == ncol(pullQtlGeno(dh1, simParam = SP1)),
+          all(diag(molecular_coancestry(g1 / 2)) == 1),
+          all(diag(molecular_coancestry(pullSegSiteGeno(pop1, simParam = SP1) / 2)) == 1))
+diag_share <- function(v, n)             # share of theta contributed by the diagonal
+  mean((1 / n) / (1 - vapply(runs[["ps"]], function(d) d[[v]][1], numeric(1))))
+share_pyt <- diag_share("gd_pyt", sch$n_pyt)
+share_par <- diag_share("gd_parents", sch$n_eyt + sch$n_ayt)
+Ns_all <- unlist(lapply(runs, function(r) lapply(r, function(d)
+  1 / (2 * (1 - c(d[["gd_pyt"]], d[["gd_parents"]], d[["gd_founders"]]))))))
+```
 
 ::: {.callout-note}
 ## Status number, and why it is not the headline here
 
-`status_number()` on a set of fully inbred lines returns a value near or below
-1, because a homozygous line has self-coancestry `f_ii = 1` and the diagonal
-dominates the mean. That is the same arithmetic @sec-sizing explains for a
-biparental cross, and it is correct rather than broken -- but it makes `N_s` an
-unhelpful headline for a line-breeding programme. Gene diversity is the metric
-that stays interpretable across both inbred and outbred populations, which is
-why the ledger is written in it.
+`status_number()` on a set of lines returns $N_s = 1/(2\theta)$. At biallelic
+loci the group coancestry satisfies $\theta \in [1/2, 1]$, so
+$N_s \in [1/2, 1]$ for *every* set of lines, whatever its size (@sec-ns,
+@sec-sizing): $N_s$ is a monotone rescaling of $\theta$, not a head count. Here
+it ranges over `r fx(min(Ns_all), 2)`-`r fx(max(Ns_all), 2)` across all
+arms, seeds, years and both sets. It carries no information that $GD$ does not,
+compressed into $[1/2, 1]$, which is why the ledger is written in $GD$. The
+diagonal of $f$ does *not* dominate the mean coancestry here: it is
+`r fx(100 * share_pyt, 1)` % of $\theta$ at $n$ = `r sch$n_pyt` (year-1 PYT) and
+`r fx(100 * share_par, 1)` % at $n$ = `r sch$n_eyt + sch$n_ayt` (year-1 parents).
 :::
 
-What would an `alpha` budget mean here? Not a constraint on which hybrids to
+### Selection or bottleneck?
+
+All `r sch$n_chr * sch$n_qtl` segregating sites of the design are QTL (the
+chunk above asserts it: `segSites` equals `nQtlPerChr`). The gene diversity of the
+ledger is therefore measured at causal loci, which selection acts on directly, and
+no neutral locus is measured in the main design. The chapter also has no
+no-selection arm, so the loss in @tbl-programme-loss cannot be split into what
+selection did and what a bottleneck of `r sch$n_eyt + sch$n_ayt` parents and
+`r sch$n_crosses` crosses a year would have done anyway. (@sec-alphasimr's Step 8
+builds a paired no-selection control for the hybrid programme; this chapter has none.)
+One probe bears on the question. It re-runs the phenotypic and the both-levers
+arms on `r n_probe` seeds with 60 neutral sites added per chromosome beside the QTL
+(`n_neutral = 60`, so `segSites` = 120 and the founders differ from the main
+design), and measures the relative loss against year 1 at the QTL loci and at the
+neutral loci separately (@tbl-programme-neutral).
+
+```{r}
+#| label: tbl-programme-neutral
+#| tbl-cap: "Relative loss of PYT gene diversity against year 1 at the 600 QTL loci and at 600 neutral loci, year 15, 48 paired seeds (seeds 1-48; 60 QTL and 60 neutral sites per chromosome; founders differ from the main design). ps: phenotypic; gs: both levers; 'gs - ps' is the paired difference with its standard error and t on 47 degrees of freedom; 'QTL - neutral' is the within-seed difference of the two losses (for the last row, the difference of the differences), with its t. Mean (standard error); proportions, three decimals."
+sch_n <- utils::modifyList(sch, list(n_neutral = 60))
+neu <- lapply(c(ps = "ps", gs = "gs"), function(a)
+  lapply(seq_len(n_probe), function(s) run_programme(sch_n, s, a)))
+nl <- function(a, v) vapply(neu[[a]], function(d) 1 - d[[v]][last] / d[[v]][1], numeric(1))
+fm <- function(x) sprintf("%.3f (%.3f)", mean(x), se(x))
+dq <- nl("gs", "gd_pyt") - nl("ps", "gd_pyt")
+dn <- nl("gs", "gd_pyt_neutral") - nl("ps", "gd_pyt_neutral")
+qn <- list(ps = nl("ps", "gd_pyt") - nl("ps", "gd_pyt_neutral"),
+           gs = nl("gs", "gd_pyt") - nl("gs", "gd_pyt_neutral"))
+qn[["dd"]] <- qn[["gs"]] - qn[["ps"]]               # = dq - dn
+tt <- function(x) mean(x) / se(x)
+t_probe <- stats::qt(0.975, n_probe - 1)
+stopifnot(tt(qn[["ps"]]) > t_probe, tt(qn[["gs"]]) > t_probe,
+          tt(qn[["dd"]]) > t_probe)           # "resolved" and "larger" in the text
+tab_neu <- data.frame(
+  row = c("ps", "gs", "gs - ps"),
+  `QTL loci`     = c(fm(nl("ps", "gd_pyt")), fm(nl("gs", "gd_pyt")), fm(dq)),
+  `neutral loci` = c(fm(nl("ps", "gd_pyt_neutral")), fm(nl("gs", "gd_pyt_neutral")), fm(dn)),
+  `QTL - neutral` = c(fm(qn[["ps"]]), fm(qn[["gs"]]), fm(qn[["dd"]])),
+  `t of QTL - neutral` = sprintf("%.1f", c(tt(qn[["ps"]]), tt(qn[["gs"]]), tt(qn[["dd"]]))),
+  `t of gs - ps` = c("", "", sprintf("QTL %.1f, neutral %.1f", tt(dq), tt(dn))),
+  check.names = FALSE)
+tab_neu
+# neutral loss as a share of the QTL loss, bootstrap over the probe seeds
+share_boot <- function(a) {
+  q <- nl(a, "gd_pyt"); u <- nl(a, "gd_pyt_neutral")
+  set.seed(2)
+  r <- replicate(4000, {i <- sample.int(n_probe, replace = TRUE); mean(u[i]) / mean(q[i])})
+  c(est = mean(u) / mean(q), stats::quantile(r, c(0.025, 0.975), names = FALSE))
+}
+sb <- lapply(c(ps = "ps", gs = "gs"), share_boot)
+pc <- function(a) sprintf("%.0f %% (95 %% bootstrap interval over seeds, %.0f-%.0f %%)",
+                          100 * sb[[a]][[1]], 100 * sb[[a]][[2]], 100 * sb[[a]][[3]])
+```
+
+At neutral loci the phenotypic arm loses `r pc("ps")` of what it loses at the QTL loci
+and the both-levers arm `r pc("gs")`. The within-seed excess of the QTL loss over the
+neutral loss is resolved in both arms (@tbl-programme-neutral: t = `r fx(tt(qn[["ps"]]), 1)`
+for the phenotypic arm and `r fx(tt(qn[["gs"]]), 1)` for the both-levers arm, beyond the
+critical value `r fx(t_probe, 2)`), and larger in the faster arm
+(t of the difference of the two excesses = `r fx(tt(qn[["dd"]]), 1)`). So the loss is
+mostly, not entirely, shared with neutral loci: it is consistent with a loss that is
+mainly a bottleneck effect plus a smaller part, resolved here, that is specific to the loci
+selection acts on or to what is linked to them. It does not separate the two:
+neutral loci here lie on the same ten chromosomes as the QTL, and loci linked to selected ones lose diversity with them, so the neutral loss is
+not a drift-only measure; and the difference between the arms
+is present at neutral loci too (`r fx(mean(dn), 3)` against `r fx(mean(dq), 3)`
+at the QTL loci, in the relative loss), so the extra loss of the faster arm is
+not confined to the causal loci either. A random-parent arm would separate selection from
+bottleneck; it is not built here.
+
+What would an $\alpha$ budget mean here? Not a constraint on which hybrids to
 sell, as in @sec-combinatorial, but a constraint on **which parents to recycle**:
 the same optimal-contribution problem of @sec-ocs, applied to the
-`c(EYT, AYT, PYT)` candidate set that the genomic arm selects from. The
-candidate set is small, the coancestry matrix is cheap, and the choice being
-constrained is annual. @sec-cycles is the argument for why that constraint pays
-back, and @sec-limits is where the payback is predicted rather than observed.
+`c(EYT, AYT, PYT)` candidate set that the lever-2 arms select from. The candidate
+set is small, the coancestry matrix is cheap, and the choice being
+constrained is annual. @sec-ocs and @sec-combinatorial were developed and tested
+on hybrid candidates, @sec-cycles follows the trajectories of constrained and
+unconstrained hybrid programmes forward, and @sec-limits tests whether the
+cumulative gain can be forecast from the rate of inbreeding; none of this is tested on the inbred-line programme of this chapter, and the
+application to line parents is a proposal.
 
-## Assumptions
+## Assumptions {#sec-programme-assumptions}
 
 **What this models.** Staged testing with replication rising across stages,
 genotype-by-environment interaction as a variance component
-(`SP$addTraitAG(varGxE = )`), doubled-haploid line development, within-family
-caps, a steady-state programme reached through a burn-in, and two distinct
-genomic-selection levers separated so their effects can be told apart.
+(`SP$addTraitAG(varGxE = )`, here 0.2 against a founder additive variance of 0.1,
+entering as one shared deviate per `setPheno()` call, as in @sec-programme-reps),
+doubled-haploid line development, within-family caps, a steady-state programme
+reached through a burn-in, one additive trait with no dominance (assumption A7 of
+@sec-genomic-era), and two genomic-selection levers with a switch each, plus a
+phenotype-only control for the second.
 
 **What it does not.** Genomic prediction is *mimicked* by adding replication,
-not fitted -- so the accuracy is assumed rather than earned, and the training
+not fitted -- so the accuracy is assumed rather than earned (its value, under the
+chapter's GxE, is in @tbl-programme-accuracy), and the training
 population, its size, and its relationship to the selection candidates play no
 role (@sec-genomic-prediction is where they do). There is one trait, so the
 index questions of @sec-alphasimr's Step 7 do not arise. Locations differ only
-through a variance component: there is no correlated environment structure, no
-year effect, and no location-by-year term, so a "location" here is an
-independent draw rather than a place. Doubled-haploid production is
+through plot error and a shared GxE deviate per call: there is no correlated
+environment structure, no year effect, and no location-by-year term, so a
+"replicate" here is an independent draw of plot error only and not an independent
+location (the GxE deviate is common to all entries of a call and is not averaged
+by `reps`). Doubled-haploid production is
 instantaneous and never fails. Founders come from `quickHaplo()`, so they carry
 no linkage disequilibrium -- @sec-alphasimr's Step 1 measures what that costs
 and argues it is the right trade for a chapter about response rather than about
-marker-QTL association.
+marker-QTL association. Every segregating site is a QTL, so the marker panel is the
+causal set and gene diversity is measured at causal loci; this is the limit
+@sec-genomic-era (assumption A5) states. There is no no-selection or random-parent
+arm, so selection and the bottleneck are not separated (the probe above is
+suggestive only). The base against which loss is reported is the programme's year
+1 (or the founders), not a frozen allele-frequency base (assumption A6) and not a
+random-subset reference.
+
+**Against the assumptions of @sec-genomic-era.** The chapter keeps A2 (fully
+inbred lines, by DH) and A7 (no dominance). It leaves A1 (an allogamous crop and an
+F1 hybrid product: the product here is a line) and A4 (discrete cycles: the cycles
+overlap, a stage holds cohorts of five different ages, and the parents of one cycle
+come from three stages, so the cycle length $T$ is a mean of 3, 4 and 5 years and
+a per-cycle rate is not computed). The results of @sec-genomic-era and of the
+hybrid chapters do not transfer to this chapter by that route, nor this chapter's to theirs.
+
+**Rate window.** The gain per year is the slope over years 6 to 15, which
+includes the years before a parent chosen by a genomic arm in year 6 reaches the
+PYT (three years for a PYT parent): it averages a transient, with a lag that
+differs between arms.
+
+```{r}
+#| label: programme-scale
+# Gaynor et al. (2017), Table 1 and Methods: crosses a year, DH lines per cross,
+# headrows, entries of PYT, AYT and EYT, and QTN, against this chapter's values
+gaynor <- c(crosses = 100, dh_per_cross = 100, headrows = 10000, pyt = 500,
+            ayt = 50, eyt = 10, qtn = 21000)
+here <- c(sch$n_crosses, sch$n_dh, n_hdrw, sch$n_pyt, sch$n_ayt, sch$n_eyt,
+          sch$n_chr * sch$n_qtl)
+scale_ratio <- gaynor / here
+```
 
 **Scale.** `r sch$n_founders` founders, `r sch$n_chr * sch$n_qtl` loci,
-`r sch$n_years` years, `r length(seeds)` paired seeds, all live at render.
-@gaynor2017's programme is an order of magnitude larger in every dimension; the
-qualitative results here are the ones that survive the reduction, and the
-absolute rates are not comparable to a real wheat programme.
+`r sch$n_years` years, `r length(seeds)` paired seeds per arm, all live at render.
+@gaynor2017's programme starts from 50 founders, against `r sch$n_founders` here,
+and is larger in every other dimension of the chunk above (crosses, DH lines per cross,
+headrows, entries of the three trials, QTN) by factors from
+`r fx(min(scale_ratio), 1)` (EYT entries) to `r fx(max(scale_ratio), 0)` (QTN). The configuration
+is the author's own reduction (see @sec-programme-scheme). The qualitative
+results here are the ones this simulation shows at this scale; they have not been
+measured at another, and the absolute rates are not comparable to a real wheat
+programme. Gaynor et al.'s genomic programmes are cost-matched and the arms here
+are not, so ratios of gain are not comparable with theirs either.
 
 ## Where this connects
 
 @sec-alphasimr supplies every primitive this chapter uses and builds them into
 the hybrid scheme instead; the two chapters are the same toolkit pointed at the
-two kinds of programme. @sec-response is where the breeder's equation says why a
-shorter generation interval raises gain per year. @sec-genomic-prediction is
+two kinds of programme. @sec-response states the breeder's equation for one round
+of selection; the per-year form used here is the division by the cycle length
+stated above. @sec-genomic-prediction is
 where an accuracy of the kind this chapter assumes is measured, on a trait generated
 from the markers the models see; there it is finite because of training size, noise
 and the rank bound, not because of a marker-versus-QTL gap. This book does not
 measure that gap, and @sec-genomic-era (assumption A5) states its collapse as a
-limit.
+limit. How many crosses, entries and locations to plant for a fixed number of
+plots is the subject of @sec-mating, @sec-sparse and @sec-joint, for hybrids.
 
 The diversity result belongs to the book's spine. @sec-cycles shows the same
 tension -- faster response, faster erosion -- with the package's own simulator
-over a longer horizon; @sec-limits explains why the erosion is what bounds the
-programme and when it can be predicted; @sec-ocs is the machinery for spending
+over a longer horizon, for the hybrid programme; @sec-limits tests whether the cumulative gain can be
+forecast from the rate of erosion (three budgets tested; the 15-cycle gain is
+reached for one of them, in the five-draw mean) and what the
+frequency-based metrics cannot see; @sec-ocs is the machinery for spending
 the budget deliberately rather than discovering afterwards what was spent.
 
 <!-- reproduce-chapter -->

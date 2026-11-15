@@ -482,8 +482,8 @@ head(ped, 3)
 #' matrix times those effects. In this chapter `R` (the target correlation of the
 #' marker effects), `B` (the matrix of marker effects) and `L` (the line genotype
 #' matrix) are names of code objects, not the $\mathbf R$, $\mathbf B$ and $L$ of
-#' @sec-notation, and $n_A$, $n_B$ count the lines of pool A and pool B, not the
-#' female and male lines of @sec-mating.
+#' @sec-notation, and $n_A$, $n_B$ count the lines of pool A and pool B, as they do in @sec-mating
+#' (where the pool-A line is also the female).
 #' 
 ## -----------------------------------------------------------------------------
 set.seed(cfg$seed + 99)
@@ -534,7 +534,7 @@ fmt(data.frame(traits = paste(ij[, 1], "x", ij[, 2]),
 #' - *The heuristics.* The gains this book reports come from greedy,
 #'   differential-evolution and local-search selections, which at the teaching scale are
 #'   not certified optima (@sec-bound; `ocs_bound()` gives a valid upper bound, and
-#'   `sel_exact()` does not converge there). A feasible selection is not a bound: a
+#'   `sel_exact()` does not converge there, @sec-oa). A feasible selection is not a bound: a
 #'   selection made on estimates could exceed a heuristic's index on the known
 #'   values, so a gain in `ctx$index` does not bound the gain that a selection on
 #'   estimates could achieve.

@@ -6,362 +6,726 @@ source("_common.R")
 bib <- read.csv(book_data("bibliography_plant.csv"), stringsAsFactors = FALSE)
 ani <- read.csv(book_data("bibliography_animal.csv"), stringsAsFactors = FALSE)
 mu  <- read.csv(book_data("plant_metric_usage.csv"))
+
+n_scr  <- nrow(bib)
+n_rel3 <- sum(bib$relevance == 3)
+n_rel2 <- sum(bib$relevance == 2)
+is_mz  <- grepl("maize", bib$crop, ignore.case = TRUE)
+yr_pl  <- range(bib$year)
+yr_an  <- range(ani$year)
+# one row of the usage table, by a fixed substring of its label
+u <- function(s) mu[grepl(s, mu$metric, fixed = TRUE), ]
+rk <- setNames(rank(-mu$n_records, ties.method = "min"), mu$metric)
+rk <- sapply(c("Marker coancestry", "Allelic richness", "Effective population size",
+               "Expected heterozygosity"),
+             function(s) unname(rk[grepl(s, names(rk), fixed = TRUE)]))
+stopifnot(rk[["Marker coancestry"]] == rk[["Allelic richness"]],
+          rk[["Effective population size"]] == nrow(mu))
+# the usage table's pct is records / screened records (relevance 2 or 3)
+stopifnot(all(abs(mu$pct - 100 * mu$n_records / n_scr) < 0.051))
+# records said in the text to sit in the other species' file
+stopifnot(all(c("10.1007/s00122-025-05028-1", "10.1093/jxb/erag073") %in% ani$doi),
+          "10.1002/tpg2.20467" %in% bib$doi)
+rg <- grepl("rogers", bib$metric_used, ignore.case = TRUE)
+am <- ani$doi == "10.1093/bioinformatics/bty375"
+n_items <- lengths(lapply(strsplit(bib$metric_used, "[,;]"),
+                          function(x) x[nzchar(trimws(x))]))
+# the same count, also splitting on "/" and " and " (items hold more than one family)
+n_items2 <- lengths(lapply(strsplit(bib$metric_used, "[,;/]| and "),
+                           function(x) x[nzchar(trimws(x))]))
+n_mc <- sum(grepl("Coancestry / relationship matrix choice", ani$theme, fixed = TRUE))
 ```
 
-@sec-choosing derived a recommendation. This one asks what the applied
-literature actually does, where it agrees, and -- more usefully -- where it is
-silent.
+@sec-choosing derived a recommendation from the book's own simulations. This
+chapter, the first of the Evidence and practice part, asks what the applied
+literature reports about the same quantities: where it agrees, and where it is
+silent. It follows the Mating and testing design part (@sec-mating,
+@sec-sparse, @sec-joint) without using it. The corpus (@sec-plant-corpus) was screened for
+diversity metrics, heterotic structure, genetic resources and optimisation
+(@sec-corpora), not for crossing or testing design, so nothing here bears on the
+literature of that part and no result of it is carried over.
 
-The corpus behind this chapter is `r nrow(bib)` screened plant-breeding records
-(2017-2026), of which `r sum(bib$relevance == 3)` are directly relevant and
-`r sum(grepl("maize", bib$crop, ignore.case = TRUE))` concern maize, plus
-`r nrow(ani)` animal-breeding records over the same period. @sec-corpora
-describes both and how to query them.
+## The corpus, and what it can support {#sec-plant-corpus}
 
-## The headline qualification
+Two cached files, both external literature screens with no producer in this
+repository (`book/scripts/regenerate.R` lists them as not regenerated here).
+Nothing computed from them is reproducible beyond what the shipped CSV contains.
+Each number in this chapter says which file it comes from.
 
-@sec-choosing recommended economising to a minimal non-redundant set: $\theta$
-and $N_{e,\text{par}}$ as constraints, allelic richness at validation. That
-recommendation stands on its own evidence. **But it is not what plant breeding
-practice does, and the gap is worth stating plainly.**
+- The **plant file**, `bibliography_plant.csv`: `r n_scr` screened records,
+  `r yr_pl[1]`-`r yr_pl[2]`. `relevance` is 3 for the `r n_rel3` directly
+  relevant records and 2 for the `r n_rel2` related-background records;
+  `r sum(is_mz)` concern maize.
+- The **animal file**, `bibliography_animal.csv`: `r nrow(ani)` records,
+  `r yr_an[1]`-`r yr_an[2]`.
+
+The files are partly misfiled. The animal file holds plant studies (for example
+@yadav2025, wheat), and the plant file holds a record whose crop field reads
+"`r bib$crop[bib$doi == "10.1093/g3journal/jkae248"]`". "In the plant file" and
+"in the animal file" in this chapter therefore describe a file, not a species.
+@sec-corpora describes both.
+
+Both files carry one-line curator notes, not abstracts. The study-level numbers
+of this chapter are read from the abstracts of the papers cited by key, except that
+@kadoumi2025 and the final remark on @zhao2023 are read from the full text; they
+are not in the CSVs and were not recomputed. A sentence "not established in the retrieved
+set" is a statement about these two files, whose windows begin in
+`r yr_pl[1]` (plant) and `r yr_an[1]` (animal) and so exclude earlier work such
+as @vanheerwaarden2012.
+
+**Two terms with more than one sense.** *Allelic richness* is used in this chapter in four
+senses: $A_{\text{ret}}$, the marker alleles retained by a set of inbred lines at
+biallelic markers (@eq-catalogue-alleles-retained, the book's sense in
+@sec-choosing and @sec-stages); the figure a study reports under that name without
+saying how it is computed; the usage table's merged category "Allelic richness /
+rare alleles"; and the expected number of alleles per locus at drift-mutation
+equilibrium at multiallelic loci. Each use says which. *Status number* in the
+literature is a count; on the book's molecular $\mathbf{f}$,
+$N_s = 1/(2\theta) \in [1/2, 1]$ is a rescaling of $\theta$ and not a head count
+(@sec-ns).
+
+## The headline qualification {#sec-plant-qualification}
+
+@sec-choosing-recommendation recommends, inside the homozygosity lens, for inbred
+parents and an index additive in the parents: two metrics inside the optimiser,
+the proportional loss $\alpha$ of gene diversity against a same-size random-subset
+baseline (@sec-ocs) and $N_{e,\text{par}}$; three at validation, marker alleles
+retained $A_{\text{ret}}$, the within/between-pool decomposition and $N_s$; and
+$F_{drift}$ and $F_{hom}$ as monitoring against the random-subset
+null. That set was chosen by cost and by a residual criterion that
+@sec-choosing-redundancy states is necessary and not sufficient. It is not claimed
+to be minimal, and the redundancy analysis behind it is cached external data with
+an unrecorded setting. This chapter compares those metrics with what the plant
+file reports.
+
+**On the screen's own table (@tbl-plant-usage), the quantities from which the recommended metrics are
+built are reported unevenly, and none of the recommended metrics themselves has a
+category.** The table is an external classification, which limits how far the
+statement can be pressed. The mapping of the recommended metrics to the
+table's categories, given in this section, is this chapter's, not the screen's, and each pair is
+approximate.
+
+- $\alpha$ is the proportional loss of $GD = 1 - \theta$ against a random-subset
+  baseline (@sec-ocs). Its inner quantity, $GD$, is Nei's $H_e$ computed on the
+  group's own frequencies (@sec-identity), so it maps to the category "Expected
+  heterozygosity (He / gene diversity)". The loss relative to a baseline has no
+  category. $\theta$ itself is a mean of the molecular coancestry $\mathbf{f}$ over
+  a usage vector, and only loosely the category "Marker coancestry / kinship /
+  relatedness", which holds pairwise kinship and relatedness of any kind.
+- $N_{e,\text{par}}$, an effective number of parents of a usage vector, is nearest
+  to "Effective population size / status number", a different quantity.
+- $A_{\text{ret}}$ is nearest to "Allelic richness / rare alleles", the merged
+  category of @sec-plant-corpus, not necessarily the same quantity.
 
 ```{r}
+#| label: tbl-plant-usage
 #| echo: false
+#| tbl-cap: "Diversity metrics in the plant file's usage table (`plant_metric_usage.csv`), as shipped: records reporting each metric category, and how many of those are maize records. The counts are an external classification with no producer in this repository and are not recomputed here (see @tbl-plant-usage-check). The percentage is records divided by all screened records (relevance 2 or 3), not by the directly relevant ones."
 m <- mu[order(-mu$n_records), c("metric", "n_records", "n_maize", "pct")]
-names(m) <- c("metric", "records", "of which maize", "% of 687")
-knitr::kable(m, row.names = FALSE,
-  caption = "Diversity metrics reported across the 687 relevant plant-breeding records.")
+names(m) <- c("metric", "records", "of which maize", "% of screened records")
+knitr::kable(m, row.names = FALSE)
 ```
 
-Three observations follow directly.
+@tbl-plant-usage is `plant_metric_usage.csv`. Its percentages divide by the
+`r n_scr` screened records, `r n_rel2` of which are background records, not by the
+`r n_rel3` directly relevant ones; the maize column counts maize records, of which
+there are `r sum(is_mz)`. The repository records neither how the categories were
+defined nor how records were assigned to them. The most likely source is the
+abstracts, which the CSVs do not hold, but that is an inference. The table is drawn in @fig-plant-landscape (@sec-corpora).
 
-**Applied plant work stacks metrics rather than economising.** A representative
-sub-Saharan maize panel of 376 elite inbreds reports PIC = 0.39, gene diversity
-= 0.37, MAF = 0.29, Shannon = 6.86, Simpson = 949.09, allelic richness = 787.70
-and mean Rogers distance = 0.303 -- all in one analysis, presented as a reporting
-package rather than as competing alternatives. Roughly 20% of relevant records
-report three or more distinct metric families together.
+```{r}
+#| label: tbl-plant-usage-check
+#| echo: false
+#| tbl-cap: "The same categories counted on the shipped `metric_used` column of `bibliography_plant.csv`, with the case-insensitive patterns written in the chunk (mine, crude, not the curator's definitions), against the usage table. Records, and of those maize records."
+mt  <- bib$metric_used
+cnt <- function(pat) {
+  h <- grepl(pat, mt, ignore.case = TRUE)
+  c(sum(h), sum(h & is_mz))
+}
+pats <- c("Population structure"   = "structur|PCA|admixture",
+          "Fst"                    = "Fst|differentiation|AMOVA",
+          "Allelic richness"       = "allel(e|ic) richness|rare allele",
+          "Marker coancestry"      = "coancestry|kinship|relatedness",
+          "Inbreeding coefficient" = "\\bROH\\b|runs of homozygosity",
+          "Effective population size" = "effective (population )?size|status number",
+          "Expected heterozygosity" = "\\bHe\\b|expected heterozygosity|gene diversity")
+chk <- do.call(rbind, lapply(names(pats), function(k) {
+  r <- u(k); s <- cnt(pats[[k]])
+  data.frame(category = r$metric, table_records = r$n_records,
+             table_maize = r$n_maize, column_records = s[1], column_maize = s[2])
+}))
+names(chk) <- c("category", "table: records", "table: maize",
+                "metric_used: records", "metric_used: maize")
+# order claimed in the text, in both sources, among the first six categories: structure and F_ST on top,
+# ROH and effective size at the bottom (expected heterozygosity is row 7 and is not in this order claim)
+stopifnot(all(chk[1:2, 2] > max(chk[3:6, 2])), all(chk[1:2, 4] > max(chk[3:6, 4])),
+          all(chk[5:6, 2] < min(chk[3:4, 2])), all(chk[5:6, 4] < min(chk[3:4, 4])))
+# The bare token Ne is not in the effective-size pattern: it matched "effective alleles (Ne)", a per-locus
+# count of alleles. The one record left is the intended quantity.
+stopifnot(!any(grepl("effective alleles", mt[grepl(pats[["Effective population size"]], mt,
+                                                   ignore.case = TRUE)], ignore.case = TRUE)))
+ratio <- chk[1:4, 2] / chk[1:4, 4]
+n_ea    <- sum(grepl("effective alleles", mt, ignore.case = TRUE))
+n_ne    <- sum(grepl("(Ne)", mt, fixed = TRUE))
+n_roh_loose <- sum(grepl("roh", mt, ignore.case = TRUE))  # unanchored: letters inside a word
+stopifnot(n_roh_loose == 1, chk[5, 4] == 0,
+          grepl("microhaplotypes", mt[grepl("roh", mt, ignore.case = TRUE)]))
+knitr::kable(chk, row.names = FALSE)
+```
 
-**The metrics recommended here are among the least used.** Marker coancestry
-appears in 6.7% of records, allelic richness in 6.7%, and effective size or
-status number in 2.5%. Population structure analysis appears in 44% and $F_{ST}$
-in 17%. The applied field is oriented toward *describing* structure, not toward
-*constraining* a loss.
+@tbl-plant-usage-check gives smaller counts than the usage table in every row.
+In the first four rows the table is `r sprintf("%.1f", min(ratio))` to
+`r sprintf("%.1f", max(ratio))` times the column; the column has
+`r chk[5, 4]` records with runs of homozygosity (ROH) and `r chk[6, 4]` effective-population-size record
+(`r chk[6, 5]` maize) against `r chk[5, 2]` and `r chk[6, 2]`. The gene-diversity
+pattern (row 7) finds `r chk[7, 4]` records against `r chk[7, 2]`. The
+effective-size pattern does not contain the bare token "Ne": the shipped column
+lists "effective alleles" in `r n_ea` records (`r n_ne` of them as "(Ne)"), a
+per-locus allele count and not an effective population size, and the chunk of @tbl-plant-usage-check
+asserts that none of them is matched. The shipped column lists coancestry, kinship or relatedness in
+`r chk[4, 4]` records (`r chk[4, 5]` maize) where the usage table has
+`r chk[4, 2]` (`r chk[4, 3]`), and `r chk[5, 4]` records with runs of homozygosity
+where the table's merged "Inbreeding coefficient / ROH" row has `r chk[5, 2]`
+(`r chk[5, 3]` maize). The `metric_used` field is empty in
+`r sum(!nzchar(trimws(bib$metric_used)))` of the `r n_scr` records. The ROH query
+printed in @sec-corpora is the pattern of @tbl-plant-usage-check, anchored as a word, and returns
+`r chk[5, 4]` records. Unanchored, a case-insensitive "roh" returns
+`r n_roh_loose` record, which matches the letters "roh" inside the word
+"microhaplotypes", in an alfalfa record. The magnitudes of the usage table therefore cannot be reproduced
+from the shipped file, and I give them only as the curator's classification. What the
+two sources share, among these six categories, is the order at the two ends:
+population structure and $F_{ST}$ are well ahead of the other four in both, and
+runs of homozygosity and effective size are the two lowest in both. Allelic
+richness and coancestry tie in the table and are `r chk[3, 4]` against
+`r chk[4, 4]` records in the column counts. Expected heterozygosity is not in
+that order claim: it is third in the table and `r chk[7, 4]` records in the column.
+The statements in this chapter that rest on the usage table rest on the order, and not on
+the percentages.
 
-**Nothing in the retrieved set computes $\theta$ or $N_s$ on a maize
-hybrid-usage vector.** The specific formalism of @sec-collapse is not
-established in the retrieved set. That is a gap this work fills rather than a
-contradiction -- but it means the approach has **no published plant-breeding
-baseline to be validated against**, which is a real limitation and should be
-read as one.
+Three observations follow.
+
+**Applied plant work often reports several metrics together.** A panel of 376
+elite sub-Saharan African inbreds reports, in one analysis, polymorphic information content (PIC) = 0.39, observed
+heterozygosity = 0.02, gene diversity = 0.37, minor allele frequency (MAF) = 0.29, Shannon = 6.86, Simpson
+= 949.09, allelic richness = 787.70 (the abstract does not say how it is computed) and an
+average genetic distance of 0.303 [@mukiti2025]. The plant file's annotation of
+that record lists "Rogers distance"; the abstract says "average genetic distance"
+and clusters on the identical-by-state (IBS) distance, so I write distance and not Rogers. The shipped
+`metric_used` column lists three or more items for
+`r sprintf("%.0f", 100 * mean(n_items >= 3))`% of the `r n_scr` screened records
+(`r sprintf("%.0f", 100 * mean(n_items[bib$relevance == 3] >= 3))`% of the
+`r n_rel3` directly relevant ones), counting comma- or semicolon-separated
+annotation items. This is a count of annotation items, not a bound on how often
+several metric families are reported together: some items hold more than one
+family (splitting also on "/" and " and " gives
+`r sprintf("%.0f", 100 * mean(n_items2 >= 3))`% and
+`r sprintf("%.0f", 100 * mean(n_items2[bib$relevance == 3] >= 3))`%), and many
+items are not diversity metrics ("genetic gain", "breeding value", "QTL effects").
+I did not define families.
+
+**The quantity inside $\alpha$ is among the most reported; the other recommended metrics are not identified as categories of the screen.** On
+the usage table (external classification), expected heterozygosity or gene
+diversity appears in `r u("Expected heterozygosity")$pct`% of screened records,
+rank `r rk[["Expected heterozygosity"]]` of `r nrow(mu)`; marker coancestry or
+kinship in `r u("Marker coancestry")$pct`%, allelic richness or rare alleles in
+`r u("Allelic richness")$pct`%, and effective size or status number in
+`r u("Effective population size")$pct`%; against
+`r u("Population structure")$pct`% for population structure, `r u("Fst")$pct`% for
+$F_{ST}$ and `r u("PIC")$pct`% for PIC. By record count the coancestry and
+allelic-richness categories tie at rank `r rk[["Marker coancestry"]]`, in the
+middle, and effective size ranks `r rk[["Effective population size"]]`, the last.
+Under the mapping of @sec-plant-qualification, then, gene diversity itself has a category,
+and the baseline-relative loss and the effective number of parents are not
+identified as categories in the screen; $A_{\text{ret}}$ maps only to the merged
+richness category, in the middle by record count. The absence of a category is not
+a measure of how often the papers report a quantity, which a screen of abstracts
+does not show. No category of the
+table corresponds to a proportional loss against a resampling baseline, the
+quantity $\alpha$ constrains, or to an effective number of parents of a usage
+vector. The most
+reported categories describe structure. A screen of abstracts cannot see a
+constraint applied inside a selection programme, so "toward constraining" is not
+testable from it.
+
+**Nothing in either file computes $\theta$ or $N_s$ on a maize hybrid-usage
+vector.** The formalism of @sec-collapse is not established in the retrieved set.
+That is a gap this work fills rather than a contradiction, but it means the
+approach has **no published plant-breeding baseline to be validated against**,
+which is a real limitation.
 
 ::: {.callout-note}
 ## These are different jobs, not a conflict
 
-For **monitoring and description**, plant practice deliberately reports many
-metrics because different audiences need different views. For **constraining an
-optimiser**, redundancy is a cost rather than a virtue.
+For **monitoring and description**, the plant file shows many metrics reported
+together; why is not tested here. For **constraining an optimiser**, redundancy is
+a cost rather than a virtue.
 
 Report the wide package to collaborators and in publications; constrain the
-optimiser on the narrow set.
+optimiser on the two metrics of @sec-choosing-recommendation.
 :::
 
 ## Why plant practice differs from animal breeding
 
-Three structural facts separate the two literatures, and they explain nearly
-every divergence in metric choice.
+Three structural facts separate the two literatures. They are reasons the animal
+methods do not transfer unchanged (@sec-hp-not-animal), not a tested explanation of
+the metric choices in @tbl-plant-usage.
 
-**Lines are homozygous.** Observed heterozygosity in an inbred panel is a purity
-control, not a diversity descriptor -- pearl millet parental lines report
-$H_o = 0.031$ against $H_e = 0.334$, and the gap is diagnostic of complete
-inbreeding rather than informative about the pool. Animal coancestry theory
-assumes a randomly mating heterozygous population; the plant analogue computes
-$\theta$ directly on fixed line genotypes, which is exactly the setting where
-the line-level collapse applies.
+**Lines are homozygous.** Observed heterozygosity in an inbred panel is the
+residual heterozygosity of the lines, a measure of how far they are from fixation
+and not a descriptor of diversity: pearl millet parental lines report
+$H_o = 0.031$ against $H_e = 0.334$ [@kandarkar2024]. Reading it as a purity
+control is this chapter's, not the paper's. Animal coancestry theory assumes a
+randomly mating heterozygous population; the plant analogue computes $\theta$
+directly on line genotypes, which is the setting where the line-level collapse of
+@sec-collapse applies, for inbred parents and an index additive in the parents.
 
-**The product is the F1, not the line.** Diversity is tracked separately for
-each parental pool and for cross-pool complementarity -- a structure with no
-livestock analogue. GWAS models are now built to partition additive and dominance
-effects by *heterotic group of origin*.
+**The product is the F1, not the line.** Diversity is tracked separately for each
+parental pool and for cross-pool complementarity, a structure with no livestock
+analogue. Association models are now built to partition additive and dominance
+effects by the heterotic group of origin of the allele [@beugnot2023].
 
-**Diversity is managed as two objects, not one.** Within-pool and between-pool
-diversity trend in opposite directions under selection and require opposite
-management, which no single pool-wide statistic can express -- the argument of
-@sec-subdivided, arrived at from the applied side.
+**Diversity is partitioned into two objects, not one.** @sec-subdivided gives the
+partition of gene diversity into within-pool and between-pool terms, and
+@sec-hp-cycle derives that under drift alone in two closed pools of equal weight
+the within-pool term falls while the between-pool term rises. That derivation does
+not cover selection; the rise of $GD_{BS}$ under `run_cycles()` is a simulation
+result (@sec-cycles) with drift and selection acting together. A single pool-wide
+statistic sees the sum, which is why the book partitions it.
 
 ### Distance measures, and the absence of a standard
 
-Modified Rogers distance dominates in maize (36 of 83 distance-reporting
-records), used chiefly for heterotic assignment and tester choice rather than for
-diversity monitoring. A recent methods paper works explicitly to unify similarity
-and distance measures for inbred comparison -- the field still treats the choice
-as open. Recall from @sec-stages that MRD and coancestry are the same statistic:
-$f_{ij} = 1 - \text{MRD}_{ij}^2$.
+The usage table's row "Modified Rogers / genetic distance" has
+`r u("Modified Rogers")$n_records` records over all crops, of which
+`r u("Modified Rogers")$n_maize` are maize. It is a merged category covering any
+genetic distance, not a share of modified Rogers distance (MRD) among the distance
+measures: the string "Rogers" appears in `r sum(rg)` `metric_used` cells of the
+plant file (`r sum(rg & is_mz)` maize). A 2025 methods paper is annotated in the
+plant file as a unified framework relating diversity metrics to distance
+[@bjb2025]; I have not read it beyond that note.
 
-One result is worth carrying into practice: in 298 African highland maize
-inbreds, **91% of line pairs differ at 30-36% of scored alleles, yet only 32% of
-pairs have kinship below 0.05.** The authors read the gap as allelic redundancy
-from repeated use of narrow source germplasm.
+For inbred lines coded 0/1, $f_{ij} = 1 - \text{MRD}_{ij}^2$, and the book checks
+it numerically to $10^{-12}$ on simulated lines (Trap 1 of @sec-stages). It is not
+claimed for hybrids, and a reported MRD equals $1 - f$ only for inbred lines on the
+same markers coded 0/1.
 
-> A pool can look diverse by marker counts while being genealogically shallow.
-> That is a direct argument for a coancestry-based constraint over a
-> distance-based one.
+One result is worth carrying into practice. In 298 African highland maize inbreds,
+nearly 91% of pairs differ at 30-36% of the scored alleles, but only 32% have a
+relative kinship coefficient below 0.050; the authors read the gap as redundancy in
+allelic composition from repeated use of few source germplasm backgrounds
+[@wegary2019].
 
-Other calibration benchmarks: North American ex-PVP dent inbreds resolve into 8
-admixture subgroups aligned with company of origin; China summer maize (490
-inbreds, 525,141 SNPs) shows 66.05% of pairwise kinship values near zero; sweet
-corn shows systematically lower diversity, PIC and MAF than field corn across
-514 versus 181 lines.
+That is the study's result. The following is an inference, and it limits what the
+result supports. On 0/1 inbred lines a pair differing at a fraction $d$ of loci has
+$f = 1 - d$, so if "scored alleles" means loci that differ, 91% of these pairs sit
+at $f$ between 0.64 and 0.70 on the book's definition. The "relative kinship
+coefficient" is on another scale, presumably relative to the sample, with unrelated
+pairs near zero; the abstract gives no estimator and the definition is in no
+versioned file. The two figures are therefore not a contrast between the book's
+$f$ and a distance: on inbred 0/1 lines $f$ is a monotone function of the
+distance. Whether a reading from state and a reading relative to the sample
+disagree about redundancy is this chapter's inference, not the study's: the
+abstract gives no threshold on either scale at which a pair counts as redundant,
+compares the two figures nowhere, and the authors read both as evidence of
+redundancy. The book's constraint is on state-based $f$, which is the first
+reading. Whether $\alpha$, $N_{e,\text{par}}$ and $A_{\text{ret}}$ would flag a
+panel like this one is not tested here, and the study is not an argument for a
+coancestry constraint over a distance constraint.
+
+Other calibration benchmarks, all from abstracts: 329 North American ex-PVP (expired Plant Variety Protection) dent
+inbreds resolve into eight admixture subgroups reflecting heterotic patterns and
+company of origin [@white2020]; in China summer maize (490 inbreds, 525,141 single-nucleotide polymorphisms (SNPs)),
+66.05% of pairs show relative kinship near zero [@shu2021]; sweet corn shows lower
+diversity, PIC and MAF than field corn across 514 versus 181 lines [@yang2024].
 
 ## Heterotic groups
 
 ### Assignment is not a solved problem
 
-GCA-based, SCA-based, combined (HSGCA) and SNP-distance classification are
-compared repeatedly with no consistent winner. Several studies report HSGCA as
-most consistent with testcross performance; others find SNP-based and
-testcross-based classification **disagree**. Notably, SSR markers linked to
-yield QTL give **no advantage** over random SSRs for grouping -- against the
-intuition that linked markers should be more predictive.
+Records that compare ways of assigning lines to groups report different winners.
+In 41 early-maturing yellow inbreds crossed to five testers, the HSGCA method
+(heterotic-group-specific and general combining ability) was more effective than
+the alternatives compared, which the abstract does not list [@annor2020]. In a
+19-line diallel, crosses between groups formed on simple sequence repeat (SSR) markers linked to
+yield-contributing traits showed no superiority, whereas inter-group crosses
+formed on random SSRs were superior to intra-group crosses [@kumar2022]. In the
+376-line panel of @mukiti2025, the IBS distance with average-linkage clustering gave the
+highest cophenetic correlation among the methods compared and yielded three groups
+[@mukiti2025]; a cophenetic correlation measures the fit of a tree to a distance
+matrix, not agreement with testcross performance. These are three records on panels
+of 19 to 376 lines with different criteria. They do not show a consistent winner,
+but I did not tabulate winners across the plant file, so "no consistent winner" is
+not a finding of the corpus.
 
 This matters for the pipeline: the line-level collapse assumes pool structure is
 given. Group assignment is itself contested, so the pool-balance constraint
 inherits whatever uncertainty the assignment method carries. Treat it as an
 uncertain input, not a fixed given.
 
-### The empirical trend that justifies the constraint
+### A longitudinal programme, and what it can and cannot show
 
-The single most load-bearing empirical result in this corpus: in a commercial
-European dent maize programme, **differentiation between Stiff Stalk and
-Non-Stiff Stalk groups increased significantly over time while genetic diversity
-within both groups declined** [@kadoumi2025]. This is longitudinal commercial
-data, not simulation.
+@kadoumi2025 analysed forty years of breeding data and about 84,000 genotypes from
+one private European dent maize programme. Their abstract states that
+differentiation between Stiff Stalk (SS) and Non-Stiff Stalk (NSS) groups
+increased significantly over time while genetic diversity within both groups
+declined. Their results are narrower. $F_{ST}$ between the groups rose from 0.178
+to 0.223. $H_e$ fell from 0.371 to 0.279 in NSS, while $H_e$ of SS remained
+stable (0.278 to 0.281), but in the full text the proportion of SS markers with
+$\text{MAF} < 0.05$ "also increased by 20.76 %, reaching 22.3 % of SNPs in era 4",
+so the stability of $H_e$ in SS does not mean an unchanged allele-frequency spectrum. The abstract states that
+marker fixation and linkage disequilibrium increased; I did not locate an
+SS-specific linkage-disequilibrium result and claim none. The mean between-group Hamming distance fell slightly, from 0.430 to
+0.420. The authors attribute the main germplasm-wide loss to the merging and
+homogenisation of the Iodent and Lancaster groups into NSS, so NSS was not a closed
+pool. They call the changes "not critical" and say they "only suggest that
+increased caution in diversity management is now needed". They write that, without
+phenotypic information, they "can only speculate" that selection caused the rise
+in divergence. Before the genomic-selection era (eras 0-2) the dataset holds only
+the inbreds that fed the modern programme, a survivor sample whose bias in the
+early diversity estimates they call uncertain in order of magnitude and direction.
+They recommend enhancing group divergence while preserving diversity across
+selection cycles. @sec-hp-cycle gives the same numbers with their limits;
+@vanheerwaarden2012, outside this corpus's window, report increasing separation of
+breeding pools across the history of North American maize lines and attribute
+little of the genome-wide pattern to selection.
 
-It confirms the constraint is doing necessary work rather than solving a
-hypothetical problem, and it confirms the two-object framing: what erodes is
-within-pool diversity; what must be protected from erosion *and* from excessive
-inflation is between-pool divergence. That is exactly the panel `s1_monitor()`
-logs in @sec-stages.
+This is one company's programme, observed, with a merger and a survivor sample,
+and no counterfactual. It shows that falling diversity in one group and rising
+$F_{ST}$ occurred together in a commercial programme. It does not show that a
+constraint is needed, and it does not isolate drift or selection as the cause. The
+between-group Hamming distance, the quantity nearest the hybrid's heterozygosity
+(@sec-hp-cycle), fell while $F_{ST}$ rose, and it is not a column of the panel
+`s1_monitor()` logs (@tbl-s1-panel). The paper is one programme with both movements,
+not a test of that panel (@sec-stages).
 
-Why divergence should be maintained rather than maximised now has a mechanistic
-basis: additive and dominance QTL effects for hybrid performance are
-**background-specific**, depending on allelic ancestry. Divergence pays through
-complementarity at specific loci, not through generic distance -- so pushing it
-further does not add hybrid value and risks removing shared favourable alleles.
-That is Trap 3 of @sec-stages, with a mechanism attached.
+What the plant literature adds on why divergence is held, not maximised, is narrower
+than the book's argument. @beugnot2023, in a Dent-by-Flint factorial and a diallel
+of admixed lines, report additive and dominance quantitative trait locus (QTL) effects for hybrid performance
+that are **background-specific**, depending on the heterotic group of origin of the
+allele, and say that group complementarity and differentiation increase over time.
+That supports background-specific effects. That divergence is not a bonus is the
+book's argument: under drift, with a dominance coefficient drawn independently of
+the frequencies, expected heterosis is invariant to the divergence of the pools
+($F_{BN}$), and under selection what happens to it can go either way
+(@sec-heterosis-flat, @sec-heterosis-alignment). That is Trap 3 of @sec-stages: the
+prescription agrees, by a different mechanism from the one the QTL result suggests.
 
-The complication worth knowing: deliberate crossing *across* the heterotic
-boundary for germplasm enhancement generated substantial usable variation, with
-**10.8% of hybrids from one sub-population exceeding a high-yielding check.** The
-boundary is maintained for commercial hybrid-parent pools while being
-selectively porous for pre-breeding.
+Crossing *across* the heterotic boundary for germplasm enhancement generated
+usable variation: in a connected population from four heterotic groups, 10.8% of
+the hybrids of one population (POP5/C229) exceeded the high-yielding check ND678
+[@cheng2025]. One population and one check bear on pre-breeding; they do not bear
+on whether the commercial hybrid-parent pools should be crossed. My reading is that
+the boundary is maintained for hybrid-parent pools and porous for pre-breeding.
 
 ## Selecting within the pool
 
 ### The constraint alone is not sufficient
 
-Optimal contribution and optimal cross selection are established across crops.
-But a load-bearing qualifier appears repeatedly: diversity depletion in closed
-elite programmes is described as **"ineluctable"** at realistic population sizes
-even under active management, with bridging populations argued as the necessary
-remedy.
+Optimal cross selection under a diversity constraint is simulated in a crop in a
+two-part programme with rapid recurrent genomic selection by @gorjanc2018 (animal
+file). In a simulation of a global programme with bridging and elite components,
+@sanchez2023 conclude that, with realistic plant breeding population sizes,
+diversity depletion in closed programmes "appears ineluctable", calling for the
+introduction of relevant diversity donors; bridging populations made by crossing
+genetic resources to elite lines, taking 25% of experimental resources, appear
+highly beneficial in their simulations, with optimal cross selection maintaining a
+constant diversity to incorporate improved donors.
 
-> A $\theta$ constraint on the existing pool cannot indefinitely substitute for
-> new germplasm. Plan periodic external injections rather than treating the line
-> pool as closed.
+> Inference, from one simulation under its assumptions: a constraint on the
+> existing pool can slow the loss of diversity but may not stop it. Plan periodic
+> external injections rather than treating the line pool as closed. @sec-cycles
+> simulates an injection in the book's own setting; that is not an operating
+> programme.
 
 ### Cycle length, and what goes unreported
 
-Rapid cycling delivers large gain-rate benefits: 12-88% relative gain advantage
-for oligogenic architectures at 2-3 cycles per year versus one; cycle time cut
-from 2-5 years to 1 year in intermediate wheatgrass with an explicit
-diversity-preserving sampling step. A maize two-cycle genomewide selection scheme
-reports larger gains at equal cost and time but **no diversity metric at all.**
+Shortening cycles is reported with gain-rate benefits in simulation and in one
+breeding programme:
+
+- In a simulation of a sorghum programme in Haiti, genomic-assisted recurrent
+  selection at two or three cycles a year had a **maximum** relative genetic gain
+  advantage over phenotypic recurrent selection at one cycle a year of 12-88% for an
+  oligogenic architecture and 26-165% for a polygenic one, observed for the
+  oligogenic case only in the first few cycles. Prediction accuracy declined
+  substantially after several cycles, and for small populations and oligogenic traits
+  the cost per unit gain was lower under phenotypic selection [@muleta2019].
+- In intermediate wheatgrass, genomic selection from 2017 cut the generation time
+  from 2-5 years to one cycle a year. About 100 of about 4,000 seedlings were chosen
+  as parents on their genomic estimated breeding value (GEBV); the genomic relationship matrix was used to represent
+  genetic diversity in the 1,000-1,200-genet validation populations that train the
+  model, not in parent selection [@crain2021].
+- In simulation, two-cycle genomewide selection in maize gave 124-178% of the
+  largest gain from phenotypic selection at the same cost and time; the abstract
+  reports no diversity metric [@bernardo2021].
 
 The diversity cost per unit of cycle-time reduction is not established in the
-retrieved set. Since shortening cycles is the single most common current
-intervention in commercial programmes, that is a conspicuous hole.
+plant file. It is addressed only in part elsewhere. @gorjanc2018 (animal file) simulates optimal cross selection
+under rapid recurrent genomic selection, and @sec-programme measures the relative loss
+of gene diversity from year 1 to year 15 in paired simulated runs with genomic selection
+switched on in year 6, in an inbred-line, wheat-type programme, and reports the mean
+cycle length of each arm beside it; that is a stock after fifteen years, not a cost per
+unit of cycle-time reduction, which @sec-programme does not compute. Neither is a hybrid
+maize programme, so the item stays open as worded.
 
-Simulation work on hybrid rice reciprocal recurrent selection reports that larger
-population sizes give higher gain *and* less depletion of genetic variance -- and
-that diversity is managed at the parental-pool level that feeds hybrids, which is
-exactly the line-usage level this book constrains.
+Simulation of reciprocal recurrent selection in hybrid rice finds that larger
+population sizes give the highest rates of improvement and the smallest decrease in
+additive genetic variance due to drift [@fritscheneto2023]. That study predicts
+single-cross performance rather than shortening cycles, and its abstract says
+nothing about how diversity is managed.
 
 ### What is hybrid-specific, and what is not
 
-This distinction decides which literature transfers. **Every usefulness-criterion
-and progeny-variance study retrieved operates upstream, at the inbred-line
-development stage** -- cross potential selection, UCPC for multi-parental
-crosses, barley validation against realised populations, soybean family mean and
-variance prediction, wheat progeny-variance formulas. None operates on F1 hybrids
-of fixed inbreds.
+This distinction decides which literature transfers. Of the records the screen
+scored, every usefulness-criterion and progeny-variance study I found operates
+upstream, at inbred-line development: usefulness criterion with parental
+contributions for multi-parental crosses [@allier2019ucpc], barley validation
+against realised populations [@neyhart2019], soybean family mean and variance
+prediction [@wartha2024], wheat cross-progeny variance [@ogetebrad2024]. None of
+them, in the abstracts and notes, operates on F1 hybrids of fixed inbreds. That is
+a negative on abstracts, and a paper that does so without saying it in the abstract
+is invisible to it.
 
-That confirms rather than challenges the decision to drop the progeny-variance
-term: the term is real and actively predicted *before* fixation, and vanishes
-after it. It is why `usefulness_criterion()` belongs at S2 and nowhere else.
+That fits the book's decision to drop the progeny-variance term for hybrids: all
+F1 hybrids of one pair of fixed inbreds are genetically identical, so there is no
+within-cross variance to predict after fixation, and the term is real only before
+it. It is why `usefulness_criterion()` belongs at S2 and nowhere else
+(@sec-stages).
 
-One caution that is genuinely hybrid-specific: hybrid **mean** prediction
-benefits materially from additive-plus-dominance models, since dominance and SCA
-change predicted performance versus additive-only GEBVs. That is a separate axis
-from the diversity constraint -- it does not reopen the variance term, but it
-means line-usage optimisation on $\theta$ should not be conflated with
-mean-performance ranking of the same crosses.
+One caution is hybrid-specific, and it concerns the mean, not diversity. Where
+dominance is present, the expected value of an F1 is not the mean of its parents'
+additive values, and an additive-only index misses the specific combining ability (SCA)
+part (@sec-heterosis-gca-sca); the index of @sec-genomic-prediction is additive by
+construction, with no SCA. Two consequences are the book's, not the corpus's. The
+diversity side of the collapse (@sec-collapse) holds whatever the index, but the
+mean index is a function of the line-usage vector only if it is additive in the
+parents. And the line merit of the rounded route of @sec-advanced is a general
+combining ability (GCA) against the opposite pool, a property of the line against that
+tester pool. So line-usage optimisation on $\alpha$ should not be conflated with
+mean-performance ranking of the same crosses. I attach no source to the claim that
+hybrid-mean prediction gains from additive-plus-dominance models: the plant file
+holds records on hybrid prediction with dominance modelled (for example
+10.3835/plantgenome2018.10.0082), which I have not read to a conclusion, and the
+book fits no dominance model in prediction.
 
 ## Genebanks, core collections and introgression
 
-Core-subset construction converges on a shared objective -- maximise retained
-diversity at minimum accession count -- but diverges on method: GenoCore
-selecting 310 from 3,300+ sorghum accessions; distance-based optimisation on
-cassava; rice cores of 247 and 30 from 2,242 accessions; a lettuce core of 268
-from 811 capturing 99.4% of total variation.
+Core-subset construction converges on a shared objective, maximising retained
+diversity at minimum accession count, but diverges on method: GenoCore selecting
+310 from 3,333 sorghum accessions [@mufumbo2022]; rice cores of 247 (core) and 30
+from 2,242 accessions [@choudhury2021]; a lettuce core of 268 from 811 accessions
+capturing 99.4% of total variation [@huo2025]; cassava core collections built by
+two strategies (two plant-file records).
 
-The quantitatively strongest result: **marker-based core extraction captures
-3-78-fold more haplotypic diversity than geography- or environment-based
-surrogate sampling** across Arabidopsis, Populus and sorghum panels. If cores are
-being assembled, assemble them on markers.
+The quantitatively strongest result: in Arabidopsis, Populus and sorghum panels,
+marker-based subsets captured 3-78-fold more haplotypic diversity than subsets from
+geographic or environmental data [@reeves2020]. For cores assembled in those
+settings, assemble them on markers.
 
 Maize-specific core-collection algorithm choice is **not established in the
-retrieved set** -- maize genetic-resource work is oriented toward bridging and
+retrieved set**. Maize genetic-resource work in it is oriented toward bridging and
 targeted introgression instead:
 
-- DNA-pool genotyping of 156 landraces (2,340 individuals) against 327 elite
-  lines spanning the 20th century produced two indicators of a landrace's genomic
-  contribution to elite germplasm, used to rank donors rather than introduce
-  material blind.
-- Haplotype mining in ~1,000 landrace-derived doubled haploids found landrace
-  haplotypes **outperforming elite alternatives at the same loci**, stable across
-  populations and environments.
-- Rapid-cycling genomic selection *within* a landrace population (899 DH lines,
-  600K array) improves donor material before it contacts the elite pool.
-- For capturing landrace variation, the **doubled-haploid route beats gamete
-  capture** -- higher prediction accuracy, and no masking of landrace variation
-  behind a capture parent's background.
+- DNA-pool genotyping of 156 landraces (2,340 individuals) against 327 elite lines
+  spanning the 20th century gave two indicators of a landrace's genomic
+  contribution to elite germplasm [@arca2023]. The abstract reports that lines
+  derived from landraces with limited contributions enriched the haplotype diversity
+  of the reference lines more than those from high-contribution landraces.
+- Haplotype mining in about 1,000 landrace-derived doubled haploids (DH) found landrace
+  haplotypes outperforming breeding-line alternatives, stable across populations and
+  environments [@mayer2020].
+- Rapid-cycling genomic selection within a landrace population (899 DH lines for
+  training, 600K array) improves donor material before it contacts the elite pool;
+  the abstract also reports that prediction accuracies declined across cycles
+  [@polzer2025].
+- For capturing landrace variation, the doubled-haploid route beats gamete capture
+  in prediction accuracy [@holker2022].
 
 A $\theta$- or $N_s$-based accounting of introgression cost against a same-size
 resampling baseline is not established in the retrieved set.
 
-## The animal-breeding corpus: which matrix to manage
+## Matrix choice: the animal file
 
-On the animal side there is broad convergence that some form of optimal
-contribution or optimal cross selection on a **marker-based** coancestry matrix
-is the right optimisation *framework*. There is **no consensus on which specific
-genomic matrix** to place inside it, and multiple post-2018 papers report that
-the choice changes allele-frequency trajectories and diversity outcomes:
+The animal file tags `r n_mc` records with the theme "Coancestry / relationship
+matrix choice". In the records read for this chapter the optimal-contribution selection
+(OCS, @sec-ocs) or optimal-cross framework is common ground and the matrix placed inside it is not
+settled. The records differ in species, criterion and design:
 
-- IBD versus homozygosity- versus drift-based matrices give substantially
-  different results unless management is IBD-based (@sec-genomic-era).
+- Drift-, homozygosity- and identity-by-descent (IBD)-based inbreeding could differ substantially in
+  genomic OCS unless diversity management was based upon IBD [@meuwissen2020;
+  @sec-genomic-era].
 - A deviation-based coancestry matrix retained more genetic variability, while
-  VanRaden's kept allele frequencies closer to the base -- a genuine trade-off
-  between "more heterozygosity" and "less frequency drift".
-- A linkage-and-pedigree-informed matrix had the highest correlation with true
-  IBD, the most accurate $\Delta F$, and was the only scheme keeping frequency
-  drift down while meeting the inbreeding target.
-- ROH-based genomic relationship outperformed SNP-based relationship for
-  limiting inbreeding accumulation at equal gain, in pigs.
+  VanRaden's kept allele frequencies closer to those of the base population
+  [@moralesgonzalez2021]. The criteria differ, so this is a trade-off between
+  variability kept and frequency change.
+- A linkage-and-pedigree-informed matrix had the highest correlation with the true
+  IBD, the most accurate rate of inbreeding $\Delta F$, and was the only scheme to stay below the
+  inbreeding target while minimising frequency change at neutral loci
+  [@waege2026].
+- In pigs, genomic mating limited inbreeding accumulation better than other mating
+  approaches at the same expected gain, and ROH-based relatedness in genomic mating
+  gave faster gain than SNP-based relatedness [@zhao2023]. That is a mate-allocation
+  study, not OCS, and in the full text the authors saw no trend using ROH-based
+  inbreeding coefficients to assess the inbreeding trend.
 
-The consensus, such as it is: molecular or IBD-flavoured coancestry outperforms
-simple VanRaden-style relationship for diversity management, but the field has
-not converged on a single preferred matrix. As @sec-choosing notes, the
-line-level collapse holds for **any** symmetric $\mathbf{f}^L$, so this open
-question does not destabilise the computational results.
+These records do not rank the matrices, and this book relies on no ranking
+(@sec-choosing-recommendation, caveats): a table of @sec-genomic-era reports that
+in the nine schemes of @meuwissen2020 the homozygosity-based matrix, to which the
+book's $\mathbf{f}$ is affine, misses the drift target by the widest margin. The
+line-level collapse of @sec-collapse is algebra for any symmetric line-level
+$\mathbf{f}^L$, given that the hybrid-level matrix is defined by @eq-collapse-f;
+whether that definition is right for a centred VanRaden matrix is not established
+there, and managing on molecular coancestry controls homozygosity, not drift. So the
+open choice of matrix does not change the cost and identity results of
+@sec-choosing and does change what the constraint controls.
 
-On allelic richness the post-2018 work sharpens rather than contradicts the
-recommendation: allelic variation is far more sensitive to bottlenecks than
-heterozygosity, there is a linear relationship between census-size reduction and
-reduction in expected number of alleles at drift-mutation equilibrium, and
-standard $N_e$ corrections do **not** predict allelic loss well. One paper
-explicitly recommends expanding the $N_e > 500$ conservation guideline to include
-an allelic-variation criterion.
+On allelic variation, @allendorf2024 write about the expected number of alleles per
+locus at drift-mutation equilibrium in a species-conservation setting, which is the
+fourth sense of allelic richness (@sec-plant-corpus) and not $A_{\text{ret}}$. They report that
+allelic variation is much more sensitive to bottlenecks than heterozygosity, that
+the usual adjustments of $N_e$ for departures from the ideal population do not
+predict the loss of allelic variation well, that the expected number of alleles at
+equilibrium is linearly related to the reduction of the census size, and they
+recommend extending the guideline of long-term $N_e > 500$ to allelic variation.
+Those results concern multiallelic loci. The book has not shown that they transfer
+to $A_{\text{ret}}$ on biallelic SNPs of inbred lines, @sec-richness declines the
+transfer, and @sec-choosing says that whether the MAF-threshold loss and allelic
+richness carry the same information was not examined. The paper is a reason to
+expect allele counts and heterozygosity to respond differently to a bottleneck,
+which is why $A_{\text{ret}}$ is reported beside $\alpha$. It does not test the
+recommendation.
 
-And on effective size, two cautions beyond $N_s = 1/(2\theta)$: under *active*
-optimal molecular management, rate-based $N_e$ is numerically pathological --
-negative in early generations, with no long-term asymptote -- and $N_e$ however
-estimated is informative about heterozygosity loss but not about allelic loss.
-Both reinforce reporting only a static status-number descriptor under active
-management.
+On effective size, @toro2020 report in their abstract that under optimal molecular
+management the rate-based $N_e = 1/(2\Delta F)$ takes negative values in early
+generations and reaches no asymptote in the long term (abstract only, as in
+@sec-ns). @allendorf2024 is a statement about $N_e$ as a predictor of
+allelic loss. The first cautions against reading a rate-based $N_e$ off a managed
+population, and the second is a separate limit of $N_e$; @sec-choosing-recommendation
+says not to report a rate-based $N_e$ under active management, and reports $N_s$ as
+a descriptor of a plan.
+That is not a recommendation to stop measuring $\Delta F$: @sec-choosing monitors
+$F_{drift}$ and $F_{hom}$ against the random-subset null, and
+@sec-cycles measures $\Delta F$ from the trajectory of $F_{\text{drift}}$ with a
+diagnostic for a saturating series.
 
 ## Optimisation machinery reported in plants
 
-This is where the corpus is thinnest, and it confirms the computational gap.
+This is where the corpus is thinnest. In the abstracts and notes the screen read:
 
-- **Optimal contribution methods** are applied across crops, but no abstract
-  states solver type, runtime, or complexity class.
+- **Optimal contribution methods** in plant records (for example @sanchez2023) do
+  not state solver type, runtime or complexity class.
 - **Core-subset search** is greedy or distance-based heuristic; only input and
-  output set sizes are reported, never runtime.
-- **Evolutionary algorithms** appear mainly *outside* plants. Within plants the
-  closest analogue is a black-box numerical optimiser for progeny allocation,
-  with no named algorithm, problem size, or convergence statistic.
-- Problem sizes are reported as candidate-cross counts (330,078 possible barley
-  parent combinations) or collection sizes, never as optimiser performance.
+  output set sizes are reported, not runtime.
+- **Evolutionary and metaheuristic algorithms** are applied in plants, to other
+  objectives. @yadav2025 (animal file) compare a genetic algorithm (GA),
+  differential evolution (DE), particle swarm optimisation (PSO) and simulated
+  annealing (SA) for choosing parents under Optimal Haplotype Selection and Optimal
+  Population Value (OPV), on 583 wheat lines with 29,972 SNPs scored for stripe rust.
+  @yadav2026 (animal file) use a genetic algorithm to select 50 donor parents for
+  introgression into one elite cultivar. @villiers2024 (plant file), titled
+  "Evolutionary computing to assemble standing genetic diversity ...", compare
+  optimal haplotype stacking, optimal population value, truncation and OCS over 100
+  generations in a wheat simulation: OCS and truncation had exhausted diversity
+  while considerable diversity remained under haplotype stacking. A plant-file
+  record optimises breeding-programme design by stochastic simulation with
+  evolutionary algorithms (10.1093/g3journal/jkae248); I have not read it beyond its
+  note.
+- **Problem sizes** are reported as candidate-cross counts (330,078 possible barley
+  parent combinations, @neyhart2019) or collection sizes, never as optimiser
+  performance.
 
-**No retrieved plant study applies differential evolution -- or any metaheuristic
--- to an OCS-type hybrid selection problem, and none reports a runtime or
-complexity comparison against quadratic-programming OCS solvers.**
+**In neither file does a record apply DE or another metaheuristic to a
+diversity-constrained selection of hybrids, or report a runtime or complexity
+comparison against quadratic-programming OCS solvers.** The tasks of the records in this section are
+haplotype stacking and introgression, not selection under a coancestry constraint.
+That is a statement about notes and abstracts.
 
-On the animal side, AlphaMate remains the most cited applied tool. The most
-directly relevant comparison benchmarked genetic algorithms, differential
-evolution, particle swarm and simulated annealing for parent selection in a
-583-line wheat dataset: GA gave the best convergence speed and fitness; **DE was
-robust but required longer runtime and careful tuning**. That is consistent with
-@sec-choosing's finding that the encoding, not the algorithm, is what decides
-the outcome.
+AlphaMate [@gorjanc2018alphamate], whose note in the animal file says it optimises
+with an evolutionary algorithm, has `r ani$citations[am]` citations at screening,
+rank `r rank(-ani$citations, ties.method = "min")[am]` of `r nrow(ani)` by
+citations in that file, so the file does not support calling it the most cited
+tool.
+
+The ranking in @yadav2025 is of algorithms on one problem. As @sec-advanced reads it,
+the order by convergence area under the curve (AUC) for the OPV objective is GA 0.879, DE
+0.860, PSO 0.820 and SA 0.769, with DE comparable in final fitness; the abstract
+says GA "consistently achieved high fitness and rapid convergence" and DE "showed
+robustness but required longer runtime and careful tuning". The AUC values and the
+583 are not in either CSV, whose note for the record only says that it compares DE,
+GA, PSO and SA, and are in no versioned file here. This is evidence about
+algorithms on a haplotype objective. It is not evidence about encodings:
+Finding 4 of @sec-choosing-search is a verdict on the N-dimensional key encoding
+at one budget (three seeds, one setup, four restrictions), and @sec-advanced finds
+`sel_de()` ahead of the line-encoded DE only without a cap and a swap local search
+ahead of both at equal wall-clock. For this book's problem the algorithm and its
+move structure matter as well as the encoding. The wheat study tests neither claim:
+it has a different objective, no OCS and no swap local search.
 
 ## What remains unestablished
 
-Stated strictly, from the screened abstracts. These are the honest boundaries of
-what this book can claim support for. The distinction that matters here is
-between *unestablished in the literature* and *unaddressed in this book*: two of
-these items now have a simulated answer in @sec-heterosis and @sec-cycles, which
-narrows what the book leaves open without changing what the corpus establishes. A
-simulation under stated assumptions is not evidence from an operating programme,
-and the items below are still the honest boundary of the second.
+Stated strictly, from the screened abstracts and notes. The distinction that
+matters is between *unestablished in the literature*, the claim of this chapter,
+and *unaddressed in this book*. @tbl-plant-unestablished lists the items and, for
+each, the answer the book gives. Those answers are simulations and measurements
+under stated assumptions, none from an operating programme; they narrow what the
+book leaves open and do not change what the corpus establishes. The third and
+seventh rows rest on @sec-cycles and @sec-programme, which had no final review
+record when this chapter was reviewed; read them as conditional on those chapters.
+The seventh row's answer is a year-15 stock beside the arms' mean cycle lengths, not
+a rate per unit of cycle-time reduction.
 
-- Application of DE or any metaheuristic to a $\theta$-constrained line-usage
-  selection problem in maize.
-- Runtime or complexity comparison between OCS quadratic solvers and
-  metaheuristics for any plant breeding problem.
-- Empirical proportional diversity loss measured against a same-size resampling
-  baseline in an operating maize hybrid programme. (@sec-cycles simulates the
-  multi-cycle consequence and finds a gain crossover; no published maize
-  programme reports the measurement itself.)
-- Longitudinal joint reporting of allelic richness alongside $\theta$ or $N_s$
-  for the same hybrid maize programme.
-- Hybrid-genome-level (rather than parental-pool-level) coancestry optimisation
-  for F1 maize.
-- Whether a dominance-informed term would change optimal-cross outcomes relative
-  to the mean-only approach. (@sec-heterosis derives the term and shows expected
-  heterosis is invariant to $F_{ST}$ under neutral divergence, so a
-  dominance-informed ranking must differ from a frequency-based one. Whether it
-  changes *realised* outcomes in a programme is untested either way.)
-- Quantitative diversity cost per unit of cycle-time reduction under
-  rapid-cycling hybrid maize.
-- ROH-based diversity metrics applied to maize hybrid pools (22 records use ROH,
-  only 5 in maize, none for hybrid diversity management).
-- Per-evaluation computational cost of diversity metrics, as a function of
-  population size or metric type, anywhere in either corpus.
-- Diversity metrics defined on hybrids rather than on lines or parents.
-- Combinatorial equal-contribution (0/1) selection compared directly against
-  continuous-contribution designs.
+| Item (not in the retrieved set) | What the book gives, and its limits |
+|:--------------------------------|:------------------------------------|
+| DE or any metaheuristic on a $\theta$-constrained line-usage selection in maize | Line-encoded DE and a swap local search on simulated pools (@sec-advanced); not maize data |
+| Runtime or complexity comparison of OCS quadratic solvers and metaheuristics, any plant problem | Quadratic-programming OCS (@sec-ocs) against metaheuristics on simulated data, at book and production scale (@sec-advanced) |
+| Proportional diversity loss against a same-size resampling baseline in an operating maize programme | None from a programme. @sec-cycles simulates the multi-cycle consequence and finds a gain crossover |
+| Joint longitudinal reporting of $A_{\text{ret}}$ with $\theta$ or $N_s$ in one hybrid programme | Reported together on simulated plans (@sec-choosing-recommendation); not longitudinal |
+| Coancestry optimisation at the hybrid genome level, F1 maize | $N \times N$ hybrid matrix in @sec-ocs; its collapse to lines for inbred parents and an additive index in @sec-collapse |
+| Whether a dominance-informed term changes optimal-cross outcomes against the mean-only approach | @sec-heterosis derives the term: expected heterosis is invariant to $F_{BN}$ under neutral divergence, for a dominance coefficient independent of the frequencies, and a mean is not a ranking. Realised outcomes in a programme are untested either way |
+| Diversity cost per unit of cycle-time reduction, rapid-cycling hybrid maize | Relative loss of gene diversity from year 1 to year 15 in an inbred-line, wheat-type simulated programme, with each arm's mean cycle length (@sec-programme): a stock, not a per-cycle or per-year rate; not hybrid maize |
+| ROH-based diversity metrics applied to maize hybrid pools | None. The usage table lists `r chk[5, 2]` records in its merged "Inbreeding coefficient / ROH" row, `r chk[5, 3]` in maize (external classification); the shipped `metric_used` column has `r chk[5, 4]` ROH records. Neither supports a hybrid-pool application |
+| Per-evaluation computational cost of diversity metrics, in either file | Measured in @sec-choosing-cost (cached external data) and in @sec-advanced |
+| Diversity metrics defined on hybrids rather than on lines | Hybrid-level $\mathbf{f}$ in @sec-catalogue and @sec-hp-popgen |
+| Combinatorial equal-contribution (0/1) selection against continuous-contribution designs | Relaxation and rounding against the bound in @sec-ocs and @sec-advanced |
+
+: Items unestablished in the retrieved set, and where the book answers each in simulation or measurement. {#tbl-plant-unestablished}
 
 ## Consequences for the pipeline
 
-1. Keep the narrow metric set inside the optimiser and report the wide package
-   outside it.
-2. Plan for periodic germplasm injection. A closed elite pool depletes regardless
-   of how well the within-pool constraint is managed.
-3. Prefer bridging over direct introduction for exotic material, and rank donors
-   by their genomic contribution to the elite pool rather than by raw diversity.
-4. Treat heterotic-group assignment as an uncertain input -- the pool-balance
+1. Keep the two metrics of @sec-choosing-recommendation inside the optimiser and
+   report the wide package outside it.
+2. Plan for periodic germplasm injection. On the one simulation reviewed
+   [@sanchez2023], a closed elite pool depletes however well the within-pool
+   constraint is managed.
+3. Bridging, rather than direct introduction, for exotic material is the
+   recommendation of the @sanchez2023 abstract, which I could not confirm against
+   a direct-introduction arm; I read it as a hypothesis for this book, not as an
+   established comparison. @sanchez2023 select donors on phenotype, not on genomic
+   predictions calibrated on the ongoing programme. The choice of donor criterion
+   is not established: @arca2023 report that lines derived from landraces with
+   limited contributions enriched the haplotype diversity of the reference lines
+   more than those from high-contribution landraces, and compare no ranking by
+   contribution with a ranking by raw diversity.
+4. Treat heterotic-group assignment as an uncertain input: the pool-balance
    constraint is only as good as the assignment behind it.
-5. Constrain between-pool divergence within a band rather than maximising it.
-6. Do not conflate the diversity constraint with mean prediction. Hybrid means
-   need additive-plus-dominance models; the diversity constraint needs neither.
-7. Report the diversity cost per cycle explicitly when shortening cycles.
-8. If assembling a core or donor set, do it on markers rather than passport data.
-9. Watch for allelic redundancy: high marker-based distance can coexist with
-   shallow genealogy, so a coancestry constraint is safer than a distance-based
-   one.
-10. Validate on real genotypes before treating the redundancy result as settled.
+5. Hold between-pool divergence in a band rather than maximising it (Trap 3 of
+   @sec-stages); the width of the band is a programme decision.
+6. Do not conflate the diversity constraint with mean prediction. The diversity
+   side is a function of line usage and needs no dominance model; the mean index
+   needs one wherever dominance is present (a consequence of
+   @sec-heterosis-gca-sca, not a corpus result).
+7. Report the diversity cost per cycle explicitly when shortening cycles
+   (@sec-programme reports the year-15 stock and the cycle length, not a
+   per-cycle rate).
+8. If assembling a core or donor set, do it on markers rather than passport data,
+   within the settings of @reeves2020.
+9. Do not read a high marker-based distance as the absence of redundancy: a
+   constraint on state-based $f$ is a constraint on distance for inbred lines
+   (Trap 1 of @sec-stages). In the 298-line study [@wegary2019] a large share of
+   pairs is distant on the state scale while a majority is above 0.050 on the
+   relative-kinship scale; the authors read both as redundancy. That the two
+   scales disagree is this chapter's inference, not a result of the study.
+10. Validate on real genotypes the redundancy result of
+    @sec-choosing-redundancy, which is cached external data with an unrecorded
+    setting, before treating it as settled.
 
 <!-- reproduce-chapter -->
 

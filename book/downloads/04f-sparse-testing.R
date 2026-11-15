@@ -121,6 +121,15 @@ spr_gain <- function(h) {
                             strategy %in% c("complete", "random"))$acc_all_mean
   a(10) - a(2)
 }
+# The same contrasts with the unpaired s.e. of the difference of two cell means
+# (15 replicates each), so that the text prints the dispersion.
+spr_d <- function(h, L0, L1) {
+  a <- subset(s4, k == 2 & nLoc == L0 & h2_plot == h & strategy %in% c("complete", "random"))
+  b <- subset(s4, k == 2 & nLoc == L1 & h2_plot == h & strategy %in% c("complete", "random"))
+  stopifnot(nrow(a) == 1L, nrow(b) == 1L)
+  d <- b$acc_all_mean - a$acc_all_mean; se <- sqrt(a$acc_all_se^2 + b$acc_all_se^2)
+  c(diff = d, se = se, z = d / se)
+}
 # Result 3: the contrasts of the cached study (the family is all of them).
 n_ct   <- nrow(ct)
 p_all  <- g("fast", "acc_all", "parentage - random")
@@ -148,6 +157,8 @@ fc   <- function(k) pc(conv$frac[conv$k == k])
 med  <- aggregate(cbind(relbias_s2f_mean, relbias_s2fl_mean, relbias_s2s_mean,
                         relbias_h2_mean) ~ k, sc, median)
 med_k <- function(v, k) 100 * med[[v]][med$k == k]
+iqr_k <- function(v, k) 100 * quantile(sc[[v]][sc$k == k], c(0.25, 0.75))
+vs2s  <- function(h) val[val$component == "s2s" & val$h2_plot == h, ]
 # Result 6: gain by N1 at the same total plots, paired by replicate (the mean
 # over the strategies and stage-2 settings that share the budget).
 mb <- aggregate(gain_sd_units ~ N1 + plots_total + rep, ts, mean)
@@ -170,13 +181,15 @@ mt$p <- 2 * pt(-abs(mt$t), df = mt$reps - 1)
 #' pressure where it has the least information. It typically has thousands of
 #' testcrosses, seed for one or two plots of each, a handful of locations, and
 #' almost no replication. @sec-mating compared **which crosses** to make from two
-#' pools -- connected sparse factorials against tester designs, analysed by BLUP, with
+#' pools -- connected sparse factorials against tester designs, analysed by best linear unbiased prediction (BLUP), with
 #' results that are conditional on the design and field size it states -- but held the
 #' field fixed and folded genotype x location into plot error. This chapter takes the
 #' crosses as given and asks the next question: **which locations should each one
 #' be planted in?**
 #' 
-#' *Sparse testing* is the answer the literature has converged on. Not every hybrid
+#' *Sparse testing* is the strategy that the six primary studies of
+#' @tbl-sparse-primary examine, on different axes and with different conclusions about
+#' overlap (@sec-sparse-overlap). Not every hybrid
 #' is grown at every location. Different subsets go to different environments, and
 #' the missing hybrid x environment cells are *predicted*, not discarded, with a
 #' relationship matrix connecting what the field left unconnected. In @sec-mating
@@ -203,9 +216,13 @@ mt$p <- 2 * pt(-abs(mt$t), df = mt$reps - 1)
 #'    on these two cells.
 #' 2. **At a fixed number of plots, spreading them over more locations raised
 #'    accuracy.** Spreading two plots per hybrid over ten locations instead of two
-#'    raised accuracy by `r r2(spr_gain(0.4))` at $h^2 = 0.4$ and `r r2(spr_gain(0.2))`
-#'    at $h^2 = 0.2$, with no extra plots (cached REML study, one configuration:
-#'    see Scope below).
+#'    raised accuracy by `r r2(spr_gain(0.4))` (s.e. `r sprintf("%.3f", spr_d(0.4, 2, 10)[["se"]])`
+#'    of the unpaired difference, $z = `r sprintf("%.1f", spr_d(0.4, 2, 10)[["z"]])`$) at
+#'    $h^2 = 0.4$ and `r r2(spr_gain(0.2))` (s.e. `r sprintf("%.3f", spr_d(0.2, 2, 10)[["se"]])`,
+#'    $z = `r sprintf("%.1f", spr_d(0.2, 2, 10)[["z"]])`$) at $h^2 = 0.2$, with no extra
+#'    plots (cached restricted maximum likelihood (REML) study, one configuration: see Scope below). The step from six to
+#'    ten locations is not resolved ($z = `r sprintf("%.1f", spr_d(0.4, 6, 10)[["z"]])`$ and
+#'    `r sprintf("%.1f", spr_d(0.2, 6, 10)[["z"]])`).
 #' 3. **Parentage allocation exceeded random allocation by a small margin that does
 #'    not survive a multiplicity correction, and not on the operational metric.**
 #'    Parentage minus random was `r r4s(p_all$diff)` on accuracy over all hybrids,
@@ -224,12 +241,21 @@ mt$p <- 2 * pt(-abs(mt$t), df = mt$reps - 1)
 #'    the highest hybrid overlap and nearly the same parent coverage, did not. No
 #'    arm varies coverage with overlap fixed.
 #' 5. **In the cached REML grid the dispersion slope of the BLUP stayed near 1
-#'    where REML converged, while variance components were estimated less well.**
-#'    Where every fit converged ($k \ge 2$) there was no systematic dispersion
-#'    bias. At one location per hybrid REML converged in `r fc(1)` of fits, and the
-#'    median relative bias was `r sprintf("%+.1f", med_k("relbias_h2_mean", 1))` % for plot $h^2$
-#'    and `r sprintf("%+.0f", med_k("relbias_s2s_mean", 1))` % for the SCA variance. The
-#'    SCA variance is also biased upward in the complete design.
+#'    where REML converged; the variance components were estimated less well, the specific combining ability (SCA)
+#'    variance with an upward median bias at small $k$ whose cause these data do not
+#'    separate.** Where every fit converged ($k \ge 2$) there was no systematic
+#'    dispersion bias. At one location per hybrid REML converged in `r fc(1)` of fits,
+#'    and the median relative bias over scenarios was
+#'    `r sprintf("%+.1f", med_k("relbias_h2_mean", 1))` % for plot $h^2$,
+#'    `r sprintf("%+.1f", med_k("relbias_s2f_mean", 1))` % for the female general combining ability (GCA) variance and
+#'    `r sprintf("%+.0f", med_k("relbias_s2s_mean", 1))` % for the SCA variance
+#'    (interquartile range of the scenarios `r sprintf("%+.0f", iqr_k("relbias_s2s_mean", 1)[[1]])`
+#'    to `r sprintf("%+.0f", iqr_k("relbias_s2s_mean", 1)[[2]])` %; no complete design
+#'    exists at $k = 1$ to compare with). In the complete design the SCA bias is positive
+#'    at both heritabilities (`r sprintf("%+.0f", vs2s(0.2)$relbias_pct)` % and
+#'    `r sprintf("%+.0f", vs2s(0.4)$relbias_pct)` %), resolved at the uncorrected 5 % level at
+#'    one of them and at neither after Bonferroni correction over the `r nrow(val)` tests of
+#'    the validation table.
 #' 6. **In the cached two-stage scenario, covering more candidates in stage 1
 #'    gave a larger realised gain at the same total plots, but with four replicates
 #'    nothing survives a multiplicity correction.** The paired
@@ -263,7 +289,7 @@ mt$p <- 2 * pt(-abs(mt$t), df = mt$reps - 1)
 #'   - allocation generators;
 #'   - connectivity diagnostics;
 #'   - a base-R mixed-model solve with **known** variance components, checked
-#'     against a literal GLS oracle (`ref_sparse_blup()`).
+#'     against a literal generalised least squares (GLS) oracle (`ref_sparse_blup()`).
 #' - **Cached** results come from a separate study and are not reproducible from
 #'   this repository. That study estimated components by REML with `sommer` on
 #'   2,630 fits, ran a two-stage scenario, and added an AlphaSimR genomic layer.
@@ -276,9 +302,12 @@ mt$p <- 2 * pt(-abs(mt$t), df = mt$reps - 1)
 #' 
 #' The literature numbers are from six primary papers: @li2026, @atanda2022,
 #' @werner2025, @lubanga2025, @gonzalezdieguez2026 and @hildaono2026. The numbers
-#' attributed to @li2026 and to @werner2025 have been checked against their abstracts
-#' only, not against their full texts; the others were checked in the book's
-#' reference review against the full text, with exceptions noted where they occur.
+#' quoted from @li2026, @werner2025 and @hildaono2026 (the validation-scheme and model
+#' definitions and anchor numbers of @li2026, Tables 1 and 2 of @werner2025, the
+#' availability results of @hildaono2026) were read against the full texts in the second
+#' review of this chapter; the statements about the other three were checked in the
+#' book's reference review against the full text, with exceptions noted where they
+#' occur. That is not a claim that every figure of the six papers was rechecked.
 #' **@werner2025 is a preprint that has not been peer reviewed.**
 #' :::
 #' 
@@ -293,7 +322,7 @@ mt$p <- 2 * pt(-abs(mt$t), df = mt$reps - 1)
 #' 
 #' - **Genotyping is no longer the bottleneck. Phenotyping is.** The cost of a
 #'   marker datum is taken to be small against the cost of a yield plot.
-#' - **Doubled haploids reversed the constraint.** A programme can now make more
+#' - **Doubled haploids (DH) reversed the constraint.** A programme can now make more
 #'   candidates than it can evaluate. Allocating plots, not creating variation, is
 #'   then the limiting factor.
 #' 
@@ -308,7 +337,7 @@ mt$p <- 2 * pt(-abs(mt$t), df = mt$reps - 1)
 #| fig-width: 9.5
 #| fig-height: 3.4
 #| fig-cap: "A two-pool hybrid pipeline. Population improvement (left) feeds product development (right). Candidate numbers fall by an order of magnitude per stage while plots per candidate rise. Sparse testing applies where the plots per candidate are fewest: the first testcross trial. The numbers are schematic; the simulation of this chapter has 400 hybrids."
-#| fig-alt: "A two-pool hybrid pipeline"
+#| fig-alt: "Flow chart of five boxes from left to right: DH lines (2 pools, about 2,000 per pool); stage 1 testcross trial (about 1,000 hybrids, 1-2 plots each, highlighted); stage 2 (about 100 hybrids, 4-8 locations); stage 3 (about 20 hybrids, 10-30 locations); release (1-3 hybrids). A dashed arrow leaves the underside of the stage 1 box and points down and to the left, ending below the DH lines box without touching it, with the label 'recycle parents (GCA)'; a second label with an arrow marks stage 1 as where sparse testing lives."
 op <- par(mar = c(0, 0, 0, 0)); plot.new(); plot.window(c(0, 100), c(0, 40))
 bx <- function(x, y, w, h, lab, fill) {
   rect(x, y, x + w, y + h, col = fill, border = "grey40")
@@ -323,8 +352,8 @@ bx(87, 14, 12, 14, "Release\n1-3\nhybrids", "grey92")
 ar(16, 21, 21); ar(40, 45, 21); ar(62, 67, 21); ar(82, 87, 21)
 arrows(30, 13, 8, 9, length = 0.08, lty = 2, col = "grey30")
 text(19, 6, "recycle parents (GCA)", cex = 0.65, font = 3)
-text(30.5, 34, "sparse testing\nlives here", cex = 0.75, font = 2, col = "#d98e04")
-arrows(30.5, 31, 30.5, 28.5, length = 0.06, col = "#d98e04")
+text(30.5, 34, "sparse testing\nlives here", cex = 0.75, font = 2, col = book_pal[["ink"]])
+arrows(30.5, 31, 30.5, 28.5, length = 0.06, col = book_pal[["ink"]])
 par(op)
 
 #' 
@@ -333,8 +362,8 @@ par(op)
 #' The gain per unit time,
 #' 
 #' $$
-#' \Delta G_t = \frac{i \, \rho \, \sigma_A}{t},
-#' $$
+#' \Delta G_T = \frac{i \, \rho \, \sigma_A}{T},
+#' $$ {#eq-sparse-breeder}
 #' 
 #' has four terms. $\rho$ is the accuracy of the selection criterion -- the $r$ of
 #' @sec-response; this Part keeps $r$ for plots,
@@ -342,12 +371,12 @@ par(op)
 #' (written $\sigma_g$ in @sec-mating). The accuracy reported by the simulation below is a
 #' correlation with the value of a *hybrid*, defined in @sec-sparse-results; it is not
 #' the GCA accuracy of @sec-mating, which is a correlation over lines. A trial design
-#' moves at least three of the terms together:
+#' moves at least three of the terms of @eq-sparse-breeder together (@tbl-sparse-box-terms):
 #' 
 #' - **intensity $i$**, through the number of candidates;
 #' - **accuracy $\rho$**, through plots, locations, and how well the locations sample
 #'   the target population of environments (TPE);
-#' - **cycle length $t$**, when parents can be recycled from stage 1.
+#' - **cycle length $T$**, when parents can be recycled from stage 1.
 #' 
 #' What a gain measured on a research station is worth depends on the genetic
 #' correlation between the selection environment and the TPE [@atlin2000;
@@ -355,7 +384,7 @@ par(op)
 #' to whichever term limits that programme [@werner2025trends;
 #' @riedelsheimer2013].
 #' 
-#' ::: {.callout-tip}
+#' ::: {.callout-note}
 #' ## Box 1 -- Where each term of the breeder's equation meets the trial design
 #' 
 #' | Term | Design decision that moves it |
@@ -364,7 +393,9 @@ par(op)
 #' | $\rho$ (accuracy) | plots per candidate, locations per candidate, use of a relationship matrix |
 #' | $\rho$ (relevance) | how well the chosen locations sample the TPE |
 #' | $\sigma_A$ | indirectly: which parents are recycled, and how related they are (@sec-ocs) |
-#' | $t$ | whether stage-1 GCA predictions are good enough to recycle parents immediately |
+#' | $T$ (cycle length) | whether stage-1 GCA predictions are good enough to recycle parents immediately |
+#' 
+#' : The terms of @eq-sparse-breeder and the design decisions that move each. {#tbl-sparse-box-terms}
 #' :::
 #' 
 #' ## Foundations {#sec-sparse-foundations}
@@ -376,9 +407,9 @@ par(op)
 #' 
 #' $$
 #' g_{ij} = \mathrm{GCA}^f_i + \mathrm{GCA}^m_j + \mathrm{SCA}_{ij}
-#' $$
+#' $$ {#eq-sparse-gca-sca}
 #' 
-#' This split is classically attributed to @sprague1942 (not checked at page level
+#' This split (@eq-sparse-gca-sca) is classically attributed to @sprague1942 (not checked at page level
 #' here). @sec-heterosis-gca-sca derives it from allele
 #' frequencies. Its consequence for this chapter is that a line's GCA includes
 #' dominance effects weighted by the *opposite* pool's frequencies. A GCA is
@@ -404,7 +435,7 @@ par(op)
 #' missing cells, and therefore the reason sparse testing works in hybrids, is not
 #' tested here.
 #' 
-#' ::: {.callout-tip}
+#' ::: {.callout-note}
 #' ## Quick glossary
 #' 
 #' - **GCA**: a line's average performance in crosses with the opposite pool.
@@ -425,9 +456,9 @@ par(op)
 #' \mathrm{GCA}^f \sim N(\mathbf 0, \mathbf A_f\sigma^2_{f}), \quad
 #' \mathrm{GCA}^m \sim N(\mathbf 0, \mathbf A_m\sigma^2_{m}), \quad
 #' \mathrm{SCA}   \sim N(\mathbf 0, (\mathbf A_f\otimes\mathbf A_m)\sigma^2_{s})
-#' $$
+#' $$ {#eq-sparse-kernels}
 #' 
-#' [@bernardo1994; @bernardo1996; @technow2012]. Here $\sigma^2_f$ and
+#' [@bernardo1994; @bernardo1996; @technow2012]. In @eq-sparse-kernels, $\sigma^2_f$ and
 #' $\sigma^2_m$ are the GCA variances of the female (pool-A) and male (pool-B)
 #' lines. They are the $\sigma^2_{gA}$ and $\sigma^2_{gB}$ of @sec-mating, whose
 #' $\sigma^2_g$ is their mean, $\sigma^2_g = (\sigma^2_f + \sigma^2_m)/2$;
@@ -449,7 +480,7 @@ par(op)
 #' **the hybrid itself never needs genotyping**: its covariance is a Kronecker
 #' product of the parental matrices. Replacing pedigree $\mathbf A$ by marker $\mathbf G$
 #' [@vanraden2008] gives the genomic version. @sec-genomic-prediction fits a single
-#' additive GBLUP over all hybrids, with no pool split, no SCA kernel and no Kronecker
+#' additive genomic BLUP (GBLUP) over all hybrids, with no pool split, no SCA kernel and no Kronecker
 #' product, so the kernels of this section are not fitted there. The live code of this
 #' chapter uses the pedigree matrices of `relmat_halfsib()`, and the cached genomic layer
 #' comes from the external study. There are
@@ -468,7 +499,7 @@ par(op)
 #' How many parameters the between-environment covariance spends ranges widely:
 #' 
 #' - identity, diagonal, or compound symmetry;
-#' - heterogeneous AR(1);
+#' - heterogeneous first-order autoregressive, AR(1);
 #' - unstructured;
 #' - factor-analytic [@smith2001; @smith2005; @kelly2007; @smith2018].
 #' 
@@ -476,24 +507,27 @@ par(op)
 #' at a fraction of its parameters, and extend directly to genomic relationships
 #' [@oakey2016; @tolhurst2019; @burgueno2012]. Reaction-norm and marker x
 #' environment models are cheaper alternatives [@jarquin2013; @lopezcruz2015].
-#' Only *crossover* G x E changes selection decisions. A scale effect does not.
+#' Only *crossover* genotype x environment (G x E) interaction changes selection decisions. A scale effect does not.
 #' 
 #' **In a sparse design the between-environment covariance stops being a
 #' statistical detail and becomes part of the design.** It decides how much one
 #' environment can tell us about another. Two-stage analyses that carry the
 #' first-stage error forward are now as efficient as one-stage ones
 #' [@piepho2012; @endelman2023]. Unreplicated trials still need spatial correction
-#' and checks [@robbins2012; @cullis2006].
+#' and checks [@robbins2012; @cullis2006]. @tbl-sparse-box-h2 sets the heritability-type quantities that can be
+#' reported side by side.
 #' 
-#' ::: {.callout-tip}
+#' ::: {.callout-warning}
 #' ## Box 2 -- Which heritability to report in a sparse trial
 #' 
 #' | Quantity | Formula | What it answers | Behaviour under sparsity |
 #' |---|---|---|---|
-#' | Plot-level $h^2$ | $\sigma^2_G / (\sigma^2_G + \sigma^2_{GE} + \sigma^2_e)$ | how informative one plot is | design-independent; it is what the simulations below fix |
+#' | Plot-level $h^2$ | $\sigma^2_G / (\sigma^2_G + \sigma^2_{GE} + \sigma^2_e)$ | how informative one plot is | design-independent; it is what the simulations of @sec-sparse-results fix |
 #' | Entry-mean $H^2$ | $\sigma^2_G / (\sigma^2_G + \sigma^2_{GE}/L + \sigma^2_e/(rL))$ | how informative an entry mean is, if every entry had $L$ locations and $r$ reps | undefined when entries have different $L$, i.e. in every sparse design |
-#' | Per-genotype reliability | $1 - \overline{\mathrm{PEV}} / \sigma^2_G$, with $\overline{\mathrm{PEV}}$ the mean prediction error variance of the target values | the squared correlation of the BLUP with the true value of one genotype, in expectation over repeated draws, if the components are right; the realised correlation over a finite set of hybrids differs (Box 4) | the quantity Box 4 computes; it uses the actual PEVs |
+#' | Per-genotype reliability | $1 - \overline{\mathrm{PEV}} / \sigma^2_G$, with $\overline{\mathrm{PEV}}$ the mean prediction error variance (PEV) of the target values | the squared correlation of the BLUP with the true value of one genotype, in expectation over repeated draws, if the components are right; the realised correlation over a finite set of hybrids differs (Box 4) | the quantity Box 4 computes; it uses the actual PEVs |
 #' | Generalised (Cullis) $H^2$ | $1 - \bar v_\Delta / (2\sigma^2_G)$, with $\bar v_\Delta$ the mean variance of the difference between two BLUPs [@cullis2006; @piepho2007] | how well the analysed design ranks entries | also uses the actual variances; not computed in this chapter. In an unbalanced design $\bar v_\Delta$ is not twice the mean PEV, so it is a different number from the reliability above |
+#' 
+#' : Four heritability-type quantities and their behaviour under sparsity. {#tbl-sparse-box-h2}
 #' 
 #' The entry-mean formula silently assumes balance. In a sparse trial, report a
 #' quantity that uses the actual PEVs: Cullis' $H^2$ or the per-genotype reliability.
@@ -530,15 +564,15 @@ par(op)
 #' Sparse testing is not a new method. It is incomplete-block design applied at
 #' the scale of many environments, made workable by genomic relationships acting as
 #' the connecting mechanism. The classical theory of incomplete blocks therefore
-#' carries over.
+#' carries over. @fig-sparse-genealogy draws the four steps as genotype x environment matrices.
 #' 
 ## -----------------------------------------------------------------------------
 #| label: fig-sparse-genealogy
 #| echo: false
 #| fig-width: 9.5
 #| fig-height: 2.9
-#| fig-cap: "The genealogy of sparse testing, drawn as genotype (rows) x environment (columns) matrices; dark = observed. From the complete trial, to incomplete blocks within locations, to p-rep (a few entries and checks replicated), to genomic sparse testing (each entry in a subset of environments, connected through relationships), to farm-as-incomplete-block (many environments, very few entries each)."
-#| fig-alt: "The genealogy of sparse testing, drawn as genotype (rows) x environment (columns) matrices; dark = observed"
+#| fig-cap: "The genealogy of sparse testing, drawn as genotype (rows) x environment (columns) matrices; dark = observed. From the complete trial, to incomplete blocks within locations, to p-rep (a few entries and checks replicated), to genomic sparse testing (each entry in a subset of environments, connected through relationships), to farm-as-incomplete-block (many environments, very few entries each). Schematic, not simulated data: four of the five panels are drawn by hand; the fourth of the five (genomic sparse testing) is one random draw of `sparse_alloc()` for 12 hybrids in 4 locations with 2 locations per hybrid."
+#| fig-alt: "Five grids of genotype rows by environment columns, dark cells observed: a complete trial, incomplete blocks, p-rep with checks, genomic sparse testing and farm-as-incomplete-block"
 set.seed(11)
 mats <- list(
   "Complete"            = matrix(1, 12, 4),
@@ -549,7 +583,7 @@ mats <- list(
 op <- par(mfrow = c(1, 5), mar = c(1, 0.6, 2, 0.6))
 for (nm in names(mats)) {
   M <- mats[[nm]]
-  image(t(M[nrow(M):1, , drop = FALSE]), col = c("grey95", "#1f5f8b"), zlim = c(0, 1), axes = FALSE,
+  image(t(M[nrow(M):1, , drop = FALSE]), col = c("grey95", book_pal[["ink"]]), zlim = c(0, 1), axes = FALSE,
         main = nm, cex.main = 0.85)
   box(col = "grey60")
 }
@@ -558,7 +592,7 @@ par(op)
 #' 
 #' ### A taxonomy of sparse designs
 #' 
-#' The designs can be classified along three independent axes.
+#' The designs can be classified along three independent axes. @fig-sparse-taxonomy draws six allocations and @tbl-sparse-taxonomy maps them onto the literature.
 #' 
 #' **Axis of sparsity.**
 #' 
@@ -585,8 +619,8 @@ par(op)
 #| echo: true
 #| fig-width: 9.5
 #| fig-height: 3.2
-#| fig-cap: "Six allocations of the same 8 x 4 factorial (32 hybrids, rows; male index fastest) to six locations (columns). The number of plots differs between panels and is printed above each. Panels 2 to 4 are written out in the chunk; panels 1, 5 and 6 are generated by the package's `sparse_alloc()`. 'Parentage' puts every female and every male in every location."
-#| fig-alt: "Six allocations of the same 8 x 4 factorial (32 hybrids, rows; male index fastest) to six locations (columns), with the number of plots printed above each panel; panels 1, 5 and 6 are generated by sparse_alloc()"
+#| fig-cap: "Six allocations of the same 8 x 4 factorial (32 hybrids, rows; male index fastest) to six locations (columns). The number of plots differs between panels and is printed above each; dark cells are planted. Panels 2 to 4 are written out in the chunk; panels 1, 5 and 6 are generated by the package's `sparse_alloc()`. 'Parentage' puts every female and every male in every location."
+#| fig-alt: "Six grids of 32 hybrid rows by six location columns, dark cells planted: complete, full-overlap core, core plus unique entries, no overlap, random with two locations per hybrid and parentage with two locations per hybrid; the number of plots is printed above each panel"
 set.seed(5)
 core6 <- function(n_core) {               # a common core + unique entries
   M <- matrix(0L, 32, 6); M[seq_len(n_core), ] <- 1L
@@ -601,7 +635,7 @@ tax <- list("Complete"          = sparse_alloc(8, 4, 6, strategy = "complete"),
             "Parentage, k = 2"  = sparse_alloc(8, 4, 6, 2, "parentage"))
 op <- par(mfrow = c(1, 6), mar = c(1, 0.5, 2.2, 0.5))
 for (nm in names(tax)) {
-  image(t(tax[[nm]][32:1, ]), col = c("grey95", "#1f5f8b"), zlim = c(0, 1), axes = FALSE,
+  image(t(tax[[nm]][32:1, ]), col = c("grey95", book_pal[["ink"]]), zlim = c(0, 1), axes = FALSE,
         main = sprintf("%s\n(%d plots)", nm, sum(tax[[nm]])), cex.main = 0.8)
   box(col = "grey60")
 }
@@ -610,26 +644,31 @@ par(op)
 #' 
 #' | Design | Sparsity axis | Overlap | Example | Reference |
 #' |---|---|---|---|---|
-#' | Full overlap (common core only) | environments | full | Li et al. "CV1" allocation | @li2026 |
-#' | Random cells, $\ge 1$ per genotype | environments | random | Li et al. "CV2"; Jarquin's allocation schemes | @li2026; @jarquin2020 |
-#' | Balanced by genotype (one environment each) | environments | none | Li et al. "CV3"; Lubanga NOL | @li2026; @lubanga2025 |
-#' | Core + unique entries | environments | partial | Li et al. "CV5"; Atanda overlap series | @li2026; @atanda2022 |
+#' | Full overlap (common core only) | environments | full | "CV1" allocation of @li2026 | @li2026 |
+#' | Random cells, $\ge 1$ per genotype | environments | random | "CV2" of @li2026; allocation schemes of @jarquin2020 | @li2026; @jarquin2020 |
+#' | Balanced by genotype (one environment each) | environments | none | "CV3" of @li2026; "NOL" (non-overlapping) of @lubanga2025 | @li2026; @lubanga2025 |
+#' | Core + unique entries | environments | partial | "CV5" of @li2026; overlap series of @atanda2022 | @li2026; @atanda2022 |
 #' | Restricted random, full-sibs apart | environments | random | farm-as-incomplete-block | @werner2025 |
 #' | One tester per line, sibs across testers | testers | none at line level | sparse testcrossing | @gonzalezdieguez2026 |
 #' | Incomplete factorial | female x male | partial | sparse factorials | @seye2020; @lorenzi2022 |
 #' 
-#' : The taxonomy mapped onto the designs in the literature. Different names often describe the same structure. {#tbl-sparse-taxonomy}
+#' : The taxonomy mapped onto the designs in the literature. Different names often describe the same structure. "CV1" to "CV5" are the labels @li2026 give to allocation designs (CV is cross-validation, from the validation schemes of @sec-sparse-validation, but here the label names a design; see the callout below). {#tbl-sparse-taxonomy}
 #' 
 #' ::: {.callout-warning}
 #' ## A naming collision to watch for
 #' 
 #' @li2026 use **"CV1" to "CV5" as names of allocation strategies**, not of the
 #' classical validation schemes of @sec-sparse-validation. Their "CV1" is the
-#' full-overlap *design*. Whether the prediction task that design poses coincides
-#' with the "new genotype" *validation* of @burgueno2012 is not settled here, because
-#' the Methods of @li2026 were not reread for this chapter; the two should not be
-#' equated. Reading the two literatures together without noticing this
-#' produces wrong comparisons.
+#' full-overlap *design*: 44 of the 264 genotypes are evaluated in all six
+#' environments. Their introduction states that CV1 "is used to predict entirely new
+#' genotypes", and in their Methods only those 44 genotypes carry records, so for CV1 the
+#' prediction task is the "new genotype" one of @burgueno2012. Their CV2 and CV3
+#' retain at least one record per genotype (Methods, Section 2.4, and the legend of
+#' their Fig. 1), so the cells predicted are unobserved cells of observed genotypes. For
+#' CV4 and CV5 the text read does not state that every genotype is observed, and the
+#' correspondence is not asserted here. What the label collision does is more modest:
+#' the same labels name a design in one literature and a validation task in the other,
+#' and reading the two together without noticing this produces wrong comparisons.
 #' 
 #' A second collision is inside this book, and it has three parts. @sec-hybrid-cv uses
 #' CV2 / CV1 / CV0 for hybrids with both / one / neither parent seen in training --
@@ -647,9 +686,9 @@ par(op)
 #' 
 #' ## Validation schemes: what each one answers {#sec-sparse-validation}
 #' 
-#' The classical schemes are defined by two questions. Has the genotype been
+#' The classical cross-validation (CV) schemes are defined by two questions. Has the genotype been
 #' observed anywhere? Has the environment been observed for anyone?
-#' [@burgueno2012; @jarquin2020]
+#' [@burgueno2012; @jarquin2020] @fig-sparse-cv draws the four schemes as a grid.
 #' 
 #' - **CV2**: the genotype is observed in some environments and missing in others.
 #'   The task is to *complete the table*.
@@ -660,7 +699,7 @@ par(op)
 #' - **CV00**: both the genotype and the environment are new. This is the hardest
 #'   case, and the most realistic for long-run decisions.
 #' 
-#' The schemes pose different prediction tasks, so accuracies obtained under
+#' @tbl-sparse-box-cv arranges the four by what is new. The schemes pose different prediction tasks, so accuracies obtained under
 #' different schemes are not comparable like for like. In the cached cells of this
 #' chapter `acc_cv1` exceeds `acc_cv2` in `r n_cv1_gt` of the `r n_both_cv` scenario cells
 #' where both exist (median difference `r sprintf("%+.3f", med_d_cv)`): neither is above
@@ -669,7 +708,7 @@ par(op)
 #' 
 #' - top-$x$ % coincidence: top 20 % by a Smith-Hazel index in @atanda2022, top 50
 #'   % in @li2026;
-#' - mean squared error [@lubanga2025];
+#' - mean squared error (MSE) [@lubanga2025];
 #' - Kendall's $\tau$ [@hildaono2026];
 #' - PEV and reliability, and the dispersion slope $b_1$ of truth on prediction.
 #' 
@@ -681,8 +720,8 @@ par(op)
 #| echo: false
 #| fig-width: 7.5
 #| fig-height: 4.6
-#| fig-cap: "The four validation schemes as a 2 x 2 by whether the genotype (rows) and the environment (columns) were observed. Blue: training cells. Orange: the cells to be predicted."
-#| fig-alt: "The four validation schemes as a 2 x 2 by whether the genotype (rows) and the environment (columns) were observed"
+#| fig-cap: "The four validation schemes as a 2 x 2 by whether the genotype (rows) and the environment (columns) were observed. Blue: training cells. Orange: the cells to be predicted. Schematic: 8 genotypes x 5 environments, not simulated data."
+#| fig-alt: "Four 8 x 5 grids, blue training cells and orange cells to predict: CV2 one cell per genotype, CV1 the last two genotypes in every environment, CV0 the last environment for every genotype, CV00 the last two genotypes in the last environment"
 op <- par(mfrow = c(2, 2), mar = c(1, 1, 2.4, 1))
 draw <- function(main, rows, cols) {
   M <- matrix(1, 8, 5); M[rows, cols] <- 2
@@ -697,13 +736,15 @@ draw("CV00: new genotype, new environment", 7:8, 5)
 par(op)
 
 #' 
-#' ::: {.callout-tip}
+#' ::: {.callout-note}
 #' ## Box 3 -- CV0, CV1, CV2 and CV00
 #' 
 #' |  | Environment observed | Environment new |
 #' |---|---|---|
 #' | **Genotype observed** | **CV2**: fill a missing cell. *"How does hybrid H do at location L, where it was not planted?"* | **CV0**: *"How will the known hybrids do next year?"* |
 #' | **Genotype new** | **CV1**: *"How good is a hybrid that was never planted?"* In this chapter's simulation, 20 % of hybrids per replicate | **CV00**: *"How good will an untested hybrid be next year?"* |
+#' 
+#' : The four cross-validation schemes by what is new. {#tbl-sparse-box-cv}
 #' 
 #' In the simulation below, `acc_cv1` is measured in this sense, for the hybrids with no
 #' plot. `acc_cv2` is measured on the missing cells of planted hybrids, against the
@@ -743,7 +784,7 @@ knitr::kable(ps[, c("study", "crop", "genotypes", "environments", "observed",
 #'   yield). Phenotyping cost could be cut by up to 80 %.
 #' - **Potato** [@hildaono2026]. For pairs of environments at 50 % completeness,
 #'   $r^2$ was 0.995 to 0.997 with an image-derived environment kernel, against
-#'   0.612 to 0.798 with the genomic kernel. Section @sec-sparse-phenomics covers
+#'   0.612 to 0.798 with the genomic kernel. @sec-sparse-phenomics covers
 #'   the caveat.
 #' 
 #' The common denominator is the **genetic correlation between environments, and
@@ -752,8 +793,18 @@ knitr::kable(ps[, c("study", "crop", "genotypes", "environments", "observed",
 #' correlations stayed poorly predicted under every design. In @li2026, plant
 #' height was the trait with the strongest between-environment correlations
 #' (0.36 to 0.67) and the best predicted. Grain yield had no strong correlations
-#' and was predicted worst. Modelling G x E explicitly helped in every study that
-#' tested it [@lubanga2025; @li2026]. **Cutting phenotyping by 50 to 80 % without
+#' and was predicted worst. The record on modelling G x E explicitly is mixed.
+#' @lubanga2025 report higher predictive ability and lower MSE for the G x E model
+#' across their sparse designs, with 20 % of records per environment; in @li2026 the
+#' reaction-norm model, which has a main genomic effect and an environment-specific
+#' deviation, had the highest accuracy of the four models compared (Table 2, S1 and CV1,
+#' and, by their text, averaged by region group over the 25 strategies); in
+#' @hildaono2026 the G x E term gave results comparable to the model without it at 66 %
+#' of the data per environment, and performance fell when it was included at higher
+#' proportions of missing data, which the authors attribute to too few individuals to
+#' estimate it. The studies differ in crop, data, kernels and sparsity, and none compares
+#' the same models across the same range, so the chapter draws no rule from them.
+#' **Cutting phenotyping by 50 to 80 % without
 #' losing accuracy is feasible. The exact cut depends on the programme's own
 #' between-environment correlations, and does not transfer between programmes.**
 #' 
@@ -792,14 +843,14 @@ knitr::kable(ps[, c("study", "crop", "genotypes", "environments", "observed",
 #' location** out of 400. A fraction of the 80 is a core common to all four
 #' locations, and the rest are unique to each location. Family size runs from
 #' unrelated lines to half-sib families of 10 (`regenerate.R sparse`, part c; 30
-#' replicates per point; known components; plot $h^2 = 0.4$).
+#' replicates per point; known components; plot $h^2 = 0.4$). @fig-sparse-overlap shows the result.
 #' 
 ## -----------------------------------------------------------------------------
 #| label: fig-sparse-overlap
 #| fig-width: 7.5
 #| fig-height: 4.2
-#| fig-cap: "Accuracy over all 400 hybrids against the fraction of each location's 80 plots taken by a core common to all four locations, by half-sib family size. The training size is held fixed, so more overlap means fewer distinct hybrids observed (top axis). Bars are two standard errors over 30 replicates. In-repo sweep, known variance components."
-#| fig-alt: "Accuracy over all 400 hybrids against the fraction of each location's 80 plots taken by a core common to all four locations, by half-sib family size"
+#| fig-cap: "Accuracy over all 400 hybrids against the fraction of each location's 80 plots taken by a core common to all four locations, by half-sib family size. The training size is held fixed, so more overlap means fewer distinct hybrids observed (top axis). Error bars span the mean plus and minus two standard errors over 30 replicates. In-repo sweep, known variance components."
+#| fig-alt: "Line plot of accuracy over all 400 hybrids against the fraction of each location's 80 plots in a common core, one line per family size from unrelated lines to half-sib families of 10, with error bars of two standard errors; a top axis gives the number of distinct hybrids observed"
 ov <- subset(core, part == "overlap")
 fs <- sort(unique(ov$family_size))
 cols <- c("grey40", "#1b9e77", "#d95f02")[seq_along(fs)]
@@ -873,7 +924,7 @@ unres_fs <- names(z_ov)[z_ov <= 2]
 #' 
 #' **What to do with this.** The right question is not "how many common
 #' genotypes?". It is "how much *effective* connectivity does the design have,
-#' counting both physical overlap and relationships?". The experiment above
+#' counting both physical overlap and relationships?". The experiment of @fig-sparse-overlap
 #' did not resolve an effect of relationships between lines at this scale, so it
 #' does not show that physical overlap and relationships substitute for each other.
 #' @atanda2022 found both the genetic correlation between environments and the
@@ -946,7 +997,18 @@ recipe <- function(M) {
 rec <- rbind(complete_2loc = recipe(sparse_alloc(nF, nM, 2, strategy = "complete")),
              random_k2     = recipe(sparse_alloc(nF, nM, L, 2, "random")),
              parentage_k2  = recipe(sparse_alloc(nF, nM, L, 2, "parentage")))
-fmt(rec, 3)
+
+#' 
+## -----------------------------------------------------------------------------
+#| label: tbl-sparse-recipe
+#| echo: true
+#| tbl-cap: "The recipe of Box 4 on three designs of 20 x 20 hybrids in 6 locations (one draw, seed 8). `plots` is the number of planted plots; `fem_cover` the mean fraction of the 20 female lines present per location; `disconnected_pairs` the fraction of location pairs sharing no hybrid; `reliability` is $1 - \\overline{\\mathrm{PEV}}/\\sigma^2_G$ at the provisional components of `sparse_vc(0.3)`."
+knitr::kable(fmt(rec, 3))
+
+#' 
+## -----------------------------------------------------------------------------
+#| label: sparse-connectivity-check
+#| echo: true
 # The PEV does not depend on y: asserted, not assumed.
 set.seed(9)
 M0 <- sparse_alloc(nF, nM, L, 2, "random")
@@ -966,7 +1028,7 @@ gap_h <- tapply(cr_b$gap, cr_b$h2_plot, mean)
 rho_b <- cor(1 - cr_b$pev / sparse_vc(0.4)$Vg, cr_b$acc_all, method = "spearman")
 
 #' 
-#' All three designs cost `r rec[1, "plots"]` plots. In the one draw above the
+#' All three designs cost `r rec[1, "plots"]` plots (@tbl-sparse-recipe). In that one draw the
 #' reliability is `r r4(rec["random_k2", "reliability"])` for random allocation and
 #' `r r4(rec["parentage_k2", "reliability"])` for parentage, against
 #' `r r4(rec["complete_2loc", "reliability"])` for the complete design in two
@@ -996,15 +1058,15 @@ rho_b <- cor(1 - cr_b$pev / sparse_vc(0.4)$Vg, cr_b$acc_all, method = "spearman"
 #' the haplotype, not the genotype. This removes a real logistical constraint. The
 #' more accurate alternative, an incomplete factorial among candidates
 #' (@sec-mating-sparse), needs hand pollination at scale and synchronised
-#' flowering between pools.
+#' flowering between pools. @fig-sparse-testcross shows the layout and @tbl-sparse-testers the gains the authors report.
 #' 
 ## -----------------------------------------------------------------------------
 #| label: fig-sparse-testcross
 #| echo: false
 #| fig-width: 8.5
 #| fig-height: 3.2
-#| fig-cap: "Sparse testcrossing. A biparental cross yields 20 DH lines; each line is crossed to one of four testers, so the family -- not the line -- meets every tester. The relationship matrix connects the full-sibs, and through them the four testers."
-#| fig-alt: "Sparse testcrossing"
+#| fig-cap: "Sparse testcrossing. A biparental cross yields 20 DH lines; each line is crossed to one of four testers, so the family -- not the line -- meets every tester. The relationship matrix connects the full-sibs, and through them the four testers. Schematic."
+#| fig-alt: "Diagram: a biparental cross P1 x P2 gives 20 DH full-sibs, each joined by a coloured line to one of four testers, so that each tester receives five of the 20 lines"
 op <- par(mar = c(0, 0, 0, 0)); plot.new(); plot.window(c(0, 100), c(0, 40))
 rect(2, 16, 16, 24, col = "grey90", border = "grey40"); text(9, 20, "P1 x P2\nbiparental", cex = 0.7)
 xs <- seq(24, 66, length.out = 20)
@@ -1050,7 +1112,7 @@ par(op)
 #' need ten isolation blocks. And in many public programmes hand pollination is
 #' already routine, which lowers the extra cost of the factorial.
 #' 
-#' ::: {.callout-tip}
+#' ::: {.callout-note}
 #' ## Box 5 -- Choosing testers: theory against practice
 #' 
 #' The classical recommendation is a *low-performing* tester, or one carrying
@@ -1079,9 +1141,10 @@ par(op)
 #' $\sigma^2_{GE}$) under sparsity.** The
 #' indirect evidence is thin:
 #' 
-#' - In @hildaono2026 the G x E term *degraded* prediction under high sparsity,
-#'   because there were too few individuals to estimate it. The authors recommend
-#'   dropping it in that regime.
+#' - In @hildaono2026 the G x E term *degraded* prediction in the scenarios with
+#'   less than 66 % of the data per environment (it was comparable at 66 %), which the
+#'   authors attribute, without testing it, to too few individuals to estimate it. They
+#'   then used models without the term.
 #' - In @li2026 propagating prediction uncertainty barely changed the GCA estimates
 #'   (correlation 0.9974 to 0.9998 with the point estimates). That is a sensitivity
 #'   of GCA, not of the variance components.
@@ -1112,7 +1175,7 @@ par(op)
 #' - the proposal of @hildaono2026: use the images to build an **environment**
 #'   kernel.
 #' 
-#' The environment kernel is built in three steps. A PCA of the image traits is
+#' The environment kernel is built in three steps (@fig-sparse-phenomics). A principal component analysis (PCA) of the image traits is
 #' run *within each environment*. The first-component eigenvector of each
 #' environment is extracted. The kernel entries are the correlations between those
 #' eigenvectors.
@@ -1120,8 +1183,9 @@ par(op)
 #' At 30 % data availability the comparison varied with the combination of
 #' environments. Across all scenarios with at least 33 % complete data per
 #' environment, the environment kernel matched or outperformed the genomic kernel,
-#' reaching $r^2 = 0.997$ on pairs of environments. At 10 and 20 % no consistent
-#' trend emerged [@hildaono2026]. **The authors warn of possible
+#' reaching $r^2 = 0.997$ on pairs of environments. At 10 and 20 % "no consistent
+#' trend emerged; however, the G kernel generally performed better in most
+#' scenarios" [@hildaono2026], that is, the genomic kernel, not the image-derived one. **The authors warn of possible
 #' information leakage**, because the kernel came from the same trial that supplied
 #' training and validation. The result should be reported with that caveat.
 #' 
@@ -1130,8 +1194,8 @@ par(op)
 #| echo: false
 #| fig-width: 9
 #| fig-height: 2.8
-#| fig-cap: "Building an environment kernel from images, after Hild Aono and Chawade (2026). The dashed box marks where training and validation share information -- the leakage the authors flag."
-#| fig-alt: "Building an environment kernel from images, after Hild Aono and Chawade (2026)"
+#| fig-cap: "Building an environment kernel from images, after @hildaono2026. The dashed box marks where training and validation share information -- the leakage the authors flag."
+#| fig-alt: "Flow chart of five boxes: UAV RGB images per environment, 6 indices (area under the time curve), PCA within each environment, PC1 eigenvectors correlated across environments, and kernel E in a G + E model; a dashed box around the first four marks where one trial supplies training and validation, a possible leakage"
 op <- par(mar = c(0, 0, 0, 0)); plot.new(); plot.window(c(0, 100), c(0, 30))
 labs <- c("UAV RGB images\nper environment", "6 indices,\narea under\ntime curve",
           "PCA within\neach\nenvironment", "PC1 eigenvectors,\ncorrelated\nacross envs", "kernel E\nin G + E model")
@@ -1151,7 +1215,7 @@ par(op)
 #' this arrangement with hybrids. It connects to envirotyping. When locations are
 #' close together, coarse-grid weather covariates discriminate poorly, and images
 #' capture differences that the weather data miss [@costaneto2020; @crossa2021;
-#' @rincent2017]. NIRS-based phenomic prediction in maize points the same way, in a
+#' @rincent2017]. near-infrared spectroscopy (NIRS)-based phenomic prediction in maize points the same way, in a
 #' non-sparse setting [@desalvio2024].
 #' 
 #' **Sensor data enter sparse testing as descriptors of environments, not of
@@ -1180,6 +1244,8 @@ par(op)
 #' 
 #' ### Realistic parameters: what the literature supplies
 #' 
+#' @tbl-sparse-parameters collects the parameters the six primary studies report.
+#' 
 ## -----------------------------------------------------------------------------
 #| label: tbl-sparse-parameters
 #| tbl-cap: "Reference parameters from the six primary studies. 'Derived' marks a value computed from reported components rather than reported directly. The ranges of genotypes, environments and cells observed are taken from @tbl-sparse-primary; the 'environments' row mixes locations and location-years."
@@ -1206,9 +1272,9 @@ knitr::kable(lp[, c("parameter", "value", "source", "derived")],
 #' y = \mu + \text{loc} + \mathrm{GCA}^f + \mathrm{GCA}^m + \mathrm{SCA}
 #'   + \mathrm{GCA}^f{\times}\text{loc} + \mathrm{GCA}^m{\times}\text{loc}
 #'   + \mathrm{SCA}{\times}\text{loc} + e .
-#' $$
+#' $$ {#eq-sparse-model}
 #' 
-#' The target is the value in the TPE, $\mathrm{GCA}^f + \mathrm{GCA}^m +
+#' In @eq-sparse-model the target is the value in the TPE, $\mathrm{GCA}^f + \mathrm{GCA}^m +
 #' \mathrm{SCA}$. In every replicate,
 #' **`r pc(mean(sc$n_cv1_mean / sc$nHyb), 0)` of the hybrids get no plot at all.**
 #' These are the CV1 hybrids, predicted only through relationships.
@@ -1231,7 +1297,7 @@ knitr::kable(lp[, c("parameter", "value", "source", "derived")],
 #' drawn at random from the 20 x 20 factorial (the cached study is described as leaving
 #' 20 % untested, and its mechanism is assumed to be the same), so every line stays a
 #' parent of about 16 planted crosses.
-#' That makes the "CV1 is T2" correspondence of the callout above true here, and it
+#' That makes the "CV1 is T2" correspondence of the callout in @sec-sparse-what true here, and it
 #' makes shared parents abundant. Both are properties of this configuration (see Scope).
 #' 
 #' **The calibration** is `sparse_vc()`:
@@ -1271,7 +1337,8 @@ knitr::kable(lp[, c("parameter", "value", "source", "derived")],
 #'   matrix, with replicated checks;
 #' - *parentage*: the factorial is cut into cyclic groups, each holding every
 #'   female and every male, and groups are dealt to locations so that **every
-#'   location receives both whole pools** (the rule that @sec-joint calls `coverage`).
+#'   location receives both whole pools** (@sec-joint's `coverage` is the closest
+#'   analogue, not the same allocation: it has no term for the hybrids two locations share).
 #' 
 #' The last is `sparse_alloc(strategy = "parentage")`.
 #' 
@@ -1298,12 +1365,16 @@ knitr::kable(fmt(v[, c("h2_plot", "component", "true", "mean_est", "relbias_pct"
 #' $p$ = `r sprintf("%.2f", 2 * pt(-abs(val$t[val$component == "s2s" & val$h2_plot == 0.4]), 29))`)
 #' at $h^2 = 0.4$. It is positive in both, detectable at the uncorrected 5 % level at
 #' one of the two heritabilities, and neither passes a Bonferroni threshold over the
-#' `r nrow(val)` tests of the table (`r sprintf("%.4f", 0.05 / nrow(val))`). The SCA variance
-#' is a small component (`r pc(vc_ex$s2s / vc_ex$Vg, 0)` of $\sigma^2_G$), and a procedure
+#' `r nrow(val)` tests of the table (`r sprintf("%.4f", 0.05 / nrow(val))`). The table
+#' therefore does not establish an upward bias of the SCA variance in the complete
+#' design: the sign agrees in the two cells, and the size is unresolved (30 replicates
+#' per cell; the s.e. of the relative bias is
+#' `r sprintf("%.1f", vs2s(0.2)$se_relbias_pct)` % and `r sprintf("%.1f", vs2s(0.4)$se_relbias_pct)` %).
+#' The SCA variance is a small component (`r pc(vc_ex$s2s / vc_ex$Vg, 0)` of $\sigma^2_G$), and a procedure
 #' bounded below at zero could produce an upward bias for a small component; that
-#' explanation is not tested here. The bias exists in the complete design, where there is
-#' no sparsity, so it is not an effect of sparsity. Every later SCA number has to be read
-#' against it.
+#' explanation is not tested here. Every later SCA number is read against this
+#' unresolved possibility; whether sparsity adds to it is addressed only descriptively
+#' in @tbl-sparse-s2s-spread, with the limits stated there.
 #' 
 #' The grid has 2,630 fits:
 #' 
@@ -1317,12 +1388,14 @@ knitr::kable(fmt(v[, c("h2_plot", "component", "true", "mean_est", "relbias_pct"
 #' 
 #' #### 1. A sparse allocation can come within 5 % of the complete design; the margin is thin
 #' 
+#' @fig-sparse-frontier shows the cost-accuracy curves (left) and the fixed-cost comparison of result 2 (right).
+#' 
 ## -----------------------------------------------------------------------------
 #| label: fig-sparse-frontier
 #| fig-width: 9
 #| fig-height: 4.2
-#| fig-cap: "Left: accuracy against plots for 400 hybrids at plot h2 = 0.4, one curve per number of locations (parentage and complete designs; complete marked with an open circle). Right: accuracy at a FIXED cost of two plots per hybrid, spread over 2 to 10 locations, random allocation, both heritabilities. Cached study, REML components, 15 replicates."
-#| fig-alt: "Left: accuracy against plots for 400 hybrids at plot h2 = 0.4, one curve per number of locations (parentage and complete designs; complete marked with an open circle)"
+#| fig-cap: "Left: accuracy against plots for 400 hybrids at plot h2 = 0.4, one curve per number of locations (parentage and complete designs; complete marked with an open circle). Right: accuracy at a FIXED cost of two plots per hybrid, spread over 2 to 10 locations, random allocation, both heritabilities. Points are cell means; no error bars are drawn. Cached study, REML components, 15 replicates."
+#| fig-alt: "Two panels. Left: accuracy over all hybrids against the number of plots at plot h2 0.4, one curve per number of locations, parentage designs as filled points and complete designs as open circles. Right: accuracy at a fixed two plots per hybrid against the number of locations (2 to 10) sharing them, random allocation, at plot h2 0.4 (solid) and 0.2 (dashed)"
 op <- par(mfrow = c(1, 2), mar = c(4.2, 4.2, 2, 1))
 d <- subset(s4, h2_plot == 0.4 & strategy %in% c("parentage", "complete"))
 Ls <- sort(unique(d$nLoc)); lc <- hcl.colors(length(Ls), "Dark 3")
@@ -1380,14 +1453,15 @@ coinc_m5  <- subset(s4, strategy == m5$strategy & nLoc == 10 & k == m5$k & h2_pl
 #' 
 ## -----------------------------------------------------------------------------
 #| label: tbl-sparse-minimal
-#| tbl-cap: "Cheapest allocation within 5 % and within 10 % of the accuracy of the complete design at the largest number of locations in each scenario. The thresholds were chosen by the author; the cells are selected on the same means that are reported, and no interval is attached. Cached study."
+#| tbl-cap: "Cheapest allocation within 5 % and within 10 % of the accuracy of the complete design at the largest number of locations in each scenario. The thresholds were chosen by the author; the cells are selected on the same means that are reported, and no interval is attached. `Rel. accuracy` and `Rel. cost` are the accuracy and the number of plots of the row as a percentage of those of the complete design at the largest number of locations (10) in the same scenario. Cached study."
 m <- mn; m$within <- ifelse(m$minimal_5, "5 %", "10 %")
 m <- m[order(m$nHyb, m$h2_plot, m$sca_level, m$nLoc, m$within), ]
-knitr::kable(fmt(m[, c("nHyb", "h2_plot", "sca_level", "nLoc", "within", "strategy", "k",
-                       "n_plots_mean", "acc_all_mean", "acc_rel", "cost_rel")], 3),
-             row.names = FALSE,
+tb <- fmt(m[, c("nHyb", "h2_plot", "sca_level", "nLoc", "within", "strategy", "k",
+                "n_plots_mean", "acc_all_mean", "acc_rel", "cost_rel")], 3)
+tb$acc_rel <- round(100 * m$acc_rel, 1); tb$cost_rel <- round(100 * m$cost_rel, 1)  # percent, as in the text
+knitr::kable(tb, row.names = FALSE,
              col.names = c("Hybrids", "Plot h2", "SCA", "Locations", "Within", "Strategy", "k",
-                           "Plots", "Accuracy", "Rel. accuracy", "Rel. cost"))
+                           "Plots", "Accuracy", "Rel. accuracy (%)", "Rel. cost (%)"))
 
 #' 
 #' #### 2. At fixed cost, spreading plots over locations beats concentrating them
@@ -1411,11 +1485,32 @@ stopifnot(length(unique(sp$n_plots_mean)) == 1L, all(sp$n_plots_se == 0),
 #' $h^2 = 0.4$, accuracy rises from `r r4(spr(0.4, 2))` with both plots in the same
 #' two locations to `r r4(spr(0.4, 4))`, `r r4(spr(0.4, 6))` and
 #' `r r4(spr(0.4, 10))` as those plots are spread across 4, 6 and 10 locations. At
-#' $h^2 = 0.2$ it rises from `r r4(spr(0.2, 2))` to `r r4(spr(0.2, 10))`. Not one
+#' $h^2 = 0.2$ it rises from `r r4(spr(0.2, 2))` to `r r4(spr(0.2, 10))`. The standard
+#' errors of the unpaired differences from the two-location trial are, at
+#' $h^2 = 0.4$, `r sprintf("%.4f", spr_d(0.4, 2, 4)[["se"]])`,
+#' `r sprintf("%.4f", spr_d(0.4, 2, 6)[["se"]])` and `r sprintf("%.4f", spr_d(0.4, 2, 10)[["se"]])`
+#' for 4, 6 and 10 locations ($z$ = `r sprintf("%.1f", spr_d(0.4, 2, 4)[["z"]])`,
+#' `r sprintf("%.1f", spr_d(0.4, 2, 6)[["z"]])` and `r sprintf("%.1f", spr_d(0.4, 2, 10)[["z"]])`),
+#' and at $h^2 = 0.2$ `r sprintf("%.4f", spr_d(0.2, 2, 4)[["se"]])`,
+#' `r sprintf("%.4f", spr_d(0.2, 2, 6)[["se"]])` and `r sprintf("%.4f", spr_d(0.2, 2, 10)[["se"]])`
+#' ($z$ = `r sprintf("%.1f", spr_d(0.2, 2, 4)[["z"]])`,
+#' `r sprintf("%.1f", spr_d(0.2, 2, 6)[["z"]])` and `r sprintf("%.1f", spr_d(0.2, 2, 10)[["z"]])`).
+#' The step from six to ten locations is `r sprintf("%+.3f", spr_d(0.4, 6, 10)[["diff"]])`
+#' (s.e. `r sprintf("%.3f", spr_d(0.4, 6, 10)[["se"]])`, $z$ = `r sprintf("%.2f", spr_d(0.4, 6, 10)[["z"]])`)
+#' at $h^2 = 0.4$ and `r sprintf("%+.3f", spr_d(0.2, 6, 10)[["diff"]])`
+#' (s.e. `r sprintf("%.3f", spr_d(0.2, 6, 10)[["se"]])`, $z$ = `r sprintf("%.2f", spr_d(0.2, 6, 10)[["z"]])`)
+#' at $h^2 = 0.2$. Not one
 #' extra plot is spent, and no planted hybrid gains a location: each is still in two.
 #' What grows is the number of environments the trial samples, and with it the
 #' number of locations over which each parent's crosses, and so its GCA, are
-#' spread. The gain saturates between six and ten locations. This slice never
+#' spread. The gain from two locations to six or ten is beyond two standard errors at both
+#' heritabilities (with no correction for the several steps shown). The gain from six to
+#' ten is not, so these data show no further gain beyond six; they
+#' do not show that it is absent, since a difference of a few hundredths is within the
+#' standard errors printed above. The figure's right panel carries no error bars; the
+#' standard errors are those of the cached `acc_all_se` (15 replicates per cell), and the
+#' difference is treated as unpaired, because the file does not record pairing. This
+#' slice never
 #' varied the locations per hybrid and never traded a location against a
 #' replicate, so it measures only the value of sampling more trial sites at a
 #' fixed number of plots -- the "broader sampling of trial sites" of
@@ -1457,7 +1552,7 @@ knitr::kable(fmt(cc[, c("layer", "contrast", "metric", "subset", "n", "diff", "s
 #' parentage minus random on `acc_cv1` is `r r4s(p_k2$diff)` $\pm$
 #' `r sprintf("%.4f", p_k2$se)` ($p$ = `r sprintf("%.3f", p_k2$p)`) and the optimised
 #' blocks give `r r4s(o_k2$diff)` $\pm$ `r sprintf("%.4f", o_k2$se)`. In the genomic layer
-#' (marker relationships, real dominance, 32 pairs) the parentage difference on `acc_all`
+#' (@fig-sparse-genomic; marker relationships, real dominance, 32 pairs) the parentage difference on `acc_all`
 #' is `r sprintf("%+.3f", p_gen$diff)` $\pm$ `r sprintf("%.3f", p_gen$se)`
 #' ($p$ = `r sprintf("%.3f", p_gen$p)`, $p_{Bonf}$ =
 #' `r sprintf("%.2f", min(1, n_ct * p_gen$p))`).
@@ -1476,18 +1571,22 @@ knitr::kable(fmt(cc[, c("layer", "contrast", "metric", "subset", "n", "diff", "s
 #' pool heterogeneous cells. (iii) At $k = 1$ the in-repo sweep does not resolve the
 #' difference either (@sec-sparse-reproduce).
 #' 
-#' None of the six primary studies compared a structured allocation with a random
-#' one. @li2026 found their structured schemes tied with each other. @werner2025
-#' used restricted randomisation without a random control. The comparison was made
-#' here for the hybrid case, with the result above: a small advantage, not resolved
-#' after multiplicity correction, in the one dense configuration simulated.
+#' @li2026 compared random sampling of cells (their CV2) with genotype-balanced (CV3),
+#' environment-balanced (CV4) and partially overlapping (CV5) allocations and found no
+#' consistently superior scheme among them. @werner2025 used restricted randomisation
+#' without a random control. In my reading of the six texts for this specific contrast,
+#' none compares an allocation built to put every parent in every location with a random
+#' allocation of the same size; that is a statement about those six papers, not a
+#' search of the literature. The comparison was made here for the hybrid case, with the
+#' result above: a small advantage, not resolved after multiplicity correction, in the
+#' one dense configuration simulated.
 #' 
 ## -----------------------------------------------------------------------------
 #| label: fig-sparse-genomic
 #| fig-width: 7.5
 #| fig-height: 4
-#| fig-cap: "Genomic layer (AlphaSimR genomes, marker relationships, 8 replicates): accuracy against the share of cells observed, by strategy and number of locations. Cached study."
-#| fig-alt: "Genomic layer (AlphaSimR genomes, marker relationships, 8 replicates): accuracy against the share of cells observed, by strategy and number of locations"
+#| fig-cap: "Genomic layer (AlphaSimR genomes, marker relationships, 8 replicates): accuracy against the share of cells observed, by strategy and number of locations. Colour is the strategy; solid lines are 4 locations and dashed lines 8; points are means over replicates and no error bars are drawn. Cached study."
+#| fig-alt: "Line plot of accuracy over all hybrids against the share of cells observed, one colour per strategy (complete, random, optimised blocks, parentage) and number of locations (4 locations as solid lines with circles, 8 as dashed lines with triangles); random, optimised blocks and parentage are lines joining two shares, 0.25 and 0.5, and the complete design is a single point at share 1 for each number of locations"
 a <- aggregate(acc_all ~ strategy + nLoc + p_real, gl, mean)
 op <- par(mar = c(4.2, 4.2, 1, 1))
 plot(NA, xlim = range(a$p_real), ylim = range(a$acc_all), xlab = "Share of cells observed",
@@ -1504,6 +1603,8 @@ par(op)
 
 #' 
 #' #### 4. Whether parent coverage, rather than shared hybrids, carries the connectivity is not decided
+#' 
+#' @tbl-sparse-coverage gives, for the one cell on which the coverage account rests, the accuracy and the connectivity measures of the three strategies.
 #' 
 ## -----------------------------------------------------------------------------
 #| label: tbl-sparse-coverage
@@ -1558,14 +1659,21 @@ knitr::kable(fmt(data.frame(
 #' there. Whether coverage accounts for the @atanda2022 versus @lubanga2025
 #' disagreement remains a hypothesis (@sec-sparse-overlap).
 #' 
-#' #### 5. In the cached grid, dispersion is small where REML converged; the SCA variance is poorly recovered
+#' #### 5. In the cached grid, dispersion is small where REML converged; the SCA variance has an upward median bias at small k
+#' 
+#' @fig-sparse-estimates and @tbl-sparse-median-bias summarise the bias of the REML estimates and the dispersion slope of the BLUP.
 #' 
 ## -----------------------------------------------------------------------------
 #| label: fig-sparse-estimates
 #| fig-width: 9
 #| fig-height: 4.2
-#| fig-cap: "Left: median relative bias of REML components and of plot h2 by locations per hybrid k, over all cached scenarios (the values are in the table below). Right: the dispersion slope b1 (truth on BLUP), one point per scenario; the dashed line is no dispersion bias. Scenarios with k = 1 and incomplete REML convergence produce the outliers (axis clipped at 0.5-1.5)."
-#| fig-alt: "Left: median relative bias of REML components and of plot h2 by locations per hybrid k, over all cached scenarios"
+#| fig-cap: "Left: median relative bias (%) of the REML estimates of the female GCA variance, the GCA x location variance and the SCA variance, and of plot h2, by locations per hybrid k, over all cached scenarios (the values are in @tbl-sparse-median-bias). Right: the dispersion slope b1 (truth on BLUP), one point per scenario, orange where some REML fits did not converge; the dashed line is no dispersion bias. Orange points are 39, 27 and 9 scenarios at k = 1, 2 and 3 (all 39 scenarios at k = 1) and there are none at k of 4 or more; at k of 2 or more the slopes of the converged scenarios lie between 0.85 and 1.08 and those of the non-converged ones between 0.79 and 1.48 (axis clipped at 0.5-1.5)."
+#| fig-alt: "Two panels. Left: lines of the median relative bias (%) of four estimates against locations per hybrid k. Right: the dispersion slope b1 of each scenario against k; orange points (some REML fits not converged) occur at k = 1, 2 and 3 and include every scenario at k = 1, and the points at k of 2 or more lie mostly near 1, the converged ones within 0.85 to 1.08 and the orange ones spreading from 0.79 to 1.48"
+# contagens e intervalos citados na legenda e no texto alternativo
+nc <- sc$frac_conv < 1; b1 <- sc[["bias_all_mean"]]
+stopifnot(identical(as.vector(table(sc$k[nc])), c(39L, 27L, 9L)), all(sc$k[nc] <= 3), all(nc[sc$k == 1]),
+          all(round(range(b1[sc$k >= 2 & !nc]), 2) == c(0.85, 1.08)),
+          all(round(range(b1[sc$k >= 2 & nc]), 2) == c(0.79, 1.48)))
 med <- aggregate(cbind(relbias_s2f_mean, relbias_s2fl_mean, relbias_s2s_mean, relbias_h2_mean) ~ k, sc, median)
 op <- par(mfrow = c(1, 2), mar = c(4.2, 4.2, 1, 1))
 matplot(med$k, 100 * med[, -1], type = "b", pch = 19, lty = 1,
@@ -1585,9 +1693,9 @@ par(op)
 #' 
 ## -----------------------------------------------------------------------------
 #| label: tbl-sparse-median-bias
-#| tbl-cap: "Median over the cached scenarios of the relative bias (%) of the REML estimates and of plot h2, by locations per hybrid k (the left panel of the figure above)."
+#| tbl-cap: "Median over the cached scenarios of the relative bias (%) of the REML estimates and of plot h2, by locations per hybrid k (the left panel of @fig-sparse-estimates)."
 mtab <- med; mtab[-1] <- 100 * mtab[-1]
-names(mtab) <- c("k", "GCA (female) variance", "GCA x location variance", "SCA variance", "Plot h2")
+names(mtab) <- c("k", "GCA (female) variance (%)", "GCA x location variance (%)", "SCA variance (%)", "Plot h2 (%)")
 knitr::kable(fmt(mtab, 1), row.names = FALSE)
 
 #' 
@@ -1622,33 +1730,76 @@ s2s_k <- function(k) median(sc$relbias_s2s_mean[sc$k == k])
 #' `r sprintf("%+.1f", med_k("relbias_h2_mean", 1))` % at $k = 1$ and
 #' `r sprintf("%+.1f", med_k("relbias_h2_mean", 2))` % at $k = 2$.
 #' 
-#' **$\sigma^2_{SCA}$ is the exception.** Its median relative bias is
-#' `r sprintf("%+.0f", 100 * s2s_k(4))` % at $k = 4$,
+#' **$\sigma^2_{SCA}$ is the exception.** Its median relative bias over the cached
+#' scenarios is `r sprintf("%+.0f", 100 * s2s_k(4))` % at $k = 4$,
 #' `r sprintf("%+.0f", 100 * s2s_k(2))` % at $k = 2$, and
-#' `r sprintf("%+.0f", 100 * s2s_k(1))` % at $k = 1$. Part of this is present in the
-#' complete design too (@tbl-sparse-validation), which suggests that identifying a small
-#' component is a problem in itself, and the larger values at small $k$ say that sparsity
-#' adds to it. A programme that needs a reliable SCA is in product development, not
-#' population improvement, and these data give no sign that adding coverage to a
-#' stage-1 trial would fix the problem.
+#' `r sprintf("%+.0f", 100 * s2s_k(1))` % at $k = 1$. @tbl-sparse-s2s-spread gives the
+#' number of scenarios behind each median, their interquartile range, and the
+#' complete designs apart from the sparse ones.
+#' 
+## -----------------------------------------------------------------------------
+#| label: tbl-sparse-s2s-spread
+#| tbl-cap: "Relative bias (%) of the SCA variance over the cached scenarios, by locations per hybrid k and by design (complete = every hybrid in every location, so k = number of locations; sparse = random, optimised blocks or parentage). The first and third quartiles and the median are taken over scenarios, which differ in number of hybrids, SCA level, plot h2 and number of locations; the cells are not paired and no standard error is attached. Cached study."
+sc2 <- sc; sc2$design <- ifelse(sc2$strategy == "complete", "complete", "sparse")
+s2s_tab <- do.call(rbind, lapply(split(sc2, list(sc2$k, sc2$design), drop = TRUE), function(d) {
+  q <- 100 * quantile(d$relbias_s2s_mean, c(0.25, 0.5, 0.75))
+  data.frame(k = d$k[1], design = d$design[1], scenarios = nrow(d),
+             q25 = q[[1]], median = q[[2]], q75 = q[[3]])
+}))
+s2s_tab <- s2s_tab[order(s2s_tab$k, s2s_tab$design), ]
+s2s_g <- function(k, d, v) s2s_tab[[v]][s2s_tab$k == k & s2s_tab$design == d]
+knitr::kable(fmt(s2s_tab, 1), row.names = FALSE,
+             col.names = c("k", "Design", "Scenarios", "Q1 (%)", "Median (%)", "Q3 (%)"))
+
+#' 
+#' Where a complete design exists at the same $k$, its median is not lower than that of
+#' the sparse designs: `r sprintf("%+.0f", s2s_g(2, "complete", "median"))` % against
+#' `r sprintf("%+.0f", s2s_g(2, "sparse", "median"))` % at $k = 2$
+#' (`r s2s_g(2, "complete", "scenarios")` and `r s2s_g(2, "sparse", "scenarios")` scenarios) and
+#' `r sprintf("%+.0f", s2s_g(4, "complete", "median"))` % against
+#' `r sprintf("%+.0f", s2s_g(4, "sparse", "median"))` % at $k = 4$
+#' (`r s2s_g(4, "complete", "scenarios")` and `r s2s_g(4, "sparse", "scenarios")`), with
+#' interquartile ranges that overlap. The median of the sparse designs does not fall
+#' steadily with $k$ either (`r paste(sprintf("%+.0f", s2s_tab$median[s2s_tab$design == "sparse"]), collapse = ", ")` %
+#' at $k$ = `r paste(s2s_tab$k[s2s_tab$design == "sparse"], collapse = ", ")`). No complete
+#' design exists at $k = 1$, and REML converged in `r fc(1)` of the fits there, so the
+#' `r sprintf("%+.0f", 100 * s2s_k(1))` % cannot be attributed to sparsity, to
+#' non-convergence or to the smallness of the component. These data therefore show an
+#' upward median bias of the SCA variance at small $k$, also seen in the
+#' complete-design scenarios at $k = 2$ and 4, and do not show that sparsity adds to it; they do not
+#' separate the explanations either. They also give no basis for saying that adding
+#' coverage to a stage-1 trial would, or would not, reduce the bias: no scenario varies
+#' $k$ with the other factors fixed.
 #' 
 #' **The hidden cost is convergence.** REML converged in `r fc(4)` of fits with
 #' four locations per hybrid, `r fc(3)` with three, `r fc(2)` with two, and only
 #' **`r fc(1)` with one**. That is `r sum(conv$nrep - conv$n_conv)` non-convergences
 #' in `r sum(conv$nrep)` fits.
 #' 
-#' ::: {.callout-important}
-#' ## Box -- Why REML does not converge when each hybrid sees one location
+#' ::: {.callout-note}
+#' ## Box -- REML at one location per hybrid: a hypothesis, not a measurement
 #' 
-#' With $k = 1$ each hybrid contributes a single plot in a single location. The
-#' data then carry no within-hybrid information to separate a hybrid's GCA from its
-#' GCA x location deviation. The likelihood is flat along that ridge. The algorithm
-#' walks to the boundary of the parameter space and stops without meeting its
-#' criterion. The BLUPs from those fits are still usable. They come from solving
-#' the mixed-model equations at the current components, which is exactly what
-#' `sparse_blup()` does with known ones. **The variance estimates are not usable,
-#' and should not be reported.** Predicting well and estimating well are different
-#' achievements. At $k = 1$ a trial can still do the first.
+#' With $k = 1$ each hybrid contributes a single plot in a single location, and REML
+#' converged in `r fc(1)` of the cached fits, against `r fc(2)` at $k = 2$. A candidate
+#' explanation, which nothing in this chapter or in the cached files tests, is that the
+#' data then carry no within-hybrid information to separate a hybrid's GCA from its GCA x
+#' location deviation, so that the likelihood is flat along that direction and the
+#' optimiser stops at the boundary of the parameter space or short of its criterion.
+#' It would be tested by examining the likelihood surface, or by summarising the
+#' converged and non-converged fits separately; the cached file holds scenario means over
+#' both and does not allow the second.
+#' 
+#' What the cached file does show is limited. The median dispersion slope at $k = 1$ is
+#' `r r4(median(sc$bias_all_mean[sc$k == 1]))` with outliers (@fig-sparse-estimates, right), so
+#' that the BLUPs of non-converged fits are usable is not established by it either. The
+#' median bias of the female GCA variance at $k = 1$ is
+#' `r sprintf("%+.1f", med_k("relbias_s2f_mean", 1))` % (interquartile range
+#' `r sprintf("%+.0f", iqr_k("relbias_s2f_mean", 1)[[1]])` to `r sprintf("%+.0f", iqr_k("relbias_s2f_mean", 1)[[2]])` %),
+#' pooled over converged and non-converged fits, which is not what an unusable estimate
+#' looks like in a median, while that of the SCA variance is
+#' `r sprintf("%+.0f", 100 * s2s_k(1))` %. A report of components from a one-location-per-hybrid
+#' trial should state the convergence status of the fit, because the pooled summaries here
+#' cannot say which estimates to trust.
 #' :::
 #' 
 #' #### 6. Two stages: covering more candidates sparsely gave more gain at the same budget (four replicates)
@@ -1690,14 +1841,14 @@ knitr::kable(fmt(mt, 3), row.names = FALSE,
 #' `r sprintf("%.1f", max(mt$t[mt$N1_from == 200]))`): not resolved. After a Bonferroni
 #' correction over the eight rows (threshold `r sprintf("%.4f", 0.05 / nrow(mt))`) no row is
 #' resolved; the budgets share replicates, so the rows are not independent and the
-#' correction is conservative.
+#' correction is conservative. @fig-sparse-twostage shows the means by budget.
 #' 
 ## -----------------------------------------------------------------------------
 #| label: fig-sparse-twostage
 #| fig-width: 7.5
 #| fig-height: 4.2
-#| fig-cap: "Realised gain (true value of the 10 hybrids finally selected, genetic SD units) against total plots, by the number of candidates tested in stage 1; mean over replicates, strategies (random, parentage, optimised blocks) and stage settings at each budget, 4 replicates, no dispersion shown (see the table above). The grey line is the oracle that selects on the truth. Cached study."
-#| fig-alt: "Realised gain (true value of the 10 hybrids finally selected, genetic SD units) against total plots, by the number of candidates tested in stage 1; mean over replicates and stage-2 settings at each bu"
+#| fig-cap: "Realised gain (true value of the 10 hybrids finally selected, genetic SD units) against total plots, by the number of candidates tested in stage 1; mean over replicates, strategies (random, parentage, optimised blocks) and stage settings at each budget, 4 replicates, no dispersion shown (see @tbl-sparse-twostage-matched). The grey line is the oracle that selects on the truth. Cached study."
+#| fig-alt: "Line plot, log horizontal axis: realised gain in genetic SD units against total plots, one line per number of candidates tested in stage 1 (100, 200, 400) and a grey line for the oracle that selects on the truth"
 a  <- aggregate(cbind(gain_sd_units, gain_max_sd_units) ~ N1 + plots_total, ts, mean)
 cl <- c("100" = "#d95f02", "200" = "#7570b3", "400" = "#1b9e77")
 op <- par(mar = c(4.2, 4.2, 1, 1))
@@ -1769,27 +1920,39 @@ par(op)
 #' 
 #' **Stage 1 (first agronomic testcross trial).**
 #' 
+#' Each item below carries its basis: a result of this chapter, a cited study, or
+#' neither ("not tested here", design reasoning only).
+#' 
 #' - Give priority to the number of candidates and the number of locations in the
-#'   trial. At fixed plots per hybrid, spread them over more locations, up to
-#'   about six (result 2).
+#'   trial. At fixed plots per hybrid, spread them over more locations: in result 2
+#'   accuracy rose from two to six locations and showed no resolved further gain from six
+#'   to ten (one configuration; `r sprintf("%.1f", spr_d(0.4, 6, 10)[["z"]])` and
+#'   `r sprintf("%.1f", spr_d(0.2, 6, 10)[["z"]])` standard errors).
 #' - Use 3 to 5 testers in sparse testcrossing, with full-sibs spread across
-#'   testers.
-#' - Use low partial replication (p-rep of 0.1 to 0.2), with checks replicated in
-#'   every block.
+#'   testers (basis: @gonzalezdieguez2026, a simulation of reciprocal recurrent
+#'   selection; not tested here).
+#' - Use low partial replication with checks replicated in every block (basis: a
+#'   p-rep of 0.1 in @werner2025; no p-rep value, 0.1 or 0.2, is compared in this
+#'   chapter, so the level is not tested here).
 #' - When plots per hybrid fall to one or two, a layout that puts both pools in
 #'   every location is cheap to adopt and was not worse than random allocation in
 #'   the cached grid; its advantage there was small and not resolved after
 #'   multiplicity correction (results 3 and 4).
-#' - The estimation target is GCA. The SCA variance was poorly recovered in the cached
-#'   grid, so do not expect a reliable SCA at this stage (result 5).
+#' - The estimation target is GCA. In the cached grid the SCA variance had an upward
+#'   median bias at small $k$ whose cause these data do not separate, so treat an SCA
+#'   estimate from a stage-1 trial as unverified (result 5).
 #' 
 #' **Stage 2 (pre-commercial hybrids).**
 #' 
-#' - Test fewer candidates, and raise replication and environmental coverage.
+#' - Test fewer candidates, and raise replication and environmental coverage (not
+#'   tested here: the simulation covers stage 1 and one stage-2 step in result 6).
 #' - Keep a common core large enough to estimate the between-environment genetic
-#'   correlations.
+#'   correlations (not tested here, and set against the overlap sweep of
+#'   @sec-sparse-overlap, where at a fixed training size a larger common core lowered
+#'   accuracy over all hybrids; the item concerns estimating the correlations, which that
+#'   sweep did not examine).
 #' - The estimation target is now specific performance and stability, so SCA and
-#'   G x E matter.
+#'   G x E matter (design reasoning; see @sec-sparse-foundations).
 #' 
 #' **Decisions that span both stages.**
 #' 
@@ -1797,7 +1960,7 @@ par(op)
 #' - Check connectivity before planting (Box 4).
 #' - Match the between-environment covariance to the amount of data. Do not force
 #'   an unstructured matrix on a very sparse design.
-#' - Advance on GBLUP rather than BLUE when heritability is low to moderate and
+#' - Advance on GBLUP rather than best linear unbiased estimation (BLUE) when heritability is low to moderate and
 #'   locations are few [@atanda2022; @endelman2014].
 #' 
 #' **What not to do.**
@@ -1807,7 +1970,11 @@ par(op)
 #' - Use one tester at stage 1 when there is infrastructure for three.
 #' - Transfer a sparsity percentage from another crop or programme without your own
 #'   simulation.
-#' - Fit a G x E term under extreme sparsity [@hildaono2026].
+#' - Assume that a G x E term helps under extreme sparsity: @hildaono2026 found that it
+#'   degraded prediction when less than 66 % of the data per environment were available,
+#'   whereas @lubanga2025 found that it raised predictive ability at 20 % of records per
+#'   environment. The two used different data and models, and this chapter has not
+#'   compared them.
 #' 
 #' **The right sparse design changes from stage to stage because the parameter of
 #' interest changes**: GCA in stage 1, specific performance and stability in
@@ -1848,9 +2015,14 @@ par(op)
 #' 
 #' As a research agenda, the open gaps are these.
 #' 
-#' - **SCA estimation, and prediction of specific hybrids, under sparsity.** This
-#'   chapter's simulation shows the variance component is not recoverable at stage
-#'   1. The accuracy of specific unseen crosses is still unmeasured.
+#' - **SCA estimation, and prediction of specific hybrids, under sparsity.** In the
+#'   cached grid the SCA variance had an upward median bias of
+#'   `r sprintf("%+.0f", 100 * s2s_k(4))` %, `r sprintf("%+.0f", 100 * s2s_k(3))` % and
+#'   `r sprintf("%+.0f", 100 * s2s_k(2))` % at $k = 4$, 3 and 2 and
+#'   `r sprintf("%+.0f", 100 * s2s_k(1))` % at $k = 1$ (with `r fc(1)` convergence). Its coverage and
+#'   precision, and a comparison with product-development designs, were not measured,
+#'   so whether it is recoverable at stage 1 is open. The accuracy of specific unseen
+#'   crosses is also unmeasured.
 #' - **A three-dimensional connectivity metric**, female x male x location. It
 #'   would join @sec-mating-connectivity to Box 4. @sec-joint-criteria defines a
 #'   pair of counts for it.
@@ -1870,10 +2042,20 @@ par(op)
 #' 
 #' Sparse testing changes the stage-1 question. It is no longer "which genotypes
 #' can I evaluate well?". It becomes "which haplotypes can I evaluate well, and
-#' against what sample of the opposite pool?". The evidence is sufficient to adopt
-#' sparse designs at stage 1 with confidence. It is not sufficient to prescribe a
-#' universal sparsity level. That decision remains specific to each programme, and
-#' should be sized by the programme's own simulation.
+#' against what sample of the opposite pool?". The evidence reviewed supports
+#' considering sparse designs at stage 1; it does not support adopting them with
+#' confidence. Almost all of it comes from resampling or simulation (above). In this
+#' chapter's own simulation a sparse allocation came within 5 % of the complete design in
+#' one cell by a margin of `r sprintf("%.1f", c_hi$margin / c_hi$se_margin)` standard errors (result 1), the structured
+#' allocation was not resolved against random after correction (result 3), the two-stage
+#' comparison has four replicates (result 6), and every simulated result comes from one
+#' dense factorial (limitation 7). The result least in doubt is that, at a fixed number of plots, more locations raised accuracy
+#' up to about six (result 2): the differences of the six- and ten-location trials from the
+#' two-location trial are beyond two standard errors at both heritabilities, and the four-location
+#' step has $z$ = `r sprintf("%.1f", spr_d(0.4, 2, 4)[["z"]])` at $h^2 = 0.4$ and
+#' `r sprintf("%.1f", spr_d(0.2, 2, 4)[["z"]])` at $h^2 = 0.2$. It is not sufficient to prescribe a universal sparsity level. That
+#' decision remains specific to each programme, and should be sized by the programme's own
+#' simulation.
 #' 
 #' ## Reproducibility and assumptions {#sec-sparse-reproduce}
 #' 
@@ -1888,9 +2070,11 @@ par(op)
 #'   study's criterion returned $-\infty$ for any disconnected start, which left
 #'   its search no gradient.
 #' 
+#' @tbl-sparse-reproduce compares the two sweeps cell by cell.
+#' 
 ## -----------------------------------------------------------------------------
 #| label: tbl-sparse-reproduce
-#| tbl-cap: "In-repo sweep (known components, 30 replicates) against the cached study (REML, 15 replicates), on overall accuracy for 400 hybrids. `z` is the difference in standard errors of the difference."
+#| tbl-cap: "In-repo sweep (known components, 30 replicates) against the cached study (REML, 15 replicates), on overall accuracy for 400 hybrids. `z` is the in-repo minus the cached accuracy divided by the standard error of that difference."
 cr <- subset(core, part %in% c("spread", "k1"))
 cr$cached <- mapply(function(L, k, s, h) {
   x <- s4$acc_all_mean[s4$nLoc == L & s4$k == k & s4$strategy == s & s4$h2_plot == h]
@@ -1978,8 +2162,10 @@ stopifnot(dev_blup < 1e-8, dev_pev < 1e-8)
 #'   layer. @sec-genomic-prediction fits one additive GBLUP and does not fit the
 #'   pool-specific or SCA kernels of this chapter.
 #' - The staged-trial trade-off of @sec-programme (a later chapter, in the Evidence
-#'   and practice part) is an analogy to result 6, not a replication of it: that chapter
-#'   models locations as independent draws, whereas result 6 uses a genetic
+#'   and practice part) is an analogy to result 6, not a replication of it: in that chapter a
+#'   replicate is an independent draw of plot error only, and the
+#'   genotype-by-environment deviate is one draw per phenotyping call shared by all
+#'   entries, so its replicates are not locations, whereas result 6 uses a genetic
 #'   correlation between locations of
 #'   `r r4(vc_ex$Vg / (vc_ex$Vg + vc_ex$VgxE))`.
 #' - Spreading testers and parents to slow within-pool erosion is the same concern

@@ -1,0 +1,39 @@
+# 11b-diversity-across-cycles -- verdict, iteration 4 (form-pass diff)
+
+VERDICT: REJECTED
+
+Chapter: `book/11b-diversity-across-cycles.qmd` (1041 lines), worktree `SB_quanti_gen-review-04-06`. Judged: the form-pass changes (editor.md W1-W22, editor-response.md W1-W13, M17, M18, E1-E4) and what depends on them. Content approved at it3 is not re-judged; numbers were recomputed.
+
+## PREVIOUS IDS
+
+- 11b-M17 -- CLOSED -- per-draw cycle-removed rho, bootstrap over draws, windows (declared "drawn after the data were seen") and arm-wise cycle-removed values are printed and reproduce (below); "follows" is gone; the unit (founder draw) is stated.
+- 11b-M18 -- CLOSED -- the ordering claim uses the parental pool of cycle 14 (0.003 / 0.1 / 0.26); the cycle-15 pool (0.001 / 0.08 / 0.22) appears only in the sentence on how the candidate pool falls and is labelled "pool of cycle 15". "88 times" is replaced by 34 (parental pool, cycle 14); no other file or the downloads script quotes 88 (grep over `book/*.qmd`, README, `book/downloads/11b*.R`: no hit).
+- 11b-E1 -- CLOSED -- knitted table of two labelled rows (0.0869 / 0.0000) with `row.names = FALSE` present in the knit.
+- 11b-E2 -- CLOSED as to colours (pool A `#1f5f8b` white text, pool B `#d98e04`, equal to `book_pal` and `_brand.yml`); see 11b-D1 for the note in the same diagram.
+- 11b-E3 -- CLOSED -- display copies `rate_show`, `pt_show`, `ai_show`; prose keys (`rate$arm == "alpha_max 0.02"` etc.) untouched and the knit gives the same values (0.0351 / 0.0261, ratios 2.31 / 1.72). `$\alpha_{\max}$` (90:290), `$k_{\max}$` (90:325, 330), `$k_a$` (90:291, 299) exist; `$\max_a k_a$` is a composite of 90 symbols.
+- 11b-E4 -- CLOSED -- `$p^{*}_k$` (90:605, 620), `$p_{Ak}$, $p_{Bk}$` (90:605), `$\bar u_S$` (90:293, "mean index of a selected set S") exist; `$\bar u_{S_t}$` is that symbol indexed by cycle, no clash. `@eq-balding-nichols` is in 03:88, and 03:78-84 states that the Beta densities and the reading of F_BN are the book's own specification and not quoted from @balding1995; 11b says the same. `simulate_pools()` (R/09_reference.R:27-52) implements that Beta (runif(0.05, 0.95), shape pa(1-fst)/fst).
+- 11b-E5 -- CLOSED (left as instructed).
+
+## DISQUALIFYING FAILURES
+
+- **11b-D1** [criterion 5] `book/11b-diversity-across-cycles.qmd:75-76 (fig-cap, fig-alt of fig-cycles-diagram) against :100 (code of the diagram)` -- the new caption says `n_sel` hybrids are selected "(the diversity budget applies at this step)" and the new alt says "A note above the hybrid box says the diversity budget applies at the selection step". The figure carries `text(37, 30.5, "diversity budget applies here")`: the note reads "here", not "at the selection step", and sits above the "every A x B hybrid" box (x 32-54) and the A -> hybrid arrow, 25 units left of the "select n_sel" box (x 62-78); in the knitted image (viewed) the note is attached to the hybrid box. So the picture places the budget at the evaluation of all 625 hybrids, and the caption and alt, which the editor describes as "everything added is read off the diagram's own labels", state a different location. The chapter text (line 60, "Selection happens at the hybrid level") and the code (`sel_greedy_budget` constrains the choice of 60 of 625) agree with the caption, not with the figure. Figure and caption/alt disagree on the one step at which the central constraint acts.
+
+## NON-DISQUALIFYING OBSERVATIONS
+
+- **11b-M19** `book/11b-diversity-across-cycles.qmd:481-483` -- the inference paragraph says "concentrated late in the horizon (weak in cycles 2 to 6 ...)"; that reading rests on three windows that lines 469-472 declare "drawn after the data were seen", and the window values carry no spread (75, 75 and 60 run-cycles, not draws). The exploratory label is not repeated where the reading is used. One observation; below the threshold of three.
+
+## WHAT WAS VERIFIED
+
+- Own script `scratchpad/v/m17.R`, from `book/data/cycles_trajectory.csv`, 225 run-cycles: pooled Spearman 0.8279; cycle-removed 0.4578; per founder draw 0.432 / 0.226 / 0.320 / 0.498 / 0.639 (0.23 to 0.64); bootstrap over the five draws, 2000 resamples, `set.seed(1)`: 0.345 to 0.587 (0.35 to 0.59; `set.seed(42)`: 0.338 to 0.579, so the interval is not seed-fragile); windows 2-6 / 7-11 / 12-15: 0.159 / 0.652 / 0.839 (n = 75 / 75 / 60); arm-wise cycle-removed 0.157 / 0.352 / 0.513 (0.005 / 0.02 / unconstrained), raw 0.610 / 0.819 / 0.977; arm ordering by gain equals that by genic variance in cycles 10, 11, 12, 13, 15 only (none of 2-9, 5 of 6 from 10). Parental var_genic at cycle 14: 0.00299 / 0.1018 / 0.2572; ratio 0.02 / unconstrained 34.10 (cycle-15 pools: 88.45, no longer quoted).
+- Knit of the whole chapter (`knitr::knit`, installed package 0.1.0, wd = `book/`, scratchpad `v/k4/11b.md`, about 5.5 min, run after the `row.names = FALSE` edit): no error, no warning, every `stopifnot()` passed (including the new ones of `gain-vs-genic`). Inline values in the knit: 0.23 to 0.64; 0.35 to 0.59; 0.16 / 0.65 / 0.84; 0.16 / 0.35 / 0.51 against 0.61 / 0.82 / 0.98; within-cycle 0.46; 5 of 14, none of 2-9 and 5 of 6; parental genic variance 0.003 / 0.1 / 0.26; 34 times; E1 table 0.0869 / 0.0000; rate table 0.0152 / 0.0288.. / 0.0351 / 0.0261 with the display labels; injection table labels "closed" / "injected at cycle 8".
+- Cross-reference targets: every `@sec-`, `@tbl-`, `@fig-`, `@eq-` in the chapter (45 distinct) resolves to a single definition in `book/*.qmd` (script over `{#id}` and `#| label:`); the eight `tbl-cycles-*` and three `fig-cycles-*` labels are defined once, each cited; no other chapter quotes the old labels (`cycles-gain-table`, `de-same-context-table`, `rate-fit`, `crossover-by-seed`, `cycles-horizon-table`, `cap-table`, `injection-table`, `partition-table`). `sec-cycles-rate` and `sec-cycles-horizon` are defined and uncited (as the editor says).
+- `book/figs/cycles_diversity.png`: git says modified against HEAD (127354 -> 128013 bytes; md5 `11c2fe1c...` at HEAD, `795c68d8...` now). It is NOT byte-identical to HEAD: it is byte-identical (md5 795c68d8) to my redraw from the CSV with the code of the figure block of `regenerate.R`, whose only change against HEAD is the left-panel title "Within" -> "Total, GD_T" (regenerate.R diff: `main = "Total, GD_T"`). The caption's "total gene diversity GD_T" agrees with that title. mtime 14 Nov 20:13, i.e. the iteration 1 redraw, not touched by the form pass. `book/figs/cycles_gain.png` is unchanged against HEAD.
+- Figures viewed: `cycles_gain.png` agrees with the caption (unconstrained highest through cycle 7, flattening near 9.5; 0.02 overtakes at cycle 8 and ends near 12; 0.005 below until about cycle 11, ends near 11; dots; colours red / blue / green; legend titled "diversity budget") and with the alt. `cycles_diversity.png` agrees with the alt (GD_T 0.316 -> 0.181 / 0.207 / 0.250; F_drift at 15 0.457 / 0.431 / 0.343, from the redraw's printed means). Knitted diagram viewed: pool A blue, pool B orange, labels as the alt says except for the note of 11b-D1.
+- Callout: line 281 is `callout-warning` with a title; the second (line 704) is `callout-warning`. Fence syntax valid.
+- Heading ids `sec-cycles-freezing`, `-trajectory`, `-rate`, `-horizon` unique across the book.
+
+## NOT VERIFIED
+
+- Typst rendering (widest table `tbl-cycles-de`, math in `col.names`, cell wrapping in `tbl-cycles-horizon`, the 6.5 x 3.05 in diagram) and resolution of the cross-references by Quarto itself: no render was run; resolution was checked statically against the labels. Not decisive for the content claims.
+- The labels of `fig-*` / `tbl-*` chunks in the Quarto HTML numbering (e.g. `@fig-cycles-gain` inside the `fig-cap` of another figure): not rendered.
+- `book/downloads/11b-diversity-across-cycles.R` against `knitr::purl`: only that it contains the `tbl-cycles-*` labels and the `row.names = FALSE` line was checked.

@@ -117,7 +117,7 @@ fmt(rbind(
 #' 
 #' ## The identity sweep
 #' 
-#' The line-level collapse was checked across $F_{ST} \in \{0.05, 0.15, 0.35\}$,
+#' The line-level collapse was checked across $F_{BN} \in \{0.05, 0.15, 0.35\}$ (the simulator's `fst` argument),
 #' two seeds and two selection sizes, thirty replicate selections each.
 #' 
 ## -----------------------------------------------------------------------------
@@ -453,9 +453,10 @@ knitr::kable(data.frame(
 #' 
 #' **Everything is verified on simulated data.** The identities are algebraic and
 #' will hold on real genotypes. The *empirical* results -- which metrics are
-#' redundant, how much index a constraint costs -- were derived at $F_{ST} = 0.15$
-#' with simulated markers, and @sec-choosing says explicitly that they should be
-#' re-derived on real genotypes before being treated as settled.
+#' redundant, how much index a constraint costs -- were derived on simulated
+#' markers, and @sec-choosing says explicitly that the redundancy analysis rests on a cached
+#' file whose setting ($F_{BN}$, number of lines and markers) is not recorded, and that it
+#' should be re-derived on real genotypes before being treated as settled.
 #' 
 #' **One chapter's headline results come from outside this repository.** The
 #' mating-design sweep of @sec-mating (`mating_scenarios_summary.csv` and its
