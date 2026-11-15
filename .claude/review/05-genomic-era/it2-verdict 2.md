@@ -1,0 +1,50 @@
+# 05-genomic-era -- iteration 2 verdict (quant-head)
+
+VERDICT: APPROVED
+
+Inputs read: book/05-genomic-era.qmd (all 2125 lines), it1-verdict.md, it1-response.md (quant-writer and quant-Rwrite sections), it1-refs.md, THREAD.md, 04c:430-436, 04d:422-429, 02:395-427, 00:205-221, 11b (C7/C8, regression section), R/00_data.R (build_ctx signature), R/14_cycles.R (cycle_ctx), Meuwissen et al. 2020 PDF (pdftotext). Comstock (1949) is the user's PENDING item and is not judged beyond "nothing of its content attributed".
+
+## PREVIOUS IDS
+- 05-D1 -- CLOSED -- the seed-1 claim is withdrawn; tbl-era-seeds-z reports 20 founder draws (z trunc F1_het -4.47 to 3.90, 7 of 20 negative, 4 > 2, 2 < -2; reproduces my it1 run). The text claims only that F_hom and F1 heterozygosity are different quantities and that the sign for truncation is not consistent; the "more heterozygous than random" claim and its mechanism are explicitly not claimed.
+- 05-D2 -- CLOSED -- the `index` row is declared a selection response on the audit loci (z_index_audit_drift 33.4 on seed 1, 23.0-34.3 over 20 draws; matches my it1 24-37 range in order of magnitude and conclusion); the noise reference is now the s.d. of the audit-minus-management F_hom gap over random subsets; "sign reverses" is counted (managed < 0 on 20/20, audit > 0 on 16/20, reproduced).
+- 05-D3 -- CLOSED -- A5 rewritten in three cases (frequency toys neutral by construction; simulate_data() rows select on an index with effects at every marker; run_cycles() uses simulate_pools()); the marker = QTL collapse is declared as a limit.
+- 05-D4 -- CLOSED -- F_ST of the chapter = GD_BS/GD_T = Nei G_ST = standardised-variance form, asserted in-chunk (gd_partition F_ST == s1$Gst_Nei == fst_var) and consistent with 02:395-427; the difference from F_drift is stated as space vs time, which is what Meuwissen 2020 says ("applied to a single population over time instead of a sample of populations", text after Eq. 1B, read in the PDF); Fst_Wright is the code's name for the between-referenced statistic with 02's "no external source"; F_BN named as the third object. The wright1951 priority claim is dropped, not softened.
+- 05-D5 -- CLOSED -- A3 now says "in reduced form ... no trials and no S3, index known without error (C7, C8)", matching 00:213-219 and 11b C7/C8; Comstock cited for existence and title only, in the same form as 05b:1034-1037.
+- 05-D6 -- CLOSED -- limit declared in 05 (A5, Step 5 interpretation); the false promises in 04c:434-436 and 04d:426-429 are reworded to "this book does not measure that gap". grep of all other chapters for marker-versus-QTL finds no further promise to 05.
+- 05-D7 -- CLOSED -- both pointers removed; A4 says the book neither models nor measures overlap and no later chapter treats it (grep over book/*.qmd for overlap/reuse phrases outside 05 is empty); Step 5 says no cycle-by-cycle audit is run anywhere (no "audit" hit outside 05 relevant to it).
+- 05-M1 -- CLOSED -- "conservative" removed; dev_se assertion dropped; the same statistic is computed over 20 seed families and 4 of 20 exceed the Bonferroni z (reproduced: fam_fail = 4, z_bonf = 3.08); R2 >= 0.999 stays asserted and is scoped to this seed family and scale. I also ran R2 over the 20 families: neutral arms 0.99903-0.99999 (never < 0.999); managed F_drift 0.99206-0.99474 (never >= 0.995).
+- 05-M2 -- CLOSED -- the "rounds both to 40%" gloss is replaced by "not both 40%", matching Table 2 Panel N and the paper's text (p.9, read).
+- 05-M3 -- CLOSED -- era-maxdiv-pull reports the implied pull 0.0131 (reproduced) against the stipulated 0.05 and calls the Step 4 arm a stipulation.
+- 05-M4 -- CLOSED -- kappa_anc by quadrature = 0.636 (reproduced) against kappa_book 1.27; the remainder is attributed, not decomposed.
+- 05-M5, M6, M7, M8, M9, M10, M11 -- CLOSED -- wording/cross-reference/executability fixes verified in the text (m, epsilon, dominance effect, @sec-heterosis-hybrid-identity, alpha against null60$gd_ref, build_ctx has no p0 argument and Step 1 Call now says to overwrite ctx$p0 and ctx$maf_pop, as cycle_ctx() does; checked in R/00_data.R:162 and R/14_cycles.R:49-57).
+- 05-M12 -- CLOSED for 05; items owed to other chapters (06, 12 "production scale"; 08b cite @eq-era-rank; 90 rows for G_VR1, G_VR2, G_i(p), G_LA, G_ROH; 11b first-order dF; 03/04c A-labels) stay on the Owed lists, not 05 defects.
+
+## DISQUALIFYING FAILURES
+None.
+
+## NON-DISQUALIFYING OBSERVATIONS
+- 05-M13 05:1558-1565 -- the unexplained half-panel finding is reported honestly, but the text gives only the seed-1 z (3.5 / 3.9) and the word "above zero". Over the 20 draws I count z > 0 on 19/20 and z > 2 on 16/20 (managed half) and 17/20 (audit half); minimum -0.77 / -0.26 (the table shows the minimum, the prose gives no count). The contrast with "the full-panel result of Step 2 (z = -0.67)" rests on one full-panel draw in the text; I ran the full panel over 20 draws (null 300, seed 7): z of max_div F_drift -1.61 to 1.49, median 0.08, none > 2, so the contrast is real, but the chapter does not show it.
+- 05-M14 05:1044-1062 -- the Step 2 interpretation "no measurable drift excess over random sampling" is scoped ("at this scale, on a single selection from a fixed candidate set") but never pointed to Step 5, where the same plan optimised on half the markers does pay drift. Not a contradiction (full panel vs half panel, declared unexplained); a reader of Step 2 alone gets the wrong generalisation.
+- 05-M15 05:1442-1446 -- the R2 thresholds 0.999 / 0.995 are calibrated on one seed family. Over 20 families they hold (neutral min 0.99903, managed max 0.99474) but with margins of 1e-4 and 5e-4; the chapter scopes them ("at this scale only", "one seed family") and does not run the families for R2, only for dev_se.
+- 05-M16 05:1747 -- "F_ST rising while GD_T falls -- almost always a one-pool collapse" is supported by the algebra of Step 6 and one draw; "almost always" is not measured.
+- 05-M17 (redundancy) 05:452-466, 05:1667-1687, 05:1725-1740 -- the F_ST object (three quantities, space vs time, GD_BS/GD_T) is restated three times in near-identical terms; the prose of Steps 2, 4, 5 carries heavy inline hedging. Clarity/redundancy only.
+- 05-M18 (bibliography, out of scope) references.bib:705 -- `wright1951` is now cited nowhere in the book (grep over book/*.qmd). If a bib-lint for unused entries exists in the pipeline, it will flag it; metadata notes of it1-refs B2 (number {1} vs issue 4, 1949-DOI artefact) unchanged. No bib-lint script found in the repository (only .claude/agents/quant-refcheck.md mentions bib).
+- Count of non-disqualifying failures under the criterion (clarity, notation, redundancy): two (M17 and the prose density in it); M13-M16 are scoping/calibration remarks on declared limits, not failures of the non-disqualifying criteria. Below the threshold of three.
+
+## WHAT WAS VERIFIED
+- Whole chapter run end to end: `knitr::purl` of book/05-genomic-era.qmd (documentation = 0) executed with `Rscript` from book/ (cwd book/, `source("_common.R")`): EXIT 0, 43 s, every `stopifnot()` passed (identities He = GD_T, F1_het = 2 GD_WI_hyb, cov_diag, p0 identity, w = 1 equals truncation, R2 >= 0.999 on the four neutral fits, R2 < 0.995 on both managed fits, F_ST triple identity, rank checks, r60 == sels$random, fam_dev[,1] == (dev_se(block), dev_se(dh))).
+- tbl-era-seeds-z output: rows min/median/max/n_below_0/n_above_2/n_below_minus2 = z_trunc_F1het -4.47 / 0.52 / 3.90 / 7 / 4 / 2; z_maxdiv_F1het 5.84 / 6.88 / 8.67 / 0 / 20 / 0; z_trunc_Fhom 3.69 / 8.44 / 12.86 / 0 / 20 / 0.
+- tbl-era-audit-null output (aud20, my rerun of the chapter code): z_div_gap_hom seed 1 5.37, min 2.28, median 4.10, max 6.38; z_div_managed_drift 3.54 (-0.77 to 5.15); z_div_audit_drift 3.86 (-0.26 to 4.94); z_index_audit_drift 33.42 (23.03 to 34.26); z_index_audit_hom 5.21 (2.19 to 8.64); max |z_audit - z_managed| = 1.11; managed F_hom < 0 on 20/20, audit F_hom > 0 on 16/20.
+- Step 2 z (seed 1): max_div F_drift z = -0.67, F_hom -4.79 (chunk output); my 20-draw full-panel check (own script, null 300, seed 7): z_full_drift range -1.61 to 1.49, median 0.08, 11/20 > 0, 0/20 > 2; z_full_hom -3.58 to -6.26 on all 20. This supports the text's contrast half panel vs full panel.
+- R2 over 20 seed families (own script): neutral arms min 0.99903; managed F_drift 0.99206-0.99474; fam_fail = 4 of 20; z_bonf 3.078.
+- Meuwissen 2020 PDF text: "Fdrift is similar to the definition of FST (Holsinger and Weir, 2009), which is here applied to a single population over time instead of a sample of populations" (after Eq. 1B); "rates by 40% in both panels" (p.9); "within 2% of the target for both Panels M and N"; "what happens in a sample of loci does not necessarily predict what happens at loci outside that subset", "Causative alleles ... quite evenly distributed ... (Wood et al., 2014)" (Discussion).
+- pull_md = 0.01314, pull_rnd = -0.00259; kappa_anc = 0.6358.
+- 04c:434-436 and 04d:426-429 read; the two edits are exactly the minimal rewordings listed in the response and nothing else of the 04c/04d diff concerns 05.
+- book/downloads/05-genomic-era.R is modified in the worktree and contains the new chunks (fam_fail, audit_run, seed_z); I did not diff it against a fresh make_downloads output.
+
+## NOT VERIFIED
+- Wright (1951) content, Wright (1922) wording, Falconer & Mackay chapter locators (Ch. 3-4, 3, 14, 7), Toro 2014 on G_0.5, VanRaden 2008 on frequencies: no copy; non-decisive (no claim rests on them after D4; Falconer Ch. 14 for ID = 2F sum d p q is the book's own formula, verified in 05b).
+- Comstock et al. (1949): PENDING with the user; 05 attributes none of its content (existence and title only).
+- Holsinger & Weir (2009) "separate ... from the several other quantities": it1-refs read the full text and supports it.
+- Production-scale behaviour of any Step 1-6 result: not run, and the chapter says so (A8, Step 5 "teaching scale on twenty founder draws").
+- Whether book/_freeze and docs/ are current: not rendered in this review (batch render at the end).

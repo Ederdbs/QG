@@ -1,0 +1,52 @@
+# 07-choosing-metrics -- verdict, iteration 2
+
+VERDICT: REJECTED
+
+PREVIOUS IDS (re-review only)
+- 07-D1 -- CLOSED -- 5 us = 5.0 s/1e6 (5.007 us); bitset/line route 891.9/106.1 = 8.4x, bitset/swap 178x, both with the right denominators (knit output).
+- 07-D2 -- CLOSED -- F_BN everywhere in 07 (only remaining `fst` is the csv column name read at 07:148).
+- 07-D3 -- CLOSED -- eff_dim form (uncentred reading; 1.47 / 26.19 confirmed in docs/06 render), lens, strategy mix 300/120/113/88 and within-strategy rho (-0.60 random, -0.95 truncation) are declared.
+- 07-D4 -- CLOSED -- assumptions (i)-(v) declared, w sufficiency restricted to diversity quantities, lattice/margins/realisability stated; theta_swap is four rank-1 updates (R/04 read). The 1/(4n^2) sum k_a k_c f^L_ac = w'f^L w derivation checked line by line, and the live identity chunks assert at 1e-12.
+- 07-D5 -- CLOSED (original defects) -- accuracy table 20 seeds with s.e.; monotone counts 4/20 and 10/20; paired difference, s.e. and block means printed. I reproduced 0.0412/0.0416/0.0396/0.0379 and the 60-seed table. New defects in the same section are 07-D13.
+- 07-D6 -- CLOSED for (a), (c)-NP, (d); (b)-(c) comparison against sel_de() reopened as 07-D14 -- max_use 5,6,6 vs 6, pool imbalance 0, cold arms, NP arithmetic (36,000 vs 1,200; <2 vs ~50 generations) all correct and declared; the sel_de() benchmark numbers added in response are scoped wrongly (D14).
+- 07-D7 -- CLOSED -- provenance paragraph names every cached file as external; 2 of 10 identity columns without producer stated; tolerance asserted.
+- 07-D8 -- CLOSED -- the 2.337/1.62%/33.2/17/85% comparison is withdrawn in the text.
+- 07-D9 -- CLOSED -- residual-fraction table for all 10 metrics reproduced (0.653/0.556/0.523/0.521/0.503/0.391/0.373/0.364/0.352/0.250); allelic richness is "one of several". Inbound 02:988-992 and 06:316-319 agree with the table (>0.5 for alleles retained, E-NE, A-NE, theta_between; ~1/3 for alleles_lost, as Ne_par).
+- 07-D10 -- CLOSED -- PC1/PC2 87.6/6.6 (16 columns) and 85.4/7.5 (12) reproduced; |rho(theta,Ne_par)| 0.925; band |theta - median| < 0.002 gives 399 selections (293 random), 11680-11851, 30.1-55.8; live caption carries no number; cost_per_eval() is now seeded and adaptive (test passes).
+- 07-D11 -- CLOSED -- GD/ANE subsection added, consistent with 06 (tbl-catalogue-z, tbl-catalogue-seeds-z exist); ane() is O(Nn) on ctx[["f"]][, idx] (R/01 read); drop-in `sel_de_fast()` call matches the signature (ne_par_min, max_use, pool_tol, NP, itermax; warm start by default).
+- 07-D12 -- CLOSED -- Gomez-Romano 2016 (paper on disk) says the expected rate is "consistently biased downward", bias larger for smaller N, and "the observed rate of coancestry was approximately double the intended rate" (N = 20): the "factor of two, small candidate sets" wording is supported. De Beukelaer 2018 defines E-NE/A-NE after Odong 2013 (read). DEoptim.control help: "best to set NP to be at least 10 times the length of the parameter vector" (read). The "post-2018 consensus" claim is gone.
+- 07-M1, M2, M3, M4, M5, M6, M8, M9 -- CLOSED -- as stated in the response and seen in the knitted text. M7 -- CLOSED for 07 (preview paragraph defines the terms; circularity with 10:455 is owed by 10). M10 -- CLOSED as non-rejecting (keys now cited; no Lacy 1989 for status number).
+
+DISQUALIFYING FAILURES
+
+- 07-D13 [criteria 2, 5] book/07-choosing-metrics.qmd:664-668 (f5-accuracy), :686-701 -- The accuracy table is generated with `run(r, s)` whose default is `kind = "correlated"`, but the prose never says which error kind the table uses (the Assumptions paragraph offers "either ... or"). The conclusion drawn from it, "alpha moves little with accuracy" (4.12% at r = 1, 3.79% at r = 0.5), holds only for error correlated with relatedness. I ran the same truncation with independent error over 20 seeds (chunk code, `predicted(r, s, "independent")`, B = 400 null, ctx as in the chapter): alpha = 4.12 / 3.38 / 1.83 / 0.75 % at r = 1 / 0.9 / 0.7 / 0.5, against 4.12 / 4.16 / 3.96 / 3.79 % under correlated error. The chapter's own 60-seed table gives 1.22% at nominal r = 0.6 under independent error. An assumption used and undeclared; the general sentence is contradicted by the chapter's own later number. Related and secondary: the sentence "the seed-to-seed sd (0.51 pp) exceeds that difference (0.33 pp)" does not show the difference is noise (the right yardstick is its s.e., 0.11 pp, i.e. about 3 s.e.; the paired r = 1 vs 0.5 contrast is not tested).
+
+- 07-D14 [criteria 3, 6] 07:538-553 (limit b), 07:757-760 -- The comparison "sel_de() finishes ahead of line-encoded DE, at mean index 1.36 against 1.059 (book) and 1.446 against 1.336 (production)" uses the uncapped rows (`de_hybrid`, `de_lines`) of search_benchmark.csv, says neither that they are uncapped nor that there are 3 seeds, and gives no dispersion. I read the file: de_hybrid sd 0.018 / de_lines sd 0.015 (book) and 0.018 / 0.067 (production), n = 3 per cell, so the production difference (0.11, s.e. of the difference ~0.04) is not resolved by three seeds. The capped rows, which are the setting of Finding 4 (max_use cap, decoder satisfying it by construction) and of the recommendation to enforce the cap in the decoder, are omitted: de_hybrid_cap 1.1097 vs de_lines_cap 1.1056 (book), 1.1223 vs 1.1223 (production), i.e. a tie. The limit is thus stated in a form that does not apply to the capped setting it is used to qualify, and the closing recommendation (07:757) repeats "sel_de() ahead of line-encoded DE" without scope. Comparative claim without dispersion, scope beyond the tested configuration, and an omitted limit.
+
+NON-DISQUALIFYING OBSERVATIONS (three or more also reject; there are six)
+- 07-M11 book/06-metric-catalogue.qmd:465 -- still says the cache "was built at 12000 markers (@sec-choosing)", while 07:332-338 withdraws that and reads 12,000 as 2m alleles (m = 6,000, inference). The response lists 06:464 as closed; the working tree shows it unedited. Cross-chapter inconsistency of a number.
+- 07-M12 07:722-731 -- "The realised accuracy is not the same: 0.59 ... against 0.6". The printed paired difference is -0.011, s.e. 0.0088, positive in 25/60 (my run: same): the means do not differ; what differs is the spread (sd 0.069 vs 0.017, ranges 0.43-0.74 vs 0.56-0.63). The same applies to "differs between the two kinds of error" in the Assumptions paragraph. A difference inside its error read as a difference.
+- 07-M13 07:458, 07:476-484 -- caption and text speak of 30 greedy selections and "62 selections in the band"; the grid gives 28 distinct greedy selections (my run, seed 77, `unique` on sorted selections), so duplicates are counted. Also "1.83 against 1.85 in the cached analysis" compares range ratios from 62 and 399 selections of different mixes; the text does say "not an estimate".
+- 07-M14 07:262-263 -- "5.0 seconds per million" from a cached 5.007 us, in a file whose values are multiples of ~0.95 us (timer resolution; the caption says about 1 us). False precision against the caption's own statement.
+- 07-M15 07:561 vs 07:757 -- the text calls the hybrid-vs-line `NP` guidance documentation (correct) but the Finding 4 limit (c) leaves the reader without the 3-seed sd of the benchmark; see D14 (kept as observation of redundancy with D14, not counted twice).
+- 07-M16 07:35-41 -- the recommendation table row "Cost per evaluation" for Ne_par calls it "the same order as the swap" while the cached n = 200 values reverse the order; Finding 2 already says not ordered. Redundant prose between table and Finding 2.
+
+WHAT WAS VERIFIED
+- Chapter knit end to end with knitr, package loaded from the worktree (pkgload; `cost_per_eval` has the `target` argument), rc 0, every stopifnot passes.
+- Finding 2 arithmetic on cost_per_eval.csv (n_sel 1000, L 300): 482x, 14.2 h, 5.0 s, 8.4x, 178x, 5.7x, 3.77 GiB; n = 50/N = 2500: matrix 6.9 us vs line 10.0 us.
+- 60-seed Finding 5 (my own script, ctx as _common.R, seeds 1-60, B = 400): alpha 0.03668 / 0.01218, paired difference 0.02450 (s.e. 0.00080), positive 60/60; max_line 17.33 / 12.98, diff 4.35 (s.e. 0.41), 52/60; realised 1.2099 / 1.2337, diff -0.0238 (s.e. 0.0284), 27/60; r_real 0.5854 / 0.5964, diff -0.0110 (s.e. 0.0088), 25/60; sd r_real 0.069 vs 0.017. Block means -0.074 / 0.002 / 0.001 reproduced in the knit.
+- 20-seed accuracy table: truncation alpha 0.0412/0.0416/0.0396/0.0379, monotone 4/20; greedy 10/20; independent-error alpha 0.0412/0.0338/0.0183/0.0075 (D13).
+- Greedy grid: 28 distinct selections out of 30 weights; band 62 selections, Ne_par 22.9-41.9, ratio 1.83; figure inspected (greedy below random inside the overlap, consistent with the alt text).
+- Residual rank sd list (10 metrics) and PC shares 87.6/6.6 and 85.4/7.5, band 399/293/171 alleles/30.1-55.8, rho -0.60 random, -0.95 truncation, -0.925 overall: all reproduced in the knit.
+- de_constraints.csv: hybrid max_use 5,6,6; Ne_par 75.8-77.2; loss 0.05-0.07%; line arm Ne_par 50-50.25, loss 0.42-0.497; pool_imbalance 0 in 9 rows; figure de_convergence.png read (start values -1 and 0.27).
+- search_benchmark.csv: cells, n = 3 seeds, means and sd per method (D14).
+- Package: `devtools::test(filter = "metrics")` FAIL 0 | WARN 0 | PASS 144 (includes the new cost_per_eval test). R/02 cost_per_eval diff read: seeded, adaptive timing, backward compatible. Roxygen of R/04 decode_lines and R/12 sel_de_fast now scoped (one recorded run, 3 seeds, both arms cold, not sel_de()), but the R/12 text "which scores higher (uncapped) in the book's search benchmark" is correct only for the uncapped rows (same point as D14).
+- Inbound edits 02:988-992 and 06:316-319 read against the residual table: consistent. DEoptim help, Gomez-Romano 2016 and Core Hunter 3 PDFs read on disk.
+
+NOT VERIFIED
+- Cached external files (cost, identity sweep, redundancy, DE constraints): no producer in the repository; only arithmetic on the stored values.
+- Package eff_dim() on the cached redundancy selections: no selections available.
+- Production-scale behaviour of any cached timing; hardware undeclared.
+- Whole-suite `devtools::test()`: only the metrics file was run by me.
+- Quarto render, cross-reference resolution and the freeze/docs state: not rendered; labels were checked by grep only.
+- Later-chapter inbound claims listed as owed in the response (08, 09, 10, 10b, 11, 12, 04b): not edited, not judged here.

@@ -1,0 +1,103 @@
+# Chapter 10 (book/10-combinatorial-selection.qmd) -- audit, iteration 1
+
+Read-only. Method: the chapter was knitted end to end against the worktree package (`pkgload::load_all`, uncommitted `R/` edits of the other agents included; they are doc/comment changes plus the `make_fitness` roxygen, none moves a number here), every inline value compared with the code output; cached CSVs recomputed; stochastic assertions rerun over 20 seeds (book scale, 8 cores). Scratch scripts: `scratchpad/a/{run,mc,rel2}.R`. Line numbers are of the working-tree qmd (only line 36 is edited against HEAD).
+
+Verified clean: instance panel and every inline number of the baselines section (9.6%, 413 of 625 scanned, 16 shared, 32 vs 33 lines, 41% retained, 4.12% / 0.33%); `greedy-increment` identity (87.07925 both ways, `stopifnot`); `decode-example` (`stopifnot`); `decode` box widths (625.999, 0.999); `theta_max` formula equals `ocs_bound()` code (`R/12_search.R:331-358`, bound = min over lambda of `V + lambda*theta_max`); `penalty = 1000` on the absolute violation (`R/03_de_select.R:177-192`: 0.001 excess costs 1.0 index unit); DE plan feasible at 0.978% vs 1%; warm-start table (7 identical truncation seeds, fitness 29.2242, one feasible seed at 0.1343); `bmean`/`bsec` quoted values equal the CSV means (recomputed); ASCII of `R/` (grep for non-ASCII bytes: none); owed re-point at 10:36 is in the working tree and correct (03:575, 03:680 define the standardised index and the contract).
+
+## Provenance of the cached data read by the chapter
+
+| file | read at | producer in `book/scripts/regenerate.R` | status |
+|---|---|---|---|
+| `book/data/de_constraints.csv` (9 rows, 3 encodings x 3 seeds, `git log`: initial commit only) | 10:9, 461-485 | **none** (grep of the whole repo outside `docs/`, `_freeze/`: only the qmd, `index.qmd:198` which lists it under "No writer in this repository", `07-choosing-metrics.qmd:68, 543`, `92-verification.qmd:275`) | external, cannot be regenerated here |
+| `book/data/search_benchmark.csv` (72 rows: 2 scales x 12 methods x 3 seeds) | 10:10-16, 503-506, 851-873 | yes: `regenerate.R search`, bench_scale at lines 235-349 (writes at 349), about 15 min | in-repo; not rerun (cost), checked for internal consistency: book `bound_certified` TRUE in 36/36 rows, **production FALSE in 36/36** (gap column NA there) |
+| `book/data/search_anytime.csv`, `search_scaling.csv`, `search_exact_gap.csv` | not read by 10 | yes (search / search_exact) | n/a |
+
+`highs` (Suggests) is not needed by this chapter: no `sel_exact()` call. `DEoptim` (hard dependency) is the only optional-looking package the chunks use; `ocs_relaxation()`/`ocs_bound()` are base R.
+
+## Findings
+
+### 10-R1 -- 10:450-452, 10:515-517 -- cached external data labelled reproducible and given a wrong path (rule: cached external never reproducible)
+"the measurement is cached in `data/de_constraints.csv`": that path is `book/data/` (`data/` is gitignored, CLAUDE.md). The chapter never says the file has no producer in this repository (07:68 and `index.qmd:198` do). 10:515-517 then says "the table is reproducible in direction, not to the digit", which presupposes a runnable source; there is none (no `regenerate.R` target, no script, `n_sel`, `NP`, `itermax`, penalty and hardware unrecorded; 07:549-551 says so). Fix: "cached, external, no writer in this repository (@sec-choosing-search lists what was not recorded)"; delete "reproducible in direction".
+
+### 10-R2 -- 10:454-455, 10:461-476 -- circular definition and a table duplicated with 07 (owed from 07-M7, THREAD l.474)
+10:455 defines the four restrictions as "of @sec-choosing" and in the same sentence lists them; 07:543-551 now defines them and points to 10 for the full treatment. The table at 10:461-476 is the same aggregation as 07's `tbl-choosing-de`. 10 owns the treatment: state the four restrictions as 10's own text (no "of @sec-choosing"), drop the second citation in the caption (10:475) and keep one table. Also report what 07 reports and 10 omits: in `de_constraints.csv` pool imbalance is 0 in all 9 rows, loss 0.05-0.07% against a 0.5% ceiling and `Ne_parents` 75.8-77.2 against a floor of 50 in every hybrid-key run, `max_use` 5, 6, 6 against 6 (computed here); so at most two of the four restrictions bind, only in the line arm. A table captioned "four simultaneous restrictions" without that reads as four binding.
+
+### 10-R3 -- 10:500-507 -- Finding 4 qualifier missing: "sel_de() finishes ahead of sel_de_fast() at both scales"
+Recomputed from `search_benchmark.csv`. Uncapped `de_hybrid` vs `de_lines`: book 1.360 vs 1.059 (seed differences 0.310, 0.283, 0.308); production 1.446 vs 1.336, seed differences 0.106, 0.168, 0.057 (mean 0.110, sd 0.056, s.e. 0.032, t = 3.4 on 2 df; `de_lines` sd 0.067): three seeds do not resolve it at production (07's own text says so, 07:622-630). Capped rows, the setting of the line decoder this section describes: book `de_hybrid_cap` 1.110 vs `de_lines_cap` 1.106 (difference 0.0041 in every seed, sd 0, no s.e. exists), production 1.122 vs 1.122 (difference 0). The sentence holds for the uncapped, book-scale rows only. Rewrite with those four statements and the numbers inline (they are `fmt()`-able from `bench`), including "three seeds per method and scale".
+
+### 10-R4 -- 10:491-495 -- untested mechanism stated as fact, and a likelier explanation from the code
+"Penalty and repair ... identical plans ... because at that dimension the search never travels far enough from its random start to reach the boundary". 07:623-626 says "I do not know why ... not tested". In the package, `make_fitness_fast(encoding = "hybrid")` calls `decode_rank(p, ctx, n_sel)` (`R/04_fast_metrics.R:394`), which ignores `max_use`; there is no repair for the hybrid encoding, so "penalty" and "repair" are the same function there and identical plans from identical seeds are what a no-op distinction produces (inference: the external run's code is not available to confirm which functions it called). Reword to "not explained; a distinction that the hybrid decoder cannot make is one candidate".
+
+### 10-R5 -- 10:481-485, 10:488 -- `ratio_of_means` printed after 07 withdrew it
+The `encoding-spread` chunk prints `ratio_of_means = 5.667` (lw/hk). 07:586-588 withdraws a ratio ("the index has no natural zero here, and the hybrid arm starts above the line arm on the penalised scale"). Drop the entry, quote the difference (1.64 index units, seed ranges 0.014 and 0.061 disjoint; that part is right).
+
+### 10-R6 -- 10:446-452, 10:508-513 -- "measured rather than asserted" and "a penalty the other arm had to pay"
+The cached run does not measure infeasibility of the N-dimensional encoding: it compares final index at 60,000 evaluations with NP unrecorded; 07:640-648 computes that 3,600 parameters at NP = 10 x dimension need 36,000 members, so 60,000 evaluations are under two generations. The N-key search is under-powered by construction, and the chapter's opening claim (10:346 "infeasible") remains an assertion. 10:510-513 says part of the margin is "a penalty the other arm had to pay": all 9 rows are `feasible = TRUE`, `violation = 0`, constraints slack at the end of the hybrid arm, so no evidence of a penalty paid; 07:604-610 reads the same table as an unconverged search. Re-word both as limits, consistent with 07.
+
+### 10-R7 -- 10:409-417 -- "slight bias toward low-numbered candidates ... has not mattered" is neither slight nor tested
+Measured here (book ctx, 2000 random parameter vectors of length 60): 2.74 duplicates per vector on average, and every repaired member is a cross of the same parent line: candidates 1-25 all have `ped$b == 26` (candidate order is A fastest within B). Mean repaired members whose B parent is line 26: 2.736 of 2.736. So the repair puts about 2.7 uses on one B line into every random individual (a line-usage bias that interacts with `max_use`), not a diffuse low-index bias. "It has not mattered at these scales" has no measurement behind it. Either measure (final line-usage histogram of the DE plans) or say it is untested; the `ponytail:` comment is in `R/03_de_select.R:136-137` of the doc/comment, not the code path measured.
+
+### 10-R8 -- 10:626-636, 10:830-836 -- 3-seed spread claim does not survive 20 seeds (criterion 7/8)
+Chapter: warm sd 0.0023 vs cold 0.0353 over seeds 9, 21, 33 -> "shrinks the run-to-run spread by an order of magnitude"; 10:833-836 quotes 0.002 as the DE's seed-to-seed spread. Rerun over seeds 1-20 with the chapter's own calls (seed 9 reproduces the chapter: warm 1.3299, cold 1.1589): warm mean 1.3401, sd 0.0225 (range 0.090); cold mean 1.2011, sd 0.0291 (range 0.117). Spread ratio 1.3, not 10. The location effect holds and is better quantified by pairing: warm minus cold 0.139, s.e. 0.0079, positive in 20/20. So "worth about 11%" stands (12% at 20 seeds); "order of magnitude" and "the seed-to-seed spread is small against the steps between budgets" (steps 0.10-0.31 vs sd 0.022, still true but with the wrong sd) do not. Also the arms are paired only loosely: in the cold arm `sample.int()` is forced inside `sel_de()` before `runif()`, so the random remainder of the initial population differs from the warm arm's despite the shared seed; say "same seed, same population size". Replace by 20 seeds (one line, 10-30 s each at this scale) or drop the spread claim.
+
+### 10-R9 -- 10:565-573, 10:568 -- README source for the cold-start claim does not exist
+"recorded as finding 7 of `README.md`": `README.md` has no numbered findings and `git log -S"finding 7" -- README.md` is empty. The 2500-candidate, n = 100, 4.5e5-evaluation result (also stated in `R/03_de_select.R` roxygen) has no source in the repository. Either state it as unreproduced and unsourced, or re-run and cache it.
+
+### 10-R10 -- 10:654-668 -- warm-start mechanism claim untested; the table undercuts it
+The table (10:641-652) shows the warm start holds one feasible plan (w = 0, index 0.134) and seven copies of truncation (infeasible, fitness 29.22 on the minimised scale). The chapter then asserts "it gives the DE something worth improving on" and "the mechanism is dimensional". No ablation (seed only w = 0; only truncation; add the best feasible greedy at w = 2.2e-4 which scores 1.378) separates the candidates. Note too that the warm DE ends below the best feasible greedy in 20/20 seeds (1.340 mean vs 1.378), so the sentence 10:340-342 "the difference between the DE working and not working" overstates: warm DE works better than cold, and still does not work as an index maximiser at this budget. Mark the mechanism as a conjecture or run the 3-arm ablation.
+
+### 10-R11 -- 10:19-22 vs 10:673-679, 10:811-820 -- intro promises what the body retracts
+Intro: "the differential evolution that beats them -- and explains why the DE only beats them under one specific condition". Body: warm DE is below the best feasible greedy at 1% in 20/20 seeds; the DE is "ahead" at 4 of 5 budgets (17 of 20 seeds; 5 of 5 in 3; at alpha_max = 0.01 it is ahead in only 3 of 20) only because the greedy grid has no point near the budget; "does not survive measurement" for dominance. Rewrite the intro to the body's conclusion (DE buys the ability to hit a budget; it does not beat a finely swept greedy at this scale).
+
+### 10-R12 -- 10:822-829 -- the 1.129 "relaxation point inside the budget" is a grid artefact (criterion 8 / 07-Owed 10:826)
+Chapter: the best relaxation point with alpha <= 1% "reaches 1.129, below both the DE plan and the best feasible greedy plan", used to show the construction is not an upper bound. Reproduced (10 lambdas, 2 inside the budget, best 1.12895). With a 48-point grid on lambda in [1, 158] (8000 iterations) 7 points fall inside the budget, best 1.518 at alpha <= 0.92%, which is **above** DE (1.330) and greedy (1.378) and below the bound (1.553). So this chapter's number does not show invalidity; it shows what 09:257-263 says, that the last grid point inside the budget is below the continuous frontier by a grid-dependent amount. The invalidity claim is made and measured in 10b `@sec-bound`, not here. Fix: either quote the number as "on this 10-point grid" with the finer-grid value, or cite 10b's measurement and drop the "below both" sentence. Also the figure shows the DE curve below the connected greedy line at every budget; the connecting line interpolates between greedy plans that do not exist, so the DE-ahead reading rests on the step function of 10:794-801, which the caption/prose should say.
+
+### 10-R13 -- 10:683-685, 10:703-713, 10:727 -- pointers to 09/10b out of date, "certifies"
+09 `@sec-relaxation` (09:204-266) now contains the bound itself (`@eq-ocs-weak`, `@eq-ocs-bound`, valid for every lambda, grid cost is tightness) and calls `converged` "a stalling criterion on the doubling, not a certificate" (09:263-265). 10:683 says "@sec-relaxation gives a relaxation. Turning it into a bound takes one more step, derived in @sec-bound": the derivation is in 09 (@eq-ocs-bound); 10b `@sec-bound` is the falsification and the production-scale failure. Cite @eq-ocs-bound at 10:707-709. 10:727 "a bound the function certifies as converged" contradicts 09: say "the stalling flag is TRUE". Checked numerically here: bound at 4000 / 8000 / 16000 / 32000 iterations = 1.55242 / 1.553244 / 1.55339 / 1.553398 (monotone, last step 5e-6), so the flag is plausible at this scale; at production the flag is FALSE in 36/36 benchmark rows.
+
+### 10-R14 -- 10:723-725 -- "a large gap means the optimiser has not converged, not that the problem is hard"
+Gap = optimiser shortfall + relaxation looseness. The chapter's gap is 14.4% (DE 1.330 vs bound 1.553); the statement that it is the optimiser is established only by 10b's local search reaching 1.527 at book scale (about 1.7% from the bound, `search_benchmark.csv`), which bounds the looseness there. At production the bound is uncertified and the sentence cannot be applied. Qualify: "where the relaxation is known to be tight (book scale, 10b)".
+
+### 10-R15 -- 10:163-166 -- feasibility "is arithmetic, not luck" is necessary, not sufficient
+$n \le \min(L_A, L_B)\,c$ is necessary. The capped walk can still return fewer than `n_sel` at $n$ equal to that bound: random complete factorials, $L_A, L_B \in 2..6$, $c \in 1..4$, $n = \min(L_A, L_B)c$, 2000 draws: the walk is short in 64 (3.2%). At the chapter's n = 60 against 100 the margin is large and the claim is harmless here, but the sentence is false as written; the `length()` warning at 10:220-223 is the correct remedy.
+
+### 10-R16 -- 10:109-120 -- identity asserted in prose, only printed in the chunk
+`greedy-collapses` prints `setequal(...)` TRUE/TRUE; the prose says "exactly the truncation set -- same index, same alpha, same max_line". Wrap in `stopifnot()` (it is the load-bearing fact of the section; with `freeze: auto` a printed FALSE would not stop a render either). Same for the `decode-roundtrip` `seed_roundtrip` and the `in_range`/`deterministic` entries (10:383-406), all printed as 1.
+
+### 10-R17 -- 10:91-99 and 10:7-8 -- seeds
+`sel_random(ctx, n_sel)` is the only unseeded draw. The random row (index 0.008, alpha -0.236%) is reproducible only because `null_distribution()` calls `set.seed(7)` internally (`R/02_benchmark.R`) and the stream position after its `replicate()` calls is deterministic. Put `set.seed()` immediately before it. `book_cfg` seed 1 and `set.seed(2026)` in `_common.R` are irrelevant to the draws that matter. All DE chunks seed immediately before the call (9, 21, 45, 9/21/33): fine, and seed 9 of `warm-vs-cold` equals the `de_idx` run by construction (the same call; say so).
+
+### 10-R18 -- 10:283-289, 10:268-270 -- the "six decades around the crossover" grid
+Measured `w_crossover` = 5.4e-5; `ws` runs 1e-5 to 10, so the crossover sits at the second grid point and the grid is almost wholly above it (it does not span six decades "around" it). "A decade or two above it every point collapses onto truncation" is also off: flat from w = 0.0215, 2.6 decades above (`flat_from`); at +2 decades the index is within 0.08% but not identical. The `w_crossover` is computed at k = 31 (`S30`), not at the n_sel = 60 problem. Reword: "spans from 0.2x to 2e5x the crossover; the useful window is 1x to 400x".
+
+### 10-R19 -- 10:45, 10:52-53, 10:125 -- owed wording (THREAD l.63, 249, 548)
+10:45 cites @sec-genomic-prediction for the standardised index: 08b does not show it; 03:575 and 03:680 do (re-point to @sec-simulating-crosses, as at 10:36). "Candidate pool" at 10:45, 10:52-53 ("the allele-frequency base `ctx$p0` is the candidate\npool", split across lines, missed by a line grep) and 10:125 -> "candidate set" (07:991, 07:1045 settled on it; "pool" is reserved for the heterotic pools in this chapter's own first paragraph). 10:52 "(@sec-choosing, finding 5)" -> @sec-choosing-error; 10:899 "@sec-choosing's cost table" -> @sec-choosing-cost (07:238, 07:300-310).
+
+### 10-R20 -- 10:346-347 vs 10:505, 10:853 -- two meanings of "production"
+10:347 "at production size ... 5041 binary dimensions" is 71 x 71 lines (the package's declared production, CLAUDE.md); 10:505 and 10:851-873 "production scale" is the benchmark's N = 10,000, 100 + 100 lines, m = 5000, n = 200, cap 4 (`regenerate.R:327-333`). Name both once, as 05 A8 did.
+
+### 10-R21 -- 10:842-875 -- strategy table, row 4
+Numbers recomputed and correct (greedy_cap 1.112 / 1.123; seconds 0.008 and 0.010 at book, 0.329 and 0.214 at production; tempering_cap short by 2.5 and 0.2 thousandths). Four qualifiers owed: (i) at production the five capped routes sit at 1.122-1.123 (greedy_cap leads by 2e-4, sd 0 in every seed) and alpha is 0.31% against the 1% budget: the cap binds, the budget does not, so "a budget and a per-line cap" is a cap-only case and "highest index" is a 2e-4 tie, the discriminating fact is cost; (ii) `sel_greedy` needs the N x N `f`, which at N = 10,000 is the 0.745 GiB `regenerate.R:217` calls the wall of the full route, so "cheap at both" omits memory; (iii) the chapter's own cap is 4 (`ceiling(2*60/50)+1`), the benchmark's is 5 at book scale and 4 at production; the table's "1.112 at book scale" is at cap 5 against this chapter's capped truncation 0.820 at cap 4, a reader will compare them; (iv) "roughly %sx the wall-clock" (36x) divides by an 8-ms total the sentence has just called unseparable by single-call timing; give the unquantised ordering or the wall-clock of both.
+
+### 10-R22 -- 10:62-73 -- instance chunk prints scientific notation
+`c(...)` of mixed counts and rates is not passed through `fmt()`: `6.250000e+02`, `3.258386e-01`. Cosmetic; use `fmt()` or `format()`.
+
+### 10-R23 -- 10:734-743 (cross-reference only)
+De Beukelaer et al. (2018) objective is E-NE (distance-based), not allele coverage: already 10-B1 in `it1-refs.md`. Not duplicated here.
+
+### 10-R24 -- orphans if a chunk is added, removed or relabelled (criterion 6)
+All three figure chunks are labelled (`greedy-frontier`, `warm-start`, `full-frontier`), so editing around them orphans nothing. Already orphaned, tracked and unreferenced by `docs/10-combinatorial-selection.html` (it references only those three): `docs/10-combinatorial-selection_files/figure-html/unnamed-chunk-{6,13,16}-1.png`, `book/_freeze/10-combinatorial-selection/figure-html/unnamed-chunk-{6,13,16}-1.png`, `book/_freeze/10-combinatorial-selection/figure-typst/unnamed-chunk-{6,13,16}-1.svg` (9 files). Adding any unlabelled figure chunk renumbers further `unnamed-chunk-N`. `book/downloads/10-combinatorial-selection.R` and `docs/downloads/` need `make_downloads.R` after any edit (the downloaded copy already carries the 10:36 re-point); `devtools::install()` is not needed for any edit proposed here (no exported function changes).
+
+## Owed items, status
+
+| owed item | status |
+|---|---|
+| 10:455 + 10:464-475 duplicated with 07, circular definition | open -> 10-R2 |
+| 10:36 contract pointer | done in tree, correct |
+| 10:43-46 / 10:45 index citation | open -> 10-R19 (10:45 still @sec-genomic-prediction) |
+| 10:683, 10:826 pointers to the relaxation | open -> 10-R13, 10-R12 (the 10:826 number is also a grid artefact) |
+| Finding 4 qualifiers | open -> 10-R1, R3, R4, R6, R10 |
+| "candidate pool" 10:45, 10:125 | open -> 10-R19 (also 10:52-53) |
+
+## Cost and what was not done
+Chapter knit: about 6 min on the render machine (DE chunks dominate, 13 `sel_de` runs of 3e4 evaluations). 20-seed rerun: 140 `sel_de` runs, 8 cores, about 8 min. `regenerate.R search` was not rerun (about 15 min); `search_benchmark.csv` was recomputed from, not regenerated. Typst/HTML render not run.

@@ -1,0 +1,1097 @@
+#' # Diversity across cycles {#sec-cycles}
+#' 
+# 11b-diversity-across-cycles -- standalone script of the chapter 11b-diversity-across-cycles.qmd
+# Book: https://ederdbs.github.io/QG/11b-diversity-across-cycles.html
+#
+# Reproduces every analysis of the chapter, in order; the chapter text is kept
+# as comments (#') so the script reads as the chapter does.
+#
+# Requirements: R >= 4.1 and the 'hybdiv' package (this repository's root):
+#   install.packages('remotes'); remotes::install_github('Ederdbs/QG')
+# Run it top to bottom in an empty working directory.
+
+library(hybdiv)
+set.seed(2026)
+
+# The teaching scale, the default of the live examples: small enough that a
+# full render takes minutes, large enough that none of the identities hold by
+# accident. Chapters that need another scale set it in their own chunks. The
+# production scale is n_pool_A = n_pool_B = 71 and m = 25000; see the note in
+# each chapter where the difference matters.
+book_cfg <- utils::modifyList(
+  hybdiv::sim_config,
+  list(n_pool_A = 25, n_pool_B = 25, m = 2000, seed = 1)
+)
+
+# Paths to the cached artefacts, so chapters never guess.
+
+# Rounded table helper, used wherever a metric panel is printed.
+fmt <- function(x, digits = 4) {
+  # A matrix must become a data frame first: `x[num] <- lapply(...)` on a
+  # matrix recycles the logical over the flattened array and assigns a list
+  # back, silently turning the matrix into a list.
+  if (is.matrix(x)) x <- as.data.frame(x)
+  if (is.data.frame(x)) {
+    num <- vapply(x, is.numeric, logical(1))
+    x[num] <- lapply(x[num], round, digits)
+    x
+  } else round(x, digits)
+}
+
+# A value in scientific notation for inline prose, as a complete math span. A
+# numeric inline value that small or large leaves knitr as bare TeX,
+# `4\times 10^{-13}`, from which Pandoc drops `\times 10` (the book printed
+# 4^{-13}); a string passes through untouched. Not for use inside $...$.
+fmt_sci <- function(x, digits = 2) {
+  s <- sprintf("%.*e", digits - 1, x)
+  sprintf("$%s \\times 10^{%d}$", sub("e.*", "", s), as.integer(sub(".*e", "", s)))
+}
+stopifnot(identical(fmt_sci(c(3.7e-13, 9.96e-5)),
+                    c("$3.7 \\times 10^{-13}$", "$1.0 \\times 10^{-4}$")))
+
+# One palette for every live figure: the two heterotic pools get fixed colours
+# (A blue, B amber, a colour-blind-safe pair); red marks the constraint or the
+# loss; greys carry everything else. Chapters pass these instead of hex codes.
+book_pal <- c(A = "#1f5f8b", B = "#d98e04", loss = "#b2182b",
+              ink = "#14202b", mid = "grey45", light = "grey85")
+
+# Cached artefacts (expensive sweeps) are fetched from the repository on first use.
+.book_get <- function(dir, ...) {
+  f <- file.path(dir, ...)
+  if (!file.exists(f)) {
+    dir.create(dirname(f), showWarnings = FALSE, recursive = TRUE)
+    utils::download.file(paste0('https://raw.githubusercontent.com/Ederdbs/QG/main/book/', f), f, quiet = TRUE, mode = 'wb')
+  }
+  f
+}
+book_data <- function(...) .book_get('data', ...)
+book_fig  <- function(...) .book_get('figs', ...)
+traj  <- read.csv(book_data("cycles_trajectory.csv"))
+cross <- read.csv(book_data("cycles_crossover.csv"))
+mu    <- read.csv(book_data("cycles_maxuse.csv"))
+inj   <- read.csv(book_data("cycles_injection.csv"))
+selc  <- read.csv(book_data("cycles_selector.csv"))
+# GD of the CSV is GD_T (checked below); within-pool diversity is GD_WS = GD_T - GD_BS
+traj$GD_WS <- traj$GD_T - traj$GD_BS
+vars  <- c("index", "GD", "GD_T", "GD_WS", "GD_BS", "F_hom", "F_drift", "max_line",
+           "gd_ref", "alpha", "var_g", "var_genic")
+avg   <- function(d, by = c("budget", "cycle")) aggregate(d[, vars], d[by], mean)
+ag    <- avg(traj)
+# Paired contrast of two arms of the same founder draws (same seed -> same founders):
+# mean over seeds, s.e. = sd / sqrt(n), and the number of seeds in which a > b.
+ix <- function(d, g, k, col = "index", by = "budget") {
+  s <- d[d[[by]] == g & d$cycle == k, ]
+  s[[col]][order(s$seed)]
+}
+pd <- function(a, b, k, d = traj, col = "index", by = "budget") {
+  z <- ix(d, a, k, col, by) - ix(d, b, k, col, by)
+  c(diff = mean(z), se = sd(z) / sqrt(length(z)), pos = sum(z > 0), n = length(z))
+}
+pf <- function(p, digits = 2)
+  sprintf(paste0("%+.", digits, "f (s.e. %.", digits, "f; positive in %d of %d seeds)"),
+          p[["diff"]], p[["se"]], as.integer(p[["pos"]]), as.integer(p[["n"]]))
+pc <- function(p, digits = 2)   # compact cell for tables
+  sprintf(paste0("%+.", digits, "f (%.", digits, "f; %d/%d)"),
+          p[["diff"]], p[["se"]], as.integer(p[["pos"]]), as.integer(p[["n"]]))
+# first cycle after which a seed-mean difference stays positive
+first_pos <- function(d) min(which(rev(cumsum(rev(d <= 0))) == 0)) - 1L
+mdiff <- function(a, b) at(a, 0:15) - at(b, 0:15)
+at    <- function(b, k, col = "index")
+  vapply(k, function(kk) ag[[col]][ag$budget == b & ag$cycle == kk], numeric(1))
+
+#' 
+#' @sec-case-study lists what its numbers cannot tell you. One item on that list is
+#' *one cycle, not a trajectory: a one-cycle constraint is not a multi-cycle policy.*
+#' This chapter runs the constrained selection forward, in simulation, to see what
+#' the constraint does to a programme over fifteen cycles.
+#' 
+#' The results of @sec-ocs to @sec-advanced on hybrid selection under the
+#' $\alpha_{\max}$ budget are single rounds. Trajectories have appeared before: the
+#' recurrent-selection cycles of @sec-alphasimr (Step 8), and the inbred-line wheat-type
+#' programme of @sec-programme, which overlaps cycles, reports a stock and not a
+#' rate, and has no $\alpha$ budget -- its own text calls the application of such a
+#' budget to line parents a proposal and sends the reader here. What has not
+#' appeared is the diversity constraint on *hybrid* selection applied cycle after
+#' cycle in a discrete-cycle, two-pool model. What diversity buys is what the next
+#' cycle can do with it. @sec-response-genic states the link between within-pool
+#' diversity and genic variance for one generation, and @sec-response says that
+#' nothing in the preceding chapters predicts the multi-cycle crossover reported
+#' here; this chapter measures it.
+#' 
+#' ## The cycle
+#' 
+#' Selection happens at the hybrid level, on $A \times B$ crosses. Recycling happens
+#' *within* pool. That asymmetry is the design, and getting it backwards would
+#' destroy the heterotic pattern: a doubled haploid (DH) derived from an $A \times B$
+#' hybrid is a blend of both pools (assumption A3 of @sec-era-programme,
+#' @sec-hp-cycle), so a programme that recycled hybrids would merge its pools. How
+#' fast the merge would happen is not simulated here.
+#' 
+#' What crosses the pool boundary is *information* -- which lines proved themselves
+#' in hybrid combination -- and never germplasm. @fig-cycles-diagram draws the cycle.
+#' 
+## -----------------------------------------------------------------------------
+#| echo: false
+#| label: fig-cycles-diagram
+#| fig-width: 6.5
+#| fig-height: 3.05
+#| fig-cap: "One cycle of `run_cycles()` (schematic; no data). Pool A is drawn in blue and pool B in orange, as elsewhere in the book. Solid arrows: every $A \\times B$ hybrid of the two pools is evaluated across the pool boundary, `n_sel` of them are selected (the diversity budget applies at this step), and the selection yields line-usage weights $w_A$, $w_B$. Dashed red arrows: lines are recycled inside their own pool, by intermating within the pool and deriving doubled haploids (DH). The usage weights are the only channel between the two pools, and they are what `line_weights()` returns."
+#| fig-alt: "Flow diagram. Pool A lines (blue box) and pool B lines (orange box) on the left, feed a grey box of every A by B hybrid, then a box that selects n_sel hybrids, then a box of usage weights for A and B. Two dashed red arrows return from the usage weights to the pool A box and to the pool B box, labelled intermate within the pool and derive doubled haploids. A note above the hybrid box says the diversity budget applies at the selection step."
+op <- par(mar = c(0, 0, 0, 0)); plot.new(); plot.window(c(0, 100), c(0, 46))
+box_ <- function(x, y, w, h, lab, fill, cex = 0.72, tcol = "black") {
+  rect(x, y, x + w, y + h, col = fill, border = "grey40")
+  text(x + w / 2, y + h / 2, lab, cex = cex, col = tcol)
+}
+arr <- function(x0, y0, x1, y1, lty = 1, col = "grey30")
+  arrows(x0, y0, x1, y1, length = 0.07, col = col, lty = lty, lwd = 1.6)
+
+box_(2, 30, 20, 10, "pool A\nlines", book_pal[["A"]], tcol = "white")
+box_(2,  4, 20, 10, "pool B\nlines", book_pal[["B"]])
+box_(32, 17, 22, 10, "every A x B\nhybrid", "#f7f7f7")
+box_(62, 17, 16, 10, "select\nn_sel", "#fddbc7")
+box_(84, 17, 14, 10, "usage\nw_A, w_B", "#fddbc7")
+
+arr(22, 34, 32, 25); arr(22, 10, 32, 20)
+arr(54, 22, 62, 22); arr(78, 22, 84, 22)
+# the recycling arrows, back inside each pool
+arr(91, 27, 91, 42, lty = 2, col = "#b2182b"); arr(91, 42, 23, 42, lty = 2, col = "#b2182b")
+arr(12, 42, 12, 40.5, lty = 2, col = "#b2182b")
+arr(91, 17, 91, 2, lty = 2, col = "#b2182b"); arr(91, 2, 23, 2, lty = 2, col = "#b2182b")
+arr(12, 2, 12, 4, lty = 2, col = "#b2182b")
+text(50, 44.5, "intermate within A, derive DH", cex = 0.62, col = "#b2182b")
+text(50, 0.2, "intermate within B, derive DH", cex = 0.62, col = "#b2182b")
+text(37, 30.5, "diversity budget applies here", cex = 0.62, col = "grey30")
+par(op)
+
+#' 
+## -----------------------------------------------------------------------------
+#| label: cycles-assumption-numbers
+#| include: false
+vr  <- traj$var_g / traj$var_genic        # per run: variance of the index over genic variance
+vrm <- function(k) tapply(vr[traj$cycle == k], traj$budget[traj$cycle == k], mean)
+stopifnot(max(abs(traj$GD - traj$GD_T)) < 1e-12,                       # GD of the CSV is GD_T
+          max(abs(traj$GD_WS - (1 - (traj$theta_A + traj$theta_B) / 2))) < 1e-12)
+
+#' 
+#' `run_cycles()` is the loop. Its data-generating mechanism, as the code of
+#' `simulate_pools()` and `run_cycles()` implements it (the arguments of
+#' `book/scripts/regenerate.R cycles`, with the defaults of `run_cycles()` unchanged):
+#' 
+#' - *Founders.* 25 + 25 inbred lines, $m = 2000$ biallelic markers, all unlinked
+#'   (C1). For each marker $k$ an ancestral frequency $p^{*}_k \sim U(0.05, 0.95)$ is drawn,
+#'   and the frequencies of the two pools are independent draws
+#'   $p_{Ak}, p_{Bk} \sim \mathrm{Beta}\big(p^{*}_k(1-F_{BN})/F_{BN},\ (1-p^{*}_k)(1-F_{BN})/F_{BN}\big)$
+#'   (@eq-balding-nichols: a Balding-Nichols draw [@balding1995] in the parametrisation of
+#'   that equation, which is this book's own specification and is the one
+#'   `simulate_pools()` implements), clipped to $[10^{-6}, 1 - 10^{-6}]$, with
+#'   $F_{BN} = 0.15$ (argument `fst`; it is the Balding-Nichols parameter, not a
+#'   realised $F_{ST}$). Each line carries allele 1 at each marker with probability
+#'   $p_{Ak}$ (pool A) or $p_{Bk}$ (pool B), independently over lines and markers, so
+#'   lines are homozygous and coded 0/1, and the 625 hybrids ($A \times B$,
+#'   complete factorial) are coded 0, 0.5, 1.
+#' - *Genetic architecture.* 300 of the 2000 markers, chosen at random without
+#'   replacement, are quantitative trait loci (QTL) with effects $\beta_k \sim N(0, 1)$ independent of allele
+#'   frequency; the other 1700 have effect 0 and are neutral for the index but count in
+#'   every diversity metric. Effects are additive (C9).
+#' - *The index.* The index of a hybrid is its true genetic value $X\beta$ (no
+#'   environment, no residual, no estimation error: C7), centred and scaled by the mean
+#'   and standard deviation of $X\beta$ over the 625 founding hybrids and held at those
+#'   constants in every cycle. The unit of every gain below is therefore the standard
+#'   deviation of the index among the founding hybrids, and cycle 0 has mean 0 over
+#'   the candidates. The argument `h2` of `simulate_pools()` only builds a noisy index that
+#'   `run_cycles()` does not use.
+#' - *Founder draws.* The seed (1 to 5) fixes the founders and $\beta$ together, so each
+#'   draw is a different founding population *and* a different architecture; the three
+#'   budgets of a seed share both. The recycling stream is `set.seed(seed + 1000 + t)`
+#'   before the selector of cycle $t$.
+#' 
+#' The assumptions it runs under, stated once:
+#' 
+#' **C1. Loci are unlinked.** Every marker segregates independently, so there is
+#' no linkage disequilibrium *from linkage*. Disequilibrium generated by selection
+#' is not excluded by this assumption, which therefore does not claim that there is
+#' no Bulmer effect [@bulmer1971]: the logged `var_g` (variance of the
+#' index over the 625 candidates) and `var_genic` (the genic variance of
+#' @sec-response) have a per-run ratio that averages
+#' `r fmt(vrm(0)[1], 2)` at cycle 0 and between
+#' `r fmt(min(vrm(5)), 2)` and `r fmt(max(vrm(5)), 2)` across the three budgets at
+#' cycle 5. A ratio below one means that the covariance term of the genic
+#' decomposition is negative. The ratio is not by itself a measure of the Bulmer
+#' effect (the divergence of the two pools moves it too); @sec-limits tests C1
+#' against a random-selection control. Linkage proper is modelled in @sec-sizing and
+#' @sec-backcross and, with real meiosis, in @sec-alphasimr.
+#' 
+#' **C2. Recycling is by doubled haploid.** Two parents are drawn within pool with
+#' probability proportional to usage, and one DH is derived per pair. Because the
+#' lines are inbred, `(GL[i, ] + GL[j, ]) / 2` lies in $\{0, 0.5, 1\}$ and a single
+#' Bernoulli draw per locus is an *exact* gamete, not an approximation.
+#' 
+#' **C3. Pool sizes are constant.** 25 lines per pool, every cycle. A real programme
+#' varies this, and the variation is itself a diversity decision.
+#' 
+#' **C4. Marker effects are fixed.** The same $\boldsymbol{\beta}$ throughout, so the
+#' index is comparable across cycles and gain accumulates on the founding cycle's
+#' scale. No new mutation, no changing selection target, no genotype-by-environment.
+#' 
+#' **C5. The base $p_0$ for $F_{hom}$ and $F_{drift}$ is frozen at cycle 0** and
+#' carried forward. This is the subject of @sec-cycles-freezing.
+#' 
+#' **C6. The pool is closed** unless a germplasm injection is scheduled.
+#' 
+#' **C7. The index is known without error.** @sec-choosing (Finding 5) measures,
+#' within one cycle, that error correlated with relatedness costs more gene
+#' diversity than independent error at the same nominal accuracy; @sec-genomic-prediction
+#' fits prediction accuracy per validation scheme and notes that retraining across
+#' cycles is not modelled. Nothing here measures how an error in the index would
+#' move a trajectory or the crossover below, and the direction of that effect is not
+#' known. The gain figures are therefore for a known index; no claim is made that
+#' they are an upper bound, for any budget.
+#' 
+#' **C8. Selection is on the hybrid only.** No per-se line selection, no stage
+#' structure. @sec-stages is where the multi-stage version lives.
+#' 
+#' **C9. The index is additive**: `X %*% beta`, with no dominance and no specific
+#' combining ability. No divergence aligned with dominance can be selected for in
+#' this simulation, so it says nothing on that mechanism of @sec-heterosis.
+#' 
+#' **C10. All 625 hybrids are candidates, in every cycle.** The candidate set is
+#' the complete $25 \times 25$ factorial and the index of every hybrid is known;
+#' there is no crossing design, tester set or sparse factorial, and none of the
+#' questions of @sec-mating (how few hybrids need be made and evaluated) arises.
+#' The between-pool gene diversity ($GD_{BS}$, column `GD_BS`) of the 60 selected
+#' hybrids below is the between-pool component of their partition at unequal line usage, not the complete-factorial identity of
+#' @sec-subdivided and @sec-heterosis.
+#' 
+#' **C11. Cycles are discrete and do not overlap** (assumption A4 of
+#' @sec-era-programme). Every rate below is per cycle, not per unit of time, and
+#' @sec-era-programme says that this is a limit of every rate reported in the
+#' book.
+#' 
+#' **C12. The budget is re-referenced to the current pool at every cycle.**
+#' `run_cycles()` takes `gd_ref`, the reference of
+#' $\alpha = (GD_{\text{ref}} - GD_S)/GD_{\text{ref}}$ (@eq-catalogue-alpha), from
+#' the mean $GD$ of random 60-subsets of the *current* cycle's 625 candidates. So
+#' $\alpha_{\max}$ is a per-cycle relative loss against a random subset of an
+#' eroding pool, not a loss against the founders; the only frozen base is $p_0$ of
+#' C5. In the mean over the five founder draws, under $\alpha_{\max} = 0.02$,
+#' `gd_ref` falls from `r fmt(at("0.020", 0, "gd_ref"), 3)` at cycle 0 to
+#' `r fmt(at("0.020", 15, "gd_ref"), 3)` at cycle 15 and the $GD_T$ of the selection
+#' from `r fmt(at("0.020", 0, "GD_T"), 3)` to `r fmt(at("0.020", 15, "GD_T"), 3)`
+#' (`r fmt(100 * (at("0.020", 15, "GD_T") / at("0.020", 0, "GD_T") - 1), 0)`%),
+#' while the realised $\alpha$ is
+#' `r fmt(at("0.020", 0, "alpha"), 3)` and `r fmt(at("0.020", 15, "alpha"), 3)`.
+#' The budget $\alpha_{\max} = 0.02$ is therefore not a 2% total loss over the
+#' programme. For $\alpha_{\max} = 0.005$ the realised $\alpha$ at cycle 15 is
+#' `r fmt(at("0.005", 15, "alpha"), 4)`: the budget no longer binds, and for the
+#' unconstrained programme the realised $\alpha$ falls from
+#' `r fmt(at("unconstrained", 0, "alpha"), 3)` to
+#' `r fmt(at("unconstrained", 15, "alpha"), 3)`: at cycle 15 even truncation loses
+#' little gene diversity against a random subset of the eroded pool.
+#' 
+#' ## Freezing $p_0$, and what happens if you do not {#sec-cycles-freezing}
+#' 
+#' `build_ctx()` sets `p0 <- colMeans(X)` on every call, and has no `p0` argument.
+#' Run it fresh each cycle and the drift lens is anchored on the population it is
+#' supposed to be measuring drift *away from*. When $F_{drift}$ is then read on the set
+#' the base was built from (all 625 hybrids of the pool), the accumulated drift is
+#' reported as none while the pool erodes underneath; read on a selected subset against
+#' a base built from the whole pool, it would report the displacement of that subset
+#' from the pool and not zero, and still not the drift from the founders.
+#' 
+#' The demonstration is a neutral arm: the same founders, equal usage for every
+#' line, no selection, five founder draws (seeds 1 to 5, the founders of the
+#' trajectories below), fifteen generations. At each generation $F_{drift}$ is read
+#' on all 625 hybrids twice, against the frozen founding $p_0$ and against a base
+#' rebuilt from the generation itself:
+#' 
+## -----------------------------------------------------------------------------
+#| label: neutral-arm
+ped_n <- expand.grid(a = 1:25, b = 25 + 1:25)
+drift_at <- function(X, base)       # F_drift of every row of X against `base`
+  freq_metrics(seq_len(nrow(X)), list(X = X, p0 = base,
+                                      maf_pop = pmin(base, 1 - base)))[["F_drift"]]
+neutral_arm <- function(s, n_gen = 15) {
+  sim <- simulate_pools(n_A = 25, n_B = 25, m = 2000, seed = s)
+  p0  <- colMeans(sim$X)                       # the founding base, frozen here
+  GL  <- sim$GL
+  set.seed(s + 6)                              # seed 7 for founder draw 1
+  out <- matrix(0, n_gen, 2, dimnames = list(NULL, c("frozen", "reanchored")))
+  for (t in seq_len(n_gen)) {
+    GL <- rbind(next_pool(GL[1:25, ], rep(1, 25), 25),
+                next_pool(GL[26:50, ], rep(1, 25), 25))
+    X  <- (GL[ped_n$a, ] + GL[ped_n$b, ]) / 2
+    out[t, ] <- c(drift_at(X, p0), drift_at(X, colMeans(X)))
+  }
+  out
+}
+neu <- lapply(1:5, neutral_arm)
+# an identity, not a finding: a population is not drifted from itself
+stopifnot(all(vapply(neu, function(x) all(x[, "reanchored"] == 0), logical(1))))
+knitr::kable(data.frame(
+  base = c("frozen $p_0$", "base rebuilt from the 625 hybrids"),
+  F_drift = c(neu[[1]][5, "frozen"], neu[[1]][5, "reanchored"])),
+  digits = 4, row.names = FALSE, col.names = c("base of $F_{drift}$", "$F_{drift}$, draw 1, generation 5"))
+
+#' 
+#' The first row is founder draw 1 after five generations of drift without
+#' selection, read against the frozen $p_0$. The second is exactly zero, in all
+#' five founder draws and all fifteen generations (the chunk asserts it). That is an
+#' identity and not a property of `build_ctx()`: a base rebuilt from the set being
+#' measured makes $F_{drift}$ zero whatever has happened to the set, here the pool
+#' of 625 hybrids and in @sec-era-step1 the selected hybrids. Five generations of
+#' real drift would be reported as exactly none.
+#' 
+#' :::: {.callout-warning}
+#' ## This is the commonest way to get a multi-cycle report wrong
+#' 
+#' @sec-genomic-era names it the commonest error in plant applications (assumption
+#' A6 and Step 1 of its protocol), and @sec-case-study repeats it in the operational
+#' checklist. `cycle_ctx()` in `run_cycles()` therefore takes `p0` once and
+#' overwrites both `ctx$p0` and `ctx$maf_pop` on every rebuilt context, and every
+#' $F_{drift}$ number in this chapter depends on it.
+#' ::::
+#' 
+#' ## The trajectory {#sec-cycles-trajectory}
+#' 
+#' Three budgets, fifteen cycles, five founder draws (seeds 1 to 5) each.
+#' $\alpha_{\max} = \infty$ is the unconstrained programme: it takes the best hybrids
+#' it can find and accepts whatever that costs. For a given seed the three arms start
+#' from the same founders, so every contrast below is paired by seed. The mean of the
+#' five paired differences is given with its standard error (s.e.: the standard deviation
+#' of the five differences over $\sqrt 5$) and the number of seeds in which the
+#' difference is positive. Five founder draws is a small number: the standard errors
+#' are themselves imprecise and no test is made. Every comparison in this chapter is
+#' exploratory: the cycles tabulated (3, 5, 8, 10, 12, 15), the cycle from which all
+#' five seeds are ahead and the contrasts of the horizon table were chosen or read
+#' after the trajectories were seen, no multiplicity correction is applied (the horizon
+#' table alone has 18 cells), and the standard errors and seed counts are descriptive,
+#' not evidence at a stated error rate. @fig-cycles-gain and @tbl-cycles-gain give the
+#' trajectory of the mean index. The five `cycles_*.csv` files and the
+#' two figures of this chapter are produced in this repository by
+#' `book/scripts/regenerate.R cycles`; they are not cached from an external study
+#' (unlike the headline sweeps of @sec-mating).
+#' 
+## -----------------------------------------------------------------------------
+#| echo: false
+#| label: fig-cycles-gain
+#| fig-cap: "Mean index of the 60 selected hybrids, in founding-cycle standard deviations, by cycle, for three diversity budgets $\\alpha_{\\max}$ (red: unconstrained; blue: 0.02; green: 0.005). Mean over five founder draws, 25 + 25 lines and 2000 markers; dots mark the cycles. No dispersion is drawn (paired contrasts with their standard errors are in @tbl-cycles-horizon). The unconstrained programme has the highest mean through cycle 7 and its curve flattens afterwards; the two constrained curves are still rising at cycle 15."
+#| fig-alt: "Line chart with markers. Horizontal axis: cycle, 0 to 15. Vertical axis: mean index of the selected hybrids in founding standard deviations, about 1 to 12. Three rising curves: unconstrained (red) starts highest, leads to about cycle 7, then flattens near 9.5; the 0.02 budget (blue) overtakes it near cycle 8 and ends near 12; the 0.005 budget (green) stays lowest until about cycle 11 and ends near 11."
+knitr::include_graphics(book_fig("cycles_gain.png"))
+
+#' 
+## -----------------------------------------------------------------------------
+#| echo: false
+#| label: tbl-cycles-gain
+#| tbl-cap: "Cumulative gain (mean index of the selected hybrids, in founding-cycle standard deviations) by diversity budget $\\alpha_{\\max}$, mean over five founder draws."
+ck <- c(0, 3, 5, 8, 10, 12, 15)
+knitr::kable(
+  data.frame(cycle = ck,
+             sapply(c("0.005", "0.020", "unconstrained"), at, k = ck),
+             check.names = FALSE),
+  digits = 2, row.names = FALSE,
+  col.names = c("cycle", "$\\alpha_{\\max} = 0.005$", "$\\alpha_{\\max} = 0.02$", "unconstrained"))
+
+#' 
+## -----------------------------------------------------------------------------
+#| label: crossover-means
+#| include: false
+k_02  <- first_pos(mdiff("0.020", "unconstrained"))
+k_005 <- first_pos(mdiff("0.005", "unconstrained"))
+best  <- c("0.005", "0.020", "unconstrained")[
+  apply(sapply(c("0.005", "0.020", "unconstrained"), at, k = 0:15), 1, which.max)]
+stopifnot(!any(best == "0.005"), all(best[1:(k_02)] == "unconstrained"),
+          all(best[(k_02 + 1):16] == "0.020"))
+
+#' 
+#' The seed-mean index of the unconstrained programme is the highest through cycle
+#' `r k_02 - 1` and below that of the $\alpha_{\max} = 0.02$ programme from cycle
+#' `r k_02` on. At cycle `r k_02` the paired difference is
+#' `r pf(pd("0.020", "unconstrained", k_02))`, so the mean crossing is not
+#' resolved by five seeds; by cycle 15 it is
+#' `r pf(pd("0.020", "unconstrained", 15))`, which is
+#' `r fmt(100 * (at("0.020", 15) / at("unconstrained", 15) - 1), 0)`% more gain, from
+#' a programme whose cycle-0 index was
+#' `r fmt(100 * (1 - at("0.020", 0) / at("unconstrained", 0)), 0)`% below the
+#' unconstrained one (paired difference at cycle 0,
+#' `r pf(pd("0.020", "unconstrained", 0))`).
+#' 
+#' @fig-cycles-diversity shows the diversity side. The left panel is $GD_T$ of the
+#' selection (the `GD` column of the CSV, which equals $GD_T$ to $10^{-15}$; it is
+#' not within-pool diversity), and the right panel is $F_{drift}$ of the selected
+#' hybrids against the frozen $p_0$.
+#' 
+## -----------------------------------------------------------------------------
+#| echo: false
+#| label: fig-cycles-diversity
+#| fig-cap: "Left: total gene diversity $GD_T$ of the 60 selected hybrids (the `GD` column; within-pool diversity is in @tbl-cycles-partition). Right: $F_{drift}$ of the selected hybrids against the frozen founding base $p_0$. Colours as in @fig-cycles-gain; legend: $\\alpha_{\\max}$. Mean over five founder draws, by cycle, 25 + 25 lines and 2000 markers; no dispersion drawn."
+#| fig-alt: "Two panels, horizontal axis cycle 0 to 15. Left: gene diversity of the selection falls in all three budgets, from about 0.32 at cycle 0 to about 0.18 unconstrained (red), 0.21 for the 0.02 budget (blue) and 0.25 for the 0.005 budget (green). Right: F_drift against the frozen base rises in all three, fastest and highest unconstrained (about 0.46 at cycle 15), then 0.02 (about 0.43), then 0.005 (about 0.34)."
+knitr::include_graphics(book_fig("cycles_diversity.png"))
+
+#' 
+#' What was measured: the genic variance of the candidate pool of each cycle, on the index scale,
+#' falls from `r fmt(at("unconstrained", 0, "var_genic"), 2)` at cycle 0 to
+#' `r fmt(at("unconstrained", 15, "var_genic"), 3)` in the pool of cycle 15 in the unconstrained
+#' programme, against `r fmt(at("0.020", 15, "var_genic"), 2)` for
+#' $\alpha_{\max} = 0.02$ and `r fmt(at("0.005", 15, "var_genic"), 2)` for
+#' $\alpha_{\max} = 0.005$ (pool of cycle 15 in each); its $F_{drift}$ is
+#' `r fmt(at("unconstrained", 8, "F_drift"), 3)` at cycle 8 and
+#' `r fmt(at("unconstrained", 15, "F_drift"), 3)` at cycle 15, and its $GD_T$ falls
+#' from `r fmt(at("unconstrained", 0, "GD_T"), 3)` to
+#' `r fmt(at("unconstrained", 15, "GD_T"), 3)`. The index gained in the last cycle
+#' (cycle 14 to 15) is `r fmt(at("unconstrained", 15) - at("unconstrained", 14), 2)`
+#' unconstrained, against `r fmt(at("0.020", 15) - at("0.020", 14), 2)` for
+#' $\alpha_{\max} = 0.02$ and `r fmt(at("0.005", 15) - at("0.005", 14), 2)` for
+#' $\alpha_{\max} = 0.005$. The last-cycle gain is selected from the pool of cycle 14, so
+#' it is paired with the genic variance of that parental pool, which is
+#' `r fmt(at("unconstrained", 14, "var_genic"), 3)` unconstrained,
+#' `r fmt(at("0.020", 14, "var_genic"), 2)` for $\alpha_{\max} = 0.02$ and
+#' `r fmt(at("0.005", 14, "var_genic"), 2)` for $\alpha_{\max} = 0.005$ (not the
+#' cycle-15 values above). Parental genic variance and last-cycle gain are ordered
+#' identically across the three arms (unconstrained, then $\alpha_{\max} = 0.02$, then
+#' $\alpha_{\max} = 0.005$, in increasing order of both).
+#' 
+#' The same association can be read over the whole trajectory. For each run and each
+#' cycle $t = 1, \dots, 15$, the gain is $\bar u_{S_t} - \bar u_{S_{t-1}}$, with $\bar u_{S_t}$
+#' the mean index of the 60 hybrids $S_t$ selected at cycle $t$, and it is set against `var_genic` of the pool
+#' that cycle $t-1$ selected from (the pool whose selection produces the pool of cycle
+#' $t$); there are $3 \times 5 \times 15 = 225$ such run-cycles. They are not independent:
+#' cycles within a run are serially dependent and the three arms of a seed share founders,
+#' so the independent unit is the founder draw (5), and the correlations below are given
+#' over run-cycles as descriptions and over founder draws as the quantity with a spread.
+#' 
+## -----------------------------------------------------------------------------
+#| label: gain-vs-genic
+#| echo: false
+gv <- do.call(rbind, lapply(split(traj[order(traj$budget, traj$seed, traj$cycle), ],
+                                  list(traj$budget, traj$seed), drop = TRUE),
+  function(d) data.frame(budget = d$budget[-1], seed = d$seed[-1], cycle = d$cycle[-1],
+                         gain = diff(d$index), vg_parent = d$var_genic[-nrow(d)],
+                         vg_same = d$var_genic[-1])))
+sp   <- function(a, b) cor(a, b, method = "spearman")
+res  <- function(y) resid(lm(y ~ factor(gv$cycle)))
+rho_all    <- sp(gv$gain, gv$vg_parent)
+rho_arm    <- tapply(seq_len(nrow(gv)), gv$budget,
+                     function(i) sp(gv$gain[i], gv$vg_parent[i]))
+rho_cyc    <- sp(res(gv$gain), res(gv$vg_parent))   # cycle means removed
+rho_cyc_t  <- sp(res(gv$gain), res(gv$vg_same))     # same, genic variance of the pool of cycle t
+mg  <- aggregate(gv[c("gain", "vg_parent")], gv[c("budget", "cycle")], mean)
+mgat <- function(b, k, col) mg[[col]][mg$budget == b & mg$cycle == k]
+ordk <- vapply(2:15, function(k) { a <- mg[mg$cycle == k, ]
+                    identical(order(a$gain), order(a$vg_parent)) }, logical(1))
+ord <- sum(ordk)
+# the unit with a spread is the founder draw (5), not the 225 run-cycles:
+# cycle-removed rho within each draw, and a bootstrap over the five draws
+rho_c <- function(d) { r <- function(y) resid(lm(y ~ factor(d$cycle)))
+                       sp(r(d$gain), r(d$vg_parent)) }
+rho_seed <- vapply(1:5, function(s) rho_c(gv[gv$seed == s, ]), numeric(1))
+set.seed(1)
+boot <- replicate(2000, rho_c(do.call(rbind,
+          lapply(sample(1:5, 5, TRUE), function(s) gv[gv$seed == s, ]))))
+ci   <- quantile(boot, c(0.025, 0.975))
+rho_win <- vapply(list(2:6, 7:11, 12:15), function(w) rho_c(gv[gv$cycle %in% w, ]), numeric(1))
+rho_arm_c <- vapply(split(gv, gv$budget), rho_c, numeric(1))   # cycle means removed within arm
+stopifnot(nrow(gv) == 225,
+          abs(mgat("0.020", 15, "gain") - (at("0.020", 15) - at("0.020", 14))) < 1e-12,
+          all(rho_seed > 0), sum(ordk[1:8]) == 0, sum(ordk[9:14]) == 5,
+          abs(rho_c(gv) - rho_cyc) < 1e-12)
+
+#' 
+#' What was measured. The Spearman correlation of gain with the genic variance of the
+#' parental pool is `r fmt(rho_all, 2)` over the 225 run-cycles, and within budget
+#' `r fmt(rho_arm[["unconstrained"]], 2)` (unconstrained),
+#' `r fmt(rho_arm[["0.020"]], 2)` ($\alpha_{\max} = 0.02$) and
+#' `r fmt(rho_arm[["0.005"]], 2)` ($\alpha_{\max} = 0.005$). Both quantities fall with the
+#' cycle number in every arm, so those correlations contain a common time trend; with
+#' the mean of each cycle removed from both (cycle as a factor, which leaves only the
+#' differences between runs and arms within a cycle) the correlation is
+#' `r fmt(rho_cyc, 2)`, and `r fmt(rho_cyc_t, 2)` if the genic variance of the pool of
+#' cycle $t$ itself is used instead of that of cycle $t-1$. On the seed means, the
+#' three arms are ordered by gain as they are by genic variance in `r ord` of the 14
+#' cycles 2 to 15 (none of cycles 2 to 9, `r sum(ordk[9:14])` of the 6 cycles 10 to 15). They
+#' are not on one curve at every cycle: at cycle 5 the
+#' $\alpha_{\max} = 0.005$ pool has the most genic variance
+#' (`r fmt(mgat("0.005", 5, "vg_parent"), 2)`, against
+#' `r fmt(mgat("unconstrained", 5, "vg_parent"), 2)` unconstrained) and gains less
+#' (`r fmt(mgat("0.005", 5, "gain"), 2)` against
+#' `r fmt(mgat("unconstrained", 5, "gain"), 2)`). At cycle 15 the orderings coincide:
+#' parental genic variance `r fmt(mgat("unconstrained", 15, "vg_parent"), 3)` /
+#' `r fmt(mgat("0.020", 15, "vg_parent"), 2)` /
+#' `r fmt(mgat("0.005", 15, "vg_parent"), 2)` and gain
+#' `r fmt(mgat("unconstrained", 15, "gain"), 2)` /
+#' `r fmt(mgat("0.020", 15, "gain"), 2)` /
+#' `r fmt(mgat("0.005", 15, "gain"), 2)` (unconstrained / $\alpha_{\max} = 0.02$ /
+#' $\alpha_{\max} = 0.005$; genic variance here is that of the parental pool of the last
+#' gain, the pool of cycle 14).
+#' 
+#' The unit with a spread is the founder draw, not the run-cycle. With the cycle means
+#' removed within each draw the correlation is positive in all five draws
+#' (`r fmt(min(rho_seed), 2)` to `r fmt(max(rho_seed), 2)`), and a bootstrap over the five
+#' draws (2000 resamples of the draws with replacement, `set.seed(1)`, the cycle-removed
+#' correlation recomputed on each resample) gives a 95% percentile interval of
+#' `r fmt(ci[[1]], 2)` to `r fmt(ci[[2]], 2)`; with five draws that interval is itself
+#' imprecise. The association is not spread evenly over the horizon. The cycle-removed
+#' correlation is `r fmt(rho_win[1], 2)` within cycles 2 to 6, `r fmt(rho_win[2], 2)` within
+#' cycles 7 to 11 and `r fmt(rho_win[3], 2)` within cycles 12 to 15 (three windows that
+#' together cover cycles 2 to 15, drawn after the data were seen). Within each arm, with the
+#' cycle means removed, it is `r fmt(rho_arm_c[["0.005"]], 2)` ($\alpha_{\max} = 0.005$),
+#' `r fmt(rho_arm_c[["0.020"]], 2)` ($\alpha_{\max} = 0.02$) and
+#' `r fmt(rho_arm_c[["unconstrained"]], 2)` (unconstrained), against
+#' `r fmt(rho_arm[["0.005"]], 2)`, `r fmt(rho_arm[["0.020"]], 2)` and
+#' `r fmt(rho_arm[["unconstrained"]], 2)` above with the time trend left in.
+#' 
+#' Inference, and what limits it. Within this simulation the per-cycle gain is
+#' associated with the genic variance of the pool it was selected from, with a
+#' within-cycle Spearman correlation of `r fmt(rho_cyc, 2)`, positive in every founder draw
+#' and concentrated late in the horizon (weak in cycles 2 to 6, where the arm ordering of
+#' gain and of genic variance never coincides); the sign is the one expected from
+#' @sec-response-genic and fits the flattening of the unconstrained curve ("out of
+#' material" is that reading). The $\alpha_{\max} = 0.02$ parental pool of the last gain
+#' (cycle 14) has lost most of its genic variance (`r fmt(at("0.020", 14, "var_genic"), 2)`
+#' against `r fmt(at("0.020", 0, "var_genic"), 2)` at cycle 0) and its last-cycle gain still
+#' exceeds the unconstrained one, but its genic variance is
+#' `r fmt(at("0.020", 14, "var_genic") / at("unconstrained", 14, "var_genic"), 0)` times
+#' that of the unconstrained parental pool of cycle 14: that is the same ordering, not an
+#' exception to it. The departure at
+#' cycle 5 is compatible with a binding budget limiting how far selection can go in a
+#' pool of a given variance, which was not tested. This is an association, not a test of
+#' a mechanism: the within-cycle correlation is `r fmt(rho_cyc, 2)` over run-cycles, with
+#' the spread over the five founder draws given above. Genic variance is logged and gain is correlated with it, but no arm manipulates
+#' genic variance with the others held fixed: the budget changes the pool's diversity,
+#' its drift and the usage of lines at once, genic variance is not the variance
+#' selection sees (the ratio of `var_g` to `var_genic` in C1), the gain of a run-cycle
+#' also contains the selection differential of cycle $t$, and the correlations that do
+#' not remove the cycle carry a common time trend. A causal test would need an
+#' intervention (for instance resetting the genic variance of a pool at a fixed cycle),
+#' which was not run. @wientjes2022 report, in 50-generation simulations of a
+#' livestock-type population, that genomic and pedigree selection lose more genetic
+#' variance and more segregating loci than phenotypic selection (abstract). That is a
+#' related process in a different system, not a demonstration of the mechanism here.
+#' 
+#' ### What differential evolution does on the same context, and what it cannot show
+#' 
+#' The trajectories above use the greedy sweep of `sel_greedy_budget()`, which is
+#' what makes fifteen cycles by five seeds by three budgets affordable. The
+#' `selector` argument of `run_cycles()` lets any selector drive the loop, and the
+#' chunk below puts differential evolution (DE, `sel_de()`, `NP = 300`,
+#' `itermax = 1000`, a nominal $3 \times 10^{5}$ evaluations per cycle) on the
+#' trajectory of seed 1 (@tbl-cycles-de). At each cycle the greedy sweep and truncation are evaluated
+#' on the *same* context as the DE plan, so that the comparison is plan against plan
+#' and not trajectory against trajectory. @sec-advanced states that its statements about the DE are statements about the
+#' budgets it runs, 30,000 evaluations in its benchmark, and not properties of the
+#' method; the budget here is ten times the benchmark's. The chunk takes
+#' several minutes to run.
+#' 
+## -----------------------------------------------------------------------------
+#| label: de-same-context
+de_cmp <- local({
+  seen <- list()
+  sel <- function(ctx, n_sel, alpha_max, gd_ref, max_use) {
+    d  <- suppressWarnings(sel_de(ctx, n_sel, alpha_max, gd_ref, NP = 300,
+                                  itermax = 1000, max_use = max_use))
+    g  <- sel_greedy_budget(ctx, n_sel, alpha_max, gd_ref, max_use)
+    tr <- sel_truncation(ctx, n_sel)
+    al <- function(s) (gd_ref - gene_diversity(s, ctx)) / gd_ref
+    seen[[length(seen) + 1L]] <<- data.frame(
+      de = mean(ctx$index[d]), greedy = mean(ctx$index[g]),
+      trunc = mean(ctx$index[tr]), alpha_de = al(d), alpha_greedy = al(g))
+    d                                          # the DE plan drives the trajectory
+  }
+  do.call(rbind, lapply(c(Inf, 0.02), function(am) {
+    seen <<- list()
+    r <- run_cycles(n_cycles = 12, alpha_max = am, n_sel = 60, B_null = 200,
+                    seed = 1, selector = sel)
+    x <- do.call(rbind, seen)
+    x$cycle  <- 0:12
+    x$budget <- if (is.finite(am)) "0.020" else "unconstrained"
+    x$traj   <- r[["index"]]
+    x
+  }))
+})
+# the DE arm of the cached file is this arm
+for (b in c("unconstrained", "0.020")) {
+  cd <- selc[selc$selector == "de" & selc$budget == b, ]
+  stopifnot(isTRUE(all.equal(de_cmp$traj[de_cmp$budget == b], cd$index[order(cd$cycle)])))
+}
+tol <- 1e-8
+u   <- de_cmp[de_cmp$budget == "unconstrained", ]
+a2  <- de_cmp[de_cmp$budget == "0.020", ]
+d2  <- a2$de - a2$greedy
+n_up <- sum(d2 > tol); n_dn <- sum(d2 < -tol); n_eq <- sum(abs(d2) <= tol)
+
+#' 
+## -----------------------------------------------------------------------------
+#| echo: false
+#| label: tbl-cycles-de
+#| tbl-cap: "Seed 1, $\\alpha_{\\max} = 0.02$, cycles 0 to 12: index of the DE plan, of the greedy-sweep plan and of truncation (founding-cycle standard deviations), each evaluated on the context the DE trajectory reaches at that cycle; the difference DE minus greedy; and the realised $\\alpha$ of the DE and the greedy plans (dimensionless)."
+knitr::kable(
+  data.frame(cycle = a2$cycle, DE = a2$de, greedy = a2$greedy, truncation = a2$trunc,
+             `DE minus greedy` = d2, `alpha DE` = a2$alpha_de,
+             `alpha greedy` = a2$alpha_greedy, check.names = FALSE),
+  digits = 3, row.names = FALSE,
+  col.names = c("cycle", "DE", "greedy", "truncation", "DE minus greedy",
+                "$\\alpha$ DE", "$\\alpha$ greedy"))
+
+#' 
+#' Result. With no budget, the DE plan, the greedy plan and truncation have the same
+#' index in `r sum(abs(u$de - u$greedy) <= tol & abs(u$de - u$trunc) <= tol)` of
+#' `r nrow(u)` cycles (largest difference `r format(max(abs(u$de - u$trunc)), digits = 2)`).
+#' At $\alpha_{\max} = 0.02$ the DE plan has a higher index than the greedy plan in
+#' `r n_up` of `r nrow(a2)` cycles, a lower one in `r n_dn` and the same in `r n_eq`;
+#' the differences run from `r fmt(min(d2), 3)` to `r fmt(max(d2), 3)` index units.
+#' Inference, and what limits it: truncation is the exact optimum without a budget,
+#' so no selector can improve on it there; under the budget this run gives no
+#' evidence that DE finds better per-cycle plans than the greedy sweep, at this
+#' evaluation budget, on this one seed. It says nothing about the DE at other
+#' budgets of evaluations or on other seeds.
+#' 
+#' Two *trajectories* of one seed cannot be compared for a selector effect. The unconstrained DE arm and the
+#' unconstrained greedy arm select the same plan in each cycle (truncation) yet
+#' differ in index at cycle 12 by
+#' `r fmt(abs(selc$index[selc$selector == "de" & selc$budget == "unconstrained" & selc$cycle == 12] - selc$index[selc$selector == "greedy" & selc$budget == "unconstrained" & selc$cycle == 12]), 2)`
+#' (at cycle 1, by
+#' `r fmt(abs(selc$index[selc$selector == "de" & selc$budget == "unconstrained" & selc$cycle == 1] - selc$index[selc$selector == "greedy" & selc$budget == "unconstrained" & selc$cycle == 1]), 2)`).
+#' The only difference between the arms is the random stream: `run_cycles()` seeds the
+#' stream once per cycle before the selector, the DE draws from it and truncation does
+#' not, so the recycling draws that follow differ. The next chunk measures the size of
+#' that effect directly: the same unconstrained rule, truncation, with one uniform
+#' draw added to the selector so that the stream shifts, on the five founder draws of
+#' the trajectories.
+#' 
+## -----------------------------------------------------------------------------
+#| label: stream-shift
+stream <- sapply(1:5, function(s)
+  run_cycles(n_cycles = 15, alpha_max = Inf, n_sel = 60, B_null = 200, seed = s,
+             selector = function(ctx, n_sel, alpha_max, gd_ref, max_use) {
+               runif(1)                        # shifts the stream, selects nothing
+               sel_truncation(ctx, n_sel)
+             })[["index"]])
+plain <- sapply(1:5, function(s) {
+  d <- traj[traj$budget == "unconstrained" & traj$seed == s, ]
+  d$index[order(d$cycle)]
+})
+stopifnot(isTRUE(all.equal(stream[1, ], plain[1, ])))   # cycle 0 does not use the stream
+shift <- stream - plain                                   # rows: cycles 0 to 15
+
+#' 
+#' Result. With the same rule and one extra uniform draw per cycle, the index at
+#' cycle 12 moves by `r fmt(mean(abs(shift[13, ])), 2)` on average over the five
+#' founder draws (largest `r fmt(max(abs(shift[13, ])), 2)`) and at cycle 15 by
+#' `r fmt(mean(abs(shift[16, ])), 2)` (largest `r fmt(max(abs(shift[16, ])), 2)`); at
+#' cycle 1 by `r fmt(mean(abs(shift[2, ])), 2)`. For comparison, the standard error
+#' of the paired contrast of $\alpha_{\max} = 0.02$ against the unconstrained
+#' programme over five seeds is
+#' `r fmt(pd("0.020", "unconstrained", 12)[["se"]], 2)` at cycle 12. Inference, and
+#' what limits it: a trajectory contrast between two arms of one seed that differ in
+#' the random stream is of the size of the effects discussed here, so the one-seed DE
+#' and greedy *trajectories* say nothing about the crossover under DE, and @tbl-cycles-de
+#' is the only DE result of this chapter. A paired design in which the selector
+#' arms share the recycling stream would settle the trajectory question; it needs the
+#' stream to be reset after the selector in `run_cycles()`, which was not changed for
+#' this chapter, so it was not run. A mechanism in which a better per-cycle optimiser
+#' spends budget that a later cycle needs is a hypothesis; nothing here tests it.
+#' 
+#' ## The rate of inbreeding, and what $N_s$ is not {#sec-cycles-rate}
+#' 
+#' @sec-case-study's checklist says to regress $\log(1 - F)$ on cycle and check that
+#' it is linear, because curvature means a non-constant rate. @sec-era-step4 gives the
+#' call: $\Delta F = 1 - e^{\text{slope}}$ on cycles $1..t$, because
+#' $1 - F_t = (1 - \Delta F)^t (1 - F_0)$ makes the slope $\log(1 - \Delta F)$, and
+#' reads $R^2$ as the check. Cycle 0 is dropped: the $F_{drift}$ of the selected
+#' hybrids at cycle 0 is the displacement of the selection from the base before any
+#' recycling, not a generation of drift. $F_{drift}$ is that of the selected hybrids
+#' on merged hybrid frequencies, which is a different level from the drift of one pool
+#' in @eq-hp-drift (@sec-hp-inbreeding says the two are not read against each other).
+#' The fit is applied to the seed-mean series, with the neutral arm of @sec-cycles-freezing (equal usage, no selection, all 625 hybrids, the same five founder draws)
+#' as the reference on the same estimator (@tbl-cycles-rate):
+#' 
+## -----------------------------------------------------------------------------
+#| label: tbl-cycles-rate
+#| tbl-cap: "Fitted rate $\\Delta F = 1 - e^{\\text{slope}}$ of $\\log(1 - F_{drift})$ on cycles 1 to 15 (per cycle), seed-mean series over five founder draws, with the $R^2$ of the fit, $F_{drift}$ at cycle 15 and the ratio of the fitted rate to that of the neutral arm."
+fit_rate <- function(Fv) {                 # Fv: seed-mean F_drift at cycles 1 to 15
+  k <- seq_along(Fv); f <- lm(log(1 - Fv) ~ k)
+  c(dF = 1 - exp(coef(f)[["k"]]), R2 = summary(f)$r.squared, F15 = Fv[length(Fv)])
+}
+Fb <- function(b) { d <- ag[ag$budget == b & ag$cycle >= 1, ]; d$F_drift[order(d$cycle)] }
+F_neu <- Reduce(`+`, lapply(neu, function(x) x[, "frozen"])) / length(neu)
+rate <- rbind(
+  neutral = fit_rate(F_neu),
+  t(sapply(c(unconstrained = "unconstrained", `alpha_max 0.02` = "0.020",
+             `alpha_max 0.005` = "0.005"), function(b)
+    fit_rate(Fb(b)))))
+rate <- data.frame(arm = rownames(rate), rate, ratio_to_neutral = rate[, "dF"] / rate["neutral", "dF"],
+                   row.names = NULL)
+rate_show <- rate     # display copy: `rate$arm` keeps the keys the prose below reads
+rate_show$arm <- c("neutral (no selection)", "unconstrained",
+                   "$\\alpha_{\\max} = 0.02$", "$\\alpha_{\\max} = 0.005$")
+knitr::kable(rate_show, digits = c(0, 4, 3, 3, 2), row.names = FALSE,
+  col.names = c("arm", "$\\Delta F$ per cycle", "$R^2$", "$F_{drift}$ at cycle 15", "$\\Delta F$ / neutral $\\Delta F$"))
+
+#' 
+#' Result. The fitted $\Delta F$ per cycle is
+#' `r fmt(rate$dF[rate$arm == "alpha_max 0.02"], 4)` for $\alpha_{\max} = 0.02$,
+#' `r fmt(rate$dF[rate$arm == "unconstrained"], 4)` for the unconstrained programme and
+#' `r fmt(rate$dF[rate$arm == "alpha_max 0.005"], 4)` for $\alpha_{\max} = 0.005$,
+#' with $R^2$ of
+#' `r fmt(rate$R2[rate$arm == "alpha_max 0.02"], 3)`,
+#' `r fmt(rate$R2[rate$arm == "unconstrained"], 3)` and
+#' `r fmt(rate$R2[rate$arm == "alpha_max 0.005"], 3)`; the neutral arm gives
+#' `r fmt(rate$dF[rate$arm == "neutral"], 4)` ($R^2 =$
+#' `r fmt(rate$R2[rate$arm == "neutral"], 3)`). The unconstrained programme has the
+#' largest $F_{drift}$ at cycle 15
+#' (`r fmt(rate$F15[rate$arm == "unconstrained"], 3)`, against
+#' `r fmt(rate$F15[rate$arm == "alpha_max 0.02"], 3)` and
+#' `r fmt(rate$F15[rate$arm == "alpha_max 0.005"], 3)`) and the middle fitted rate, so
+#' the two orderings differ. The managed rates are
+#' `r fmt(min(rate$ratio_to_neutral[rate$arm != "neutral"]), 1)` to
+#' `r fmt(max(rate$ratio_to_neutral[rate$arm != "neutral"]), 1)` times the neutral
+#' one.
+#' 
+#' Inference, and what limits it. The unconstrained series is the one whose
+#' $\log(1 - F)$ is least linear ($R^2$ in @tbl-cycles-rate): $F_{drift}$ is
+#' decelerating, and the slope of a regression through a decelerating series is an
+#' average over the curve, which is consistent with the programme of highest
+#' $F_{drift}$ having only the middle fitted rate. @sec-era-step4 reads $R^2 < 0.995$ on an averaged
+#' series as a non-constant rate, at its scale only. By that threshold the
+#' $\alpha_{\max} = 0.02$ series is under it too, and the neutral arm here is under
+#' the $0.999$ that @sec-era-step4 found for its own neutral fits, so the threshold
+#' does not separate the arms in this chapter; the reading rests on the unconstrained
+#' $R^2$ being far below the others. The ratio to the neutral arm mixes two things:
+#' selection's effect on which lines are used, and the displacement of 60 selected
+#' hybrids from their pool, which a random 60 would also show and which the neutral arm
+#' (all 625 hybrids) does not. Neither is separated here, and the neutral arm is one
+#' set of five founder draws. A rate-based $N_e = 1/(2\Delta F)$ is therefore not
+#' reported for the managed arms: @sec-choosing says not to report one under active
+#' management, and a $\Delta F$ read off a managed trajectory with a saturating series
+#' is a fitted slope, not a realised effective size.
+#' 
+#' :::: {.callout-warning}
+#' ## $N_s$ does not project this
+#' 
+#' @sec-ns shows that on molecular coancestry $\theta_S \in [1/2, 1]$ and so
+#' $N_s = 1/(2\theta_S) \in [1/2, 1]$ for every set: $N_s$ is a monotone rescaling of
+#' $\theta_S$, not a number of individuals. Here $N_s$ of the selected hybrids ranges
+#' over `r fmt(min(traj$Ns), 2)` to `r fmt(max(traj$Ns), 2)` (mean
+#' `r fmt(mean(traj$Ns), 2)`) across all runs and cycles. A number in that range
+#' cannot be set beside an effective size in individuals or a rate, and no
+#' discrepancy between them is quantified. Report $N_s$ as a descriptor of a plan, and
+#' read $\Delta F$ from the trajectory.
+#' ::::
+#' 
+#' ## Choosing a budget for a horizon {#sec-cycles-horizon}
+#' 
+#' Every seed crosses over for both budgets, and the cycle at which it happens
+#' varies across seeds (@tbl-cycles-crossover):
+#' 
+## -----------------------------------------------------------------------------
+#| echo: false
+#| label: tbl-cycles-crossover
+#| tbl-cap: "Cycle at which each budget $\\alpha_{\\max}$ first overtakes the unconstrained programme in mean index, per founder draw (seed)."
+c02  <- cross[cross$budget == 0.02, ]; c005 <- cross[cross$budget == 0.005, ]
+c02  <- c02[order(c02$seed), ]; c005 <- c005[order(c005$seed), ]
+knitr::kable(data.frame(seed = c02$seed, c02$crossover, c005$crossover),
+  row.names = FALSE, col.names = c("seed", "$\\alpha_{\\max} = 0.02$", "$\\alpha_{\\max} = 0.005$"))
+
+#' 
+#' The crossover cycle of $\alpha_{\max} = 0.02$ is
+#' `r min(c02$crossover)` to `r max(c02$crossover)` across the five seeds (mean
+#' `r fmt(mean(c02$crossover), 1)`), that of $\alpha_{\max} = 0.005$ is
+#' `r min(c005$crossover)` to `r max(c005$crossover)` (mean
+#' `r fmt(mean(c005$crossover), 1)`), and the tighter budget crosses later in
+#' `r sum(c005$crossover > c02$crossover)` of 5 seeds. "About eight cycles" is the
+#' mean of the $\alpha_{\max} = 0.02$ crossovers only. Crossing later is not ending
+#' higher: against the looser budget, at cycle 15, the paired difference of index
+#' ($\alpha_{\max} = 0.005$ minus $\alpha_{\max} = 0.02$) is
+#' `r pf(pd("0.005", "0.020", 15))`, and the $\alpha_{\max} = 0.005$ mean is below
+#' the $\alpha_{\max} = 0.02$ mean at every cycle from 0 to 15. The tighter budget
+#' ends higher only than the unconstrained programme
+#' (`r pf(pd("0.005", "unconstrained", 15))`), and that contrast is the one every
+#' budget below $\infty$ shares. The choice of $\alpha_{\max}$ is a function of the
+#' planning horizon, and the paired contrasts at selected cycles are in @tbl-cycles-horizon:
+#' 
+## -----------------------------------------------------------------------------
+#| echo: false
+#| label: tbl-cycles-horizon
+#| tbl-cap: "Paired difference in cumulative index (founding-cycle standard deviations) at cycle $k$ between two budgets: mean over five founder draws, then (s.e.; seeds out of five in which the first budget is ahead)."
+ckh <- c(3, 5, 8, 10, 12, 15)
+knitr::kable(data.frame(
+  cycle = ckh,
+  `0.02 minus unconstrained`  = sapply(ckh, function(k) pc(pd("0.020", "unconstrained", k))),
+  `0.005 minus unconstrained` = sapply(ckh, function(k) pc(pd("0.005", "unconstrained", k))),
+  `0.005 minus 0.02`          = sapply(ckh, function(k) pc(pd("0.005", "0.020", k))),
+  check.names = FALSE), row.names = FALSE)
+
+#' 
+## -----------------------------------------------------------------------------
+#| label: horizon-counts
+#| include: false
+pos02   <- sapply(0:15, function(k) pd("0.020", "unconstrained", k)[["pos"]])
+first_all <- min(which(rev(cumsum(rev(pos02 < 5))) == 0)) - 1L
+
+#' 
+#' Read within the 15 cycles run and on five founder draws, not as a rule beyond
+#' them, and as exploratory: the cycles tabulated and the cycle from which all five
+#' seeds are ahead were chosen or read after the data, with no multiplicity rule
+#' (@sec-cycles-trajectory). On the seed mean, the unconstrained programme is the best of the three through
+#' cycle `r k_02 - 1`; $\alpha_{\max} = 0.02$ is the best from cycle `r k_02` to cycle
+#' 15; $\alpha_{\max} = 0.005$ is the best at no cycle. The number of seeds, out of 5,
+#' in which $\alpha_{\max} = 0.02$ is ahead of the unconstrained programme is
+#' `r paste(pos02[ckh + 1], collapse = ", ")` at cycles `r paste(ckh, collapse = ", ")`,
+#' and all five are ahead from cycle `r first_all` on; $\alpha_{\max} = 0.005$ is
+#' ahead in `r pd("0.005", "unconstrained", 10)[["pos"]]` of 5 at cycle 10, and its
+#' seed mean crosses at cycle `r k_005`. So, in this population and selection
+#' intensity, and at the cycles tabulated: for horizons where no seed is ahead the
+#' constraint is a cost in all five seeds; where the count is neither 0 nor 5 the sign
+#' of the $\alpha_{\max} = 0.02$ contrast is not resolved by five seeds; from cycle
+#' `r first_all` on it is ahead in all five. For $\alpha_{\max} = 0.005$ the data give
+#' no horizon within 15 cycles at which it is the better choice. The gap
+#' $\alpha_{\max} = 0.005$ minus $\alpha_{\max} = 0.02$ is
+#' `r fmt(mdiff("0.005", "0.020")[11], 2)` at cycle 10 and
+#' `r fmt(mdiff("0.005", "0.020")[16], 2)` at cycle 15; whether it closes beyond cycle 15
+#' is not measured, and no extrapolation is made. Of the three, $\alpha_{\max} = 0.02$ is
+#' the only one with a measured advantage within 15 cycles, and no budget is
+#' recommended for any horizon outside the cycles tabulated.
+#' 
+#' The caveat matters more than the numbers. `n_sel = 60` out of 625 candidates from
+#' 25 + 25 lines is a small, intensely selected programme, and only that selection
+#' intensity was run. Whether the crossover arrives sooner under harder selection, or
+#' depends on the pool size or the number of markers, is not measured here and is a
+#' hypothesis. @gorjanc2018 find that the best diversity penalty depends on the number
+#' of candidates per cycle (full text), which makes the dependence plausible and does
+#' not measure it for this model. What was observed, for this population, is the shape:
+#' an unconstrained programme leads early, flattens, and is passed; whether the shape
+#' transfers to another scale is not tested.
+#' 
+#' ## The per-line cap, at last measurable
+#' 
+#' @sec-combinatorial carries `max_use` through every selector, defaulting to `NULL`
+#' everywhere. Within a single cycle a cap shrinks the feasible set and so cannot raise
+#' the optimum of the index; across cycles it may buy something, and this is where that
+#' can be looked at. @sec-genomic-era (Step 6) prices a cap of 4 on truncation with no
+#' budget and defers the answer to this chapter; the chapter does not run that arm. It
+#' runs the same budget ($\alpha_{\max} = 0.02$), the same seeds and two caps, 6 and 3 (@tbl-cycles-cap):
+#' 
+## -----------------------------------------------------------------------------
+#| echo: false
+#| label: tbl-cycles-cap
+#| tbl-cap: "The per-line usage cap $k_{\\max}$ (`max_use`) across fifteen cycles, $\\alpha_{\\max} = 0.02$, mean over five founder draws, at cycles 0, 5, 10 and 15 (`none`: no cap). $\\max_a k_a$ (`max_line`) is the largest number of times one line enters the 60 selected hybrids."
+amu <- aggregate(mu[, c("index", "GD", "F_drift", "max_line")],
+                 mu[c("max_use", "cycle")], mean)
+knitr::kable(amu[amu$cycle %in% c(0, 5, 10, 15), ], digits = 3, row.names = FALSE,
+  col.names = c("$k_{\\max}$", "cycle", "index (founding s.d.)", "$GD_T$", "$F_{drift}$", "$\\max_a k_a$"))
+
+#' 
+## -----------------------------------------------------------------------------
+#| label: cap-contrasts
+#| include: false
+cap6 <- function(col, k = 15) pd("6", "none", k, mu, col, "max_use")
+cap3 <- function(col, k = 15) pd("3", "none", k, mu, col, "max_use")
+
+#' 
+#' At cycle 15, `max_use = 6` against no cap differs by
+#' `r pf(cap6("index"))` in index (capped minus uncapped), which is
+#' `r fmt(100 * (1 - amu$index[amu$max_use == "6" & amu$cycle == 15] / amu$index[amu$max_use == "none" & amu$cycle == 15]), 0)`%
+#' of the uncapped gain, and by `r pf(cap6("F_drift"), 3)` in $F_{drift}$
+#' (`r fmt(amu$F_drift[amu$max_use == "6" & amu$cycle == 15], 3)` against
+#' `r fmt(amu$F_drift[amu$max_use == "none" & amu$cycle == 15], 3)`); the uncapped
+#' programme leans on one line
+#' `r fmt(amu$max_line[amu$max_use == "none" & amu$cycle == 15], 0)` times in its final
+#' cycle. `max_use = 3` differs by `r pf(cap3("index"))` in index, which leaves
+#' `r fmt(100 * amu$index[amu$max_use == "3" & amu$cycle == 15] / amu$index[amu$max_use == "none" & amu$cycle == 15], 0)`%
+#' of the uncapped gain, and by `r pf(cap3("F_drift"), 3)` in $F_{drift}$. In
+#' this horizon neither cap is repaid in index: the cost is not recovered by
+#' cycle 15, which answers the question that @sec-genomic-era left to this chapter for
+#' these two caps and this budget. Whether it is repaid beyond cycle 15 is not
+#' measured, and the cost of `max_use = 6` is
+#' `r fmt(abs(cap6("index")[["diff"]]) / cap6("index")[["se"]], 1)` standard errors of its
+#' paired difference.
+#' 
+#' Note *which* lens the cap moves. Gene diversity $GD_T$ at cycle 15 differs by
+#' `r pf(cap6("GD"), 3)` with the cap of 6, and $GD_T$ is the lens $\alpha_{\max}$ pins. The difference shows up in $F_{drift}$, which is the lens
+#' @sec-genomic-era established the constraint does *not* pin. Inference: the cap is a
+#' handle on the lens the budget leaves free, which is a reason to have it in addition
+#' to the budget and not instead of it, at the price in index above.
+#' 
+#' This changes no default. `max_use` remains `NULL` throughout the package.
+#' 
+#' ## Injection, and what it costs
+#' 
+#' No closed budget holds indefinitely: all three trajectories are still losing
+#' diversity at cycle 15, only at different rates. @sec-plant-literature and
+#' @sec-case-study both prescribe periodic germplasm injection.
+#' 
+#' The experiment is a particular kind of injection. At cycle 8, six of the
+#' twenty-five lines in each pool are replaced by lines drawn from the *founding
+#' generation of the same programme* (`inject = list(cycle = 8, n = 6)`). These are
+#' whole founder lines of known merit on the index scale of cycle 0, with no
+#' conversion and no donor from outside the programme. It is not what @sec-backcross
+#' simulates, which is the transfer of up to four loci into one elite line by
+#' backcrossing and ends in a near-copy of the recurrent parent; whether such a line
+#' then enters a pool is a decision that chapter leaves outside it.
+#' 
+## -----------------------------------------------------------------------------
+#| echo: false
+#| label: tbl-cycles-injection
+#| tbl-cap: "One injection event at cycle 8 (six founder lines per pool), against the same programme left closed: mean index (founding-cycle standard deviations), $GD_T$, $F_{drift}$ and realised $\\alpha$ at cycles 7, 8, 10, 12 and 15; $\\alpha_{\\max} = 0.02$, mean over five founder draws."
+ai <- aggregate(inj[, c("index", "GD", "F_drift", "alpha")], inj[c("regime", "cycle")], mean)
+ai_show <- ai         # display copy
+ai_show$regime <- c(closed = "closed", injected = "injected at cycle 8")[ai$regime]
+knitr::kable(ai_show[ai$cycle %in% c(7, 8, 10, 12, 15), ], digits = 3, row.names = FALSE,
+  col.names = c("programme", "cycle", "index (founding s.d.)", "$GD_T$", "$F_{drift}$", "$\\alpha$"))
+
+#' 
+#' The cost is immediate and the return is slow (@tbl-cycles-injection). Gene diversity $GD_T$ jumps from
+#' `r fmt(ai$GD[ai$regime=="closed" & ai$cycle==8], 3)` to
+#' `r fmt(ai$GD[ai$regime=="injected" & ai$cycle==8], 3)` and
+#' $F_{drift}$ falls by
+#' `r fmt(100 * (1 - ai$F_drift[ai$regime=="injected" & ai$cycle==8] / ai$F_drift[ai$regime=="closed" & ai$cycle==8]), 0)`%,
+#' but the index drops by
+#' `r pf(pd("closed", "injected", 8, inj, by = "regime"))`
+#' on the spot (closed minus injected) and has **not repaid by cycle 15**: closed minus
+#' injected is then `r pf(pd("closed", "injected", 15, inj, by = "regime"))`
+#' (`r fmt(ai$index[ai$regime=="injected" & ai$cycle==15], 2)` against
+#' `r fmt(ai$index[ai$regime=="closed" & ai$cycle==15], 2)`).
+#' 
+#' The budget is slack in the injection cycle. The realised $\alpha$ at cycle 8
+#' is `r fmt(ai$alpha[ai$regime=="injected" & ai$cycle==8], 4)` in the injected arm
+#' against `r fmt(ai$alpha[ai$regime=="closed" & ai$cycle==8], 4)` in the closed one
+#' (budget 0.02), so the budget is not what limits the selection in that cycle: the pool
+#' is more diverse and the reference of C12 moves with it. Inference: the index drop
+#' then reflects the merit of the injected founder lines against the evolved pool, not
+#' the price of meeting the budget; the simulation does not separate the two.
+#' 
+#' What was measured, in short: within 15 cycles the injection arm has higher $GD_T$
+#' and lower $F_{drift}$ than the closed arm and a lower index (@tbl-cycles-injection), in this
+#' one event (6 lines per pool at cycle 8) and on five founder draws. Inference, and
+#' what limits it: injection of the programme's own founders restores diversity
+#' without returning more gain within this horizon, and one may read it as a trade of
+#' the same kind as the diversity budget, with a later return and a larger initial
+#' cost. That comparison is an interpretation; the injection arm shares no parameter
+#' with the budget arm, "diversity" here is only $GD_T$ and $F_{drift}$, and the cost
+#' of the budget was not measured on the injection's scale. The run that would repay
+#' the injection is longer than fifteen cycles, if it exists; this chapter does not
+#' measure it. What unadapted material
+#' from a genebank would cost is not simulated: @sec-plant-literature reads
+#' @sanchez2023 on bridging populations, in simulation only.
+#' 
+#' ## What the corpus supports
+#' 
+## -----------------------------------------------------------------------------
+#| label: corpus-counts
+#| include: false
+ani  <- read.csv(book_data("bibliography_animal.csv"), stringsAsFactors = FALSE)
+pla  <- read.csv(book_data("bibliography_plant.csv"), stringsAsFactors = FALSE)
+th   <- trimws(unlist(strsplit(ani$theme[ani$relevance == 3], ";")))
+th   <- th[nzchar(th)]
+cited <- c("10.1007/s00122-018-3125-3", "10.3389/fgene.2019.01006",
+           "10.1186/s12711-022-00709-7", "10.1186/s12711-019-0495-1",
+           "10.2135/cropsci2018.09.0537", "10.1534/g3.118.200091")
+n_ani <- sum(tolower(ani$doi) %in% cited); n_pla <- sum(tolower(pla$doi) %in% cited)
+stopifnot(n_ani + n_pla == length(cited))
+
+#' 
+#' @sec-corpora's screened corpora hold `r nrow(pla)` plant and `r nrow(ani)` animal
+#' records. They carry no field for recurrent selection or long-term gain: the `theme`
+#' field of the `r sum(ani$relevance == 3)` directly relevant animal records takes
+#' `r length(unique(th))` values (`r paste(unique(th), collapse = "; ")`;
+#' @tbl-corpora-themes), none of them recurrent selection or long-term gain, and the plant file has no theme field. The corpora
+#' therefore do not allow a count of how much of them concerns this chapter's topic.
+#' The six records cited below are in them (`r n_ani` in the animal file, `r n_pla` in
+#' the plant file) and were chosen by reading titles and relevance notes. The reading
+#' level of each statement is given: full text for @gorjanc2018 and @allier2019,
+#' abstract only for the other four.
+#' 
+#' @allier2019 (full text) report, in a simulation of optimal cross selection, that
+#' selection under a diversity target gave lower short-term and significantly higher
+#' long-term genetic gain than unconstrained cross selection. That is the same sign as
+#' the crossover found here; their model, selection unit and horizon differ, and no
+#' crossing cycle for a budgeted against an unconstrained trajectory is taken from
+#' them. @gorjanc2018 (full text) compare truncation with diversity-penalised optimal
+#' cross selection in two-part programmes with rapid recurrent genomic selection, in a
+#' 20-year wheat simulation: more cycles per year raised gain in the early years and
+#' lowered long-term gain, and optimal cross selection gave more gain than truncation.
+#' That is a trade between gain and diversity of the same kind as the constrained
+#' against unconstrained contrast here; it is not a result about a better per-cycle
+#' optimiser, which this chapter's DE check does not support. @muller2018 (abstract)
+#' report that selecting on expected maximum haploid breeding values, a criterion
+#' chosen for its effect on later cycles and with no diversity budget, outperformed
+#' selection on genomic estimated breeding values (GEBVs) after about five cycles and kept more diversity: a crossing
+#' cycle, for a different pair of criteria. @wientjes2022 is read above (abstract).
+#' @doublet2019 (abstract) report, for three French dairy breeds, annual gains raised
+#' by 50, 71 and 33% (Montbeliarde, Normande, Holstein) by genomic selection and a
+#' significant rise in inbreeding in Holstein only, with no significant change in
+#' Montbeliarde and Normande: a before-and-after comparison in operating programmes,
+#' and a diversity cost in one breed of three. @rutkoski2019 (abstract) is itself a
+#' simulation, of 80 rice programmes over 28 years, in which five estimators of
+#' realised gain are compared with the simulated truth: the best estimators erred by
+#' 15% over all 28 years and 27% over the last 15, and the best correlation with true
+#' gain was 0.59. The gain in this chapter is the true index of the selected hybrids
+#' (C7); in a programme it must be estimated, and in that simulation the estimates were
+#' imprecise.
+#' 
+#' What @sec-plant-literature lists as not established in the retrieved set, in its
+#' row for proportional diversity loss against a same-size resampling baseline in an
+#' operating maize programme (@tbl-plant-unestablished), remains so for that set. This
+#' chapter demonstrates a crossover in simulation, under C1 to C12, which is not the
+#' same as establishing it in an operating programme, and nothing is claimed about
+#' publications outside the retrieved corpora.
+#' 
+#' ## Where this connects
+#' 
+#' @sec-heterosis derives, for inbred parents, the complete factorial and flat
+#' dominance, that the divergence term of expected heterosis is $GD_{BS}$, and a
+#' $d$-weighted version where dominance varies across loci. This chapter's index is
+#' additive (C9), so it cannot test whether selection builds divergence aligned with
+#' dominance. What it logs is $GD_{BS}$ of the 60 selected hybrids (C10) and the
+#' within-pool diversity $GD_{WS} = GD_T - GD_{BS}$ (the chunk at the start of the
+#' assumptions asserts that it equals $1 - (\theta_A + \theta_B)/2$ to $10^{-12}$),
+#' which neither the left panel of @fig-cycles-diversity nor the `GD` column shows
+#' (@tbl-cycles-partition):
+#' 
+## -----------------------------------------------------------------------------
+#| echo: false
+#| label: tbl-cycles-partition
+#| tbl-cap: "Partition of the gene diversity of the 60 selected hybrids at cycles 0 and 15, $GD_T = GD_{WS} + GD_{BS}$, by diversity budget $\\alpha_{\\max}$ (unconstrained, 0.02, 0.005); mean over five founder draws."
+pt <- ag[ag$cycle %in% c(0, 15), c("budget", "cycle", "GD_T", "GD_WS", "GD_BS")]
+pt <- pt[order(match(pt$budget, c("unconstrained", "0.020", "0.005")), pt$cycle), ]
+runs <- do.call(rbind, lapply(split(traj, list(traj$budget, traj$seed)), function(d) {
+  d <- d[order(d$cycle), ]
+  data.frame(bs_up = d$GD_BS[d$cycle == 15] > d$GD_BS[d$cycle == 0],
+             bs_mono = all(diff(d$GD_BS) >= 0),
+             ws_down = d$GD_WS[d$cycle == 15] < d$GD_WS[d$cycle == 0])
+}))
+pt_show <- pt         # display copy: budgets as symbols, not CSV keys
+pt_show$budget <- c(unconstrained = "unconstrained", `0.020` = "$\\alpha_{\\max} = 0.02$",
+                    `0.005` = "$\\alpha_{\\max} = 0.005$")[pt$budget]
+knitr::kable(pt_show, digits = 3, row.names = FALSE,
+  col.names = c("budget $\\alpha_{\\max}$", "cycle", "$GD_T$", "$GD_{WS}$ (within pools)", "$GD_{BS}$ (between pools)"))
+
+#' 
+#' Result. $GD_{BS}$ at cycle 15 is above its cycle-0 value in
+#' `r sum(runs$bs_up)` of `r nrow(runs)` runs (three budgets by five seeds) and is
+#' non-decreasing over the 15 cycles in `r sum(runs$bs_mono)`; $GD_{WS}$ at cycle 15 is
+#' below its cycle-0 value in `r sum(runs$ws_down)`. Seed-averaged, $GD_{WS}$ falls from
+#' `r fmt(at("unconstrained", 0, "GD_WS"), 3)` to
+#' `r fmt(at("unconstrained", 15, "GD_WS"), 3)` unconstrained, from
+#' `r fmt(at("0.020", 0, "GD_WS"), 3)` to `r fmt(at("0.020", 15, "GD_WS"), 3)` under
+#' $\alpha_{\max} = 0.02$ and from `r fmt(at("0.005", 0, "GD_WS"), 3)` to
+#' `r fmt(at("0.005", 15, "GD_WS"), 3)` under $\alpha_{\max} = 0.005$, while $GD_{BS}$
+#' rises in all three. Interpretation, and what limits it: under drift and selection on
+#' an additive index acting together, the two pools separate while each loses its own
+#' diversity, and the budgets that keep more $GD_T$ keep more of the within-pool part.
+#' @sec-subdivided shows that drift alone in two closed pools of equal weight
+#' raises $GD_{BS}$ in expectation, and this chapter has no arm that separates drift from selection
+#' for $GD_{BS}$, so the rise is not attributed to selection, and with an additive index
+#' it is not evidence about heterosis. The within/between trade is the one
+#' @sec-catalogue's partition was built to expose.
+#' 
+#' @sec-case-study is a single cycle in operational detail, with another simulator and
+#' another selection size (`stage1_simulate()` and 10% of the candidates, against
+#' `simulate_pools()`, 300 QTL and 60 of 625 here), so it is a pointer to this chapter
+#' and not its cycle 0. Its checklist for "Across cycles" lists: the per-stage loss
+#' ledger, the linearity of $\log(1 - F)$, periodic germplasm injection, and the
+#' diversity cost per cycle when cycle time is shortened. This chapter bears on two of
+#' them, the linearity of $\log(1 - F)$ ($R^2$ in @tbl-cycles-rate) and injection (one
+#' injection arm). It has no stage structure (C8), so it says nothing about the ledger,
+#' and its rate is per cycle in a discrete-cycle model (C11), so it says nothing about
+#' the fourth item. Freezing $p_0$, which is in the "Setting up" list of that chapter and not in its
+#' "Across cycles" list, is shown in @sec-cycles-freezing.
