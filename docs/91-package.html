@@ -649,9 +649,10 @@ window.Quarto = {
   <li><a href="#heterosis-and-cycles" id="toc-heterosis-and-cycles" class="nav-link" data-scroll-target="#heterosis-and-cycles"><span class="header-section-number">B.5.2</span> Heterosis and cycles</a></li>
   <li><a href="#mating-design" id="toc-mating-design" class="nav-link" data-scroll-target="#mating-design"><span class="header-section-number">B.5.3</span> Mating design</a></li>
   <li><a href="#sparse-testing" id="toc-sparse-testing" class="nav-link" data-scroll-target="#sparse-testing"><span class="header-section-number">B.5.4</span> Sparse testing</a></li>
-  <li><a href="#caballero-toro" id="toc-caballero-toro" class="nav-link" data-scroll-target="#caballero-toro"><span class="header-section-number">B.5.5</span> Caballero &amp; Toro</a></li>
-  <li><a href="#population-sizing" id="toc-population-sizing" class="nav-link" data-scroll-target="#population-sizing"><span class="header-section-number">B.5.6</span> Population sizing</a></li>
-  <li><a href="#reference-oracles" id="toc-reference-oracles" class="nav-link" data-scroll-target="#reference-oracles"><span class="header-section-number">B.5.7</span> Reference oracles</a></li>
+  <li><a href="#joint-allocation" id="toc-joint-allocation" class="nav-link" data-scroll-target="#joint-allocation"><span class="header-section-number">B.5.5</span> Joint allocation</a></li>
+  <li><a href="#caballero-toro" id="toc-caballero-toro" class="nav-link" data-scroll-target="#caballero-toro"><span class="header-section-number">B.5.6</span> Caballero &amp; Toro</a></li>
+  <li><a href="#population-sizing" id="toc-population-sizing" class="nav-link" data-scroll-target="#population-sizing"><span class="header-section-number">B.5.7</span> Population sizing</a></li>
+  <li><a href="#reference-oracles" id="toc-reference-oracles" class="nav-link" data-scroll-target="#reference-oracles"><span class="header-section-number">B.5.8</span> Reference oracles</a></li>
   </ul></li>
   <li><a href="#full-export-list" id="toc-full-export-list" class="nav-link" data-scroll-target="#full-export-list"><span class="header-section-number">B.6</span> Full export list</a></li>
   <li><a href="#reproduce-this-chapter" id="toc-reproduce-this-chapter" class="nav-link" data-scroll-target="#reproduce-this-chapter">Reproduce this chapter</a></li>
@@ -704,9 +705,9 @@ window.Quarto = {
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
-<col style="width: 22%">
-<col style="width: 56%">
-<col style="width: 20%">
+<col style="width: 18%">
+<col style="width: 64%">
+<col style="width: 16%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -805,6 +806,11 @@ window.Quarto = {
 <td style="text-align: left;"><code>R/17_sparse_testing.R</code></td>
 <td style="text-align: left;">sparse testing: allocation, connectivity, MME BLUP/PEV</td>
 <td style="text-align: left;"><a href="04f-sparse-testing.html" class="quarto-xref"><span>Chapter 19</span></a></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>R/18_joint_allocation.R</code></td>
+<td style="text-align: left;">joint allocation: crosses x locations, PEV before planting, cross and location connectivity</td>
+<td style="text-align: left;"><a href="04g-joint-allocation.html" class="quarto-xref"><span>Chapter 20</span></a></td>
 </tr>
 </tbody>
 </table>
@@ -1382,8 +1388,41 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="caballero-toro" class="level3" data-number="B.5.5">
-<h3 data-number="B.5.5" class="anchored" data-anchor-id="caballero-toro"><span class="header-section-number">B.5.5</span> Caballero &amp; Toro</h3>
+<section id="joint-allocation" class="level3" data-number="B.5.5">
+<h3 data-number="B.5.5" class="anchored" data-anchor-id="joint-allocation"><span class="header-section-number">B.5.5</span> Joint allocation</h3>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 22%">
+<col style="width: 77%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Function</th>
+<th style="text-align: left;">Does</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>joint_alloc()</code></td>
+<td style="text-align: left;">crossing plan x locations: random, coverage or PEV-optimised (exchange search)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>joint_pev()</code></td>
+<td style="text-align: left;">mean GCA prediction-error variance of an allocation, before planting</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>joint_connectivity()</code></td>
+<td style="text-align: left;"><code>sparse_connectivity()</code> plus <code>n_comp_cross</code> and <code>n_comp_loc</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="caballero-toro" class="level3" data-number="B.5.6">
+<h3 data-number="B.5.6" class="anchored" data-anchor-id="caballero-toro"><span class="header-section-number">B.5.6</span> Caballero &amp; Toro</h3>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -1411,8 +1450,8 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="population-sizing" class="level3" data-number="B.5.6">
-<h3 data-number="B.5.6" class="anchored" data-anchor-id="population-sizing"><span class="header-section-number">B.5.6</span> Population sizing</h3>
+<section id="population-sizing" class="level3" data-number="B.5.7">
+<h3 data-number="B.5.7" class="anchored" data-anchor-id="population-sizing"><span class="header-section-number">B.5.7</span> Population sizing</h3>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -1476,8 +1515,8 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="reference-oracles" class="level3" data-number="B.5.7">
-<h3 data-number="B.5.7" class="anchored" data-anchor-id="reference-oracles"><span class="header-section-number">B.5.7</span> Reference oracles</h3>
+<section id="reference-oracles" class="level3" data-number="B.5.8">
+<h3 data-number="B.5.8" class="anchored" data-anchor-id="reference-oracles"><span class="header-section-number">B.5.8</span> Reference oracles</h3>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">

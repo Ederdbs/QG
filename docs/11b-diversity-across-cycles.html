@@ -651,13 +651,13 @@ window.Quarto = {
    
   <ul>
   <li><a href="#the-cycle" id="toc-the-cycle" class="nav-link active" data-scroll-target="#the-cycle"><span class="header-section-number">23.1</span> The cycle</a></li>
-  <li><a href="#freezing-p_0-and-what-happens-if-you-do-not" id="toc-freezing-p_0-and-what-happens-if-you-do-not" class="nav-link" data-scroll-target="#freezing-p_0-and-what-happens-if-you-do-not"><span class="header-section-number">23.2</span> Freezing <span class="math inline">\(p_0\)</span>, and what happens if you do not</a></li>
-  <li><a href="#the-trajectory" id="toc-the-trajectory" class="nav-link" data-scroll-target="#the-trajectory"><span class="header-section-number">23.3</span> The trajectory</a>
+  <li><a href="#sec-cycles-freezing" id="toc-sec-cycles-freezing" class="nav-link" data-scroll-target="#sec-cycles-freezing"><span class="header-section-number">23.2</span> Freezing <span class="math inline">\(p_0\)</span>, and what happens if you do not</a></li>
+  <li><a href="#sec-cycles-trajectory" id="toc-sec-cycles-trajectory" class="nav-link" data-scroll-target="#sec-cycles-trajectory"><span class="header-section-number">23.3</span> The trajectory</a>
   <ul class="collapse">
-  <li><a href="#it-is-not-an-artefact-of-the-cheap-selector" id="toc-it-is-not-an-artefact-of-the-cheap-selector" class="nav-link" data-scroll-target="#it-is-not-an-artefact-of-the-cheap-selector"><span class="header-section-number">23.3.1</span> It is not an artefact of the cheap selector</a></li>
+  <li><a href="#what-differential-evolution-does-on-the-same-context-and-what-it-cannot-show" id="toc-what-differential-evolution-does-on-the-same-context-and-what-it-cannot-show" class="nav-link" data-scroll-target="#what-differential-evolution-does-on-the-same-context-and-what-it-cannot-show"><span class="header-section-number">23.3.1</span> What differential evolution does on the same context, and what it cannot show</a></li>
   </ul></li>
-  <li><a href="#the-rate-of-inbreeding-and-what-n_s-is-not" id="toc-the-rate-of-inbreeding-and-what-n_s-is-not" class="nav-link" data-scroll-target="#the-rate-of-inbreeding-and-what-n_s-is-not"><span class="header-section-number">23.4</span> The rate of inbreeding, and what <span class="math inline">\(N_s\)</span> is not</a></li>
-  <li><a href="#choosing-a-budget-for-a-horizon" id="toc-choosing-a-budget-for-a-horizon" class="nav-link" data-scroll-target="#choosing-a-budget-for-a-horizon"><span class="header-section-number">23.5</span> Choosing a budget for a horizon</a></li>
+  <li><a href="#sec-cycles-rate" id="toc-sec-cycles-rate" class="nav-link" data-scroll-target="#sec-cycles-rate"><span class="header-section-number">23.4</span> The rate of inbreeding, and what <span class="math inline">\(N_s\)</span> is not</a></li>
+  <li><a href="#sec-cycles-horizon" id="toc-sec-cycles-horizon" class="nav-link" data-scroll-target="#sec-cycles-horizon"><span class="header-section-number">23.5</span> Choosing a budget for a horizon</a></li>
   <li><a href="#the-per-line-cap-at-last-measurable" id="toc-the-per-line-cap-at-last-measurable" class="nav-link" data-scroll-target="#the-per-line-cap-at-last-measurable"><span class="header-section-number">23.6</span> The per-line cap, at last measurable</a></li>
   <li><a href="#injection-and-what-it-costs" id="toc-injection-and-what-it-costs" class="nav-link" data-scroll-target="#injection-and-what-it-costs"><span class="header-section-number">23.7</span> Injection, and what it costs</a></li>
   <li><a href="#what-the-corpus-supports" id="toc-what-the-corpus-supports" class="nav-link" data-scroll-target="#what-the-corpus-supports"><span class="header-section-number">23.8</span> What the corpus supports</a></li>
@@ -689,97 +689,147 @@ window.Quarto = {
 </header>
 
 
-<p><a href="12-case-study.html" class="quarto-xref"><span>Chapter 25</span></a> will end with a list of things its numbers cannot tell you, and the last item on it is the one that matters most: <em>one cycle, not a trajectory. A one-cycle constraint is not a multi-cycle policy.</em></p>
-<p>Every result on hybrid selection under the <span class="math inline">\(\alpha\)</span> budget has so far been a single round. Trajectories have appeared before – the recurrent-selection cycles of <a href="04c-alphasimr-pipeline.html" class="quarto-xref"><span>Chapter 9</span></a> (Step 8) and the whole programme of <a href="04d-breeding-programme.html" class="quarto-xref"><span>Chapter 22</span></a> – but not with the diversity constraint applied cycle after cycle. Nobody pays an index cost for diversity in order to have more diversity. They pay it because of what next cycle can do with it, and that argument has so far been taken on faith. This chapter runs the constrained selection forward and checks.</p>
+<p><a href="12-case-study.html" class="quarto-xref"><span>Chapter 25</span></a> lists what its numbers cannot tell you. One item on that list is <em>one cycle, not a trajectory: a one-cycle constraint is not a multi-cycle policy.</em> This chapter runs the constrained selection forward, in simulation, to see what the constraint does to a programme over fifteen cycles.</p>
+<p>The results of <a href="09-optimal-contributions.html" class="quarto-xref"><span>Chapter 15</span></a> to <a href="10b-advanced-selection.html" class="quarto-xref"><span>Chapter 17</span></a> on hybrid selection under the <span class="math inline">\(\alpha_{\max}\)</span> budget are single rounds. Trajectories have appeared before: the recurrent-selection cycles of <a href="04c-alphasimr-pipeline.html" class="quarto-xref"><span>Chapter 9</span></a> (Step 8), and the inbred-line wheat-type programme of <a href="04d-breeding-programme.html" class="quarto-xref"><span>Chapter 22</span></a>, which overlaps cycles, reports a stock and not a rate, and has no <span class="math inline">\(\alpha\)</span> budget – its own text calls the application of such a budget to line parents a proposal and sends the reader here. What has not appeared is the diversity constraint on <em>hybrid</em> selection applied cycle after cycle in a discrete-cycle, two-pool model. What diversity buys is what the next cycle can do with it. <a href="02b-response.html#sec-response-genic" class="quarto-xref"><span>Section 4.2</span></a> states the link between within-pool diversity and genic variance for one generation, and <a href="02b-response.html" class="quarto-xref"><span>Chapter 4</span></a> says that nothing in the preceding chapters predicts the multi-cycle crossover reported here; this chapter measures it.</p>
 <section id="the-cycle" class="level2" data-number="23.1">
 <h2 data-number="23.1" class="anchored" data-anchor-id="the-cycle"><span class="header-section-number">23.1</span> The cycle</h2>
-<p>Selection happens at the hybrid level, on <span class="math inline">\(A \times B\)</span> crosses. Recycling happens <em>within</em> pool. That asymmetry is the whole design, and getting it backwards would quietly destroy the thing <a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 5</span></a> says the programme is selling: a doubled haploid derived from an <span class="math inline">\(A \times B\)</span> hybrid is a blend of both pools, and a programme that recycled hybrids would merge its heterotic groups within a few cycles.</p>
-<p>What crosses the pool boundary is <em>information</em> – which lines proved themselves in hybrid combination – and never germplasm.</p>
+<p>Selection happens at the hybrid level, on <span class="math inline">\(A \times B\)</span> crosses. Recycling happens <em>within</em> pool. That asymmetry is the design, and getting it backwards would destroy the heterotic pattern: a doubled haploid (DH) derived from an <span class="math inline">\(A \times B\)</span> hybrid is a blend of both pools (assumption A3 of <a href="05-genomic-era.html#sec-era-programme" class="quarto-xref"><span>Section 10.1</span></a>, <a href="00-hybrid-programme.html#sec-hp-cycle" class="quarto-xref"><span>Section 1.1</span></a>), so a programme that recycled hybrids would merge its pools. How fast the merge would happen is not simulated here.</p>
+<p>What crosses the pool boundary is <em>information</em> – which lines proved themselves in hybrid combination – and never germplasm. <a href="#fig-cycles-diagram" class="quarto-xref">Figure&nbsp;<span>23.1</span></a> draws the cycle.</p>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="11b-diversity-across-cycles_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" alt="One cycle" width="1350"></p>
-<figcaption>One cycle. Hybrids are evaluated across the pool boundary; lines are recycled inside it. The usage weights are the only channel between the two, and they are what <code>line_weights()</code> returns.</figcaption>
+<div id="fig-cycles-diagram" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" alt="Flow diagram. Pool A lines (blue box) and pool B lines (orange box) on the left, feed a grey box of every A by B hybrid, then a box that selects n_sel hybrids, then a box of usage weights for A and B. Two dashed red arrows return from the usage weights to the pool A box and to the pool B box, labelled intermate within the pool and derive doubled haploids. A note above the hybrid box says the diversity budget applies at the selection step.">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-cycles-diagram-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="11b-diversity-across-cycles_files/figure-html/fig-cycles-diagram-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Flow diagram. Pool A lines (blue box) and pool B lines (orange box) on the left, feed a grey box of every A by B hybrid, then a box that selects n_sel hybrids, then a box of usage weights for A and B. Two dashed red arrows return from the usage weights to the pool A box and to the pool B box, labelled intermate within the pool and derive doubled haploids. A note above the hybrid box says the diversity budget applies at the selection step." width="975">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-cycles-diagram-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;23.1: One cycle of <code>run_cycles()</code> (schematic; no data). Pool A is drawn in blue and pool B in orange, as elsewhere in the book. Solid arrows: every <span class="math inline">\(A \times B\)</span> hybrid of the two pools is evaluated across the pool boundary, <code>n_sel</code> of them are selected (the diversity budget applies at this step), and the selection yields line-usage weights <span class="math inline">\(w_A\)</span>, <span class="math inline">\(w_B\)</span>. Dashed red arrows: lines are recycled inside their own pool, by intermating within the pool and deriving doubled haploids (DH). The usage weights are the only channel between the two pools, and they are what <code>line_weights()</code> returns.
+</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p><code>run_cycles()</code> is the loop. The assumptions it runs under, stated once:</p>
-<p><strong>C1. Loci are unlinked.</strong> Every marker segregates independently, so no linkage disequilibrium builds up and there is no Bulmer effect on the genic side. This is the same abstraction <a href="03-simulating-crosses.html" class="quarto-xref"><span>Chapter 6</span></a> already makes; <a href="04-population-sizing.html" class="quarto-xref"><span>Chapter 7</span></a> is where linkage is modelled properly, and <code>build_map()</code>/<code>meiosis()</code> are there if this ever has to change.</p>
+<p><code>run_cycles()</code> is the loop. Its data-generating mechanism, as the code of <code>simulate_pools()</code> and <code>run_cycles()</code> implements it (the arguments of <code>book/scripts/regenerate.R cycles</code>, with the defaults of <code>run_cycles()</code> unchanged):</p>
+<ul>
+<li><em>Founders.</em> 25 + 25 inbred lines, <span class="math inline">\(m = 2000\)</span> biallelic markers, all unlinked (C1). For each marker <span class="math inline">\(k\)</span> an ancestral frequency <span class="math inline">\(p^{*}_k \sim U(0.05, 0.95)\)</span> is drawn, and the frequencies of the two pools are independent draws <span class="math inline">\(p_{Ak}, p_{Bk} \sim \mathrm{Beta}\big(p^{*}_k(1-F_{BN})/F_{BN},\ (1-p^{*}_k)(1-F_{BN})/F_{BN}\big)\)</span> (<a href="03-simulating-crosses.html#eq-balding-nichols" class="quarto-xref">Equation&nbsp;<span>6.1</span></a>: a Balding-Nichols draw <span class="citation" data-cites="balding1995">(<a href="99-references.html#ref-balding1995" role="doc-biblioref">Balding and Nichols 1995</a>)</span> in the parametrisation of that equation, which is this book’s own specification and is the one <code>simulate_pools()</code> implements), clipped to <span class="math inline">\([10^{-6}, 1 - 10^{-6}]\)</span>, with <span class="math inline">\(F_{BN} = 0.15\)</span> (argument <code>fst</code>; it is the Balding-Nichols parameter, not a realised <span class="math inline">\(F_{ST}\)</span>). Each line carries allele 1 at each marker with probability <span class="math inline">\(p_{Ak}\)</span> (pool A) or <span class="math inline">\(p_{Bk}\)</span> (pool B), independently over lines and markers, so lines are homozygous and coded 0/1, and the 625 hybrids (<span class="math inline">\(A \times B\)</span>, complete factorial) are coded 0, 0.5, 1.</li>
+<li><em>Genetic architecture.</em> 300 of the 2000 markers, chosen at random without replacement, are quantitative trait loci (QTL) with effects <span class="math inline">\(\beta_k \sim N(0, 1)\)</span> independent of allele frequency; the other 1700 have effect 0 and are neutral for the index but count in every diversity metric. Effects are additive (C9).</li>
+<li><em>The index.</em> The index of a hybrid is its true genetic value <span class="math inline">\(X\beta\)</span> (no environment, no residual, no estimation error: C7), centred and scaled by the mean and standard deviation of <span class="math inline">\(X\beta\)</span> over the 625 founding hybrids and held at those constants in every cycle. The unit of every gain below is therefore the standard deviation of the index among the founding hybrids, and cycle 0 has mean 0 over the candidates. The argument <code>h2</code> of <code>simulate_pools()</code> only builds a noisy index that <code>run_cycles()</code> does not use.</li>
+<li><em>Founder draws.</em> The seed (1 to 5) fixes the founders and <span class="math inline">\(\beta\)</span> together, so each draw is a different founding population <em>and</em> a different architecture; the three budgets of a seed share both. The recycling stream is <code>set.seed(seed + 1000 + t)</code> before the selector of cycle <span class="math inline">\(t\)</span>.</li>
+</ul>
+<p>The assumptions it runs under, stated once:</p>
+<p><strong>C1. Loci are unlinked.</strong> Every marker segregates independently, so there is no linkage disequilibrium <em>from linkage</em>. Disequilibrium generated by selection is not excluded by this assumption, which therefore does not claim that there is no Bulmer effect <span class="citation" data-cites="bulmer1971">(<a href="99-references.html#ref-bulmer1971" role="doc-biblioref">Bulmer 1971</a>)</span>: the logged <code>var_g</code> (variance of the index over the 625 candidates) and <code>var_genic</code> (the genic variance of <a href="02b-response.html" class="quarto-xref"><span>Chapter 4</span></a>) have a per-run ratio that averages 0.96 at cycle 0 and between 0.63 and 0.78 across the three budgets at cycle 5. A ratio below one means that the covariance term of the genic decomposition is negative. The ratio is not by itself a measure of the Bulmer effect (the divergence of the two pools moves it too); <a href="11c-limits.html" class="quarto-xref"><span>Chapter 24</span></a> tests C1 against a random-selection control. Linkage proper is modelled in <a href="04-population-sizing.html" class="quarto-xref"><span>Chapter 7</span></a> and <a href="04b-backcross-introgression.html" class="quarto-xref"><span>Chapter 8</span></a> and, with real meiosis, in <a href="04c-alphasimr-pipeline.html" class="quarto-xref"><span>Chapter 9</span></a>.</p>
 <p><strong>C2. Recycling is by doubled haploid.</strong> Two parents are drawn within pool with probability proportional to usage, and one DH is derived per pair. Because the lines are inbred, <code>(GL[i, ] + GL[j, ]) / 2</code> lies in <span class="math inline">\(\{0, 0.5, 1\}\)</span> and a single Bernoulli draw per locus is an <em>exact</em> gamete, not an approximation.</p>
 <p><strong>C3. Pool sizes are constant.</strong> 25 lines per pool, every cycle. A real programme varies this, and the variation is itself a diversity decision.</p>
 <p><strong>C4. Marker effects are fixed.</strong> The same <span class="math inline">\(\boldsymbol{\beta}\)</span> throughout, so the index is comparable across cycles and gain accumulates on the founding cycle’s scale. No new mutation, no changing selection target, no genotype-by-environment.</p>
-<p><strong>C5. The base <span class="math inline">\(p_0\)</span> is frozen at cycle 0</strong> and carried forward. This is the subject of the next section.</p>
+<p><strong>C5. The base <span class="math inline">\(p_0\)</span> for <span class="math inline">\(F_{hom}\)</span> and <span class="math inline">\(F_{drift}\)</span> is frozen at cycle 0</strong> and carried forward. This is the subject of <a href="#sec-cycles-freezing" class="quarto-xref"><span>Section 23.2</span></a>.</p>
 <p><strong>C6. The pool is closed</strong> unless a germplasm injection is scheduled.</p>
-<p><strong>C7. The index is known without error.</strong> <a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 12</span></a> Finding 5 measures what relaxing this does within a cycle; the effect compounds across cycles and is not modelled here. Every gain figure below is therefore an optimistic ceiling, for all budgets equally.</p>
+<p><strong>C7. The index is known without error.</strong> <a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 12</span></a> (Finding 5) measures, within one cycle, that error correlated with relatedness costs more gene diversity than independent error at the same nominal accuracy; <a href="08b-genomic-prediction.html" class="quarto-xref"><span>Chapter 14</span></a> fits prediction accuracy per validation scheme and notes that retraining across cycles is not modelled. Nothing here measures how an error in the index would move a trajectory or the crossover below, and the direction of that effect is not known. The gain figures are therefore for a known index; no claim is made that they are an upper bound, for any budget.</p>
 <p><strong>C8. Selection is on the hybrid only.</strong> No per-se line selection, no stage structure. <a href="08-pipeline-stages.html" class="quarto-xref"><span>Chapter 13</span></a> is where the multi-stage version lives.</p>
+<p><strong>C9. The index is additive</strong>: <code>X %*% beta</code>, with no dominance and no specific combining ability. No divergence aligned with dominance can be selected for in this simulation, so it says nothing on that mechanism of <a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 5</span></a>.</p>
+<p><strong>C10. All 625 hybrids are candidates, in every cycle.</strong> The candidate set is the complete <span class="math inline">\(25 \times 25\)</span> factorial and the index of every hybrid is known; there is no crossing design, tester set or sparse factorial, and none of the questions of <a href="04e-mating-design.html" class="quarto-xref"><span>Chapter 18</span></a> (how few hybrids need be made and evaluated) arises. The between-pool gene diversity (<span class="math inline">\(GD_{BS}\)</span>, column <code>GD_BS</code>) of the 60 selected hybrids below is the between-pool component of their partition at unequal line usage, not the complete-factorial identity of <a href="02-subdivided.html" class="quarto-xref"><span>Chapter 3</span></a> and <a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 5</span></a>.</p>
+<p><strong>C11. Cycles are discrete and do not overlap</strong> (assumption A4 of <a href="05-genomic-era.html#sec-era-programme" class="quarto-xref"><span>Section 10.1</span></a>). Every rate below is per cycle, not per unit of time, and <a href="05-genomic-era.html#sec-era-programme" class="quarto-xref"><span>Section 10.1</span></a> says that this is a limit of every rate reported in the book.</p>
+<p><strong>C12. The budget is re-referenced to the current pool at every cycle.</strong> <code>run_cycles()</code> takes <code>gd_ref</code>, the reference of <span class="math inline">\(\alpha = (GD_{\text{ref}} - GD_S)/GD_{\text{ref}}\)</span> (<a href="06-metric-catalogue.html#eq-catalogue-alpha" class="quarto-xref">Equation&nbsp;<span>11.15</span></a>), from the mean <span class="math inline">\(GD\)</span> of random 60-subsets of the <em>current</em> cycle’s 625 candidates. So <span class="math inline">\(\alpha_{\max}\)</span> is a per-cycle relative loss against a random subset of an eroding pool, not a loss against the founders; the only frozen base is <span class="math inline">\(p_0\)</span> of C5. In the mean over the five founder draws, under <span class="math inline">\(\alpha_{\max} = 0.02\)</span>, <code>gd_ref</code> falls from 0.329 at cycle 0 to 0.21 at cycle 15 and the <span class="math inline">\(GD_T\)</span> of the selection from 0.324 to 0.207 (-36%), while the realised <span class="math inline">\(\alpha\)</span> is 0.016 and 0.017. The budget <span class="math inline">\(\alpha_{\max} = 0.02\)</span> is therefore not a 2% total loss over the programme. For <span class="math inline">\(\alpha_{\max} = 0.005\)</span> the realised <span class="math inline">\(\alpha\)</span> at cycle 15 is -0.001: the budget no longer binds, and for the unconstrained programme the realised <span class="math inline">\(\alpha\)</span> falls from 0.039 to 0.003: at cycle 15 even truncation loses little gene diversity against a random subset of the eroded pool.</p>
 </section>
-<section id="freezing-p_0-and-what-happens-if-you-do-not" class="level2" data-number="23.2">
-<h2 data-number="23.2" class="anchored" data-anchor-id="freezing-p_0-and-what-happens-if-you-do-not"><span class="header-section-number">23.2</span> Freezing <span class="math inline">\(p_0\)</span>, and what happens if you do not</h2>
-<p><code>build_ctx()</code> sets <code>p0 &lt;- colMeans(X)</code> on every call. Run it fresh each cycle and the drift lens is re-anchored to the population it is supposed to be measuring drift <em>away from</em>, which reports approximately zero loss forever while the pool erodes underneath.</p>
-<p>The demonstration needs two generations and nothing else:</p>
+<section id="sec-cycles-freezing" class="level2" data-number="23.2">
+<h2 data-number="23.2" class="anchored" data-anchor-id="sec-cycles-freezing"><span class="header-section-number">23.2</span> Freezing <span class="math inline">\(p_0\)</span>, and what happens if you do not</h2>
+<p><code>build_ctx()</code> sets <code>p0 &lt;- colMeans(X)</code> on every call, and has no <code>p0</code> argument. Run it fresh each cycle and the drift lens is anchored on the population it is supposed to be measuring drift <em>away from</em>. When <span class="math inline">\(F_{drift}\)</span> is then read on the set the base was built from (all 625 hybrids of the pool), the accumulated drift is reported as none while the pool erodes underneath; read on a selected subset against a base built from the whole pool, it would report the displacement of that subset from the pool and not zero, and still not the drift from the founders.</p>
+<p>The demonstration is a neutral arm: the same founders, equal usage for every line, no selection, five founder draws (seeds 1 to 5, the founders of the trajectories below), fifteen generations. At each generation <span class="math inline">\(F_{drift}\)</span> is read on all 625 hybrids twice, against the frozen founding <span class="math inline">\(p_0\)</span> and against a base rebuilt from the generation itself:</p>
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="fu">simulate_pools</span>(<span class="at">n_A =</span> <span class="dv">25</span>, <span class="at">n_B =</span> <span class="dv">25</span>, <span class="at">m =</span> <span class="dv">2000</span>, <span class="at">seed =</span> <span class="dv">1</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>p0  <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(sim<span class="sc">$</span>X)                       <span class="co"># the founding base, frozen here</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>GL5 <span class="ot">&lt;-</span> sim<span class="sc">$</span>GL</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">7</span>)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>) {                              <span class="co"># five generations of drift</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  GL5 <span class="ot">&lt;-</span> <span class="fu">rbind</span>(<span class="fu">next_pool</span>(GL5[<span class="dv">1</span><span class="sc">:</span><span class="dv">25</span>, ], <span class="fu">rep</span>(<span class="dv">1</span>, <span class="dv">25</span>), <span class="dv">25</span>),</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>               <span class="fu">next_pool</span>(GL5[<span class="dv">26</span><span class="sc">:</span><span class="dv">50</span>, ], <span class="fu">rep</span>(<span class="dv">1</span>, <span class="dv">25</span>), <span class="dv">25</span>))</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>ped5 <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">a =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">25</span>, <span class="at">b =</span> <span class="dv">25</span> <span class="sc">+</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">25</span>)</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>X5   <span class="ot">&lt;-</span> (GL5[ped5<span class="sc">$</span>a, ] <span class="sc">+</span> GL5[ped5<span class="sc">$</span>b, ]) <span class="sc">/</span> <span class="dv">2</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>drift <span class="ot">&lt;-</span> <span class="cf">function</span>(X, base) {</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(X); k <span class="ot">&lt;-</span> base <span class="sc">&gt;</span> <span class="fl">1e-6</span> <span class="sc">&amp;</span> base <span class="sc">&lt;</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fl">1e-6</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>((p[k] <span class="sc">-</span> base[k])<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> (base[k] <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> base[k])))</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">frozen_p0   =</span> <span class="fu">drift</span>(X5, p0),</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">reanchored  =</span> <span class="fu">drift</span>(X5, <span class="fu">colMeans</span>(X5)))</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  frozen_p0 reanchored </span></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 0.08693168 0.00000000</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>ped_n <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">a =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">25</span>, <span class="at">b =</span> <span class="dv">25</span> <span class="sc">+</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">25</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>drift_at <span class="ot">&lt;-</span> <span class="cf">function</span>(X, base)       <span class="co"># F_drift of every row of X against `base`</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">freq_metrics</span>(<span class="fu">seq_len</span>(<span class="fu">nrow</span>(X)), <span class="fu">list</span>(<span class="at">X =</span> X, <span class="at">p0 =</span> base,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>                                      <span class="at">maf_pop =</span> <span class="fu">pmin</span>(base, <span class="dv">1</span> <span class="sc">-</span> base)))[[<span class="st">"F_drift"</span>]]</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>neutral_arm <span class="ot">&lt;-</span> <span class="cf">function</span>(s, <span class="at">n_gen =</span> <span class="dv">15</span>) {</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  sim <span class="ot">&lt;-</span> <span class="fu">simulate_pools</span>(<span class="at">n_A =</span> <span class="dv">25</span>, <span class="at">n_B =</span> <span class="dv">25</span>, <span class="at">m =</span> <span class="dv">2000</span>, <span class="at">seed =</span> s)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  p0  <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(sim<span class="sc">$</span>X)                       <span class="co"># the founding base, frozen here</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  GL  <span class="ot">&lt;-</span> sim<span class="sc">$</span>GL</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(s <span class="sc">+</span> <span class="dv">6</span>)                              <span class="co"># seed 7 for founder draw 1</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  out <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, n_gen, <span class="dv">2</span>, <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="cn">NULL</span>, <span class="fu">c</span>(<span class="st">"frozen"</span>, <span class="st">"reanchored"</span>)))</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (t <span class="cf">in</span> <span class="fu">seq_len</span>(n_gen)) {</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    GL <span class="ot">&lt;-</span> <span class="fu">rbind</span>(<span class="fu">next_pool</span>(GL[<span class="dv">1</span><span class="sc">:</span><span class="dv">25</span>, ], <span class="fu">rep</span>(<span class="dv">1</span>, <span class="dv">25</span>), <span class="dv">25</span>),</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>                <span class="fu">next_pool</span>(GL[<span class="dv">26</span><span class="sc">:</span><span class="dv">50</span>, ], <span class="fu">rep</span>(<span class="dv">1</span>, <span class="dv">25</span>), <span class="dv">25</span>))</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    X  <span class="ot">&lt;-</span> (GL[ped_n<span class="sc">$</span>a, ] <span class="sc">+</span> GL[ped_n<span class="sc">$</span>b, ]) <span class="sc">/</span> <span class="dv">2</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    out[t, ] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">drift_at</span>(X, p0), <span class="fu">drift_at</span>(X, <span class="fu">colMeans</span>(X)))</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  out</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>neu <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, neutral_arm)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co"># an identity, not a finding: a population is not drifted from itself</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">all</span>(<span class="fu">vapply</span>(neu, <span class="cf">function</span>(x) <span class="fu">all</span>(x[, <span class="st">"reanchored"</span>] <span class="sc">==</span> <span class="dv">0</span>), <span class="fu">logical</span>(<span class="dv">1</span>))))</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">data.frame</span>(</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">base =</span> <span class="fu">c</span>(<span class="st">"frozen $p_0$"</span>, <span class="st">"base rebuilt from the 625 hybrids"</span>),</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">F_drift =</span> <span class="fu">c</span>(neu[[<span class="dv">1</span>]][<span class="dv">5</span>, <span class="st">"frozen"</span>], neu[[<span class="dv">1</span>]][<span class="dv">5</span>, <span class="st">"reanchored"</span>])),</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">digits =</span> <span class="dv">4</span>, <span class="at">row.names =</span> <span class="cn">FALSE</span>, <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"base of $F_{drift}$"</span>, <span class="st">"$F_{drift}$, draw 1, generation 5"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">base of <span class="math inline">\(F_{drift}\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(F_{drift}\)</span>, draw 1, generation 5</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">frozen <span class="math inline">\(p_0\)</span></td>
+<td style="text-align: right;">0.0869</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">base rebuilt from the 625 hybrids</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+</tbody>
+</table>
 </div>
-<p>The second number is zero by construction: a population is never drifted from itself. Five generations of real drift have been reported as none.</p>
-<div class="callout callout-style-simple callout-important callout-titled">
+</div>
+<p>The first row is founder draw 1 after five generations of drift without selection, read against the frozen <span class="math inline">\(p_0\)</span>. The second is exactly zero, in all five founder draws and all fifteen generations (the chunk asserts it). That is an identity and not a property of <code>build_ctx()</code>: a base rebuilt from the set being measured makes <span class="math inline">\(F_{drift}\)</span> zero whatever has happened to the set, here the pool of 625 hybrids and in <a href="05-genomic-era.html#sec-era-step1" class="quarto-xref"><span>Section 10.7.1</span></a> the selected hybrids. Five generations of real drift would be reported as exactly none.</p>
+<div class="callout callout-style-simple callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Important</span>This is the most common way to get a multi-cycle report wrong
+<span class="screen-reader-only">Warning</span>This is the commonest way to get a multi-cycle report wrong
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><a href="05-genomic-era.html" class="quarto-xref"><span>Chapter 10</span></a> named it as the single most frequent error in applying <code>F_hom</code> and <code>F_drift</code>, and <a href="12-case-study.html" class="quarto-xref"><span>Chapter 25</span></a> repeats it in the operational checklist. <code>run_cycles()</code> therefore takes <code>p0</code> once and overwrites it on every rebuilt context. It is one assignment, and every drift number in this chapter depends on it.</p>
+<p><a href="05-genomic-era.html" class="quarto-xref"><span>Chapter 10</span></a> names it the commonest error in plant applications (assumption A6 and Step 1 of its protocol), and <a href="12-case-study.html" class="quarto-xref"><span>Chapter 25</span></a> repeats it in the operational checklist. <code>cycle_ctx()</code> in <code>run_cycles()</code> therefore takes <code>p0</code> once and overwrites both <code>ctx$p0</code> and <code>ctx$maf_pop</code> on every rebuilt context, and every <span class="math inline">\(F_{drift}\)</span> number in this chapter depends on it.</p>
 </div>
 </div>
 </section>
-<section id="the-trajectory" class="level2" data-number="23.3">
-<h2 data-number="23.3" class="anchored" data-anchor-id="the-trajectory"><span class="header-section-number">23.3</span> The trajectory</h2>
-<p>Three budgets, fifteen cycles, five seeds each. <code>alpha_max = Inf</code> is the unconstrained programme: it takes the best hybrids it can find and accepts whatever that costs.</p>
+<section id="sec-cycles-trajectory" class="level2" data-number="23.3">
+<h2 data-number="23.3" class="anchored" data-anchor-id="sec-cycles-trajectory"><span class="header-section-number">23.3</span> The trajectory</h2>
+<p>Three budgets, fifteen cycles, five founder draws (seeds 1 to 5) each. <span class="math inline">\(\alpha_{\max} = \infty\)</span> is the unconstrained programme: it takes the best hybrids it can find and accepts whatever that costs. For a given seed the three arms start from the same founders, so every contrast below is paired by seed. The mean of the five paired differences is given with its standard error (s.e.: the standard deviation of the five differences over <span class="math inline">\(\sqrt 5\)</span>) and the number of seeds in which the difference is positive. Five founder draws is a small number: the standard errors are themselves imprecise and no test is made. Every comparison in this chapter is exploratory: the cycles tabulated (3, 5, 8, 10, 12, 15), the cycle from which all five seeds are ahead and the contrasts of the horizon table were chosen or read after the trajectories were seen, no multiplicity correction is applied (the horizon table alone has 18 cells), and the standard errors and seed counts are descriptive, not evidence at a stated error rate. <a href="#fig-cycles-gain" class="quarto-xref">Figure&nbsp;<span>23.2</span></a> and <a href="#tbl-cycles-gain" class="quarto-xref">Table&nbsp;<span>23.1</span></a> give the trajectory of the mean index. The five <code>cycles_*.csv</code> files and the two figures of this chapter are produced in this repository by <code>book/scripts/regenerate.R cycles</code>; they are not cached from an external study (unlike the headline sweeps of <a href="04e-mating-design.html" class="quarto-xref"><span>Chapter 18</span></a>).</p>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="figs/cycles_gain.png" class="img-fluid figure-img" alt="Mean index of the selected hybrids, in founding-cycle standard deviations, averaged over five seeds" width="336"></p>
-<figcaption>Mean index of the selected hybrids, in founding-cycle standard deviations, averaged over five seeds. The unconstrained programme leads for eight cycles and then stops climbing. Neither constrained programme has stopped by cycle 15.</figcaption>
+<div id="fig-cycles-gain" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" alt="Line chart with markers. Horizontal axis: cycle, 0 to 15. Vertical axis: mean index of the selected hybrids in founding standard deviations, about 1 to 12. Three rising curves: unconstrained (red) starts highest, leads to about cycle 7, then flattens near 9.5; the 0.02 budget (blue) overtakes it near cycle 8 and ends near 12; the 0.005 budget (green) stays lowest until about cycle 11 and ends near 11.">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-cycles-gain-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figs/cycles_gain.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Line chart with markers. Horizontal axis: cycle, 0 to 15. Vertical axis: mean index of the selected hybrids in founding standard deviations, about 1 to 12. Three rising curves: unconstrained (red) starts highest, leads to about cycle 7, then flattens near 9.5; the 0.02 budget (blue) overtakes it near cycle 8 and ends near 12; the 0.005 budget (green) stays lowest until about cycle 11 and ends near 11." width="336">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-cycles-gain-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;23.2: Mean index of the 60 selected hybrids, in founding-cycle standard deviations, by cycle, for three diversity budgets <span class="math inline">\(\alpha_{\max}\)</span> (red: unconstrained; blue: 0.02; green: 0.005). Mean over five founder draws, 25 + 25 lines and 2000 markers; dots mark the cycles. No dispersion is drawn (paired contrasts with their standard errors are in <a href="#tbl-cycles-horizon" class="quarto-xref">Table&nbsp;<span>23.5</span></a>). The unconstrained programme has the highest mean through cycle 7 and its curve flattens afterwards; the two constrained curves are still rising at cycle 15.
+</figcaption>
 </figure>
 </div>
 </div>
 </div>
 <div class="cell" data-layout-align="center">
+<div id="tbl-cycles-gain" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-cycles-gain-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;23.1: Cumulative gain (mean index of the selected hybrids, in founding-cycle standard deviations) by diversity budget <span class="math inline">\(\alpha_{\max}\)</span>, mean over five founder draws.
+</figcaption>
+<div aria-describedby="tbl-cycles-gain-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<table class="caption-top table table-sm table-striped small">
-<caption>Cumulative gain by budget. The columns cross between cycle 5 and cycle 12.</caption>
+<table class="cell caption-top table table-sm table-striped small">
 <thead>
 <tr class="header">
 <th style="text-align: right;">cycle</th>
-<th style="text-align: right;">alpha &lt;= 0.005</th>
-<th style="text-align: right;">alpha &lt;= 0.02</th>
+<th style="text-align: right;"><span class="math inline">\(\alpha_{\max} = 0.005\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(\alpha_{\max} = 0.02\)</span></th>
 <th style="text-align: right;">unconstrained</th>
 </tr>
 </thead>
@@ -830,122 +880,335 @@ window.Quarto = {
 </table>
 </div>
 </div>
-<p>The unconstrained run wins the first eight cycles and loses every cycle after that. By cycle 15 the <span class="math inline">\(\alpha \le 0.02\)</span> programme is 2.33 standard deviations ahead – 24% more gain, from a programme that gave up 17% of its gain in year one.</p>
-<p>The mechanism is visible in the diversity panel:</p>
+</figure>
+</div>
+</div>
+<p>The seed-mean index of the unconstrained programme is the highest through cycle 7 and below that of the <span class="math inline">\(\alpha_{\max} = 0.02\)</span> programme from cycle 8 on. At cycle 8 the paired difference is +0.02 (s.e. 0.37; positive in 3 of 5 seeds), so the mean crossing is not resolved by five seeds; by cycle 15 it is +2.33 (s.e. 0.32; positive in 5 of 5 seeds), which is 24% more gain, from a programme whose cycle-0 index was 17% below the unconstrained one (paired difference at cycle 0, -0.29 (s.e. 0.06; positive in 0 of 5 seeds)).</p>
+<p><a href="#fig-cycles-diversity" class="quarto-xref">Figure&nbsp;<span>23.3</span></a> shows the diversity side. The left panel is <span class="math inline">\(GD_T\)</span> of the selection (the <code>GD</code> column of the CSV, which equals <span class="math inline">\(GD_T\)</span> to <span class="math inline">\(10^{-15}\)</span>; it is not within-pool diversity), and the right panel is <span class="math inline">\(F_{drift}\)</span> of the selected hybrids against the frozen <span class="math inline">\(p_0\)</span>.</p>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="figs/cycles_diversity.png" class="img-fluid figure-img" alt="Left: gene diversity of the selection" width="336"></p>
-<figcaption>Left: gene diversity of the selection. Right: F_drift against the frozen founding base. The unconstrained programme spends nearly its whole diversity endowment by cycle 8 and has little left to convert afterwards.</figcaption>
+<div id="fig-cycles-diversity" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" alt="Two panels, horizontal axis cycle 0 to 15. Left: gene diversity of the selection falls in all three budgets, from about 0.32 at cycle 0 to about 0.18 unconstrained (red), 0.21 for the 0.02 budget (blue) and 0.25 for the 0.005 budget (green). Right: F_drift against the frozen base rises in all three, fastest and highest unconstrained (about 0.46 at cycle 15), then 0.02 (about 0.43), then 0.005 (about 0.34).">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-cycles-diversity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figs/cycles_diversity.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Two panels, horizontal axis cycle 0 to 15. Left: gene diversity of the selection falls in all three budgets, from about 0.32 at cycle 0 to about 0.18 unconstrained (red), 0.21 for the 0.02 budget (blue) and 0.25 for the 0.005 budget (green). Right: F_drift against the frozen base rises in all three, fastest and highest unconstrained (about 0.46 at cycle 15), then 0.02 (about 0.43), then 0.005 (about 0.34)." width="336">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-cycles-diversity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;23.3: Left: total gene diversity <span class="math inline">\(GD_T\)</span> of the 60 selected hybrids (the <code>GD</code> column; within-pool diversity is in <a href="#tbl-cycles-partition" class="quarto-xref">Table&nbsp;<span>23.8</span></a>). Right: <span class="math inline">\(F_{drift}\)</span> of the selected hybrids against the frozen founding base <span class="math inline">\(p_0\)</span>. Colours as in <a href="#fig-cycles-gain" class="quarto-xref">Figure&nbsp;<span>23.2</span></a>; legend: <span class="math inline">\(\alpha_{\max}\)</span>. Mean over five founder draws, by cycle, 25 + 25 lines and 2000 markers; no dispersion drawn.
+</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p>The unconstrained programme is not out-selected. It is out of material. Its <span class="math inline">\(F_{\text{drift}}\)</span> reaches 0.41 by cycle 8 and only 0.457 by cycle 15 – it has converted almost everything it had into gain, early, and then has nothing to convert.</p>
-<section id="it-is-not-an-artefact-of-the-cheap-selector" class="level3" data-number="23.3.1">
-<h3 data-number="23.3.1" class="anchored" data-anchor-id="it-is-not-an-artefact-of-the-cheap-selector"><span class="header-section-number">23.3.1</span> It is not an artefact of the cheap selector</h3>
-<p>The trajectories above use a greedy sweep, which is what makes fifteen cycles by five seeds by three budgets affordable. <a href="10-combinatorial-selection.html" class="quarto-xref"><span>Chapter 16</span></a>’s differential evolution finds slightly better plans per cycle. Re-running one seed with it:</p>
+<p>What was measured: the genic variance of the candidate pool of each cycle, on the index scale, falls from 1.06 at cycle 0 to 0.001 in the pool of cycle 15 in the unconstrained programme, against 0.08 for <span class="math inline">\(\alpha_{\max} = 0.02\)</span> and 0.22 for <span class="math inline">\(\alpha_{\max} = 0.005\)</span> (pool of cycle 15 in each); its <span class="math inline">\(F_{drift}\)</span> is 0.41 at cycle 8 and 0.457 at cycle 15, and its <span class="math inline">\(GD_T\)</span> falls from 0.316 to 0.181. The index gained in the last cycle (cycle 14 to 15) is 0.02 unconstrained, against 0.34 for <span class="math inline">\(\alpha_{\max} = 0.02\)</span> and 0.41 for <span class="math inline">\(\alpha_{\max} = 0.005\)</span>. The last-cycle gain is selected from the pool of cycle 14, so it is paired with the genic variance of that parental pool, which is 0.003 unconstrained, 0.1 for <span class="math inline">\(\alpha_{\max} = 0.02\)</span> and 0.26 for <span class="math inline">\(\alpha_{\max} = 0.005\)</span> (not the cycle-15 values above). Parental genic variance and last-cycle gain are ordered identically across the three arms (unconstrained, then <span class="math inline">\(\alpha_{\max} = 0.02\)</span>, then <span class="math inline">\(\alpha_{\max} = 0.005\)</span>, in increasing order of both).</p>
+<p>The same association can be read over the whole trajectory. For each run and each cycle <span class="math inline">\(t = 1, \dots, 15\)</span>, the gain is <span class="math inline">\(\bar u_{S_t} - \bar u_{S_{t-1}}\)</span>, with <span class="math inline">\(\bar u_{S_t}\)</span> the mean index of the 60 hybrids <span class="math inline">\(S_t\)</span> selected at cycle <span class="math inline">\(t\)</span>, and it is set against <code>var_genic</code> of the pool that cycle <span class="math inline">\(t-1\)</span> selected from (the pool whose selection produces the pool of cycle <span class="math inline">\(t\)</span>); there are <span class="math inline">\(3 \times 5 \times 15 = 225\)</span> such run-cycles. They are not independent: cycles within a run are serially dependent and the three arms of a seed share founders, so the independent unit is the founder draw (5), and the correlations below are given over run-cycles as descriptions and over founder draws as the quantity with a spread.</p>
+<p>What was measured. The Spearman correlation of gain with the genic variance of the parental pool is 0.83 over the 225 run-cycles, and within budget 0.98 (unconstrained), 0.82 (<span class="math inline">\(\alpha_{\max} = 0.02\)</span>) and 0.61 (<span class="math inline">\(\alpha_{\max} = 0.005\)</span>). Both quantities fall with the cycle number in every arm, so those correlations contain a common time trend; with the mean of each cycle removed from both (cycle as a factor, which leaves only the differences between runs and arms within a cycle) the correlation is 0.46, and 0.4 if the genic variance of the pool of cycle <span class="math inline">\(t\)</span> itself is used instead of that of cycle <span class="math inline">\(t-1\)</span>. On the seed means, the three arms are ordered by gain as they are by genic variance in 5 of the 14 cycles 2 to 15 (none of cycles 2 to 9, 5 of the 6 cycles 10 to 15). They are not on one curve at every cycle: at cycle 5 the <span class="math inline">\(\alpha_{\max} = 0.005\)</span> pool has the most genic variance (0.79, against 0.39 unconstrained) and gains less (0.63 against 0.76). At cycle 15 the orderings coincide: parental genic variance 0.003 / 0.1 / 0.26 and gain 0.02 / 0.34 / 0.41 (unconstrained / <span class="math inline">\(\alpha_{\max} = 0.02\)</span> / <span class="math inline">\(\alpha_{\max} = 0.005\)</span>; genic variance here is that of the parental pool of the last gain, the pool of cycle 14).</p>
+<p>The unit with a spread is the founder draw, not the run-cycle. With the cycle means removed within each draw the correlation is positive in all five draws (0.23 to 0.64), and a bootstrap over the five draws (2000 resamples of the draws with replacement, <code>set.seed(1)</code>, the cycle-removed correlation recomputed on each resample) gives a 95% percentile interval of 0.35 to 0.59; with five draws that interval is itself imprecise. The association is not spread evenly over the horizon. The cycle-removed correlation is 0.16 within cycles 2 to 6, 0.65 within cycles 7 to 11 and 0.84 within cycles 12 to 15 (three windows that together cover cycles 2 to 15, drawn after the data were seen). Within each arm, with the cycle means removed, it is 0.16 (<span class="math inline">\(\alpha_{\max} = 0.005\)</span>), 0.35 (<span class="math inline">\(\alpha_{\max} = 0.02\)</span>) and 0.51 (unconstrained), against 0.61, 0.82 and 0.98 above with the time trend left in.</p>
+<p>Inference, and what limits it. Within this simulation the per-cycle gain is associated with the genic variance of the pool it was selected from, with a within-cycle Spearman correlation of 0.46, positive in every founder draw and concentrated late in the horizon (weak in cycles 2 to 6, where the arm ordering of gain and of genic variance never coincides); the sign is the one expected from <a href="02b-response.html#sec-response-genic" class="quarto-xref"><span>Section 4.2</span></a> and fits the flattening of the unconstrained curve (“out of material” is that reading). The <span class="math inline">\(\alpha_{\max} = 0.02\)</span> parental pool of the last gain (cycle 14) has lost most of its genic variance (0.1 against 1.06 at cycle 0) and its last-cycle gain still exceeds the unconstrained one, but its genic variance is 34 times that of the unconstrained parental pool of cycle 14: that is the same ordering, not an exception to it. The departure at cycle 5 is compatible with a binding budget limiting how far selection can go in a pool of a given variance, which was not tested. This is an association, not a test of a mechanism: the within-cycle correlation is 0.46 over run-cycles, with the spread over the five founder draws given above. Genic variance is logged and gain is correlated with it, but no arm manipulates genic variance with the others held fixed: the budget changes the pool’s diversity, its drift and the usage of lines at once, genic variance is not the variance selection sees (the ratio of <code>var_g</code> to <code>var_genic</code> in C1), the gain of a run-cycle also contains the selection differential of cycle <span class="math inline">\(t\)</span>, and the correlations that do not remove the cycle carry a common time trend. A causal test would need an intervention (for instance resetting the genic variance of a pool at a fixed cycle), which was not run. <span class="citation" data-cites="wientjes2022">Wientjes et al. (<a href="99-references.html#ref-wientjes2022" role="doc-biblioref">2022</a>)</span> report, in 50-generation simulations of a livestock-type population, that genomic and pedigree selection lose more genetic variance and more segregating loci than phenotypic selection (abstract). That is a related process in a different system, not a demonstration of the mechanism here.</p>
+<section id="what-differential-evolution-does-on-the-same-context-and-what-it-cannot-show" class="level3" data-number="23.3.1">
+<h3 data-number="23.3.1" class="anchored" data-anchor-id="what-differential-evolution-does-on-the-same-context-and-what-it-cannot-show"><span class="header-section-number">23.3.1</span> What differential evolution does on the same context, and what it cannot show</h3>
+<p>The trajectories above use the greedy sweep of <code>sel_greedy_budget()</code>, which is what makes fifteen cycles by five seeds by three budgets affordable. The <code>selector</code> argument of <code>run_cycles()</code> lets any selector drive the loop, and the chunk below puts differential evolution (DE, <code>sel_de()</code>, <code>NP = 300</code>, <code>itermax = 1000</code>, a nominal <span class="math inline">\(3 \times 10^{5}\)</span> evaluations per cycle) on the trajectory of seed 1 (<a href="#tbl-cycles-de" class="quarto-xref">Table&nbsp;<span>23.2</span></a>). At each cycle the greedy sweep and truncation are evaluated on the <em>same</em> context as the DE plan, so that the comparison is plan against plan and not trajectory against trajectory. <a href="10b-advanced-selection.html" class="quarto-xref"><span>Chapter 17</span></a> states that its statements about the DE are statements about the budgets it runs, 30,000 evaluations in its benchmark, and not properties of the method; the budget here is ten times the benchmark’s. The chunk takes several minutes to run.</p>
 <div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>de_cmp <span class="ot">&lt;-</span> <span class="fu">local</span>({</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  seen <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  sel <span class="ot">&lt;-</span> <span class="cf">function</span>(ctx, n_sel, alpha_max, gd_ref, max_use) {</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    d  <span class="ot">&lt;-</span> <span class="fu">suppressWarnings</span>(<span class="fu">sel_de</span>(ctx, n_sel, alpha_max, gd_ref, <span class="at">NP =</span> <span class="dv">300</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">itermax =</span> <span class="dv">1000</span>, <span class="at">max_use =</span> max_use))</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    g  <span class="ot">&lt;-</span> <span class="fu">sel_greedy_budget</span>(ctx, n_sel, alpha_max, gd_ref, max_use)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    tr <span class="ot">&lt;-</span> <span class="fu">sel_truncation</span>(ctx, n_sel)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    al <span class="ot">&lt;-</span> <span class="cf">function</span>(s) (gd_ref <span class="sc">-</span> <span class="fu">gene_diversity</span>(s, ctx)) <span class="sc">/</span> gd_ref</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    seen[[<span class="fu">length</span>(seen) <span class="sc">+</span> <span class="dv">1</span>L]] <span class="ot">&lt;&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>      <span class="at">de =</span> <span class="fu">mean</span>(ctx<span class="sc">$</span>index[d]), <span class="at">greedy =</span> <span class="fu">mean</span>(ctx<span class="sc">$</span>index[g]),</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>      <span class="at">trunc =</span> <span class="fu">mean</span>(ctx<span class="sc">$</span>index[tr]), <span class="at">alpha_de =</span> <span class="fu">al</span>(d), <span class="at">alpha_greedy =</span> <span class="fu">al</span>(g))</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    d                                          <span class="co"># the DE plan drives the trajectory</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">c</span>(<span class="cn">Inf</span>, <span class="fl">0.02</span>), <span class="cf">function</span>(am) {</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    seen <span class="ot">&lt;&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    r <span class="ot">&lt;-</span> <span class="fu">run_cycles</span>(<span class="at">n_cycles =</span> <span class="dv">12</span>, <span class="at">alpha_max =</span> am, <span class="at">n_sel =</span> <span class="dv">60</span>, <span class="at">B_null =</span> <span class="dv">200</span>,</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>                    <span class="at">seed =</span> <span class="dv">1</span>, <span class="at">selector =</span> sel)</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    x <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, seen)</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    x<span class="sc">$</span>cycle  <span class="ot">&lt;-</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">12</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    x<span class="sc">$</span>budget <span class="ot">&lt;-</span> <span class="cf">if</span> (<span class="fu">is.finite</span>(am)) <span class="st">"0.020"</span> <span class="cf">else</span> <span class="st">"unconstrained"</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    x<span class="sc">$</span>traj   <span class="ot">&lt;-</span> r[[<span class="st">"index"</span>]]</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    x</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>  }))</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="co"># the DE arm of the cached file is this arm</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (b <span class="cf">in</span> <span class="fu">c</span>(<span class="st">"unconstrained"</span>, <span class="st">"0.020"</span>)) {</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>  cd <span class="ot">&lt;-</span> selc[selc<span class="sc">$</span>selector <span class="sc">==</span> <span class="st">"de"</span> <span class="sc">&amp;</span> selc<span class="sc">$</span>budget <span class="sc">==</span> b, ]</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stopifnot</span>(<span class="fu">isTRUE</span>(<span class="fu">all.equal</span>(de_cmp<span class="sc">$</span>traj[de_cmp<span class="sc">$</span>budget <span class="sc">==</span> b], cd<span class="sc">$</span>index[<span class="fu">order</span>(cd<span class="sc">$</span>cycle)])))</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>tol <span class="ot">&lt;-</span> <span class="fl">1e-8</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>u   <span class="ot">&lt;-</span> de_cmp[de_cmp<span class="sc">$</span>budget <span class="sc">==</span> <span class="st">"unconstrained"</span>, ]</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>a2  <span class="ot">&lt;-</span> de_cmp[de_cmp<span class="sc">$</span>budget <span class="sc">==</span> <span class="st">"0.020"</span>, ]</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>d2  <span class="ot">&lt;-</span> a2<span class="sc">$</span>de <span class="sc">-</span> a2<span class="sc">$</span>greedy</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>n_up <span class="ot">&lt;-</span> <span class="fu">sum</span>(d2 <span class="sc">&gt;</span> tol); n_dn <span class="ot">&lt;-</span> <span class="fu">sum</span>(d2 <span class="sc">&lt;</span> <span class="sc">-</span>tol); n_eq <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">abs</span>(d2) <span class="sc">&lt;=</span> tol)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div class="cell" data-layout-align="center">
+<div id="tbl-cycles-de" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-cycles-de-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;23.2: Seed 1, <span class="math inline">\(\alpha_{\max} = 0.02\)</span>, cycles 0 to 12: index of the DE plan, of the greedy-sweep plan and of truncation (founding-cycle standard deviations), each evaluated on the context the DE trajectory reaches at that cycle; the difference DE minus greedy; and the realised <span class="math inline">\(\alpha\)</span> of the DE and the greedy plans (dimensionless).
+</figcaption>
+<div aria-describedby="tbl-cycles-de-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<table class="caption-top table table-sm table-striped small">
-<caption>Seed 1, greedy against differential evolution. The crossover survives, and is wider under DE.</caption>
+<table class="cell caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 8%">
+<col style="width: 9%">
+<col style="width: 9%">
+<col style="width: 14%">
+<col style="width: 21%">
+<col style="width: 16%">
+<col style="width: 21%">
+</colgroup>
 <thead>
 <tr class="header">
 <th style="text-align: right;">cycle</th>
-<th style="text-align: right;">0.020 de</th>
-<th style="text-align: right;">0.020 greedy</th>
-<th style="text-align: right;">unconstrained de</th>
-<th style="text-align: right;">unconstrained greedy</th>
+<th style="text-align: right;">DE</th>
+<th style="text-align: right;">greedy</th>
+<th style="text-align: right;">truncation</th>
+<th style="text-align: right;">DE minus greedy</th>
+<th style="text-align: right;"><span class="math inline">\(\alpha\)</span> DE</th>
+<th style="text-align: right;"><span class="math inline">\(\alpha\)</span> greedy</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">1.39</td>
-<td style="text-align: right;">1.37</td>
-<td style="text-align: right;">1.53</td>
-<td style="text-align: right;">1.53</td>
+<td style="text-align: right;">1.389</td>
+<td style="text-align: right;">1.375</td>
+<td style="text-align: right;">1.532</td>
+<td style="text-align: right;">0.014</td>
+<td style="text-align: right;">0.020</td>
+<td style="text-align: right;">0.018</td>
 </tr>
 <tr class="even">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2.610</td>
+<td style="text-align: right;">2.582</td>
+<td style="text-align: right;">2.961</td>
+<td style="text-align: right;">0.028</td>
+<td style="text-align: right;">0.020</td>
+<td style="text-align: right;">0.013</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">3.597</td>
+<td style="text-align: right;">3.536</td>
+<td style="text-align: right;">4.253</td>
+<td style="text-align: right;">0.062</td>
+<td style="text-align: right;">0.020</td>
+<td style="text-align: right;">0.007</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">4.577</td>
+<td style="text-align: right;">4.659</td>
+<td style="text-align: right;">5.021</td>
+<td style="text-align: right;">-0.082</td>
+<td style="text-align: right;">0.020</td>
+<td style="text-align: right;">0.015</td>
+</tr>
+<tr class="odd">
 <td style="text-align: right;">4</td>
-<td style="text-align: right;">5.53</td>
-<td style="text-align: right;">5.98</td>
-<td style="text-align: right;">5.22</td>
-<td style="text-align: right;">6.60</td>
+<td style="text-align: right;">5.528</td>
+<td style="text-align: right;">5.579</td>
+<td style="text-align: right;">5.919</td>
+<td style="text-align: right;">-0.051</td>
+<td style="text-align: right;">0.020</td>
+<td style="text-align: right;">0.015</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">6.352</td>
+<td style="text-align: right;">6.319</td>
+<td style="text-align: right;">6.456</td>
+<td style="text-align: right;">0.033</td>
+<td style="text-align: right;">0.020</td>
+<td style="text-align: right;">0.013</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">7.113</td>
+<td style="text-align: right;">7.162</td>
+<td style="text-align: right;">7.210</td>
+<td style="text-align: right;">-0.049</td>
+<td style="text-align: right;">0.018</td>
+<td style="text-align: right;">0.020</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">7.890</td>
+<td style="text-align: right;">7.938</td>
+<td style="text-align: right;">7.970</td>
+<td style="text-align: right;">-0.048</td>
+<td style="text-align: right;">0.020</td>
+<td style="text-align: right;">0.020</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">8</td>
-<td style="text-align: right;">8.44</td>
-<td style="text-align: right;">9.56</td>
-<td style="text-align: right;">7.40</td>
-<td style="text-align: right;">9.08</td>
+<td style="text-align: right;">8.443</td>
+<td style="text-align: right;">8.471</td>
+<td style="text-align: right;">8.527</td>
+<td style="text-align: right;">-0.028</td>
+<td style="text-align: right;">0.019</td>
+<td style="text-align: right;">0.019</td>
 </tr>
 <tr class="even">
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">8.986</td>
+<td style="text-align: right;">9.001</td>
+<td style="text-align: right;">9.105</td>
+<td style="text-align: right;">-0.015</td>
+<td style="text-align: right;">0.019</td>
+<td style="text-align: right;">0.018</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">9.535</td>
+<td style="text-align: right;">9.579</td>
+<td style="text-align: right;">9.693</td>
+<td style="text-align: right;">-0.044</td>
+<td style="text-align: right;">0.020</td>
+<td style="text-align: right;">0.018</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">10.015</td>
+<td style="text-align: right;">10.037</td>
+<td style="text-align: right;">10.147</td>
+<td style="text-align: right;">-0.022</td>
+<td style="text-align: right;">0.020</td>
+<td style="text-align: right;">0.019</td>
+</tr>
+<tr class="odd">
 <td style="text-align: right;">12</td>
-<td style="text-align: right;">10.47</td>
-<td style="text-align: right;">11.73</td>
-<td style="text-align: right;">7.99</td>
-<td style="text-align: right;">9.84</td>
+<td style="text-align: right;">10.467</td>
+<td style="text-align: right;">10.467</td>
+<td style="text-align: right;">10.467</td>
+<td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.017</td>
+<td style="text-align: right;">0.017</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-<p>The crossover reproduces. Under DE the constrained programme is ahead by 2.48 at cycle 12, against 1.89 under greedy. The cheap selector understates the case rather than manufacturing it.</p>
-<p>There is a second thing in that table worth not glossing over: DE reaches a <em>lower</em> absolute index than greedy by cycle 12 in both columns, despite finding a better plan in every individual cycle. It uses more of the budget each time – <span class="math inline">\(\alpha = 0.0200\)</span> against greedy’s <span class="math inline">\(0.0177\)</span> at cycle 0 – and spends the difference out of the next cycle’s inheritance. <strong>Per-cycle optimality is not multi-cycle optimality.</strong> This is one seed and should be read as a flag rather than a result, but it is the same trade the whole chapter is about, one level up.</p>
-</section>
-</section>
-<section id="the-rate-of-inbreeding-and-what-n_s-is-not" class="level2" data-number="23.4">
-<h2 data-number="23.4" class="anchored" data-anchor-id="the-rate-of-inbreeding-and-what-n_s-is-not"><span class="header-section-number">23.4</span> The rate of inbreeding, and what <span class="math inline">\(N_s\)</span> is not</h2>
-<p><a href="12-case-study.html" class="quarto-xref"><span>Chapter 25</span></a>’s checklist says to regress <span class="math inline">\(\log(1 - F)\)</span> on cycle and check that it is linear, because curvature means a non-constant rate. Doing it:</p>
+</figure>
+</div>
+</div>
+<p>Result. With no budget, the DE plan, the greedy plan and truncation have the same index in 13 of 13 cycles (largest difference 0). At <span class="math inline">\(\alpha_{\max} = 0.02\)</span> the DE plan has a higher index than the greedy plan in 4 of 13 cycles, a lower one in 8 and the same in 1; the differences run from -0.082 to 0.062 index units. Inference, and what limits it: truncation is the exact optimum without a budget, so no selector can improve on it there; under the budget this run gives no evidence that DE finds better per-cycle plans than the greedy sweep, at this evaluation budget, on this one seed. It says nothing about the DE at other budgets of evaluations or on other seeds.</p>
+<p>Two <em>trajectories</em> of one seed cannot be compared for a selector effect. The unconstrained DE arm and the unconstrained greedy arm select the same plan in each cycle (truncation) yet differ in index at cycle 12 by 1.86 (at cycle 1, by 0.6). The only difference between the arms is the random stream: <code>run_cycles()</code> seeds the stream once per cycle before the selector, the DE draws from it and truncation does not, so the recycling draws that follow differ. The next chunk measures the size of that effect directly: the same unconstrained rule, truncation, with one uniform draw added to the selector so that the stream shifts, on the five founder draws of the trajectories.</p>
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>rate <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">unique</span>(traj<span class="sc">$</span>budget), <span class="cf">function</span>(b) {</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  d <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(F_drift <span class="sc">~</span> cycle, traj[traj<span class="sc">$</span>budget <span class="sc">==</span> b, ], mean)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  f <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="fu">log</span>(<span class="dv">1</span> <span class="sc">-</span> F_drift) <span class="sc">~</span> cycle, d[<span class="sc">-</span><span class="dv">1</span>, ])</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">budget =</span> b, <span class="at">dF_per_cycle =</span> <span class="sc">-</span><span class="fu">coef</span>(f)[[<span class="st">"cycle"</span>]],</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>             <span class="at">Ne =</span> <span class="dv">1</span> <span class="sc">/</span> (<span class="sc">-</span><span class="dv">2</span> <span class="sc">*</span> <span class="fu">coef</span>(f)[[<span class="st">"cycle"</span>]]), <span class="at">R2 =</span> <span class="fu">summary</span>(f)<span class="sc">$</span>r.squared)</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>}))</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(rate, <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>stream <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="cf">function</span>(s)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">run_cycles</span>(<span class="at">n_cycles =</span> <span class="dv">15</span>, <span class="at">alpha_max =</span> <span class="cn">Inf</span>, <span class="at">n_sel =</span> <span class="dv">60</span>, <span class="at">B_null =</span> <span class="dv">200</span>, <span class="at">seed =</span> s,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">selector =</span> <span class="cf">function</span>(ctx, n_sel, alpha_max, gd_ref, max_use) {</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>               <span class="fu">runif</span>(<span class="dv">1</span>)                        <span class="co"># shifts the stream, selects nothing</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>               <span class="fu">sel_truncation</span>(ctx, n_sel)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>             })[[<span class="st">"index"</span>]])</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>plain <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="cf">function</span>(s) {</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  d <span class="ot">&lt;-</span> traj[traj<span class="sc">$</span>budget <span class="sc">==</span> <span class="st">"unconstrained"</span> <span class="sc">&amp;</span> traj<span class="sc">$</span>seed <span class="sc">==</span> s, ]</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  d<span class="sc">$</span>index[<span class="fu">order</span>(d<span class="sc">$</span>cycle)]</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">isTRUE</span>(<span class="fu">all.equal</span>(stream[<span class="dv">1</span>, ], plain[<span class="dv">1</span>, ])))   <span class="co"># cycle 0 does not use the stream</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>shift <span class="ot">&lt;-</span> stream <span class="sc">-</span> plain                                   <span class="co"># rows: cycles 0 to 15</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
+</div>
+<p>Result. With the same rule and one extra uniform draw per cycle, the index at cycle 12 moves by 0.77 on average over the five founder draws (largest 1.89) and at cycle 15 by 1.02 (largest 2.26); at cycle 1 by 0.2. For comparison, the standard error of the paired contrast of <span class="math inline">\(\alpha_{\max} = 0.02\)</span> against the unconstrained programme over five seeds is 0.34 at cycle 12. Inference, and what limits it: a trajectory contrast between two arms of one seed that differ in the random stream is of the size of the effects discussed here, so the one-seed DE and greedy <em>trajectories</em> say nothing about the crossover under DE, and <a href="#tbl-cycles-de" class="quarto-xref">Table&nbsp;<span>23.2</span></a> is the only DE result of this chapter. A paired design in which the selector arms share the recycling stream would settle the trajectory question; it needs the stream to be reset after the selector in <code>run_cycles()</code>, which was not changed for this chapter, so it was not run. A mechanism in which a better per-cycle optimiser spends budget that a later cycle needs is a hypothesis; nothing here tests it.</p>
+</section>
+</section>
+<section id="sec-cycles-rate" class="level2" data-number="23.4">
+<h2 data-number="23.4" class="anchored" data-anchor-id="sec-cycles-rate"><span class="header-section-number">23.4</span> The rate of inbreeding, and what <span class="math inline">\(N_s\)</span> is not</h2>
+<p><a href="12-case-study.html" class="quarto-xref"><span>Chapter 25</span></a>’s checklist says to regress <span class="math inline">\(\log(1 - F)\)</span> on cycle and check that it is linear, because curvature means a non-constant rate. <a href="05-genomic-era.html#sec-era-step4" class="quarto-xref"><span>Section 10.7.4</span></a> gives the call: <span class="math inline">\(\Delta F = 1 - e^{\text{slope}}\)</span> on cycles <span class="math inline">\(1..t\)</span>, because <span class="math inline">\(1 - F_t = (1 - \Delta F)^t (1 - F_0)\)</span> makes the slope <span class="math inline">\(\log(1 - \Delta F)\)</span>, and reads <span class="math inline">\(R^2\)</span> as the check. Cycle 0 is dropped: the <span class="math inline">\(F_{drift}\)</span> of the selected hybrids at cycle 0 is the displacement of the selection from the base before any recycling, not a generation of drift. <span class="math inline">\(F_{drift}\)</span> is that of the selected hybrids on merged hybrid frequencies, which is a different level from the drift of one pool in <a href="00-hybrid-programme.html#eq-hp-drift" class="quarto-xref">Equation&nbsp;<span>1.4</span></a> (<a href="00-hybrid-programme.html#sec-hp-inbreeding" class="quarto-xref"><span>Section 1.2.4</span></a> says the two are not read against each other). The fit is applied to the seed-mean series, with the neutral arm of <a href="#sec-cycles-freezing" class="quarto-xref"><span>Section 23.2</span></a> (equal usage, no selection, all 625 hybrids, the same five founder draws) as the reference on the same estimator (<a href="#tbl-cycles-rate" class="quarto-xref">Table&nbsp;<span>23.3</span></a>):</p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fit_rate <span class="ot">&lt;-</span> <span class="cf">function</span>(Fv) {                 <span class="co"># Fv: seed-mean F_drift at cycles 1 to 15</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  k <span class="ot">&lt;-</span> <span class="fu">seq_along</span>(Fv); f <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="fu">log</span>(<span class="dv">1</span> <span class="sc">-</span> Fv) <span class="sc">~</span> k)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="at">dF =</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="fu">coef</span>(f)[[<span class="st">"k"</span>]]), <span class="at">R2 =</span> <span class="fu">summary</span>(f)<span class="sc">$</span>r.squared, <span class="at">F15 =</span> Fv[<span class="fu">length</span>(Fv)])</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>Fb <span class="ot">&lt;-</span> <span class="cf">function</span>(b) { d <span class="ot">&lt;-</span> ag[ag<span class="sc">$</span>budget <span class="sc">==</span> b <span class="sc">&amp;</span> ag<span class="sc">$</span>cycle <span class="sc">&gt;=</span> <span class="dv">1</span>, ]; d<span class="sc">$</span>F_drift[<span class="fu">order</span>(d<span class="sc">$</span>cycle)] }</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>F_neu <span class="ot">&lt;-</span> <span class="fu">Reduce</span>(<span class="st">`</span><span class="at">+</span><span class="st">`</span>, <span class="fu">lapply</span>(neu, <span class="cf">function</span>(x) x[, <span class="st">"frozen"</span>])) <span class="sc">/</span> <span class="fu">length</span>(neu)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>rate <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">neutral =</span> <span class="fu">fit_rate</span>(F_neu),</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">t</span>(<span class="fu">sapply</span>(<span class="fu">c</span>(<span class="at">unconstrained =</span> <span class="st">"unconstrained"</span>, <span class="st">`</span><span class="at">alpha_max 0.02</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"0.020"</span>,</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>             <span class="st">`</span><span class="at">alpha_max 0.005</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"0.005"</span>), <span class="cf">function</span>(b)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">fit_rate</span>(<span class="fu">Fb</span>(b)))))</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>rate <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">arm =</span> <span class="fu">rownames</span>(rate), rate, <span class="at">ratio_to_neutral =</span> rate[, <span class="st">"dF"</span>] <span class="sc">/</span> rate[<span class="st">"neutral"</span>, <span class="st">"dF"</span>],</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>                   <span class="at">row.names =</span> <span class="cn">NULL</span>)</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>rate_show <span class="ot">&lt;-</span> rate     <span class="co"># display copy: `rate$arm` keeps the keys the prose below reads</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>rate_show<span class="sc">$</span>arm <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"neutral (no selection)"</span>, <span class="st">"unconstrained"</span>,</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>                   <span class="st">"$</span><span class="sc">\\</span><span class="st">alpha_{</span><span class="sc">\\</span><span class="st">max} = 0.02$"</span>, <span class="st">"$</span><span class="sc">\\</span><span class="st">alpha_{</span><span class="sc">\\</span><span class="st">max} = 0.005$"</span>)</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(rate_show, <span class="at">digits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">4</span>, <span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">2</span>), <span class="at">row.names =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"arm"</span>, <span class="st">"$</span><span class="sc">\\</span><span class="st">Delta F$ per cycle"</span>, <span class="st">"$R^2$"</span>, <span class="st">"$F_{drift}$ at cycle 15"</span>, <span class="st">"$</span><span class="sc">\\</span><span class="st">Delta F$ / neutral $</span><span class="sc">\\</span><span class="st">Delta F$"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div id="tbl-cycles-rate" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-cycles-rate-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;23.3: Fitted rate <span class="math inline">\(\Delta F = 1 - e^{\text{slope}}\)</span> of <span class="math inline">\(\log(1 - F_{drift})\)</span> on cycles 1 to 15 (per cycle), seed-mean series over five founder draws, with the <span class="math inline">\(R^2\)</span> of the fit, <span class="math inline">\(F_{drift}\)</span> at cycle 15 and the ratio of the fitted rate to that of the neutral arm.
+</figcaption>
+<div aria-describedby="tbl-cycles-rate-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<div class="kable-table">
-<table class="caption-top table table-sm table-striped small">
+<table class="cell caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 22%">
+<col style="width: 19%">
+<col style="width: 5%">
+<col style="width: 22%">
+<col style="width: 29%">
+</colgroup>
 <thead>
 <tr class="header">
-<th style="text-align: left;">budget</th>
-<th style="text-align: right;">dF_per_cycle</th>
-<th style="text-align: right;">Ne</th>
-<th style="text-align: right;">R2</th>
+<th style="text-align: left;">arm</th>
+<th style="text-align: right;"><span class="math inline">\(\Delta F\)</span> per cycle</th>
+<th style="text-align: right;"><span class="math inline">\(R^2\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(F_{drift}\)</span> at cycle 15</th>
+<th style="text-align: right;"><span class="math inline">\(\Delta F\)</span> / neutral <span class="math inline">\(\Delta F\)</span></th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">unconstrained</td>
-<td style="text-align: right;">0.0292</td>
-<td style="text-align: right;">17.1146</td>
-<td style="text-align: right;">0.8534</td>
+<td style="text-align: left;">neutral (no selection)</td>
+<td style="text-align: right;">0.0152</td>
+<td style="text-align: right;">0.997</td>
+<td style="text-align: right;">0.209</td>
+<td style="text-align: right;">1.00</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">0.020</td>
-<td style="text-align: right;">0.0358</td>
-<td style="text-align: right;">13.9841</td>
-<td style="text-align: right;">0.9931</td>
+<td style="text-align: left;">unconstrained</td>
+<td style="text-align: right;">0.0288</td>
+<td style="text-align: right;">0.853</td>
+<td style="text-align: right;">0.457</td>
+<td style="text-align: right;">1.89</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">0.005</td>
-<td style="text-align: right;">0.0265</td>
-<td style="text-align: right;">18.8898</td>
-<td style="text-align: right;">0.9976</td>
+<td style="text-align: left;"><span class="math inline">\(\alpha_{\max} = 0.02\)</span></td>
+<td style="text-align: right;">0.0351</td>
+<td style="text-align: right;">0.993</td>
+<td style="text-align: right;">0.431</td>
+<td style="text-align: right;">2.31</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\alpha_{\max} = 0.005\)</span></td>
+<td style="text-align: right;">0.0261</td>
+<td style="text-align: right;">0.998</td>
+<td style="text-align: right;">0.343</td>
+<td style="text-align: right;">1.72</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
+</figure>
 </div>
-<p>The diagnostic fires, and it fires on the unconstrained run: <span class="math inline">\(R^2 =\)</span> 0.853 against 0.998 for the tightest budget. The unconstrained rate is not constant because it is decelerating – there is progressively less left to lose. Read naively its fitted <span class="math inline">\(\Delta F\)</span> is the <em>lowest</em> of the three, which is exactly backwards; the fit is meaningless for a saturating series, and the <span class="math inline">\(R^2\)</span> column is what says so.</p>
+</div>
+<p>Result. The fitted <span class="math inline">\(\Delta F\)</span> per cycle is 0.0351 for <span class="math inline">\(\alpha_{\max} = 0.02\)</span>, 0.0288 for the unconstrained programme and 0.0261 for <span class="math inline">\(\alpha_{\max} = 0.005\)</span>, with <span class="math inline">\(R^2\)</span> of 0.993, 0.853 and 0.998; the neutral arm gives 0.0152 (<span class="math inline">\(R^2 =\)</span> 0.997). The unconstrained programme has the largest <span class="math inline">\(F_{drift}\)</span> at cycle 15 (0.457, against 0.431 and 0.343) and the middle fitted rate, so the two orderings differ. The managed rates are 1.7 to 2.3 times the neutral one.</p>
+<p>Inference, and what limits it. The unconstrained series is the one whose <span class="math inline">\(\log(1 - F)\)</span> is least linear (<span class="math inline">\(R^2\)</span> in <a href="#tbl-cycles-rate" class="quarto-xref">Table&nbsp;<span>23.3</span></a>): <span class="math inline">\(F_{drift}\)</span> is decelerating, and the slope of a regression through a decelerating series is an average over the curve, which is consistent with the programme of highest <span class="math inline">\(F_{drift}\)</span> having only the middle fitted rate. <a href="05-genomic-era.html#sec-era-step4" class="quarto-xref"><span>Section 10.7.4</span></a> reads <span class="math inline">\(R^2 &lt; 0.995\)</span> on an averaged series as a non-constant rate, at its scale only. By that threshold the <span class="math inline">\(\alpha_{\max} = 0.02\)</span> series is under it too, and the neutral arm here is under the <span class="math inline">\(0.999\)</span> that <a href="05-genomic-era.html#sec-era-step4" class="quarto-xref"><span>Section 10.7.4</span></a> found for its own neutral fits, so the threshold does not separate the arms in this chapter; the reading rests on the unconstrained <span class="math inline">\(R^2\)</span> being far below the others. The ratio to the neutral arm mixes two things: selection’s effect on which lines are used, and the displacement of 60 selected hybrids from their pool, which a random 60 would also show and which the neutral arm (all 625 hybrids) does not. Neither is separated here, and the neutral arm is one set of five founder draws. A rate-based <span class="math inline">\(N_e = 1/(2\Delta F)\)</span> is therefore not reported for the managed arms: <a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 12</span></a> says not to report one under active management, and a <span class="math inline">\(\Delta F\)</span> read off a managed trajectory with a saturating series is a fitted slope, not a realised effective size.</p>
 <div class="callout callout-style-simple callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -956,23 +1219,27 @@ window.Quarto = {
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><a href="06-metric-catalogue.html#sec-ns" class="quarto-xref"><span>Section 11.3</span></a> insists that the status number is a static descriptor and not a drift projection. Here is the size of the discrepancy: <span class="math inline">\(N_s\)</span> computed on the selected hybrids averages 0.67 across all of these runs, while the realised effective size implied by the drift they actually accumulated is between 14 and 19.</p>
-<p>They are not the same quantity and are not off by a constant. Report <span class="math inline">\(N_s\)</span> as a descriptor of a plan, and measure <span class="math inline">\(\Delta F\)</span> from the trajectory.</p>
+<p><a href="06-metric-catalogue.html#sec-ns" class="quarto-xref"><span>Section 11.3</span></a> shows that on molecular coancestry <span class="math inline">\(\theta_S \in [1/2, 1]\)</span> and so <span class="math inline">\(N_s = 1/(2\theta_S) \in [1/2, 1]\)</span> for every set: <span class="math inline">\(N_s\)</span> is a monotone rescaling of <span class="math inline">\(\theta_S\)</span>, not a number of individuals. Here <span class="math inline">\(N_s\)</span> of the selected hybrids ranges over 0.61 to 0.75 (mean 0.67) across all runs and cycles. A number in that range cannot be set beside an effective size in individuals or a rate, and no discrepancy between them is quantified. Report <span class="math inline">\(N_s\)</span> as a descriptor of a plan, and read <span class="math inline">\(\Delta F\)</span> from the trajectory.</p>
 </div>
 </div>
 </section>
-<section id="choosing-a-budget-for-a-horizon" class="level2" data-number="23.5">
-<h2 data-number="23.5" class="anchored" data-anchor-id="choosing-a-budget-for-a-horizon"><span class="header-section-number">23.5</span> Choosing a budget for a horizon</h2>
-<p>Every seed crosses over, and the cycle at which it happens is the useful number:</p>
+<section id="sec-cycles-horizon" class="level2" data-number="23.5">
+<h2 data-number="23.5" class="anchored" data-anchor-id="sec-cycles-horizon"><span class="header-section-number">23.5</span> Choosing a budget for a horizon</h2>
+<p>Every seed crosses over for both budgets, and the cycle at which it happens varies across seeds (<a href="#tbl-cycles-crossover" class="quarto-xref">Table&nbsp;<span>23.4</span></a>):</p>
 <div class="cell" data-layout-align="center">
+<div id="tbl-cycles-crossover" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-cycles-crossover-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;23.4: Cycle at which each budget <span class="math inline">\(\alpha_{\max}\)</span> first overtakes the unconstrained programme in mean index, per founder draw (seed).
+</figcaption>
+<div aria-describedby="tbl-cycles-crossover-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<table class="caption-top table table-sm table-striped small">
-<caption>Cycle at which each budget overtakes the unconstrained programme.</caption>
+<table class="cell caption-top table table-sm table-striped small">
 <thead>
 <tr class="header">
 <th style="text-align: right;">seed</th>
-<th style="text-align: right;">alpha &lt;= 0.02</th>
-<th style="text-align: right;">alpha &lt;= 0.005</th>
+<th style="text-align: right;"><span class="math inline">\(\alpha_{\max} = 0.02\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(\alpha_{\max} = 0.005\)</span></th>
 </tr>
 </thead>
 <tbody>
@@ -1005,65 +1272,108 @@ window.Quarto = {
 </table>
 </div>
 </div>
-<p>The tighter budget always crosses later and always ends higher. That is the whole trade, and it makes the choice of <span class="math inline">\(\alpha_{\max}\)</span> a function of the planning horizon rather than a matter of taste:</p>
+</figure>
+</div>
+</div>
+<p>The crossover cycle of <span class="math inline">\(\alpha_{\max} = 0.02\)</span> is 5 to 12 across the five seeds (mean 8.4), that of <span class="math inline">\(\alpha_{\max} = 0.005\)</span> is 9 to 15 (mean 11.4), and the tighter budget crosses later in 5 of 5 seeds. “About eight cycles” is the mean of the <span class="math inline">\(\alpha_{\max} = 0.02\)</span> crossovers only. Crossing later is not ending higher: against the looser budget, at cycle 15, the paired difference of index (<span class="math inline">\(\alpha_{\max} = 0.005\)</span> minus <span class="math inline">\(\alpha_{\max} = 0.02\)</span>) is -0.74 (s.e. 0.16; positive in 0 of 5 seeds), and the <span class="math inline">\(\alpha_{\max} = 0.005\)</span> mean is below the <span class="math inline">\(\alpha_{\max} = 0.02\)</span> mean at every cycle from 0 to 15. The tighter budget ends higher only than the unconstrained programme (+1.59 (s.e. 0.42; positive in 5 of 5 seeds)), and that contrast is the one every budget below <span class="math inline">\(\infty\)</span> shares. The choice of <span class="math inline">\(\alpha_{\max}\)</span> is a function of the planning horizon, and the paired contrasts at selected cycles are in <a href="#tbl-cycles-horizon" class="quarto-xref">Table&nbsp;<span>23.5</span></a>:</p>
 <div class="cell" data-layout-align="center">
+<div id="tbl-cycles-horizon" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-cycles-horizon-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;23.5: Paired difference in cumulative index (founding-cycle standard deviations) at cycle <span class="math inline">\(k\)</span> between two budgets: mean over five founder draws, then (s.e.; seeds out of five in which the first budget is ahead).
+</figcaption>
+<div aria-describedby="tbl-cycles-horizon-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<table class="caption-top table table-sm table-striped small">
-<caption>Reading the crossover as a budget rule. These cycle numbers are specific to this population size and selection intensity; the shape is what transfers.</caption>
+<table class="cell caption-top table table-sm table-striped small">
 <colgroup>
-<col style="width: 18%">
-<col style="width: 20%">
-<col style="width: 60%">
+<col style="width: 8%">
+<col style="width: 33%">
+<col style="width: 34%">
+<col style="width: 24%">
 </colgroup>
 <thead>
 <tr class="header">
-<th style="text-align: left;">Planning horizon</th>
-<th style="text-align: left;">Budget</th>
-<th style="text-align: left;">Why</th>
+<th style="text-align: right;">cycle</th>
+<th style="text-align: left;">0.02 minus unconstrained</th>
+<th style="text-align: left;">0.005 minus unconstrained</th>
+<th style="text-align: left;">0.005 minus 0.02</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">3 cycles or fewer</td>
-<td style="text-align: left;">do not constrain</td>
-<td style="text-align: left;">the crossover has not happened yet; the constraint is pure cost</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: left;">-0.75 (0.19; 0/5)</td>
+<td style="text-align: left;">-1.09 (0.10; 0/5)</td>
+<td style="text-align: left;">-0.33 (0.12; 1/5)</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">about 5 to 8 cycles</td>
-<td style="text-align: left;">alpha ~ 0.02</td>
-<td style="text-align: left;">the looser budget has crossed and the tighter one has not</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">-0.76 (0.25; 1/5)</td>
+<td style="text-align: left;">-1.34 (0.33; 0/5)</td>
+<td style="text-align: left;">-0.57 (0.17; 0/5)</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">10 cycles or more</td>
-<td style="text-align: left;">alpha ~ 0.005 to 0.02</td>
-<td style="text-align: left;">both have crossed; the tighter budget is still climbing</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: left;">+0.02 (0.37; 3/5)</td>
+<td style="text-align: left;">-1.02 (0.45; 0/5)</td>
+<td style="text-align: left;">-1.04 (0.13; 0/5)</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">indefinite</td>
-<td style="text-align: left;">constrain, and inject</td>
-<td style="text-align: left;">no closed budget holds forever – see below</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: left;">+0.68 (0.35; 4/5)</td>
+<td style="text-align: left;">-0.35 (0.50; 2/5)</td>
+<td style="text-align: left;">-1.02 (0.23; 0/5)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">12</td>
+<td style="text-align: left;">+1.36 (0.34; 5/5)</td>
+<td style="text-align: left;">+0.53 (0.47; 4/5)</td>
+<td style="text-align: left;">-0.83 (0.20; 0/5)</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">15</td>
+<td style="text-align: left;">+2.33 (0.32; 5/5)</td>
+<td style="text-align: left;">+1.59 (0.42; 5/5)</td>
+<td style="text-align: left;">-0.74 (0.16; 0/5)</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-<p>The caveat matters more than the numbers. <code>n_sel = 60</code> out of 625 candidates from 25 + 25 lines is a small, intensely selected programme, and the crossover arrives sooner the harder the selection is. What transfers is the shape: an unconstrained programme leads early, saturates, and is passed.</p>
+</figure>
+</div>
+</div>
+<p>Read within the 15 cycles run and on five founder draws, not as a rule beyond them, and as exploratory: the cycles tabulated and the cycle from which all five seeds are ahead were chosen or read after the data, with no multiplicity rule (<a href="#sec-cycles-trajectory" class="quarto-xref"><span>Section 23.3</span></a>). On the seed mean, the unconstrained programme is the best of the three through cycle 7; <span class="math inline">\(\alpha_{\max} = 0.02\)</span> is the best from cycle 8 to cycle 15; <span class="math inline">\(\alpha_{\max} = 0.005\)</span> is the best at no cycle. The number of seeds, out of 5, in which <span class="math inline">\(\alpha_{\max} = 0.02\)</span> is ahead of the unconstrained programme is 0, 1, 3, 4, 5, 5 at cycles 3, 5, 8, 10, 12, 15, and all five are ahead from cycle 12 on; <span class="math inline">\(\alpha_{\max} = 0.005\)</span> is ahead in 2 of 5 at cycle 10, and its seed mean crosses at cycle 11. So, in this population and selection intensity, and at the cycles tabulated: for horizons where no seed is ahead the constraint is a cost in all five seeds; where the count is neither 0 nor 5 the sign of the <span class="math inline">\(\alpha_{\max} = 0.02\)</span> contrast is not resolved by five seeds; from cycle 12 on it is ahead in all five. For <span class="math inline">\(\alpha_{\max} = 0.005\)</span> the data give no horizon within 15 cycles at which it is the better choice. The gap <span class="math inline">\(\alpha_{\max} = 0.005\)</span> minus <span class="math inline">\(\alpha_{\max} = 0.02\)</span> is -1.02 at cycle 10 and -0.74 at cycle 15; whether it closes beyond cycle 15 is not measured, and no extrapolation is made. Of the three, <span class="math inline">\(\alpha_{\max} = 0.02\)</span> is the only one with a measured advantage within 15 cycles, and no budget is recommended for any horizon outside the cycles tabulated.</p>
+<p>The caveat matters more than the numbers. <code>n_sel = 60</code> out of 625 candidates from 25 + 25 lines is a small, intensely selected programme, and only that selection intensity was run. Whether the crossover arrives sooner under harder selection, or depends on the pool size or the number of markers, is not measured here and is a hypothesis. <span class="citation" data-cites="gorjanc2018">Gorjanc et al. (<a href="99-references.html#ref-gorjanc2018" role="doc-biblioref">2018</a>)</span> find that the best diversity penalty depends on the number of candidates per cycle (full text), which makes the dependence plausible and does not measure it for this model. What was observed, for this population, is the shape: an unconstrained programme leads early, flattens, and is passed; whether the shape transfers to another scale is not tested.</p>
 </section>
 <section id="the-per-line-cap-at-last-measurable" class="level2" data-number="23.6">
 <h2 data-number="23.6" class="anchored" data-anchor-id="the-per-line-cap-at-last-measurable"><span class="header-section-number">23.6</span> The per-line cap, at last measurable</h2>
-<p><a href="10-combinatorial-selection.html" class="quarto-xref"><span>Chapter 16</span></a> carries <code>max_use</code> through every selector, defaulting to <code>NULL</code> everywhere, because within a single cycle a usage cap only costs index. Across cycles it is buying something, and this is where it can be seen. Same budget (<span class="math inline">\(\alpha \le 0.02\)</span>), same seeds, three caps:</p>
+<p><a href="10-combinatorial-selection.html" class="quarto-xref"><span>Chapter 16</span></a> carries <code>max_use</code> through every selector, defaulting to <code>NULL</code> everywhere. Within a single cycle a cap shrinks the feasible set and so cannot raise the optimum of the index; across cycles it may buy something, and this is where that can be looked at. <a href="05-genomic-era.html" class="quarto-xref"><span>Chapter 10</span></a> (Step 6) prices a cap of 4 on truncation with no budget and defers the answer to this chapter; the chapter does not run that arm. It runs the same budget (<span class="math inline">\(\alpha_{\max} = 0.02\)</span>), the same seeds and two caps, 6 and 3 (<a href="#tbl-cycles-cap" class="quarto-xref">Table&nbsp;<span>23.6</span></a>):</p>
 <div class="cell" data-layout-align="center">
+<div id="tbl-cycles-cap" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-cycles-cap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;23.6: The per-line usage cap <span class="math inline">\(k_{\max}\)</span> (<code>max_use</code>) across fifteen cycles, <span class="math inline">\(\alpha_{\max} = 0.02\)</span>, mean over five founder draws, at cycles 0, 5, 10 and 15 (<code>none</code>: no cap). <span class="math inline">\(\max_a k_a\)</span> (<code>max_line</code>) is the largest number of times one line enters the 60 selected hybrids.
+</figcaption>
+<div aria-describedby="tbl-cycles-cap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<table class="caption-top table table-sm table-striped small">
-<caption>The per-line usage cap across fifteen cycles.</caption>
+<table class="cell caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 15%">
+<col style="width: 8%">
+<col style="width: 30%">
+<col style="width: 9%">
+<col style="width: 16%">
+<col style="width: 18%">
+</colgroup>
 <thead>
 <tr class="header">
-<th style="text-align: left;">max_use</th>
+<th style="text-align: left;"><span class="math inline">\(k_{\max}\)</span></th>
 <th style="text-align: right;">cycle</th>
-<th style="text-align: right;">index</th>
-<th style="text-align: right;">GD</th>
-<th style="text-align: right;">F_drift</th>
-<th style="text-align: right;">max_line</th>
+<th style="text-align: right;">index (founding s.d.)</th>
+<th style="text-align: right;"><span class="math inline">\(GD_T\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(F_{drift}\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(\max_a k_a\)</span></th>
 </tr>
 </thead>
 <tbody>
@@ -1167,25 +1477,42 @@ window.Quarto = {
 </table>
 </div>
 </div>
-<p><code>max_use = 6</code> costs 5% of cycle-15 gain and holds <span class="math inline">\(F_{\text{drift}}\)</span> to 0.395 against 0.431, while the uncapped programme leans on one line 16 times in its final cycle. <code>max_use = 3</code> is too tight: it halves the gain and is not compensated.</p>
-<p>Note <em>which</em> lens the cap moves. Gene diversity at cycle 15 is essentially the same with the cap and without it (0.21 against 0.207), because <span class="math inline">\(\alpha\)</span> is already pinning that. The difference shows up in <span class="math inline">\(F_{\text{drift}}\)</span>, which is the lens <a href="05-genomic-era.html" class="quarto-xref"><span>Chapter 10</span></a> established the constraint does <em>not</em> pin. The cap is a handle on the uncontrolled lens, which is exactly why it is worth having in addition to the budget and not instead of it.</p>
+</figure>
+</div>
+</div>
+<p>At cycle 15, <code>max_use = 6</code> against no cap differs by -0.61 (s.e. 0.28; positive in 1 of 5 seeds) in index (capped minus uncapped), which is 5% of the uncapped gain, and by -0.037 (s.e. 0.010; positive in 0 of 5 seeds) in <span class="math inline">\(F_{drift}\)</span> (0.395 against 0.431); the uncapped programme leans on one line 16 times in its final cycle. <code>max_use = 3</code> differs by -6.35 (s.e. 0.35; positive in 0 of 5 seeds) in index, which leaves 47% of the uncapped gain, and by -0.182 (s.e. 0.008; positive in 0 of 5 seeds) in <span class="math inline">\(F_{drift}\)</span>. In this horizon neither cap is repaid in index: the cost is not recovered by cycle 15, which answers the question that <a href="05-genomic-era.html" class="quarto-xref"><span>Chapter 10</span></a> left to this chapter for these two caps and this budget. Whether it is repaid beyond cycle 15 is not measured, and the cost of <code>max_use = 6</code> is 2.2 standard errors of its paired difference.</p>
+<p>Note <em>which</em> lens the cap moves. Gene diversity <span class="math inline">\(GD_T\)</span> at cycle 15 differs by +0.003 (s.e. 0.002; positive in 3 of 5 seeds) with the cap of 6, and <span class="math inline">\(GD_T\)</span> is the lens <span class="math inline">\(\alpha_{\max}\)</span> pins. The difference shows up in <span class="math inline">\(F_{drift}\)</span>, which is the lens <a href="05-genomic-era.html" class="quarto-xref"><span>Chapter 10</span></a> established the constraint does <em>not</em> pin. Inference: the cap is a handle on the lens the budget leaves free, which is a reason to have it in addition to the budget and not instead of it, at the price in index above.</p>
 <p>This changes no default. <code>max_use</code> remains <code>NULL</code> throughout the package.</p>
 </section>
 <section id="injection-and-what-it-costs" class="level2" data-number="23.7">
 <h2 data-number="23.7" class="anchored" data-anchor-id="injection-and-what-it-costs"><span class="header-section-number">23.7</span> Injection, and what it costs</h2>
-<p>No closed budget holds indefinitely: all three trajectories are still losing diversity at cycle 15, only at different rates. <a href="11-plant-literature.html" class="quarto-xref"><span>Chapter 21</span></a> and <a href="12-case-study.html" class="quarto-xref"><span>Chapter 25</span></a> both prescribe periodic germplasm injection, and <a href="04b-backcross-introgression.html" class="quarto-xref"><span>Chapter 8</span></a> is the machinery that performs it – introgression is how new material enters an elite pool without dragging the rest of the genome with it.</p>
-<p>Replacing six of the twenty-five lines in each pool with founding-generation material at cycle 8:</p>
+<p>No closed budget holds indefinitely: all three trajectories are still losing diversity at cycle 15, only at different rates. <a href="11-plant-literature.html" class="quarto-xref"><span>Chapter 21</span></a> and <a href="12-case-study.html" class="quarto-xref"><span>Chapter 25</span></a> both prescribe periodic germplasm injection.</p>
+<p>The experiment is a particular kind of injection. At cycle 8, six of the twenty-five lines in each pool are replaced by lines drawn from the <em>founding generation of the same programme</em> (<code>inject = list(cycle = 8, n = 6)</code>). These are whole founder lines of known merit on the index scale of cycle 0, with no conversion and no donor from outside the programme. It is not what <a href="04b-backcross-introgression.html" class="quarto-xref"><span>Chapter 8</span></a> simulates, which is the transfer of up to four loci into one elite line by backcrossing and ends in a near-copy of the recurrent parent; whether such a line then enters a pool is a decision that chapter leaves outside it.</p>
 <div class="cell" data-layout-align="center">
+<div id="tbl-cycles-injection" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-cycles-injection-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;23.7: One injection event at cycle 8 (six founder lines per pool), against the same programme left closed: mean index (founding-cycle standard deviations), <span class="math inline">\(GD_T\)</span>, <span class="math inline">\(F_{drift}\)</span> and realised <span class="math inline">\(\alpha\)</span> at cycles 7, 8, 10, 12 and 15; <span class="math inline">\(\alpha_{\max} = 0.02\)</span>, mean over five founder draws.
+</figcaption>
+<div aria-describedby="tbl-cycles-injection-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<table class="caption-top table table-sm table-striped small">
-<caption>One injection event at cycle 8, against the same programme left closed.</caption>
+<table class="cell caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 26%">
+<col style="width: 7%">
+<col style="width: 28%">
+<col style="width: 9%">
+<col style="width: 15%">
+<col style="width: 11%">
+</colgroup>
 <thead>
 <tr class="header">
-<th style="text-align: left;">regime</th>
+<th style="text-align: left;">programme</th>
 <th style="text-align: right;">cycle</th>
-<th style="text-align: right;">index</th>
-<th style="text-align: right;">GD</th>
-<th style="text-align: right;">F_drift</th>
+<th style="text-align: right;">index (founding s.d.)</th>
+<th style="text-align: right;"><span class="math inline">\(GD_T\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(F_{drift}\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(\alpha\)</span></th>
 </tr>
 </thead>
 <tbody>
@@ -1195,13 +1522,15 @@ window.Quarto = {
 <td style="text-align: right;">7.697</td>
 <td style="text-align: right;">0.255</td>
 <td style="text-align: right;">0.270</td>
+<td style="text-align: right;">0.015</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">injected</td>
+<td style="text-align: left;">injected at cycle 8</td>
 <td style="text-align: right;">7</td>
 <td style="text-align: right;">7.697</td>
 <td style="text-align: right;">0.255</td>
 <td style="text-align: right;">0.270</td>
+<td style="text-align: right;">0.015</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">closed</td>
@@ -1209,13 +1538,15 @@ window.Quarto = {
 <td style="text-align: right;">8.440</td>
 <td style="text-align: right;">0.246</td>
 <td style="text-align: right;">0.301</td>
+<td style="text-align: right;">0.016</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">injected</td>
+<td style="text-align: left;">injected at cycle 8</td>
 <td style="text-align: right;">8</td>
 <td style="text-align: right;">6.469</td>
 <td style="text-align: right;">0.283</td>
 <td style="text-align: right;">0.182</td>
+<td style="text-align: right;">0.004</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">closed</td>
@@ -1223,13 +1554,15 @@ window.Quarto = {
 <td style="text-align: right;">9.677</td>
 <td style="text-align: right;">0.233</td>
 <td style="text-align: right;">0.348</td>
+<td style="text-align: right;">0.016</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">injected</td>
+<td style="text-align: left;">injected at cycle 8</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">7.865</td>
 <td style="text-align: right;">0.270</td>
 <td style="text-align: right;">0.233</td>
+<td style="text-align: right;">0.009</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">closed</td>
@@ -1237,13 +1570,15 @@ window.Quarto = {
 <td style="text-align: right;">10.722</td>
 <td style="text-align: right;">0.222</td>
 <td style="text-align: right;">0.385</td>
+<td style="text-align: right;">0.016</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">injected</td>
+<td style="text-align: left;">injected at cycle 8</td>
 <td style="text-align: right;">12</td>
 <td style="text-align: right;">9.391</td>
 <td style="text-align: right;">0.254</td>
 <td style="text-align: right;">0.291</td>
+<td style="text-align: right;">0.011</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">closed</td>
@@ -1251,30 +1586,113 @@ window.Quarto = {
 <td style="text-align: right;">11.877</td>
 <td style="text-align: right;">0.207</td>
 <td style="text-align: right;">0.431</td>
+<td style="text-align: right;">0.017</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">injected</td>
+<td style="text-align: left;">injected at cycle 8</td>
 <td style="text-align: right;">15</td>
 <td style="text-align: right;">11.283</td>
 <td style="text-align: right;">0.234</td>
 <td style="text-align: right;">0.364</td>
+<td style="text-align: right;">0.017</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-<p>The cost is immediate and the return is slow. Gene diversity jumps from 0.246 to 0.283 and <span class="math inline">\(F_{\text{drift}}\)</span> falls by 40%, but the index drops 1.97 standard deviations on the spot, and <strong>has not repaid by cycle 15</strong> (11.28 against 11.88).</p>
-<p>That is the honest result and it should not be dressed up. Within this horizon injection buys a restored resource and not more gain; it is the same trade as the diversity budget itself, at a longer wavelength and a steeper entry price. The run that would repay it is longer than fifteen cycles, and the founders used here are the programme’s own – unadapted material from a genebank would cost considerably more.</p>
+</figure>
+</div>
+</div>
+<p>The cost is immediate and the return is slow (<a href="#tbl-cycles-injection" class="quarto-xref">Table&nbsp;<span>23.7</span></a>). Gene diversity <span class="math inline">\(GD_T\)</span> jumps from 0.246 to 0.283 and <span class="math inline">\(F_{drift}\)</span> falls by 40%, but the index drops by +1.97 (s.e. 0.13; positive in 5 of 5 seeds) on the spot (closed minus injected) and has <strong>not repaid by cycle 15</strong>: closed minus injected is then +0.59 (s.e. 0.12; positive in 5 of 5 seeds) (11.28 against 11.88).</p>
+<p>The budget is slack in the injection cycle. The realised <span class="math inline">\(\alpha\)</span> at cycle 8 is 0.0035 in the injected arm against 0.0158 in the closed one (budget 0.02), so the budget is not what limits the selection in that cycle: the pool is more diverse and the reference of C12 moves with it. Inference: the index drop then reflects the merit of the injected founder lines against the evolved pool, not the price of meeting the budget; the simulation does not separate the two.</p>
+<p>What was measured, in short: within 15 cycles the injection arm has higher <span class="math inline">\(GD_T\)</span> and lower <span class="math inline">\(F_{drift}\)</span> than the closed arm and a lower index (<a href="#tbl-cycles-injection" class="quarto-xref">Table&nbsp;<span>23.7</span></a>), in this one event (6 lines per pool at cycle 8) and on five founder draws. Inference, and what limits it: injection of the programme’s own founders restores diversity without returning more gain within this horizon, and one may read it as a trade of the same kind as the diversity budget, with a later return and a larger initial cost. That comparison is an interpretation; the injection arm shares no parameter with the budget arm, “diversity” here is only <span class="math inline">\(GD_T\)</span> and <span class="math inline">\(F_{drift}\)</span>, and the cost of the budget was not measured on the injection’s scale. The run that would repay the injection is longer than fifteen cycles, if it exists; this chapter does not measure it. What unadapted material from a genebank would cost is not simulated: <a href="11-plant-literature.html" class="quarto-xref"><span>Chapter 21</span></a> reads <span class="citation" data-cites="sanchez2023">Sanchez et al. (<a href="99-references.html#ref-sanchez2023" role="doc-biblioref">2023</a>)</span> on bridging populations, in simulation only.</p>
 </section>
 <section id="what-the-corpus-supports" class="level2" data-number="23.8">
 <h2 data-number="23.8" class="anchored" data-anchor-id="what-the-corpus-supports"><span class="header-section-number">23.8</span> What the corpus supports</h2>
-<p><a href="93-corpora.html" class="quarto-xref"><span>Appendix D</span></a>’s screened corpora hold 687 plant and 324 animal records, of which a substantial block concerns recurrent selection and long-term gain: two-part and rapid-cycling programme designs, optimal cross selection evaluated over cycles rather than within one, and simulation studies of the long-term effects of genomic selection on both gain and variance.</p>
-<p>The qualitative shape found here – early advantage to unconstrained selection, saturation, then a crossover – is the standard finding in that literature. <span class="citation" data-cites="gorjanc2018">Gorjanc et al. (<a href="99-references.html#ref-gorjanc2018" role="doc-biblioref">2018</a>)</span> optimise cross selection explicitly for long-term gain in two-part programmes and report the same tension between per-cycle and multi-cycle optimality that the DE comparison above ran into. <span class="citation" data-cites="allier2019">Allier et al. (<a href="99-references.html#ref-allier2019" role="doc-biblioref">2019</a>)</span> separate the short-term and long-term components directly. <span class="citation" data-cites="wientjes2022">Wientjes et al. (<a href="99-references.html#ref-wientjes2022" role="doc-biblioref">2022</a>)</span> track what genomic selection does to additive variance over many generations, which is the mechanism behind the saturation seen here, and <span class="citation" data-cites="doublet2019">Doublet et al. (<a href="99-references.html#ref-doublet2019" role="doc-biblioref">2019</a>)</span> measure the diversity cost in three dairy cattle breeds where the cycles have actually been run. <span class="citation" data-cites="rutkoski2019">Rutkoski (<a href="99-references.html#ref-rutkoski2019" role="doc-biblioref">2019</a>)</span> is the counterpart caution: realised rates of gain are harder to estimate from an operating programme than a simulation makes them look. <span class="citation" data-cites="muller2018">Müller et al. (<a href="99-references.html#ref-muller2018" role="doc-biblioref">2018</a>)</span> is the closest thing in the corpus to the selection criterion used here, chosen for its effect on later cycles rather than the current one. What <a href="11-plant-literature.html" class="quarto-xref"><span>Chapter 21</span></a> listed as unestablished was something narrower and remains so: nobody has published the crossover <em>for a <span class="math inline">\(\theta\)</span>-constrained hybrid maize programme measured against a same-size resampling baseline</em>. This chapter demonstrates it in simulation, under C1-C8, which is not the same as establishing it in an operating programme.</p>
+<p><a href="93-corpora.html" class="quarto-xref"><span>Appendix D</span></a>’s screened corpora hold 687 plant and 324 animal records. They carry no field for recurrent selection or long-term gain: the <code>theme</code> field of the 89 directly relevant animal records takes 7 values (OCS / contribution optimisation; Coancestry / relationship matrix choice; Allelic richness / rare alleles; Optimisation algorithms / cost; Effective size; Heterozygosity / gene diversity; Core collection / subset selection; <a href="93-corpora.html#tbl-corpora-themes" class="quarto-xref">Table&nbsp;<span>D.5</span></a>), none of them recurrent selection or long-term gain, and the plant file has no theme field. The corpora therefore do not allow a count of how much of them concerns this chapter’s topic. The six records cited below are in them (4 in the animal file, 2 in the plant file) and were chosen by reading titles and relevance notes. The reading level of each statement is given: full text for <span class="citation" data-cites="gorjanc2018">Gorjanc et al. (<a href="99-references.html#ref-gorjanc2018" role="doc-biblioref">2018</a>)</span> and <span class="citation" data-cites="allier2019">Allier et al. (<a href="99-references.html#ref-allier2019" role="doc-biblioref">2019</a>)</span>, abstract only for the other four.</p>
+<p><span class="citation" data-cites="allier2019">Allier et al. (<a href="99-references.html#ref-allier2019" role="doc-biblioref">2019</a>)</span> (full text) report, in a simulation of optimal cross selection, that selection under a diversity target gave lower short-term and significantly higher long-term genetic gain than unconstrained cross selection. That is the same sign as the crossover found here; their model, selection unit and horizon differ, and no crossing cycle for a budgeted against an unconstrained trajectory is taken from them. <span class="citation" data-cites="gorjanc2018">Gorjanc et al. (<a href="99-references.html#ref-gorjanc2018" role="doc-biblioref">2018</a>)</span> (full text) compare truncation with diversity-penalised optimal cross selection in two-part programmes with rapid recurrent genomic selection, in a 20-year wheat simulation: more cycles per year raised gain in the early years and lowered long-term gain, and optimal cross selection gave more gain than truncation. That is a trade between gain and diversity of the same kind as the constrained against unconstrained contrast here; it is not a result about a better per-cycle optimiser, which this chapter’s DE check does not support. <span class="citation" data-cites="muller2018">Müller et al. (<a href="99-references.html#ref-muller2018" role="doc-biblioref">2018</a>)</span> (abstract) report that selecting on expected maximum haploid breeding values, a criterion chosen for its effect on later cycles and with no diversity budget, outperformed selection on genomic estimated breeding values (GEBVs) after about five cycles and kept more diversity: a crossing cycle, for a different pair of criteria. <span class="citation" data-cites="wientjes2022">Wientjes et al. (<a href="99-references.html#ref-wientjes2022" role="doc-biblioref">2022</a>)</span> is read above (abstract). <span class="citation" data-cites="doublet2019">Doublet et al. (<a href="99-references.html#ref-doublet2019" role="doc-biblioref">2019</a>)</span> (abstract) report, for three French dairy breeds, annual gains raised by 50, 71 and 33% (Montbeliarde, Normande, Holstein) by genomic selection and a significant rise in inbreeding in Holstein only, with no significant change in Montbeliarde and Normande: a before-and-after comparison in operating programmes, and a diversity cost in one breed of three. <span class="citation" data-cites="rutkoski2019">Rutkoski (<a href="99-references.html#ref-rutkoski2019" role="doc-biblioref">2019</a>)</span> (abstract) is itself a simulation, of 80 rice programmes over 28 years, in which five estimators of realised gain are compared with the simulated truth: the best estimators erred by 15% over all 28 years and 27% over the last 15, and the best correlation with true gain was 0.59. The gain in this chapter is the true index of the selected hybrids (C7); in a programme it must be estimated, and in that simulation the estimates were imprecise.</p>
+<p>What <a href="11-plant-literature.html" class="quarto-xref"><span>Chapter 21</span></a> lists as not established in the retrieved set, in its row for proportional diversity loss against a same-size resampling baseline in an operating maize programme (<a href="11-plant-literature.html#tbl-plant-unestablished" class="quarto-xref">Table&nbsp;<span>21.3</span></a>), remains so for that set. This chapter demonstrates a crossover in simulation, under C1 to C12, which is not the same as establishing it in an operating programme, and nothing is claimed about publications outside the retrieved corpora.</p>
 </section>
 <section id="where-this-connects" class="level2" data-number="23.9">
 <h2 data-number="23.9" class="anchored" data-anchor-id="where-this-connects"><span class="header-section-number">23.9</span> Where this connects</h2>
-<p><a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 5</span></a> argued that what builds a heterotic pattern is divergence aligned with dominance, and that selection on cross performance is the only process in the programme that searches for it. This chapter is that process running. The <span class="math inline">\(GD_{BS}\)</span> column of <code>cycles_trajectory.csv</code> rises in every run – the pools do separate under reciprocal selection, as they should – while <span class="math inline">\(GD\)</span> within them falls, which is the trade <a href="06-metric-catalogue.html" class="quarto-xref"><span>Chapter 11</span></a>’s partition was built to expose.</p>
-<p><a href="12-case-study.html" class="quarto-xref"><span>Chapter 25</span></a> is the single cycle, in operational detail. Read it as cycle 0 of this chapter, and read its final checklist – freeze <span class="math inline">\(p_0\)</span>, keep the per-stage ledger, check <span class="math inline">\(\log(1 - F)\)</span> for curvature, plan germplasm injection – as the four things this chapter has now shown the consequences of skipping.</p>
+<p><a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 5</span></a> derives, for inbred parents, the complete factorial and flat dominance, that the divergence term of expected heterosis is <span class="math inline">\(GD_{BS}\)</span>, and a <span class="math inline">\(d\)</span>-weighted version where dominance varies across loci. This chapter’s index is additive (C9), so it cannot test whether selection builds divergence aligned with dominance. What it logs is <span class="math inline">\(GD_{BS}\)</span> of the 60 selected hybrids (C10) and the within-pool diversity <span class="math inline">\(GD_{WS} = GD_T - GD_{BS}\)</span> (the chunk at the start of the assumptions asserts that it equals <span class="math inline">\(1 - (\theta_A + \theta_B)/2\)</span> to <span class="math inline">\(10^{-12}\)</span>), which neither the left panel of <a href="#fig-cycles-diversity" class="quarto-xref">Figure&nbsp;<span>23.3</span></a> nor the <code>GD</code> column shows (<a href="#tbl-cycles-partition" class="quarto-xref">Table&nbsp;<span>23.8</span></a>):</p>
+<div class="cell" data-layout-align="center">
+<div id="tbl-cycles-partition" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-cycles-partition-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;23.8: Partition of the gene diversity of the 60 selected hybrids at cycles 0 and 15, <span class="math inline">\(GD_T = GD_{WS} + GD_{BS}\)</span>, by diversity budget <span class="math inline">\(\alpha_{\max}\)</span> (unconstrained, 0.02, 0.005); mean over five founder draws.
+</figcaption>
+<div aria-describedby="tbl-cycles-partition-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="cell caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 27%">
+<col style="width: 6%">
+<col style="width: 7%">
+<col style="width: 28%">
+<col style="width: 29%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">budget <span class="math inline">\(\alpha_{\max}\)</span></th>
+<th style="text-align: right;">cycle</th>
+<th style="text-align: right;"><span class="math inline">\(GD_T\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(GD_{WS}\)</span> (within pools)</th>
+<th style="text-align: right;"><span class="math inline">\(GD_{BS}\)</span> (between pools)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">unconstrained</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.316</td>
+<td style="text-align: right;">0.268</td>
+<td style="text-align: right;">0.048</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">unconstrained</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">0.181</td>
+<td style="text-align: right;">0.006</td>
+<td style="text-align: right;">0.175</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\alpha_{\max} = 0.02\)</span></td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.324</td>
+<td style="text-align: right;">0.281</td>
+<td style="text-align: right;">0.043</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\alpha_{\max} = 0.02\)</span></td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">0.207</td>
+<td style="text-align: right;">0.040</td>
+<td style="text-align: right;">0.166</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\alpha_{\max} = 0.005\)</span></td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.328</td>
+<td style="text-align: right;">0.288</td>
+<td style="text-align: right;">0.040</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\alpha_{\max} = 0.005\)</span></td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">0.250</td>
+<td style="text-align: right;">0.102</td>
+<td style="text-align: right;">0.148</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>Result. <span class="math inline">\(GD_{BS}\)</span> at cycle 15 is above its cycle-0 value in 15 of 15 runs (three budgets by five seeds) and is non-decreasing over the 15 cycles in 14; <span class="math inline">\(GD_{WS}\)</span> at cycle 15 is below its cycle-0 value in 15. Seed-averaged, <span class="math inline">\(GD_{WS}\)</span> falls from 0.268 to 0.006 unconstrained, from 0.281 to 0.04 under <span class="math inline">\(\alpha_{\max} = 0.02\)</span> and from 0.288 to 0.102 under <span class="math inline">\(\alpha_{\max} = 0.005\)</span>, while <span class="math inline">\(GD_{BS}\)</span> rises in all three. Interpretation, and what limits it: under drift and selection on an additive index acting together, the two pools separate while each loses its own diversity, and the budgets that keep more <span class="math inline">\(GD_T\)</span> keep more of the within-pool part. <a href="02-subdivided.html" class="quarto-xref"><span>Chapter 3</span></a> shows that drift alone in two closed pools of equal weight raises <span class="math inline">\(GD_{BS}\)</span> in expectation, and this chapter has no arm that separates drift from selection for <span class="math inline">\(GD_{BS}\)</span>, so the rise is not attributed to selection, and with an additive index it is not evidence about heterosis. The within/between trade is the one <a href="06-metric-catalogue.html" class="quarto-xref"><span>Chapter 11</span></a>’s partition was built to expose.</p>
+<p><a href="12-case-study.html" class="quarto-xref"><span>Chapter 25</span></a> is a single cycle in operational detail, with another simulator and another selection size (<code>stage1_simulate()</code> and 10% of the candidates, against <code>simulate_pools()</code>, 300 QTL and 60 of 625 here), so it is a pointer to this chapter and not its cycle 0. Its checklist for “Across cycles” lists: the per-stage loss ledger, the linearity of <span class="math inline">\(\log(1 - F)\)</span>, periodic germplasm injection, and the diversity cost per cycle when cycle time is shortened. This chapter bears on two of them, the linearity of <span class="math inline">\(\log(1 - F)\)</span> (<span class="math inline">\(R^2\)</span> in <a href="#tbl-cycles-rate" class="quarto-xref">Table&nbsp;<span>23.3</span></a>) and injection (one injection arm). It has no stage structure (C8), so it says nothing about the ledger, and its rate is per cycle in a discrete-cycle model (C11), so it says nothing about the fourth item. Freezing <span class="math inline">\(p_0\)</span>, which is in the “Setting up” list of that chapter and not in its “Across cycles” list, is shown in <a href="#sec-cycles-freezing" class="quarto-xref"><span>Section 23.2</span></a>.</p>
 <!-- reproduce-chapter -->
 </section>
 <section id="reproduce-this-chapter" class="level2 unnumbered">
@@ -1284,22 +1702,31 @@ window.Quarto = {
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
 <div id="ref-allier2019" class="csl-entry" role="listitem">
-Allier, A., C. Lehermeier, A. Charcosset, L. Moreau, and S. Teyssèdre. 2019. <span>“Improving Short- and Long-Term Genetic Gain by Accounting for Within-Family Variance in Optimal Cross-Selection.”</span> <em>Frontiers in Genetics</em> 10. <a href="https://doi.org/10.3389/fgene.2019.01006">https://doi.org/10.3389/fgene.2019.01006</a>.
+Allier, A., C. Lehermeier, A. Charcosset, L. Moreau, and S. Teyssèdre. 2019. <span>“Improving Short- and Long-Term Genetic Gain by Accounting for Within-Family Variance in Optimal Cross-Selection.”</span> <em>Frontiers in Genetics</em> 10 (1006). <a href="https://doi.org/10.3389/fgene.2019.01006">https://doi.org/10.3389/fgene.2019.01006</a>.
+</div>
+<div id="ref-balding1995" class="csl-entry" role="listitem">
+Balding, David J., and Richard A. Nichols. 1995. <span>“A Method for Quantifying Differentiation Between Populations at Multi-Allelic Loci and Its Implications for Investigating Identity and Paternity.”</span> <em>Genetica</em> 96 (1-2): 3–12. <a href="https://doi.org/10.1007/BF01441146">https://doi.org/10.1007/BF01441146</a>.
+</div>
+<div id="ref-bulmer1971" class="csl-entry" role="listitem">
+Bulmer, Michael G. 1971. <span>“The Effect of Selection on Genetic Variability.”</span> <em>The American Naturalist</em> 105 (943): 201–11. <a href="https://doi.org/10.1086/282718">https://doi.org/10.1086/282718</a>.
 </div>
 <div id="ref-doublet2019" class="csl-entry" role="listitem">
-Doublet, A.-C., P. Croiseau, S. Fritz, A. Michenet, C. Hozé, and C. Danchin-Burge. 2019. <span>“The Impact of Genomic Selection on Genetic Diversity and Genetic Gain in Three <span>French</span> Dairy Cattle Breeds.”</span> <em>Genetics Selection Evolution</em> 51. <a href="https://doi.org/10.1186/s12711-019-0495-1">https://doi.org/10.1186/s12711-019-0495-1</a>.
+Doublet, A.-C., P. Croiseau, S. Fritz, et al. 2019. <span>“The Impact of Genomic Selection on Genetic Diversity and Genetic Gain in Three <span>French</span> Dairy Cattle Breeds.”</span> <em>Genetics Selection Evolution</em> 51 (52). <a href="https://doi.org/10.1186/s12711-019-0495-1">https://doi.org/10.1186/s12711-019-0495-1</a>.
 </div>
 <div id="ref-gorjanc2018" class="csl-entry" role="listitem">
 Gorjanc, G., R. C. Gaynor, and J. M. Hickey. 2018. <span>“Optimal Cross Selection for Long-Term Genetic Gain in Two-Part Programs with Rapid Recurrent Genomic Selection.”</span> <em>Theoretical and Applied Genetics</em> 131: 1953–66. <a href="https://doi.org/10.1007/s00122-018-3125-3">https://doi.org/10.1007/s00122-018-3125-3</a>.
 </div>
 <div id="ref-muller2018" class="csl-entry" role="listitem">
-Müller, D., P. Schopp, and A. E. Melchinger. 2018. <span>“Selection on Expected Maximum Haploid Breeding Values Can Increase Genetic Gain in Recurrent Genomic Selection.”</span> <em>G3: Genes, Genomes, Genetics</em> 8. <a href="https://doi.org/10.1534/g3.118.200091">https://doi.org/10.1534/g3.118.200091</a>.
+Müller, D., P. Schopp, and A. E. Melchinger. 2018. <span>“Selection on Expected Maximum Haploid Breeding Values Can Increase Genetic Gain in Recurrent Genomic Selection.”</span> <em>G3: Genes, Genomes, Genetics</em> 8 (4): 1173–81. <a href="https://doi.org/10.1534/g3.118.200091">https://doi.org/10.1534/g3.118.200091</a>.
 </div>
 <div id="ref-rutkoski2019" class="csl-entry" role="listitem">
-Rutkoski, J. E. 2019. <span>“Estimation of Realized Rates of Genetic Gain and Indicators for Breeding Program Assessment.”</span> <em>Crop Science</em> 59. <a href="https://doi.org/10.2135/cropsci2018.09.0537">https://doi.org/10.2135/cropsci2018.09.0537</a>.
+Rutkoski, J. E. 2019. <span>“Estimation of Realized Rates of Genetic Gain and Indicators for Breeding Program Assessment.”</span> <em>Crop Science</em> 59 (3): 981–93. <a href="https://doi.org/10.2135/cropsci2018.09.0537">https://doi.org/10.2135/cropsci2018.09.0537</a>.
+</div>
+<div id="ref-sanchez2023" class="csl-entry" role="listitem">
+Sanchez, Dimitri, Sarah Ben Sadoun, Tristan Mary-Huard, Antoine Allier, Laurence Moreau, and Alain Charcosset. 2023. <span>“<span class="nocase">Improving the use of plant genetic resources to sustain breeding programs’ efficiency</span>.”</span> <em>Proceedings of the National Academy of Sciences</em> 120 (14): e2205780119. <a href="https://doi.org/10.1073/pnas.2205780119">https://doi.org/10.1073/pnas.2205780119</a>.
 </div>
 <div id="ref-wientjes2022" class="csl-entry" role="listitem">
-Wientjes, Y. C. J., P. Bijma, M. P. L. Calus, B. J. Zwaan, Z. G. Vitezica, and J. van den Heuvel. 2022. <span>“The Long-Term Effects of Genomic Selection: 1. Response to Selection, Additive Genetic Variance, and Genetic Architecture.”</span> <em>Genetics Selection Evolution</em> 54. <a href="https://doi.org/10.1186/s12711-022-00709-7">https://doi.org/10.1186/s12711-022-00709-7</a>.
+Wientjes, Y. C. J., P. Bijma, M. P. L. Calus, B. J. Zwaan, Z. G. Vitezica, and J. van den Heuvel. 2022. <span>“The Long-Term Effects of Genomic Selection: 1. Response to Selection, Additive Genetic Variance, and Genetic Architecture.”</span> <em>Genetics Selection Evolution</em> 54 (19). <a href="https://doi.org/10.1186/s12711-022-00709-7">https://doi.org/10.1186/s12711-022-00709-7</a>.
 </div>
 </div>
 </section>

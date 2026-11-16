@@ -902,15 +902,15 @@ Table&nbsp;11.3: Time per call, in microseconds, of the two routes to <span clas
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">us_matrix</td>
-<td style="text-align: right;">11.93</td>
+<td style="text-align: right;">7.95</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">us_frequency</td>
-<td style="text-align: right;">185.31</td>
+<td style="text-align: right;">127.50</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">ratio</td>
-<td style="text-align: right;">15.53</td>
+<td style="text-align: right;">16.04</td>
 </tr>
 </tbody>
 </table>
@@ -1269,7 +1269,7 @@ Table&nbsp;11.8: Effective dimensionality <span class="math inline">\(D_{\text{e
 </section>
 <section id="decomposition-by-heterotic-group" class="level2" data-number="11.8">
 <h2 data-number="11.8" class="anchored" data-anchor-id="decomposition-by-heterotic-group"><span class="header-section-number">11.8</span> Decomposition by heterotic group</h2>
-<p>The diversity <strong>between</strong> the two heterotic pools and the diversity <strong>within</strong> each are different resources. With inbred parents, the complete factorial and flat dominance (<span class="math inline">\(d_k \equiv 1\)</span>), the divergence term of expected heterosis is <code>GD_BS</code> itself (<a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 5</span></a>); with <span class="math inline">\(d_k\)</span> varying across loci it is the <span class="math inline">\(d\)</span>-weighted version, which <code>GD_BS</code> does not fix, so divergence is worth having where it lands on the dominance loci and worth nothing where it does not. The diversity within each pool is the fuel for future progress; <code>run_cycles()</code> logs <code>theta_A</code>, <code>theta_B</code>, <code>GD_T</code> and <code>GD_BS</code> every cycle, and the cached <code>cycles_*.csv</code> carry those columns, but <a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 23</span></a> aggregates and plots only a subset (index, <code>GD</code>, <code>GD_BS</code>, <code>F_hom</code>, <code>F_drift</code>, <code>max_line</code>) and never reads the within-pool columns, so this book states that within-pool diversity is the fuel and does not demonstrate it. The simulated index of this chapter has no dominance term, so <code>GD_BS</code> below is a component of a partition and not a heterosis measure. Following <span class="citation" data-cites="caballero2002">Caballero and Toro (<a href="99-references.html#ref-caballero2002" role="doc-biblioref">2002</a>)</span>, compute molecular coancestry between lines and weight it by each line’s usage among the selected hybrids:</p>
+<p>The diversity <strong>between</strong> the two heterotic pools and the diversity <strong>within</strong> each are different resources. With inbred parents, the complete factorial and flat dominance (<span class="math inline">\(d_k \equiv 1\)</span>), the divergence term of expected heterosis is <code>GD_BS</code> itself (<a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 5</span></a>); with <span class="math inline">\(d_k\)</span> varying across loci it is the <span class="math inline">\(d\)</span>-weighted version, which <code>GD_BS</code> does not fix, so divergence is worth having where it lands on the dominance loci and worth nothing where it does not. The diversity within each pool is the fuel for future progress; <code>run_cycles()</code> logs <code>theta_A</code>, <code>theta_B</code>, <code>GD_T</code> and <code>GD_BS</code> every cycle, and the cached <code>cycles_*.csv</code> carry those columns, but <a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 23</span></a> plots only the index, <code>GD</code> (which is <span class="math inline">\(GD_T\)</span>) and <code>F_drift</code>, and reads the within-pool diversity as <span class="math inline">\(GD_{WS} = GD_T - GD_{BS}\)</span> at cycles 0 and 15 (tabulated) and checks <code>theta_A</code> and <code>theta_B</code> against it in every row (an identity, not a result), so this book states that within-pool diversity is the fuel and does not demonstrate it. The simulated index of this chapter has no dominance term, so <code>GD_BS</code> below is a component of a partition and not a heterosis measure. Following <span class="citation" data-cites="caballero2002">Caballero and Toro (<a href="99-references.html#ref-caballero2002" role="doc-biblioref">2002</a>)</span>, compute molecular coancestry between lines and weight it by each line’s usage among the selected hybrids:</p>
 <p><span id="eq-catalogue-theta-pools"><span class="math display">\[\theta_A = \mathbf{w}_A' \mathbf{f}^{L} \mathbf{w}_A, \qquad
   \theta_B = \mathbf{w}_B' \mathbf{f}^{L} \mathbf{w}_B, \qquad
   \theta_{AB} = \mathbf{w}_A' \mathbf{f}^{L} \mathbf{w}_B, \tag{11.10}\]</span></span></p>

@@ -668,9 +668,16 @@ window.Quarto = {
 <p><a href="11-plant-literature.html" class="quarto-xref"><span>Chapter 21</span></a> draws on two screened corpora. This appendix describes them so the claims there can be checked, extended, or disagreed with.</p>
 <section id="what-they-are" class="level2" data-number="D.1">
 <h2 data-number="D.1" class="anchored" data-anchor-id="what-they-are"><span class="header-section-number">D.1</span> What they are</h2>
+<p><a href="#tbl-corpora-files" class="quarto-xref">Table&nbsp;<span>D.1</span></a> lists the two corpora.</p>
 <div class="cell" data-layout-align="center">
+<div id="tbl-corpora-files" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-corpora-files-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;D.1: The two screened corpora: number of records, publication years and subject of each file.
+</figcaption>
+<div aria-describedby="tbl-corpora-files-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<table class="caption-top table table-sm table-striped small">
+<table class="cell caption-top table table-sm table-striped small">
 <colgroup>
 <col style="width: 20%">
 <col style="width: 6%">
@@ -702,22 +709,23 @@ window.Quarto = {
 </table>
 </div>
 </div>
-<p>Both are annotated screens, not exhaustive searches. The plant corpus came from 2004 records across 29 plant-breeding queries on Crossref and Europe PMC, of which 687 were scored relevant.</p>
+</figure>
+</div>
+</div>
+<p>Both are annotated screens, not exhaustive searches. The plant corpus came from 2004 records across 29 plant-breeding queries on Crossref and Europe PMC, of which 687 were retained (relevance 2, related background, or 3, directly relevant; 158 are 3).</p>
 </section>
 <section id="structure" class="level2" data-number="D.2">
 <h2 data-number="D.2" class="anchored" data-anchor-id="structure"><span class="header-section-number">D.2</span> Structure</h2>
+<p>The plant file has the columns <code>doi</code>, <code>year</code>, <code>authors</code>, <code>title</code>, <code>journal</code>, <code>citations</code>, <code>relevance</code>, <code>crop</code>, <code>metric_used</code>, <code>selection_method</code>, <code>contribution</code>, <code>url</code>. The ones that carry the screening annotation are described in <a href="#tbl-corpora-columns" class="quarto-xref">Table&nbsp;<span>D.2</span></a>.</p>
 <div class="cell" data-layout-align="center">
-<details class="code-fold">
-<summary>Show code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(pl)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [1] "doi"              "year"             "authors"          "title"           </span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [5] "journal"          "citations"        "relevance"        "crop"            </span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [9] "metric_used"      "selection_method" "contribution"     "url"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
-</div>
-<div class="cell" data-layout-align="center">
+<div id="tbl-corpora-columns" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-corpora-columns-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;D.2: Annotation columns of the corpus files and what each holds.
+</figcaption>
+<div aria-describedby="tbl-corpora-columns-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<table class="caption-top table table-sm table-striped small">
+<table class="cell caption-top table table-sm table-striped small">
 <colgroup>
 <col style="width: 39%">
 <col style="width: 60%">
@@ -757,26 +765,55 @@ window.Quarto = {
 </table>
 </div>
 </div>
+</figure>
+</div>
+</div>
 </section>
 <section id="relevance-and-coverage" class="level2" data-number="D.3">
 <h2 data-number="D.3" class="anchored" data-anchor-id="relevance-and-coverage"><span class="header-section-number">D.3</span> Relevance and coverage</h2>
 <div class="cell" data-layout-align="center">
-<details class="code-fold">
-<summary>Show code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(<span class="at">plant =</span> pl<span class="sc">$</span>relevance)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; plant</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   2   3 </span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 529 158</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(<span class="at">animal =</span> ani<span class="sc">$</span>relevance)</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; animal</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   2   3 </span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 235  89</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
+<div id="tbl-corpora-relevance" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-corpora-relevance-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;D.3: Number of screened records by relevance score (3 = directly relevant, 2 = related background) in each file.
+</figcaption>
+<div aria-describedby="tbl-corpora-relevance-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="cell caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Corpus</th>
+<th style="text-align: right;">Relevance 2</th>
+<th style="text-align: right;">Relevance 3</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">plant</td>
+<td style="text-align: right;">529</td>
+<td style="text-align: right;">158</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">animal</td>
+<td style="text-align: right;">235</td>
+<td style="text-align: right;">89</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
 </div>
 <div class="cell" data-layout-align="center">
+<div id="tbl-corpora-crops" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-corpora-crops-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;D.4: Crop coverage of the directly relevant plant records (relevance 3): the ten most frequent crop labels and their number of records.
+</figcaption>
+<div aria-describedby="tbl-corpora-crops-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<table class="caption-top table table-sm table-striped small">
-<caption>Crop coverage of the directly relevant plant records.</caption>
+<table class="cell caption-top table table-sm table-striped small">
 <thead>
 <tr class="header">
 <th style="text-align: left;">crop</th>
@@ -828,23 +865,35 @@ window.Quarto = {
 </table>
 </div>
 </div>
-<p>Maize dominates, which is the intended bias – but it also means every claim in <a href="11-plant-literature.html" class="quarto-xref"><span>Chapter 21</span></a> about crops other than maize rests on a handful of records.</p>
+</figure>
+</div>
+</div>
+<p>Maize dominates (<a href="#tbl-corpora-crops" class="quarto-xref">Table&nbsp;<span>D.4</span></a>, <a href="#fig-plant-landscape" class="quarto-xref">Figure&nbsp;<span>D.2</span></a>), which is the intended bias – but it also means every claim in <a href="11-plant-literature.html" class="quarto-xref"><span>Chapter 21</span></a> about crops other than maize rests on a handful of records.</p>
+<p>The publication years of both files are in <a href="#fig-corpora-years" class="quarto-xref">Figure&nbsp;<span>D.1</span></a>.</p>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="93-corpora_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" alt="Publication year of the screened records" width="1050"></p>
-<figcaption>Publication year of the screened records. Both corpora are deliberately post-2017.</figcaption>
+<div id="fig-corpora-years" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" alt="Two bar charts of the number of screened records per publication year, plant file on the left and animal file on the right. Both rise from a handful of records or fewer in the earliest year to the largest counts in 2025 and 2026.">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-corpora-years-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="93-corpora_files/figure-html/fig-corpora-years-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Two bar charts of the number of screened records per publication year, plant file on the left and animal file on the right. Both rise from a handful of records or fewer in the earliest year to the largest counts in 2025 and 2026." width="1050">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-corpora-years-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;D.1: Number of screened records per publication year in the plant file (left, <code>bibliography_plant.csv</code>) and the animal file (right, <code>bibliography_animal.csv</code>); each bar is a count of records, with no uncertainty, and the two panels do not share a vertical scale. The plant file starts in 2017 with 1 record and is mainly from 2018 onward; the animal file starts in 2018.
+</figcaption>
 </figure>
 </div>
 </div>
 </div>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="figs/plant_lit_landscape.png" class="img-fluid figure-img" alt="Which diversity metrics the plant literature actually reports" width="727"></p>
-<figcaption>Which diversity metrics the plant literature actually reports.</figcaption>
+<div id="fig-plant-landscape" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" alt="Two horizontal bar charts. Left: records per diversity metric category in the plant usage table, from population structure (303 records) down to effective size or status number (17); each bar is split into maize (dark grey) and other crops (light grey), and red outlines mark expected heterozygosity, marker coancestry, allelic richness and effective size. Right: the ten most frequent crop labels among the screened plant records, maize (197) far ahead of wheat (42), multi-crop (39) and rice (33).">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-plant-landscape-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="93-corpora_files/figure-html/fig-plant-landscape-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Two horizontal bar charts. Left: records per diversity metric category in the plant usage table, from population structure (303 records) down to effective size or status number (17); each bar is split into maize (dark grey) and other crops (light grey), and red outlines mark expected heterozygosity, marker coancestry, allelic richness and effective size. Right: the ten most frequent crop labels among the screened plant records, maize (197) far ahead of wheat (42), multi-crop (39) and rice (33)." width="1350">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-plant-landscape-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;D.2: Left: the usage table <code>plant_metric_usage.csv</code> as shipped, records per metric category, maize and other crops; it is an external classification with no producer in this repository and is not recomputed (see <a href="11-plant-literature.html#tbl-plant-usage-check" class="quarto-xref">Table&nbsp;<span>21.2</span></a> in <a href="11-plant-literature.html" class="quarto-xref"><span>Chapter 21</span></a>). Right: the ten most frequent crop labels among the screened records, with all labels containing ‘maize’ pooled; the labels ‘none’ and empty are left out. In both panels the denominator is the screened records of <code>bibliography_plant.csv</code> (relevance 2 or 3), 2017-2026. Red outline: the categories to which <a href="11-plant-literature.html" class="quarto-xref"><span>Chapter 21</span></a> maps the recommended metrics (expected heterozygosity for the quantity inside the proportional loss, coancestry, allelic richness, effective size), an approximate and non-unique mapping. Coancestry and allelic richness tie at rank 6 by record count; effective size ranks 12 of 12.
+</figcaption>
 </figure>
 </div>
 </div>
@@ -854,42 +903,76 @@ window.Quarto = {
 <h2 data-number="D.4" class="anchored" data-anchor-id="themes-in-the-animal-corpus"><span class="header-section-number">D.4</span> Themes in the animal corpus</h2>
 <p>The <code>theme</code> column is multi-valued. Splitting it:</p>
 <div class="cell" data-layout-align="center">
-<details class="code-fold">
-<summary>Show code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>th <span class="ot">&lt;-</span> <span class="fu">unlist</span>(<span class="fu">strsplit</span>(ani<span class="sc">$</span>theme[ani<span class="sc">$</span>relevance <span class="sc">==</span> <span class="dv">3</span>], <span class="st">";</span><span class="sc">\\</span><span class="st">s*"</span>))</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>th <span class="ot">&lt;-</span> <span class="fu">trimws</span>(th); th <span class="ot">&lt;-</span> th[<span class="fu">nzchar</span>(th)]</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sort</span>(<span class="fu">table</span>(th), <span class="at">decreasing =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; th</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         OCS / contribution optimisation Coancestry / relationship matrix choice </span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                      68                                      61 </span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          Optimisation algorithms / cost         Allelic richness / rare alleles </span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                      27                                      20 </span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                          Effective size         Heterozygosity / gene diversity </span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                      18                                      15 </span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      Core collection / subset selection </span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                       9</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
+<div id="tbl-corpora-themes" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-corpora-themes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;D.5: Themes of the directly relevant records (relevance 3) of <code>bibliography_animal.csv</code>, after splitting the semicolon-separated <code>theme</code> field; a record with several themes is counted once in each.
+</figcaption>
+<div aria-describedby="tbl-corpora-themes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="cell caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">theme</th>
+<th style="text-align: right;">records</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">OCS / contribution optimisation</td>
+<td style="text-align: right;">68</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Coancestry / relationship matrix choice</td>
+<td style="text-align: right;">61</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Optimisation algorithms / cost</td>
+<td style="text-align: right;">27</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Allelic richness / rare alleles</td>
+<td style="text-align: right;">20</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Effective size</td>
+<td style="text-align: right;">18</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Heterozygosity / gene diversity</td>
+<td style="text-align: right;">15</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Core collection / subset selection</td>
+<td style="text-align: right;">9</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
 </div>
 </section>
 <section id="querying-them" class="level2" data-number="D.5">
 <h2 data-number="D.5" class="anchored" data-anchor-id="querying-them"><span class="header-section-number">D.5</span> Querying them</h2>
-<p>The corpora are ordinary CSVs, so the claims in <a href="11-plant-literature.html" class="quarto-xref"><span>Chapter 21</span></a> are checkable in one line each.</p>
+<p>The corpora are ordinary CSVs. The queries below count what the shipped <code>metric_used</code> column holds; they do not reproduce the usage table of <a href="11-plant-literature.html" class="quarto-xref"><span>Chapter 21</span></a>, which is an external classification with no producer here and gives larger counts (<a href="11-plant-literature.html#tbl-plant-usage-check" class="quarto-xref">Table&nbsp;<span>21.2</span></a> compares the two).</p>
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># records that report a coancestry or kinship metric</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">grepl</span>(<span class="st">"coancestry|kinship|relatedness"</span>, pl<span class="sc">$</span>metric_used, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 12</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># records using ROH, and how many of those are maize</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>roh <span class="ot">&lt;-</span> <span class="fu">grepl</span>(<span class="st">"ROH"</span>, pl<span class="sc">$</span>metric_used, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">roh_total =</span> <span class="fu">sum</span>(roh), <span class="at">roh_maize =</span> <span class="fu">sum</span>(roh <span class="sc">&amp;</span> <span class="fu">grepl</span>(<span class="st">"maize"</span>, pl<span class="sc">$</span>crop, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>)))</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; roh_total roh_maize </span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         1         0</span></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co"># the most-cited directly relevant maize records</span></span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>mz <span class="ot">&lt;-</span> pl[pl<span class="sc">$</span>relevance <span class="sc">==</span> <span class="dv">3</span> <span class="sc">&amp;</span> <span class="fu">grepl</span>(<span class="st">"maize"</span>, pl<span class="sc">$</span>crop, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>), ]</span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(mz[<span class="fu">order</span>(<span class="sc">-</span>mz<span class="sc">$</span>citations), <span class="fu">c</span>(<span class="st">"year"</span>, <span class="st">"title"</span>, <span class="st">"citations"</span>)], <span class="dv">6</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># records that report a coancestry or kinship metric</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">grepl</span>(<span class="st">"coancestry|kinship|relatedness"</span>, pl<span class="sc">$</span>metric_used, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 12</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># records using ROH, and how many of those are maize</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>roh <span class="ot">&lt;-</span> <span class="fu">grepl</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">bROH</span><span class="sc">\\</span><span class="st">b|runs of homozygosity"</span>, pl<span class="sc">$</span>metric_used, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">roh_total =</span> <span class="fu">sum</span>(roh), <span class="at">roh_maize =</span> <span class="fu">sum</span>(roh <span class="sc">&amp;</span> <span class="fu">grepl</span>(<span class="st">"maize"</span>, pl<span class="sc">$</span>crop, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>)))</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; roh_total roh_maize </span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         0         0</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co"># the most-cited directly relevant maize records</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>mz <span class="ot">&lt;-</span> pl[pl<span class="sc">$</span>relevance <span class="sc">==</span> <span class="dv">3</span> <span class="sc">&amp;</span> <span class="fu">grepl</span>(<span class="st">"maize"</span>, pl<span class="sc">$</span>crop, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>), ]</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(mz[<span class="fu">order</span>(<span class="sc">-</span>mz<span class="sc">$</span>citations), <span class="fu">c</span>(<span class="st">"year"</span>, <span class="st">"title"</span>, <span class="st">"citations"</span>)], <span class="dv">6</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
 <div class="kable-table">
@@ -953,9 +1036,9 @@ window.Quarto = {
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># the animal-side records on matrix choice</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>mc <span class="ot">&lt;-</span> ani[<span class="fu">grepl</span>(<span class="st">"Coancestry / relationship matrix choice"</span>, ani<span class="sc">$</span>theme), ]</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(mc[<span class="fu">order</span>(<span class="sc">-</span>mc<span class="sc">$</span>citations), <span class="fu">c</span>(<span class="st">"year"</span>, <span class="st">"title"</span>, <span class="st">"citations"</span>)], <span class="dv">6</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># the animal-side records on matrix choice</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>mc <span class="ot">&lt;-</span> ani[<span class="fu">grepl</span>(<span class="st">"Coancestry / relationship matrix choice"</span>, ani<span class="sc">$</span>theme), ]</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(mc[<span class="fu">order</span>(<span class="sc">-</span>mc<span class="sc">$</span>citations), <span class="fu">c</span>(<span class="st">"year"</span>, <span class="st">"title"</span>, <span class="st">"citations"</span>)], <span class="dv">6</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
 <div class="kable-table">
@@ -1026,10 +1109,17 @@ window.Quarto = {
 </section>
 <section id="classical-references" class="level2" data-number="D.7">
 <h2 data-number="D.7" class="anchored" data-anchor-id="classical-references"><span class="header-section-number">D.7</span> Classical references</h2>
-<p>The corpora are deliberately post-2017. The classical results the book rests on are cited from the source literature, and collected in <code>book/references.bib</code>:</p>
+<p>The plant file starts in 2017 (one record; mainly 2018 onward) and the animal file in 2018, so the corpora leave out classical work by construction. The classical results the book rests on are cited from the source literature, and collected in <code>book/references.bib</code> with two exceptions stated after the table:</p>
+<p><a href="#tbl-corpora-classical" class="quarto-xref">Table&nbsp;<span>D.6</span></a> lists them.</p>
 <div class="cell" data-layout-align="center">
+<div id="tbl-corpora-classical" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-corpora-classical-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;D.6: Classical results the book rests on and the source each is cited from.
+</figcaption>
+<div aria-describedby="tbl-corpora-classical-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<table class="caption-top table table-sm table-striped small">
+<table class="cell caption-top table table-sm table-striped small">
 <thead>
 <tr class="header">
 <th style="text-align: left;">Result</th>
@@ -1081,6 +1171,10 @@ window.Quarto = {
 </table>
 </div>
 </div>
+</figure>
+</div>
+</div>
+<p>Wright (1978) and Schnell &amp; Utz (1975) are not in <code>book/references.bib</code> and are given in the table by author and year only. A Crossref bibliographic query for each returned no record of either work (for Wright, only reviews of the book), so neither entry was checked against a source record here.</p>
 <!-- reproduce-chapter -->
 </section>
 <section id="reproduce-this-chapter" class="level2 unnumbered">

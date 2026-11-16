@@ -677,32 +677,27 @@ window.Quarto = {
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>ref_theta</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (idx, ctx) </span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; mean(ctx[["f"]][idx, idx])</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x78cefa32d8&gt;</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>theta_group</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (idx, ctx) </span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; {</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     f &lt;- ctx[["f"]]</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     if (!is.matrix(f)) </span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         stop("ctx[[\"f\"]] (hybrid coancestry) is missing")</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     mean(f[idx, idx])</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x78cefdc7b0&gt;</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>fast_theta</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function (idx, ctx) </span></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; {</span></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     cnt &lt;- line_counts(idx, ctx)</span></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     u &lt;- which(cnt &gt; 0L)</span></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     cu &lt;- cnt[u]</span></span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     s &lt;- sum(cu)</span></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     as.numeric(crossprod(cu, ctx$fL[u, u, drop = FALSE] %*% cu))/(s * </span></span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         s)</span></span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x78cdc2fdc8&gt;</span></span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function(idx, ctx) mean(ctx[["f"]][idx, idx])</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x7bb384b690&gt;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>theta_group</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function(idx, ctx) {</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   f &lt;- ctx[["f"]]</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   if (!is.matrix(f)) stop("ctx[[\"f\"]] (hybrid coancestry) is missing")</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   mean(f[idx, idx])</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x7bb39195b0&gt;</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>fast_theta</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; function(idx, ctx) {</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   cnt &lt;- line_counts(idx, ctx)</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   u   &lt;- which(cnt &gt; 0L)                       # restrict to used lines</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   cu  &lt;- cnt[u]</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   s   &lt;- sum(cu)</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   as.numeric(crossprod(cu, ctx$fL[u, u, drop = FALSE] %*% cu)) / (s * s)</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x7bb3957738&gt;</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <p>Three implementations of one quantity: a literal mean over the submatrix, the packaged version, and the line-route collapse that never forms the submatrix at all. They must agree.</p>
@@ -1247,7 +1242,7 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td style="text-align: left;"><a href="11c-limits.html" class="quarto-xref"><span>Chapter 24</span></a></td>
-<td style="text-align: left;">Robertson’s limit against the observed trajectory, the paired selected-versus-random variance test in both the unlinked and the linked arm</td>
+<td style="text-align: left;">Robertson’s forecast against the cached trajectories, the paired selected-versus-random variance test on the cached unlinked file (with a live re-run of seed 1 and of twenty further seeds), and on the cached linked file (not reproducible from this repository)</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;"><a href="12-case-study.html" class="quarto-xref"><span>Chapter 25</span></a></td>
@@ -1422,6 +1417,10 @@ window.Quarto = {
 <td style="text-align: left;"><code>data/sparse_primary_studies.csv</code>, <code>data/sparse_literature_parameters.csv</code></td>
 <td style="text-align: left;">hand-extracted from the six primary papers of <a href="04f-sparse-testing.html" class="quarto-xref"><span>Chapter 19</span></a></td>
 </tr>
+<tr class="odd">
+<td style="text-align: left;"><code>data/joint_core_sweep.csv</code>, <code>data/joint_contrasts.csv</code>, <code>data/joint_optimiser.csv</code></td>
+<td style="text-align: left;">regenerated in this repository by <code>regenerate.R joint</code> (about 33 min CPU): the sweep of <a href="04g-joint-allocation.html" class="quarto-xref"><span>Chapter 20</span></a>, its paired contrasts and the exchange-search log; a rerun gave the first two byte-identical to the tracked files and the third identical except the wall-clock column <code>sec_600</code>, which is machine-dependent</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -1440,7 +1439,8 @@ window.Quarto = {
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>Rscript book<span class="sc">/</span>scripts<span class="sc">/</span>regenerate.R search_exact  <span class="co"># just the exact oracle</span></span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>Rscript book<span class="sc">/</span>scripts<span class="sc">/</span>regenerate.R cycles   <span class="co"># the recurrent-selection trajectories</span></span>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>Rscript book<span class="sc">/</span>scripts<span class="sc">/</span>regenerate.R mating   <span class="co"># the mating-design core sweep (~6 min)</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>Rscript book<span class="sc">/</span>scripts<span class="sc">/</span>regenerate.R sparse   <span class="co"># the sparse-testing core sweep (~5 min)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>Rscript book<span class="sc">/</span>scripts<span class="sc">/</span>regenerate.R sparse   <span class="co"># the sparse-testing core sweep (~5 min)</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>Rscript book<span class="sc">/</span>scripts<span class="sc">/</span>regenerate.R joint    <span class="co"># the joint-allocation sweep, contrasts and optimiser log (~30 min CPU)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <p>The script is the single place where the expensive computations live. It is never invoked by <code>quarto render</code>.</p>
@@ -1465,7 +1465,8 @@ window.Quarto = {
 <p><strong>Monte Carlo checks have Monte Carlo error.</strong> Where a test asserts agreement with a simulated expectation rather than an algebraic identity, the tolerance is loose by necessity, and a genuinely small bias would pass.</p>
 <p><strong>Everything is verified on simulated data.</strong> The identities are algebraic and will hold on real genotypes. The <em>empirical</em> results – which metrics are redundant, how much index a constraint costs – were derived on simulated markers, and <a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 12</span></a> says explicitly that the redundancy analysis rests on a cached file whose setting (<span class="math inline">\(F_{BN}\)</span>, number of lines and markers) is not recorded, and that it should be re-derived on real genotypes before being treated as settled.</p>
 <p><strong>One chapter’s headline results come from outside this repository.</strong> The mating-design sweep of <a href="04e-mating-design.html" class="quarto-xref"><span>Chapter 18</span></a> (<code>mating_scenarios_summary.csv</code> and its siblings) was produced by an external study whose code needs AlphaSimR and <code>sommer</code>; it shipped with its own 37-check validation report, summarised in that chapter, but it is not re-run by anything here. What is re-run is its phenotypic core (<code>regenerate.R mating</code>), and <a href="04e-mating-design.html#sec-mating-reproduce" class="quarto-xref"><span>Section 18.10</span></a> compares the two.</p>
-<p>The sparse-testing chapter (<a href="04f-sparse-testing.html" class="quarto-xref"><span>Chapter 19</span></a>) has the same structure. Its REML grid, two-stage scenario and genomic layer are cached from an external study, which validated its own estimator on the complete design (<a href="04f-sparse-testing.html#tbl-sparse-validation" class="quarto-xref">Table&nbsp;<span>19.5</span></a>). The in-repo <code>regenerate.R sparse</code> re-runs the known-component core, and <a href="04f-sparse-testing.html#sec-sparse-reproduce" class="quarto-xref"><span>Section 19.14</span></a> compares the two.</p>
+<p>The sparse-testing chapter (<a href="04f-sparse-testing.html" class="quarto-xref"><span>Chapter 19</span></a>) has the same structure. Its REML grid, two-stage scenario and genomic layer are cached from an external study, which validated its own estimator on the complete design (<a href="04f-sparse-testing.html#tbl-sparse-validation" class="quarto-xref">Table&nbsp;<span>19.9</span></a>). The in-repo <code>regenerate.R sparse</code> re-runs the known-component core, and <a href="04f-sparse-testing.html#sec-sparse-reproduce" class="quarto-xref"><span>Section 19.14</span></a> compares the two.</p>
+<p>The joint-allocation chapter (<a href="04g-joint-allocation.html" class="quarto-xref"><span>Chapter 20</span></a>) does not: its three data files are regenerated in this repository by <code>regenerate.R joint</code> (<a href="04g-joint-allocation.html#sec-joint-reproduce" class="quarto-xref"><span>Section 20.8</span></a>).</p>
 <!-- reproduce-chapter -->
 </section>
 <section id="reproduce-this-chapter" class="level2 unnumbered">

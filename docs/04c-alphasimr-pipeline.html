@@ -799,13 +799,13 @@ Table&nbsp;9.1: The two founder engines on one founder set of 20 inbred individu
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">quickHaplo</td>
-<td style="text-align: right;">0.0004</td>
+<td style="text-align: right;">0.0003</td>
 <td style="text-align: left;">TRUE</td>
 <td style="text-align: left;">TRUE</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">runMacs</td>
-<td style="text-align: right;">3.4190</td>
+<td style="text-align: right;">2.7300</td>
 <td style="text-align: left;">FALSE</td>
 <td style="text-align: left;">TRUE</td>
 </tr>
@@ -818,7 +818,7 @@ Table&nbsp;9.1: The two founder engines on one founder set of 20 inbred individu
 </div>
 </div>
 <p>Read the last two columns of <a href="#tbl-alphasimr-engines" class="quarto-xref">Table&nbsp;<span>9.1</span></a> together. What was measured is one pair of calls per engine, each pair after the same <code>set.seed(7)</code>, in this render. For <code>quickHaplo()</code> the two outputs are identical, as expected of pure R sampling. For <code>runMacs()</code> (<code>species = "MAIZE"</code>, default threading) the two outputs differed, while R’s <code>.Random.seed</code> after the two calls was identical (asserted in the chunk). Because R’s stream is identical after both calls, every draw R makes afterwards is the same in both runs; what can differ between two calls is the haplotypes MaCS returns. What one pair does not show: how often <code>runMacs()</code> returns different haplotypes from the same seed (a pair is a count of one, and whether it repeats on another render is not recorded here); whether <code>runMacs2()</code> does, which this chunk never calls and Step 8 uses; and why. A hypothesis, untested in this chapter, is that the output of the multithreaded coalescent depends on thread scheduling (the <code>nThreads</code> argument of <code>runMacs()</code>); nothing below depends on it.</p>
-<p>(The <code>seconds_per_call</code> column is wall clock and will differ on your machine and between renders. <code>runMacs()</code> takes seconds; <code>quickHaplo()</code>, timed over 100 calls because one call is below the clock’s resolution, takes about 0.45 ms per call.)</p>
+<p>(The <code>seconds_per_call</code> column is wall clock and will differ on your machine and between renders. <code>runMacs()</code> takes seconds; <code>quickHaplo()</code>, timed over 100 calls because one call is below the clock’s resolution, takes about 0.27 ms per call.)</p>
 <div class="callout callout-style-simple callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -887,8 +887,8 @@ Table&nbsp;9.2: Mean linkage disequilibrium (<span class="math inline">\(r^2\)</
 </tr>
 <tr class="even">
 <td style="text-align: left;">runMacs</td>
-<td style="text-align: right;">0.1312</td>
-<td style="text-align: right;">0.0121</td>
+<td style="text-align: right;">0.1333</td>
+<td style="text-align: right;">0.0119</td>
 <td style="text-align: right;">0.0101</td>
 </tr>
 </tbody>
@@ -2363,9 +2363,9 @@ Table&nbsp;9.17: One founder draw of <code>alphasimr_founder_pools(rrs_cfg)</cod
 <td style="text-align: right;">12</td>
 <td style="text-align: right;">12</td>
 <td style="text-align: right;">750</td>
-<td style="text-align: right;">0.228</td>
-<td style="text-align: right;">0.211</td>
-<td style="text-align: right;">0.222</td>
+<td style="text-align: right;">0.232</td>
+<td style="text-align: right;">0.217</td>
+<td style="text-align: right;">0.227</td>
 </tr>
 </tbody>
 </table>
@@ -2484,10 +2484,10 @@ Table&nbsp;9.18: Founder pools from <code>runMacs2()</code> at four split times 
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">split_0</td>
-<td style="text-align: right;">0.023</td>
-<td style="text-align: right;">0.314</td>
+<td style="text-align: right;">0.021</td>
+<td style="text-align: right;">0.310</td>
 <td style="text-align: right;">0.007</td>
-<td style="text-align: right;">0.022</td>
+<td style="text-align: right;">0.021</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">split_10</td>
@@ -2498,17 +2498,17 @@ Table&nbsp;9.18: Founder pools from <code>runMacs2()</code> at four split times 
 </tr>
 <tr class="odd">
 <td style="text-align: left;">split_100</td>
-<td style="text-align: right;">0.256</td>
-<td style="text-align: right;">0.299</td>
-<td style="text-align: right;">0.077</td>
-<td style="text-align: right;">0.205</td>
+<td style="text-align: right;">0.259</td>
+<td style="text-align: right;">0.300</td>
+<td style="text-align: right;">0.078</td>
+<td style="text-align: right;">0.206</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">split_1000</td>
-<td style="text-align: right;">0.572</td>
-<td style="text-align: right;">0.334</td>
-<td style="text-align: right;">0.191</td>
-<td style="text-align: right;">0.366</td>
+<td style="text-align: right;">0.567</td>
+<td style="text-align: right;">0.330</td>
+<td style="text-align: right;">0.187</td>
+<td style="text-align: right;">0.360</td>
 </tr>
 </tbody>
 </table>
@@ -2545,24 +2545,24 @@ Table&nbsp;9.18: Founder pools from <code>runMacs2()</code> at four split times 
 </tr>
 <tr class="even">
 <td style="text-align: left;">split_10</td>
-<td style="text-align: right;">0.005</td>
-<td style="text-align: right;">0.007</td>
-<td style="text-align: right;">0.002</td>
-<td style="text-align: right;">0.005</td>
+<td style="text-align: right;">0.004</td>
+<td style="text-align: right;">0.006</td>
+<td style="text-align: right;">0.001</td>
+<td style="text-align: right;">0.004</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">split_100</td>
-<td style="text-align: right;">0.015</td>
-<td style="text-align: right;">0.007</td>
-<td style="text-align: right;">0.005</td>
+<td style="text-align: right;">0.011</td>
+<td style="text-align: right;">0.006</td>
+<td style="text-align: right;">0.004</td>
 <td style="text-align: right;">0.009</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">split_1000</td>
-<td style="text-align: right;">0.010</td>
-<td style="text-align: right;">0.006</td>
+<td style="text-align: right;">0.014</td>
 <td style="text-align: right;">0.006</td>
 <td style="text-align: right;">0.007</td>
+<td style="text-align: right;">0.008</td>
 </tr>
 </tbody>
 </table>
@@ -2603,39 +2603,39 @@ Table&nbsp;9.18: Founder pools from <code>runMacs2()</code> at four split times 
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">split_0</td>
-<td style="text-align: right;">0.065</td>
-<td style="text-align: right;">0.067</td>
+<td style="text-align: right;">0.070</td>
+<td style="text-align: right;">0.068</td>
 <td style="text-align: right;">0.000</td>
 <td style="text-align: right;">0.000</td>
-<td style="text-align: right;">0.314</td>
-<td style="text-align: right;">0.233</td>
+<td style="text-align: right;">0.310</td>
+<td style="text-align: right;">0.229</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">split_10</td>
-<td style="text-align: right;">0.108</td>
-<td style="text-align: right;">0.108</td>
+<td style="text-align: right;">0.113</td>
+<td style="text-align: right;">0.105</td>
 <td style="text-align: right;">0.000</td>
 <td style="text-align: right;">0.000</td>
 <td style="text-align: right;">0.304</td>
-<td style="text-align: right;">0.224</td>
+<td style="text-align: right;">0.225</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">split_100</td>
-<td style="text-align: right;">0.320</td>
-<td style="text-align: right;">0.321</td>
+<td style="text-align: right;">0.326</td>
+<td style="text-align: right;">0.316</td>
 <td style="text-align: right;">0.009</td>
 <td style="text-align: right;">0.005</td>
-<td style="text-align: right;">0.294</td>
-<td style="text-align: right;">0.220</td>
+<td style="text-align: right;">0.295</td>
+<td style="text-align: right;">0.221</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">split_1000</td>
-<td style="text-align: right;">0.562</td>
-<td style="text-align: right;">0.564</td>
-<td style="text-align: right;">0.189</td>
-<td style="text-align: right;">0.094</td>
-<td style="text-align: right;">0.239</td>
-<td style="text-align: right;">0.268</td>
+<td style="text-align: right;">0.565</td>
+<td style="text-align: right;">0.556</td>
+<td style="text-align: right;">0.186</td>
+<td style="text-align: right;">0.093</td>
+<td style="text-align: right;">0.237</td>
+<td style="text-align: right;">0.265</td>
 </tr>
 </tbody>
 </table>
@@ -2676,39 +2676,39 @@ Table&nbsp;9.18: Founder pools from <code>runMacs2()</code> at four split times 
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">split_0</td>
-<td style="text-align: right;">0.574</td>
-<td style="text-align: right;">0.504</td>
-<td style="text-align: right;">0.059</td>
-<td style="text-align: right;">0.011</td>
-<td style="text-align: right;">0.102</td>
-<td style="text-align: right;">0.948</td>
+<td style="text-align: right;">0.507</td>
+<td style="text-align: right;">0.435</td>
+<td style="text-align: right;">0.046</td>
+<td style="text-align: right;">0.026</td>
+<td style="text-align: right;">0.094</td>
+<td style="text-align: right;">0.954</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">split_10</td>
-<td style="text-align: right;">0.519</td>
-<td style="text-align: right;">0.470</td>
-<td style="text-align: right;">0.053</td>
-<td style="text-align: right;">-0.004</td>
-<td style="text-align: right;">0.104</td>
-<td style="text-align: right;">0.948</td>
+<td style="text-align: right;">0.501</td>
+<td style="text-align: right;">0.439</td>
+<td style="text-align: right;">0.045</td>
+<td style="text-align: right;">0.017</td>
+<td style="text-align: right;">0.090</td>
+<td style="text-align: right;">0.956</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">split_100</td>
-<td style="text-align: right;">0.408</td>
-<td style="text-align: right;">0.360</td>
-<td style="text-align: right;">0.062</td>
-<td style="text-align: right;">-0.014</td>
-<td style="text-align: right;">0.150</td>
-<td style="text-align: right;">0.925</td>
+<td style="text-align: right;">0.491</td>
+<td style="text-align: right;">0.396</td>
+<td style="text-align: right;">0.076</td>
+<td style="text-align: right;">0.019</td>
+<td style="text-align: right;">0.165</td>
+<td style="text-align: right;">0.918</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">split_1000</td>
-<td style="text-align: right;">0.414</td>
-<td style="text-align: right;">0.345</td>
-<td style="text-align: right;">0.070</td>
-<td style="text-align: right;">-0.002</td>
-<td style="text-align: right;">0.187</td>
-<td style="text-align: right;">0.906</td>
+<td style="text-align: right;">0.263</td>
+<td style="text-align: right;">0.214</td>
+<td style="text-align: right;">0.050</td>
+<td style="text-align: right;">-0.001</td>
+<td style="text-align: right;">0.202</td>
+<td style="text-align: right;">0.901</td>
 </tr>
 </tbody>
 </table>
@@ -2749,39 +2749,39 @@ Table&nbsp;9.18: Founder pools from <code>runMacs2()</code> at four split times 
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">split_0</td>
-<td style="text-align: right;">0.164</td>
-<td style="text-align: right;">0.142</td>
-<td style="text-align: right;">0.035</td>
-<td style="text-align: right;">0.041</td>
-<td style="text-align: right;">0.039</td>
-<td style="text-align: right;">0.021</td>
+<td style="text-align: right;">0.112</td>
+<td style="text-align: right;">0.091</td>
+<td style="text-align: right;">0.016</td>
+<td style="text-align: right;">0.061</td>
+<td style="text-align: right;">0.037</td>
+<td style="text-align: right;">0.019</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">split_10</td>
-<td style="text-align: right;">0.158</td>
-<td style="text-align: right;">0.165</td>
-<td style="text-align: right;">0.019</td>
-<td style="text-align: right;">0.071</td>
-<td style="text-align: right;">0.030</td>
+<td style="text-align: right;">0.141</td>
+<td style="text-align: right;">0.153</td>
+<td style="text-align: right;">0.021</td>
+<td style="text-align: right;">0.052</td>
+<td style="text-align: right;">0.031</td>
 <td style="text-align: right;">0.016</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">split_100</td>
-<td style="text-align: right;">0.189</td>
-<td style="text-align: right;">0.161</td>
-<td style="text-align: right;">0.042</td>
-<td style="text-align: right;">0.055</td>
-<td style="text-align: right;">0.064</td>
-<td style="text-align: right;">0.033</td>
+<td style="text-align: right;">0.258</td>
+<td style="text-align: right;">0.206</td>
+<td style="text-align: right;">0.041</td>
+<td style="text-align: right;">0.097</td>
+<td style="text-align: right;">0.069</td>
+<td style="text-align: right;">0.038</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">split_1000</td>
-<td style="text-align: right;">0.258</td>
-<td style="text-align: right;">0.217</td>
-<td style="text-align: right;">0.044</td>
-<td style="text-align: right;">0.072</td>
+<td style="text-align: right;">0.221</td>
+<td style="text-align: right;">0.169</td>
+<td style="text-align: right;">0.042</td>
+<td style="text-align: right;">0.054</td>
 <td style="text-align: right;">0.081</td>
-<td style="text-align: right;">0.044</td>
+<td style="text-align: right;">0.034</td>
 </tr>
 </tbody>
 </table>
@@ -2839,19 +2839,19 @@ Table&nbsp;9.19: Contrast of two statistics of <a href="#tbl-alphasimr-split-4" 
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">GCA_dominance_share</td>
-<td style="text-align: right;">0.187</td>
-<td style="text-align: right;">0.102</td>
-<td style="text-align: right;">0.085</td>
+<td style="text-align: right;">0.202</td>
+<td style="text-align: right;">0.094</td>
+<td style="text-align: right;">0.108</td>
 <td style="text-align: right;">0.020</td>
-<td style="text-align: right;">4.263</td>
+<td style="text-align: right;">5.457</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">cor_perse_GCA</td>
-<td style="text-align: right;">0.906</td>
-<td style="text-align: right;">0.948</td>
-<td style="text-align: right;">-0.043</td>
-<td style="text-align: right;">0.011</td>
-<td style="text-align: right;">-3.897</td>
+<td style="text-align: right;">0.901</td>
+<td style="text-align: right;">0.954</td>
+<td style="text-align: right;">-0.053</td>
+<td style="text-align: right;">0.009</td>
+<td style="text-align: right;">-6.084</td>
 </tr>
 </tbody>
 </table>
@@ -2861,11 +2861,11 @@ Table&nbsp;9.19: Contrast of two statistics of <a href="#tbl-alphasimr-split-4" 
 </figure>
 </div>
 </div>
-<p>Read <a href="#tbl-alphasimr-split-1" class="quarto-xref">Table&nbsp;<span>9.18 (a)</span></a> and <a href="#tbl-alphasimr-split-2" class="quarto-xref">Table&nbsp;<span>9.18 (b)</span></a> together: the first is the mean over the 20 draws, the second their standard deviation. What was measured: <code>F_ST</code> rises from 0.023 at <code>split = 0</code> to 0.572 at <code>split = 1000</code>, and <code>GD_BS</code> from 0.007 to 0.191, each step many standard deviations wide; the divergence share of expected heterosis rises from 0.022 to 0.366. <code>GD_T</code> does not stay flat: it is 0.314 at <code>split = 0</code>, 0.299 at <code>split = 100</code> and 0.334 at <code>split = 1000</code>, and the rise from <code>split = 100</code> to <code>split = 1000</code>, 0.035, is 17 standard errors at this replication. <a href="#tbl-alphasimr-split-3" class="quarto-xref">Table&nbsp;<span>9.18 (c)</span></a> is the bookkeeping behind that rise. Across the same range the fraction of sites monomorphic within pool A goes from 0.065 to 0.562 (pool B: 0.067 to 0.564), the fraction of sites fixed for opposite alleles in the two pools from 0 to 0.189, the part of <code>GD_T</code> those sites carry (<code>GD_T_fixed</code>) from 0 to 0.094, and the part carried by every other site (<code>GD_T_other</code>) falls from 0.314 to 0.239.</p>
+<p>Read <a href="#tbl-alphasimr-split-1" class="quarto-xref">Table&nbsp;<span>9.18 (a)</span></a> and <a href="#tbl-alphasimr-split-2" class="quarto-xref">Table&nbsp;<span>9.18 (b)</span></a> together: the first is the mean over the 20 draws, the second their standard deviation. What was measured: <code>F_ST</code> rises from 0.021 at <code>split = 0</code> to 0.567 at <code>split = 1000</code>, and <code>GD_BS</code> from 0.007 to 0.187, each step many standard deviations wide; the divergence share of expected heterosis rises from 0.021 to 0.36. <code>GD_T</code> does not stay flat: it is 0.31 at <code>split = 0</code>, 0.3 at <code>split = 100</code> and 0.33 at <code>split = 1000</code>, and the rise from <code>split = 100</code> to <code>split = 1000</code>, 0.03, is 16 standard errors at this replication. <a href="#tbl-alphasimr-split-3" class="quarto-xref">Table&nbsp;<span>9.18 (c)</span></a> is the bookkeeping behind that rise. Across the same range the fraction of sites monomorphic within pool A goes from 0.07 to 0.565 (pool B: 0.068 to 0.556), the fraction of sites fixed for opposite alleles in the two pools from 0 to 0.186, the part of <code>GD_T</code> those sites carry (<code>GD_T_fixed</code>) from 0 to 0.093, and the part carried by every other site (<code>GD_T_other</code>) falls from 0.31 to 0.237.</p>
 <p>What is inferred from <a href="#tbl-alphasimr-split-1" class="quarto-xref">Table&nbsp;<span>9.18 (a)</span></a> to <a href="#tbl-alphasimr-split-3" class="quarto-xref">Table&nbsp;<span>9.18 (c)</span></a>: <code>runMacs2()</code> returns the sites that segregate in the <em>pooled</em> sample of the two demes, so a site fixed for opposite alleles in the two pools is kept and, with equal pool sizes, sits at pooled frequency one half – the maximum of <span class="math inline">\(2\bar p \bar q\)</span>, which is exactly what <code>GD_T</code> averages over sites (asserted in the chunk). The rise in <code>GD_T</code> therefore comes entirely from sites fixed for opposite alleles, an ascertainment effect of how the founder sites are sampled, while diversity at every other site falls with divergence. At those other sites the direction is the one <a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 5</span></a> gives for drift: diversity within pools falls, the between-pool component rises, and the total does not rise (<code>GD_T_other</code> falls in <a href="#tbl-alphasimr-split-3" class="quarto-xref">Table&nbsp;<span>9.18 (c)</span></a>). How much of <code>GD_T</code> a marker panel shows under divergence therefore depends on how its sites were ascertained, which is a property of the panel and not of the pools.</p>
-<p><a href="#tbl-alphasimr-split-4" class="quarto-xref">Table&nbsp;<span>9.18 (d)</span></a> and <a href="#tbl-alphasimr-split-5" class="quarto-xref">Table&nbsp;<span>9.18 (e)</span></a> are the combining-ability side, mean and standard deviation, and <a href="#tbl-alphasimr-contrast" class="quarto-xref">Table&nbsp;<span>9.19</span></a> is the contrast between the two extreme split times, unpaired because the draws are independent. GCA is the sum of its additive and dominance parts (asserted in the chunk), so its variance is <span class="math inline">\(\mathrm{var}(\mathrm{add}) + \mathrm{var}(\mathrm{dom}) + 2\,\mathrm{cov}(\mathrm{add}, \mathrm{dom})\)</span>, three terms. What was measured, from <code>split = 0</code> to <code>split = 1000</code>: <code>GCA_var</code> goes from 0.574 to 0.414, <code>GCA_var_add</code> from 0.504 to 0.345, <code>GCA_var_dom</code> from 0.059 to 0.07, and <code>GCA_cov2</code> (<span class="math inline">\(2\,\mathrm{cov}\)</span>) from 0.011 to -0.002, the last with between-draw standard deviations of 0.041 and 0.072; its largest <span class="math inline">\(|\text{mean}|/\text{s.e.}\)</span> across splits is 1.19, against the two-sided 5 percent point <span class="math inline">\(t_{0.975,\,19} =\)</span> 2.09. The ratio <code>GCA_dominance_share</code> <span class="math inline">\(= \mathrm{var}(\mathrm{dom}) / \mathrm{var}(\mathrm{GCA})\)</span> rises from 0.102 to 0.187 (<code>t = 4.3</code>). Which part drives it: holding the dominance part at its <code>split = 0</code> value and moving only the additive part to its <code>split = 1000</code> value gives a ratio of 0.142; holding the additive part and moving only the dominance part gives 0.12. And the per se-versus-GCA correlation falls from 0.948 to 0.906 (<code>t = -3.9</code>). Both correlations are below the 0.997 of Step 6’s undifferentiated halves, but that comparison crosses a change of founders, trait draw and line number, so the within-sweep contrast is the one that isolates <code>split</code>. The <code>split = 0</code> row is the frequency-spectrum route of Step 6 without divergence: its pooled minor-allele frequency is 0.233, so the mean of <span class="math inline">\(|1 - 2\bar p_k|\)</span> over sites, which equals <span class="math inline">\(1 - 2\,\)</span><code>maf_pooled</code> exactly, is 0.534, against 0.098 for Step 6’s two halves.</p>
+<p><a href="#tbl-alphasimr-split-4" class="quarto-xref">Table&nbsp;<span>9.18 (d)</span></a> and <a href="#tbl-alphasimr-split-5" class="quarto-xref">Table&nbsp;<span>9.18 (e)</span></a> are the combining-ability side, mean and standard deviation, and <a href="#tbl-alphasimr-contrast" class="quarto-xref">Table&nbsp;<span>9.19</span></a> is the contrast between the two extreme split times, unpaired because the draws are independent. GCA is the sum of its additive and dominance parts (asserted in the chunk), so its variance is <span class="math inline">\(\mathrm{var}(\mathrm{add}) + \mathrm{var}(\mathrm{dom}) + 2\,\mathrm{cov}(\mathrm{add}, \mathrm{dom})\)</span>, three terms. What was measured, from <code>split = 0</code> to <code>split = 1000</code>: <code>GCA_var</code> goes from 0.507 to 0.263, <code>GCA_var_add</code> from 0.435 to 0.214, <code>GCA_var_dom</code> from 0.046 to 0.05, and <code>GCA_cov2</code> (<span class="math inline">\(2\,\mathrm{cov}\)</span>) from 0.026 to -0.001, the last with between-draw standard deviations of 0.061 and 0.054; its largest <span class="math inline">\(|\text{mean}|/\text{s.e.}\)</span> across splits is 1.93, against the two-sided 5 percent point <span class="math inline">\(t_{0.975,\,19} =\)</span> 2.09. The ratio <code>GCA_dominance_share</code> <span class="math inline">\(= \mathrm{var}(\mathrm{dom}) / \mathrm{var}(\mathrm{GCA})\)</span> rises from 0.094 to 0.202 (<code>t = 5.5</code>). Which part drives it: holding the dominance part at its <code>split = 0</code> value and moving only the additive part to its <code>split = 1000</code> value gives a ratio of 0.16; holding the additive part and moving only the dominance part gives 0.098. And the per se-versus-GCA correlation falls from 0.954 to 0.901 (<code>t = -6.1</code>). Both correlations are below the 0.997 of Step 6’s undifferentiated halves, but that comparison crosses a change of founders, trait draw and line number, so the within-sweep contrast is the one that isolates <code>split</code>. The <code>split = 0</code> row is the frequency-spectrum route of Step 6 without divergence: its pooled minor-allele frequency is 0.229, so the mean of <span class="math inline">\(|1 - 2\bar p_k|\)</span> over sites, which equals <span class="math inline">\(1 - 2\,\)</span><code>maf_pooled</code> exactly, is 0.543, against 0.098 for Step 6’s two halves.</p>
 <p><strong>Multiplicity of the sweep.</strong> The statistics decided against a critical value in this section are the two contrasts of <a href="#tbl-alphasimr-contrast" class="quarto-xref">Table&nbsp;<span>9.19</span></a>, the <code>GCA_var_dom</code> contrast and the covariance term at each of the 4 split times: 7 tests, a number fixed by this paragraph and not by the data. The point <span class="math inline">\(t_{0.975,\,19} =\)</span> 2.09 used above is unadjusted for them: it is the permissive end for a verdict of <em>a difference</em> (it ignores the number of tests) and the strict end for a verdict of “not distinguishable from zero”. The Bonferroni point for 7 tests is 3.01. Against it, in this render, 2 of the 7 statistics are beyond it (2 are beyond the unadjusted point); the tests are not independent (the statistics are computed on the same draws and the covariance term enters the ratio); Bonferroni holds the family-wise level at or below 5 percent whatever the dependence, and is not its exact value. The <code>F_ST</code>, <code>GD_BS</code> and <code>GD_T</code> movements, the ascertainment bookkeeping of <a href="#tbl-alphasimr-split-3" class="quarto-xref">Table&nbsp;<span>9.18 (c)</span></a> and the one-part-at-a-time decomposition (<code>gca_only()</code>) are descriptive: no test is attached to them and none is adjusted, and they are exploratory.</p>
-<p>What is inferred: in this render the fall of the <em>additive</em> part of the GCA variance accounts for more of the rise in the ratio than the growth of the dominance part; an additive part that falls with divergence does so because the sites that fix within a pool stop contributing to it (at linkage equilibrium its variance over DH lines is <span class="math inline">\(\sum_k a_k^2\, p_{Ak} q_{Ak}\)</span>), so the ratio can rise without the dominance part growing at all. The ratio is a partition of <span class="math inline">\(\mathrm{var}(\mathrm{GCA})\)</span> only insofar as the covariance term is negligible. In this render that term is within the two-sided 5 percent point at every split; with 20 draws, a term within that point is not shown to differ from zero, which is not a bound on its size. If the founders differ between the executions that produce the HTML and the PDF (see “Founders from MaCS”), a term whose <span class="math inline">\(|t|\)</span> lies near the unadjusted point (2.09) and below the Bonferroni point (3.01) could fall on either side in the two formats; no inference drawn in this paragraph depends on which side it falls, but the render’s own wording above and the counts in it do. In magnitude, at <code>split = 0</code> <span class="math inline">\(|2\,\mathrm{cov}|\)</span> is 0.19 times <code>GCA_var_dom</code>, and dropping it changes the ratio of the <code>split = 0</code> means from 0.103 to <span class="math inline">\(\mathrm{var}(\mathrm{dom}) / [\mathrm{var}(\mathrm{add}) + \mathrm{var}(\mathrm{dom})] =\)</span> 0.105. “Share” is used only in that qualified sense, and each founder draw calls <code>runMacs2()</code>, whose repeatability from <code>set.seed()</code> was not established (Step 1), so that verdict is this render’s and may change with the next. Whether the dominance part itself grows with divergence is a separate question, and the algebra does not fix its sign: at linkage equilibrium its variance over DH lines is <span class="math inline">\(\sum_k d_k^2 (1 - 2 p_{Bk})^2\, p_{Ak} q_{Ak}\)</span>, and divergence pushes the weight <span class="math inline">\((1 - 2 p_{Bk})^2\)</span> up at the same loci where it pushes <span class="math inline">\(p_{Ak} q_{Ak}\)</span> down. Measured, <code>GCA_var_dom</code> changes by 0.011 from <code>split = 0</code> to <code>split = 1000</code> (<code>t = 0.9</code>, against the unadjusted point <span class="math inline">\(t_{0.975,\,19} =\)</span> 2.09), so in this render that change is not distinguishable from zero; being computed from <code>runMacs2()</code> founders over 20 draws, it is this render’s verdict and not a property of the scheme. The ratio’s own contrast is beyond the same point in this render; where it is beyond it and positive, what it supports is that a larger share, in the qualified sense above, of <span class="math inline">\(\mathrm{var}(\mathrm{GCA})\)</span> is invisible to a line’s own genetic value after the split, through whichever part the decomposition above identifies, and nothing here separates how much of the between-draw spread is the trait drawn with each founder set and how much is the DH sampling. The limit of the inference is the scale: 12 individuals per pool, 750 sites, 20 draws per split, and a <code>split</code> in coalescent generations that is not calibrated to any named heterotic-pool pair. No other scale was simulated, so whether any of these directions holds at another one is not claimed.</p>
+<p>What is inferred: in this render the fall of the <em>additive</em> part of the GCA variance accounts for more of the rise in the ratio than the growth of the dominance part; an additive part that falls with divergence does so because the sites that fix within a pool stop contributing to it (at linkage equilibrium its variance over DH lines is <span class="math inline">\(\sum_k a_k^2\, p_{Ak} q_{Ak}\)</span>), so the ratio can rise without the dominance part growing at all. The ratio is a partition of <span class="math inline">\(\mathrm{var}(\mathrm{GCA})\)</span> only insofar as the covariance term is negligible. In this render that term is within the two-sided 5 percent point at every split; with 20 draws, a term within that point is not shown to differ from zero, which is not a bound on its size. If the founders differ between the executions that produce the HTML and the PDF (see “Founders from MaCS”), a term whose <span class="math inline">\(|t|\)</span> lies near the unadjusted point (2.09) and below the Bonferroni point (3.01) could fall on either side in the two formats; no inference drawn in this paragraph depends on which side it falls, but the render’s own wording above and the counts in it do. In magnitude, at <code>split = 0</code> <span class="math inline">\(|2\,\mathrm{cov}|\)</span> is 0.58 times <code>GCA_var_dom</code>, and dropping it changes the ratio of the <code>split = 0</code> means from 0.091 to <span class="math inline">\(\mathrm{var}(\mathrm{dom}) / [\mathrm{var}(\mathrm{add}) + \mathrm{var}(\mathrm{dom})] =\)</span> 0.096. “Share” is used only in that qualified sense, and each founder draw calls <code>runMacs2()</code>, whose repeatability from <code>set.seed()</code> was not established (Step 1), so that verdict is this render’s and may change with the next. Whether the dominance part itself grows with divergence is a separate question, and the algebra does not fix its sign: at linkage equilibrium its variance over DH lines is <span class="math inline">\(\sum_k d_k^2 (1 - 2 p_{Bk})^2\, p_{Ak} q_{Ak}\)</span>, and divergence pushes the weight <span class="math inline">\((1 - 2 p_{Bk})^2\)</span> up at the same loci where it pushes <span class="math inline">\(p_{Ak} q_{Ak}\)</span> down. Measured, <code>GCA_var_dom</code> changes by 0.004 from <code>split = 0</code> to <code>split = 1000</code> (<code>t = 0.4</code>, against the unadjusted point <span class="math inline">\(t_{0.975,\,19} =\)</span> 2.09), so in this render that change is not distinguishable from zero; being computed from <code>runMacs2()</code> founders over 20 draws, it is this render’s verdict and not a property of the scheme. The ratio’s own contrast is beyond the same point in this render; where it is beyond it and positive, what it supports is that a larger share, in the qualified sense above, of <span class="math inline">\(\mathrm{var}(\mathrm{GCA})\)</span> is invisible to a line’s own genetic value after the split, through whichever part the decomposition above identifies, and nothing here separates how much of the between-draw spread is the trait drawn with each founder set and how much is the DH sampling. The limit of the inference is the scale: 12 individuals per pool, 750 sites, 20 draws per split, and a <code>split</code> in coalescent generations that is not calibrated to any named heterotic-pool pair. No other scale was simulated, so whether any of these directions holds at another one is not claimed.</p>
 </section>
 <section id="one-cycle" class="level3" data-number="9.8.2">
 <h3 data-number="9.8.2" class="anchored" data-anchor-id="one-cycle"><span class="header-section-number">9.8.2</span> One cycle</h3>
@@ -2896,10 +2896,10 @@ Table&nbsp;9.20: Summary of one reciprocal recurrent selection cycle (<code>alph
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: right;">2.453</td>
-<td style="text-align: right;">2.7894</td>
-<td style="text-align: right;">0.19</td>
-<td style="text-align: right;">0.174</td>
+<td style="text-align: right;">1.291</td>
+<td style="text-align: right;">1.0104</td>
+<td style="text-align: right;">0.1819</td>
+<td style="text-align: right;">0.1855</td>
 </tr>
 </tbody>
 </table>
@@ -3007,35 +3007,35 @@ Table&nbsp;9.21: The selected arm of the first of the 48 founder draws, cycle 0 
 </tr>
 <tr class="even">
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">2.036</td>
-<td style="text-align: right;">3.146</td>
-<td style="text-align: right;">3.507</td>
-<td style="text-align: right;">0.184</td>
-<td style="text-align: right;">0.198</td>
+<td style="text-align: right;">2.143</td>
+<td style="text-align: right;">2.670</td>
+<td style="text-align: right;">3.992</td>
+<td style="text-align: right;">0.163</td>
+<td style="text-align: right;">0.192</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">2</td>
-<td style="text-align: right;">3.396</td>
-<td style="text-align: right;">2.884</td>
-<td style="text-align: right;">4.296</td>
-<td style="text-align: right;">0.156</td>
-<td style="text-align: right;">0.164</td>
+<td style="text-align: right;">3.711</td>
+<td style="text-align: right;">4.075</td>
+<td style="text-align: right;">5.659</td>
+<td style="text-align: right;">0.133</td>
+<td style="text-align: right;">0.165</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">3</td>
-<td style="text-align: right;">4.500</td>
-<td style="text-align: right;">4.471</td>
-<td style="text-align: right;">5.376</td>
-<td style="text-align: right;">0.136</td>
-<td style="text-align: right;">0.146</td>
+<td style="text-align: right;">6.048</td>
+<td style="text-align: right;">5.539</td>
+<td style="text-align: right;">6.707</td>
+<td style="text-align: right;">0.098</td>
+<td style="text-align: right;">0.147</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">4</td>
-<td style="text-align: right;">5.400</td>
-<td style="text-align: right;">5.036</td>
-<td style="text-align: right;">5.882</td>
-<td style="text-align: right;">0.096</td>
-<td style="text-align: right;">0.133</td>
+<td style="text-align: right;">6.747</td>
+<td style="text-align: right;">7.121</td>
+<td style="text-align: right;">7.340</td>
+<td style="text-align: right;">0.062</td>
+<td style="text-align: right;">0.118</td>
 </tr>
 </tbody>
 </table>
@@ -3065,38 +3065,38 @@ Table&nbsp;9.21: The selected arm of the first of the 48 founder draws, cycle 0 
 <tbody>
 <tr class="odd">
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">0.222</td>
-<td style="text-align: right;">0.224</td>
-<td style="text-align: right;">0.076</td>
-<td style="text-align: right;">0.254</td>
+<td style="text-align: right;">0.212</td>
+<td style="text-align: right;">0.237</td>
+<td style="text-align: right;">0.071</td>
+<td style="text-align: right;">0.239</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">0.183</td>
-<td style="text-align: right;">0.196</td>
-<td style="text-align: right;">0.092</td>
-<td style="text-align: right;">0.328</td>
+<td style="text-align: right;">0.161</td>
+<td style="text-align: right;">0.193</td>
+<td style="text-align: right;">0.096</td>
+<td style="text-align: right;">0.352</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">2</td>
-<td style="text-align: right;">0.159</td>
-<td style="text-align: right;">0.163</td>
-<td style="text-align: right;">0.109</td>
-<td style="text-align: right;">0.404</td>
+<td style="text-align: right;">0.134</td>
+<td style="text-align: right;">0.164</td>
+<td style="text-align: right;">0.117</td>
+<td style="text-align: right;">0.440</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">3</td>
-<td style="text-align: right;">0.140</td>
-<td style="text-align: right;">0.145</td>
-<td style="text-align: right;">0.120</td>
-<td style="text-align: right;">0.456</td>
+<td style="text-align: right;">0.098</td>
+<td style="text-align: right;">0.146</td>
+<td style="text-align: right;">0.133</td>
+<td style="text-align: right;">0.522</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">4</td>
-<td style="text-align: right;">0.094</td>
-<td style="text-align: right;">0.133</td>
-<td style="text-align: right;">0.133</td>
-<td style="text-align: right;">0.539</td>
+<td style="text-align: right;">0.059</td>
+<td style="text-align: right;">0.120</td>
+<td style="text-align: right;">0.157</td>
+<td style="text-align: right;">0.636</td>
 </tr>
 </tbody>
 </table>
@@ -3181,91 +3181,91 @@ Table&nbsp;9.22: Selected arm against the paired no-selection control at the las
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">mean_tc_A</td>
-<td style="text-align: right;">4.763</td>
-<td style="text-align: right;">2.306</td>
-<td style="text-align: right;">2.457</td>
-<td style="text-align: right;">1.128</td>
-<td style="text-align: right;">15.093</td>
+<td style="text-align: right;">4.940</td>
+<td style="text-align: right;">2.157</td>
+<td style="text-align: right;">2.784</td>
+<td style="text-align: right;">1.439</td>
+<td style="text-align: right;">13.404</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">mean_tc_B</td>
-<td style="text-align: right;">4.784</td>
-<td style="text-align: right;">2.368</td>
-<td style="text-align: right;">2.417</td>
-<td style="text-align: right;">1.161</td>
-<td style="text-align: right;">14.422</td>
+<td style="text-align: right;">4.894</td>
+<td style="text-align: right;">2.226</td>
+<td style="text-align: right;">2.668</td>
+<td style="text-align: right;">1.415</td>
+<td style="text-align: right;">13.069</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">hybrid_meanG</td>
-<td style="text-align: right;">5.285</td>
-<td style="text-align: right;">2.298</td>
-<td style="text-align: right;">2.986</td>
-<td style="text-align: right;">1.275</td>
-<td style="text-align: right;">16.223</td>
+<td style="text-align: right;">5.489</td>
+<td style="text-align: right;">2.277</td>
+<td style="text-align: right;">3.212</td>
+<td style="text-align: right;">1.528</td>
+<td style="text-align: right;">14.564</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">gd_A</td>
-<td style="text-align: right;">0.099</td>
-<td style="text-align: right;">0.107</td>
-<td style="text-align: right;">-0.007</td>
-<td style="text-align: right;">0.025</td>
-<td style="text-align: right;">-1.964</td>
+<td style="text-align: right;">0.093</td>
+<td style="text-align: right;">0.109</td>
+<td style="text-align: right;">-0.016</td>
+<td style="text-align: right;">0.026</td>
+<td style="text-align: right;">-4.380</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">gd_B</td>
-<td style="text-align: right;">0.092</td>
-<td style="text-align: right;">0.108</td>
-<td style="text-align: right;">-0.016</td>
-<td style="text-align: right;">0.025</td>
-<td style="text-align: right;">-4.409</td>
+<td style="text-align: right;">0.086</td>
+<td style="text-align: right;">0.105</td>
+<td style="text-align: right;">-0.020</td>
+<td style="text-align: right;">0.029</td>
+<td style="text-align: right;">-4.601</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">gd_elite_mean</td>
-<td style="text-align: right;">0.096</td>
+<td style="text-align: right;">0.089</td>
 <td style="text-align: right;">0.107</td>
-<td style="text-align: right;">-0.011</td>
-<td style="text-align: right;">0.018</td>
-<td style="text-align: right;">-4.491</td>
+<td style="text-align: right;">-0.018</td>
+<td style="text-align: right;">0.017</td>
+<td style="text-align: right;">-7.142</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">gd_pool_A</td>
-<td style="text-align: right;">0.099</td>
-<td style="text-align: right;">0.105</td>
-<td style="text-align: right;">-0.007</td>
-<td style="text-align: right;">0.025</td>
-<td style="text-align: right;">-1.883</td>
+<td style="text-align: right;">0.093</td>
+<td style="text-align: right;">0.109</td>
+<td style="text-align: right;">-0.016</td>
+<td style="text-align: right;">0.026</td>
+<td style="text-align: right;">-4.323</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">gd_pool_B</td>
-<td style="text-align: right;">0.092</td>
-<td style="text-align: right;">0.108</td>
-<td style="text-align: right;">-0.015</td>
-<td style="text-align: right;">0.026</td>
-<td style="text-align: right;">-4.113</td>
+<td style="text-align: right;">0.085</td>
+<td style="text-align: right;">0.104</td>
+<td style="text-align: right;">-0.019</td>
+<td style="text-align: right;">0.030</td>
+<td style="text-align: right;">-4.439</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">gd_pool_mean</td>
-<td style="text-align: right;">0.095</td>
+<td style="text-align: right;">0.089</td>
 <td style="text-align: right;">0.106</td>
-<td style="text-align: right;">-0.011</td>
-<td style="text-align: right;">0.018</td>
-<td style="text-align: right;">-4.205</td>
+<td style="text-align: right;">-0.017</td>
+<td style="text-align: right;">0.017</td>
+<td style="text-align: right;">-6.995</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">GD_BS</td>
-<td style="text-align: right;">0.145</td>
-<td style="text-align: right;">0.133</td>
-<td style="text-align: right;">0.012</td>
-<td style="text-align: right;">0.013</td>
-<td style="text-align: right;">6.497</td>
+<td style="text-align: right;">0.149</td>
+<td style="text-align: right;">0.134</td>
+<td style="text-align: right;">0.015</td>
+<td style="text-align: right;">0.011</td>
+<td style="text-align: right;">9.453</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">F_ST</td>
-<td style="text-align: right;">0.604</td>
-<td style="text-align: right;">0.556</td>
-<td style="text-align: right;">0.048</td>
-<td style="text-align: right;">0.063</td>
-<td style="text-align: right;">5.341</td>
+<td style="text-align: right;">0.627</td>
+<td style="text-align: right;">0.558</td>
+<td style="text-align: right;">0.069</td>
+<td style="text-align: right;">0.059</td>
+<td style="text-align: right;">8.184</td>
 </tr>
 </tbody>
 </table>
@@ -3296,27 +3296,27 @@ Table&nbsp;9.22: Selected arm against the paired no-selection control at the las
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">gd_elite</td>
-<td style="text-align: right;">-0.001</td>
-<td style="text-align: right;">0.025</td>
-<td style="text-align: right;">0.025</td>
-<td style="text-align: right;">0.018</td>
-<td style="text-align: right;">0.018</td>
+<td style="text-align: right;">-0.212</td>
+<td style="text-align: right;">0.026</td>
+<td style="text-align: right;">0.029</td>
+<td style="text-align: right;">0.017</td>
+<td style="text-align: right;">0.020</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">gd_pool</td>
-<td style="text-align: right;">0.029</td>
-<td style="text-align: right;">0.025</td>
+<td style="text-align: right;">-0.220</td>
 <td style="text-align: right;">0.026</td>
-<td style="text-align: right;">0.018</td>
-<td style="text-align: right;">0.018</td>
+<td style="text-align: right;">0.030</td>
+<td style="text-align: right;">0.017</td>
+<td style="text-align: right;">0.020</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">mean_tc</td>
-<td style="text-align: right;">0.886</td>
-<td style="text-align: right;">1.128</td>
-<td style="text-align: right;">1.161</td>
-<td style="text-align: right;">1.111</td>
-<td style="text-align: right;">0.809</td>
+<td style="text-align: right;">0.919</td>
+<td style="text-align: right;">1.439</td>
+<td style="text-align: right;">1.415</td>
+<td style="text-align: right;">1.398</td>
+<td style="text-align: right;">1.009</td>
 </tr>
 </tbody>
 </table>
@@ -3370,23 +3370,23 @@ Table&nbsp;9.23: Relative loss of gene diversity of the recombined pools from cy
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">pool A, selected</td>
-<td style="text-align: right;">0.552</td>
-<td style="text-align: right;">0.089</td>
+<td style="text-align: right;">0.579</td>
+<td style="text-align: right;">0.079</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">pool A, control</td>
-<td style="text-align: right;">0.522</td>
-<td style="text-align: right;">0.084</td>
+<td style="text-align: right;">0.508</td>
+<td style="text-align: right;">0.080</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">pool B, selected</td>
-<td style="text-align: right;">0.579</td>
-<td style="text-align: right;">0.095</td>
+<td style="text-align: right;">0.611</td>
+<td style="text-align: right;">0.099</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">pool B, control</td>
-<td style="text-align: right;">0.510</td>
-<td style="text-align: right;">0.068</td>
+<td style="text-align: right;">0.524</td>
+<td style="text-align: right;">0.078</td>
 </tr>
 </tbody>
 </table>
@@ -3410,10 +3410,10 @@ Figure&nbsp;9.1: Reciprocal recurrent selection over 4 cycles, 12 + 12 founders,
 </div>
 </div>
 </div>
-<p>What was measured (<a href="#fig-alphasimr-cycles" class="quarto-xref">Figure&nbsp;<span>9.1</span></a>, <a href="#tbl-alphasimr-paired" class="quarto-xref">Table&nbsp;<span>9.22</span></a> and <a href="#tbl-alphasimr-loss" class="quarto-xref">Table&nbsp;<span>9.23</span></a>): over 48 paired replicates, the selected arm’s mean testcross phenotype at cycle 4 differs from the control’s by +2.46 (<code>mean_tc_A</code>, pool-A lines on pool-B testers) and +2.42 (<code>mean_tc_B</code>, pool-B lines on pool-A testers) trait units, with paired standard deviations of 1.13 and 1.16; the elite factorial’s genetic value – the product – differs by +2.99 (<code>t = 16.2</code>). Gene diversity of the elite lines, averaged over the two pools, differs by -0.011 (paired s.d. 0.018, <code>t = -4.5</code>), and that of the recombined pools by -0.011 (<code>t = -4.2</code>). Between the pools, <code>GD_BS</code> differs by +0.012 (<code>t = 6.5</code>) and <code>F_ST</code> by +0.048 (<code>t = 5.3</code>). The two-sided 5 percent point of <code>t</code> with 47 degrees of freedom is 2.01. Against it, in this render, the response – both testcross means and the product – is beyond it; the pooled elite-line gene-diversity difference is beyond it; the pooled recombined-pool difference is beyond it; the <code>GD_BS</code> difference is beyond it; the <code>F_ST</code> difference is beyond it.</p>
-<p><strong>Multiplicity.</strong> <a href="#tbl-alphasimr-paired-1" class="quarto-xref">Table&nbsp;<span>9.22 (a)</span></a> tests 11 statistics, each against the unadjusted point just given. They are not independent: the pooled means are averages of the per-pool rows, and the elite-line and recombined-pool gene diversities are computed on the same elites. The Bonferroni two-sided 5 percent point for 11 comparisons is 2.98, the correction reported here; it is conservative given the dependence and is not the exact family-wise level. Against it, in this render, the response statistics (both testcross means and the product) are all beyond it (smallest <span class="math inline">\(|t|\)</span> 14.4); the pooled elite-line gene-diversity difference is beyond it (<code>t = -4.5</code>); the pooled recombined-pool difference is beyond it (<code>t = -4.2</code>); <code>GD_BS</code> is beyond it and <code>F_ST</code> is beyond it. The two pooled gene-diversity means (<code>gd_elite_mean</code>, <code>gd_pool_mean</code>) are constructions made to reduce the noise of the per-pool rows, not a test declared before the data were looked at, so every conclusion about diversity in this section is <strong>exploratory</strong>. The response statistics are what the scheme is built to move, and their correction is the one stated above.</p>
-<p>Pooling the two pools’ differences is not free noise reduction, and <a href="#tbl-alphasimr-paired-2" class="quarto-xref">Table&nbsp;<span>9.22 (b)</span></a> (<code>pool_tab</code>) measures what it buys. Averaging halves the variance only if the two pools’ paired differences are independent across founder draws. For the elite-line gene diversity they are correlated at 0, and the pooled standard deviation, 0.018, is close to the 0.018 it would be if they were independent: pooling does what it should there. For the testcross mean they are correlated at 0.89, and the pooled standard deviation is 1.11 against 0.81 if independent: pooling does not reduce that noise. The construction of the two statistics accounts for the correlation without any appeal to the founder draw: <code>mean_tc_A</code> is the mean of pool-A lines on testers from the current pool B and <code>mean_tc_B</code> the mean of pool-B lines on testers from the current pool A, so both are estimates of the same A x B hybrid level, and progress in either pool raises both (better lines in one statistic, better testers in the other). How much of the correlation is that and how much is the founder draw is not separated here. The <code>gd_A</code>/<code>gd_B</code> and <code>gd_pool_A</code>/<code>gd_pool_B</code> rows are per pool and show the asymmetry between two exchangeable pools that any one set of 48 draws produces; the <code>mean_tc_A</code>/<code>mean_tc_B</code> rows are not per-pool responses, for the reason just given. <a href="#tbl-alphasimr-loss" class="quarto-xref">Table&nbsp;<span>9.23</span></a> says how much of the pools’ loss is selection: the control loses gene diversity too – 6 elites recombined into 12 individuals is a bottleneck whether or not the elites were chosen – and the selected arm’s mean loss exceeds the control’s, with the pooled <code>t</code> just stated as the evidence.</p>
-<p>What is inferred: with real meiosis and a dominance trait behind it, the A x B hybrid level responds to reciprocal recurrent selection – both testcross means and the elite factorial’s genetic value measure it – and at this replication that response is beyond <code>t_crit</code>. How much of it each pool contributes is not identified by these statistics: each testcross mean carries the progress of both pools, so a response in pool A alone would raise <code>mean_tc_A</code> and <code>mean_tc_B</code> together. Whether it spends within-pool diversity faster than the same bottleneck under drift alone is an exploratory question (multiplicity above). In this render the pooled gene-diversity <code>t</code> is beyond the unadjusted point for the elite lines and beyond it for the recombined pools, and at least one of them is also beyond the Bonferroni point; the supported reading is therefore that selection spends more within-pool diversity than the bottleneck alone, with the correction. Per founder draw, the ratio of the mean elite-line selection component to its paired standard deviation is 0.6, so a single draw does not settle its sign; the 48-draw <code>t</code> of -4.5 against <code>t_crit</code> = 2.01 is what decides it. Where the sign holds, the control separates the selection component of the loss from the bottleneck (drift) component, within this design. It is not a replication of another chapter’s control: <a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 23</span></a> follows diversity across cycles under a budget <code>alpha</code> against the frozen founding base and has no random-selection arm, and <a href="04d-breeding-programme.html" class="quarto-xref"><span>Chapter 22</span></a> measures its loss against the programme’s own starting point “rather than against a random-selection baseline of the same size”, as it says there. <a href="11c-limits.html" class="quarto-xref"><span>Chapter 24</span></a> has another paired no-selection design, built on the same founder wrapper and measuring a different quantity, the gap between <code>varA</code> and <code>genicVarA</code>. The between-pool rows: the <code>GD_BS</code> difference is beyond <code>t_crit</code>; where it is, and positive, RRS has moved the pools further apart than the control did. Whether that raises heterosis is not tested here. <a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 5</span></a> infers, and says it has not shown, that selection on cross performance is the only process considered there that can move frequencies according to where the dominance is, and that the alignment of divergence with dominance, <span class="math inline">\(\operatorname{cov}(d, y^2)\)</span> of <a href="05b-heterosis-dominance.html#sec-heterosis-alignment" class="quarto-xref"><span>Section 5.9</span></a>, is built or eroded cycle by cycle; this chapter computes neither that alignment nor the divergence share of expected heterosis across cycles (the share is computed only across founder split times, in <a href="#tbl-alphasimr-split-1" class="quarto-xref">Table&nbsp;<span>9.18 (a)</span></a>), so that inference stays untested. <code>F_ST</code> <span class="math inline">\(= GD_{BS} / GD_T\)</span> moves with its denominator as well, and <code>GD_T</code> of the recombined pools is not recorded in <a href="#tbl-alphasimr-paired-1" class="quarto-xref">Table&nbsp;<span>9.22 (a)</span></a>, so <code>GD_BS</code> is the row read for divergence. What limits the inference is the scale – 12 founders per pool, 4 cycles, 2 testers at one location, 48 draws – and, if <code>runMacs2()</code> founders do not repeat from the seed (not established, Step 1), the numbers in this paragraph and any verdict that rests on a <code>t</code> near <code>t_crit</code> may differ between renders.</p>
+<p>What was measured (<a href="#fig-alphasimr-cycles" class="quarto-xref">Figure&nbsp;<span>9.1</span></a>, <a href="#tbl-alphasimr-paired" class="quarto-xref">Table&nbsp;<span>9.22</span></a> and <a href="#tbl-alphasimr-loss" class="quarto-xref">Table&nbsp;<span>9.23</span></a>): over 48 paired replicates, the selected arm’s mean testcross phenotype at cycle 4 differs from the control’s by +2.78 (<code>mean_tc_A</code>, pool-A lines on pool-B testers) and +2.67 (<code>mean_tc_B</code>, pool-B lines on pool-A testers) trait units, with paired standard deviations of 1.44 and 1.41; the elite factorial’s genetic value – the product – differs by +3.21 (<code>t = 14.6</code>). Gene diversity of the elite lines, averaged over the two pools, differs by -0.018 (paired s.d. 0.017, <code>t = -7.1</code>), and that of the recombined pools by -0.017 (<code>t = -7</code>). Between the pools, <code>GD_BS</code> differs by +0.015 (<code>t = 9.5</code>) and <code>F_ST</code> by +0.069 (<code>t = 8.2</code>). The two-sided 5 percent point of <code>t</code> with 47 degrees of freedom is 2.01. Against it, in this render, the response – both testcross means and the product – is beyond it; the pooled elite-line gene-diversity difference is beyond it; the pooled recombined-pool difference is beyond it; the <code>GD_BS</code> difference is beyond it; the <code>F_ST</code> difference is beyond it.</p>
+<p><strong>Multiplicity.</strong> <a href="#tbl-alphasimr-paired-1" class="quarto-xref">Table&nbsp;<span>9.22 (a)</span></a> tests 11 statistics, each against the unadjusted point just given. They are not independent: the pooled means are averages of the per-pool rows, and the elite-line and recombined-pool gene diversities are computed on the same elites. The Bonferroni two-sided 5 percent point for 11 comparisons is 2.98, the correction reported here; it is conservative given the dependence and is not the exact family-wise level. Against it, in this render, the response statistics (both testcross means and the product) are all beyond it (smallest <span class="math inline">\(|t|\)</span> 13.1); the pooled elite-line gene-diversity difference is beyond it (<code>t = -7.1</code>); the pooled recombined-pool difference is beyond it (<code>t = -7</code>); <code>GD_BS</code> is beyond it and <code>F_ST</code> is beyond it. The two pooled gene-diversity means (<code>gd_elite_mean</code>, <code>gd_pool_mean</code>) are constructions made to reduce the noise of the per-pool rows, not a test declared before the data were looked at, so every conclusion about diversity in this section is <strong>exploratory</strong>. The response statistics are what the scheme is built to move, and their correction is the one stated above.</p>
+<p>Pooling the two pools’ differences is not free noise reduction, and <a href="#tbl-alphasimr-paired-2" class="quarto-xref">Table&nbsp;<span>9.22 (b)</span></a> (<code>pool_tab</code>) measures what it buys. Averaging halves the variance only if the two pools’ paired differences are independent across founder draws. For the elite-line gene diversity they are correlated at -0.21, and the pooled standard deviation, 0.017, is close to the 0.02 it would be if they were independent: pooling does what it should there. For the testcross mean they are correlated at 0.92, and the pooled standard deviation is 1.4 against 1.01 if independent: pooling does not reduce that noise. The construction of the two statistics accounts for the correlation without any appeal to the founder draw: <code>mean_tc_A</code> is the mean of pool-A lines on testers from the current pool B and <code>mean_tc_B</code> the mean of pool-B lines on testers from the current pool A, so both are estimates of the same A x B hybrid level, and progress in either pool raises both (better lines in one statistic, better testers in the other). How much of the correlation is that and how much is the founder draw is not separated here. The <code>gd_A</code>/<code>gd_B</code> and <code>gd_pool_A</code>/<code>gd_pool_B</code> rows are per pool and show the asymmetry between two exchangeable pools that any one set of 48 draws produces; the <code>mean_tc_A</code>/<code>mean_tc_B</code> rows are not per-pool responses, for the reason just given. <a href="#tbl-alphasimr-loss" class="quarto-xref">Table&nbsp;<span>9.23</span></a> says how much of the pools’ loss is selection: the control loses gene diversity too – 6 elites recombined into 12 individuals is a bottleneck whether or not the elites were chosen – and the selected arm’s mean loss exceeds the control’s, with the pooled <code>t</code> just stated as the evidence.</p>
+<p>What is inferred: with real meiosis and a dominance trait behind it, the A x B hybrid level responds to reciprocal recurrent selection – both testcross means and the elite factorial’s genetic value measure it – and at this replication that response is beyond <code>t_crit</code>. How much of it each pool contributes is not identified by these statistics: each testcross mean carries the progress of both pools, so a response in pool A alone would raise <code>mean_tc_A</code> and <code>mean_tc_B</code> together. Whether it spends within-pool diversity faster than the same bottleneck under drift alone is an exploratory question (multiplicity above). In this render the pooled gene-diversity <code>t</code> is beyond the unadjusted point for the elite lines and beyond it for the recombined pools, and at least one of them is also beyond the Bonferroni point; the supported reading is therefore that selection spends more within-pool diversity than the bottleneck alone, with the correction. Per founder draw, the ratio of the mean elite-line selection component to its paired standard deviation is 1, so a single draw does not settle its sign; the 48-draw <code>t</code> of -7.1 against <code>t_crit</code> = 2.01 is what decides it. Where the sign holds, the control separates the selection component of the loss from the bottleneck (drift) component, within this design. It is not a replication of another chapter’s control: <a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 23</span></a> follows diversity across cycles under a budget <code>alpha</code> re-referenced at each cycle to a random subset of the current pool (the frozen founding base anchors only <code>F_hom</code> and <code>F_drift</code>) and has no random-selection arm, and <a href="04d-breeding-programme.html" class="quarto-xref"><span>Chapter 22</span></a> measures its loss against the programme’s own year 1 or its founders, not against a random-selection baseline of the same size (it has no random-parent arm; its control truncates on phenotype, as it says there). <a href="11c-limits.html" class="quarto-xref"><span>Chapter 24</span></a> has another paired no-selection design, built on the same founder wrapper and measuring a different quantity, the gap between <code>varA</code> and <code>genicVarA</code>. The between-pool rows: the <code>GD_BS</code> difference is beyond <code>t_crit</code>; where it is, and positive, RRS has moved the pools further apart than the control did. Whether that raises heterosis is not tested here. <a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 5</span></a> infers, and says it has not shown, that selection on cross performance is the only process considered there that can move frequencies according to where the dominance is, and that the alignment of divergence with dominance, <span class="math inline">\(\operatorname{cov}(d, y^2)\)</span> of <a href="05b-heterosis-dominance.html#sec-heterosis-alignment" class="quarto-xref"><span>Section 5.9</span></a>, is built or eroded cycle by cycle; this chapter computes neither that alignment nor the divergence share of expected heterosis across cycles (the share is computed only across founder split times, in <a href="#tbl-alphasimr-split-1" class="quarto-xref">Table&nbsp;<span>9.18 (a)</span></a>), so that inference stays untested. <code>F_ST</code> <span class="math inline">\(= GD_{BS} / GD_T\)</span> moves with its denominator as well, and <code>GD_T</code> of the recombined pools is not recorded in <a href="#tbl-alphasimr-paired-1" class="quarto-xref">Table&nbsp;<span>9.22 (a)</span></a>, so <code>GD_BS</code> is the row read for divergence. What limits the inference is the scale – 12 founders per pool, 4 cycles, 2 testers at one location, 48 draws – and, if <code>runMacs2()</code> founders do not repeat from the seed (not established, Step 1), the numbers in this paragraph and any verdict that rests on a <code>t</code> near <code>t_crit</code> may differ between renders.</p>
 </section>
 <section id="the-final-hybrid-pool-through-stage2_select-unchanged" class="level3" data-number="9.8.4">
 <h3 data-number="9.8.4" class="anchored" data-anchor-id="the-final-hybrid-pool-through-stage2_select-unchanged"><span class="header-section-number">9.8.4</span> The final hybrid pool through <code>stage2_select()</code>, unchanged</h3>
@@ -3457,31 +3457,31 @@ Table&nbsp;9.24: <code>alphasimr_pipeline(rrs_cfg)</code> on one founder draw (t
 <tbody>
 <tr class="odd">
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">1.6965</td>
-<td style="text-align: right;">1.6947</td>
-<td style="text-align: right;">0.1834</td>
-<td style="text-align: right;">0.1878</td>
+<td style="text-align: right;">2.2813</td>
+<td style="text-align: right;">2.7370</td>
+<td style="text-align: right;">0.1567</td>
+<td style="text-align: right;">0.1721</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">2</td>
-<td style="text-align: right;">3.0332</td>
-<td style="text-align: right;">2.7109</td>
-<td style="text-align: right;">0.1624</td>
-<td style="text-align: right;">0.1437</td>
+<td style="text-align: right;">4.6681</td>
+<td style="text-align: right;">4.1927</td>
+<td style="text-align: right;">0.1201</td>
+<td style="text-align: right;">0.1546</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">3</td>
-<td style="text-align: right;">3.8647</td>
-<td style="text-align: right;">3.8180</td>
-<td style="text-align: right;">0.1363</td>
-<td style="text-align: right;">0.0833</td>
+<td style="text-align: right;">5.3966</td>
+<td style="text-align: right;">5.4939</td>
+<td style="text-align: right;">0.1070</td>
+<td style="text-align: right;">0.1222</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">4</td>
-<td style="text-align: right;">4.8632</td>
-<td style="text-align: right;">4.6980</td>
-<td style="text-align: right;">0.1166</td>
-<td style="text-align: right;">0.0754</td>
+<td style="text-align: right;">6.2850</td>
+<td style="text-align: right;">6.3029</td>
+<td style="text-align: right;">0.0736</td>
+<td style="text-align: right;">0.1038</td>
 </tr>
 </tbody>
 </table>
@@ -3512,75 +3512,75 @@ Table&nbsp;9.24: <code>alphasimr_pipeline(rrs_cfg)</code> on one founder draw (t
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">DE_alpha_0.00</td>
-<td style="text-align: right;">-0.0082</td>
-<td style="text-align: right;">0.2488</td>
-<td style="text-align: right;">0.1585</td>
-<td style="text-align: right;">0.6371</td>
-<td style="text-align: right;">1.0422</td>
+<td style="text-align: right;">-0.0026</td>
+<td style="text-align: right;">0.2362</td>
+<td style="text-align: right;">0.1549</td>
+<td style="text-align: right;">0.6559</td>
+<td style="text-align: right;">1.1654</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">DE_alpha_0.01</td>
-<td style="text-align: right;">-0.0082</td>
-<td style="text-align: right;">0.2488</td>
-<td style="text-align: right;">0.1585</td>
-<td style="text-align: right;">0.6371</td>
-<td style="text-align: right;">1.0422</td>
+<td style="text-align: left;">DE_alpha_0.63</td>
+<td style="text-align: right;">0.0050</td>
+<td style="text-align: right;">0.2344</td>
+<td style="text-align: right;">0.1541</td>
+<td style="text-align: right;">0.6576</td>
+<td style="text-align: right;">1.1972</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">DE_alpha_0.02</td>
-<td style="text-align: right;">-0.0082</td>
-<td style="text-align: right;">0.2488</td>
-<td style="text-align: right;">0.1585</td>
-<td style="text-align: right;">0.6371</td>
-<td style="text-align: right;">1.0422</td>
+<td style="text-align: left;">DE_alpha_1.27</td>
+<td style="text-align: right;">0.0114</td>
+<td style="text-align: right;">0.2329</td>
+<td style="text-align: right;">0.1572</td>
+<td style="text-align: right;">0.6751</td>
+<td style="text-align: right;">1.2059</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">DE_alpha_0.03</td>
-<td style="text-align: right;">-0.0082</td>
-<td style="text-align: right;">0.2488</td>
-<td style="text-align: right;">0.1585</td>
-<td style="text-align: right;">0.6371</td>
-<td style="text-align: right;">1.0422</td>
+<td style="text-align: left;">DE_alpha_1.90</td>
+<td style="text-align: right;">0.0166</td>
+<td style="text-align: right;">0.2316</td>
+<td style="text-align: right;">0.1567</td>
+<td style="text-align: right;">0.6764</td>
+<td style="text-align: right;">1.2137</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">DE_alpha_0.04</td>
-<td style="text-align: right;">0.0004</td>
-<td style="text-align: right;">0.2467</td>
-<td style="text-align: right;">0.1562</td>
-<td style="text-align: right;">0.6333</td>
-<td style="text-align: right;">1.0492</td>
+<td style="text-align: left;">DE_alpha_2.53</td>
+<td style="text-align: right;">0.0253</td>
+<td style="text-align: right;">0.2296</td>
+<td style="text-align: right;">0.1590</td>
+<td style="text-align: right;">0.6925</td>
+<td style="text-align: right;">1.2182</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">ref_truncation</td>
-<td style="text-align: right;">0.0004</td>
-<td style="text-align: right;">0.2467</td>
-<td style="text-align: right;">0.1562</td>
-<td style="text-align: right;">0.6333</td>
-<td style="text-align: right;">1.0492</td>
+<td style="text-align: right;">0.0253</td>
+<td style="text-align: right;">0.2296</td>
+<td style="text-align: right;">0.1590</td>
+<td style="text-align: right;">0.6925</td>
+<td style="text-align: right;">1.2182</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">ref_trunc_cap</td>
-<td style="text-align: right;">0.0004</td>
-<td style="text-align: right;">0.2467</td>
-<td style="text-align: right;">0.1562</td>
-<td style="text-align: right;">0.6333</td>
-<td style="text-align: right;">1.0492</td>
+<td style="text-align: right;">0.0114</td>
+<td style="text-align: right;">0.2329</td>
+<td style="text-align: right;">0.1540</td>
+<td style="text-align: right;">0.6613</td>
+<td style="text-align: right;">1.2050</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">ref_max_div</td>
-<td style="text-align: right;">-0.0318</td>
-<td style="text-align: right;">0.2546</td>
-<td style="text-align: right;">0.1539</td>
-<td style="text-align: right;">0.6045</td>
-<td style="text-align: right;">-0.0109</td>
+<td style="text-align: right;">-0.0271</td>
+<td style="text-align: right;">0.2419</td>
+<td style="text-align: right;">0.1525</td>
+<td style="text-align: right;">0.6305</td>
+<td style="text-align: right;">0.0955</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">ref_random</td>
-<td style="text-align: right;">-0.0006</td>
-<td style="text-align: right;">0.2469</td>
-<td style="text-align: right;">0.1562</td>
-<td style="text-align: right;">0.6327</td>
-<td style="text-align: right;">0.1711</td>
+<td style="text-align: right;">-0.0171</td>
+<td style="text-align: right;">0.2396</td>
+<td style="text-align: right;">0.1529</td>
+<td style="text-align: right;">0.6382</td>
+<td style="text-align: right;">-0.6130</td>
 </tr>
 </tbody>
 </table>
