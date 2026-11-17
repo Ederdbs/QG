@@ -742,7 +742,7 @@ window.Quarto = {
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         -(mean(ix[idx]) - penalty * viol)</span></span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     }</span></span>
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x7a7abc6900&gt;</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x764db3e900&gt;</span></span>
 <span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
@@ -857,7 +857,7 @@ Table&nbsp;15.1: Price of a 10% overshoot of the budget in <code>make_fitness()<
 <span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     }</span></span>
 <span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     pmin(pmax(v - (lo + hi)/2, 0), cap)</span></span>
 <span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; }</span></span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x7a7b19c040&gt;</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;bytecode: 0x764d67fd90&gt;</span></span>
 <span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;environment: namespace:hybdiv&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
@@ -1116,7 +1116,7 @@ Table&nbsp;15.2: The continuous relaxation, one row per multiplier <span class="
 <span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="fu">grid</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
-<div id="fig-ocs-relaxation" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" alt="Mean index against gene diversity loss: a grey concave curve of relaxation points, red greedy plans, and a triangle above them at the 1% budget">
+<div id="fig-ocs-relaxation" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Mean index against gene diversity loss: a grey concave curve of relaxation points, red greedy plans, and a triangle above them at the 1% budget" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ocs-relaxation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="09-optimal-contributions_files/figure-html/fig-ocs-relaxation-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Mean index against gene diversity loss: a grey concave curve of relaxation points, red greedy plans, and a triangle above them at the 1% budget" width="1050">
@@ -1231,7 +1231,7 @@ Table&nbsp;15.3: Convergence of the relaxation at <span class="math inline">\(\l
 </section>
 <section id="setting-the-budget" class="level2" data-number="15.5">
 <h2 data-number="15.5" class="anchored" data-anchor-id="setting-the-budget"><span class="header-section-number">15.5</span> Setting the budget</h2>
-<p>The budget should not be chosen a priori. Pure truncation, the unconstrained optimum of the index, has loss <span class="math inline">\(\alpha_{\text{trunc}}\)</span>: the <span class="math inline">\(\alpha\)</span> at which the constraint stops binding. It is not the largest <span class="math inline">\(\alpha\)</span> any <span class="math inline">\(n\)</span>-subset reaches (a minimum-diversity selection would exceed it); it is the largest a gain-maximising selection ever needs (<a href="06-metric-catalogue.html#sec-baseline" class="quarto-xref"><span>Section 11.9</span></a>). A budget <span class="math inline">\(\alpha_{\max} \ge \alpha_{\text{trunc}}\)</span> restricts nothing, and <code>stage2_select()</code> warns about any requested <span class="math inline">\(\alpha\)</span> above this ceiling rather than return an unconstrained plan that looks constrained. Here <span class="math inline">\(\alpha_{\text{trunc}} =\)</span> 0.0412 for <span class="math inline">\(B\)</span> = 400 random subsets; it depends on <span class="math inline">\(B\)</span> in the third decimal.</p>
+<p>The budget should not be chosen a priori. Pure truncation, the unconstrained optimum of the index, has loss <span class="math inline">\(\alpha_{\text{trunc}}\)</span>: the <span class="math inline">\(\alpha\)</span> at which the constraint stops binding. It is not the largest <span class="math inline">\(\alpha\)</span> any <span class="math inline">\(n\)</span>-subset reaches (a minimum-diversity selection would exceed it); it is the largest a gain-maximising selection ever needs (<a href="06-metric-catalogue.html#sec-baseline" class="quarto-xref"><span>Section 11.9</span></a>). A budget <span class="math inline">\(\alpha_{\max} \ge \alpha_{\text{trunc}}\)</span> restricts nothing, and <code>stage2_select()</code> warns that the constraint is inoperative for any requested <span class="math inline">\(\alpha\)</span> above this ceiling, and then still runs the DE for that scenario and returns its plan under the <code>DE_alpha_*</code> label like any other. Here <span class="math inline">\(\alpha_{\text{trunc}} =\)</span> 0.0412 for <span class="math inline">\(B\)</span> = 400 random subsets; it depends on <span class="math inline">\(B\)</span> in the third decimal.</p>
 <p><a href="#fig-ocs-frontier" class="quarto-xref">Figure&nbsp;<span>15.2</span></a> traces what each budget costs: the greedy frontier over the index weight <span class="math inline">\(\omega\)</span> of the grid above. The frontier is the set of feasible plans the greedy finds; it is a lower bound on the constrained optimum, not the optimum. <a href="#tbl-ocs-frontier" class="quarto-xref">Table&nbsp;<span>15.4</span></a> lists a subset of its plans.</p>
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
@@ -1246,7 +1246,7 @@ Table&nbsp;15.3: Convergence of the relaxation at <span class="math inline">\(\l
 <span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="fu">grid</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
-<div id="fig-ocs-frontier" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" alt="Mean index against gene diversity loss for the distinct greedy plans, rising and flattening towards the truncation plan">
+<div id="fig-ocs-frontier" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Mean index against gene diversity loss for the distinct greedy plans, rising and flattening towards the truncation plan" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ocs-frontier-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="09-optimal-contributions_files/figure-html/fig-ocs-frontier-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Mean index against gene diversity loss for the distinct greedy plans, rising and flattening towards the truncation plan" width="1050">

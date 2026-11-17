@@ -73,7 +73,7 @@ in hybrid combination -- and never germplasm. @fig-cycles-diagram draws the cycl
 #| fig-width: 6.5
 #| fig-height: 3.05
 #| fig-cap: "One cycle of `run_cycles()` (schematic; no data). Pool A is drawn in blue and pool B in orange, as elsewhere in the book. Solid arrows: every $A \\times B$ hybrid of the two pools is evaluated across the pool boundary, `n_sel` of them are selected (the diversity budget applies at this step), and the selection yields line-usage weights $w_A$, $w_B$. Dashed red arrows: lines are recycled inside their own pool, by intermating within the pool and deriving doubled haploids (DH). The usage weights are the only channel between the two pools, and they are what `line_weights()` returns."
-#| fig-alt: "Flow diagram. Pool A lines (blue box) and pool B lines (orange box) on the left, feed a grey box of every A by B hybrid, then a box that selects n_sel hybrids, then a box of usage weights for A and B. Two dashed red arrows return from the usage weights to the pool A box and to the pool B box, labelled intermate within the pool and derive doubled haploids. A note above the hybrid box says the diversity budget applies at the selection step."
+#| fig-alt: "Flow diagram. Pool A lines (blue box) and pool B lines (orange box) on the left, feed a grey box of every A by B hybrid, then a box that selects n_sel hybrids, then a box of usage weights for A and B. Two dashed red arrows return from the usage weights to the pool A box and to the pool B box, labelled intermate within the pool and derive doubled haploids. A note above the select n_sel box says the diversity budget applies here, at the selection step."
 op <- par(mar = c(0, 0, 0, 0)); plot.new(); plot.window(c(0, 100), c(0, 46))
 box_ <- function(x, y, w, h, lab, fill, cex = 0.72, tcol = "black") {
   rect(x, y, x + w, y + h, col = fill, border = "grey40")
@@ -97,7 +97,7 @@ arr(91, 17, 91, 2, lty = 2, col = "#b2182b"); arr(91, 2, 23, 2, lty = 2, col = "
 arr(12, 2, 12, 4, lty = 2, col = "#b2182b")
 text(50, 44.5, "intermate within A, derive DH", cex = 0.62, col = "#b2182b")
 text(50, 0.2, "intermate within B, derive DH", cex = 0.62, col = "#b2182b")
-text(37, 30.5, "diversity budget applies here", cex = 0.62, col = "grey30")
+text(70, 30.5, "diversity budget\napplies here", cex = 0.62, col = "grey30")
 par(op)
 ```
 
@@ -480,7 +480,9 @@ Inference, and what limits it. Within this simulation the per-cycle gain is
 associated with the genic variance of the pool it was selected from, with a
 within-cycle Spearman correlation of `r fmt(rho_cyc, 2)`, positive in every founder draw
 and concentrated late in the horizon (weak in cycles 2 to 6, where the arm ordering of
-gain and of genic variance never coincides); the sign is the one expected from
+gain and of genic variance never coincides). That last reading is exploratory: the three
+windows were drawn after the data were seen, and each window value is a single
+correlation over pooled run-cycles with no spread attached. The sign is the one expected from
 @sec-response-genic and fits the flattening of the unconstrained curve ("out of
 material" is that reading). The $\alpha_{\max} = 0.02$ parental pool of the last gain
 (cycle 14) has lost most of its genic variance (`r fmt(at("0.020", 14, "var_genic"), 2)`

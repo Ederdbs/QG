@@ -503,8 +503,9 @@ knitr::kable(fmt(rbind(conv, disc), 4),
 #' (a minimum-diversity selection would exceed it); it is the largest a
 #' gain-maximising selection ever needs (@sec-baseline). A budget
 #' $\alpha_{\max} \ge \alpha_{\text{trunc}}$ restricts nothing, and
-#' `stage2_select()` warns about any requested $\alpha$ above this ceiling rather
-#' than return an unconstrained plan that looks constrained. Here
+#' `stage2_select()` warns that the constraint is inoperative for any requested
+#' $\alpha$ above this ceiling, and then still runs the DE for that scenario and
+#' returns its plan under the `DE_alpha_*` label like any other. Here
 #' $\alpha_{\text{trunc}} =$ `r fmt(a_trunc, 4)` for $B$ = 400 random subsets; it
 #' depends on $B$ in the third decimal.
 #' 
