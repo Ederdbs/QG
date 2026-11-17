@@ -1635,7 +1635,8 @@ knitr::kable(data.frame(
 #'    crossover measured from your own data (here the index starts rising about
 #'    `r fmt(1 / window_ends["fine_60", "first_rise_x_crossover"], 0)` times below it) and
 #'    ends above the point where the plan becomes truncation, not a grid of round
-#'    numbers. Read the frontier and locate the knee.
+#'    numbers. Read the frontier; where along it to set the budget is the
+#'    programme's decision (@sec-ocs locates no sharp knee on its dataset).
 #' 5. Only if a specific budget has to be hit, or an $N_{e,\text{par}}$ floor
 #'    applies, run an optimiser, with an evaluation budget of the order of the printed
 #'    default of `sel_de()` (at the 1% budget of this chapter's dataset

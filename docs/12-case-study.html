@@ -61,7 +61,26 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
@@ -631,16 +650,16 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#the-whole-pipeline-in-one-script" id="toc-the-whole-pipeline-in-one-script" class="nav-link active" data-scroll-target="#the-whole-pipeline-in-one-script"><span class="header-section-number">25.1</span> The whole pipeline in one script</a>
+  <li><a href="#the-two-stages-in-one-script" id="toc-the-two-stages-in-one-script" class="nav-link active" data-scroll-target="#the-two-stages-in-one-script"><span class="header-section-number">25.1</span> The two stages in one script</a>
   <ul class="collapse">
   <li><a href="#the-reference-values" id="toc-the-reference-values" class="nav-link" data-scroll-target="#the-reference-values"><span class="header-section-number">25.1.1</span> The reference values</a></li>
   <li><a href="#metrics-per-scenario" id="toc-metrics-per-scenario" class="nav-link" data-scroll-target="#metrics-per-scenario"><span class="header-section-number">25.1.2</span> Metrics per scenario</a></li>
-  <li><a href="#both-lenses-and-the-pool-partition" id="toc-both-lenses-and-the-pool-partition" class="nav-link" data-scroll-target="#both-lenses-and-the-pool-partition"><span class="header-section-number">25.1.3</span> Both lenses, and the pool partition</a></li>
+  <li><a href="#sec-case-study-lenses" id="toc-sec-case-study-lenses" class="nav-link" data-scroll-target="#sec-case-study-lenses"><span class="header-section-number">25.1.3</span> Both lenses, and the pool partition</a></li>
   <li><a href="#distance-from-the-random-null" id="toc-distance-from-the-random-null" class="nav-link" data-scroll-target="#distance-from-the-random-null"><span class="header-section-number">25.1.4</span> Distance from the random null</a></li>
   <li><a href="#the-selection-table" id="toc-the-selection-table" class="nav-link" data-scroll-target="#the-selection-table"><span class="header-section-number">25.1.5</span> The selection table</a></li>
   </ul></li>
-  <li><a href="#reading-the-frontier" id="toc-reading-the-frontier" class="nav-link" data-scroll-target="#reading-the-frontier"><span class="header-section-number">25.2</span> Reading the frontier</a></li>
-  <li><a href="#what-this-simulation-cannot-tell-you" id="toc-what-this-simulation-cannot-tell-you" class="nav-link" data-scroll-target="#what-this-simulation-cannot-tell-you"><span class="header-section-number">25.3</span> What this simulation cannot tell you</a></li>
+  <li><a href="#sec-case-study-frontier" id="toc-sec-case-study-frontier" class="nav-link" data-scroll-target="#sec-case-study-frontier"><span class="header-section-number">25.2</span> Reading the frontier</a></li>
+  <li><a href="#sec-case-study-limits" id="toc-sec-case-study-limits" class="nav-link" data-scroll-target="#sec-case-study-limits"><span class="header-section-number">25.3</span> What this simulation cannot tell you</a></li>
   <li><a href="#the-operational-checklist" id="toc-the-operational-checklist" class="nav-link" data-scroll-target="#the-operational-checklist"><span class="header-section-number">25.4</span> The operational checklist</a>
   <ul class="collapse">
   <li><a href="#setting-up" id="toc-setting-up" class="nav-link" data-scroll-target="#setting-up"><span class="header-section-number">25.4.1</span> Setting up</a></li>
@@ -677,9 +696,9 @@ window.Quarto = {
 </header>
 
 
-<p>Everything the book has built, run once, on one dataset, in the order a programme would run it. Then the checklist.</p>
-<section id="the-whole-pipeline-in-one-script" class="level2" data-number="25.1">
-<h2 data-number="25.1" class="anchored" data-anchor-id="the-whole-pipeline-in-one-script"><span class="header-section-number">25.1</span> The whole pipeline in one script</h2>
+<p>The package’s two stages, run once, on one simulated dataset: <code>stage1_simulate()</code> builds the three-object contract of <a href="03-simulating-crosses.html" class="quarto-xref"><span>Chapter 6</span></a>, and <code>stage2_select()</code> selects hybrids from it under a grid of diversity budgets. That is the hybrid-selection side of a programme only. The stages S1 to S3 of <a href="08-pipeline-stages.html" class="quarto-xref"><span>Chapter 13</span></a> (pool conservation, doubled-haploid (DH) crosses, line selection) and the crossing and testing design of <a href="04e-mating-design.html" class="quarto-xref"><span>Chapter 18</span></a>, <a href="04f-sparse-testing.html" class="quarto-xref"><span>Chapter 19</span></a> and <a href="04g-joint-allocation.html" class="quarto-xref"><span>Chapter 20</span></a> are not run here. Then the checklist, which draws on the whole book.</p>
+<section id="the-two-stages-in-one-script" class="level2" data-number="25.1">
+<h2 data-number="25.1" class="anchored" data-anchor-id="the-two-stages-in-one-script"><span class="header-section-number">25.1</span> The two stages in one script</h2>
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Show code</summary>
@@ -694,28 +713,32 @@ window.Quarto = {
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>n_sel <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fl">0.10</span> <span class="sc">*</span> <span class="fu">nrow</span>(st1<span class="sc">$</span>X))</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">suppressWarnings</span>(<span class="fu">stage2_select</span>(</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">withCallingHandlers</span>(<span class="fu">stage2_select</span>(</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">X =</span> st1<span class="sc">$</span>X, <span class="at">f =</span> st1<span class="sc">$</span>f, <span class="at">hybrids =</span> st1<span class="sc">$</span>hybrids,</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">n_sel   =</span> n_sel,</span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">alphas  =</span> <span class="cn">NULL</span>,     <span class="co"># NULL = automatic grid, 0 to the attainable ceiling</span></span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">weights =</span> <span class="cn">NULL</span>,     <span class="co"># NULL = equal weight across traits</span></span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">fL      =</span> st1<span class="sc">$</span>fL,   <span class="co"># optional: enables theta_A / theta_B / theta_AB</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">B_null =</span> <span class="dv">500</span>, <span class="at">B_full =</span> <span class="dv">80</span>, <span class="at">NP =</span> <span class="dv">100</span>, <span class="at">itermax =</span> <span class="dv">200</span>, <span class="at">verbose =</span> <span class="cn">FALSE</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">B_null =</span> <span class="dv">500</span>, <span class="at">B_full =</span> <span class="dv">80</span>, <span class="at">NP =</span> <span class="dv">100</span>, <span class="at">itermax =</span> <span class="dv">200</span>, <span class="at">verbose =</span> <span class="cn">FALSE</span>),</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="co"># muffle only DEoptim's advice that NP be &gt;= 10 x the number of parameters</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">warning =</span> <span class="cf">function</span>(w) <span class="cf">if</span> (<span class="fu">grepl</span>(<span class="st">"'NP'"</span>, <span class="fu">conditionMessage</span>(w), <span class="at">fixed =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">invokeRestart</span>(<span class="st">"muffleWarning"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
+<p>The run’s settings, which every number below depends on. It selects <span class="math inline">\(n\)</span> = 62 hybrids, 10 % of the <span class="math inline">\(N\)</span> = 625 candidates, where <a href="09-optimal-contributions.html" class="quarto-xref"><span>Chapter 15</span></a>, <a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 12</span></a> and <a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 23</span></a> select 60. The random-subset reference <code>gd_ref</code> comes from <code>B_null</code> = 500 subsets and the z-scores below from <code>B_full</code> = 80. The differential evolution (DE) runs with <code>NP</code> = 100 and <code>itermax</code> = 200, a nominal <span class="math inline">\(2 \times 10^4\)</span> evaluations per budget, against <span class="math inline">\(6 \times 10^5\)</span> at the package defaults (<code>NP</code> = 300, <code>itermax</code> = 2000). Every scenario is one run, with <code>seed = 1</code> for both the null and the DE; <a href="#sec-case-study-frontier" class="quarto-xref"><span>Section 25.2</span></a> repeats the call over further seeds and at the default DE budget, from a cache. The ceiling and the frontier below are therefore not comparable number for number with those of <a href="09-optimal-contributions.html" class="quarto-xref"><span>Chapter 15</span></a> or <a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 12</span></a>, which use other <span class="math inline">\(n\)</span> and other <span class="math inline">\(B\)</span>.</p>
 <div class="callout callout-style-simple callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>The same pipeline as a script
+<span class="screen-reader-only">Note</span>The same functions as a script
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>This chapter runs at the book’s reduced scale so it renders in seconds. The identical pipeline at the <strong>production</strong> scale of <code>sim_config</code>, writing its tables to <code>report/</code>, is <code>inst/scripts/run_all.R</code>:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Rscript</span> inst/scripts/run_all.R          <span class="co"># ~4 min</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">Rscript</span> inst/scripts/run_benchmark.R    <span class="co"># ~6 min; the numbers quoted in README.md</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This chapter runs at the book’s teaching scale (25 + 25 lines, 2000 markers). <code>inst/scripts/run_all.R</code> calls the same two functions at the <code>sim_config</code> default (50 + 50 lines, 5000 markers), which is not the package’s declared production scale of 71 + 71 lines and 25000 markers (A8 of <a href="05-genomic-era.html#sec-era-programme" class="quarto-xref"><span>Section 10.1</span></a>). It also uses other settings: <span class="math inline">\(n\)</span> at 4 % of the candidates, and the package defaults of <code>B_null</code>, <code>B_full</code>, <code>NP</code> and <code>itermax</code>. Its tables go to <code>report/</code>. <code>run_benchmark.R</code> produces the numbers quoted in <code>README.md</code>. Neither script is run by this chapter, and their run times are not measured here.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Rscript</span> inst/scripts/run_all.R</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">Rscript</span> inst/scripts/run_benchmark.R</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <p>With real data only the first line changes:</p>
@@ -733,22 +756,32 @@ window.Quarto = {
 <summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">unlist</span>(res<span class="sc">$</span>ref)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          gd_ref           gd_se       alpha_max           n_sel population_bias </span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    3.259845e-01    3.556567e-05    3.938109e-02    6.200000e+01    6.467346e-03</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    3.259845e-01    3.556567e-05    3.938109e-02    6.200000e+01    6.467346e-03</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># the ceiling is the achieved loss of the truncation plan</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">isTRUE</span>(<span class="fu">all.equal</span>(</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  res<span class="sc">$</span>metrics<span class="sc">$</span>alpha[res<span class="sc">$</span>metrics<span class="sc">$</span>scenario <span class="sc">==</span> <span class="st">"ref_truncation"</span>], res<span class="sc">$</span>ref<span class="sc">$</span>alpha_max)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<p><code>alpha_max</code> is the attainable ceiling from <a href="06-metric-catalogue.html#sec-baseline" class="quarto-xref"><span>Section 11.9</span></a>: the loss pure truncation would incur. Any requested budget above it constrains nothing, and <code>stage2_select()</code> says so rather than returning a solution that merely looks constrained.</p>
+<p><code>alpha_max</code> in <code>res$ref</code> is the code name of the attainable ceiling <span class="math inline">\(\alpha_{\text{trunc}}\)</span> of <a href="09-optimal-contributions.html" class="quarto-xref"><span>Chapter 15</span></a>: the loss that pure truncation incurs, measured against the same-size baseline of <a href="06-metric-catalogue.html#sec-baseline" class="quarto-xref"><span>Section 11.9</span></a>. It is not the budget <span class="math inline">\(\alpha_{\max}\)</span>, which in this chapter, as in <a href="09-optimal-contributions.html" class="quarto-xref"><span>Chapter 15</span></a>, is the policy value a scenario requests. A requested budget at or above <span class="math inline">\(\alpha_{\text{trunc}}\)</span> constrains nothing. For a budget above it <code>stage2_select()</code> raises a warning that the constraint is inoperative, and then still runs the DE for that scenario and returns its plan under the <code>DE_alpha_*</code> label like any other. The automatic grid (<code>alphas = NULL</code>) ends at <span class="math inline">\(\alpha_{\text{trunc}}\)</span>, so no such warning arises in this run. The call above muffles one warning only: the <code>DEoptim</code> advice that <code>NP</code> be at least ten times the number of parameters, which is raised once per DE run, 5 times in this call. Every other warning, the inoperative-budget one included, would surface.</p>
 </section>
 <section id="metrics-per-scenario" class="level3" data-number="25.1.2">
 <h3 data-number="25.1.2" class="anchored" data-anchor-id="metrics-per-scenario"><span class="header-section-number">25.1.2</span> Metrics per scenario</h3>
+<p><a href="#tbl-case-study-metrics" class="quarto-xref">Table&nbsp;<span>25.1</span></a> gives the metrics of the nine scenarios of this run.</p>
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(res<span class="sc">$</span>metrics[, <span class="fu">c</span>(<span class="st">"scenario"</span>, <span class="st">"alpha"</span>, <span class="st">"index"</span>, <span class="st">"Ns"</span>, <span class="st">"Ne_parents"</span>,</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"Ne_lines_A"</span>, <span class="st">"Ne_lines_B"</span>, <span class="st">"max_line"</span>, <span class="st">"alleles_lost"</span>)], <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
+<div id="tbl-case-study-metrics" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-case-study-metrics-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;25.1: Metrics of the selected set for each scenario of this run, as returned in <code>$metrics</code> by <code>stage2_select()</code> (the metrics are defined in <a href="06-metric-catalogue.html" class="quarto-xref"><span>Chapter 11</span></a>). Five DE rows, one per requested budget, the name carrying <span class="math inline">\(\alpha_{\max}\)</span> in percent; four reference selections (<code>ref_*</code>). <code>alpha</code> is the achieved gene diversity loss against the same-size random baseline (a fraction); <code>index</code> is the mean index of the selected hybrids in standard deviations. Teaching scale (25 + 25 lines, 2000 markers), <span class="math inline">\(n\)</span> = 62 of <span class="math inline">\(N\)</span> = 625 candidates, DE and null seed 1.
+</figcaption>
+<div aria-describedby="tbl-case-study-metrics-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
 <div class="kable-table">
-<table class="caption-top table table-sm table-striped small">
+<table class="cell caption-top table table-sm table-striped small">
 <colgroup>
 <col style="width: 16%">
 <col style="width: 8%">
@@ -878,8 +911,11 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>Read the <code>index</code> column against <code>alpha</code>. That is the price list: what each percentage point of diversity costs in index units, on this dataset, at this selection intensity.</p>
-<p>Now read <code>Ne_parents</code> against <code>Ns</code> in the same rows. This is the diagnostic <a href="05-genomic-era.html" class="quarto-xref"><span>Chapter 10</span></a> called for, and the reason <code>Ne_parents</code> is a second constraint rather than a report line:</p>
+</figure>
+</div>
+</div>
+<p>Read the <code>index</code> column against <code>alpha</code>. The scenario name carries the <em>requested</em> budget in percent (<code>DE_alpha_3.94</code> requests <span class="math inline">\(\alpha_{\max} = \alpha_{\text{trunc}}\)</span>); the <code>alpha</code> column is the loss the plan <em>achieved</em>. The five <code>DE_</code> rows are the index each budget bought, on this dataset, at this selection intensity and at the evaluation budget stated above; <a href="#sec-case-study-frontier" class="quarto-xref"><span>Section 25.2</span></a> reads them as a frontier and states what limits that reading. The four <code>ref_</code> rows are reference selections, not budgets.</p>
+<p>Now read <code>Ne_parents</code> against <code>Ns</code> in the same rows. <a href="05-genomic-era.html" class="quarto-xref"><span>Chapter 10</span></a> calls for <span class="math inline">\(F_{hom}\)</span> and <span class="math inline">\(F_{drift}\)</span> to be computed separately (<a href="#sec-case-study-lenses" class="quarto-xref"><span>Section 25.1.3</span></a> does), and names <code>ne_parents()</code> as this book’s implementation of the parent-count side of that diagnostic. <code>stage2_select()</code> has no argument that bounds <code>Ne_parents</code>, so in this run it is a report line, not a constraint (<a href="#tbl-case-study-ns" class="quarto-xref">Table&nbsp;<span>25.2</span></a>):</p>
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Show code</summary>
@@ -888,11 +924,21 @@ window.Quarto = {
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">Ns =</span> d<span class="sc">$</span>Ns,</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>               <span class="at">Ne_parents =</span> d<span class="sc">$</span>Ne_parents,</span>
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>               <span class="at">Ns_relative =</span> d<span class="sc">$</span>Ns <span class="sc">/</span> <span class="fu">max</span>(d<span class="sc">$</span>Ns),</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">Ne_par_relative =</span> d<span class="sc">$</span>Ne_parents <span class="sc">/</span> <span class="fu">max</span>(d<span class="sc">$</span>Ne_parents)), <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">Ne_par_relative =</span> d<span class="sc">$</span>Ne_parents <span class="sc">/</span> <span class="fu">max</span>(d<span class="sc">$</span>Ne_parents)), <span class="dv">3</span>)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co"># GD = 1 - theta, Ns = 1/(2 theta), hence Ns is a function of the achieved alpha</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">isTRUE</span>(<span class="fu">all.equal</span>(d<span class="sc">$</span>GD, <span class="dv">1</span> <span class="sc">-</span> d<span class="sc">$</span>theta)),</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>          <span class="fu">isTRUE</span>(<span class="fu">all.equal</span>(d<span class="sc">$</span>Ns, <span class="dv">1</span> <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> d<span class="sc">$</span>theta))),</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>          <span class="fu">isTRUE</span>(<span class="fu">all.equal</span>(d<span class="sc">$</span>Ns, <span class="dv">1</span> <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> res<span class="sc">$</span>ref<span class="sc">$</span>gd_ref <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> d<span class="sc">$</span>alpha))))))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
+<div id="tbl-case-study-ns" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-case-study-ns-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;25.2: <span class="math inline">\(N_s\)</span> (<code>Ns</code>) and <code>Ne_parents</code> for each scenario of <a href="#tbl-case-study-metrics" class="quarto-xref">Table&nbsp;<span>25.1</span></a>, and each divided by its maximum over the nine scenarios (<code>Ns_relative</code>, <code>Ne_par_relative</code>).
+</figcaption>
+<div aria-describedby="tbl-case-study-ns-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
 <div class="kable-table">
-<table class="caption-top table table-sm table-striped small">
+<table class="cell caption-top table table-sm table-striped small">
 <thead>
 <tr class="header">
 <th style="text-align: left;">scenario</th>
@@ -971,19 +1017,30 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>The status number barely moves across scenarios while the effective number of parents collapses. A programme reporting only <span class="math inline">\(N_s\)</span> would see a healthy pool and a shrinking parent base it never measured.</p>
+</figure>
+</div>
+</div>
+<p>Result. <span class="math inline">\(N_s\)</span> goes from 0.7418 at <span class="math inline">\(\alpha_{\max} = 0\)</span> to 0.728 under truncation; <code>Ne_parents</code> goes from 27.5 to 13.5, against 37.3 for the random subset. The two columns are not on one scale. On molecular <span class="math inline">\(\mathbf f\)</span>, <span class="math inline">\(N_s = 1/(2\theta_S)\)</span> lies in <span class="math inline">\([1/2, 1]\)</span> at biallelic loci and is not a number of individuals (<a href="06-metric-catalogue.html#sec-ns" class="quarto-xref"><span>Section 11.3</span></a>), so its ratio to its own maximum (<code>Ns_relative</code>) says nothing about the size of a pool. In this run <span class="math inline">\(N_s\)</span> is also fixed by the achieved loss: with gene diversity <span class="math inline">\(GD_S = 1 - \theta_S\)</span> and <span class="math inline">\(\alpha = (GD_{\text{ref}} - GD_S)/GD_{\text{ref}}\)</span> (<a href="06-metric-catalogue.html#eq-catalogue-alpha" class="quarto-xref">Equation&nbsp;<span>11.15</span></a>), <span class="math inline">\(N_s = 1/\{2[1 - GD_{\text{ref}}(1 - \alpha)]\}\)</span> (all three asserted in the code of <a href="#tbl-case-study-ns" class="quarto-xref">Table&nbsp;<span>25.2</span></a>), so the <code>Ns</code> column restates the constraint and adds nothing to the <code>alpha</code> column.</p>
+<p>Interpretation, and what limits it. The contrast that carries information is between the lens the budget pins (<span class="math inline">\(\theta_S\)</span>, <span class="math inline">\(GD_S\)</span>, <span class="math inline">\(\alpha\)</span>, and therefore <span class="math inline">\(N_s\)</span>) and a parent-count quantity it does not pin. A report limited to the first would not show the fall of <code>Ne_parents</code>. This is one dataset; the dispersion of <code>Ne_parents</code> over the optimiser’s seed is given in <a href="#sec-case-study-frontier" class="quarto-xref"><span>Section 25.2</span></a>.</p>
 </section>
-<section id="both-lenses-and-the-pool-partition" class="level3" data-number="25.1.3">
-<h3 data-number="25.1.3" class="anchored" data-anchor-id="both-lenses-and-the-pool-partition"><span class="header-section-number">25.1.3</span> Both lenses, and the pool partition</h3>
+<section id="sec-case-study-lenses" class="level3" data-number="25.1.3">
+<h3 data-number="25.1.3" class="anchored" data-anchor-id="sec-case-study-lenses"><span class="header-section-number">25.1.3</span> Both lenses, and the pool partition</h3>
+<p><a href="#tbl-case-study-lenses" class="quarto-xref">Table&nbsp;<span>25.3</span></a> gives both lenses and the pool partition for each scenario.</p>
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(res<span class="sc">$</span>metrics[, <span class="fu">c</span>(<span class="st">"scenario"</span>, <span class="st">"alpha"</span>, <span class="st">"F_hom"</span>, <span class="st">"F_drift"</span>, <span class="st">"cov_diag"</span>,</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"rare_retained"</span>, <span class="st">"GD_WI_hyb"</span>, <span class="st">"GD_BS"</span>, <span class="st">"F_ST"</span>)], <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
+<div id="tbl-case-study-lenses" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-case-study-lenses-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;25.3: The two lenses and the pool partition for each scenario of <a href="#tbl-case-study-metrics" class="quarto-xref">Table&nbsp;<span>25.1</span></a>: achieved loss <code>alpha</code> (a fraction), <code>F_hom</code> and <code>F_drift</code> on the frozen base <span class="math inline">\(p_0\)</span>, their gap <code>cov_diag</code>, <code>rare_retained</code> (the fraction of the candidate pool’s rare alleles still present in the selected set), the within-hybrid gene diversity <code>GD_WI_hyb</code>, the between-pool component <code>GD_BS</code> and the statistic <code>F_ST</code> <span class="math inline">\(= GD_{BS}/GD_T\)</span>.
+</figcaption>
+<div aria-describedby="tbl-case-study-lenses-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
 <div class="kable-table">
-<table class="caption-top table table-sm table-striped small">
+<table class="cell caption-top table table-sm table-striped small">
 <colgroup>
 <col style="width: 17%">
 <col style="width: 9%">
@@ -1113,29 +1170,41 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p><code>alpha</code> constrains the first lens only. <code>F_drift</code> is the unmonitored bill, and <code>cov_diag</code> is exactly the gap between them – verify it:</p>
+</figure>
+</div>
+</div>
+<p><code>F_ST</code> is the statistic <span class="math inline">\(GD_{BS}/GD_T\)</span> of <a href="02-subdivided.html#eq-f-stats" class="quarto-xref">Equation&nbsp;<span>3.7</span></a> computed on each selected set. It is not the Balding-Nichols parameter <span class="math inline">\(F_{BN}\)</span> of the simulation.</p>
+<p><code>alpha</code> constrains the first lens only. <code>F_drift</code> is the lens it does not pin, and <code>cov_diag</code> is exactly the gap between them, <span class="math inline">\(F_{hom} - F_{drift}\)</span> (<a href="05-genomic-era.html#eq-era-cov" class="quarto-xref">Equation&nbsp;<span>10.4</span></a>; Eq. 3 of <span class="citation" data-cites="meuwissen2020">Meuwissen et al. (<a href="99-references.html#ref-meuwissen2020" role="doc-biblioref">2020</a>)</span>). The largest absolute deviation over the nine rows is printed below and asserted to lie within 100 machine epsilons, the tolerance of an exact identity; the package’s test suite asserts it too (<code>tests/testthat/test-lenses.R</code>):</p>
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">max_deviation_from_Eq3 =</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">max</span>(<span class="fu">abs</span>(d<span class="sc">$</span>cov_diag <span class="sc">-</span> (d<span class="sc">$</span>F_hom <span class="sc">-</span> d<span class="sc">$</span>F_drift)), <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; max_deviation_from_Eq3 </span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           6.678685e-17</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>dev_eq3 <span class="ot">&lt;-</span> <span class="fu">max</span>(<span class="fu">abs</span>(d<span class="sc">$</span>cov_diag <span class="sc">-</span> (d<span class="sc">$</span>F_hom <span class="sc">-</span> d<span class="sc">$</span>F_drift)))</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(dev_eq3 <span class="sc">&lt;</span> <span class="dv">100</span> <span class="sc">*</span> .Machine<span class="sc">$</span>double.eps)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">max_deviation_from_Eq3 =</span> dev_eq3)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; max_deviation_from_Eq3 </span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           6.678685e-17</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<p><code>GD_BS</code> rising across scenarios is selection concentrating on the most complementary line pairs, which pushes the pools further apart. That is not automatically bad – it is heterosis – but <a href="08-pipeline-stages.html" class="quarto-xref"><span>Chapter 13</span></a> is the reason to watch it rather than celebrate it.</p>
+<p>Result. <code>GD_BS</code> rises with the budget, from 0.0393 at <span class="math inline">\(\alpha_{\max} = 0\)</span> to 0.0514 under truncation, against 0.0357 for the random subset. Its cause is not identified here: concentrating the use of a few lines inside a pool raises <span class="math inline">\(GD_{BS}\)</span> with no change in the lines (<a href="06-metric-catalogue.html#tbl-catalogue-gdbs-conc" class="quarto-xref">Table&nbsp;<span>11.11</span></a>), and this run has no arm that separates that effect from selection. The index is additive and the model has no dominance (<a href="#sec-case-study-limits" class="quarto-xref"><span>Section 25.3</span></a>), so the rise is not evidence about heterosis; <span class="math inline">\(GD_{BS}\)</span> stands for the divergence heterosis rests on only under the conditions of <a href="02-subdivided.html#tbl-keystone" class="quarto-xref">Table&nbsp;<span>3.6</span></a> (flat dominance, inbred parents, a complete factorial). <a href="08-pipeline-stages.html" class="quarto-xref"><span>Chapter 13</span></a> is the reason to watch it rather than celebrate it.</p>
 </section>
 <section id="distance-from-the-random-null" class="level3" data-number="25.1.4">
 <h3 data-number="25.1.4" class="anchored" data-anchor-id="distance-from-the-random-null"><span class="header-section-number">25.1.4</span> Distance from the random null</h3>
+<p><a href="#tbl-case-study-z" class="quarto-xref">Table&nbsp;<span>25.4</span></a> places six of the metrics against the random null.</p>
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(res<span class="sc">$</span>z_scores[, <span class="fu">c</span>(<span class="st">"scenario"</span>, <span class="st">"z_GD"</span>, <span class="st">"z_Ne_parents"</span>, <span class="st">"z_F_drift"</span>,</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"z_rare_retained"</span>, <span class="st">"z_GD_BS"</span>, <span class="st">"z_ANE"</span>)], <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
+<div id="tbl-case-study-z" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-case-study-z-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;25.4: Six metrics for each scenario of <a href="#tbl-case-study-metrics" class="quarto-xref">Table&nbsp;<span>25.1</span></a>, in standard deviations from the random-subset null (<code>B_full</code> = 80 random subsets of the same size). Less diverse than chance is negative for <code>z_GD</code>, <code>z_Ne_parents</code> and <code>z_rare_retained</code>, and positive for <code>z_F_drift</code> and <code>z_ANE</code>; <code>z_GD_BS</code> has no worse direction.
+</figcaption>
+<div aria-describedby="tbl-case-study-z-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
 <div class="kable-table">
-<table class="caption-top table table-sm table-striped small">
+<table class="cell caption-top table table-sm table-striped small">
 <colgroup>
 <col style="width: 20%">
 <col style="width: 9%">
@@ -1243,20 +1312,31 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>Every metric in standard deviations from a random selection of the same size. A metric near zero is not distinguishing this plan from chance, and cannot be serving as a constraint.</p>
+</figure>
+</div>
+</div>
+<p>Every metric in standard deviations from random selections of the same size (<code>B_full</code> = 80 subsets). The direction of “less diverse than chance” differs by column: negative for <code>z_GD</code>, <code>z_Ne_parents</code> and <code>z_rare_retained</code>, positive for <code>z_F_drift</code> and <code>z_ANE</code>. <code>ANE</code> is A-NE (accession-to-nearest-entry), the mean distance from each candidate to its nearest selected hybrid (<a href="06-metric-catalogue.html#eq-catalogue-ene-ane" class="quarto-xref">Equation&nbsp;<span>11.8</span></a>), where lower means better representation. <code>z_GD_BS</code> has no “worse” direction.</p>
+<p>A z near zero says that a metric does not separate the plan from chance. It does not say that the metric is not acting as a constraint. <code>z_GD</code> is 0 at <code>DE_alpha_0.00</code>, the scenario in which <span class="math inline">\(GD\)</span> is the binding constraint, and it is near zero on average only. That scenario holds <span class="math inline">\(\alpha\)</span> at 0, so its <span class="math inline">\(GD\)</span> sits at <code>gd_ref</code>, the mean of the <code>B_null</code> = 500 draws; <code>z_GD</code> is centred and scaled on the separate <code>B_full</code> = 80 draws. The difference between the two Monte Carlo means gives <code>z_GD</code> at <span class="math inline">\(\alpha = 0\)</span> a standard deviation of about <span class="math inline">\(\sqrt{1/80 + 1/500}\)</span> = 0.12 z units (independent draws, and the <code>B_full</code> standard deviation taken as exact); the value printed at this seed is one draw of that error. A constrained metric is read against its budget. The metrics the constraint does not pin are the ones that move under it: at the same scenario <code>z_Ne_parents</code> is -5.6 and <code>z_F_drift</code> is 7.7. Each z divides by a standard deviation estimated from 80 subsets; if the null is close to normal, which is not checked here, that standard deviation carries a relative standard error of <span class="math inline">\(1/\sqrt{2(B_{full} - 1)}\)</span> = 8 % (<a href="06-metric-catalogue.html#sec-catalogue-null" class="quarto-xref"><span>Section 11.10</span></a>), not shown in <a href="#tbl-case-study-z" class="quarto-xref">Table&nbsp;<span>25.4</span></a>.</p>
 </section>
 <section id="the-selection-table" class="level3" data-number="25.1.5">
 <h3 data-number="25.1.5" class="anchored" data-anchor-id="the-selection-table"><span class="header-section-number">25.1.5</span> The selection table</h3>
+<p><a href="#tbl-case-study-selection" class="quarto-xref">Table&nbsp;<span>25.5</span></a> shows the hybrids selected under the most scenarios.</p>
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>scn <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(<span class="fu">names</span>(res<span class="sc">$</span>selection), <span class="fu">c</span>(<span class="fu">names</span>(st1<span class="sc">$</span>hybrids), <span class="st">"n_scenarios"</span>))</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>scn <span class="ot">&lt;-</span><span class="fu">setdiff</span>(<span class="fu">names</span>(res<span class="sc">$</span>selection), <span class="fu">c</span>(<span class="fu">names</span>(st1<span class="sc">$</span>hybrids), <span class="st">"n_scenarios"</span>))</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(res<span class="sc">$</span>selection[<span class="fu">order</span>(<span class="sc">-</span>res<span class="sc">$</span>selection<span class="sc">$</span>n_scenarios),</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>                   <span class="fu">c</span>(<span class="st">"hybrid"</span>, <span class="st">"line_A"</span>, <span class="st">"line_B"</span>, scn, <span class="st">"n_scenarios"</span>)], <span class="dv">8</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
+<div id="tbl-case-study-selection" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-case-study-selection-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;25.5: The first eight rows of the selection table <code>$selection</code>, ordered by <code>n_scenarios</code>: each hybrid with its two parent lines, 1 in a scenario’s column if that scenario selects it and 0 otherwise, and <code>n_scenarios</code>, the number of the nine scenarios of <a href="#tbl-case-study-metrics" class="quarto-xref">Table&nbsp;<span>25.1</span></a> that select it.
+</figcaption>
+<div aria-describedby="tbl-case-study-selection-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
 <div class="kable-table">
-<table class="caption-top table table-sm table-striped small">
+<table class="cell caption-top table table-sm table-striped small">
 <colgroup>
 <col style="width: 2%">
 <col style="width: 4%">
@@ -1425,6 +1505,9 @@ window.Quarto = {
 </div>
 </div>
 </div>
+</figure>
+</div>
+</div>
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Show code</summary>
@@ -1438,40 +1521,260 @@ window.Quarto = {
 <span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                9               18              386              625</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<p><code>n_scenarios</code> is the most directly useful column in the whole output. Hybrids chosen under <strong>every</strong> diversity budget are robust to the choice of <span class="math inline">\(\alpha\)</span> – they are the plan’s backbone, and the argument for them does not depend on a policy number nobody wants to defend. Hybrids that appear only at the loosest budget are the ones being bought with diversity.</p>
-</section>
-</section>
-<section id="reading-the-frontier" class="level2" data-number="25.2">
-<h2 data-number="25.2" class="anchored" data-anchor-id="reading-the-frontier"><span class="header-section-number">25.2</span> Reading the frontier</h2>
+<p><code>n_scenarios</code> counts, for each hybrid, the scenarios that select it, the four reference rows included. <code>chosen_in_all_DE</code> counts the hybrids selected under all five DE budgets of this run (DE and null seed 1). Whether the same hybrids recur under another seed of the optimiser is read from the same call repeated over DE/null seeds at the chapter’s DE budget and at the package default, cached by <code>regenerate.R case_study</code> (seed 1 at the chapter budget is asserted to be this run):</p>
 <div class="cell" data-layout-align="center">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(d<span class="sc">$</span>alpha <span class="sc">*</span> <span class="dv">100</span>, d<span class="sc">$</span>index, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="st">"#b2182b"</span>, <span class="at">lwd =</span> <span class="dv">2</span>,</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"gene diversity loss, alpha (%)"</span>, <span class="at">ylab =</span> <span class="st">"mean index (s.d.)"</span>)</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(d<span class="sc">$</span>alpha <span class="sc">*</span> <span class="dv">100</span>, d<span class="sc">$</span>index, d<span class="sc">$</span>scenario, <span class="at">pos =</span> <span class="dv">4</span>, <span class="at">cex =</span> <span class="fl">0.65</span>, <span class="at">col =</span> <span class="st">"grey30"</span>)</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="dv">0</span>, <span class="at">lty =</span> <span class="dv">3</span>)</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="fu">grid</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>kept <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="fu">book_data</span>(<span class="st">"case_study_kept.csv"</span>))</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>live_kept <span class="ot">&lt;-</span> res<span class="sc">$</span>selection<span class="sc">$</span>hybrid[</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rowSums</span>(res<span class="sc">$</span>selection[, de_cols, <span class="at">drop =</span> <span class="cn">FALSE</span>]) <span class="sc">==</span> <span class="fu">length</span>(de_cols)]</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">setequal</span>(kept<span class="sc">$</span>hybrid[kept<span class="sc">$</span>budget <span class="sc">==</span> <span class="st">"chapter"</span> <span class="sc">&amp;</span> kept<span class="sc">$</span>seed <span class="sc">==</span> <span class="dv">1</span>],</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>                   live_kept))</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>kept_seeds <span class="ot">&lt;-</span> <span class="fu">sort</span>(<span class="fu">unique</span>(kept<span class="sc">$</span>seed))</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>kept_tab <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">vapply</span>(<span class="fu">c</span>(<span class="st">"chapter"</span>, <span class="st">"default"</span>), <span class="cf">function</span>(b) {</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  s <span class="ot">&lt;-</span> <span class="fu">split</span>(kept<span class="sc">$</span>hybrid[kept<span class="sc">$</span>budget <span class="sc">==</span> b],</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>             <span class="fu">factor</span>(kept<span class="sc">$</span>seed[kept<span class="sc">$</span>budget <span class="sc">==</span> b], <span class="at">levels =</span> kept_seeds))</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="at">seeds =</span> <span class="fu">length</span>(s), <span class="at">min_kept =</span> <span class="fu">min</span>(<span class="fu">lengths</span>(s)), <span class="at">max_kept =</span> <span class="fu">max</span>(<span class="fu">lengths</span>(s)),</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">kept_in_every_seed =</span> <span class="fu">length</span>(<span class="fu">Reduce</span>(intersect, s)),</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">kept_in_any_seed =</span> <span class="fu">length</span>(<span class="fu">Reduce</span>(union, s)))</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>}, <span class="fu">numeric</span>(<span class="dv">5</span>)))</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>kept_tab</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         seeds min_kept max_kept kept_in_every_seed kept_in_any_seed</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; chapter    10       15       23                  1               41</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; default    10        8       24                  0               45</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Over 10 seeds, the number of hybrids kept under every DE budget ranges from 15 to 23 at the chapter’s DE budget and from 8 to 24 at the default. The sets do not coincide: the number kept under every budget in all 10 seeds is 1 at the chapter budget and 0 at the default, out of 41 and 45 kept in at least one seed. Within a run the plan keeps a core across budgets; which hybrids form it depends on the optimiser’s seed, so no set of hybrids is shown here to be robust to the choice of <span class="math inline">\(\alpha\)</span>.</p>
+</section>
+</section>
+<section id="sec-case-study-frontier" class="level2" data-number="25.2">
+<h2 data-number="25.2" class="anchored" data-anchor-id="sec-case-study-frontier"><span class="header-section-number">25.2</span> Reading the frontier</h2>
+<p><a href="#fig-case-study-frontier" class="quarto-xref">Figure&nbsp;<span>25.1</span></a> draws the five DE rows of this run as a line and the four reference rows as separate marks. Behind them is the same <code>stage2_select()</code> call repeated over DE/null seeds at the chapter’s DE budget and at the package default, cached by <code>regenerate.R case_study</code>. <code>seed</code> drives both the null and the DE, so the two budgets are paired by seed; seed 1 at the chapter budget is asserted to reproduce this run. <code>k</code> is the position in the automatic grid, because the requested <span class="math inline">\(\alpha_{\max}\)</span> moves with <code>gd_ref</code> and hence with the seed. <a href="#tbl-case-study-frontier" class="quarto-xref">Table&nbsp;<span>25.6</span></a> gives the mean and standard deviation of the index over seeds at each budget, and the paired gain of the default budget with its standard error and the number of seeds in which it is positive:</p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>fr <span class="ot">&lt;-</span><span class="fu">read.csv</span>(<span class="fu">book_data</span>(<span class="st">"case_study_frontier.csv"</span>))</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>fr1 <span class="ot">&lt;-</span> fr[fr<span class="sc">$</span>budget <span class="sc">==</span> <span class="st">"chapter"</span> <span class="sc">&amp;</span> fr<span class="sc">$</span>seed <span class="sc">==</span> <span class="dv">1</span>, ]</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">match</span>(fr1<span class="sc">$</span>scenario, d<span class="sc">$</span>scenario)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="sc">!</span><span class="fu">anyNA</span>(m1), <span class="fu">isTRUE</span>(<span class="fu">all.equal</span>(fr1<span class="sc">$</span>index, d<span class="sc">$</span>index[m1])),</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>          <span class="fu">isTRUE</span>(<span class="fu">all.equal</span>(fr1<span class="sc">$</span>alpha, d<span class="sc">$</span>alpha[m1])))</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>n_seed <span class="ot">&lt;-</span> <span class="fu">length</span>(<span class="fu">unique</span>(fr<span class="sc">$</span>seed))</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>de_fr <span class="ot">&lt;-</span> fr[<span class="sc">!</span><span class="fu">is.na</span>(fr<span class="sc">$</span>k), ]</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>fr_ch <span class="ot">&lt;-</span> de_fr[de_fr<span class="sc">$</span>budget <span class="sc">==</span> <span class="st">"chapter"</span>, ]</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>fr_def <span class="ot">&lt;-</span> de_fr[de_fr<span class="sc">$</span>budget <span class="sc">==</span> <span class="st">"default"</span>, ]</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co"># the two budgets share null and DE seed: paired by (seed, k)</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>w <span class="ot">&lt;-</span> <span class="fu">merge</span>(fr_ch[, <span class="fu">c</span>(<span class="st">"seed"</span>, <span class="st">"k"</span>, <span class="st">"index"</span>)], fr_def[, <span class="fu">c</span>(<span class="st">"seed"</span>, <span class="st">"k"</span>, <span class="st">"index"</span>)],</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>           <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"seed"</span>, <span class="st">"k"</span>), <span class="at">suffixes =</span> <span class="fu">c</span>(<span class="st">"_ch"</span>, <span class="st">"_def"</span>))</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">nrow</span>(w) <span class="sc">==</span> <span class="fu">nrow</span>(fr_ch), <span class="fu">nrow</span>(w) <span class="sc">==</span> <span class="fu">nrow</span>(fr_def))</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>gain <span class="ot">&lt;-</span> w<span class="sc">$</span>index_def <span class="sc">-</span> w<span class="sc">$</span>index_ch</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>front_tab <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">k =</span> <span class="fu">sort</span>(<span class="fu">unique</span>(fr_ch<span class="sc">$</span>k)),</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">alpha_req_pct =</span> <span class="dv">100</span> <span class="sc">*</span> <span class="fu">tapply</span>(fr_ch<span class="sc">$</span>alpha_max, fr_ch<span class="sc">$</span>k, mean),</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">index_ch =</span> <span class="fu">tapply</span>(fr_ch<span class="sc">$</span>index, fr_ch<span class="sc">$</span>k, mean), <span class="at">sd_ch =</span> <span class="fu">tapply</span>(fr_ch<span class="sc">$</span>index, fr_ch<span class="sc">$</span>k, sd),</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">index_def =</span> <span class="fu">tapply</span>(fr_def<span class="sc">$</span>index, fr_def<span class="sc">$</span>k, mean), <span class="at">sd_def =</span> <span class="fu">tapply</span>(fr_def<span class="sc">$</span>index, fr_def<span class="sc">$</span>k, sd),</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">gain =</span> <span class="fu">tapply</span>(gain, w<span class="sc">$</span>k, mean),</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">se_gain =</span> <span class="fu">tapply</span>(gain, w<span class="sc">$</span>k, sd) <span class="sc">/</span> <span class="fu">sqrt</span>(n_seed),</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">gain_pos =</span> <span class="fu">tapply</span>(gain <span class="sc">&gt;</span> <span class="dv">0</span>, w<span class="sc">$</span>k, sum))</span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt</span>(front_tab, <span class="dv">3</span>)</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a><span class="co"># the loosest DE budget against the truncation plan, seed by seed</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>top <span class="ot">&lt;-</span> <span class="fu">merge</span>(de_fr[de_fr<span class="sc">$</span>k <span class="sc">==</span> <span class="fu">max</span>(de_fr<span class="sc">$</span>k), <span class="fu">c</span>(<span class="st">"budget"</span>, <span class="st">"seed"</span>, <span class="st">"index"</span>)],</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>             fr[fr<span class="sc">$</span>scenario <span class="sc">==</span> <span class="st">"ref_truncation"</span>, <span class="fu">c</span>(<span class="st">"budget"</span>, <span class="st">"seed"</span>, <span class="st">"index"</span>)],</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>             <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"budget"</span>, <span class="st">"seed"</span>), <span class="at">suffixes =</span> <span class="fu">c</span>(<span class="st">"_de"</span>, <span class="st">"_trunc"</span>))</span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>trunc_wins <span class="ot">&lt;-</span> <span class="fu">tapply</span>(top<span class="sc">$</span>index_trunc <span class="sc">&gt;</span> top<span class="sc">$</span>index_de, top<span class="sc">$</span>budget, sum)</span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>trunc_wins</span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; chapter default </span></span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      10      10</span></span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a><span class="co"># what the prose below states: the default budget moves the tighter points by</span></span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a><span class="co"># more than their seed-to-seed s.d., and truncation beats the loosest DE point</span></span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a><span class="co"># in every seed at both budgets</span></span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">all</span>(front_tab<span class="sc">$</span>gain[<span class="sc">-</span><span class="fu">nrow</span>(front_tab)] <span class="sc">&gt;</span> front_tab<span class="sc">$</span>sd_ch[<span class="sc">-</span><span class="fu">nrow</span>(front_tab)]),</span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>          <span class="fu">all</span>(trunc_wins <span class="sc">==</span> n_seed))</span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>np_it <span class="ot">&lt;-</span> <span class="cf">function</span>(b) <span class="fu">unlist</span>(fr[fr<span class="sc">$</span>budget <span class="sc">==</span> b, <span class="fu">c</span>(<span class="st">"NP"</span>, <span class="st">"itermax"</span>)][<span class="dv">1</span>, ])</span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>cap_frontier <span class="ot">&lt;-</span> <span class="fu">sprintf</span>(<span class="fu">paste</span>(</span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Mean index of the selected hybrids (standard deviations of the index) against"</span>,</span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>  <span class="st">"the achieved gene diversity loss $</span><span class="sc">\\</span><span class="st">alpha$ (%%). Red line: the five DE budgets"</span>,</span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a>  <span class="st">"of this chapter's run (requested $</span><span class="sc">\\</span><span class="st">alpha_{</span><span class="sc">\\</span><span class="st">max}$ from 0 to"</span>,</span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a>  <span class="st">"$</span><span class="sc">\\</span><span class="st">alpha_{</span><span class="sc">\\</span><span class="st">text{trunc}}$; DE/null seed 1, `NP` = %d, `itermax` = %d). Grey"</span>,</span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a>  <span class="st">"lines: the same call over DE/null seeds %d-%d at that budget. Blue lines: the"</span>,</span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a>  <span class="st">"same seeds at the package default (`NP` = %d, `itermax` = %d). Black marks: the"</span>,</span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a>  <span class="st">"four reference selections of this run, which are plans, not budgets. Teaching"</span>,</span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>  <span class="st">"scale (%d + %d lines, %d markers), simulation seed %d, $n$ = %d of $N$ = %d."</span>,</span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a>  <span class="st">"The seed lines are cached by `regenerate.R case_study`."</span>),</span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">np_it</span>(<span class="st">"chapter"</span>)[[<span class="dv">1</span>]], <span class="fu">np_it</span>(<span class="st">"chapter"</span>)[[<span class="dv">2</span>]], <span class="fu">min</span>(fr<span class="sc">$</span>seed), <span class="fu">max</span>(fr<span class="sc">$</span>seed),</span>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a>  <span class="fu">np_it</span>(<span class="st">"default"</span>)[[<span class="dv">1</span>]], <span class="fu">np_it</span>(<span class="st">"default"</span>)[[<span class="dv">2</span>]],</span>
+<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a>  book_cfg<span class="sc">$</span>n_pool_A, book_cfg<span class="sc">$</span>n_pool_B, book_cfg<span class="sc">$</span>m, book_cfg<span class="sc">$</span>seed,</span>
+<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a>  n_sel, <span class="fu">nrow</span>(st1<span class="sc">$</span>X))</span>
+<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a>de_d <span class="ot">&lt;-</span> d[<span class="sc">!</span><span class="fu">is.na</span>(d<span class="sc">$</span>alpha_max), ]</span>
+<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a>tr_d <span class="ot">&lt;-</span> d[d<span class="sc">$</span>scenario <span class="sc">==</span> <span class="st">"ref_truncation"</span>, ]</span>
+<span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a>oth_d <span class="ot">&lt;-</span> d[<span class="fu">is.na</span>(d<span class="sc">$</span>alpha_max) <span class="sc">&amp;</span> d<span class="sc">$</span>scenario <span class="sc">!=</span> <span class="st">"ref_truncation"</span>, ]</span>
+<span id="cb14-55"><a href="#cb14-55" aria-hidden="true" tabindex="-1"></a>alt_frontier <span class="ot">&lt;-</span> <span class="fu">sprintf</span>(<span class="fu">paste</span>(</span>
+<span id="cb14-56"><a href="#cb14-56" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Line chart of mean index against diversity loss in percent. The red DE line"</span>,</span>
+<span id="cb14-57"><a href="#cb14-57" aria-hidden="true" tabindex="-1"></a>  <span class="st">"rises from %.2f at %.2f %% loss to %.2f at %.2f %%. Grey lines for the other"</span>,</span>
+<span id="cb14-58"><a href="#cb14-58" aria-hidden="true" tabindex="-1"></a>  <span class="st">"seeds lie around it; blue lines for the default budget lie on average %.2f"</span>,</span>
+<span id="cb14-59"><a href="#cb14-59" aria-hidden="true" tabindex="-1"></a>  <span class="st">"index units above the grey ones at the same seed. The truncation mark is at"</span>,</span>
+<span id="cb14-60"><a href="#cb14-60" aria-hidden="true" tabindex="-1"></a>  <span class="st">"%.2f, %.2f %% loss; the other three reference marks lie between index %.2f"</span>,</span>
+<span id="cb14-61"><a href="#cb14-61" aria-hidden="true" tabindex="-1"></a>  <span class="st">"and %.2f."</span>),</span>
+<span id="cb14-62"><a href="#cb14-62" aria-hidden="true" tabindex="-1"></a>  de_d<span class="sc">$</span>index[<span class="dv">1</span>], <span class="fu">round</span>(<span class="dv">100</span> <span class="sc">*</span> de_d<span class="sc">$</span>alpha[<span class="dv">1</span>], <span class="dv">2</span>) <span class="sc">+</span> <span class="dv">0</span>, de_d<span class="sc">$</span>index[<span class="fu">nrow</span>(de_d)],</span>
+<span id="cb14-63"><a href="#cb14-63" aria-hidden="true" tabindex="-1"></a>  <span class="dv">100</span> <span class="sc">*</span> de_d<span class="sc">$</span>alpha[<span class="fu">nrow</span>(de_d)], <span class="fu">mean</span>(gain), tr_d<span class="sc">$</span>index, <span class="dv">100</span> <span class="sc">*</span> tr_d<span class="sc">$</span>alpha,</span>
+<span id="cb14-64"><a href="#cb14-64" aria-hidden="true" tabindex="-1"></a>  <span class="fu">min</span>(oth_d<span class="sc">$</span>index), <span class="fu">max</span>(oth_d<span class="sc">$</span>index))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div id="tbl-case-study-frontier" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-case-study-frontier-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;25.6: The DE frontier over DE/null seeds, by grid point <code>k</code> (position in the automatic grid). <code>alpha_req_pct</code>: mean requested budget <span class="math inline">\(\alpha_{\max}\)</span> (%). <code>index_ch</code>, <code>sd_ch</code>: mean and standard deviation of the index over seeds at the chapter’s DE budget (<code>NP</code> = 100, <code>itermax</code> = 200). <code>index_def</code>, <code>sd_def</code>: the same at the package default (<code>NP</code> = 300, <code>itermax</code> = 2000). <code>gain</code>: mean paired gain of the default budget over the chapter budget, seed by seed; <code>se_gain</code>: its standard error; <code>gain_pos</code>: the number of seeds in which it is positive. Index in standard deviations. Cached by <code>regenerate.R case_study</code>.
+</figcaption>
+<div aria-describedby="tbl-case-study-frontier-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="cell caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 4%">
+<col style="width: 19%">
+<col style="width: 12%">
+<col style="width: 8%">
+<col style="width: 13%">
+<col style="width: 9%">
+<col style="width: 8%">
+<col style="width: 11%">
+<col style="width: 12%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: right;">k</th>
+<th style="text-align: right;">alpha_req_pct</th>
+<th style="text-align: right;">index_ch</th>
+<th style="text-align: right;">sd_ch</th>
+<th style="text-align: right;">index_def</th>
+<th style="text-align: right;">sd_def</th>
+<th style="text-align: right;">gain</th>
+<th style="text-align: right;">se_gain</th>
+<th style="text-align: right;">gain_pos</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.000</td>
+<td style="text-align: right;">1.105</td>
+<td style="text-align: right;">0.023</td>
+<td style="text-align: right;">1.168</td>
+<td style="text-align: right;">0.006</td>
+<td style="text-align: right;">0.063</td>
+<td style="text-align: right;">0.008</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0.982</td>
+<td style="text-align: right;">1.444</td>
+<td style="text-align: right;">0.018</td>
+<td style="text-align: right;">1.486</td>
+<td style="text-align: right;">0.006</td>
+<td style="text-align: right;">0.042</td>
+<td style="text-align: right;">0.006</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">1.964</td>
+<td style="text-align: right;">1.680</td>
+<td style="text-align: right;">0.017</td>
+<td style="text-align: right;">1.714</td>
+<td style="text-align: right;">0.007</td>
+<td style="text-align: right;">0.034</td>
+<td style="text-align: right;">0.006</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">2.946</td>
+<td style="text-align: right;">1.834</td>
+<td style="text-align: right;">0.019</td>
+<td style="text-align: right;">1.874</td>
+<td style="text-align: right;">0.007</td>
+<td style="text-align: right;">0.040</td>
+<td style="text-align: right;">0.008</td>
+<td style="text-align: right;">9</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">3.928</td>
+<td style="text-align: right;">1.960</td>
+<td style="text-align: right;">0.001</td>
+<td style="text-align: right;">1.961</td>
+<td style="text-align: right;">0.002</td>
+<td style="text-align: right;">0.001</td>
+<td style="text-align: right;">0.001</td>
+<td style="text-align: right;">7</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>de <span class="ot">&lt;-</span> d[<span class="sc">!</span><span class="fu">is.na</span>(d<span class="sc">$</span>alpha_max), ]</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>rf <span class="ot">&lt;-</span> d[<span class="fu">is.na</span>(d<span class="sc">$</span>alpha_max), ]</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>rf_pch <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">ref_truncation =</span> <span class="dv">17</span>, <span class="at">ref_trunc_cap =</span> <span class="dv">15</span>, <span class="at">ref_max_div =</span> <span class="dv">18</span>,</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">ref_random =</span> <span class="dv">4</span>)[rf<span class="sc">$</span>scenario]</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="dv">100</span> <span class="sc">*</span> fr<span class="sc">$</span>alpha, fr<span class="sc">$</span>index, <span class="at">type =</span> <span class="st">"n"</span>,</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlim =</span> <span class="fu">range</span>(<span class="dv">100</span> <span class="sc">*</span> <span class="fu">c</span>(fr<span class="sc">$</span>alpha, rf<span class="sc">$</span>alpha)), <span class="at">ylim =</span> <span class="fu">range</span>(<span class="fu">c</span>(fr<span class="sc">$</span>index, rf<span class="sc">$</span>index)),</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"achieved gene diversity loss, alpha (%)"</span>,</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">"mean index of the selected hybrids (s.d.)"</span>)</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="fu">grid</span>()</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="dv">0</span>, <span class="at">lty =</span> <span class="dv">3</span>, <span class="at">col =</span> book_pal[[<span class="st">"mid"</span>]])</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (s <span class="cf">in</span> <span class="fu">unique</span>(fr<span class="sc">$</span>seed)) {</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lines</span>(<span class="dv">100</span> <span class="sc">*</span> fr_def<span class="sc">$</span>alpha[fr_def<span class="sc">$</span>seed <span class="sc">==</span> s], fr_def<span class="sc">$</span>index[fr_def<span class="sc">$</span>seed <span class="sc">==</span> s],</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>        <span class="at">col =</span> <span class="fu">adjustcolor</span>(book_pal[[<span class="st">"A"</span>]], <span class="fl">0.45</span>))</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lines</span>(<span class="dv">100</span> <span class="sc">*</span> fr_ch<span class="sc">$</span>alpha[fr_ch<span class="sc">$</span>seed <span class="sc">==</span> s], fr_ch<span class="sc">$</span>index[fr_ch<span class="sc">$</span>seed <span class="sc">==</span> s],</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>        <span class="at">col =</span> <span class="fu">adjustcolor</span>(book_pal[[<span class="st">"mid"</span>]], <span class="fl">0.5</span>))</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="dv">100</span> <span class="sc">*</span> de<span class="sc">$</span>alpha, de<span class="sc">$</span>index, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">lwd =</span> <span class="dv">2</span>,</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>      <span class="at">col =</span> book_pal[[<span class="st">"loss"</span>]])</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(<span class="dv">100</span> <span class="sc">*</span> rf<span class="sc">$</span>alpha, rf<span class="sc">$</span>index, <span class="at">pch =</span> rf_pch, <span class="at">cex =</span> <span class="fl">1.3</span>, <span class="at">col =</span> book_pal[[<span class="st">"ink"</span>]])</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"bottomright"</span>, <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">cex =</span> <span class="fl">0.8</span>,</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>       <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"DE, this run (seed 1, chapter budget)"</span>,</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">sprintf</span>(<span class="st">"DE, seeds %d-%d, chapter budget"</span>, <span class="fu">min</span>(fr<span class="sc">$</span>seed), <span class="fu">max</span>(fr<span class="sc">$</span>seed)),</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">sprintf</span>(<span class="st">"DE, seeds %d-%d, package default budget"</span>,</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>                          <span class="fu">min</span>(fr<span class="sc">$</span>seed), <span class="fu">max</span>(fr<span class="sc">$</span>seed)),</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">sub</span>(<span class="st">"^ref_"</span>, <span class="st">"reference: "</span>, rf<span class="sc">$</span>scenario)),</span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="fu">c</span>(book_pal[[<span class="st">"loss"</span>]], <span class="fu">adjustcolor</span>(book_pal[[<span class="st">"mid"</span>]], <span class="fl">0.5</span>),</span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>               <span class="fu">adjustcolor</span>(book_pal[[<span class="st">"A"</span>]], <span class="fl">0.45</span>), <span class="fu">rep</span>(book_pal[[<span class="st">"ink"</span>]], <span class="fu">nrow</span>(rf))),</span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>       <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="fu">nrow</span>(rf))), <span class="at">lwd =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="fu">nrow</span>(rf))),</span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>       <span class="at">pch =</span> <span class="fu">c</span>(<span class="dv">19</span>, <span class="cn">NA</span>, <span class="cn">NA</span>, rf_pch))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="12-case-study_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" alt="The price list" width="1050"></p>
-<figcaption>The price list. Each point is one diversity budget; the curve is what index it buys.</figcaption>
+<div id="fig-case-study-frontier" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" alt="Line chart of mean index against diversity loss in percent. The red DE line rises from 1.10 at 0.00 % loss to 1.96 at 3.57 %. Grey lines for the other seeds lie around it; blue lines for the default budget lie on average 0.04 index units above the grey ones at the same seed. The truncation mark is at 1.97, 3.94 % loss; the other three reference marks lie between index 0.07 and 0.78.">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-case-study-frontier-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="12-case-study_files/figure-html/fig-case-study-frontier-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Line chart of mean index against diversity loss in percent. The red DE line rises from 1.10 at 0.00 % loss to 1.96 at 3.57 %. Grey lines for the other seeds lie around it; blue lines for the default budget lie on average 0.04 index units above the grey ones at the same seed. The truncation mark is at 1.97, 3.94 % loss; the other three reference marks lie between index 0.07 and 0.78." width="1050">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-case-study-frontier-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;25.1: Mean index of the selected hybrids (standard deviations of the index) against the achieved gene diversity loss <span class="math inline">\(\alpha\)</span> (%). Red line: the five DE budgets of this chapter’s run (requested <span class="math inline">\(\alpha_{\max}\)</span> from 0 to <span class="math inline">\(\alpha_{\text{trunc}}\)</span>; DE/null seed 1, <code>NP</code> = 100, <code>itermax</code> = 200). Grey lines: the same call over DE/null seeds 1-10 at that budget. Blue lines: the same seeds at the package default (<code>NP</code> = 300, <code>itermax</code> = 2000). Black marks: the four reference selections of this run, which are plans, not budgets. Teaching scale (25 + 25 lines, 2000 markers), simulation seed 1, <span class="math inline">\(n\)</span> = 62 of <span class="math inline">\(N\)</span> = 625. The seed lines are cached by <code>regenerate.R case_study</code>.
+</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p>Choose the knee, not the endpoint. Past the knee, each additional unit of index costs disproportionately more diversity, and the diversity is not recoverable next cycle while the index gain is realised once.</p>
+<p>Result. Between successive DE budgets the index rises by 0.32, 0.27, 0.18, 0.18 index units per percentage point of achieved <span class="math inline">\(\alpha\)</span>, from the tightest budget to the loosest. At the loosest budget the DE plan scores 1.96 at <span class="math inline">\(\alpha\)</span> = 0.0357; the truncation plan scores 1.97 at <span class="math inline">\(\alpha\)</span> = 0.0394, a loss that budget allows. The warm start of <code>stage2_select()</code> (greedy plans and the capped truncation) does not include the truncation plan.</p>
+<p>Over the 10 seeds, the standard deviation of the index at the chapter budget is between 0.001 and 0.023 across the five grid points. The default budget raises the index at the four tighter points by 0.063, 0.042, 0.034, 0.04 (standard errors at most 0.008), and at the loosest by 0.001 (s.e. 0.001, positive in 7 of 10 seeds). Truncation scores above the DE at the loosest budget in 10 of 10 seeds at the chapter budget and in 10 at the default, by 0.0057 to 0.0102 index units over the 20 (seed, budget) pairs. Secant slopes of the default-budget means are 0.32, 0.23, 0.16, 0.12 index units per percentage point. <code>Ne_parents</code> at <span class="math inline">\(\alpha_{\max} = 0\)</span> ranges from 25.3 to 27.5 over the seeds at the chapter budget.</p>
+<p>Interpretation, and what limits it. The DE curve is a price list of this run, not the constrained optimum. At the chapter’s evaluation budget part of each price is the optimiser’s shortfall: the default budget moves the tighter points by more than their seed-to-seed spread. Its loosest point stays below a feasible plan at both budgets run, so that shortfall is not closed by the 30-fold increase in nominal evaluations (<span class="math inline">\(\texttt{NP} \times \texttt{itermax}\)</span>) between them; no larger budget was run. The warm start lacks the truncation plan; whether adding it closes the gap is not run here. How much of the default-budget price is still shortfall is not separated, because no bound (<code>ocs_bound()</code>, <a href="10b-advanced-selection.html#sec-bound" class="quarto-xref"><span>Section 17.4</span></a>) is computed here, and all of it is one simulated dataset. The secant slopes show no sharp knee at either budget, and none is located. As in <a href="09-optimal-contributions.html" class="quarto-xref"><span>Chapter 15</span></a>, where along the frontier to set the budget is the programme’s decision. Nor is the trade a permanent loss against a one-off gain: in <a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 23</span></a> the index gain accumulates over cycles, and what the budgets leave for later cycles is that chapter’s subject, not this one’s.</p>
 </section>
-<section id="what-this-simulation-cannot-tell-you" class="level2" data-number="25.3">
-<h2 data-number="25.3" class="anchored" data-anchor-id="what-this-simulation-cannot-tell-you"><span class="header-section-number">25.3</span> What this simulation cannot tell you</h2>
+<section id="sec-case-study-limits" class="level2" data-number="25.3">
+<h2 data-number="25.3" class="anchored" data-anchor-id="sec-case-study-limits"><span class="header-section-number">25.3</span> What this simulation cannot tell you</h2>
 <p>Stated plainly, because the numbers above are precise and precision invites more confidence than the model supports.</p>
-<p><strong>The GEBVs carry no prediction error.</strong> The traits are built from <em>known</em> marker effects (<a href="03-simulating-crosses.html" class="quarto-xref"><span>Chapter 6</span></a>). <a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 12</span></a> Finding 5 measures what happens when they do not: the reported index is biased upward, and error <em>correlated with relatedness</em> costs several times the diversity that independent error of the same size does. The plans below should be read as an optimistic ceiling.</p>
-<p><strong>The model is additive.</strong> An additive <span class="math inline">\(\mathbf{G}\)</span> misses heterosis and specific combining ability, which is precisely what a hybrid programme sells. The diversity constraint does not need a dominance model; the <em>mean-performance ranking</em> does (<a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 5</span></a>). Do not conflate them, and do not use these <code>index</code> values as performance predictions.</p>
-<p><strong>The pools are symmetric by construction.</strong> Both are simulated from the same ancestral frequencies at the same <span class="math inline">\(F_{ST}\)</span>. Real heterotic pools differ in size, history and internal structure, and a real programme will find one pool eroding faster than the other – which is why <code>ne_lines_pool()</code> is reported per pool.</p>
-<p><strong><span class="math inline">\(N_s\)</span> is not a drift projection.</strong> It is a static descriptor (<a href="06-metric-catalogue.html#sec-ns" class="quarto-xref"><span>Section 11.3</span></a>). Do not extrapolate it forward.</p>
-<p><strong>One cycle, not a trajectory.</strong> Every result here is a single round of hybrid selection. <a href="08-pipeline-stages.html" class="quarto-xref"><span>Chapter 13</span></a> found, in 8 cached founder pools, that a diversity term on cross choice at S2 lowered the S2 loss and raised the S3 and S4 losses, and could not say whether it improved the effective number of parents or the alleles retained at the end of the pipeline – and the same question applies across cycles. A one-cycle constraint is not a multi-cycle policy: <a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 23</span></a> runs fifteen of them and finds the unconstrained programme ahead of the <span class="math inline">\(\alpha_{\max} = 0.02\)</span> programme, on the seed mean, for eight cycles and behind it for the rest.</p>
-<p><strong><span class="math inline">\(p_0\)</span> must be frozen.</strong> In this book it is set once in <code>build_ctx()</code>. In a real multi-cycle programme it must be the founder cycle’s frequencies, propagated forward – the single most common error in applying <code>F_hom</code> and <code>F_drift</code> (<a href="05-genomic-era.html" class="quarto-xref"><span>Chapter 10</span></a>). <a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 23</span></a> shows the failure directly: re-anchored, five generations of real drift are reported as exactly none.</p>
+<p><strong>The index carries no prediction error.</strong> The traits are built from <em>known</em> marker effects (<a href="03-simulating-crosses.html" class="quarto-xref"><span>Chapter 6</span></a>). <a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 12</span></a> (Finding 5) measures, within one cycle at the teaching scale, what happens when they are predicted: the plan’s reported index is biased upward, and for truncation at nominal accuracy <span class="math inline">\(r\)</span> = 0.6, error correlated with relatedness costs more gene diversity than independent error of the same nominal accuracy. <a href="08b-genomic-prediction.html" class="quarto-xref"><span>Chapter 14</span></a> fits the accuracies that validation schemes actually give. The reported <code>index</code> of a plan here should be read as an upper bound on what it would deliver in this one cycle; across cycles no such bound is claimed (<a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 23</span></a>, C7).</p>
+<p><strong>The model is additive.</strong> The index is a sum of additive marker effects. It misses heterosis and specific combining ability, which is precisely what a hybrid programme sells. The diversity constraint does not need a dominance model; the <em>mean-performance ranking</em> does (<a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 5</span></a>). Do not conflate them, and do not use these <code>index</code> values as performance predictions.</p>
+<p><strong>The pools are symmetric by construction, and still erode unevenly.</strong> Both are drawn from the same ancestral frequencies at the same Balding-Nichols parameter, <span class="math inline">\(F_{BN}\)</span> = 0.15 (<code>fst</code> in <code>sim_config</code>, <a href="03-simulating-crosses.html#eq-balding-nichols" class="quarto-xref">Equation&nbsp;<span>6.1</span></a>). Even so, truncation leaves <code>Ne_lines_A</code> = 4.69 and <code>Ne_lines_B</code> = 12.01 in <a href="#tbl-case-study-metrics" class="quarto-xref">Table&nbsp;<span>25.1</span></a>. Because the two pools are exchangeable by construction, which of them erodes faster in a run is a property of that draw, not of pool A or B, and this chapter runs one draw. Per-pool reporting (<code>ne_lines_pool()</code>) is therefore needed even when the pools are alike. Real pools that differ in size, history and internal structure would add a systematic difference on top, which this simulation does not represent.</p>
+<p><strong><span class="math inline">\(N_s\)</span> is not a drift projection.</strong> It is a static descriptor of a set, in <span class="math inline">\([1/2, 1]\)</span> on molecular <span class="math inline">\(\mathbf f\)</span> (<a href="06-metric-catalogue.html#sec-ns" class="quarto-xref"><span>Section 11.3</span></a>). Do not extrapolate it forward.</p>
+<p><strong>What the run assumes and does not test.</strong> The parent lines are fully inbred (A2 of <a href="05-genomic-era.html#sec-era-programme" class="quarto-xref"><span>Section 10.1</span></a>). The markers are biallelic and drawn independently (no linkage), and they are also the loci of the index: <code>simulate_data()</code> gives every marker an effect on each trait (<a href="03-simulating-crosses.html" class="quarto-xref"><span>Chapter 6</span></a>), so the markers the metrics read are themselves under selection. Every one of the 25 x 25 crosses is made and evaluated, so the crossing plan and the testing design that would produce the 625 values (<a href="04e-mating-design.html" class="quarto-xref"><span>Chapter 18</span></a>, <a href="04f-sparse-testing.html" class="quarto-xref"><span>Chapter 19</span></a>, <a href="04g-joint-allocation.html" class="quarto-xref"><span>Chapter 20</span></a>) are assumed away. <span class="math inline">\(n\)</span> is 10 % of the candidates, no line has a usage cap (<code>max_use = NULL</code>), and the selector is the hybrid-key DE of <code>stage2_select()</code>, not the routes compared in <a href="10b-advanced-selection.html" class="quarto-xref"><span>Chapter 17</span></a>. Each of these is a choice of this run; none of the numbers above is shown to hold without it.</p>
+<p><strong>One cycle, not a trajectory.</strong> Every result here is a single round of hybrid selection. <a href="08-pipeline-stages.html" class="quarto-xref"><span>Chapter 13</span></a> found, in 8 cached founder pools of one external study, that a diversity term on cross choice at S2 lowered the S2 loss and raised the S3 and S4 losses, and could not say whether it changed the effective size of the final set (a set the file does not record) or the marker alleles retained; the gene diversity of the final set, the outcome that was higher with the term in most pools, was added post hoc. The same question applies across cycles. A one-cycle constraint is not a multi-cycle policy: <a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 23</span></a> runs fifteen cycles from five founder draws, and on the mean over draws the unconstrained programme has the higher index in the early cycles and the <span class="math inline">\(\alpha_{\max} = 0.02\)</span> programme in the later ones; the crossing is not resolved by five draws (<a href="11b-diversity-across-cycles.html#sec-cycles-trajectory" class="quarto-xref"><span>Section 23.3</span></a>).</p>
+<p><strong><span class="math inline">\(p_0\)</span> must be frozen.</strong> <code>build_ctx()</code> sets <span class="math inline">\(p_0\)</span> to the column means of the <code>X</code> it is given, on every call. This chapter makes one call, so <span class="math inline">\(p_0\)</span> is the frequency over the 625 candidates. In a multi-cycle programme it must be the founder cycle’s frequencies, held fixed (<code>run_cycles()</code> does so, <a href="11b-diversity-across-cycles.html#sec-cycles-freezing" class="quarto-xref"><span>Section 23.2</span></a>) – the single most common error in applying <code>F_hom</code> and <code>F_drift</code> (<a href="05-genomic-era.html" class="quarto-xref"><span>Chapter 10</span></a>). <a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 23</span></a> shows the failure directly: re-anchored each generation and read on the set the base was built from, five generations of real drift are reported as exactly none.</p>
 </section>
 <section id="the-operational-checklist" class="level2" data-number="25.4">
 <h2 data-number="25.4" class="anchored" data-anchor-id="the-operational-checklist"><span class="header-section-number">25.4</span> The operational checklist</h2>
@@ -1479,57 +1782,57 @@ window.Quarto = {
 <h3 data-number="25.4.1" class="anchored" data-anchor-id="setting-up"><span class="header-section-number">25.4.1</span> Setting up</h3>
 <ul>
 <li>The base <span class="math inline">\(p_0\)</span> is frozen at the founding cycle and documented.</li>
-<li>Diversity is computed on molecular coancestry <code>f</code>, never on a centered <code>G</code>. Check <code>sum(G) == 0</code> once, to see why.</li>
-<li>The marker panel’s MAF spectrum is known – it decides how severely the two lenses diverge.</li>
+<li>Diversity is computed on molecular coancestry <code>f</code>, never on a centred VanRaden <code>G</code>, whose elements sum to zero by construction (<a href="01-coancestry.html#eq-g-sum-zero" class="quarto-xref">Equation&nbsp;<span>2.4</span></a>, <a href="01-coancestry.html#sec-why-not-g" class="quarto-xref"><span>Section 2.2</span></a>).</li>
+<li>The marker panel’s minor allele frequency (MAF) spectrum is known – it decides how severely the two lenses diverge.</li>
 <li>Heterotic-group assignment is recorded, with the method that produced it, and treated as uncertain.</li>
 </ul>
 </section>
 <section id="choosing-the-budget" class="level3" data-number="25.4.2">
 <h3 data-number="25.4.2" class="anchored" data-anchor-id="choosing-the-budget"><span class="header-section-number">25.4.2</span> Choosing the budget</h3>
 <ul>
-<li>The attainable <span class="math inline">\(\alpha\)</span> ceiling is computed <em>before</em> choosing <span class="math inline">\(\alpha_{\max}\)</span>. A budget above the ceiling constrains nothing.</li>
-<li>Loss is measured against a <strong>same-size resampling baseline</strong>, never against the full pool.</li>
+<li>The attainable ceiling <span class="math inline">\(\alpha_{\text{trunc}}\)</span> is computed <em>before</em> choosing <span class="math inline">\(\alpha_{\max}\)</span> (<a href="09-optimal-contributions.html" class="quarto-xref"><span>Chapter 15</span></a>). A budget at or above the ceiling constrains nothing.</li>
+<li>Loss is measured against a <strong>same-size resampling baseline</strong>, never against the full pool (<a href="06-metric-catalogue.html#sec-baseline" class="quarto-xref"><span>Section 11.9</span></a>).</li>
 <li>The constraint is applied at the target set size, not incrementally.</li>
-<li>The frontier is traced and the knee chosen, rather than a round number.</li>
+<li>The frontier is traced and the budget is set on it by the programme, rather than as a round number fixed in advance. Neither <a href="09-optimal-contributions.html" class="quarto-xref"><span>Chapter 15</span></a> nor this chapter finds a sharp knee to locate.</li>
 </ul>
 </section>
 <section id="running-the-optimiser" class="level3" data-number="25.4.3">
 <h3 data-number="25.4.3" class="anchored" data-anchor-id="running-the-optimiser"><span class="header-section-number">25.4.3</span> Running the optimiser</h3>
 <ul>
-<li>The search is encoded on <strong>line weights</strong>, not hybrid keys.</li>
-<li>The differential evolution is <strong>warm-started</strong> from greedy solutions.</li>
-<li><span class="math inline">\(N_{e,\text{par}}\)</span> is a second constraint, not a report line.</li>
-<li>The per-line usage cap is enforced in the decoder, not by penalty.</li>
-<li>The result is checked against the continuous relaxation. A large gap means the optimiser has not converged; a slack constraint means the search never reached the boundary.</li>
+<li>The route and its evaluation budget are stated. <code>stage2_select()</code>, the route this chapter runs, is <code>sel_de()</code> on <span class="math inline">\(n\)</span> hybrid keys (<a href="10-combinatorial-selection.html" class="quarto-xref"><span>Chapter 16</span></a>); the line-weight encoding is <code>sel_de_fast()</code>. No experiment in the book isolates the encoding, and the closest comparison favours <code>sel_de()</code> uncapped (<a href="10b-advanced-selection.html" class="quarto-xref"><span>Chapter 17</span></a>).</li>
+<li>The differential evolution is <strong>warm-started</strong> from greedy solutions (<a href="10-combinatorial-selection.html#sec-combinatorial-warm" class="quarto-xref"><span>Section 16.4.1</span></a>).</li>
+<li>If a per-line usage cap applies, the way it is enforced is stated: <code>sel_de()</code> adds it to the fitness as a penalty, and <code>sel_de_fast()</code> satisfies it in the decoder by construction (<a href="10b-advanced-selection.html#sec-defast-restrictions" class="quarto-xref"><span>Section 17.3.2.1</span></a>). This chapter’s run has no cap.</li>
+<li><span class="math inline">\(N_{e,\text{par}}\)</span> is a report line, read against the random null, unless the route accepts a floor on it. Among the package’s routes only <code>sel_de_fast()</code> does, as a penalty that can bind but is not guaranteed met (<a href="10b-advanced-selection.html#sec-defast-restrictions" class="quarto-xref"><span>Section 17.3.2.1</span></a>); the achieved <span class="math inline">\(N_{e,\text{par}}\)</span> is checked against the floor. In this chapter it is a report line.</li>
+<li>The plan is checked against the Lagrangian bound <code>ocs_bound()</code> (<a href="10b-advanced-selection.html#sec-bound" class="quarto-xref"><span>Section 17.4</span></a>), not against a point of the continuous relaxation inside the budget, which is not a bound. Its <code>converged</code> attribute, a stalling criterion rather than a certificate, is read first: converged and the gap small, the gap is the most further search can gain if that criterion is trusted; converged and the gap large, keep going; not converged, no gap is reported (<a href="10b-advanced-selection.html" class="quarto-xref"><span>Chapter 17</span></a>). A gap is the sum of the optimiser’s shortfall and the relaxation’s, and does not separate them (<a href="10-combinatorial-selection.html" class="quarto-xref"><span>Chapter 16</span></a>). This chapter computes no bound and no gap.</li>
 </ul>
 </section>
 <section id="validating-the-plan" class="level3" data-number="25.4.4">
 <h3 data-number="25.4.4" class="anchored" data-anchor-id="validating-the-plan"><span class="header-section-number">25.4.4</span> Validating the plan</h3>
 <ul>
-<li><code>F_hom</code> and <code>F_drift</code> are computed <strong>separately</strong> and reported together, with <code>cov_diag</code> as the diagnostic.</li>
-<li>Allelic richness is computed on the returned plan – it is the one metric carrying information <span class="math inline">\(\theta\)</span> does not.</li>
+<li><code>F_hom</code> and <code>F_drift</code> are computed <strong>separately</strong> and reported together, with <code>cov_diag</code> as the diagnostic, on a panel not used in the management where one exists (<a href="05-genomic-era.html#sec-era-step5" class="quarto-xref"><span>Section 10.7.5</span></a>).</li>
+<li>Allelic richness <span class="math inline">\(A_{\text{ret}}\)</span> (<a href="06-metric-catalogue.html#sec-richness" class="quarto-xref"><span>Section 11.5</span></a>) is computed on the returned plan. It is not the only quantity <span class="math inline">\(\theta\)</span> leaves free: <code>F_drift</code> is another (<a href="#sec-case-study-lenses" class="quarto-xref"><span>Section 25.1.3</span></a>), and <a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 12</span></a> (Finding 3) finds A-NE and E-NE (entry-to-nearest-entry) keeping as much rank variation at fixed <span class="math inline">\(\theta\)</span> as allelic richness does. This chapter reports <span class="math inline">\(A_{\text{lost}}\)</span> (<code>alleles_lost</code>) and <code>rare_retained</code>, not <span class="math inline">\(A_{\text{ret}}\)</span>.</li>
 <li>The within/between pool decomposition confirms diversity was not preserved by degrading pool separation.</li>
 <li>The number of selected parent lines is biologically plausible.</li>
-<li><span class="math inline">\(N_s\)</span> is reported; a rate-based <span class="math inline">\(N_e\)</span> is <strong>not</strong>, under active management.</li>
-<li>Every metric is reported against the random null, in standard deviations.</li>
+<li><span class="math inline">\(N_s\)</span> is reported as a static descriptor in <span class="math inline">\([1/2, 1]\)</span> (<a href="06-metric-catalogue.html#sec-ns" class="quarto-xref"><span>Section 11.3</span></a>), not as a head count; a rate-based <span class="math inline">\(N_e\)</span> is <strong>not</strong> reported under active management (<a href="07-choosing-metrics.html#sec-choosing-recommendation" class="quarto-xref"><span>Section 12.6</span></a>).</li>
+<li>Every metric is reported against the random null, in standard deviations; a constrained metric is read against its budget, not against zero.</li>
 </ul>
 </section>
 <section id="across-cycles" class="level3" data-number="25.4.5">
 <h3 data-number="25.4.5" class="anchored" data-anchor-id="across-cycles"><span class="header-section-number">25.4.5</span> Across cycles</h3>
 <ul>
-<li>The per-stage loss ledger is kept. DH induction, not hybrid mining, is usually where the diversity goes.</li>
-<li>The regression of <span class="math inline">\(\log(1 - F)\)</span> on cycle is checked for linearity. Curvature means a non-constant rate.</li>
-<li>Periodic germplasm injection is planned. A closed elite pool depletes however well the constraint is managed.</li>
-<li>The diversity cost per cycle is reported when cycle time is shortened.</li>
+<li>The per-stage loss ledger of <a href="08-pipeline-stages.html#sec-stages-ledger" class="quarto-xref"><span>Section 13.6</span></a> is kept (not the year-by-year diversity ledger of <a href="04d-breeding-programme.html#sec-programme-ledger" class="quarto-xref"><span>Section 22.6</span></a>). In the one study the book has (8 cached founder pools), S2, DH induction, carries the largest share of the summed stage losses under cross selection on merit alone, and with a diversity term the three stages carry similar shares (<a href="08-pipeline-stages.html" class="quarto-xref"><span>Chapter 13</span></a>); where diversity goes in general is not established.</li>
+<li>The regression of <span class="math inline">\(\log(1 - F)\)</span> on cycle is checked for linearity (<a href="05-genomic-era.html#sec-era-step4" class="quarto-xref"><span>Section 10.7.4</span></a>, <a href="11b-diversity-across-cycles.html#sec-cycles-rate" class="quarto-xref"><span>Section 23.4</span></a>). Curvature means a non-constant rate. The regression is read as that diagnostic and is not converted into a rate-based <span class="math inline">\(N_e\)</span>; a high <span class="math inline">\(R^2\)</span> does not validate a projection from the fitted rate, and the covariance term is outside every one-locus metric (<a href="11c-limits.html" class="quarto-xref"><span>Chapter 24</span></a>).</li>
+<li>Periodic germplasm injection is planned. The evidence is one simulation reviewed in <a href="11-plant-literature.html" class="quarto-xref"><span>Chapter 21</span></a>, in which a closed elite pool depletes under a within-pool constraint, and <a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 23</span></a>, in which all three closed budgets are still losing diversity at cycle 15 (five founder draws). Injection has a cost: there one injection of the programme’s own founder lines raised <span class="math inline">\(GD_T\)</span> and lowered <span class="math inline">\(F_{drift}\)</span> and the index, and the index had not recovered by cycle 15.</li>
+<li>The diversity cost per cycle is reported when cycle time is shortened. No chapter of this book measures it as a rate: <a href="04d-breeding-programme.html" class="quarto-xref"><span>Chapter 22</span></a> reports the cost of shorter cycles as a 15-year stock because its cycles overlap, and <a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 23</span></a> has discrete cycles of fixed length.</li>
 </ul>
 </section>
 </section>
 <section id="where-to-go-next" class="level2" data-number="25.5">
 <h2 data-number="25.5" class="anchored" data-anchor-id="where-to-go-next"><span class="header-section-number">25.5</span> Where to go next</h2>
 <p>Three extensions the material here supports but does not cover, each needing new work rather than new derivation:</p>
-<p><strong>Real data ingestion.</strong> <code>load_data()</code> is the single swap point and is currently a stub. A worked path from a VCF to the <code>X</code>/<code>f</code>/<code>hybrids</code> contract is what most readers will need first, and it is the one extension here that is pure engineering rather than new derivation.</p>
-<p><strong>Estimating the dominance deviations.</strong> <a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 5</span></a> shows that expected heterosis depends on the alignment between divergence and <span class="math inline">\(d\)</span>, and that no frequency-based statistic can see <span class="math inline">\(d\)</span>. Everything downstream of that – ranking crosses on more than the mean, putting a number on the <span class="math inline">\(\lambda\)</span> of <a href="06-metric-catalogue.html" class="quarto-xref"><span>Chapter 11</span></a> – waits on an estimate of <span class="math inline">\(d\)</span> the book does not attempt.</p>
-<p><strong>Prediction error compounded across cycles.</strong> <a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 12</span></a> Finding 5 measures it within one cycle and <a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 23</span></a> assumes it away (C7). The two have not been run together, and the interaction is not obviously benign: correlated error concentrates the selection, and <a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 23</span></a> shows concentration is what erodes the programme’s future.</p>
+<p><strong>Real data ingestion.</strong> <code>load_data()</code> is the single swap point and is currently a stub. A worked path from a variant call format (VCF) file to the <code>X</code>/<code>f</code>/<code>hybrids</code> contract is what most readers will need first, and it is the one extension here that is pure engineering rather than new derivation.</p>
+<p><strong>Estimating the dominance effects.</strong> <a href="05b-heterosis-dominance.html" class="quarto-xref"><span>Chapter 5</span></a> shows that expected heterosis depends on the alignment between divergence and <span class="math inline">\(d\)</span>, and that no frequency-based statistic can see <span class="math inline">\(d\)</span>. Ranking crosses on more than the mean needs the dominance effects locus by locus, which the book does not estimate. Setting the <span class="math inline">\(\lambda\)</span> of <a href="06-metric-catalogue.html" class="quarto-xref"><span>Chapter 11</span></a> needs less: two covariances of <span class="math inline">\(d\)</span> with the frequencies, not <span class="math inline">\(d\)</span> itself (<a href="05b-heterosis-dominance.html#sec-heterosis-lambda" class="quarto-xref"><span>Section 5.14.1</span></a>). <a href="05b-heterosis-dominance.html#sec-heterosis-protocol" class="quarto-xref"><span>Section 5.13</span></a> sets out what a programme would run to obtain them.</p>
+<p><strong>Prediction error compounded across cycles.</strong> <a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 12</span></a> Finding 5 measures it within one cycle and <a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 23</span></a> assumes it away (C7). The two have not been run together. Correlated error concentrates the selection (<a href="07-choosing-metrics.html" class="quarto-xref"><span>Chapter 12</span></a>), and in <a href="11b-diversity-across-cycles.html" class="quarto-xref"><span>Chapter 23</span></a> the per-cycle gain is associated with the genic variance of the parents, an association that chapter does not test as a mechanism; how the two would combine across cycles is not known.</p>
 <!-- reproduce-chapter -->
 </section>
 <section id="reproduce-this-chapter" class="level2 unnumbered">
@@ -1537,6 +1840,11 @@ window.Quarto = {
 <p>All the code of this chapter, in order and with the explanation kept as comments, is one script: <a href="https://ederdbs.github.io/QG/downloads/12-case-study.R" download="12-case-study.R"><strong>12-case-study.R</strong></a>. Download it, install <code>hybdiv</code>, and run it top to bottom in an empty directory; cached results are fetched on first use.</p>
 
 
+<div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
+<div id="ref-meuwissen2020" class="csl-entry" role="listitem">
+Meuwissen, T. H. E., A. K. Sonesson, G. Gebregiwergis, and J. A. Woolliams. 2020. <span>“Management of Genetic Diversity in the Era of Genomics.”</span> <em>Frontiers in Genetics</em> 11: 880. <a href="https://doi.org/10.3389/fgene.2020.00880">https://doi.org/10.3389/fgene.2020.00880</a>.
+</div>
+</div>
 </section>
 
 </main> <!-- /main -->

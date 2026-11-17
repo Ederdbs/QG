@@ -562,8 +562,9 @@ D_unc <- sum(l_unc)^2 / sum(l_unc^2)
 #' version, which `GD_BS` does not fix, so divergence is worth having where it lands on
 #' the dominance loci and worth nothing where it does not. The diversity within each
 #' pool is the fuel for future progress; `run_cycles()` logs `theta_A`, `theta_B`, `GD_T` and `GD_BS` every cycle, and the cached
-#' `cycles_*.csv` carry those columns, but @sec-cycles aggregates and plots only a subset (index,
-#' `GD`, `GD_BS`, `F_hom`, `F_drift`, `max_line`) and never reads the within-pool columns, so this
+#' `cycles_*.csv` carry those columns, but @sec-cycles plots only the index, `GD` (which is $GD_T$) and `F_drift`, and
+#' reads the within-pool diversity as $GD_{WS} = GD_T - GD_{BS}$ at cycles 0 and 15 (tabulated) and
+#' checks `theta_A` and `theta_B` against it in every row (an identity, not a result), so this
 #' book states that within-pool diversity is the fuel and does not demonstrate it. The simulated
 #' index of this chapter has no dominance term, so `GD_BS` below is a component of a
 #' partition and not a heterosis measure. Following @caballero2002, compute molecular coancestry between lines
@@ -999,7 +1000,8 @@ attainable <- alpha_loss(sel_truncation(ctx, n_sel), ctx, null$gd_ref)
 #' package's production scale (71 + 71 lines, 25000 markers, as in A8 of
 #' @sec-era-programme) and at the `sim_config` default (50 + 50 lines, 5000 markers) is
 #' not computed in this chapter, and this one does not transfer to either. The correct
-#' procedure is to trace the $\alpha$-versus-gain frontier and choose its knee:
+#' procedure is to trace the $\alpha$-versus-gain frontier and set the budget on it
+#' (@sec-ocs finds no sharp knee on its dataset, and leaves the point to the programme):
 #' @sec-ocs shows the frontier of the greedy over the merit weight and
 #' @sec-combinatorial gives the recipe.
 #' 

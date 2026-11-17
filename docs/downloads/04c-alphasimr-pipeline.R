@@ -2231,10 +2231,12 @@ sgn <- function(x, d = 3) sprintf(paste0("%+.", d, "f"), x)
 #' `t_crit` = `r fmt(t_crit, 2)` is what decides it. Where the sign holds, the control separates
 #' the selection component of the loss from the bottleneck (drift) component,
 #' within this design. It is not a replication of another chapter's control:
-#' @sec-cycles follows diversity across cycles under a budget `alpha` against the
-#' frozen founding base and has no random-selection arm, and @sec-programme
-#' measures its loss against the programme's own starting point "rather than
-#' against a random-selection baseline of the same size", as it says there. @sec-limits has
+#' @sec-cycles follows diversity across cycles under a budget `alpha` re-referenced
+#' at each cycle to a random subset of the current pool (the frozen founding base
+#' anchors only `F_hom` and `F_drift`) and has no random-selection arm, and @sec-programme
+#' measures its loss against the programme's own year 1 or its founders, not
+#' against a random-selection baseline of the same size (it has no random-parent arm;
+#' its control truncates on phenotype, as it says there). @sec-limits has
 #' another paired no-selection design, built on the same founder wrapper and
 #' measuring a different quantity, the gap between `varA` and
 #' `genicVarA`. The between-pool rows: the `GD_BS` difference

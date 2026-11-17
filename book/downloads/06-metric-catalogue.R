@@ -1000,7 +1000,8 @@ attainable <- alpha_loss(sel_truncation(ctx, n_sel), ctx, null$gd_ref)
 #' package's production scale (71 + 71 lines, 25000 markers, as in A8 of
 #' @sec-era-programme) and at the `sim_config` default (50 + 50 lines, 5000 markers) is
 #' not computed in this chapter, and this one does not transfer to either. The correct
-#' procedure is to trace the $\alpha$-versus-gain frontier and choose its knee:
+#' procedure is to trace the $\alpha$-versus-gain frontier and set the budget on it
+#' (@sec-ocs finds no sharp knee on its dataset, and leaves the point to the programme):
 #' @sec-ocs shows the frontier of the greedy over the merit weight and
 #' @sec-combinatorial gives the recipe.
 #' 

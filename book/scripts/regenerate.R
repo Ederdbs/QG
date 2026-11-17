@@ -22,6 +22,8 @@
 #   joint        crosses x locations at a fixed plot budget (Ch 4g)
 #   ocs_panel    how the truncation alpha moves with the marker panel, over 20
 #                founder draws (Ch 9)
+#   case_study   the Ch 12 frontier over 10 DE/null seeds, at the chapter's DE
+#                budget and at the package default (~12 min)
 #
 # Not regenerated here, because they are not this project's output:
 #   bibliography_animal.csv, bibliography_plant.csv  (literature screens)
@@ -60,7 +62,7 @@ dir.create(fig_dir,  showWarnings = FALSE, recursive = TRUE)
 dir.create(out_dir,  showWarnings = FALSE, recursive = TRUE)
 
 targets <- commandArgs(trailingOnly = TRUE)
-if (!length(targets)) targets <- c("f2size", "benchmark", "identity", "genpred", "search", "cycles", "limits", "mating", "sparse", "joint", "ocs_panel")
+if (!length(targets)) targets <- c("f2size", "benchmark", "identity", "genpred", "search", "cycles", "limits", "mating", "sparse", "joint", "ocs_panel", "case_study")
 want <- function(x) x %in% targets
 
 # --- f2size: the population-sizing grid ---------------------------------------
@@ -945,6 +947,53 @@ if (want("ocs_panel")) {
   }))
   write.csv(res, file.path(data_dir, "ocs_panel_sweep.csv"), row.names = FALSE)
   message("ocs_panel: done")
+}
+
+# --- case_study: the Ch 12 frontier over DE/null seeds ---------------------------
+# The chapter's own stage2_select() call (teaching scale, simulation seed 1,
+# n_sel = 10 %, B_null = 500, B_full = 80), repeated over `seed` = 1..10 at the
+# chapter's DE budget (NP 100, itermax 200) and at the package default (NP 300,
+# itermax 2000). `seed` drives both the null and the DE, so the two budgets are
+# paired by seed. `k` is the position in the automatic alpha grid: the requested
+# alphas move with gd_ref, hence with the seed. Seed 1 at the chapter budget is
+# the chapter's live run, and the chapter asserts that it matches.
+if (want("case_study")) {
+  message("case_study: 10 seeds x 2 DE budgets, about 12 minutes")
+  cfg <- utils::modifyList(hybdiv::sim_config,
+                           list(n_pool_A = 25, n_pool_B = 25, m = 2000, seed = 1))
+  st1 <- stage1_simulate(cfg)
+  n_sel <- round(0.10 * nrow(st1$X))
+  budgets <- list(chapter = c(NP = 100, itermax = 200),
+                  default = c(NP = 300, itermax = 2000))
+  front <- list(); kept <- list()
+  for (b in names(budgets)) for (s in 1:10) {
+    r <- withCallingHandlers(
+      stage2_select(X = st1$X, f = st1$f, hybrids = st1$hybrids, n_sel = n_sel,
+                    fL = st1$fL, B_null = 500, B_full = 80,
+                    NP = budgets[[b]][["NP"]], itermax = budgets[[b]][["itermax"]],
+                    seed = s, verbose = FALSE),
+      warning = function(w) if (grepl("'NP'", conditionMessage(w), fixed = TRUE))
+        invokeRestart("muffleWarning"))
+    m <- r$metrics
+    keep <- grepl("^DE_", m$scenario) | m$scenario == "ref_truncation"
+    front[[length(front) + 1]] <- data.frame(
+      budget = b, NP = budgets[[b]][["NP"]], itermax = budgets[[b]][["itermax"]],
+      seed = s, scenario = m$scenario[keep],
+      k = ifelse(is.na(m$alpha_max[keep]), NA_integer_, seq_len(sum(keep))),
+      alpha_max = m$alpha_max[keep], alpha = m$alpha[keep], index = m$index[keep],
+      Ne_parents = m$Ne_parents[keep])
+    de <- grep("^DE_", m$scenario, value = TRUE)
+    all_de <- which(rowSums(r$selection[, de, drop = FALSE]) == length(de))
+    kept[[length(kept) + 1]] <- data.frame(budget = rep(b, length(all_de)),
+                                           seed = rep(s, length(all_de)),
+                                           hybrid = r$selection$hybrid[all_de])
+    message("  ", b, " seed ", s)
+  }
+  write.csv(do.call(rbind, front), file.path(data_dir, "case_study_frontier.csv"),
+            row.names = FALSE)
+  write.csv(do.call(rbind, kept), file.path(data_dir, "case_study_kept.csv"),
+            row.names = FALSE)
+  message("case_study: done")
 }
 
 message("regenerate: complete")

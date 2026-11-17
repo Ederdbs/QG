@@ -760,8 +760,8 @@ round(dr, 4)
 #' when the next generation is a set of DH lines, and excluding selfing moves the
 #' block far less than that.
 #' Selection is outside @eq-hp-drift, and this chapter does not measure what it does
-#' to the rate. @sec-cycles fits rates across cycles, but every arm there is
-#' selected and its $F_{drift}$ is taken on merged hybrid frequencies, a different
+#' to the rate. @sec-cycles fits rates across cycles, for selected arms against one
+#' unselected neutral arm, and its $F_{drift}$ is taken on merged hybrid frequencies, a different
 #' level from @eq-hp-drift, so those rates are not read against the values here;
 #' @sec-era-step4 shows how to read $\Delta F$ off a trajectory.
 #' $N_e$ is a size defined by a rate, $N_e = 1/(2\Delta F)$ in @eq-hp-drift, and

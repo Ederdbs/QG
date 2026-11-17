@@ -26,6 +26,6 @@
 | 04g-joint-allocation | OPEN after 3 -- user arbitration pending (04g-D6: chapter 04g:132-137 and 1456-1459 say the rerun was not compared byte for byte, 92:345 says it was; one clause; do NOT iterate further; skip) | 3 | - | 2026-11-16 |
 | 11-plant-literature | APPROVED (render pending, batch 2) | 4 | - | 2026-11-16 |
 | 04d-breeding-programme | APPROVED (render pending, batch 2) | 4 | - | 2026-11-16 |
-| 11b-diversity-across-cycles | in progress (APPROVED it3, form pending) | 3 | - | 2026-11-16 |
+| 11b-diversity-across-cycles | APPROVED (batch render 2026-11-17) | 5 | - | 2026-11-17 |
 | 11c-limits | OPEN after 3 -- user arbitration pending (11c-D16: unhedged claims on five-draw means in 11c:19-24, 301-302, 342-362, 436 and index.qmd:131-134; do NOT iterate further; skip) | 3 | - | 2026-11-17 |
-| 12-case-study | in progress | 0 | - | 2026-11-17 |
+| 12-case-study | APPROVED (batch render 2026-11-17) | 4 | - | 2026-11-17 |
